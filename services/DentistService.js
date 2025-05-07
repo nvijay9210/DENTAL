@@ -73,7 +73,11 @@ const dentistFieldMap = {
 const createDentist = async (data) => {
   try {
     const { columns, values } = mapFields(data, dentistFieldMap);
-    const dentistId = await dentistModel.createDentist("dentist", columns, values);
+    const dentistId = await dentistModel.createDentist(
+      "dentist",
+      columns,
+      values
+    );
     await invalidateCacheByTenant("dentist", data.tenant_id);
     return dentistId;
   } catch (error) {
@@ -86,7 +90,12 @@ const createDentist = async (data) => {
 const updateDentist = async (dentistId, data, tenant_id) => {
   try {
     const { columns, values } = mapFields(data, dentistFieldMap);
-    const affectedRows = await dentistModel.updateDentist(dentistId, columns, values, tenant_id);
+    const affectedRows = await dentistModel.updateDentist(
+      dentistId,
+      columns,
+      values,
+      tenant_id
+    );
 
     if (affectedRows === 0) {
       throw new CustomError("Dentist not found or no changes made.", 404);
@@ -113,21 +122,21 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
     "bio",
     "languages_spoken",
     "social_links",
-    "awards_certifications"
+    "awards_certifications",
   ];
-  const booleanFields = [
-    "teleconsultation_supported",
-    "insurance_supported"
-  ];
+  const booleanFields = ["teleconsultation_supported", "insurance_supported"];
 
   try {
     const dentists = await getOrSetCache(cacheKey, async () => {
-      return await dentistModel.getAllDentistsByTenantId(tenantId, Number(limit), offset);
+      return await dentistModel.getAllDentistsByTenantId(
+        tenantId,
+        Number(limit),
+        offset
+      );
     });
 
-    console.log('dentists:',dentists)
+    console.log("dentists:", dentists);
 
-  
     const parsed = decodeJsonFields(dentists, jsonFields);
     parsed.forEach((d) => mapBooleanFields(d, booleanFields));
     return parsed;
@@ -146,15 +155,15 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
     "available_days",
     "bio",
     "languages_spoken",
-    "social_links"
+    "social_links",
   ];
-  const booleanFields = [
-    "teleconsultation_supported",
-    "insurance_supported"
-  ];
+  const booleanFields = ["teleconsultation_supported", "insurance_supported"];
 
   try {
-    const dentist = await dentistModel.getDentistByTenantIdAndDentistId(tenantId, dentistId);
+    const dentist = await dentistModel.getDentistByTenantIdAndDentistId(
+      tenantId,
+      dentistId
+    );
     if (!dentist) {
       throw new CustomError("Dentist not found", 404);
     }
@@ -170,7 +179,10 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
 // -------------------- DELETE --------------------
 const deleteDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
   try {
-    const result = await dentistModel.deleteDentistByTenantIdAndDentistId(tenantId, dentistId);
+    const result = await dentistModel.deleteDentistByTenantIdAndDentistId(
+      tenantId,
+      dentistId
+    );
     await invalidateCacheByTenant("dentist", tenantId);
     return result;
   } catch (error) {
@@ -179,11 +191,53 @@ const deleteDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
 };
 
 // -------------------- CHECK EXISTS --------------------
-const checkDentistExistsByTenantIdAndDentistId = async (tenantId, dentistId) => {
+const checkDentistExistsByTenantIdAndDentistId = async (
+  tenantId,
+  dentistId
+) => {
   try {
-    return await dentistModel.checkDentistExistsByTenantIdAndDentistId(tenantId, dentistId);
+    return await dentistModel.checkDentistExistsByTenantIdAndDentistId(
+      tenantId,
+      dentistId
+    );
   } catch (error) {
-    throw new CustomError(`Failed to check dentist existence: ${error.message}`, 500);
+    throw new CustomError(
+      `Failed to check dentist existence: ${error.message}`,
+      500
+    );
+  }
+};
+
+
+const getAllDentistsByTenantIdAndClinicId = async (
+  tenantId,
+  clinicId,
+  limit,
+  page
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `dentistsbyclinic:${tenantId}:page:${page}:limit:${limit}`;
+  const jsonFields = ["specialization"];
+  try {
+    const dentists = await getOrSetCache(cacheKey, async () => {
+      return await dentistModel.getAllDentistsByTenantIdAndClinicId(
+        tenantId,
+        clinicId,
+        Number(limit),
+        offset
+      );
+    });
+
+    console.log("dentists:", dentists);
+
+    const parsed = decodeJsonFields(dentists, jsonFields);
+    return parsed;
+    return dentists;
+  } catch (error) {
+    throw new CustomError(
+      `Failed to check dentist existence: ${error.message}`,
+      500
+    );
   }
 };
 
@@ -194,4 +248,5 @@ module.exports = {
   getDentistByTenantIdAndDentistId,
   checkDentistExistsByTenantIdAndDentistId,
   deleteDentistByTenantIdAndDentistId,
+  getAllDentistsByTenantIdAndClinicId,
 };

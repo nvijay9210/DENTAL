@@ -5,7 +5,7 @@ const dentistQuery = {
 
   first_name VARCHAR(50) NOT NULL,
   last_name VARCHAR(50) NOT NULL,
-  gender VARCHAR(10),
+  gender ENUM('male', 'female', 'transgender') NOT NULL,
   date_of_birth DATE,
   email VARCHAR(255),
   phone_number VARCHAR(15) NOT NULL,

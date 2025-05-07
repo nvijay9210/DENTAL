@@ -14,6 +14,7 @@ module.exports={
     ADD_DENTIST:'/adddentist',
     GETALL_DENTIST_TENANT:'/getalldentists/:tenant_id',
     GET_DENTIST_TENANT:'/getdentist/:dentist_id/:tenant_id',
+    GET_DENTIST_TENANT_CLINIC:'/getdentist/:tenant_id/:clinic_id',
     UPDATE_DENTIST_TENANT:'/updatedentist/:dentist_id/:tenant_id',
     DELETE_DENTIST_TENANT:'/deletedentist/:dentist_id/:tenant_id',
 

@@ -25,6 +25,7 @@ const getAllClinicsByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
+
 // Get Clinic by Tenant ID and Clinic ID
 const getClinicByTenantIdAndClinicId = async (tenant_id, clinic_id) => {
   try {

@@ -65,3 +65,14 @@ exports.deleteDentistByTenantIdAndDentistId = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getAllDentistByTenantIdAndClientId = async (req, res, next) => {
+  const { tenant_id,client_id } = req.params;
+  const { page, limit } = req.query;
+  try {
+    const dentists = await dentistService.getAllDentistsByTenantId(tenant_id,client_id, page, limit);
+    res.status(200).json(dentists);
+  } catch (err) {
+    next(err);
+  }
+};

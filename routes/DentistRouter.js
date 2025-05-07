@@ -6,7 +6,7 @@ const validate = require("../middlewares/validate");
 const routerPath = require("./RouterPath");
 const { UploadDentistPhoto } = require("../utils/UploadDentistPhoto");
 const { uploadFileMiddleware } = require("../utils/UploadFiles");
-const dentistValidation=require('../validations/DentistValidation')
+const dentistValidation = require("../validations/DentistValidation");
 
 // Setup multer memory storage
 const upload = multer({ storage: multer.memoryStorage() });
@@ -27,7 +27,12 @@ const dentistFileMiddleware = uploadFileMiddleware({
       maxSizeMB: 2,
       multiple: false,
     },
-    { fieldName: "awards_certifications", subFolder: "Documents", maxSizeMB: 5, multiple: true },
+    {
+      fieldName: "awards_certifications",
+      subFolder: "Documents",
+      maxSizeMB: 5,
+      multiple: true,
+    },
     // { fieldName: "aadhaar_back", subFolder: "Documents", maxSizeMB: 5, multiple: false },
     // { fieldName: "medical_reports", subFolder: "Documents", maxSizeMB: 5, multiple: true },
   ],
@@ -53,6 +58,11 @@ router.get(
 router.get(
   routerPath.GET_DENTIST_TENANT,
   dentistController.getDentistByTenantIdAndDentistId
+);
+
+router.get(
+  routerPath.GET_DENTIST_TENANT_CLINIC,
+  dentistController.getAllDentistByTenantIdAndClientId
 );
 
 // Update Dentist
