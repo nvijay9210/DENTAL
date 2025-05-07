@@ -3,6 +3,7 @@ const treatmentModel = require("../models/TreatmentModel");
 const { redisClient, getOrSetCache, invalidateCacheByTenant } = require("../config/redisConfig");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
+const helper=require('../utils/Helpers')
 
 // Create Treatment
 const createTreatment = async (data) => {
@@ -47,20 +48,22 @@ const createTreatment = async (data) => {
 const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `treatment:${tenantId}:page:${page}:limit:${limit}`;
-  const fieldsToDecode = ["description", "diagnosis", "notes"];
+
+  const jsonFields = ["description", "diagnosis", "notes"];
 
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
       const result = await treatmentModel.getAllTreatmentsByTenantId(tenantId, Number(limit), offset);
-      return decodeJsonFields(result, fieldsToDecode);
+      return result;
     });
 
-    return treatments;
-  } catch (error) {
-    console.error("Database error while fetching treatments:", error);
+    return helper.decodeJsonFields(treatments, jsonFields);
+  } catch (err) {
+    console.error("Database error while fetching treatments:", err);
     throw new CustomError("Failed to fetch treatments", 500);
   }
 };
+
 
 // Get Treatment by ID & Tenant
 const getTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {

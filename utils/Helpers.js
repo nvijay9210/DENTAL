@@ -1,33 +1,10 @@
 function getJsonValue(field) {
-  console.log('stringify:',field);
   return field && field.length > 0 ? JSON.stringify(field) : null;
 }
 
 function toBooleanNumber(value) {
   return value ? 1 : 0;
 }
-
-const decodeJsonFields = (data, fields) => {
-  return data.length > 0
-    ? data.map((record) => {
-        fields.forEach((field) => {
-          try {
-            const value = record[field];
-            if (
-              typeof value === "string" &&
-              (value.trim().startsWith("{") || value.trim().startsWith("["))
-            ) {
-              record[field] = JSON.parse(value);
-            }
-          } catch (error) {
-            console.error(`Error decoding record field: ${field}`, error);
-          }
-        });
-        return record;
-      })
-    : null;
-};
-
 
 function sameLengthChecker(
   arr1,
@@ -44,13 +21,61 @@ function sameLengthChecker(
   return true;
 }
 
-function mapBooleanFields(data, booleanFields) {
-  booleanFields.forEach((field) => {
-    if (data.hasOwnProperty(field)) {
-      data[field] = data[field] === 1 ? true : false;
+// -------------------- JSON SAFE PARSE --------------------
+
+function safeJsonParse(value) {
+  if (!value) return null;
+
+  try {
+    const parsed = JSON.parse(value);
+    return typeof parsed === "string" ? [parsed] : parsed;
+  } catch (err) {
+    return [value]; // Fallback: wrap bad string in array
+  }
+}
+
+const decodeJsonFields = (data, jsonFields) => {
+  if (!Array.isArray(data)) data = [data];
+
+  return data.map(item => {
+    jsonFields.forEach(field => {
+      if (item[field] !== undefined && item[field] !== null) {
+        try {
+          let value = item[field];
+
+          // If already parsed (array/object), skip
+          if (typeof value === 'object') return;
+
+          // Try parsing
+          item[field] = safeJsonParse(value);
+        } catch (err) {
+          // Handle common bad cases
+          if (value === '[object Object]' || value.trim() === '') {
+            item[field] = null;
+          } else if (typeof value === 'string') {
+            item[field] = value.trim() ? [value] : null;
+          }
+        }
+      }
+    });
+    return item;
+  });
+};
+
+function mapBooleanFields(item, fields) {
+  fields.forEach((field) => {
+    if (item[field] !== undefined) {
+      item[field] = Boolean(item[field]);
     }
   });
-  return data;
+}
+
+function buildUpdatedData(fields, updateObj, createObj) {
+  const result = {};
+  for (const field of fields) {
+    result[field] = updateObj[field] ?? createObj[field] ?? null;
+  }
+  return result;
 }
 
 module.exports = {
@@ -58,5 +83,7 @@ module.exports = {
   toBooleanNumber,
   decodeJsonFields,
   sameLengthChecker,
+  safeJsonParse,
   mapBooleanFields,
+  buildUpdatedData
 };

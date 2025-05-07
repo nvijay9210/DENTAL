@@ -19,7 +19,7 @@ const UploadHospitalLogo = async (req, res, next) => {
     };
 
     const uploadedFiles = {};
-    const hospital_logo = req.files?.["hospital_logo"]?.[0] || null;
+    const clinic_logo = req.files?.["clinic_logo"]?.[0] || null;
 
     const { hospital_id } = req.params;
 
@@ -43,12 +43,12 @@ const UploadHospitalLogo = async (req, res, next) => {
       "Hospital"
     );
 
-    if (hospital_logo) {
-      const resizedImage = await compressImage(hospital_logo.buffer, 100);
-      uploadedFiles.hospital_logo = await saveFile(
+    if (clinic_logo) {
+      const resizedImage = await compressImage(clinic_logo.buffer, 100);
+      uploadedFiles.clinic_logo = await saveFile(
         resizedImage,
         path.join(tenantPath, "Photos"),
-        `hospital_logo_${Date.now()}.jpg`
+        `clinic_logo_${Date.now()}.jpg`
       );
     }
 

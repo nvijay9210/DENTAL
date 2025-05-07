@@ -59,11 +59,10 @@ const updatePatient = async (patient_id, columns, values, tenant_id) => {
 const deletePatientByTenantIdAndPatientId = async (tenant_id, patient_id) => {
   const conditionColumn = ['tenant_id', 'patient_id'];
   const conditionValue = [tenant_id, patient_id];
-  helper.validateColumnValueLengthMatch(conditionColumn, conditionValue);
 
   try {
-    const [result] = await record.deleteRecord('patient', conditionColumn, conditionValue);
-    return result.affectedRows;
+    const result = await record.deleteRecord('patient', conditionColumn, conditionValue);
+    return result[0].affectedRows;
   } catch (error) {
     console.error("Error executing query:", error);
     throw new Error("Error deleting patient.");
@@ -71,18 +70,20 @@ const deletePatientByTenantIdAndPatientId = async (tenant_id, patient_id) => {
 };
 
 const checkPatientExistsByTenantIdAndPatientId = async (tenantId, patientId) => {
-  const query = `SELECT EXISTS(SELECT 1 FROM patient WHERE tenant_id=? AND patient_id=?) as exists`;
+  const query = `SELECT EXISTS(SELECT 1 FROM patient WHERE tenant_id = ? AND patient_id = ?) AS \`exists\``;
   const conn = await pool.getConnection();
+
   try {
     const [rows] = await conn.query(query, [tenantId, patientId]);
-    return rows[0].exists;
+    return Boolean(rows[0].exists); // Ensure consistent return type (true/false)
   } catch (error) {
-    console.log(error);
+    console.error("Error checking patient existence:", error);
     throw new Error("Database Query Error");
   } finally {
     conn.release();
   }
 };
+
 
 module.exports = {
   createPatient,

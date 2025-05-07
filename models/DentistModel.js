@@ -35,8 +35,9 @@ const getAllDentistsByTenantId = async (tenantId, limit, offset) => {
 
 const getDentistByTenantIdAndDentistId = async (tenant_id, dentist_id) => {
   try {
-    const [rows] = await record.getRecordByIdAndTenantId('dentist', 'tenant_id', tenant_id, 'dentist_id', dentist_id);
-    return rows[0] || null;
+    const rows = await record.getRecordByIdAndTenantId('dentist', 'tenant_id', tenant_id, 'dentist_id', dentist_id);
+    
+    return rows || null;
   } catch (error) {
     console.error("Error executing query:", error);
     throw new Error("Error fetching dentist.");

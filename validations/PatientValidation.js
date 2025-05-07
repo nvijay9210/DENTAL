@@ -18,7 +18,7 @@ const CreateColumnConfig = [
   {
     columnname: "gender",
     type: "enum",
-    enum_values: ["Male", "Female", "Transgender"],
+    enum_values: ["male", "female", "transgender"],
     null: false,
   },
   { columnname: "blood_group", type: "varchar", size: 10, null: true },
@@ -38,13 +38,13 @@ const CreateColumnConfig = [
   {
     columnname: "smoking_status",
     type: "enum",
-    enum_values: ["Never", "Former", "Current"],
+    enum_values: ["never", "former", "current"],
     null: false,
   },
   {
     columnname: "alcohol_consumption",
     type: "enum",
-    enum_values: ["Never", "Occasional", "Regular"],
+    enum_values: ["never", "occasional", "regular"],
     null: false,
   },
   {
@@ -73,6 +73,7 @@ const CreateColumnConfig = [
   { columnname: "created_by", type: "varchar", size: 20, null: false },
   { columnname: "first_visit_date", type: "timestamp", null: true },
 ];
+
 const UpdateColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },
   { columnname: "first_name", type: "varchar", size: 50, null: false },
@@ -84,7 +85,7 @@ const UpdateColumnConfig = [
   {
     columnname: "gender",
     type: "enum",
-    enum_values: ["Male", "Female", "Transgender"],
+    enum_values: ["male", "female", "transgender"],
     null: false,
   },
   { columnname: "blood_group", type: "varchar", size: 10, null: true },
@@ -104,13 +105,13 @@ const UpdateColumnConfig = [
   {
     columnname: "smoking_status",
     type: "enum",
-    enum_values: ["Never", "Former", "Current"],
+    enum_values: ["never", "former", "current"],
     null: false,
   },
   {
     columnname: "alcohol_consumption",
     type: "enum",
-    enum_values: ["Never", "Occasional", "Regular"],
+    enum_values: ["never", "occasional", "regular"],
     null: false,
   },
   {
@@ -176,6 +177,7 @@ const validatePatientPhones = async (data, patientId = 0) => {
 
 // Create Patient Validation
 const createPatientValidation = async (details) => {
+  console.log(details)
   await validateInput(details, CreateColumnConfig);
   await checkTenantExistsByTenantIdValidation(details.tenant_id);
   await validatePatientPhones(details);

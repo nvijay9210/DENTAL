@@ -81,6 +81,7 @@ function validateInput(userInput, columnConfig) {
         break;
 
       case 'date':
+        console.log(value)
         if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
           throw new CustomError(`${columnname} must be a valid date (YYYY-MM-DD)`, 400);
         }
@@ -94,7 +95,7 @@ function validateInput(userInput, columnConfig) {
         break;
 
       case 'enum':
-        if (!Array.isArray(enum_values) || !enum_values.includes(value.toLowerCase())) {
+        if (!Array.isArray(enum_values) || !enum_values.includes(value)) {
           throw new CustomError(`${columnname} must be one of: ${enum_values?.join(', ')}`, 400);
         }
         break;

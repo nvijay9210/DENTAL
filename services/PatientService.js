@@ -8,58 +8,11 @@ const {
 const { decodeJsonFields, getJsonValue } = require("../utils/Helpers");
 const { formatDateOnly } = require("../utils/DateUtils");
 const { mapFields } = require("../query/Records");
+const helper=require('../utils/Helpers')
 
 // Create patient
 const createPatient = async (data) => {
-  // const columns = [
-  //   "tenant_id",
-  //   "first_name",
-  //   "last_name",
-  //   "email",
-  //   "phone_number",
-  //   "alternate_phone_number",
-  //   "date_of_birth",
-  //   "gender",
-  //   "blood_group",
-  //   "address",
-  //   "city",
-  //   "state",
-  //   "country",
-  //   "pin_code",
-  //   "smoking_status",
-  //   "alcohol_consumption",
-  //   "emergency_contact_name",
-  //   "emergency_contact_phone",
-  //   "insurance_provider",
-  //   "insurance_policy_number",
-  //   "profile_picture",
-  //   "created_by",
-  // ];
 
-  // const values = [
-  //   data.tenant_id,
-  //   data.first_name,
-  //   data.last_name,
-  //   data.email || null,
-  //   data.phone_number,
-  //   data.alternate_phone_number || null,
-  //   data.date_of_birth || null,
-  //   data.gender,
-  //   data.blood_group || null,
-  //   data.address || null,
-  //   data.city || null,
-  //   data.state || null,
-  //   data.country || null,
-  //   data.pin_code || null,
-  //   data.smoking_status,
-  //   data.alcohol_consumption,
-  //   data.emergency_contact_name,
-  //   data.emergency_contact_phone,
-  //   data.insurance_provider || null,
-  //   data.insurance_policy_number || null,
-  //   data.profile_picture || null,
-  //   data.created_by,
-  // ];
   const fieldMap = {
     tenant_id: (val) => val,
     first_name: (val) => val,
@@ -96,17 +49,39 @@ const createPatient = async (data) => {
   }
 };
 
-// Get all patients with cache
 const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `patients:${tenantId}:page:${page}:limit:${limit}`;
-  const fieldsToDecode = ["emergency_contact", "medical_history", "allergies"];
+
+  const jsonFields = ["emergency_contact", "medical_history", "allergies"];
+  const booleanFields = []; // Add boolean fields here if needed in the future
 
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
-      const result = await patientModel.getAllPatientsByTenantId(tenantId, Number(limit), offset);
-      return decodeJsonFields(result, fieldsToDecode);
+      const result = await patientModel.getAllPatientsByTenantId(
+        tenantId,
+        Number(limit),
+        offset
+      );
+      console.log("✅ Serving patients from DB and caching result");
+      return result;
     });
+
+    if (patients && patients.length > 0) {
+      patients.forEach((patient) => {
+        jsonFields.forEach((field) => {
+          if (patient[field] !== undefined) {
+            patient[field] = helper.safeJsonParse(patient[field]);
+          }
+        });
+
+        // Optional: Boolean mapping if needed
+        if (booleanFields.length > 0) {
+          helper.mapBooleanFields(patient, booleanFields);
+        }
+      });
+    }
+
     return patients;
   } catch (error) {
     console.error(error);
@@ -161,49 +136,6 @@ const updatePatient = async (patientId, data, tenant_id) => {
     updated_by: (val) => val,
   };
   try {
-    // const columns = [
-    //   "first_name",
-    //   "last_name",
-    //   "gender",
-    //   "date_of_birth",
-    //   "email",
-    //   "phone_number",
-    //   "alternate_phone_number",
-    //   "address",
-    //   "city",
-    //   "state",
-    //   "country",
-    //   "pin_code",
-    //   "emergency_contact_phone",
-    //   "medical_history",
-    //   "blood_group",
-    //   "insurance_provider",
-    //   "insurance_policy_number",
-    //   "profile_picture",
-    //   "updated_by"
-    // ];
-
-    // const values = [
-    //   data.first_name,
-    //   data.last_name,
-    //   data.gender,
-    //   formatDateOnly(data.date_of_birth || null),
-    //   data.email || null,
-    //   data.phone_number,
-    //   data.alternate_phone_number || null,
-    //   data.address || null,
-    //   data.city || null,
-    //   data.state || null,
-    //   data.country || null,
-    //   data.pin_code || null,
-    //   getJsonValue(data.emergency_contact_phone),
-    //   getJsonValue(data.medical_history),
-    //   data.blood_group || null,
-    //   data.insurance_provider || null,
-    //   data.insurance_policy_number || null,
-    //   data.profile_picture || null,
-    //   data.updated_by
-    // ];
     const {columns,values}=mapFields(data,fieldMap)
     const affectedRows = await patientModel.updatePatient(patientId, columns, values, tenant_id);
     if (affectedRows === 0) {

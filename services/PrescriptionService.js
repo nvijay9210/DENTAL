@@ -3,6 +3,7 @@ const prescriptionModel = require("../models/PrescriptionModel");
 const { redisClient, getOrSetCache, invalidateCacheByTenant } = require("../config/redisConfig");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
+const helper=require('../utils/Helpers')
 
 const { formatDateOnly, formatTimeOnly, formatAppointments } = require("../utils/DateUtils");
 
@@ -46,20 +47,22 @@ const createPrescription = async (data) => {
 const getAllPrescriptionsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `prescription:${tenantId}:page:${page}:limit:${limit}`;
-  const fieldsToDecode = ["medication", "side_effects", "instructions", "notes"];
+
+  const jsonFields = ["medication", "side_effects", "instructions", "notes"];
 
   try {
     const prescriptions = await getOrSetCache(cacheKey, async () => {
       const result = await prescriptionModel.getAllPrescriptionsByTenantId(tenantId, Number(limit), offset);
-      return decodeJsonFields(result, fieldsToDecode);
+      return result;
     });
 
-    return prescriptions;
-  } catch (error) {
-    console.error("Database error while fetching prescriptions:", error);
+    return helper.decodeJsonFields(prescriptions, jsonFields);
+  } catch (err) {
+    console.error("Database error while fetching prescriptions:", err);
     throw new CustomError("Failed to fetch prescriptions", 500);
   }
 };
+
 
 // Get Prescription by ID & Tenant
 const getPrescriptionByTenantIdAndPrescriptionId = async (tenantId, prescriptionId) => {

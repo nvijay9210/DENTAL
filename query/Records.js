@@ -45,7 +45,7 @@ const getRecordByIdAndTenantId = async (
   const sql = `SELECT * FROM ${table} WHERE ${tenantColumn} = ? AND ${idColumn} = ?`;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(sql, [tenantId, idValue]);
+    const rows = await conn.query(sql, [tenantId, idValue]);
     return rows[0] || null;
   } catch (error) {
     console.error("Error executing SELECT BY ID:", error);
@@ -66,7 +66,7 @@ const updateRecord = async (table, updateColumns, values, conditionColumns = [],
 
   const conn = await pool.getConnection();
   try {
-    // console.log(sql, [...values, ...conditionValues])
+    console.log(sql, [...values, ...conditionValues])
     const [rows] = await conn.query(sql, [...values, ...conditionValues]);
     return rows; // rows.affectedRows will have the count
   } catch (error) {
@@ -85,7 +85,7 @@ const deleteRecord = async (table, conditionColumns=[], conditionValues=[]) => {
 
   const conn = await pool.getConnection();
   try {
-    const [result] = await conn.query(sql, conditionValues);
+    const result = await conn.query(sql, conditionValues);
     return result;
   } catch (error) {
     console.error("Error executing DELETE:", error);
@@ -101,13 +101,18 @@ function mapFields(data, fieldMap) {
   const columns = [];
   const values = [];
 
-  for (const [key, transform] of Object.entries(fieldMap)) {
-    columns.push(key);
-    values.push(transform(data[key], data)); // apply transform function
+  for (const [column, mapRule] of Object.entries(fieldMap)) {
+    columns.push(column);
+    if (typeof mapRule === "function") {
+      values.push(mapRule(data[column], data)); // transform value
+    } else {
+      values.push(data[mapRule]); // plain mapping
+    }
   }
 
   return { columns, values };
 }
+
 
 const recordExists = async (table, conditions) => {
   const keys = Object.keys(conditions);

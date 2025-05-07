@@ -31,8 +31,10 @@ const uploadFileMiddleware = (options) => {
       const id = req.params.clinic_id || req.params.patient_id || req.params.dentist_id;
 
       if (id) {
+        console.log('updatevalidation activated')
         await updateValidationFn(id, req.body, tenant_id);
       } else {
+        console.log('createvalidation activated')
         await createValidationFn(req.body);
       }
 
