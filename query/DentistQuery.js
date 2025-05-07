@@ -1,63 +1,51 @@
 const dentistQuery = {
   createDentistTable: `CREATE TABLE IF NOT EXISTS dentist (
-  dentist_id INT AUTO_INCREMENT PRIMARY KEY,
-  tenant_id INT NOT NULL,
-
+  dentist_id INT(11) NOT NULL AUTO_INCREMENT,
+  tenant_id INT(11) NOT NULL,
+  clinic_id INT(11) NULL,
   first_name VARCHAR(50) NOT NULL,
   last_name VARCHAR(50) NOT NULL,
-  gender ENUM('male', 'female', 'transgender') NOT NULL,
-  date_of_birth DATE,
-  email VARCHAR(255),
+  gender ENUM('M','F','TG') DEFAULT 'M',
+  date_of_birth DATE DEFAULT NULL,
+  email VARCHAR(255) DEFAULT NULL,
   phone_number VARCHAR(15) NOT NULL,
-  alternate_phone_number VARCHAR(15),
-
-  specialization JSON NOT NULL,
-  qualifications JSON NOT NULL,
-
+  alternate_phone_number VARCHAR(15) DEFAULT NULL,
+  specialization LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (JSON_VALID(specialization)),
+  qualifications LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (JSON_VALID(qualifications)),
   experience_years INT(2) NOT NULL,
   license_number VARCHAR(20) NOT NULL,
-
-  clinic_name VARCHAR(150),
-  clinic_address VARCHAR(300) NULL,
+  clinic_name VARCHAR(150) DEFAULT NULL,
+  clinic_address VARCHAR(300) DEFAULT NULL,
   city VARCHAR(100) NOT NULL,
   state VARCHAR(100) NOT NULL,
   country VARCHAR(50) NOT NULL,
   pin_code VARCHAR(20) NOT NULL,
-
-  working_hours JSON,
-  available_days JSON,
-
-  consultation_fee DECIMAL(10,2),
-  ratings DECIMAL(3,2),
-  reviews_count INT,
-  appointment_count INT,
-
-  profile_picture VARCHAR(255),
-  bio JSON,
-
+  working_hours LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (JSON_VALID(working_hours)),
+  available_days LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (JSON_VALID(available_days)),
+  consultation_fee DECIMAL(10,2) DEFAULT NULL,
+  ratings DECIMAL(3,2) DEFAULT NULL,
+  reviews_count INT(11) DEFAULT NULL,
+  appointment_count INT(11) DEFAULT NULL,
+  profile_picture VARCHAR(255) DEFAULT NULL,
+  bio LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (JSON_VALID(bio)),
   teleconsultation_supported TINYINT(1) NOT NULL DEFAULT 0,
   insurance_supported TINYINT(1) NOT NULL DEFAULT 0,
-
-  languages_spoken JSON,
-  awards_certifications VARCHAR(255),
-  social_links JSON,
-
+  languages_spoken LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (JSON_VALID(languages_spoken)),
+  awards_certifications VARCHAR(255) DEFAULT NULL,
+  social_links LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (JSON_VALID(social_links)),
   last_login TIMESTAMP NULL DEFAULT NULL,
-
   created_by VARCHAR(20) NOT NULL,
   created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_by VARCHAR(20),
+  updated_by VARCHAR(20) DEFAULT NULL,
   updated_time TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-
-  -- Foreign Key
-  CONSTRAINT fk_dentist_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-
-  -- Indexes
-  INDEX idx_tenant_id (tenant_id),
-  INDEX idx_phone_number (phone_number)
+  PRIMARY KEY (dentist_id),
+  KEY idx_tenant_id (tenant_id),
+  KEY idx_phone_number (phone_number),
+  KEY clinic_id (clinic_id),
+  CONSTRAINT fk_dentist_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_dentist_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
       `,
   addDentist: `INSERT INTO dentist (

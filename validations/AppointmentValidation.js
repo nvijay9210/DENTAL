@@ -4,6 +4,8 @@ const appointmentModel = require("../models/AppointmentModel");
 const {
   checkPhoneNumberExists,
   checkPhoneNumberExistsWithId,
+  checkIfIdExists,
+  checkIfExists,
 } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
@@ -126,8 +128,11 @@ const updateColumnConfig = [
 
 // Create Appointment Validation
 const createAppointmentValidation = async (details) => {
-  await validateInput(details, createColumnConfig);
+  validateInput(details, createColumnConfig);
   await checkTenantExistsByTenantIdValidation(details.tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", details.clinic_id);
+  await checkIfIdExists("dentist", "dentist_id", details.dentist_id);
+  await checkIfIdExists("patient", "patient_id", details.patient_id);
   const appointment =
     await appointmentModel.checkAppointmentExistsByStartTimeAndEndTimeAndDate(
       details
@@ -144,7 +149,7 @@ const updateAppointmentValidation = async (
   patient_id,
   dentist_id
 ) => {
-  await validateInput(details, updateColumnConfig);
+  validateInput(details, updateColumnConfig);
   await checkTenantExistsByTenantIdValidation(tenantId);
   const appointment =
     await appointmentModel.checkAppointmentExistsByStartTimeAndEndTimeAndDate(
@@ -164,11 +169,12 @@ const checkAppointmentExistsByAppointmentIdValidation = async (
 ) => {
   await checkTenantExistsByTenantIdValidation(tenantId);
 
-  const appointment =
-    await appointmentService.checkAppointmentExistsByTenantIdAndAppointmentId(
-      tenantId,
-      appointmentId
-    );
+  const appointment = await checkIfExists(
+    "appointment",
+    "appointment_id",
+    appointmentId,
+    tenantId
+  );
 
   if (!appointment) {
     throw new CustomError("Appointment not found", 409);

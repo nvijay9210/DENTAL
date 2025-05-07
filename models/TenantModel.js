@@ -46,7 +46,7 @@ const getTenantByTenantId = async (tenant_id) => {
 };
 
 const checkTenantExistsByTenantId = async (tenant_id) => {
-  const query = tenantQuery.checkTenantExistsByTenantId;
+  const query = 'select 1 from tenant where tenant_id=?'
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query, [tenant_id]);
@@ -59,7 +59,7 @@ const checkTenantExistsByTenantId = async (tenant_id) => {
 };
 
 const checkTenantExistsByTenantnameAndTenantdomain = async (tenantName,tenantDomain) => {
-  const query = tenantQuery.checkTenantExistsByTenantnameAndTenantdomain;
+  const query = 'select 1 from tenant where tenant_name=? and tenant_domain=?';
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query, [tenantName,tenantDomain]);

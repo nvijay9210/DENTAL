@@ -32,25 +32,6 @@ const getTenantByTenantId = async (tenantId) => {
   }
 };
 
-// Check if tenant exists by phone number service
-const checkTenantExistsByTenantId = async (tenantId) => {
-  try {
-    const exists = await tenantModel.checkTenantExistsByTenantId(tenantId); // Call model function to check tenant by mobile
-    return exists;
-  } catch (error) {
-    throw new Error("Failed to check tenant by phone number: " + error.message);
-  }
-};
-
-const checkTenantExistsByTenantnameAndTenantdomain = async (tenantName,tenantDomain) => {
-  try {
-    const exists = await tenantModel.checkTenantExistsByTenantnameAndTenantdomain(tenantName,tenantDomain); // Call model function to check tenant by mobile
-    return exists;
-  } catch (error) {
-    throw new Error("Failed to check tenant by tenantname and tenantdomain: " + error.message);
-  }
-};
-
 // Update tenant service
 const updateTenant = async (tenantId, data) => {
   try {
@@ -80,8 +61,6 @@ const deleteTenant = async (tenantId) => {
 module.exports = {
   createTenant,
   getTenants,
-  checkTenantExistsByTenantId,
-  checkTenantExistsByTenantnameAndTenantdomain,
   getTenantByTenantId,
   updateTenant,
   deleteTenant,

@@ -3,7 +3,7 @@ const treatmentService = require("../services/TreatmentService");
 const treatmentModel = require("../models/TreatmentModel");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
-const { checkIfIdExists } = require("../models/checkIfExists");
+const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
 const { recordExists } = require("../query/Records");
 
 const createColumnConfig = [
@@ -46,7 +46,7 @@ const createColumnConfig = [
     },
     { columnname: "anesthesia_type", type: "varchar", size: 100, null: true },
     { columnname: "technician_assisted", type: "varchar", size: 255, null: true },
-    { columnname: "images", type: "text", null: true },
+    { columnname: "treatment_images", type: "text", null: true },
     { columnname: "notes", type: "text", null: true },
     { columnname: "created_by", type: "varchar", size: 20, null: false },
   ];
@@ -91,7 +91,7 @@ const createColumnConfig = [
     },
     { columnname: "anesthesia_type", type: "varchar", size: 100, null: true },
     { columnname: "technician_assisted", type: "varchar", size: 255, null: true },
-    { columnname: "images", type: "text", null: true },
+    { columnname: "treatment_images", type: "text", null: true },
     { columnname: "notes", type: "text", null: true },
     { columnname: "updated_by", type: "varchar", size: 20, null: false },
   ];
@@ -110,36 +110,15 @@ const createTreatmentValidation = async (details) => {
 
 // Update Treatment Validation
 const updateTreatmentValidation = async (
-  tenantId,clinicId,patientId,dentistId,details,treatmentId
+  tenantId,details,treatmentId
 ) => {
   await validateInput(details, updateColumnConfig);
-  const data={
-    tenant_id:tenantId,
-    clinic_id:clinicId,
-    patient_id:patientId,
-    dentist_id:dentistId,
-    treatment_id:treatmentId
-}
-    const treatment=await recordExists('treatment',data)
+
+    const treatment=await checkIfExists('treatment','treatment_id',treatmentId,tenantId)
     if(!treatment) throw new CustomError('Treatment Not Exists',404)
 };
-
-// Check if Treatment exists by ID
-// const checkTreatmentExistsByIdValidation = async (tenantId, treatmentId) => {
-//   await checkTenantExistsByTenantIdValidation(tenantId);
-
-//   const exists = await treatmentService.checkTreatmentExistsById(
-//     tenantId,
-//     treatmentId
-//   );
-
-//   if (!exists) {
-//     throw new CustomError("Treatment not found", 409);
-//   }
-// };
 
 module.exports = {
   createTreatmentValidation,
   updateTreatmentValidation,
-//   checkTreatmentExistsByIdValidation,
 };

@@ -131,3 +131,15 @@ exports.getAppointmentMonthlySummary = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (req, res, next) => {
+  const { tenant_id,clinic_id,patient_id } = req.params;
+  const {limit,page}=req.query
+
+  try {
+    const appointments = await appointmentService.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId(tenant_id,clinic_id,patient_id,page,limit);
+    res.status(200).json(appointments);
+  } catch (err) {
+    next(err);
+  }
+};

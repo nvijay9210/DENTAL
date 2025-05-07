@@ -3,16 +3,14 @@ const dentistService = require("../services/DentistService");
 const {
   checkPhoneNumberExists,
   checkPhoneNumberExistsWithId,
+  checkIfExistsWithoutId,
+  checkIfExists,
+  checkIfIdExists,
 } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
 
-// Validate mandatory fields dynamically
-const validateRequiredField = (fieldValue, fieldName) => {
-  if (fieldValue===undefined || fieldValue === null) {
-    throw new CustomError(`${fieldName} is required`, 400);
-  }
-};
+const uniqueFields = ["email", "license_number"];
 
 // Validate tenant existence
 const validateTenant = async (tenantId) => {
@@ -126,17 +124,30 @@ const validateDentistPhones = async (data, dentistId = 0) => {
   }
 };
 
+const validateUniqueFields = async (details, isUpdate = false, dentistId = 0) => {
+  for (const field of uniqueFields) {
+    if (!details[field]) continue;
+    const exists = isUpdate
+      ? await checkIfExistsWithoutId("dentist", field, details[field], dentistId,details.tenant_id)
+      : await checkIfExists("dentist", field, details[field],details.tenant_id);
+    if (exists) throw new CustomError(`${field} already exists`, 409);
+  }
+};
+
 // Create Dentist Validation
 const createDentistValidation = async (details) => {
   await validateInput(details,createColumnConfig)
-  await validateTenant(details.tenant_id);
+  await checkTenantExistsByTenantIdValidation(details.tenant_id);
   await validateDentistPhones(details);
+  await validateUniqueFields(details)
 };
 
 // Update Dentist Validation
 const updateDentistValidation = async (dentistId, details) => {
-  await validateInput(details,updateColumnConfig)
+   validateInput(details,updateColumnConfig)
   await validateTenant(details.tenant_id);
+  await validateUniqueFields(details,true,dentistId)
+  await checkIfIdExists('clinic',clinic_id,details.clinic_id)
 
   if (
     details.alternate_phone_number !== null &&

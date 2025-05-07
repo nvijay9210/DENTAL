@@ -1,36 +1,38 @@
 const appointmentQuery = {
   createAppointmnetTable: `
- CREATE TABLE IF NOT EXISTS appointment (
-  appointment_id     INT AUTO_INCREMENT PRIMARY KEY,
-  tenant_id          INT NOT NULL,
-  patient_id         INT NOT NULL,
-  dentist_id         INT NOT NULL,
-  clinic_id          INT NOT NULL,
-  appointment_date   DATE NOT NULL,
-  start_time         TIME NOT NULL,
-  end_time           TIME NOT NULL,
-  status             ENUM('scheduled', 'completed', 'cancelled') NOT NULL,
-  appointment_type   ENUM('in-person', 'teleconsultation') NOT NULL,
-  consultation_fee   DECIMAL(10,2),
-  discount_applied   DECIMAL(10,2) DEFAULT 0.00,
-  payment_status     ENUM('paid', 'unpaid', 'pending') DEFAULT 'pending' NOT NULL,
-  payment_method     ENUM('cash', 'card', 'insurance', 'other') NOT NULL,
-  visit_reason       TEXT,
-  follow_up_needed   TINYINT(1) NOT NULL DEFAULT 0,
-  reminder_method    ENUM('sms', 'email', 'call', 'whatsapp') NOT NULL,
-  notes              TEXT,
-  created_by         VARCHAR(20) NOT NULL,
-  created_time       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_by         VARCHAR(20) DEFAULT NULL,
-  updated_time       TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-
-  -- ✅ Add comma above before constraints
-  CONSTRAINT fk_appointment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id),
-  CONSTRAINT fk_appointment_patient FOREIGN KEY (patient_id) REFERENCES patient(patient_id),
-  CONSTRAINT fk_appointment_dentist FOREIGN KEY (dentist_id) REFERENCES dentist(dentist_id),
-  CONSTRAINT fk_appointment_clinic FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id)
-);
-
+CREATE TABLE IF NOT EXISTS appointment (
+  appointment_id int(11) NOT NULL AUTO_INCREMENT,
+  tenant_id int(11) NOT NULL,
+  patient_id int(11) NOT NULL,
+  dentist_id int(11) NOT NULL,
+  clinic_id int(11) NOT NULL,
+  appointment_date date NOT NULL,
+  start_time time NOT NULL,
+  end_time time NOT NULL,
+  status enum('SC','CP','CL') NOT NULL DEFAULT 'SC',
+  appointment_type enum('IP','TC') NOT NULL DEFAULT 'TC',
+  consultation_fee decimal(10,2) DEFAULT NULL,
+  discount_applied decimal(10,2) DEFAULT 0.00,
+  payment_status enum('P','UP','PD') NOT NULL DEFAULT 'P',
+  payment_method enum('CH','CD','IN','O') NOT NULL,
+  visit_reason text DEFAULT NULL,
+  follow_up_needed tinyint(1) NOT NULL DEFAULT 0,
+  reminder_method enum('SMS','EM','CL','WA') NOT NULL DEFAULT 'SMS',
+  notes text DEFAULT NULL,
+  created_by varchar(20) NOT NULL,
+  created_time timestamp NOT NULL DEFAULT current_timestamp(),
+  updated_by varchar(20) DEFAULT NULL,
+  updated_time timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+  PRIMARY KEY (appointment_id),
+  KEY fk_appointment_tenant (tenant_id),
+  KEY fk_appointment_patient (patient_id),
+  KEY fk_appointment_dentist (dentist_id),
+  KEY fk_appointment_clinic (clinic_id),
+  CONSTRAINT fk_appointment_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id),
+  CONSTRAINT fk_appointment_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id),
+  CONSTRAINT fk_appointment_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id),
+  CONSTRAINT fk_appointment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `
 };
 

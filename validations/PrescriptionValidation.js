@@ -1,6 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { validateInput } = require("./InputValidation");
-const { checkIfIdExists } = require("../models/checkIfExists");
+const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
 const { recordExists } = require("../query/Records");
 
 // Prescription Column Configuration for Validation
@@ -82,16 +82,15 @@ const updateColumnConfig = [
  * Validate Create Prescription Input with Tenant Scope
  */
 const createPrescriptionValidation = async (details) => {
-  await validateInput(details, createColumnConfig);
-
-  // Ensure tenant exists
-  await checkIfIdExists("tenant", "tenant_id", details.tenant_id);
+  validateInput(details, createColumnConfig);
 
   // Check if referenced records exist within the same tenant
   await Promise.all([
-    checkIfIdExists('tenant','tenant_id', details.tenant_id),
-    checkIfIdExists('patient','patient_id', details.patient_id),
-    checkIfIdExists('dentist','dentist_id', details.dentist_id)
+    checkIfIdExists("tenant", "tenant_id", details.tenant_id),
+    checkIfIdExists("clinic", "clinic_id", details.clinic_id),
+    checkIfIdExists("dentist", "dentist_id", details.dentist_id),
+    checkIfIdExists("patient", "patient_id", details.patient_id),
+    checkIfIdExists("treatment", "treatment_id", details.treatment_id)
   ]);
 };
 
@@ -101,38 +100,7 @@ const createPrescriptionValidation = async (details) => {
 const updatePrescriptionValidation = async (prescriptionId, details) => {
   await validateInput(details, updateColumnConfig);
 
-  const data = {
-    tenant_id: details.tenant_id,
-    prescription_id: prescriptionId,
-  };
-
-  const exists = await recordExists("prescription", data);
-  if (!exists) {
-    throw new CustomError("Prescription not found", 404);
-  }
-
-  // Optional: Validate foreign keys again if they're being updated
-  if (details.patient_id) {
-    await checkIfIdExists("patient", "patient_id", details.patient_id, tenantId);
-  }
-  if (details.dentist_id) {
-    await checkIfIdExists("dentist", "dentist_id", details.dentist_id, tenantId);
-  }
-  if (details.treatment_id) {
-    await checkIfIdExists("treatment", "treatment_id", details.treatment_id, tenantId);
-  }
-};
-
-/**
- * Validate if Prescription Exists by Tenant ID and Prescription ID
- */
-const checkPrescriptionExistsByIdValidation = async (tenantId, prescriptionId) => {
-  const data = {
-    tenant_id: tenantId,
-    prescription_id: prescriptionId,
-  };
-
-  const exists = await recordExists("prescription", data);
+  const exists = await checkIfExists("prescription", "prescription_id",details.prescription_id,details.tenant_id);
   if (!exists) {
     throw new CustomError("Prescription not found", 404);
   }
@@ -140,6 +108,5 @@ const checkPrescriptionExistsByIdValidation = async (tenantId, prescriptionId) =
 
 module.exports = {
   createPrescriptionValidation,
-  updatePrescriptionValidation,
-  checkPrescriptionExistsByIdValidation,
+  updatePrescriptionValidation
 };

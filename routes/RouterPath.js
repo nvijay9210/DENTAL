@@ -31,6 +31,7 @@ module.exports={
     DELETE_APPOINTMENT_TENANT:'/deleteappointment/:appointment_id/:tenant_id',
     GETALL_APPOINTMENT_TENANT_CLINIC_DENTIST:'/getallappointments/:tenant_id/:clinic_id/:dentist_id',
     GET_APPOINTMENT_MONTHLY_SUMMARY:'/getallappointments/monthlysummary/:tenant_id/:clinic_id/:dentist_id',
+    GETALL_PATIENT_VISITEDETAILS:'/getallvisitdetails/:tenant_id/:clinic_id/:patient_id',
 
     ADD_TREATMENT:'/addtreatment',
     GETALL_TREATMENT_TENANT:'/getalltreatments/:tenant_id',

@@ -3,182 +3,41 @@ const clinicService = require("../services/ClinicService");
 const {
   checkPhoneNumberExists,
   checkPhoneNumberExistsWithId,
+  checkIfExists,
+  checkIfExistsWithoutId,
 } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
 const { recordExists } = require("../query/Records");
 
-// Validate mandatory fields dynamically
-const validateRequiredField = (fieldValue, fieldName) => {
-  if (!fieldValue || fieldValue === null) {
-    throw new CustomError(`${fieldName} is required`, 400);
-  }
-};
+const uniqueFields = ["email", "gst_number", "license_number", "pan_number"];
 
-// Validate tenant existence
+// Helpers
 const validateTenant = async (tenantId) => {
   await checkTenantExistsByTenantIdValidation(tenantId);
 };
 
-// Validate clinic phone numbers
 const validateClinicPhones = async (data, clinicId = 0) => {
-  const { phone_number, alternate_phone_number } = data;
-
-  if (clinicId > 0) {
-    await checkPhoneNumberExistsWithId(
-      "clinic",
-      phone_number,
-      "Phone Number",
-      clinicId
-    );
-    if (alternate_phone_number) {
-      await checkPhoneNumberExistsWithId(
-        "clinic",
-        alternate_phone_number,
-        "Alternate Phone Number",
-        clinicId
-      );
-    }
-  } else {
-    await checkPhoneNumberExists("clinic", phone_number, "Phone Number");
-    if (alternate_phone_number) {
-      await checkPhoneNumberExists(
-        "clinic",
-        alternate_phone_number,
-        "Alternate Phone Number"
-      );
-    }
+  const checker = clinicId > 0 ? checkPhoneNumberExistsWithId : checkPhoneNumberExists;
+  await checker("clinic", data.phone_number, "Phone Number", clinicId);
+  if (data.alternate_phone_number) {
+    await checker("clinic", data.alternate_phone_number, "Alternate Phone Number", clinicId);
   }
 };
 
-const createColumnConfig = [
-  { columnname: "tenant_id", type: "int", size: 11, null: false },
-  { columnname: "clinic_name", type: "varchar", size: 255, null: false },
-  { columnname: "email", type: "varchar", size: 255, null: true },
-  { columnname: "phone_number", type: "varchar", size: 15, null: false },
-  {
-    columnname: "alternate_phone_number",
-    type: "varchar",
-    size: 15,
-    null: true,
-  },
-  { columnname: "branch", type: "varchar", size: 50, null: true },
-  { columnname: "website", type: "varchar", size: 255, null: true },
-  { columnname: "address", type: "text", null: false },
-  { columnname: "city", type: "varchar", size: 100, null: false },
-  { columnname: "state", type: "varchar", size: 100, null: false },
-  { columnname: "country", type: "varchar", size: 50, null: false },
-  { columnname: "pin_code", type: "varchar", size: 10, null: false },
-  { columnname: "license_number", type: "varchar", size: 15, null: false },
-  { columnname: "gst_number", type: "varchar", size: 15, null: true },
-  { columnname: "pan_number", type: "varchar", size: 15, null: true },
-  { columnname: "established_year", type: "int", null: false },
-  { columnname: "total_doctors", type: "int", null: true },
-  { columnname: "total_patients", type: "int", null: true },
-  { columnname: "total_dental_chairs", type: "int", null: true },
-  { columnname: "number_of_assistants", type: "int", null: true },
-  {
-    columnname: "available_services",
-    type: "text",
-    null: false,
-    data_type: "json",
-  },
-  {
-    columnname: "operating_hours",
-    type: "text",
-    null: true,
-    data_type: "json",
-  },
-  {
-    columnname: "insurance_supported",
-    type: "tinyint",
-    null: false,
-    is_boolean: true,
-  },
-  { columnname: "ratings", type: "decimal", size: "3,2", null: true },
-  { columnname: "reviews_count", type: "int", null: true },
-  { columnname: "emergency_support", type: "tinyint", null: false },
-  { columnname: "teleconsultation_supported", type: "tinyint", null: false },
-  { columnname: "clinic_logo", type: "text", size: 255, null: true },
-  { columnname: "parking_availability", type: "tinyint", null: false },
-  { columnname: "pharmacy", type: "tinyint", null: true },
-  { columnname: "wifi", type: "tinyint", null: false },
-  { columnname: "created_by", type: "varchar", size: 20, null: false },
-];
-const updateColumnConfig = [
-  { columnname: "tenant_id", type: "int", size: 11, null: false },
-  { columnname: "clinic_name", type: "varchar", size: 255, null: false },
-  { columnname: "email", type: "varchar", size: 255, null: true },
-  { columnname: "phone_number", type: "varchar", size: 15, null: false },
-  {
-    columnname: "alternate_phone_number",
-    type: "varchar",
-    size: 15,
-    null: true,
-  },
-  { columnname: "branch", type: "varchar", size: 50, null: true },
-  { columnname: "website", type: "varchar", size: 255, null: true },
-  { columnname: "address", type: "text", null: false },
-  { columnname: "city", type: "varchar", size: 100, null: false },
-  { columnname: "state", type: "varchar", size: 100, null: false },
-  { columnname: "country", type: "varchar", size: 50, null: false },
-  { columnname: "pin_code", type: "varchar", size: 10, null: false },
-  { columnname: "license_number", type: "varchar", size: 15, null: false },
-  { columnname: "gst_number", type: "varchar", size: 15, null: true },
-  { columnname: "pan_number", type: "varchar", size: 15, null: true },
-  { columnname: "established_year", type: "int", null: false },
-  { columnname: "total_doctors", type: "int", null: true },
-  { columnname: "total_patients", type: "int", null: true },
-  { columnname: "total_dental_chairs", type: "int", null: true },
-  { columnname: "number_of_assistants", type: "int", null: true },
-  {
-    columnname: "available_services",
-    type: "text",
-    null: false,
-    data_type: "json",
-  },
-  {
-    columnname: "operating_hours",
-    type: "text",
-    null: true,
-    data_type: "json",
-  },
-  {
-    columnname: "insurance_supported",
-    type: "tinyint",
-    null: false,
-    is_boolean: true,
-  },
-  { columnname: "ratings", type: "decimal", size: "3,2", null: true },
-  { columnname: "reviews_count", type: "int", null: true },
-  { columnname: "emergency_support", type: "tinyint", null: false },
-  { columnname: "teleconsultation_supported", type: "tinyint", null: false },
-  { columnname: "clinic_logo", type: "text", size: 255, null: true },
-  { columnname: "parking_availability", type: "tinyint", null: false },
-  { columnname: "pharmacy", type: "tinyint", null: true },
-  { columnname: "wifi", type: "tinyint", null: false },
-  { columnname: "updated_by", type: "varchar", size: 20, null: false },
-];
-
-// Create Clinic Validation
-const createClinicValidation = async (details) => {
-  await validateInput(details, createColumnConfig);
-  await validateTenant(details.tenant_id);
-  await validateClinicPhones(details);
+const validateUniqueFields = async (details, isUpdate = false, clinicId = 0) => {
+  for (const field of uniqueFields) {
+    if (!details[field]) continue;
+    const exists = isUpdate
+      ? await checkIfExistsWithoutId("clinic", field, details[field],clinicId,details.tenant_id)
+      : await checkIfExists("clinic", field, details[field],details.tenant_id);
+    if (exists) throw new CustomError(`${field} already exists`, 409);
+  }
 };
 
-// Update Clinic Validation
-const updateClinicValidation = async (clinicId, details, tenantId) => {
-  if (!clinicId) throw new CustomError("Clinic ID is required", 400);
-  await validateInput(details, updateColumnConfig);
-  await validateTenant(tenantId);
-  const clinic = await recordExists("clinic", {
-    tenant_id: tenantId,
-    clinic_id: clinicId,
-  });
-  if (!clinic) throw new CustomError("clinic id not found", 404);
+const validatePhonesNotSame = (details) => {
   if (
-    details.alternate_phone_number !== null &&
+    details.alternate_phone_number &&
     Number(details.phone_number) === Number(details.alternate_phone_number)
   ) {
     throw new CustomError(
@@ -186,26 +45,33 @@ const updateClinicValidation = async (clinicId, details, tenantId) => {
       409
     );
   }
-
-  await validateClinicPhones(details, clinicId);
 };
 
-// Check if Clinic exists by Clinic ID
-const checkClinicExistsByClinicIdValidation = async (
-  tenantId,
-  clinicId
-) => {
+// Main validations
+const createClinicValidation = async (details) => {
+  validateInput(details, require("../configs/ClinicCreateConfig"));
+  await validateTenant(details.tenant_id);
+  await validateClinicPhones(details);
+  await validateUniqueFields(details);
+};
+
+const updateClinicValidation = async (clinicId, details, tenantId) => {
+  if (!clinicId) throw new CustomError("Clinic ID is required", 400);
+  validateInput(details, require("../configs/ClinicUpdateConfig"));
   await validateTenant(tenantId);
 
-  const clinic =
-    await clinicService.checkClinicExistsByTenantIdAndClinicId(
-      tenantId,
-      clinicId
-    );
+  const clinic = await recordExists("clinic", { tenant_id: tenantId, clinic_id: clinicId });
+  if (!clinic) throw new CustomError("Clinic ID not found", 404);
 
-  if (!clinic) {
-    throw new CustomError("Clinic not found", 409);
-  }
+  validatePhonesNotSame(details);
+  await validateClinicPhones(details, clinicId);
+  await validateUniqueFields(details, true, clinicId);
+};
+
+const checkClinicExistsByClinicIdValidation = async (tenantId, clinicId) => {
+  await validateTenant(tenantId);
+  const clinic = await clinicService.checkClinicExistsByTenantIdAndClinicId(tenantId, clinicId);
+  if (!clinic) throw new CustomError("Clinic not found", 409);
 };
 
 module.exports = {

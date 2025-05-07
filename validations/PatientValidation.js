@@ -7,6 +7,8 @@ const {
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
 
+const uniqueFields = ["email", "emergency_contact_number","insurance_policy_number"];
+
 const CreateColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },
   { columnname: "first_name", type: "varchar", size: 50, null: false },
@@ -18,7 +20,7 @@ const CreateColumnConfig = [
   {
     columnname: "gender",
     type: "enum",
-    enum_values: ["male", "female", "transgender"],
+    enum_values: ["M", "F", "TG"],
     null: false,
   },
   { columnname: "blood_group", type: "varchar", size: 10, null: true },
@@ -38,13 +40,13 @@ const CreateColumnConfig = [
   {
     columnname: "smoking_status",
     type: "enum",
-    enum_values: ["never", "former", "current"],
+    enum_values: ["N", "F", "C"],
     null: false,
   },
   {
     columnname: "alcohol_consumption",
     type: "enum",
-    enum_values: ["never", "occasional", "regular"],
+    enum_values: ["N", "OC", "R"],
     null: false,
   },
   {
@@ -85,7 +87,7 @@ const UpdateColumnConfig = [
   {
     columnname: "gender",
     type: "enum",
-    enum_values: ["male", "female", "transgender"],
+    enum_values: ["M", "F", "TG"],
     null: false,
   },
   { columnname: "blood_group", type: "varchar", size: 10, null: true },
@@ -105,13 +107,13 @@ const UpdateColumnConfig = [
   {
     columnname: "smoking_status",
     type: "enum",
-    enum_values: ["never", "former", "current"],
+    enum_values: ["N", "F", "C"],
     null: false,
   },
   {
     columnname: "alcohol_consumption",
     type: "enum",
-    enum_values: ["never", "occasional", "regular"],
+    enum_values: ["N", "OC", "R"],
     null: false,
   },
   {
@@ -175,12 +177,23 @@ const validatePatientPhones = async (data, patientId = 0) => {
   }
 };
 
+const validateUniqueFields = async (details, isUpdate = false, patientId = 0) => {
+  for (const field of uniqueFields) {
+    if (!details[field]) continue;
+    const exists = isUpdate
+      ? await checkIfExistsWithoutId("patient", field, details[field], patientId,details.tenant_id)
+      : await checkIfExists("patient", field, details[field],details.tenant_id);
+    if (exists) throw new CustomError(`${field} already exists`, 409);
+  }
+};
+
 // Create Patient Validation
 const createPatientValidation = async (details) => {
   console.log(details)
   await validateInput(details, CreateColumnConfig);
   await checkTenantExistsByTenantIdValidation(details.tenant_id);
   await validatePatientPhones(details);
+  await validateUniqueFields(details)
 };
 
 // Update Patient Validation
@@ -200,6 +213,7 @@ const updatePatientValidation = async (patientId, details, tenantId) => {
   }
 
   await validatePatientPhones(details, patientId);
+  await validateUniqueFields(details,true,patientId)
 };
 
 // Check if Patient exists by Patient ID

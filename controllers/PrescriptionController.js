@@ -58,13 +58,11 @@ exports.getPrescriptionByTenantIdAndPrescriptionId = async (req, res, next) => {
  * Update an existing prescription
  */
 exports.updatePrescription = async (req, res, next) => {
-  const { prescription_id } = req.params;
+  const { prescription_id,tenant_id } = req.params;
   const details = req.body;
 
   try {
-    // Validate if prescription exists before update
-    await prescriptionValidation.checkPrescriptionExistsByIdValidation(details.tenant_id, prescription_id);
-
+  
     // Validate update input
     await prescriptionValidation.updatePrescriptionValidation(prescription_id, details);
 

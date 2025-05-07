@@ -239,6 +239,38 @@ WHERE
   }
 };
 
+const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (tenantId,clinicId, patientId,limit,offset) => {
+  const query = `SELECT 
+    p.patient_id,
+     CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
+     app.appointment_date,
+     app.reason
+FROM 
+    appointment AS app
+JOIN 
+    patient as p 
+ON
+  p.patient_id=app.patient_id
+WHERE 
+    app.tenant_id = ? AND 
+    app.clinic_id = ? AND 
+    app.patient_id=? AND
+    app.status='CP'
+    limit ? offset ? 
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId,clinicId, patientId,limit,offset]);
+    console.log('appoinments:',rows)
+    return rows;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+};
+
 module.exports = {
   createAppointment,
   getAllAppointmentsByTenantId,
@@ -247,5 +279,6 @@ module.exports = {
   deleteAppointmentByTenantIdAndAppointmentId,
   checkAppointmentExistsByStartTimeAndEndTimeAndDate,
   getAppointmentsWithDetails,
-  getAppointmentMonthlySummary
+  getAppointmentMonthlySummary,
+  getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId
 };

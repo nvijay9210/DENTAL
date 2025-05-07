@@ -1,35 +1,42 @@
 const prescriptionQuery = {
   createTable: `CREATE TABLE IF NOT EXISTS prescription (
-  prescription_id       INT(11) PRIMARY KEY AUTO_INCREMENT, -- Primary Key
-  tenant_id             INT NOT NULL,                       
-  patient_id            INT NOT NULL,                       -- Foreign Key
-  dentist_id            INT NOT NULL,                       -- Foreign Key
-  treatment_id          INT NOT NULL,                       -- Foreign Key
-  medication            TEXT,                              -- Null
-  generic_name          VARCHAR(255),                      -- Null
-  brand_name            VARCHAR(255),                      -- Null
-  dosage                TEXT,                              -- Null
-  frequency             VARCHAR(50),                       -- Null
-  quantity              INT,                               -- Null
-  refill_allowed        BOOLEAN DEFAULT FALSE,             -- Default: FALSE, Null
-  refill_count          INT DEFAULT 0,                     -- Default: 0, Null
-  side_effects          TEXT,                              -- Null
-  start_date            DATE,                              -- Null
-  end_date              DATE,                              -- Null
-  instructions          TEXT,                              -- Null
-  notes                 TEXT,                              -- Null
-  is_active             BOOLEAN DEFAULT TRUE NOT NULL,     -- Default: TRUE, Not Null
-  created_by            VARCHAR(20) NOT NULL,              -- Not Null
-  created_time          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Not Null
-  updated_by            VARCHAR(20),                       -- Null
-  updated_time          TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP, -- Null
-
-  -- Foreign key constraints
-  CONSTRAINT fk_prescription_patient FOREIGN KEY (patient_id) REFERENCES patient(patient_id),
-  CONSTRAINT fk_prescription_dentist FOREIGN KEY (dentist_id) REFERENCES dentist(dentist_id),
-  CONSTRAINT fk_prescription_treatment FOREIGN KEY (treatment_id) REFERENCES treatment(treatment_id),
-    CONSTRAINT fk_prescription_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id)
-);`,
+  prescription_id INT(11) NOT NULL AUTO_INCREMENT,
+  tenant_id INT(11) NOT NULL,
+  clinic_id INT(11) NOT NULL,
+  patient_id INT(11) NOT NULL,
+  dentist_id INT(11) NOT NULL,
+  treatment_id INT(11) NOT NULL,
+  medication TEXT DEFAULT NULL,
+  generic_name VARCHAR(255) DEFAULT NULL,
+  brand_name VARCHAR(255) DEFAULT NULL,
+  dosage TEXT DEFAULT NULL,
+  frequency VARCHAR(50) DEFAULT NULL,
+  quantity INT(11) DEFAULT NULL,
+  refill_allowed TINYINT(1) DEFAULT 0,
+  refill_count INT(11) DEFAULT 0,
+  side_effects TEXT DEFAULT NULL,
+  start_date DATE DEFAULT NULL,
+  end_date DATE DEFAULT NULL,
+  instructions TEXT DEFAULT NULL,
+  notes TEXT DEFAULT NULL,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_by VARCHAR(20) NOT NULL,
+  created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_by VARCHAR(20) DEFAULT NULL,
+  updated_time TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (prescription_id),
+  KEY fk_prescription_patient (patient_id),
+  KEY fk_prescription_dentist (dentist_id),
+  KEY fk_prescription_treatment (treatment_id),
+  KEY fk_prescription_tenant (tenant_id),
+  KEY fk_prescription_clinic (clinic_id),
+  CONSTRAINT fk_prescription_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id),
+  CONSTRAINT fk_prescription_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id),
+  CONSTRAINT fk_prescription_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id),
+  CONSTRAINT fk_prescription_treatment FOREIGN KEY (treatment_id) REFERENCES treatment (treatment_id),
+  CONSTRAINT fk_prescription_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+`,
 };
 
 module.exports = { prescriptionQuery };

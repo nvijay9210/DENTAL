@@ -206,6 +206,24 @@ const getAppointmentMonthlySummary = async (tenantId, clinic_id, dentist_id) => 
   }
 };
 
+const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (tenantId,clinicId, patientId,page,limit) => {
+  try {
+    const offset = (page - 1) * limit;
+    const cacheKey = `patientvisitdetails:${tenantId}/${clinicId}/${patientId}`;
+    const appointment = await getOrSetCache(cacheKey, async () => {
+      const result = await appointmentModel.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId(
+        tenantId,clinicId, patientId,limit,offset
+      );
+      return result; // 🔁 Important: return from cache function
+    });
+
+    return appointment;
+  } catch (error) {
+    console.error("Database error while fetching appointment:", error);
+    throw new CustomError("Failed to fetch appointment", 500);
+  }
+};
+
 
 
 module.exports = {
@@ -217,5 +235,6 @@ module.exports = {
   deleteAppointmentByTenantIdAndAppointmentId,
   checkAppointmentExistsByStartTimeAndEndTimeAndDate,
   getAppointmentsWithDetails,
-  getAppointmentMonthlySummary
+  getAppointmentMonthlySummary,
+  getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId
 };

@@ -60,11 +60,9 @@ exports.updateTreatment = async (req, res, next) => {
   const details = req.body;
 
   try {
-    // Validate if treatment exists before update
-    await treatmentValidation.checkTreatmentExistsByIdValidation(tenant_id, treatment_id);
 
     // Validate update input
-    await treatmentValidation.updateTreatmentValidation(treatment_id, details, tenant_id);
+    await treatmentValidation.updateTreatmentValidation(treatment_id,details, tenant_id);
 
     // Update the treatment
     await treatmentService.updateTreatment(treatment_id, details, tenant_id);

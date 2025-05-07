@@ -61,7 +61,7 @@ const checkIfIdExists = async (table, field, value) => {
   const conn = await pool.getConnection();
   try {
     // Sanitize table name to prevent SQL injection
-    const allowedTables = ['patient', 'dentist', 'hospital', 'tenant']; // Add your actual table names here
+    const allowedTables = ['patient', 'dentist', 'clinic', 'tenant','appointment','treatment','prescription']; // Add your actual table names here
     if (!allowedTables.includes(table)) {
       throw new Error(`Invalid table name: ${table}`);
     }
@@ -85,8 +85,62 @@ const checkIfIdExists = async (table, field, value) => {
   }
 };
 
+const checkIfExists = async (table, field, value,tenantId) => {
+  const conn = await pool.getConnection();
+  try {
+    // Sanitize table name to prevent SQL injection
+    const allowedTables = ['patient', 'dentist', 'clinic', 'tenant','appointment','treatment','prescription']; // Add your actual table names here
+    if (!allowedTables.includes(table)) {
+      throw new Error(`Invalid table name: ${table}`);
+    }
+
+    // Query using proper placeholder for column name and value
+    const [result] = await conn.query(
+      `SELECT 1 FROM ?? WHERE ?? = ? AND tenant_id = ? LIMIT 1`,
+      [table, field, value, tenantId]
+    );
+    
+
+     return result.length>0 ? true : false
+
+  } catch (err) {
+    console.error(err);
+    throw new CustomError(`Database error: ${err.message}`, 500);
+  } finally {
+    conn.release();
+  }
+};
+
+const checkIfExistsWithoutId = async (table, field, value,clinicId,tenantId) => {
+  const conn = await pool.getConnection();
+  try {
+    // Sanitize table name to prevent SQL injection
+    const allowedTables = ['patient', 'dentist', 'clinic', 'tenant','appointment','treatment','prescription']; // Add your actual table names here
+    if (!allowedTables.includes(table)) {
+      throw new Error(`Invalid table name: ${table}`);
+    }
+
+    // Query using proper placeholder for column name and value
+    const [result] = await conn.query(
+      `SELECT 1 FROM ?? WHERE ?? != ? AND tenant_id = ? LIMIT 1`,
+      [table, field, value,clinicId,tenantId]
+    );
+    
+
+     return result.length>0 ? true : false
+
+  } catch (err) {
+    console.error(err);
+    throw new CustomError(`Database error: ${err.message}`, 500);
+  } finally {
+    conn.release();
+  }
+};
+
 module.exports = {
   checkPhoneNumberExists,
   checkPhoneNumberExistsWithId,
-  checkIfIdExists
+  checkIfIdExists,
+  checkIfExists,
+  checkIfExistsWithoutId
 };
