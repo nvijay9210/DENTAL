@@ -80,7 +80,6 @@ function validateInput(userInput, columnConfig) {
           break;
 
         case 'date':
-          console.log(value)
           if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
             throw new CustomError(`${columnname} must be a valid date (YYYY-MM-DD)`, 400);
           }

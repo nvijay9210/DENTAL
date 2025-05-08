@@ -126,7 +126,8 @@ const validateDentistPhones = async (data, dentistId = 0) => {
 
 const validateUniqueFields = async (details, isUpdate = false, dentistId = 0) => {
   for (const field of uniqueFields) {
-    if (!details[field]) continue;
+    if (!details[field] || details[field]==='null') continue;
+    
     const exists = isUpdate
       ? await checkIfExistsWithoutId("dentist", field, details[field],"dentist_id", dentistId,details.tenant_id)
       : await checkIfExists("dentist", field, details[field],details.tenant_id);
@@ -144,6 +145,7 @@ const createDentistValidation = async (details) => {
 
 // Update Dentist Validation
 const updateDentistValidation = async (dentistId, details,tenant_id) => {
+  console.log('DentistRouter:',details)
    validateInput(details,updateColumnConfig)
   await validateTenant(tenant_id);
   // await checkIfIdExists('clinic','clinic_id',details.clinic_id||0)

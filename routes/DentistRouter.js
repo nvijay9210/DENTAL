@@ -30,7 +30,7 @@ const dentistFileMiddleware = uploadFileMiddleware({
     {
       fieldName: "awards_certifications",
       subFolder: "Documents",
-      maxSizeMB: 5,
+      maxSizeMB: 10,
       multiple: true,
     },
     // { fieldName: "aadhaar_back", subFolder: "Documents", maxSizeMB: 5, multiple: false },

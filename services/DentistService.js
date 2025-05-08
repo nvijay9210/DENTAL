@@ -27,13 +27,14 @@ function safeStringify(val) {
 
 const dentistFieldMap = {
   tenant_id: (val) => val,
+  clinic_id: (val) => val,
   first_name: (val) => val,
   last_name: (val) => val,
-  gender: (val) => val || null,
-  date_of_birth: (val) => val || null,
-  email: (val) => val || null,
+  gender: (val) => val ,
+  date_of_birth: (val) => val ,
+  email: (val) => val ,
   phone_number: (val) => val,
-  alternate_phone_number: (val) => val || null,
+  alternate_phone_number: (val) => val ,
 
   specialization: safeStringify,
   qualifications: safeStringify,
@@ -45,8 +46,8 @@ const dentistFieldMap = {
 
   experience_years: (val) => val,
   license_number: (val) => val,
-  clinic_name: (val) => val || null,
-  clinic_address: (val) => val || null,
+  clinic_name: (val) => val ,
+  clinic_address: (val) => val ,
   city: (val) => val,
   state: (val) => val,
   country: (val) => val,
