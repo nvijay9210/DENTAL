@@ -111,7 +111,7 @@ const checkIfExists = async (table, field, value,tenantId) => {
   }
 };
 
-const checkIfExistsWithoutId = async (table, field, value,clinicId,tenantId) => {
+const checkIfExistsWithoutId = async (table, field, value, excludeField, excludeValue, tenantId) => {
   const conn = await pool.getConnection();
   try {
     // Sanitize table name to prevent SQL injection
@@ -122,8 +122,8 @@ const checkIfExistsWithoutId = async (table, field, value,clinicId,tenantId) => 
 
     // Query using proper placeholder for column name and value
     const [result] = await conn.query(
-      `SELECT 1 FROM ?? WHERE ?? != ? AND tenant_id = ? LIMIT 1`,
-      [table, field, value,clinicId,tenantId]
+      `SELECT 1 FROM ?? WHERE ?? = ? AND ?? != ? AND tenant_id = ? LIMIT 1`,
+      [table, field, value, excludeField, excludeValue, tenantId]
     );
     
 

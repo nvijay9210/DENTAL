@@ -128,7 +128,7 @@ const validateUniqueFields = async (details, isUpdate = false, dentistId = 0) =>
   for (const field of uniqueFields) {
     if (!details[field]) continue;
     const exists = isUpdate
-      ? await checkIfExistsWithoutId("dentist", field, details[field], dentistId,details.tenant_id)
+      ? await checkIfExistsWithoutId("dentist", field, details[field],"dentist_id", dentistId,details.tenant_id)
       : await checkIfExists("dentist", field, details[field],details.tenant_id);
     if (exists) throw new CustomError(`${field} already exists`, 409);
   }
@@ -136,18 +136,18 @@ const validateUniqueFields = async (details, isUpdate = false, dentistId = 0) =>
 
 // Create Dentist Validation
 const createDentistValidation = async (details) => {
-  await validateInput(details,createColumnConfig)
+   validateInput(details,createColumnConfig)
   await checkTenantExistsByTenantIdValidation(details.tenant_id);
   await validateDentistPhones(details);
   await validateUniqueFields(details)
 };
 
 // Update Dentist Validation
-const updateDentistValidation = async (dentistId, details) => {
+const updateDentistValidation = async (dentistId, details,tenant_id) => {
    validateInput(details,updateColumnConfig)
-  await validateTenant(details.tenant_id);
+  await validateTenant(tenant_id);
+  // await checkIfIdExists('clinic','clinic_id',details.clinic_id||0)
   await validateUniqueFields(details,true,dentistId)
-  await checkIfIdExists('clinic',clinic_id,details.clinic_id)
 
   if (
     details.alternate_phone_number !== null &&

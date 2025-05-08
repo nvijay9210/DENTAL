@@ -181,7 +181,7 @@ const validateUniqueFields = async (details, isUpdate = false, patientId = 0) =>
   for (const field of uniqueFields) {
     if (!details[field]) continue;
     const exists = isUpdate
-      ? await checkIfExistsWithoutId("patient", field, details[field], patientId,details.tenant_id)
+      ? await checkIfExistsWithoutId("patient", field, details[field],"patient_id", patientId,details.tenant_id)
       : await checkIfExists("patient", field, details[field],details.tenant_id);
     if (exists) throw new CustomError(`${field} already exists`, 409);
   }
