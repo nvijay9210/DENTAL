@@ -78,6 +78,20 @@ function buildUpdatedData(fields, updateObj, createObj) {
   return result;
 }
 
+function safeStringify(val) {
+  if (!val) return null;
+  try {
+    JSON.parse(val); // Check if already valid JSON string
+    return val;
+  } catch {
+    return JSON.stringify(val);
+  }
+}
+const parseBoolean = (val) => {
+  if (val === true || val === "true" || val === 1 || val === "1") return 1;
+  return 0;
+};
+
 module.exports = {
   getJsonValue,
   toBooleanNumber,
@@ -85,5 +99,7 @@ module.exports = {
   sameLengthChecker,
   safeJsonParse,
   mapBooleanFields,
-  buildUpdatedData
+  buildUpdatedData,
+  safeStringify,
+  parseBoolean
 };

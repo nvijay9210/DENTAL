@@ -1,41 +1,49 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const treatmentModel = require("../models/TreatmentModel");
-const { redisClient, getOrSetCache, invalidateCacheByTenant } = require("../config/redisConfig");
+const {
+  redisClient,
+  getOrSetCache,
+  invalidateCacheByTenant,
+} = require("../config/redisConfig");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
-const helper=require('../utils/Helpers')
+const helper = require("../utils/Helpers");
 
 // Create Treatment
 const createTreatment = async (data) => {
-    const fieldMap = {
-        tenant_id: (val) => val,
-        patient_id: (val) => val,
-        dentist_id: (val) => val,
-        clinic_id: (val) => val,
-        diagnosis: (val) => val || null,
-        treatment_procedure: (val) => val || null,
-        treatment_type: (val) => val.toLowerCase() || null,
-        treatment_status: (val) => val || null,
-        treatment_date: (val) => val,
-        cost: (val) => val || 0,
-        duration: (val) => val || null,
-        teeth_involved: (val) => val || null,
-        complications: (val) => val || null,
-        follow_up_required: (val) => val || false,
-        follow_up_date: (val) => val || null,
-        follow_up_notes: (val) => val || null,
-        anesthesia_used: (val) => val || false,
-        anesthesia_type: (val) => val || null,
-        technician_assisted: (val) => val || null,
-        images: (val) => val || null,
-        notes: (val) => val || null,
-        created_by: (val) => val
-      };
-      
+  console.log("data:", data);
+  const fieldMap = {
+    tenant_id: (val) => val,
+    patient_id: (val) => val,
+    dentist_id: (val) => val,
+    clinic_id: (val) => val,
+    diagnosis: helper.safeStringify,
+    treatment_procedure: helper.safeStringify,
+    treatment_type: (val) => val,
+    treatment_status: (val) => val,
+    treatment_date: (val) => val,
+    cost: (val) => val || 0,
+    duration: (val) => val || null,
+    teeth_involved: (val) => val || null,
+    complications: helper.safeStringify,
+    follow_up_required: helper.parseBoolean,
+    follow_up_date: (val) => val || null,
+    follow_up_notes: helper.safeStringify,
+    anesthesia_used: helper.parseBoolean,
+    anesthesia_type: (val) => val || null,
+    technician_assisted: (val) => val || null,
+    treatment_images: (val) => val || null,
+    notes: helper.safeStringify,
+    created_by: (val) => val,
+  };
 
   try {
     const { columns, values } = mapFields(data, fieldMap);
-    const treatmentId = await treatmentModel.createTreatment("treatment", columns, values);
+    const treatmentId = await treatmentModel.createTreatment(
+      "treatment",
+      columns,
+      values
+    );
     await invalidateCacheByTenant("treatment", data.tenant_id);
     return treatmentId;
   } catch (error) {
@@ -53,7 +61,11 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
 
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
-      const result = await treatmentModel.getAllTreatmentsByTenantId(tenantId, Number(limit), offset);
+      const result = await treatmentModel.getAllTreatmentsByTenantId(
+        tenantId,
+        Number(limit),
+        offset
+      );
       return result;
     });
 
@@ -64,11 +76,13 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
   }
 };
 
-
 // Get Treatment by ID & Tenant
 const getTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {
   try {
-    const treatment = await treatmentModel.getTreatmentByTenantIdAndTreatmentId(tenantId, treatmentId);
+    const treatment = await treatmentModel.getTreatmentByTenantIdAndTreatmentId(
+      tenantId,
+      treatmentId
+    );
     const fieldsToDecode = ["description", "diagnosis", "notes"];
     return decodeJsonFields(treatment, fieldsToDecode);
   } catch (error) {
@@ -78,34 +92,39 @@ const getTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {
 
 // Update Treatment
 const updateTreatment = async (treatmentId, data, tenant_id) => {
-    const fieldMap = {
-        tenant_id: (val) => val,
-        patient_id: (val) => val,
-        dentist_id: (val) => val,
-        clinic_id: (val) => val,
-        diagnosis: (val) => val || null,
-        treatment_procedure: (val) => val || null,
-        treatment_type: (val) => val || null,
-        treatment_status: (val) => val || null,
-        treatment_date: (val) => val,
-        cost: (val) => val || 0,
-        duration: (val) => val || null,
-        teeth_involved: (val) => val || null,
-        complications: (val) => val || null,
-        follow_up_required: (val) => val || false,
-        follow_up_date: (val) => val || null,
-        follow_up_notes: (val) => val || null,
-        anesthesia_used: (val) => val || false,
-        anesthesia_type: (val) => val || null,
-        technician_assisted: (val) => val || null,
-        images: (val) => val || null,
-        notes: (val) => val || null,
-        updated_by: (val) => val
-      };
+  const fieldMap = {
+    tenant_id: (val) => val,
+    patient_id: (val) => val,
+    dentist_id: (val) => val,
+    clinic_id: (val) => val,
+    diagnosis: helper.safeStringify,
+    treatment_procedure: helper.safeStringify,
+    treatment_type: (val) => val,
+    treatment_status: (val) => val,
+    treatment_date: (val) => val,
+    cost: (val) => val || 0,
+    duration: (val) => val || null,
+    teeth_involved: (val) => val || null,
+    complications: helper.safeStringify,
+    follow_up_required: helper.parseBoolean,
+    follow_up_date: (val) => val || null,
+    follow_up_notes: helper.safeStringify,
+    anesthesia_used: helper.parseBoolean,
+    anesthesia_type: (val) => val || null,
+    technician_assisted: (val) => val || null,
+    treatment_images: (val) => val || null,
+    notes: helper.safeStringify,
+    updated_by: (val) => val,
+  };
 
   try {
     const { columns, values } = mapFields(data, fieldMap);
-    const affectedRows = await treatmentModel.updateTreatment(treatmentId, columns, values, tenant_id);
+    const affectedRows = await treatmentModel.updateTreatment(
+      treatmentId,
+      columns,
+      values,
+      tenant_id
+    );
 
     if (affectedRows === 0) {
       throw new CustomError("Treatment not found or no changes made.", 404);
@@ -120,9 +139,16 @@ const updateTreatment = async (treatmentId, data, tenant_id) => {
 };
 
 // Delete Treatment
-const deleteTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {
+const deleteTreatmentByTenantIdAndTreatmentId = async (
+  tenantId,
+  treatmentId
+) => {
   try {
-    const affectedRows = await treatmentModel.deleteTreatmentByTenantAndTreatmentId(tenantId, treatmentId);
+    const affectedRows =
+      await treatmentModel.deleteTreatmentByTenantAndTreatmentId(
+        tenantId,
+        treatmentId
+      );
     if (affectedRows === 0) {
       throw new CustomError("Treatment not found.", 404);
     }

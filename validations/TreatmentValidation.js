@@ -102,7 +102,7 @@ const createTreatmentValidation = async (details) => {
 
   await Promise.all([
     checkIfIdExists('tenant','tenant_id', details.tenant_id),
-    checkIfIdExists('hospital','hospital_id', details.clinic_id),
+    checkIfIdExists('clinic','clinic_id', details.clinic_id),
     checkIfIdExists('patient','patient_id', details.patient_id),
     checkIfIdExists('dentist','dentist_id', details.dentist_id)
   ]);

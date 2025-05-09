@@ -8,30 +8,32 @@ const helper=require('../utils/Helpers')
 const { formatDateOnly, formatTimeOnly, formatAppointments } = require("../utils/DateUtils");
 
 // Field mapping for prescriptions (similar to treatment)
-const fieldMap = {
-    tenant_id:(val)=>val,
-  patient_id: (val) => val,
-  dentist_id: (val) => val,
-  treatment_id: (val) => val,
-  medication: (val) => val || null,
-  generic_name: (val) => val || null,
-  brand_name: (val) => val || null,
-  dosage: (val) => val || null,
-  frequency: (val) => val || null,
-  quantity: (val) => val || null,
-  refill_allowed: (val) => val ?? false,
-  refill_count: (val) => val || 0,
-  side_effects: (val) => val || null,
-  start_date: (val) => val || null,
-  end_date: (val) => val || null,
-  instructions: (val) => val || null,
-  notes: (val) => val || null,
-  is_active: (val) => val ?? true,
-  created_by: (val) => val
-};
+
 
 // Create Prescription
 const createPrescription = async (data) => {
+  const fieldMap = {
+    tenant_id:(val)=>val,
+    clinic_id:(val)=>val,
+  patient_id: (val) => val,
+  dentist_id: (val) => val,
+  treatment_id: (val) => val,
+  medication: helper.safeStringify,
+  generic_name: (val) => val || null,
+  brand_name: (val) => val || null,
+  dosage: helper.safeStringify,
+  frequency: (val) => val || null,
+  quantity: (val) => val || null,
+  refill_allowed: helper.parseBoolean,
+  refill_count: (val) => val || 0,
+  side_effects: helper.safeStringify,
+  start_date: (val) => val || null,
+  end_date: (val) => val || null,
+  instructions: helper.safeStringify,
+  notes: helper.safeStringify,
+  is_active: helper.parseBoolean,
+  created_by: (val) => val
+};
   try {
     const { columns, values } = mapFields(data, fieldMap);
     const prescriptionId = await prescriptionModel.createPrescription("prescription", columns, values);
@@ -80,26 +82,28 @@ const getPrescriptionByTenantIdAndPrescriptionId = async (tenantId, prescription
 
 // Update Prescription
 const updatePrescription = async (prescriptionId, data, tenant_id) => {
-    const fieldMap = {
-        patient_id: (val) => val,
-        dentist_id: (val) => val,
-        treatment_id: (val) => val,
-        medication: (val) => val || null,
-        generic_name: (val) => val || null,
-        brand_name: (val) => val || null,
-        dosage: (val) => val || null,
-        frequency: (val) => val || null,
-        quantity: (val) => val || null,
-        refill_allowed: (val) => val ?? false,
-        refill_count: (val) => val || 0,
-        side_effects: (val) => val || null,
-        start_date: (val) => formatDateOnly(val) || null,
-        end_date: (val) => formatDateOnly(val) || null,
-        instructions: (val) => val || null,
-        notes: (val) => val || null,
-        is_active: (val) => val ?? true,
-        updated_by: (val) => val
-      };
+  const fieldMap = {
+    tenant_id:(val)=>val,
+    clinic_id:(val)=>val,
+  patient_id: (val) => val,
+  dentist_id: (val) => val,
+  treatment_id: (val) => val,
+  medication: helper.safeStringify,
+  generic_name: (val) => val || null,
+  brand_name: (val) => val || null,
+  dosage: helper.safeStringify,
+  frequency: (val) => val || null,
+  quantity: (val) => val || null,
+  refill_allowed: helper.parseBoolean,
+  refill_count: (val) => val || 0,
+  side_effects: helper.safeStringify,
+  start_date: (val) => val || null,
+  end_date: (val) => val || null,
+  instructions: helper.safeStringify,
+  notes: helper.safeStringify,
+  is_active: helper.parseBoolean,
+  updated_by: (val) => val
+};
   try {
     const { columns, values } = mapFields(data, fieldMap);
     const affectedRows = await prescriptionModel.updatePrescription(

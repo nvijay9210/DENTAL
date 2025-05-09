@@ -213,9 +213,9 @@ WHERE app.tenant_id = ?
 const getAppointmentMonthlySummary = async (tenantId, clinic_id, dentist_id,limit,offset) => {
   const query = `SELECT 
     COUNT(*) AS total_appointments,
-    SUM(CASE WHEN app.status = 'completed' THEN 1 ELSE 0 END) AS completed_appointments,
-    SUM(CASE WHEN app.status = 'scheduled' THEN 1 ELSE 0 END) AS pending_appointments,
-    SUM(CASE WHEN app.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_appointments
+    SUM(CASE WHEN app.status = 'CP' THEN 1 ELSE 0 END) AS completed_appointments,
+    SUM(CASE WHEN app.status = 'SCH' THEN 1 ELSE 0 END) AS pending_appointments,
+    SUM(CASE WHEN app.status = 'CL' THEN 1 ELSE 0 END) AS cancelled_appointments
 FROM 
     appointment AS app
 WHERE 
