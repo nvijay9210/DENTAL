@@ -28,7 +28,6 @@ const patientQuery = {
   treatment_history LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (JSON_VALID(treatment_history)),
   appointment_count INT(11) DEFAULT NULL,
   last_appointment_date TIMESTAMP NULL DEFAULT NULL,
-  upcoming_appointment_id INT(11) DEFAULT NULL,
   profile_picture TEXT DEFAULT NULL,
   created_by VARCHAR(20) NOT NULL,
   created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
