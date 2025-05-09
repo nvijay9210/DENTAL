@@ -7,6 +7,7 @@ const {
 } = require("../config/redisConfig");
 const { decodeJsonFields, mapBooleanFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
+const { formatDateOnly } = require("../utils/DateUtils");
 
 // Helper: Convert truthy values to 1/0
 const parseBoolean = (val) => {
@@ -123,7 +124,7 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
     "bio",
     "languages_spoken",
     "social_links",
-    "awards_certifications",
+    "awards_certifications"
   ];
   const booleanFields = ["teleconsultation_supported", "insurance_supported"];
 
@@ -136,16 +137,22 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
       );
     });
 
-    console.log("dentists:", dentists);
-
     const parsed = decodeJsonFields(dentists, jsonFields);
-    parsed.forEach((d) => mapBooleanFields(d, booleanFields));
+
+    parsed.forEach((d) => {
+      mapBooleanFields(d, booleanFields);
+      if (d.date_of_birth) {
+        d.date_of_birth = formatDateOnly(d.date_of_birth);
+      }
+    });
+
     return parsed;
   } catch (err) {
     console.error("Database error while fetching dentists:", err.message);
     throw new CustomError("Database error while fetching dentists", 500);
   }
 };
+
 
 // -------------------- GET SINGLE --------------------
 const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {

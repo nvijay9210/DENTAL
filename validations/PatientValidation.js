@@ -3,19 +3,54 @@ const patientService = require("../services/PatientService");
 const {
   checkPhoneNumberExists,
   checkPhoneNumberExistsWithId,
+  checkIfExistsWithoutId,
 } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
 
-const uniqueFields = ["email", "emergency_contact_number","insurance_policy_number"];
+const uniqueFields = [
+  "email",
+  "emergency_contact_number",
+  "insurance_policy_number",
+];
 
 const CreateColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },
-  { columnname: "first_name", type: "varchar", size: 50, null: false },
-  { columnname: "last_name", type: "varchar", size: 50, null: false },
-  { columnname: "email", type: "varchar", size: 255, null: true },
-  { columnname: "phone_number", type: "varchar", size: 15, null: false },
-  { columnname: "alter_phone_number", type: "varchar", size: 15, null: true },
+  {
+    columnname: "first_name",
+    type: "varchar",
+    size: 50,
+    null: false,
+    pattern: /^[a-zA-Z\s]{2,50}$/,
+  },
+  {
+    columnname: "last_name",
+    type: "varchar",
+    size: 50,
+    null: false,
+    pattern: /^[a-zA-Z\s]{2,50}$/,
+  },
+  {
+    columnname: "email",
+    type: "varchar",
+    size: 255,
+    null: true,
+    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  },
+  {
+    columnname: "phone_number",
+    type: "varchar",
+    size: 15,
+    null: false,
+    pattern: /^\+?[0-9]{7,15}$/,
+  },
+  {
+    columnname: "alternate_phone_number",
+    type: "varchar",
+    size: 15,
+    null: true,
+    pattern: /^\+?[0-9]{7,15}$/,
+  },
   { columnname: "date_of_birth", type: "date", null: false },
   {
     columnname: "gender",
@@ -28,7 +63,13 @@ const CreateColumnConfig = [
   { columnname: "city", type: "varchar", size: 100, null: false },
   { columnname: "state", type: "varchar", size: 100, null: false },
   { columnname: "country", type: "varchar", size: 50, null: false },
-  { columnname: "pin_code", type: "varchar", size: 20, null: false },
+  {
+    columnname: "pin_code",
+    type: "varchar",
+    size: 10,
+    null: false,
+    pattern: /^\d{6}$/,
+  },
   { columnname: "medical_history", type: "text", null: true },
   { columnname: "current_medications", type: "text", null: true },
   {
@@ -67,6 +108,7 @@ const CreateColumnConfig = [
     type: "varchar",
     size: 255,
     null: true,
+    pattern: /^[A-Z0-9]{10,20}$/,
   },
   { columnname: "treatment_history", type: "json", null: true },
   { columnname: "appointment_count", type: "int", null: true },
@@ -80,9 +122,27 @@ const UpdateColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },
   { columnname: "first_name", type: "varchar", size: 50, null: false },
   { columnname: "last_name", type: "varchar", size: 50, null: false },
-  { columnname: "email", type: "varchar", size: 255, null: true },
-  { columnname: "phone_number", type: "varchar", size: 15, null: false },
-  { columnname: "alter_phone_number", type: "varchar", size: 15, null: true },
+  {
+    columnname: "email",
+    type: "varchar",
+    size: 255,
+    null: true,
+    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  },
+  {
+    columnname: "phone_number",
+    type: "varchar",
+    size: 15,
+    null: false,
+    pattern: /^\+?[0-9]{7,15}$/,
+  },
+  {
+    columnname: "alternate_phone_number",
+    type: "varchar",
+    size: 15,
+    null: true,
+    pattern: /^\+?[0-9]{7,15}$/,
+  },
   { columnname: "date_of_birth", type: "date", null: false },
   {
     columnname: "gender",
@@ -95,7 +155,13 @@ const UpdateColumnConfig = [
   { columnname: "city", type: "varchar", size: 100, null: false },
   { columnname: "state", type: "varchar", size: 100, null: false },
   { columnname: "country", type: "varchar", size: 50, null: false },
-  { columnname: "pin_code", type: "varchar", size: 20, null: false },
+  {
+    columnname: "pin_code",
+    type: "varchar",
+    size: 10,
+    null: false,
+    pattern: /^\d{6}$/,
+  },
   { columnname: "medical_history", type: "text", null: true },
   { columnname: "current_medications", type: "text", null: true },
   {
@@ -134,6 +200,7 @@ const UpdateColumnConfig = [
     type: "varchar",
     size: 255,
     null: true,
+    pattern: /^[A-Z0-9]{10,20}$/,
   },
   { columnname: "treatment_history", type: "json", null: true },
   { columnname: "appointment_count", type: "int", null: true },
@@ -177,23 +244,39 @@ const validatePatientPhones = async (data, patientId = 0) => {
   }
 };
 
-const validateUniqueFields = async (details, isUpdate = false, patientId = 0) => {
+const validateUniqueFields = async (
+  details,
+  isUpdate = false,
+  patientId = 0
+) => {
   for (const field of uniqueFields) {
     if (!details[field]) continue;
     const exists = isUpdate
-      ? await checkIfExistsWithoutId("patient", field, details[field],"patient_id", patientId,details.tenant_id)
-      : await checkIfExists("patient", field, details[field],details.tenant_id);
+      ? await checkIfExistsWithoutId(
+          "patient",
+          field,
+          details[field],
+          "patient_id",
+          patientId,
+          details.tenant_id
+        )
+      : await checkIfExists(
+          "patient",
+          field,
+          details[field],
+          details.tenant_id
+        );
     if (exists) throw new CustomError(`${field} already exists`, 409);
   }
 };
 
 // Create Patient Validation
 const createPatientValidation = async (details) => {
-  console.log(details)
+  console.log(details);
   await validateInput(details, CreateColumnConfig);
   await checkTenantExistsByTenantIdValidation(details.tenant_id);
   await validatePatientPhones(details);
-  await validateUniqueFields(details)
+  await validateUniqueFields(details);
 };
 
 // Update Patient Validation
@@ -213,7 +296,7 @@ const updatePatientValidation = async (patientId, details, tenantId) => {
   }
 
   await validatePatientPhones(details, patientId);
-  await validateUniqueFields(details,true,patientId)
+  await validateUniqueFields(details, true, patientId);
 };
 
 // Check if Patient exists by Patient ID

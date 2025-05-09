@@ -18,75 +18,183 @@ const validateTenant = async (tenantId) => {
 };
 
 const createColumnConfig = [
-  { columnname: 'tenant_id', type: 'int', size:11, null: false },
-  { columnname: 'first_name', type: 'varchar', size: 50, null: false },
-  { columnname: 'last_name', type: 'varchar', size: 50, null: false },
-  { columnname: 'gender', type: 'varchar', size: 10, null: true },
-  { columnname: 'date_of_birth', type: 'date', null: true },
-  { columnname: 'email', type: 'varchar', size: 255, null: true },
-  { columnname: 'phone_number', type: 'varchar', size: 15, null: false },
-  { columnname: 'alternate_phone_number', type: 'varchar', size: 15, null: true },
-  { columnname: 'specialization', type: 'text', null: false, data_type: 'json' },
-  { columnname: 'experience_years', type: 'int', size: 2, null: false },
-  { columnname: 'license_number', type: 'varchar', size: 20, null: false },
-  { columnname: 'qualifications', type: 'text', null: false, data_type: 'json' },
-  { columnname: 'clinic_name', type: 'varchar', size: 150, null: true },
-  { columnname: 'clinic_address', type: 'varchar', size: 300, null: true },
-  { columnname: 'city', type: 'varchar', size: 100, null: false },
-  { columnname: 'state', type: 'varchar', size: 100, null: false },
-  { columnname: 'country', type: 'varchar', size: 50, null: false },
-  { columnname: 'pin_code', type: 'varchar', size: 20, null: false },
-  { columnname: 'working_hours', type: 'text', null: true, data_type: 'json' },
-  { columnname: 'available_days', type: 'text', null: true, data_type: 'json' },
-  { columnname: 'consultation_fee', type: 'decimal', size: '10,2', null: true },
-  { columnname: 'ratings', type: 'decimal', size: '3,2', null: true },
-  { columnname: 'reviews_count', type: 'int', null: true },
-  { columnname: 'appointment_count', type: 'int', null: true },
-  { columnname: 'profile_picture', type: 'varchar', size: 255, null: true },
-  { columnname: 'bio', type: 'text', null: true, data_type: 'json' },
-  { columnname: 'teleconsultation_supported', type: 'tinyint', null: false, is_boolean: true },
-  { columnname: 'insurance_supported', type: 'tinyint', null: false, is_boolean: true },
-  { columnname: 'languages_spoken', type: 'text', null: true, data_type: 'json' },
-  { columnname: 'awards_certifications', type: 'varchar', size: 255, null: true },
-  { columnname: 'social_links', type: 'text', null: true, data_type: 'json' },
-  { columnname: 'last_login', type: 'timestamp', null: true },
-  { columnname: 'created_by', type: 'varchar', size: 20, null: false }
+  { columnname: "tenant_id", type: "int", size: 11, null: false },
+  { columnname: "first_name", type: "varchar", size: 50, null: false,pattern:/^[a-zA-Z\s]{2,50}$/},
+  { columnname: "last_name", type: "varchar", size: 50, null: false,pattern:/^[a-zA-Z\s]{2,50}$/},
+  { columnname: "gender", type: "varchar", size: 10, null: true },
+  { columnname: "date_of_birth", type: "date", null: true },
+  {
+    columnname: "email",
+    type: "varchar",
+    size: 255,
+    null: true,
+    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  },
+  {
+    columnname: "phone_number",
+    type: "varchar",
+    size: 15,
+    null: false,
+    pattern: /^\+?[0-9]{7,15}$/,
+  },
+  {
+    columnname: "alternate_phone_number",
+    type: "varchar",
+    size: 15,
+    null: true,
+    pattern: /^\+?[0-9]{7,15}$/,
+  },
+  {
+    columnname: "specialization",
+    type: "text",
+    null: false,
+    data_type: "json",
+  },
+  { columnname: "experience_years", type: "int", size: 2, null: false },
+  {
+    columnname: "license_number",
+    type: "varchar",
+    size: 10,
+    null: false,
+    pattern:  /^[A-Z]{2}[0-9]{4}[A-Z]{2}[0-9]{2}$/,
+  },
+  {
+    columnname: "qualifications",
+    type: "text",
+    null: false,
+    data_type: "json",
+  },
+  { columnname: "clinic_name", type: "varchar", size: 150, null: true },
+  { columnname: "clinic_address", type: "varchar", size: 300, null: true },
+  { columnname: "city", type: "varchar", size: 100, null: false },
+  { columnname: "state", type: "varchar", size: 100, null: false },
+  { columnname: "country", type: "varchar", size: 50, null: false },
+  { columnname: "pin_code", type: "varchar", size: 10, null: false,pattern:/^\d{6}$/ },
+  { columnname: "working_hours", type: "text", null: true, data_type: "json" },
+  { columnname: "available_days", type: "text", null: true, data_type: "json" },
+  { columnname: "consultation_fee", type: "decimal", size: "10,2", null: true },
+  { columnname: "ratings", type: "decimal", size: "3,2", null: true },
+  { columnname: "reviews_count", type: "int", null: true },
+  { columnname: "appointment_count", type: "int", null: true },
+  { columnname: "profile_picture", type: "varchar", size: 255, null: true },
+  { columnname: "bio", type: "text", null: true, data_type: "json" },
+  {
+    columnname: "teleconsultation_supported",
+    type: "tinyint",
+    null: false,
+    is_boolean: true,
+  },
+  {
+    columnname: "insurance_supported",
+    type: "tinyint",
+    null: false,
+    is_boolean: true,
+  },
+  {
+    columnname: "languages_spoken",
+    type: "text",
+    null: true,
+    data_type: "json",
+  },
+  {
+    columnname: "awards_certifications",
+    type: "varchar",
+    size: 255,
+    null: true,
+  },
+  { columnname: "social_links", type: "text", null: true, data_type: "json" },
+  { columnname: "last_login", type: "timestamp", null: true },
+  { columnname: "created_by", type: "varchar", size: 20, null: false },
 ];
 
 const updateColumnConfig = [
-  { columnname: 'tenant_id', type: 'int', size:11, null: false },
-  { columnname: 'first_name', type: 'varchar', size: 50, null: false },
-  { columnname: 'last_name', type: 'varchar', size: 50, null: false },
-  { columnname: 'gender', type: 'varchar', size: 10, null: true },
-  { columnname: 'date_of_birth', type: 'date', null: true },
-  { columnname: 'email', type: 'varchar', size: 255, null: true },
-  { columnname: 'phone_number', type: 'varchar', size: 15, null: false },
-  { columnname: 'alternate_phone_number', type: 'varchar', size: 15, null: true },
-  { columnname: 'specialization', type: 'text', null: false, data_type: 'json' },
-  { columnname: 'experience_years', type: 'int', size: 2, null: false },
-  { columnname: 'license_number', type: 'varchar', size: 20, null: false },
-  { columnname: 'qualifications', type: 'text', null: false, data_type: 'json' },
-  { columnname: 'clinic_name', type: 'varchar', size: 150, null: true },
-  { columnname: 'clinic_address', type: 'varchar', size: 300, null: true },
-  { columnname: 'city', type: 'varchar', size: 100, null: false },
-  { columnname: 'state', type: 'varchar', size: 100, null: false },
-  { columnname: 'country', type: 'varchar', size: 50, null: false },
-  { columnname: 'pin_code', type: 'varchar', size: 20, null: false },
-  { columnname: 'working_hours', type: 'text', null: true, data_type: 'json' },
-  { columnname: 'available_days', type: 'text', null: true, data_type: 'json' },
-  { columnname: 'consultation_fee', type: 'decimal', size: '10,2', null: true },
-  { columnname: 'ratings', type: 'decimal', size: '3,2', null: true },
-  { columnname: 'reviews_count', type: 'int', null: true },
-  { columnname: 'appointment_count', type: 'int', null: true },
-  { columnname: 'profile_picture', type: 'varchar', size: 255, null: true },
-  { columnname: 'bio', type: 'text', null: true, data_type: 'json' },
-  { columnname: 'teleconsultation_supported', type: 'tinyint', null: false, is_boolean: true },
-  { columnname: 'insurance_supported', type: 'tinyint', null: false, is_boolean: true },
-  { columnname: 'languages_spoken', type: 'text', null: true, data_type: 'json' },
-  { columnname: 'awards_certifications', type: 'varchar', size: 255, null: true },
-  { columnname: 'social_links', type: 'text', null: true, data_type: 'json' },
-  { columnname: 'last_login', type: 'timestamp', null: true },
-  { columnname: 'updated_by', type: 'varchar', size: 20, null: false }
+  { columnname: "tenant_id", type: "int", size: 11, null: false },
+  { columnname: "first_name", type: "varchar", size: 50, null: false,pattern:/^[a-zA-Z\s]{2,50}$/ },
+  { columnname: "last_name", type: "varchar", size: 50, null: false,pattern:/^[a-zA-Z\s]{2,50}$/ },
+  { columnname: "gender", type: "varchar", size: 10, null: true },
+  { columnname: "date_of_birth", type: "date", null: true },
+  {
+    columnname: "email",
+    type: "varchar",
+    size: 255,
+    null: true,
+    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  },
+  {
+    columnname: "phone_number",
+    type: "varchar",
+    size: 15,
+    null: false,
+    pattern: /^\+?[0-9]{7,15}$/,
+  },
+  {
+    columnname: "alternate_phone_number",
+    type: "varchar",
+    size: 15,
+    null: true,
+    pattern: /^\+?[0-9]{7,15}$/,
+  },
+  {
+    columnname: "specialization",
+    type: "text",
+    null: false,
+    data_type: "json",
+  },
+  { columnname: "experience_years", type: "int", size: 2, null: false },
+  {
+    columnname: "license_number",
+    type: "varchar",
+    size: 10,
+    null: false,
+    pattern:  /^[A-Z]{2}[0-9]{4}[A-Z]{2}[0-9]{2}$/,
+  },
+  {
+    columnname: "qualifications",
+    type: "text",
+    null: false,
+    data_type: "json",
+  },
+  { columnname: "clinic_name", type: "varchar", size: 150, null: true },
+  { columnname: "clinic_address", type: "varchar", size: 300, null: true },
+  { columnname: "city", type: "varchar", size: 100, null: false },
+  { columnname: "state", type: "varchar", size: 100, null: false },
+  { columnname: "country", type: "varchar", size: 50, null: false },
+  { columnname: "pin_code", type: "varchar", size: 10, null: false,pattern:/^\d{6}$/ },
+  { columnname: "working_hours", type: "text", null: true, data_type: "json" },
+  { columnname: "available_days", type: "text", null: true, data_type: "json" },
+  { columnname: "consultation_fee", type: "decimal", size: "10,2", null: true },
+  { columnname: "ratings", type: "decimal", size: "3,2", null: true },
+  { columnname: "reviews_count", type: "int", null: true },
+  { columnname: "appointment_count", type: "int", null: true },
+  { columnname: "profile_picture", type: "varchar", size: 255, null: true },
+  { columnname: "bio", type: "text", null: true, data_type: "json" },
+  {
+    columnname: "teleconsultation_supported",
+    type: "tinyint",
+    null: false,
+    is_boolean: true,
+  },
+  {
+    columnname: "insurance_supported",
+    type: "tinyint",
+    null: false,
+    is_boolean: true,
+  },
+  {
+    columnname: "languages_spoken",
+    type: "text",
+    null: true,
+    data_type: "json",
+  },
+  {
+    columnname: "awards_certifications",
+    type: "varchar",
+    size: 255,
+    null: true,
+  },
+  { columnname: "social_links", type: "text", null: true, data_type: "json" },
+  { columnname: "last_login", type: "timestamp", null: true },
+  { columnname: "updated_by", type: "varchar", size: 20, null: false },
 ];
 
 // Validate phone numbers
@@ -124,32 +232,48 @@ const validateDentistPhones = async (data, dentistId = 0) => {
   }
 };
 
-const validateUniqueFields = async (details, isUpdate = false, dentistId = 0) => {
+const validateUniqueFields = async (
+  details,
+  isUpdate = false,
+  dentistId = 0
+) => {
   for (const field of uniqueFields) {
-    if (!details[field] || details[field]==='null') continue;
-    
+    if (!details[field] || details[field] === "null") continue;
+
     const exists = isUpdate
-      ? await checkIfExistsWithoutId("dentist", field, details[field],"dentist_id", dentistId,details.tenant_id)
-      : await checkIfExists("dentist", field, details[field],details.tenant_id);
+      ? await checkIfExistsWithoutId(
+          "dentist",
+          field,
+          details[field],
+          "dentist_id",
+          dentistId,
+          details.tenant_id
+        )
+      : await checkIfExists(
+          "dentist",
+          field,
+          details[field],
+          details.tenant_id
+        );
     if (exists) throw new CustomError(`${field} already exists`, 409);
   }
 };
 
 // Create Dentist Validation
 const createDentistValidation = async (details) => {
-   validateInput(details,createColumnConfig)
+  validateInput(details, createColumnConfig);
   await checkTenantExistsByTenantIdValidation(details.tenant_id);
   await validateDentistPhones(details);
-  await validateUniqueFields(details)
+  await validateUniqueFields(details);
 };
 
 // Update Dentist Validation
-const updateDentistValidation = async (dentistId, details,tenant_id) => {
-  console.log('DentistRouter:',details)
-   validateInput(details,updateColumnConfig)
+const updateDentistValidation = async (dentistId, details, tenant_id) => {
+  console.log("DentistRouter:", details);
+  validateInput(details, updateColumnConfig);
   await validateTenant(tenant_id);
   // await checkIfIdExists('clinic','clinic_id',details.clinic_id||0)
-  await validateUniqueFields(details,true,dentistId)
+  await validateUniqueFields(details, true, dentistId);
 
   if (
     details.alternate_phone_number !== null &&

@@ -23,7 +23,7 @@ const createAppointment = async (data) => {
     appointment_type: (val) => val,
     consultation_fee: (val) => val || null,
     discount_applied: (val) => val || 0.00,
-    payment_status: (val) => val || "Pending",
+    payment_status: (val) => val || "P",
     payment_method: (val) => val || null,
     visit_reason: (val) => val || null,
     follow_up_needed: (val) => Boolean(val),

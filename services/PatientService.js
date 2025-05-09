@@ -79,6 +79,11 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
         if (booleanFields.length > 0) {
           helper.mapBooleanFields(patient, booleanFields);
         }
+
+        // Handling date_of_birth field conversion
+        if (patient.date_of_birth) {
+          patient.date_of_birth = formatDateOnly(patient.date_of_birth);
+        }
       });
     }
 
@@ -88,6 +93,7 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
     throw new CustomError("Database error while fetching patients", 500);
   }
 };
+
 
 // Get single patient
 const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {

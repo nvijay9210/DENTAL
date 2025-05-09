@@ -1,27 +1,78 @@
 const { CustomError } = require("../middlewares/CustomeError");
 
+function sanitizeInput(value, type) {
+  // Check for `--` in any input value and throw error if found
+  if (typeof value === 'string' && value.includes('--')) {
+    throw new CustomError("Input contains invalid characters: '--'", 400);
+  }
+
+  // Trim whitespace for string values
+  if (typeof value === 'string') {
+    value = value.trim();
+  }
+
+  // Specific sanitization for certain types (you can extend as needed)
+  switch (type.toLowerCase()) {
+    case 'varchar':
+    case 'text':
+    case 'longtext':
+      // Strip leading/trailing spaces for strings
+      return typeof value === 'string' ? value.trim() : value;
+    
+    case 'int':
+    case 'integer':
+    case 'bigint':
+      // Ensure the value is a valid integer
+      return Number.isInteger(Number(value)) ? Number(value) : value;
+    
+    case 'float':
+    case 'double':
+    case 'decimal':
+      // Ensure the value is a valid float/decimal
+      return isNaN(Number(value)) ? value : Number(value);
+
+    case 'boolean':
+    case 'tinyint':
+      // Convert values to boolean types
+      if (value === 'true' || value === 1 || value === '1') {
+        return true;
+      } else if (value === 'false' || value === 0 || value === '0') {
+        return false;
+      }
+      return value; // Return as is if no valid boolean
+
+    case 'date':
+    case 'datetime':
+    case 'timestamp':
+      // For date and datetime, you might want to sanitize (ensure valid format)
+      return value; // Return as is for now. More sanitization can be added.
+    
+    default:
+      return value; // No sanitization needed for unsupported types
+  }
+}
+
 function validateInput(userInput, columnConfig) {
   if (!userInput || typeof userInput === undefined) {
     throw new CustomError(`Invalid input`, 400);
   }
 
   for (const column of columnConfig) {
-    const { columnname, type, size, null: isNullable, enum_values } = column;
-    const value = userInput[columnname];
+    const { columnname, type, size, null: isNullable, enum_values, pattern } = column;
+    let value = userInput[columnname];
 
-    // Skip validation completely if nullable and value is undefined, null, or empty string
+    // Sanitization step
+    value = sanitizeInput(value, type);
+
     if ((value === undefined || value === null || value === '') && isNullable === true) {
       continue;
     }
 
-    // Throw error if required field is missing
     if ((value === undefined || value === null || value === '') && isNullable === false) {
       throw new CustomError(`${columnname} is required`, 400);
     }
 
-    // Proceed with further validations only if value is present
     if (value !== undefined && value !== null && value !== '') {
-      console.log(value)
       switch (type.toLowerCase()) {
         case 'varchar':
         case 'text':
@@ -102,8 +153,16 @@ function validateInput(userInput, columnConfig) {
           console.warn(`Unsupported type "${type}" for column "${columnname}"`);
           break;
       }
+
+      // ✅ Add Pattern Check (After Type Validation)
+      if (pattern && value !== null) {
+        const regex = pattern instanceof RegExp ? pattern : new RegExp(pattern);
+        if (!regex.test(value)) {
+          throw new CustomError(`${columnname} Invalid`, 400);
+        }
+      }
     }
   }
 }
 
-module.exports={validateInput}
+module.exports = { validateInput };
