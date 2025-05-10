@@ -32,6 +32,7 @@ const getTenantByTenantId = async (tenantId) => {
   }
 };
 
+
 // Update tenant service
 const updateTenant = async (tenantId, data) => {
   try {

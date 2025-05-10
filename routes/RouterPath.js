@@ -35,6 +35,7 @@ module.exports={
 
     ADD_TREATMENT:'/addtreatment',
     GETALL_TREATMENT_TENANT:'/getalltreatments/:tenant_id',
+    GETALL_TREATMENT_TENANT_PATIENT:"/getalltreatments/:tenant_id/:patient_id",
     GET_TREATMENT_TENANT:'/gettreatment/:treatment_id/:tenant_id',
     UPDATE_TREATMENT_TENANT:'/updatetreatment/:treatment_id/:tenant_id',
     DELETE_TREATMENT_TENANT:'/deletetreatment/:treatment_id/:tenant_id',
@@ -42,6 +43,7 @@ module.exports={
     ADD_PRESCRIPTION:'/addprescription',
     GETALL_PRESCRIPTION_TENANT:'/getallprescriptions/:tenant_id',
     GET_PRESCRIPTION_TENANT:'/getprescription/:prescription_id/:tenant_id',
+    GETALL_PRESCRIPTION_TENANT_PATIENT:'/getallprescriptions/:tenant_id/:patient_id',
     UPDATE_PRESCRIPTION_TENANT:'/updateprescription/:prescription_id/:tenant_id',
     DELETE_PRESCRIPTION_TENANT:'/deleteprescription/:prescription_id/:tenant_id',
 }

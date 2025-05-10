@@ -76,6 +76,35 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
   }
 };
 
+const getAllTreatmentsByTenantAndPatientId = async (tenantId,patientId, page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `treatment_patient:${tenantId}:${patientId}:page:${page}:limit:${limit}`;
+
+  const jsonFields = ["description", "diagnosis", "notes"];
+  const booleanFields = ["follow_up_required", "anesthesia_used"];
+
+  try {
+    const treatments = await getOrSetCache(cacheKey, async () => {
+      const result = await treatmentModel.getAllTreatmentsByTenantAndPatientId(
+        tenantId,
+        patientId,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+
+    const parsed= helper.decodeJsonFields(treatments, jsonFields);
+    parsed.forEach(p => {
+      helper.mapBooleanFields(p,booleanFields)
+    });
+    return parsed
+  } catch (err) {
+    console.error("Database error while fetching treatments:", err);
+    throw new CustomError("Failed to fetch treatments", 500);
+  }
+};
+
 // Get Treatment by ID & Tenant
 const getTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {
   try {
@@ -166,4 +195,5 @@ module.exports = {
   getTreatmentByTenantIdAndTreatmentId,
   updateTreatment,
   deleteTreatmentByTenantIdAndTreatmentId,
+  getAllTreatmentsByTenantAndPatientId
 };

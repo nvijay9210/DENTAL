@@ -47,6 +47,27 @@ const getTreatmentByTenantAndTreatmentId = async (tenant_id, treatment_id) => {
   }
 };
 
+const getAllTreatmentsByTenantAndPatientId = async (tenantId, patientId,limit,offset) => {
+  const query = `SELECT *
+FROM 
+    treatment 
+WHERE 
+    tenant_id = ? AND 
+    patient_id=?
+    limit ? offset ? 
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, patientId,limit,offset]);
+    return rows;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+};
+
 // Update treatment
 const updateTreatment = async (treatment_id, columns, values, tenant_id) => {
   try {
@@ -82,5 +103,6 @@ module.exports = {
   getAllTreatmentsByTenantId,
   getTreatmentByTenantAndTreatmentId,
   updateTreatment,
-  deleteTreatmentByTenantAndTreatmentId
+  deleteTreatmentByTenantAndTreatmentId,
+  getAllTreatmentsByTenantAndPatientId
 };

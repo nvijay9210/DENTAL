@@ -33,6 +33,17 @@ exports.getAllPrescriptionsByTenantId = async (req, res, next) => {
   }
 };
 
+exports.getAllPrescriptionsByTenantAndPatientId = async (req, res, next) => {
+  const { tenant_id,patient_id } = req.params;
+  const { page, limit } = req.query;
+  try {
+    const prescriptions = await prescriptionService.getAllPrescriptionsByTenantAndPatientId(tenant_id,patient_id, page, limit);
+    res.status(200).json(prescriptions);
+  } catch (err) {
+    next(err);
+  }
+};
+
 /**
  * Get prescription by tenant and prescription ID
  */

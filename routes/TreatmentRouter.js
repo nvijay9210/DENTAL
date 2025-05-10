@@ -12,6 +12,7 @@ const {
   GET_TREATMENT_TENANT,
   UPDATE_TREATMENT_TENANT,
   DELETE_TREATMENT_TENANT,
+  GETALL_TREATMENT_TENANT_PATIENT,
 } = require("./RouterPath");
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -47,6 +48,11 @@ router.post(
 router.get(
   GETALL_TREATMENT_TENANT,
   treatmentController.getAllTreatmentsByTenantId
+);
+
+router.get(
+  GETALL_TREATMENT_TENANT_PATIENT,
+  treatmentController.getAllTreatmentsByTenantAndPatientId
 );
 
 // Get Single Treatment by Tenant ID & Treatment ID

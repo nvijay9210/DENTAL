@@ -8,6 +8,7 @@ const {
   GET_PRESCRIPTION_TENANT,
   UPDATE_PRESCRIPTION_TENANT,
   DELETE_PRESCRIPTION_TENANT,
+  GETALL_PRESCRIPTION_TENANT_PATIENT,
 } = require("./RouterPath");
 
 // Create Prescription
@@ -17,6 +18,11 @@ router.post(ADD_PRESCRIPTION, prescriptionController.createPrescription);
 router.get(
   GETALL_PRESCRIPTION_TENANT,
   prescriptionController.getAllPrescriptionsByTenantId
+);
+
+router.get(
+  GETALL_PRESCRIPTION_TENANT_PATIENT,
+  prescriptionController.getAllPrescriptionsByTenantAndPatientId
 );
 
 // Get Single Prescription by Tenant ID & Prescription ID

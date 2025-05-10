@@ -107,6 +107,27 @@ WHERE
   }
 };
 
+const getAllPrescriptionsByTenantAndPatientId = async (tenantId, patientId,limit,offset) => {
+  const query = `SELECT *
+FROM 
+    prescription 
+WHERE 
+    tenant_id = ? AND 
+    patient_id=?
+    limit ? offset ? 
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, patientId,limit,offset]);
+    return rows;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+};
+
 
 
 module.exports = {
@@ -114,5 +135,6 @@ module.exports = {
   getAllPrescriptionsByTenantId,
   getPrescriptionByTenantAndPrescriptionId,
   updatePrescription,
-  deletePrescriptionByTenantAndPrescriptionId
+  deletePrescriptionByTenantAndPrescriptionId,
+  getAllPrescriptionsByTenantAndPatientId
 };
