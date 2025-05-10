@@ -81,7 +81,7 @@ const deleteDentistByTenantIdAndDentistId = async (tenant_id, dentist_id) => {
   const conditionValue = [tenant_id, dentist_id];
   try {
     helper.sameLengthChecker(conditionColumn, conditionValue);
-    const [result] = await record.deleteRecord(
+    const result = await record.deleteRecord(
       "dentist",
       conditionColumn,
       conditionValue

@@ -177,7 +177,7 @@ const getAppointmentsWithDetails = async (tenantId, clinic_id, dentist_id, page 
         offset
       );
 
-      const formatted = formatAppointments(result); // ✅ Use the returned value
+      const formatted = await formatAppointments(result); // ✅ Use the returned value
       return decodeJsonFields(formatted, fieldsToDecode); // ✅ Pass formatted data
     });
 
