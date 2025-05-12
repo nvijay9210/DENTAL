@@ -95,41 +95,64 @@ const getClinicNameAndAddressByClinicId=async(tenantId,clinicId)=>{
   }
 }
 
-const updateDoctorCount = async (tenantId, clinicId, assign = true) => {
-  const modifier = operation === false 
-    ? 'GREATEST(total_doctors - 1, 0)' 
-    : 'total_doctors + 1';
+const getTotalDentistCountByClinicId = async (tenantId, clinicId) => {
+  const query = `
+    SELECT COUNT(*) AS total_dentists
+    FROM clinic c
+    JOIN dentist d ON d.clinic_id = c.clinic_id
+    WHERE c.tenant_id = ? AND c.clinic_id = ?
+  `;
 
-  const query = `UPDATE clinic SET total_doctors = ${modifier} WHERE tenant_id = ? AND clinic_id = ?`;
   const conn = await pool.getConnection();
   try {
-    const [result] = await conn.query(query, [tenantId, clinicId]);
-    return result.affectedRows > 0;
+    const [rows] = await conn.execute(query, [tenantId, Number(clinicId)]);
+    const count = rows[0]?.total_dentists || 0;
+    console.log(`Total dentists for clinic ${clinicId} (tenant ${tenantId}):`, count);
+    return count;
   } catch (error) {
-    console.error(error);
-    throw new Error(`Database Query Error while ${operation}ing doctor count`);
+    console.error("Error in getTotalDentistCountByClinicId:", error);
+    throw new Error("Database Query Error");
   } finally {
     conn.release();
   }
 };
 
-const updatePatientCount = async (tenantId, clinicId, assign = true) => {
-  const modifier = operation === false 
-    ? 'GREATEST(total_patients - 1, 0)' 
-    : 'total_patients + 1';
 
-  const query = `UPDATE clinic SET total_patients = ${modifier} WHERE tenant_id = ? AND clinic_id = ?`;
-  const conn = await pool.getConnection();
-  try {
-    const [result] = await conn.query(query, [tenantId, clinicId]);
-    return result.affectedRows > 0;
-  } catch (error) {
-    console.error(error);
-    throw new Error(`Database Query Error while ${operation}ing patient count`);
-  } finally {
-    conn.release();
-  }
-};
+// const updateDoctorCount = async (tenantId, clinicId, assign = true) => {
+//   const modifier = operation === false 
+//     ? 'GREATEST(total_doctors - 1, 0)' 
+//     : 'total_doctors + 1';
+
+//   const query = `UPDATE clinic SET total_doctors = ${modifier} WHERE tenant_id = ? AND clinic_id = ?`;
+//   const conn = await pool.getConnection();
+//   try {
+//     const [result] = await conn.query(query, [tenantId, clinicId]);
+//     return result.affectedRows > 0;
+//   } catch (error) {
+//     console.error(error);
+//     throw new Error(`Database Query Error while ${operation}ing doctor count`);
+//   } finally {
+//     conn.release();
+//   }
+// };
+
+// const updatePatientCount = async (tenantId, clinicId, assign = true) => {
+//   const modifier = operation === false 
+//     ? 'GREATEST(total_patients - 1, 0)' 
+//     : 'total_patients + 1';
+
+//   const query = `UPDATE clinic SET total_patients = ${modifier} WHERE tenant_id = ? AND clinic_id = ?`;
+//   const conn = await pool.getConnection();
+//   try {
+//     const [result] = await conn.query(query, [tenantId, clinicId]);
+//     return result.affectedRows > 0;
+//   } catch (error) {
+//     console.error(error);
+//     throw new Error(`Database Query Error while ${operation}ing patient count`);
+//   } finally {
+//     conn.release();
+//   }
+// };
 
 
 module.exports = {
@@ -140,6 +163,7 @@ module.exports = {
   deleteClinicByTenantIdAndClinicId,
   checkClinicExistsByTenantIdAndClinicId,
   getClinicNameAndAddressByClinicId,
-  updateDoctorCount,
-  updatePatientCount
+  // updateDoctorCount,
+  // updatePatientCount,
+  getTotalDentistCountByClinicId
 };

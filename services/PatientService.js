@@ -55,7 +55,7 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `patients:${tenantId}:page:${page}:limit:${limit}`;
 
-  const jsonFields = ["emergency_contact", "medical_history", "allergies"];
+  const jsonFields = ["emergency_contact", "pre_history","treatment_history"];
   const booleanFields = []; // Add boolean fields here if needed in the future
 
   try {
@@ -101,7 +101,7 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
 const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
   try {
     const patient = await patientModel.getPatientByTenantIdAndPatientId(tenantId, patientId);
-    const fieldsToDecode = ["emergency_contact", "medical_history", "allergies"];
+    const fieldsToDecode = ["emergency_contact", "pre_history", "treatment_history"];
     return decodeJsonFields(patient, fieldsToDecode);
   } catch (error) {
     throw new CustomError("Failed to get patient: " + error.message, 500);
