@@ -197,24 +197,37 @@ const checkClinicExistsByTenantIdAndClinicId = async (tenantId, clinicId) => {
 };
 
 
-const handleClinicAssignment = async (tenantId, clinicId, dentistId, assign = true) => {
+const handleClinicAssignment = async (tenantId, clinicId, details, assign = true) => {
   try {
-      const clinic = await clinicModel.getClinicNameAndAddressByClinicId(tenantId, clinicId);
+    const clinic = await clinicModel.getClinicNameAndAddressByClinicId(tenantId, clinicId);
 
-      const dentist = await updateClinicIdAndNameAndAddress(
-        tenantId,
-        clinicId,
-        clinic.clinic_name,
-        clinic.clinic_address,
-        dentistId
-      );
+    const dentistIds = details?.dentist_id;
+    if (!Array.isArray(dentistIds) || dentistIds.length === 0) {
+      throw new CustomError("At least one dentistId is required", 400);
+    }
 
-      await clinicModel.updateDoctorCount(tenantId,clinicId,assign); // increment
-      return dentist;
+    // Update each dentist
+    const updatedDentists = await Promise.all(
+      dentistIds.map(dentistId =>
+        updateClinicIdAndNameAndAddress(
+          tenantId,
+          clinicId,
+          clinic.clinic_name,
+          clinic.clinic_address,
+          dentistId
+        )
+      )
+    );
+
+    // Optionally: adjust doctor count based on how many added/removed
+    await clinicModel.updateDoctorCount(tenantId, clinicId, assign, dentistIds.length);
+
+    return updatedDentists;
   } catch (error) {
     throw new CustomError("Failed to update clinic assignment: " + error.message, 404);
   }
 };
+
 
 
 
