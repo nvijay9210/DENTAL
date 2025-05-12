@@ -23,6 +23,16 @@ function formatAppointments(rows) {
       formatted.date_of_birth = dob.toLocaleDateString("en-CA"); // "YYYY-MM-DD"
     }
 
+    // if (app.start_date) {
+    //   const dob = new Date(app.start_date);
+    //   formatted.start_date = dob.toLocaleDateString("en-CA"); // "YYYY-MM-DD"
+    // }
+
+    // if (app.end_date) {
+    //   const dob = new Date(app.end_date);
+    //   formatted.end_date = dob.toLocaleDateString("en-CA"); // "YYYY-MM-DD"
+    // }
+
     return formatted;
   });
 }

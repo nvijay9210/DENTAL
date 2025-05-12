@@ -8,6 +8,7 @@ const {
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
+const { formatDateOnly } = require("../utils/DateUtils");
 
 // Create Treatment
 const createTreatment = async (data) => {
@@ -98,7 +99,11 @@ const getAllTreatmentsByTenantAndPatientId = async (tenantId,patientId, page = 1
     parsed.forEach(p => {
       helper.mapBooleanFields(p,booleanFields)
     });
-    return parsed
+    return parsed.map((p) => ({
+      ...p,
+      treatment_date: formatDateOnly(p.treatment_date),
+      follow_up_date: formatDateOnly(p.follow_up_date),
+    }));
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
     throw new CustomError("Failed to fetch treatments", 500);

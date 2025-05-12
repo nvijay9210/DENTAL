@@ -108,7 +108,7 @@ const createClinicColumnConfig = [
     type: "varchar",
     size: 10,
     null: false,
-    pattern: /^[A-Z]{2}[0-9]{4}[A-Z]{2}[0-9]{2}$/
+    // pattern: /^[A-Z]{2}[0-9]{4}[A-Z]{2}[0-9]{2}$/ // For Standard Pattern not found
   },
   {
     columnname: "gst_number",
@@ -216,7 +216,7 @@ const updateClinicColumnConfig = [
     type: "varchar",
     size: 10,
     null: false,
-    pattern:/^[A-Z]{2}[0-9]{4}[A-Z]{2}[0-9]{2}$/
+    // pattern:/^[A-Z]{2}[0-9]{4}[A-Z]{2}[0-9]{2}$ //For Standard Pattern not found
   },
   {
     columnname: "gst_number",

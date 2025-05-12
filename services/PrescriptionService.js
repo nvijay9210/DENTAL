@@ -113,10 +113,14 @@ const getAllPrescriptionsByTenantAndPatientId = async (
     });
 
     const parsed = helper.decodeJsonFields(prescriptions, jsonFields);
-    parsed.forEach((p) => {
+    parsed.forEach(async(p) => {
       helper.mapBooleanFields(p, booleanFields);
     });
-    return parsed;
+    return parsed.map((p) => ({
+      ...p,
+      start_date: formatDateOnly(p.start_date),
+      end_date: formatDateOnly(p.end_date),
+    }));
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
     throw new CustomError("Failed to fetch prescriptions", 500);

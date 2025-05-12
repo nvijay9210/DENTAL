@@ -210,7 +210,7 @@ WHERE app.tenant_id = ?
   }
 };
 
-const getAppointmentMonthlySummary = async (tenantId, clinic_id, dentist_id,limit,offset) => {
+const getAppointmentMonthlySummary = async (tenantId, clinic_id, dentist_id) => {
   const query = `SELECT 
     COUNT(*) AS total_appointments,
     SUM(CASE WHEN app.status = 'CP' THEN 1 ELSE 0 END) AS completed_appointments,
