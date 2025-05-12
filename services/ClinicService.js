@@ -132,40 +132,24 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
 
   const jsonFields = ["available_services", "operating_hours"];
   const booleanFields = [
-    "insurance_supported",
-    "emergency_support",
-    "teleconsultation_supported",
-    "parking_availability",
-    "pharmacy",
-    "wifi"
+    "insurance_supported", "emergency_support", "teleconsultation_supported",
+    "parking_availability", "pharmacy", "wifi"
   ];
 
   try {
     const clinics = await getOrSetCache(cacheKey, async () => {
-      return await clinicModel.getAllClinicsByTenantId(tenantId, Number(limit), offset);
+      const result = await clinicModel.getAllClinicsByTenantId(tenantId, Number(limit), offset);
+      return result;
     });
 
-    const parsedClinics = helper.decodeJsonFields(clinics, jsonFields);
-    parsedClinics.forEach((clinic) => helper.mapBooleanFields(clinic, booleanFields));
-
-    // Use Promise.all for async mapping
-    const clinicsWithDoctors = await Promise.all(
-      parsedClinics.map(async (clinic) => {
-        const total_doctors = await clinicModel.getTotalDentistCountByClinicId(tenantId, clinic.clinic_id);
-        return {
-          ...clinic,
-          total_doctors:total_doctors
-        };
-      })
-    );
-
-    return clinicsWithDoctors;
+    const parsed = helper.decodeJsonFields(clinics, jsonFields);
+    parsed.forEach((c) => helper.mapBooleanFields(c, booleanFields));
+    return parsed;
   } catch (err) {
-    console.error("Error fetching clinics:", err);
-    throw new CustomError("Database error while fetching clinics", 500);
+    console.error(err);
+    throw new CustomError("Database error while fetching clinics", 404);
   }
 };
-
 
 
 
@@ -225,7 +209,7 @@ const handleClinicAssignment = async (tenantId, clinicId, dentistId, assign = tr
         dentistId
       );
 
-      // await clinicModel.updateDoctorCount(tenantId,clinicId,assign); // increment
+      await clinicModel.updateDoctorCount(tenantId,clinicId,assign); // increment
       return dentist;
   } catch (error) {
     throw new CustomError("Failed to update clinic assignment: " + error.message, 404);

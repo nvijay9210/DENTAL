@@ -1,6 +1,6 @@
 const appointmentQuery = {
-  createAppointmnetTable: `
-CREATE TABLE IF NOT EXISTS appointment (
+  createAppointmnetTable: 
+`CREATE TABLE IF NOT EXISTS appointment (
   appointment_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(11) NOT NULL,
   patient_id int(11) NOT NULL,
@@ -32,8 +32,8 @@ CREATE TABLE IF NOT EXISTS appointment (
   CONSTRAINT fk_appointment_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id),
   CONSTRAINT fk_appointment_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id),
   CONSTRAINT fk_appointment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
-`
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;`
+
 };
 
 module.exports = { appointmentQuery };
