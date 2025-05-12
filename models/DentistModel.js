@@ -120,6 +120,35 @@ const getAllDentistsByTenantIdAndClinicId = async (tenantId, clinicId,limit,offs
   }
 };
 
+const getAllDentistsByClinicId=async(tenantId,clinicId)=>{
+  const query = `select concat(first_name,'',last_name) as name,specialization  where tenant_id=? and clinic_id=?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId,clinicId]);
+    return rows.length > 0;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+}
+
+const updateClinicIdAndNameAndAddress=async(tenantId,clinicId,clinic_name,clinic_addrss,dentist_id)=>{
+  const query = `update dentist set clinic_id=?, clinic_name=?, clinic_address=? where tenant_id=? and dentist_id=?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId,clinicId,clinic_name,clinic_addrss,dentist_id]);
+    return rows.length > 0;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+}
+
+
 module.exports = {
   createDentist,
   getAllDentistsByTenantId,
@@ -128,4 +157,6 @@ module.exports = {
   deleteDentistByTenantIdAndDentistId,
   checkDentistExistsByTenantIdAndDentistId,
   getAllDentistsByTenantIdAndClinicId,
+  updateClinicIdAndNameAndAddress,
+  getAllDentistsByClinicId
 };

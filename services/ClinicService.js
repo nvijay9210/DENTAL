@@ -8,6 +8,7 @@ const {
 const { decodeJsonFields } = require("../utils/Helpers");
 const helper = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
+const { updateClinicIdAndNameAndAddress } = require("../models/DentistModel");
 
 // -------------------- CREATE --------------------
 const createClinic = async (data) => {
@@ -195,11 +196,34 @@ const checkClinicExistsByTenantIdAndClinicId = async (tenantId, clinicId) => {
   }
 };
 
+
+const handleClinicAssignment = async (tenantId, clinicId, dentistId, assign = true) => {
+  try {
+      const clinic = await clinicModel.getClinicNameAndAddressByClinicId(tenantId, clinicId);
+
+      const dentist = await updateClinicIdAndNameAndAddress(
+        tenantId,
+        clinicId,
+        clinic.clinic_name,
+        clinic.clinic_address,
+        dentistId
+      );
+
+      await clinicModel.updateDoctorCount(tenantId,clinicId,assign); // increment
+      return dentist;
+  } catch (error) {
+    throw new CustomError("Failed to update clinic assignment: " + error.message, 404);
+  }
+};
+
+
+
 module.exports = {
   createClinic,
   updateClinic,
   getAllClinicsByTenantId,
   getClinicByTenantIdAndClinicId,
   checkClinicExistsByTenantIdAndClinicId,
-  deleteClinicByTenantIdAndClinicId
+  deleteClinicByTenantIdAndClinicId,
+  handleClinicAssignment
 };

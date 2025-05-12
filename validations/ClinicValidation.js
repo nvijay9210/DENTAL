@@ -5,6 +5,7 @@ const {
   checkPhoneNumberExistsWithId,
   checkIfExists,
   checkIfExistsWithoutId,
+  checkIfIdExists,
 } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
@@ -303,6 +304,18 @@ const updateClinicValidation = async (clinicId, details, tenantId) => {
   await validateClinicPhones(details, clinicId);
   await validateUniqueFields(details, true, clinicId);
 };
+const handleClinicAssignmentValidation = async (tenantId, clinicId, dentistId,assign) => {
+
+  const ids=['tenantId', 'clinicId', 'dentistId','assign']
+  ids.forEach(id=>{
+    if(!id) throw new CustomError(`${id} is required`, 400)
+  })
+
+  await Promise.all([
+    checkIfExists("tenant", "tenant_id", details.tenant_id),
+    checkIfExists("clinic", "clinic_id", details.clinic_id),
+    checkIfExists("dentist", "dentist_id", details.dentist_id)])
+};
 
 const checkClinicExistsByClinicIdValidation = async (tenantId, clinicId) => {
   await validateTenant(tenantId);
@@ -317,4 +330,5 @@ module.exports = {
   createClinicValidation,
   updateClinicValidation,
   checkClinicExistsByClinicIdValidation,
+  handleClinicAssignmentValidation
 };

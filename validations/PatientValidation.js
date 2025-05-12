@@ -70,7 +70,7 @@ const CreateColumnConfig = [
     null: false,
     pattern: /^\d{6}$/,
   },
-  { columnname: "medical_history", type: "text", null: true },
+  { columnname: "pre_history", type: "text", null: true },
   { columnname: "current_medications", type: "text", null: true },
   {
     columnname: "dentist_preference",
@@ -109,6 +109,18 @@ const CreateColumnConfig = [
     size: 255,
     null: true,
     pattern: /^[A-Z0-9]{10,20}$/,
+  },
+  {
+    columnname: "referred_by",
+    type: "varchar",
+    size: 100,
+    null: true,
+  },
+  {
+    columnname: "profession",
+    type: "varchar",
+    size: 100,
+    null: true,
   },
   { columnname: "treatment_history", type: "json", null: true },
   { columnname: "appointment_count", type: "int", null: true },
@@ -162,7 +174,19 @@ const UpdateColumnConfig = [
     null: false,
     pattern: /^\d{6}$/,
   },
-  { columnname: "medical_history", type: "text", null: true },
+  {
+    columnname: "referred_by",
+    type: "varchar",
+    size: 100,
+    null: true,
+  },
+  {
+    columnname: "profession",
+    type: "varchar",
+    size: 100,
+    null: true,
+  },
+  { columnname: "pre_history", type: "text", null: true },
   { columnname: "current_medications", type: "text", null: true },
   {
     columnname: "dentist_preference",

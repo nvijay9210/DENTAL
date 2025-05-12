@@ -57,6 +57,11 @@ router.put(
   clinicController.updateClinic
 );
 
+router.put(
+  routerPath.HANDLE_CLINIC_ASSIGNMENT,
+  clinicController.handleClinicAssignment
+);
+
 // Delete Clinic
 router.delete(
   routerPath.DELETE_CLINIC_TENANT,

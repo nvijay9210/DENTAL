@@ -9,6 +9,7 @@ module.exports={
     GETALL_CLINIC_TENANT:'/getallclinics/:tenant_id',
     GET_CLINIC_TENANT:'/getclinic/:clinic_id/:tenant_id',
     UPDATE_CLINIC_TENANT:'/updateclinic/:clinic_id/:tenant_id',
+    HANDLE_CLINIC_ASSIGNMENT:'/handleClinicassignment/:tenant_id/:clinic_id/:dentist_id',
     DELETE_CLINIC_TENANT:'/deleteclinic/:clinic_id/:tenant_id',
 
     ADD_DENTIST:'/adddentist',

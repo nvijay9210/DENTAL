@@ -64,3 +64,18 @@ exports.deleteClinicByTenantIdAndClinicId = async (req, res, next) => {
   }
 };
 
+exports.handleClinicAssignment = async (req, res, next) => {
+  const {clinic_id,tenant_id,patient_id}=req.params
+  const {assign}=req.query
+  const details=req.body
+  console.log('details:',details)
+  try {
+    await clinicValidation.handleClinicAssignmentValidation(tenant_id,clinic_id,patient_id,assign)
+
+    await clinicService.handleClinicAssignment(tenant_id,clinic_id,patient_id,assign);
+    res.status(200).json({ message: "Clinic updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+

@@ -81,11 +81,65 @@ const checkClinicExistsByTenantIdAndClinicId = async (tenantId, clinicId) => {
   }
 };
 
+const getClinicNameAndAddressByClinicId=async(tenantId,clinicId)=>{
+  const query = `select clinic_name,clinic_addrss where tenant_id=? and clinic_id=? limit 1`;
+  const conn = await pool.getConnection();
+  try {
+    const rows = await conn.query(query, [tenantId, clinicId]);
+    return rows[0];
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+}
+
+const updateDoctorCount = async (tenantId, clinicId, assign = true) => {
+  const modifier = operation === false 
+    ? 'GREATEST(total_doctors - 1, 0)' 
+    : 'total_doctors + 1';
+
+  const query = `UPDATE clinic SET total_doctors = ${modifier} WHERE tenant_id = ? AND clinic_id = ?`;
+  const conn = await pool.getConnection();
+  try {
+    const [result] = await conn.query(query, [tenantId, clinicId]);
+    return result.affectedRows > 0;
+  } catch (error) {
+    console.error(error);
+    throw new Error(`Database Query Error while ${operation}ing doctor count`);
+  } finally {
+    conn.release();
+  }
+};
+
+const updatePatientCount = async (tenantId, clinicId, assign = true) => {
+  const modifier = operation === false 
+    ? 'GREATEST(total_patients - 1, 0)' 
+    : 'total_patients + 1';
+
+  const query = `UPDATE clinic SET total_patients = ${modifier} WHERE tenant_id = ? AND clinic_id = ?`;
+  const conn = await pool.getConnection();
+  try {
+    const [result] = await conn.query(query, [tenantId, clinicId]);
+    return result.affectedRows > 0;
+  } catch (error) {
+    console.error(error);
+    throw new Error(`Database Query Error while ${operation}ing patient count`);
+  } finally {
+    conn.release();
+  }
+};
+
+
 module.exports = {
   createClinic,
   getAllClinicsByTenantId,
   getClinicByTenantIdAndClinicId,
   updateClinic,
   deleteClinicByTenantIdAndClinicId,
-  checkClinicExistsByTenantIdAndClinicId
+  checkClinicExistsByTenantIdAndClinicId,
+  getClinicNameAndAddressByClinicId,
+  updateDoctorCount,
+  updatePatientCount
 };

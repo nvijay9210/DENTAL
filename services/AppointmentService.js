@@ -8,6 +8,7 @@ const {
 const { decodeJsonFields, getJsonValue } = require("../utils/Helpers");
 const { formatDateOnly, formatTimeOnly, formatAppointments } = require("../utils/DateUtils");
 const { mapFields } = require("../query/Records");
+const { updatePatientCount } = require("../models/ClinicModel");
 
 // Create Appointment
 const createAppointment = async (data) => {
@@ -36,6 +37,7 @@ const createAppointment = async (data) => {
     const { columns, values } = mapFields(data, fieldMap);
     const appointmentId = await appointmentModel.createAppointment("appointment", columns, values);
     await invalidateCacheByTenant("appointment", data.tenant_id);
+    if(appointmentId) await updatePatientCount(data.tenant_id,data.clinic_id,true)
     return appointmentId;
   } catch (error) {
     console.error("Failed to create appointment:", error);
