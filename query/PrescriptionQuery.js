@@ -1,7 +1,7 @@
 const prescriptionQuery = {
   createTable:`CREATE TABLE IF NOT EXISTS prescription (
   prescription_id int(11) NOT NULL AUTO_INCREMENT,
-  tenant_id int(11) NOT NULL,
+  tenant_id int(6) NOT NULL,
   clinic_id int(11) NOT NULL,
   patient_id int(11) NOT NULL,
   dentist_id int(11) NOT NULL,

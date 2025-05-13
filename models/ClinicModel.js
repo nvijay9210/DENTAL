@@ -82,11 +82,11 @@ const checkClinicExistsByTenantIdAndClinicId = async (tenantId, clinicId) => {
 };
 
 const getClinicNameAndAddressByClinicId=async(tenantId,clinicId)=>{
-  const query = `select clinic_name,clinic_addrss where tenant_id=? and clinic_id=? limit 1`;
+  const query = `select clinic_name,address from clinic where tenant_id=? and clinic_id=? limit 1`;
   const conn = await pool.getConnection();
   try {
     const rows = await conn.query(query, [tenantId, clinicId]);
-    return rows[0];
+    return rows[0][0];
   } catch (error) {
     console.error(error);
     throw new Error("Database Query Error");
@@ -119,7 +119,7 @@ const getClinicNameAndAddressByClinicId=async(tenantId,clinicId)=>{
 
 
 const updateDoctorCount = async (tenantId, clinicId, assign = true) => {
-  const modifier = operation === false 
+  const modifier = assign === false 
     ? 'GREATEST(total_doctors - 1, 0)' 
     : 'total_doctors + 1';
 
@@ -130,14 +130,14 @@ const updateDoctorCount = async (tenantId, clinicId, assign = true) => {
     return result.affectedRows > 0;
   } catch (error) {
     console.error(error);
-    throw new Error(`Database Query Error while ${operation}ing doctor count`);
+    throw new Error(`Database Query Error while ${assign?'creat':'updat'}ing doctor count`);
   } finally {
     conn.release();
   }
 };
 
 const updatePatientCount = async (tenantId, clinicId, assign = true) => {
-  const modifier = operation === false 
+  const modifier = assign === false 
     ? 'GREATEST(total_patients - 1, 0)' 
     : 'total_patients + 1';
 
@@ -148,7 +148,7 @@ const updatePatientCount = async (tenantId, clinicId, assign = true) => {
     return result.affectedRows > 0;
   } catch (error) {
     console.error(error);
-    throw new Error(`Database Query Error while ${operation}ing patient count`);
+    throw new Error(`Database Query Error while ${assign?'creat':'updat'}ing patient count`);
   } finally {
     conn.release();
   }

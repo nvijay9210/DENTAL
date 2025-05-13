@@ -19,7 +19,7 @@ const createTreatment = async (data) => {
     dentist_id: (val) => val,
     clinic_id: (val) => val,
     diagnosis: helper.safeStringify,
-    treatment_procedure: helper.safeStringify,
+    treatment_procedure: (val) => val,
     treatment_type: (val) => val,
     treatment_status: (val) => val,
     treatment_date: (val) => val,
@@ -45,7 +45,7 @@ const createTreatment = async (data) => {
       columns,
       values
     );
-    await invalidateCacheByTenant("treatment", data.tenant_id);
+    await invalidateCacheByTenant("treatment_patient", data.tenant_id);
     return treatmentId;
   } catch (error) {
     console.error("Failed to create treatment:", error);
@@ -79,7 +79,7 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
 
 const getAllTreatmentsByTenantAndPatientId = async (tenantId,patientId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `treatment_patient:${tenantId}:${patientId}:page:${page}:limit:${limit}`;
+  const cacheKey = `treatment_patient:${tenantId}:page:${page}:limit:${limit}`;
 
   const jsonFields = ["description", "diagnosis", "notes"];
   const booleanFields = ["follow_up_required", "anesthesia_used"];
@@ -132,7 +132,7 @@ const updateTreatment = async (treatmentId, data, tenant_id) => {
     dentist_id: (val) => val,
     clinic_id: (val) => val,
     diagnosis: helper.safeStringify,
-    treatment_procedure: helper.safeStringify,
+    treatment_procedure:(val) => val,
     treatment_type: (val) => val,
     treatment_status: (val) => val,
     treatment_date: (val) => val,
@@ -164,7 +164,7 @@ const updateTreatment = async (treatmentId, data, tenant_id) => {
       throw new CustomError("Treatment not found or no changes made.", 404);
     }
 
-    await invalidateCacheByTenant("treatment", tenant_id);
+    await invalidateCacheByTenant("treatment_patient", tenant_id);
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);

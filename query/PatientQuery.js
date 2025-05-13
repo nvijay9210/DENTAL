@@ -2,7 +2,7 @@ const patientQuery = {
   createPatientTable: `
     CREATE TABLE IF NOT EXISTS patient (
   patient_id int(11) NOT NULL AUTO_INCREMENT,
-  tenant_id int(11) NOT NULL,
+  tenant_id int(6) NOT NULL,
   first_name varchar(50) NOT NULL,
   last_name varchar(50) NOT NULL,
   email varchar(255) DEFAULT NULL,
@@ -28,7 +28,7 @@ const patientQuery = {
   treatment_history longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(treatment_history)),
   appointment_count int(11) DEFAULT NULL,
   last_appointment_date timestamp NULL DEFAULT NULL,
-  profile_picture text DEFAULT NULL,
+  profile_picture varchar(255) DEFAULT NULL,
   created_by varchar(30) NOT NULL,
   created_time timestamp NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,

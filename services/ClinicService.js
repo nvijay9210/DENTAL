@@ -8,15 +8,15 @@ const {
 const { decodeJsonFields } = require("../utils/Helpers");
 const helper = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
-const { updateClinicIdAndNameAndAddress } = require("../models/DentistModel");
+const { updateClinicIdAndNameAndAddress, updateNullClinicInfoWithJoin } = require("../models/DentistModel");
 
 // -------------------- CREATE --------------------
 const createClinic = async (data) => {
   const parseBoolean = (val) => {
-    if (val === true || val === 'true' || val === 1 || val === '1') return 1;
+    if (val === true || val === "true" || val === 1 || val === "1") return 1;
     return 0;
   };
-  
+
   const clinicFieldMap = {
     tenant_id: (val) => val,
     clinic_name: (val) => val,
@@ -38,8 +38,8 @@ const createClinic = async (data) => {
     total_patients: (val) => val || null,
     total_dental_chairs: (val) => val || null,
     number_of_assistants: (val) => val || null,
-    available_services: (val) => val ? JSON.stringify(val) : null,
-    operating_hours: (val) => val ? JSON.stringify(val) : null,
+    available_services: (val) => (val ? JSON.stringify(val) : null),
+    operating_hours: (val) => (val ? JSON.stringify(val) : null),
     insurance_supported: parseBoolean,
     ratings: (val) => val || 0,
     reviews_count: (val) => val || 0,
@@ -49,9 +49,9 @@ const createClinic = async (data) => {
     parking_availability: parseBoolean,
     pharmacy: parseBoolean,
     wifi: parseBoolean,
-    created_by: (val) => val
+    created_by: (val) => val,
   };
-  
+
   try {
     const { columns, values } = mapFields(data, clinicFieldMap);
     const clinicId = await clinicModel.createClinic("clinic", columns, values);
@@ -65,12 +65,12 @@ const createClinic = async (data) => {
 
 // -------------------- UPDATE --------------------
 const updateClinic = async (clinicId, data, tenant_id) => {
-  console.log('data:',data)
+
   const parseBoolean = (val) => {
-    if (val === true || val === 'true' || val === 1 || val === '1') return 1;
+    if (val === true || val === "true" || val === 1 || val === "1") return 1;
     return 0;
   };
-  
+
   const clinicFieldMap = {
     tenant_id: (val) => val,
     clinic_name: (val) => val,
@@ -92,8 +92,8 @@ const updateClinic = async (clinicId, data, tenant_id) => {
     total_patients: (val) => val || null,
     total_dental_chairs: (val) => val || null,
     number_of_assistants: (val) => val || null,
-    available_services: (val) => val ? JSON.stringify(val) : null,
-    operating_hours: (val) => val ? JSON.stringify(val) : null,
+    available_services: (val) => (val ? JSON.stringify(val) : null),
+    operating_hours: (val) => (val ? JSON.stringify(val) : null),
     insurance_supported: parseBoolean,
     ratings: (val) => val || 0,
     reviews_count: (val) => val || 0,
@@ -103,13 +103,18 @@ const updateClinic = async (clinicId, data, tenant_id) => {
     parking_availability: parseBoolean,
     pharmacy: parseBoolean,
     wifi: parseBoolean,
-    updated_by: (val) => val
+    updated_by: (val) => val,
   };
-  
+
   try {
     const { columns, values } = mapFields(data, clinicFieldMap);
-    console.log(columns,'=',values)
-    const affectedRows = await clinicModel.updateClinic(clinicId, columns, values, tenant_id);
+    console.log(columns, "=", values);
+    const affectedRows = await clinicModel.updateClinic(
+      clinicId,
+      columns,
+      values,
+      tenant_id
+    );
 
     if (affectedRows === 0) {
       throw new CustomError("Clinic not found or no changes made.", 404);
@@ -123,8 +128,6 @@ const updateClinic = async (clinicId, data, tenant_id) => {
   }
 };
 
-
-
 // -------------------- GET ALL --------------------
 const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
@@ -132,13 +135,21 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
 
   const jsonFields = ["available_services", "operating_hours"];
   const booleanFields = [
-    "insurance_supported", "emergency_support", "teleconsultation_supported",
-    "parking_availability", "pharmacy", "wifi"
+    "insurance_supported",
+    "emergency_support",
+    "teleconsultation_supported",
+    "parking_availability",
+    "pharmacy",
+    "wifi",
   ];
 
   try {
     const clinics = await getOrSetCache(cacheKey, async () => {
-      const result = await clinicModel.getAllClinicsByTenantId(tenantId, Number(limit), offset);
+      const result = await clinicModel.getAllClinicsByTenantId(
+        tenantId,
+        Number(limit),
+        offset
+      );
       return result;
     });
 
@@ -150,8 +161,6 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
     throw new CustomError("Database error while fetching clinics", 404);
   }
 };
-
-
 
 // -------------------- GET SINGLE --------------------
 const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
@@ -166,7 +175,10 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
   ];
 
   try {
-    const clinic = await clinicModel.getClinicByTenantIdAndClinicId(tenantId, clinicId);
+    const clinic = await clinicModel.getClinicByTenantIdAndClinicId(
+      tenantId,
+      clinicId
+    );
     if (clinic) {
       await decodeJsonFields(clinic, fieldsToDecode);
       helper.mapBooleanFields(clinic, booleanFields);
@@ -179,7 +191,10 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
 
 const deleteClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
   try {
-    const clinic = await clinicModel.deleteClinicByTenantIdAndClinicId(tenantId, clinicId);
+    const clinic = await clinicModel.deleteClinicByTenantIdAndClinicId(
+      tenantId,
+      clinicId
+    );
     await invalidateCacheByTenant("clinic", tenantId);
     return clinic;
   } catch (error) {
@@ -190,46 +205,65 @@ const deleteClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
 // -------------------- CHECK EXISTS --------------------
 const checkClinicExistsByTenantIdAndClinicId = async (tenantId, clinicId) => {
   try {
-    return await clinicModel.checkClinicExistsByTenantIdAndClinicId(tenantId, clinicId);
-  } catch (error) {
-    throw new CustomError("Failed to check clinic existence: " + error.message, 404);
-  }
-};
-
-
-const handleClinicAssignment = async (tenantId, clinicId, details, assign = true) => {
-  try {
-    const clinic = await clinicModel.getClinicNameAndAddressByClinicId(tenantId, clinicId);
-
-    const dentistIds = details?.dentist_id;
-    if (!Array.isArray(dentistIds) || dentistIds.length === 0) {
-      throw new CustomError("At least one dentistId is required", 400);
-    }
-
-    // Update each dentist
-    const updatedDentists = await Promise.all(
-      dentistIds.map(dentistId =>
-        updateClinicIdAndNameAndAddress(
-          tenantId,
-          clinicId,
-          clinic.clinic_name,
-          clinic.clinic_address,
-          dentistId
-        )
-      )
+    return await clinicModel.checkClinicExistsByTenantIdAndClinicId(
+      tenantId,
+      clinicId
     );
-
-    // Optionally: adjust doctor count based on how many added/removed
-    await clinicModel.updateDoctorCount(tenantId, clinicId, assign, dentistIds.length);
-
-    return updatedDentists;
   } catch (error) {
-    throw new CustomError("Failed to update clinic assignment: " + error.message, 404);
+    throw new CustomError(
+      "Failed to check clinic existence: " + error.message,
+      404
+    );
   }
 };
 
+const handleClinicAssignment = async (
+  tenantId,
+  clinicId,
+  details,
+  assign = true
+) => {
+  try {
+    if (assign) {
+      const clinic = await clinicModel.getClinicNameAndAddressByClinicId(
+        tenantId,
+        clinicId
+      );
 
+      const dentistIds = details?.dentist_id;
+      if (!Array.isArray(dentistIds) || dentistIds.length === 0) {
+        throw new CustomError("At least one dentistId is required", 400);
+      }
 
+      // Update each dentist
+      const updatedDentists = await Promise.all(
+        dentistIds.map((dentistId) =>
+          updateClinicIdAndNameAndAddress(
+            tenantId,
+            clinicId,
+            clinic.clinic_name,
+            clinic.address,
+            dentistId
+          )
+        )
+      );
+
+      // Optionally: adjust doctor count based on how many added/removed
+      await clinicModel.updateDoctorCount(tenantId, clinicId, assign);
+
+      return updatedDentists;
+    } else {
+      await updateNullClinicInfoWithJoin(tenantId,dentistId,clinicId)
+      await clinicModel.updateDoctorCount(tenantId, clinicId, assign);
+      return 
+    }
+  } catch (error) {
+    throw new CustomError(
+      "Failed to update clinic assignment: " + error.message,
+      404
+    );
+  }
+};
 
 module.exports = {
   createClinic,
@@ -238,5 +272,5 @@ module.exports = {
   getClinicByTenantIdAndClinicId,
   checkClinicExistsByTenantIdAndClinicId,
   deleteClinicByTenantIdAndClinicId,
-  handleClinicAssignment
+  handleClinicAssignment,
 };

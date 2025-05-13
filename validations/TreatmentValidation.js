@@ -110,9 +110,9 @@ const createTreatmentValidation = async (details) => {
 
 // Update Treatment Validation
 const updateTreatmentValidation = async (
-  tenantId,details,treatmentId
+treatmentId,details,tenantId
 ) => {
-  await validateInput(details, updateColumnConfig);
+   validateInput(details, updateColumnConfig);
 
     const treatment=await checkIfExists('treatment','treatment_id',treatmentId,tenantId)
     if(!treatment) throw new CustomError('Treatment Not Exists',404)

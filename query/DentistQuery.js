@@ -2,7 +2,7 @@ const dentistQuery = {
   createDentistTable: `
   CREATE TABLE IF NOT EXISTS dentist (
   dentist_id int(11) NOT NULL AUTO_INCREMENT,
-  tenant_id int(11) NOT NULL,
+  tenant_id int(6) NOT NULL,
   clinic_id int(11) DEFAULT NULL,
   first_name varchar(50) NOT NULL,
   last_name varchar(50) NOT NULL,

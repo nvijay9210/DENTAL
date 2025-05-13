@@ -2,7 +2,7 @@ const clinicQuery = {
   createClinicTable: `
   CREATE TABLE IF NOT EXISTS clinic (
   clinic_id int(11) NOT NULL AUTO_INCREMENT,
-  tenant_id int(11) NOT NULL,
+  tenant_id int(6) NOT NULL,
   clinic_name varchar(50) NOT NULL,
   email varchar(255) DEFAULT NULL,
   phone_number varchar(15) NOT NULL,

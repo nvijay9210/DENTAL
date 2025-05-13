@@ -107,11 +107,11 @@ const checkDentistExistsByTenantIdAndDentistId = async (
 };
 
 const getAllDentistsByTenantIdAndClinicId = async (tenantId, clinicId,limit,offset) => {
-  const query = `SELECT CONCAT(d.first_name, ' ', d.last_name) AS patient_name,specialization FROM dentist d join clinic c on c.tenant_id = d.tenant_id WHERE d.tenant_id = ? AND c.clinic_id = ? limit=? offset=?`;
+  const query = `SELECT CONCAT(d.first_name, ' ', d.last_name) AS doctor_name,specialization,profile_picture FROM dentist d join clinic c on c.clinic_id = d.clinic_id WHERE d.tenant_id = ? AND d.clinic_id = ? limit ? offset ?`;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, clinicId]);
-    return rows.length > 0;
+    const [rows] = await conn.query(query, [tenantId, clinicId,limit,offset]);
+    return rows;
   } catch (error) {
     console.error(error);
     throw new Error("Database Query Error");
@@ -135,10 +135,11 @@ const getAllDentistsByClinicId=async(tenantId,clinicId)=>{
 }
 
 const updateClinicIdAndNameAndAddress=async(tenantId,clinicId,clinic_name,clinic_addrss,dentist_id)=>{
+ 
   const query = `update dentist set clinic_id=?, clinic_name=?, clinic_address=? where tenant_id=? and dentist_id=?`;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId,clinicId,clinic_name,clinic_addrss,dentist_id]);
+    const [rows] = await conn.query(query, [clinicId,clinic_name,clinic_addrss,tenantId,dentist_id]);
     return rows.length > 0;
   } catch (error) {
     console.error(error);
@@ -147,6 +148,32 @@ const updateClinicIdAndNameAndAddress=async(tenantId,clinicId,clinic_name,clinic
     conn.release();
   }
 }
+const updateNullClinicInfoWithJoin = async (tenantId, dentistId, clinicId) => {
+  const query = `
+    UPDATE dentist d
+    JOIN clinic c ON d.clinic_id = c.clinic_id AND d.tenant_id = c.tenant_id
+    SET 
+      d.clinic_id = NULL,
+      d.clinic_name = NULL,
+      d.clinic_address = NULL
+    WHERE 
+      d.tenant_id = ? 
+      AND d.dentist_id = ? 
+      AND d.clinic_id = ?;
+  `;
+
+  const conn = await pool.getConnection();
+  try {
+    const [result] = await conn.query(query, [tenantId, dentistId, clinicId]);
+    return result.affectedRows > 0;
+  } catch (error) {
+    console.error("Error updating with join and clinic_id:", error);
+    throw new Error("Database update failed");
+  } finally {
+    conn.release();
+  }
+};
+
 
 
 module.exports = {
@@ -158,5 +185,6 @@ module.exports = {
   checkDentistExistsByTenantIdAndDentistId,
   getAllDentistsByTenantIdAndClinicId,
   updateClinicIdAndNameAndAddress,
-  getAllDentistsByClinicId
+  getAllDentistsByClinicId,
+  updateNullClinicInfoWithJoin
 };

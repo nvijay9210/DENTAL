@@ -1,3 +1,5 @@
+const { CustomError } = require("../middlewares/CustomeError");
+const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
 const treatmentService = require("../services/TreatmentService");
 const treatmentValidation = require("../validations/TreatmentValidation");
 
@@ -92,7 +94,8 @@ exports.deleteTreatmentByTenantIdAndTreatmentId = async (req, res, next) => {
 
   try {
     // Validate if treatment exists
-    await treatmentValidation.checkTreatmentExistsByIdValidation(tenant_id, treatment_id);
+    const treatment=await checkIfExists('treatment','treatment_id',treatment_id,tenant_id);
+    if(!treatment) throw new CustomError('TreatmentId not Exists',404)
 
     // Delete the treatment
     await treatmentService.deleteTreatmentByTenantIdAndTreatmentId(tenant_id, treatment_id);

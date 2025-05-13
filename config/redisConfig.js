@@ -58,15 +58,41 @@ const getOrSetCache = async (cacheKey, fetchFunction, ttlSeconds = process.env.R
   return freshData;
 };
 
-const invalidateCacheByTenant = async (tableName, tenantId) => {
-  if (!redisConnected) return;
+const scanKeys = async (pattern) => {
+  let cursor = '0';
+  let keys = [];
 
+  do {
+    const [nextCursor, foundKeys] = await redisClient.scan(cursor, {
+      MATCH: pattern,
+      COUNT: 100, // adjust as needed
+    });
+    cursor = nextCursor;
+    keys.push(...foundKeys);
+  } while (cursor !== '0');
+
+  return keys;
+};
+
+
+const invalidateCacheByTenant = async (tableName, tenantId) => {
   const pattern = `${tableName}:${tenantId}:page:*:limit:*`;
-  const keys = await redisClient.keys(pattern);
-  if (keys.length > 0) {
-    await redisClient.del(keys);
+
+  try {
+    const keys = await scanKeys(pattern);
+
+    if (keys.length > 0) {
+      await redisClient.del(...keys); // Spread the keys for deletion
+      console.log(`🗑️ Deleted ${keys.length} cache entries for pattern: ${pattern}`);
+    } else {
+      console.log(`ℹ️ No cache keys matched pattern: ${pattern}`);
+    }
+  } catch (err) {
+    console.error("❌ Redis cache invalidation error:", err.message);
   }
 };
+
+
 
 module.exports = {
   redisClient,

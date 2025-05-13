@@ -2,7 +2,7 @@ const treatmentQuery = {
   createTable: `
   CREATE TABLE IF NOT EXISTS treatment (
   treatment_id int(11) NOT NULL AUTO_INCREMENT,
-  tenant_id int(11) NOT NULL,
+  tenant_id int(6) NOT NULL,
   patient_id int(11) NOT NULL,
   dentist_id int(11) NOT NULL,
   clinic_id int(11) NOT NULL,
@@ -21,7 +21,7 @@ const treatmentQuery = {
   anesthesia_used tinyint(1) NOT NULL DEFAULT 0,
   anesthesia_type varchar(100) DEFAULT NULL,
   technician_assisted varchar(255) DEFAULT NULL,
-  treatment_images text DEFAULT NULL,
+  treatment_images varchar(255) DEFAULT NULL,
   notes text DEFAULT NULL,
   created_by varchar(30) NOT NULL,
   created_time timestamp NOT NULL DEFAULT current_timestamp(),

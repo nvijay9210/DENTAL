@@ -67,10 +67,11 @@ exports.deleteDentistByTenantIdAndDentistId = async (req, res, next) => {
 };
 
 exports.getAllDentistByTenantIdAndClientId = async (req, res, next) => {
-  const { tenant_id,client_id } = req.params;
+  const { tenant_id,clinic_id } = req.params;
   const { page, limit } = req.query;
+  console.log(tenant_id,clinic_id,page,limit)
   try {
-    const dentists = await dentistService.getAllDentistsByTenantId(tenant_id,client_id, page, limit);
+    const dentists = await dentistService.getAllDentistsByTenantIdAndClinicId(tenant_id,clinic_id, page, limit);
     res.status(200).json(dentists);
   } catch (err) {
     next(err);

@@ -3,7 +3,7 @@ const clinicValidation = require("../validations/ClinicValidation");
 
 exports.createClinic = async (req, res, next) => {
   const details=req.body
-  console.log('details:',details)
+
   try {
 
     await clinicValidation.createClinicValidation(details)
@@ -40,7 +40,7 @@ exports.getClinicByTenantIdAndClinicId = async (req, res, next) => {
 exports.updateClinic = async (req, res, next) => {
   const {clinic_id,tenant_id}=req.params
   const details=req.body
-  console.log('details:',details)
+ 
   try {
     await clinicValidation.updateClinicValidation(clinic_id,details,tenant_id)
 
@@ -68,7 +68,7 @@ exports.handleClinicAssignment = async (req, res, next) => {
   const {clinic_id,tenant_id}=req.params
   const {assign}=req.query
   const details=req.body
-  console.log('details:',details)
+ 
   try {
     await clinicValidation.handleClinicAssignmentValidation(tenant_id,clinic_id,details,assign)
 

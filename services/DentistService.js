@@ -220,8 +220,8 @@ const checkDentistExistsByTenantIdAndDentistId = async (
 const getAllDentistsByTenantIdAndClinicId = async (
   tenantId,
   clinicId,
-  limit,
-  page
+  page,
+  limit
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = `dentistsbyclinic:${tenantId}:page:${page}:limit:${limit}`;
@@ -240,7 +240,6 @@ const getAllDentistsByTenantIdAndClinicId = async (
 
     const parsed = decodeJsonFields(dentists, jsonFields);
     return parsed;
-    return dentists;
   } catch (error) {
     throw new CustomError(
       `Failed to check dentist existence: ${error.message}`,

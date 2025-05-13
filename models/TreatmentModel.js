@@ -86,7 +86,6 @@ const deleteTreatmentByTenantAndTreatmentId = async (tenant_id, treatment_id) =>
   try {
     const conditionColumn = ["tenant_id", "treatment_id"];
     const conditionValue = [tenant_id, treatment_id];
-    helper.validateColumnValueLengthMatch(conditionColumn, conditionValue);
 
     const [result] = await record.deleteRecord(TABLE, conditionColumn, conditionValue);
     return result.affectedRows;
