@@ -3,7 +3,7 @@ const treatmentModel = require("../models/TreatmentModel");
 const {
   redisClient,
   getOrSetCache,
-  invalidateCacheByTenant,
+  invalidateCacheByPattern,
 } = require("../config/redisConfig");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
@@ -45,7 +45,8 @@ const createTreatment = async (data) => {
       columns,
       values
     );
-    //await invalidateCacheByTenant("treatment_patient", data.tenant_id);
+    await invalidateCacheByPattern("treatment:*");
+    await invalidateCacheByPattern("treatment_patient:*");
     return treatmentId;
   } catch (error) {
     console.error("Failed to create treatment:", error);
@@ -164,7 +165,8 @@ const updateTreatment = async (treatmentId, data, tenant_id) => {
       throw new CustomError("Treatment not found or no changes made.", 404);
     }
 
-    //await invalidateCacheByTenant("treatment_patient", tenant_id);
+    await invalidateCacheByPattern("treatment:*");
+    await invalidateCacheByPattern("treatment_patient:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -187,7 +189,8 @@ const deleteTreatmentByTenantIdAndTreatmentId = async (
       throw new CustomError("Treatment not found.", 404);
     }
 
-    //await invalidateCacheByTenant("treatment", tenantId);
+    await invalidateCacheByPattern("treatment:*");
+    await invalidateCacheByPattern("treatment_patient:*");
     return affectedRows;
   } catch (error) {
     throw new CustomError(`Failed to delete treatment: ${error.message}`, 500);

@@ -2,10 +2,10 @@ const { CustomError } = require("../middlewares/CustomeError");
 const patientModel = require("../models/PatientModel");
 const {
   redisClient,
-  invalidateCacheByTenant,
+  invalidateCacheByPattern,
   getOrSetCache,
 } = require("../config/redisConfig");
-const { decodeJsonFields, getJsonValue } = require("../utils/Helpers");
+const { decodeJsonFields } = require("../utils/Helpers");
 const { formatDateOnly } = require("../utils/DateUtils");
 const { mapFields } = require("../query/Records");
 const helper=require('../utils/Helpers')
@@ -43,7 +43,7 @@ const createPatient = async (data) => {
   try {
     const {columns,values}=mapFields(data,fieldMap)
     const patientId = await patientModel.createPatient("patient", columns, values);
-    //await invalidateCacheByTenant("patients", data.tenant_id);
+    await invalidateCacheByPattern("patients:*");
     return patientId;
   } catch (error) {
     console.trace(error);
@@ -152,7 +152,7 @@ const updatePatient = async (patientId, data, tenant_id) => {
       throw new CustomError("Patient not found or no changes made.", 404);
     }
 
-    //await invalidateCacheByTenant("patients", tenant_id);
+    await invalidateCacheByPattern("patients:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -168,7 +168,7 @@ const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
       throw new CustomError("Patient not found.", 404);
     }
 
-    //await invalidateCacheByTenant("patients", tenantId);
+    await invalidateCacheByPattern("patients:*");
     return affectedRows;
   } catch (error) {
     throw new CustomError(`Failed to delete patient: ${error.message}`, 500);

@@ -24,18 +24,39 @@ const prescriptionQuery = {
   created_time timestamp NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
   updated_time timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+
   PRIMARY KEY (prescription_id),
   KEY fk_prescription_patient (patient_id),
   KEY fk_prescription_dentist (dentist_id),
   KEY fk_prescription_treatment (treatment_id),
   KEY fk_prescription_tenant (tenant_id),
-  KEY clinic_id (clinic_id),
-  CONSTRAINT fk_prescripition_clinic_id FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id),
-  CONSTRAINT fk_prescription_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id),
-  CONSTRAINT fk_prescription_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id),
-  CONSTRAINT fk_prescription_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id),
-  CONSTRAINT fk_prescription_treatment FOREIGN KEY (treatment_id) REFERENCES treatment (treatment_id)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+  KEY fk_prescription_clinic (clinic_id),
+
+  CONSTRAINT fk_prescription_tenant FOREIGN KEY (tenant_id)
+    REFERENCES tenant(tenant_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+
+  CONSTRAINT fk_prescription_clinic FOREIGN KEY (clinic_id)
+    REFERENCES clinic(clinic_id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+
+  CONSTRAINT fk_prescription_patient FOREIGN KEY (patient_id)
+    REFERENCES patient(patient_id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+
+  CONSTRAINT fk_prescription_dentist FOREIGN KEY (dentist_id)
+    REFERENCES dentist(dentist_id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+
+  CONSTRAINT fk_prescription_treatment FOREIGN KEY (treatment_id)
+    REFERENCES treatment(treatment_id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
 };
 

@@ -39,9 +39,13 @@ const patientQuery = {
   PRIMARY KEY (patient_id),
   KEY fk_patient_tenant (tenant_id),
   KEY fk_patient_dentist (dentist_preference),
-  CONSTRAINT fk_patient_dentist FOREIGN KEY (dentist_preference) REFERENCES dentist (dentist_id),
+  CONSTRAINT fk_patient_dentist FOREIGN KEY (dentist_preference) REFERENCES dentist (dentist_id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
   CONSTRAINT fk_patient_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
     `,
   addPatient: `
     INSERT INTO patient (

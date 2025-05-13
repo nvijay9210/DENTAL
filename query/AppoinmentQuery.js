@@ -12,7 +12,7 @@ const appointmentQuery = {
   status enum('SC','CP','CL') NOT NULL DEFAULT 'SC',
   appointment_type enum('IP','TC') NOT NULL DEFAULT 'TC',
   consultation_fee decimal(10,2) DEFAULT NULL,
-  discount_applied decimal(10,2) DEFAULT 0.00,
+  discount_applied decimal(10,2) NOT NULL DEFAULT 0.00,
   payment_status enum('P','UP','PD') NOT NULL DEFAULT 'P',
   payment_method enum('CH','CD','IN','O') NOT NULL,
   visit_reason text DEFAULT NULL,
@@ -28,10 +28,27 @@ const appointmentQuery = {
   KEY fk_appointment_patient (patient_id),
   KEY fk_appointment_dentist (dentist_id),
   KEY fk_appointment_clinic (clinic_id),
-  CONSTRAINT fk_appointment_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id),
-  CONSTRAINT fk_appointment_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id),
-  CONSTRAINT fk_appointment_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id),
-  CONSTRAINT fk_appointment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id)
+
+  -- Foreign Keys with Cascade Rules
+  CONSTRAINT fk_appointment_tenant FOREIGN KEY (tenant_id)
+    REFERENCES tenant(tenant_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+
+  CONSTRAINT fk_appointment_patient FOREIGN KEY (patient_id)
+    REFERENCES patient(patient_id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+
+  CONSTRAINT fk_appointment_dentist FOREIGN KEY (dentist_id)
+    REFERENCES dentist(dentist_id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+
+  CONSTRAINT fk_appointment_clinic FOREIGN KEY (clinic_id)
+    REFERENCES clinic(clinic_id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;`
 
 };

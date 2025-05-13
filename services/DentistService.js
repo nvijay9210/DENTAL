@@ -2,8 +2,8 @@ const { CustomError } = require("../middlewares/CustomeError");
 const dentistModel = require("../models/DentistModel"); // Make sure this model exists
 const {
   redisClient,
-  invalidateCacheByTenant,
   getOrSetCache,
+  invalidateCacheByPattern,
 } = require("../config/redisConfig");
 const { decodeJsonFields, mapBooleanFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
@@ -31,11 +31,11 @@ const dentistFieldMap = {
   clinic_id: (val) => val,
   first_name: (val) => val,
   last_name: (val) => val,
-  gender: (val) => val ,
-  date_of_birth: (val) => val ,
-  email: (val) => val ,
+  gender: (val) => val,
+  date_of_birth: (val) => val,
+  email: (val) => val,
   phone_number: (val) => val,
-  alternate_phone_number: (val) => val ,
+  alternate_phone_number: (val) => val,
 
   specialization: safeStringify,
   qualifications: safeStringify,
@@ -47,8 +47,8 @@ const dentistFieldMap = {
 
   experience_years: (val) => val,
   license_number: (val) => val,
-  clinic_name: (val) => val ,
-  clinic_address: (val) => val ,
+  clinic_name: (val) => val,
+  clinic_address: (val) => val,
   city: (val) => val,
   state: (val) => val,
   country: (val) => val,
@@ -80,7 +80,8 @@ const createDentist = async (data) => {
       columns,
       values
     );
-    //await invalidateCacheByTenant("dentist", data.tenant_id);
+    await invalidateCacheByPattern("dentists:*");
+    await invalidateCacheByPattern("dentistsbyclinic:*");
     return dentistId;
   } catch (error) {
     console.error("Failed to create dentist:", error.message);
@@ -103,7 +104,8 @@ const updateDentist = async (dentistId, data, tenant_id) => {
       throw new CustomError("Dentist not found or no changes made.", 404);
     }
 
-    //await invalidateCacheByTenant("dentist", tenant_id);
+    await invalidateCacheByPattern("dentists:*");
+    await invalidateCacheByPattern("dentistsbyclinic:*");
     return affectedRows;
   } catch (error) {
     console.error("Failed to update dentist:", error.message);
@@ -153,7 +155,6 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
   }
 };
 
-
 // -------------------- GET SINGLE --------------------
 const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
   const jsonFields = [
@@ -191,7 +192,8 @@ const deleteDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
       tenantId,
       dentistId
     );
-    //await invalidateCacheByTenant("dentist", tenantId);
+    await invalidateCacheByPattern("dentists:*");
+    await invalidateCacheByPattern("dentistsbyclinic:*");
     return result;
   } catch (error) {
     throw new CustomError(`Failed to delete dentist: ${error.message}`, 500);
@@ -215,7 +217,6 @@ const checkDentistExistsByTenantIdAndDentistId = async (
     );
   }
 };
-
 
 const getAllDentistsByTenantIdAndClinicId = async (
   tenantId,

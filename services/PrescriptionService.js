@@ -3,7 +3,7 @@ const prescriptionModel = require("../models/PrescriptionModel");
 const {
   redisClient,
   getOrSetCache,
-  invalidateCacheByTenant,
+  invalidateCacheByPattern,
 } = require("../config/redisConfig");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
@@ -11,10 +11,7 @@ const helper = require("../utils/Helpers");
 
 const {
   formatDateOnly,
-  formatTimeOnly,
-  formatAppointments,
 } = require("../utils/DateUtils");
-const { bool } = require("joi");
 
 // Field mapping for prescriptions (similar to treatment)
 
@@ -49,7 +46,8 @@ const createPrescription = async (data) => {
       columns,
       values
     );
-    // await invalidateCacheByTenant("prescription", data.tenant_id);
+    await invalidateCacheByPattern("prescription:*");
+    await invalidateCacheByPattern("prescriptionByPatientId:*");
     return prescriptionId;
   } catch (error) {
     console.error("Failed to create prescription:", error);
@@ -187,7 +185,8 @@ const updatePrescription = async (prescriptionId, data, tenant_id) => {
       throw new CustomError("Prescription not found or no changes made.", 404);
     }
 
-    await invalidateCacheByTenant("prescription", tenant_id);
+    await invalidateCacheByPattern("prescription:*");
+    await invalidateCacheByPattern("prescriptionByPatientId:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -210,7 +209,8 @@ const deletePrescriptionByTenantIdAndPrescriptionId = async (
       throw new CustomError("Prescription not found.", 404);
     }
 
-    // await invalidateCacheByTenant("prescription", tenantId);
+    await invalidateCacheByPattern("prescription:*");
+    await invalidateCacheByPattern("prescriptionByPatientId:*");
     return affectedRows;
   } catch (error) {
     throw new CustomError(
