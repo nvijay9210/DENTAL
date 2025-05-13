@@ -1,3 +1,4 @@
+const { checkIfExists } = require("../models/checkIfExists");
 const clinicService = require("../services/ClinicService");
 const clinicValidation = require("../validations/ClinicValidation");
 
@@ -55,7 +56,8 @@ exports.deleteClinicByTenantIdAndClinicId = async (req, res, next) => {
   const {clinic_id,tenant_id}=req.params
   
   try {
-    await clinicValidation.checkClinicExistsByClinicIdValidation(tenant_id,clinic_id)
+    const clinic=await checkIfExists('clinic','clinic_id',clinic_id,tenant_id);
+    if(!clinic) throw new CustomError('ClinicId not Exists',404)
     
     await clinicService.deleteClinicByTenantIdAndClinicId(tenant_id,clinic_id);
     res.status(200).json({ message: "Clinic deleted successfully" });

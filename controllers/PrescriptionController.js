@@ -1,3 +1,4 @@
+const { checkIfExists } = require("../models/checkIfExists");
 const prescriptionService = require("../services/PrescriptionService");
 const prescriptionValidation = require("../validations/PrescriptionValidation");
 
@@ -93,7 +94,8 @@ exports.deletePrescriptionByTenantIdAndPrescriptionId = async (req, res, next) =
 
   try {
     // Validate if prescription exists
-    await prescriptionValidation.checkPrescriptionExistsByIdValidation(tenant_id, prescription_id);
+    const treatment=await checkIfExists('prescription','prescription_id',prescription_id,tenant_id);
+    if(!treatment) throw new CustomError('prescriptionId not Exists',404)
 
     // Delete the prescription
     await prescriptionService.deletePrescriptionByTenantIdAndPrescriptionId(tenant_id, prescription_id);

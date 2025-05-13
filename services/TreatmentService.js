@@ -45,7 +45,7 @@ const createTreatment = async (data) => {
       columns,
       values
     );
-    await invalidateCacheByTenant("treatment_patient", data.tenant_id);
+    //await invalidateCacheByTenant("treatment_patient", data.tenant_id);
     return treatmentId;
   } catch (error) {
     console.error("Failed to create treatment:", error);
@@ -164,7 +164,7 @@ const updateTreatment = async (treatmentId, data, tenant_id) => {
       throw new CustomError("Treatment not found or no changes made.", 404);
     }
 
-    await invalidateCacheByTenant("treatment_patient", tenant_id);
+    //await invalidateCacheByTenant("treatment_patient", tenant_id);
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -187,7 +187,7 @@ const deleteTreatmentByTenantIdAndTreatmentId = async (
       throw new CustomError("Treatment not found.", 404);
     }
 
-    await invalidateCacheByTenant("treatment", tenantId);
+    //await invalidateCacheByTenant("treatment", tenantId);
     return affectedRows;
   } catch (error) {
     throw new CustomError(`Failed to delete treatment: ${error.message}`, 500);

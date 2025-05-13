@@ -43,7 +43,7 @@ const createPatient = async (data) => {
   try {
     const {columns,values}=mapFields(data,fieldMap)
     const patientId = await patientModel.createPatient("patient", columns, values);
-    await invalidateCacheByTenant("patients", data.tenant_id);
+    //await invalidateCacheByTenant("patients", data.tenant_id);
     return patientId;
   } catch (error) {
     console.trace(error);
@@ -152,7 +152,7 @@ const updatePatient = async (patientId, data, tenant_id) => {
       throw new CustomError("Patient not found or no changes made.", 404);
     }
 
-    await invalidateCacheByTenant("patients", tenant_id);
+    //await invalidateCacheByTenant("patients", tenant_id);
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -168,7 +168,7 @@ const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
       throw new CustomError("Patient not found.", 404);
     }
 
-    await invalidateCacheByTenant("patients", tenantId);
+    //await invalidateCacheByTenant("patients", tenantId);
     return affectedRows;
   } catch (error) {
     throw new CustomError(`Failed to delete patient: ${error.message}`, 500);

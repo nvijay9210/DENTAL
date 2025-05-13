@@ -36,7 +36,7 @@ const createAppointment = async (data) => {
   try {
     const { columns, values } = mapFields(data, fieldMap);
     const appointmentId = await appointmentModel.createAppointment("appointment", columns, values);
-    await invalidateCacheByTenant("appointment", data.tenant_id);
+    // await invalidateCacheByTenant("appointment", data.tenant_id);
     if(appointmentId) await updatePatientCount(data.tenant_id,data.clinic_id,true)
     return appointmentId;
   } catch (error) {
@@ -118,7 +118,7 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
       throw new CustomError("Appointment not found or no changes made.", 404);
     }
 
-    await invalidateCacheByTenant("appointment", tenant_id);
+    // await invalidateCacheByTenant("appointment", tenant_id);
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -134,7 +134,7 @@ const deleteAppointmentByTenantIdAndAppointmentId = async (tenantId, appointment
       throw new CustomError("Appointment not found.", 404);
     }
 
-    await invalidateCacheByTenant("appointment", tenantId);
+    // await invalidateCacheByTenant("appointment", tenantId);
     return affectedRows;
   } catch (error) {
     throw new CustomError(`Failed to delete appointment: ${error.message}`, 500);

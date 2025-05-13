@@ -80,7 +80,7 @@ const createDentist = async (data) => {
       columns,
       values
     );
-    await invalidateCacheByTenant("dentist", data.tenant_id);
+    //await invalidateCacheByTenant("dentist", data.tenant_id);
     return dentistId;
   } catch (error) {
     console.error("Failed to create dentist:", error.message);
@@ -103,7 +103,7 @@ const updateDentist = async (dentistId, data, tenant_id) => {
       throw new CustomError("Dentist not found or no changes made.", 404);
     }
 
-    await invalidateCacheByTenant("dentist", tenant_id);
+    //await invalidateCacheByTenant("dentist", tenant_id);
     return affectedRows;
   } catch (error) {
     console.error("Failed to update dentist:", error.message);
@@ -191,7 +191,7 @@ const deleteDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
       tenantId,
       dentistId
     );
-    await invalidateCacheByTenant("dentist", tenantId);
+    //await invalidateCacheByTenant("dentist", tenantId);
     return result;
   } catch (error) {
     throw new CustomError(`Failed to delete dentist: ${error.message}`, 500);

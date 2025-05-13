@@ -55,7 +55,7 @@ const createClinic = async (data) => {
   try {
     const { columns, values } = mapFields(data, clinicFieldMap);
     const clinicId = await clinicModel.createClinic("clinic", columns, values);
-    await invalidateCacheByTenant("clinic", data.tenant_id);
+    //await invalidateCacheByTenant("clinic", data.tenant_id);
     return clinicId;
   } catch (error) {
     console.trace(error);
@@ -120,7 +120,7 @@ const updateClinic = async (clinicId, data, tenant_id) => {
       throw new CustomError("Clinic not found or no changes made.", 404);
     }
 
-    await invalidateCacheByTenant("clinic", tenant_id);
+    //await invalidateCacheByTenant("clinic", tenant_id);
     return affectedRows;
   } catch (error) {
     console.log("Service Error:", error);
@@ -195,7 +195,7 @@ const deleteClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
       tenantId,
       clinicId
     );
-    await invalidateCacheByTenant("clinic", tenantId);
+    //await invalidateCacheByTenant("clinic", tenantId);
     return clinic;
   } catch (error) {
     throw new CustomError("Failed to delete clinic: " + error.message, 404);

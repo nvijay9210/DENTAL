@@ -49,7 +49,7 @@ const createPrescription = async (data) => {
       columns,
       values
     );
-    await invalidateCacheByTenant("prescription", data.tenant_id);
+    // await invalidateCacheByTenant("prescription", data.tenant_id);
     return prescriptionId;
   } catch (error) {
     console.error("Failed to create prescription:", error);
@@ -210,7 +210,7 @@ const deletePrescriptionByTenantIdAndPrescriptionId = async (
       throw new CustomError("Prescription not found.", 404);
     }
 
-    await invalidateCacheByTenant("prescription", tenantId);
+    // await invalidateCacheByTenant("prescription", tenantId);
     return affectedRows;
   } catch (error) {
     throw new CustomError(

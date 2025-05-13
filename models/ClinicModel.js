@@ -55,7 +55,6 @@ const updateClinic = async (clinic_id, columns, values, tenant_id) => {
 const deleteClinicByTenantIdAndClinicId = async (tenant_id, clinic_id) => {
   const conditionColumn = ['tenant_id', 'clinic_id'];
   const conditionValue = [tenant_id, clinic_id];
-  helper.sameLengthChecker(conditionColumn, conditionValue);
 
   try {
     const result = await record.deleteRecord('clinic', conditionColumn, conditionValue);
@@ -82,7 +81,7 @@ const checkClinicExistsByTenantIdAndClinicId = async (tenantId, clinicId) => {
 };
 
 const getClinicNameAndAddressByClinicId=async(tenantId,clinicId)=>{
-  const query = `select clinic_name,address from clinic where tenant_id=? and clinic_id=? limit 1`;
+  const query = `select clinic_id,clinic_name,address from clinic where tenant_id=? and clinic_id=? limit 1`;
   const conn = await pool.getConnection();
   try {
     const rows = await conn.query(query, [tenantId, clinicId]);
