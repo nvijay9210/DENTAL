@@ -67,6 +67,7 @@ const dentistFieldMap = {
   awards_certifications: safeStringify, // or keep as raw string if needed
 
   last_login: (val) => val || null,
+  duration:(val)=>val || null,
   created_by: (val) => val,
   updated_by: (val) => val || null,
 };
@@ -126,7 +127,8 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
     "bio",
     "languages_spoken",
     "social_links",
-    "awards_certifications"
+    "awards_certifications",
+    "duration"
   ];
   const booleanFields = ["teleconsultation_supported", "insurance_supported"];
 
@@ -165,6 +167,7 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
     "bio",
     "languages_spoken",
     "social_links",
+    "duration"
   ];
   const booleanFields = ["teleconsultation_supported", "insurance_supported"];
 

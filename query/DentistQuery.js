@@ -35,6 +35,7 @@ const dentistQuery = {
   awards_certifications varchar(255) DEFAULT NULL,
   social_links longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(social_links)),
   last_login timestamp NULL DEFAULT NULL,
+  duration text DEFAULT NULL,
   created_by varchar(30) NOT NULL,
   created_time timestamp NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
