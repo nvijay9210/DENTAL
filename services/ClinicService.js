@@ -256,7 +256,6 @@ const handleClinicAssignment = async (
 
       return "Dentists Added Successfully";
     } else {
-      
 
       const dentistIds = details?.dentist_id;
       if (!Array.isArray(dentistIds) || dentistIds.length === 0) {

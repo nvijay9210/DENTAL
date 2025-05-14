@@ -27,14 +27,14 @@ const uploadFileMiddleware = (options) => {
 
       const uploadedFiles = {};
 
-      const tenant_id= req.body.tenant_id || req.params.tenant_id;
+      const tenant_id = req.body.tenant_id || req.params.tenant_id;
       const id = req.params.clinic_id || req.params.patient_id || req.params.dentist_id;
 
       if (id) {
-        console.log('updatevalidation activated')
+        console.log('update validation activated');
         await updateValidationFn(id, req.body, tenant_id);
       } else {
-        console.log('createvalidation activated')
+        console.log('create validation activated');
         await createValidationFn(req.body);
       }
 
@@ -51,7 +51,9 @@ const uploadFileMiddleware = (options) => {
         if (files.length > 0) {
           const savedPaths = [];
 
-          for (const file of files) {
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+
             // ✅ Size Check
             const maxSizeBytes = fileField.maxSizeMB * 1024 * 1024;
             if (file.size > maxSizeBytes) {
@@ -63,20 +65,25 @@ const uploadFileMiddleware = (options) => {
             // ✅ Save file
             const resizedImage = await compressImage(file.buffer, 100);
             const fieldTenantPath = path.join(baseTenantPath, fileField.subFolder);
-            const savedPath = await saveFile(
-              resizedImage,
-              fieldTenantPath,
-              `${fileField.fieldName}_${Date.now()}_${Math.floor(Math.random() * 10000)}.jpg`
-            );
 
-            savedPaths.push(savedPath);
+            const fileName = `${fileField.fieldName}_${Date.now()}_${Math.floor(Math.random() * 10000)}.jpg`;
+            const savedPath = await saveFile(resizedImage, fieldTenantPath, fileName);
+
+            // ✅ Get description from body using index
+            const descriptionKey = `description_${fileField.fieldName}_${i}`;
+            const description = req.body[descriptionKey] || "No description";
+
+            savedPaths.push({
+              path: savedPath,
+              description: description,
+            });
           }
 
-          // ✅ Store paths in body
+          // ✅ Store structured data in req.body
           if (fileField.multiple) {
-            req.body[fileField.fieldName] = savedPaths; // Array of paths
+            req.body[fileField.fieldName] = savedPaths; // array of { path, description }
           } else {
-            req.body[fileField.fieldName] = savedPaths[0]; // Single path
+            req.body[fileField.fieldName] = savedPaths[0]; // single object { path, description }
           }
 
           uploadedFiles[fileField.fieldName] = savedPaths;
@@ -84,11 +91,12 @@ const uploadFileMiddleware = (options) => {
       }
 
       console.log("Uploaded files:", uploadedFiles);
+      next();
+
     } catch (error) {
       console.error("Error uploading files:", error);
-      return next(error);
+      return res.status(500).json({ message: "Internal Server Error" });
     }
-    next();
   };
 };
 

@@ -148,8 +148,8 @@ const updateClinicIdAndNameAndAddress=async(tenantId,clinicId,clinic_name,clinic
     conn.release();
   }
 }
-const updateNullClinicInfoWithJoin = async (tenantId, dentistId, clinicId) => {
-
+const updateNullClinicInfoWithJoin = async (tenantId, clinicId,dentistId) => {
+console.log(tenantId,dentistId,clinicId)
   const query = `
     UPDATE dentist d
     JOIN clinic c ON d.clinic_id = c.clinic_id AND d.tenant_id = c.tenant_id
