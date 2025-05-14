@@ -65,6 +65,7 @@ const dentistFieldMap = {
   insurance_supported: parseBoolean,
 
   awards_certifications: safeStringify, // or keep as raw string if needed
+  member_of:safeStringify,
 
   last_login: (val) => val || null,
   duration:(val)=>val || null,
@@ -128,7 +129,8 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
     "languages_spoken",
     "social_links",
     "awards_certifications",
-    "duration"
+    "duration",
+    "member_of"
   ];
   const booleanFields = ["teleconsultation_supported", "insurance_supported"];
 
@@ -167,7 +169,8 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
     "bio",
     "languages_spoken",
     "social_links",
-    "duration"
+    "duration",
+    "member_of"
   ];
   const booleanFields = ["teleconsultation_supported", "insurance_supported"];
 
@@ -239,8 +242,6 @@ const getAllDentistsByTenantIdAndClinicId = async (
         offset
       );
     });
-
-    console.log("dentists:", dentists);
 
     const parsed = decodeJsonFields(dentists, jsonFields);
     return parsed;

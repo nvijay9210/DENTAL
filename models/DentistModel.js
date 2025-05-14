@@ -149,6 +149,7 @@ const updateClinicIdAndNameAndAddress=async(tenantId,clinicId,clinic_name,clinic
   }
 }
 const updateNullClinicInfoWithJoin = async (tenantId, dentistId, clinicId) => {
+
   const query = `
     UPDATE dentist d
     JOIN clinic c ON d.clinic_id = c.clinic_id AND d.tenant_id = c.tenant_id
@@ -174,6 +175,26 @@ const updateNullClinicInfoWithJoin = async (tenantId, dentistId, clinicId) => {
   }
 };
 
+const checkDentistExistsUsingTenantIdAndClinicIdAnddentistId = async (dentistId,tenantId, clinicId) => {
+  const query = `
+    SELECT 1
+    FROM dentist
+    WHERE dentist_id=? AND tenant_id = ? AND clinic_id = ? LIMIT 1
+  `;
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute(query, [dentistId,tenantId, clinicId]);
+    
+    return rows.length>0;
+  } catch (error) {
+    console.error("Error in checkDentistExistsUsingTenantIdAndClinicIdAnddentistId:", error);
+    throw new Error("DentistId Not Exists");
+  } finally {
+    conn.release();
+  }
+};
+
 
 
 module.exports = {
@@ -186,5 +207,6 @@ module.exports = {
   getAllDentistsByTenantIdAndClinicId,
   updateClinicIdAndNameAndAddress,
   getAllDentistsByClinicId,
-  updateNullClinicInfoWithJoin
+  updateNullClinicInfoWithJoin,
+  checkDentistExistsUsingTenantIdAndClinicIdAnddentistId
 };

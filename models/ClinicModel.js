@@ -94,31 +94,9 @@ const getClinicNameAndAddressByClinicId=async(tenantId,clinicId)=>{
   }
 }
 
-// const getTotalDentistCountByClinicId = async (tenantId, clinicId) => {
-//   const query = `
-//     SELECT COUNT(*) AS total_dentists
-//     FROM clinic c
-//     JOIN dentist d ON d.clinic_id = c.clinic_id
-//     WHERE c.tenant_id = ? AND c.clinic_id = ?
-//   `;
 
-//   const conn = await pool.getConnection();
-//   try {
-//     const [rows] = await conn.execute(query, [tenantId, Number(clinicId)]);
-//     const count = rows[0]?.total_dentists || 0;
-//     console.log(`Total dentists for clinic ${clinicId} (tenant ${tenantId}):`, count);
-//     return count;
-//   } catch (error) {
-//     console.error("Error in getTotalDentistCountByClinicId:", error);
-//     throw new Error("Database Query Error");
-//   } finally {
-//     conn.release();
-//   }
-// };
-
-
-const updateDoctorCount = async (tenantId, clinicId, assign = true) => {
-  const modifier = assign === false 
+const updateDoctorCount = async (tenantId, clinicId, assign = 'true') => {
+  const modifier = assign == 'false' 
     ? 'GREATEST(total_doctors - 1, 0)' 
     : 'total_doctors + 1';
 

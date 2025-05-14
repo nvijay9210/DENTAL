@@ -10,6 +10,7 @@ const {
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
 const { recordExists } = require("../query/Records");
+const { checkDentistExistsUsingTenantIdAndClinicIdAnddentistId } = require("../models/DentistModel");
 
 const uniqueFields = ["email", "gst_number", "license_number", "pan_number"];
 
@@ -304,19 +305,37 @@ const updateClinicValidation = async (clinicId, details, tenantId) => {
   await validateClinicPhones(details, clinicId);
   await validateUniqueFields(details, true, clinicId);
 };
+
 const handleClinicAssignmentValidation = async (tenantId, clinicId, details, assign) => {
+  // Validate required fields
   if (!tenantId) throw new CustomError("tenantId is required", 400);
   if (!clinicId) throw new CustomError("clinicId is required", 400);
-  if (!Array.isArray(details?.dentist_id) || details.dentist_id.length === 0) {
+  if (!details?.dentist_id || !Array.isArray(details.dentist_id) || details.dentist_id.length === 0) {
     throw new CustomError("At least one dentistId is required", 400);
   }
   if (assign === undefined || assign === null) throw new CustomError("assign is required", 400);
 
-  await Promise.all([
+  // Normalize assign to boolean
+  const isAssignTrue = String(assign).toLowerCase() === 'true';
+
+  // Check if tenant, clinic, and all dentists exist
+  const existenceChecks = [
     checkIfExists("tenant", "tenant_id", tenantId),
     checkIfExists("clinic", "clinic_id", clinicId),
     ...details.dentist_id.map(id => checkIfExists("dentist", "dentist_id", id))
-  ]);
+  ];
+
+  await Promise.all(existenceChecks);
+
+  // If assigning, ensure dentist is NOT already assigned to this clinic
+  if (isAssignTrue) {
+    for (const id of details.dentist_id) {
+      const exists = await checkDentistExistsUsingTenantIdAndClinicIdAnddentistId(id, tenantId, clinicId);
+      if (exists) {
+        throw new CustomError('Dentist Already Exists In This Clinic', 400);
+      }
+    }
+  }
 };
 
 

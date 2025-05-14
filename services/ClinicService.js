@@ -8,7 +8,10 @@ const {
 const { decodeJsonFields } = require("../utils/Helpers");
 const helper = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
-const { updateClinicIdAndNameAndAddress, updateNullClinicInfoWithJoin } = require("../models/DentistModel");
+const {
+  updateClinicIdAndNameAndAddress,
+  updateNullClinicInfoWithJoin,
+} = require("../models/DentistModel");
 
 // -------------------- CREATE --------------------
 const createClinic = async (data) => {
@@ -65,7 +68,6 @@ const createClinic = async (data) => {
 
 // -------------------- UPDATE --------------------
 const updateClinic = async (clinicId, data, tenant_id) => {
-
   const parseBoolean = (val) => {
     if (val === true || val === "true" || val === 1 || val === "1") return 1;
     return 0;
@@ -108,7 +110,7 @@ const updateClinic = async (clinicId, data, tenant_id) => {
 
   try {
     const { columns, values } = mapFields(data, clinicFieldMap);
-    console.log(columns, "=", values);
+    
     const affectedRows = await clinicModel.updateClinic(
       clinicId,
       columns,
@@ -224,7 +226,9 @@ const handleClinicAssignment = async (
   assign = true
 ) => {
   try {
-    if (assign) {
+
+    if (assign==='true') {
+
       const clinic = await clinicModel.getClinicNameAndAddressByClinicId(
         tenantId,
         clinicId
@@ -235,7 +239,6 @@ const handleClinicAssignment = async (
         throw new CustomError("At least one dentistId is required", 400);
       }
 
-      // Update each dentist
       const updatedDentists = await Promise.all(
         dentistIds.map((dentistId) =>
           updateClinicIdAndNameAndAddress(
@@ -248,20 +251,32 @@ const handleClinicAssignment = async (
         )
       );
 
-      // Optionally: adjust doctor count based on how many added/removed
       await clinicModel.updateDoctorCount(tenantId, clinicId, assign);
+      await invalidateCacheByPattern("clinics:*");
 
-      return updatedDentists;
+      return "Dentists Added Successfully";
     } else {
-      await updateNullClinicInfoWithJoin(tenantId,dentistId,clinicId)
+      
+
+      const dentistIds = details?.dentist_id;
+      if (!Array.isArray(dentistIds) || dentistIds.length === 0) {
+        throw new CustomError("At least one dentistId is required", 400);
+      }
+
+      await Promise.all(
+        dentistIds.map((dentistId) =>
+          updateNullClinicInfoWithJoin(tenantId, clinicId, dentistId)
+        )
+      );
+
       await clinicModel.updateDoctorCount(tenantId, clinicId, assign);
-      return 
+      await invalidateCacheByPattern("clinics:*");
+
+      return "Dentists Removed Successfully";
     }
   } catch (error) {
-    throw new CustomError(
-      "Failed to update clinic assignment: " + error.message,
-      404
-    );
+    console.error("Error in handleClinicAssignment:", error);
+    throw new CustomError(`Failed to update clinic assignment: ${error.message}`, 500);
   }
 };
 

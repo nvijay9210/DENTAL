@@ -2,9 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const router = express.Router();
 const dentistController = require("../controllers/DentistController");
-const validate = require("../middlewares/validate");
 const routerPath = require("./RouterPath");
-const { UploadDentistPhoto } = require("../utils/UploadDentistPhoto");
 const { uploadFileMiddleware } = require("../utils/UploadFiles");
 const dentistValidation = require("../validations/DentistValidation");
 
