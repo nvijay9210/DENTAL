@@ -82,7 +82,7 @@ const uploadFileMiddleware = (options) => {
               const description = req.body[descriptionKey] || "No description";
 
               savedPaths.push({
-                [fileField.fieldName]: savedPath,
+                image: savedPath,
                 description: description,
               });
             } else {
