@@ -13,11 +13,14 @@ const uploadFileMiddleware = (options) => {
 
   return async (req, res, next) => {
     try {
+      // Utility: Ensure folder exists
       const ensureFolderExists = (folderPath) => {
-        if (!fs.existsSync(folderPath))
+        if (!fs.existsSync(folderPath)) {
           fs.mkdirSync(folderPath, { recursive: true });
+        }
       };
 
+      // Save file to disk and return relative path
       const saveFile = async (buffer, outputPath, fileName) => {
         ensureFolderExists(outputPath);
         const filePath = path.join(outputPath, fileName);
@@ -26,10 +29,13 @@ const uploadFileMiddleware = (options) => {
       };
 
       const uploadedFiles = {};
-
       const tenant_id = req.body.tenant_id || req.params.tenant_id;
-      const id = req.params.clinic_id || req.params.patient_id || req.params.dentist_id;
+      const id =
+        req.params.clinic_id ||
+        req.params.patient_id ||
+        req.params.dentist_id;
 
+       
       if (id) {
         console.log('update validation activated');
         await updateValidationFn(id, req.body, tenant_id);
@@ -45,6 +51,7 @@ const uploadFileMiddleware = (options) => {
         folderName
       );
 
+      // Process each file field
       for (const fileField of fileFields) {
         const files = req.files?.[fileField.fieldName] || [];
 
@@ -69,21 +76,28 @@ const uploadFileMiddleware = (options) => {
             const fileName = `${fileField.fieldName}_${Date.now()}_${Math.floor(Math.random() * 10000)}.jpg`;
             const savedPath = await saveFile(resizedImage, fieldTenantPath, fileName);
 
-            // ✅ Get description from body using index
-            const descriptionKey = `description_${fileField.fieldName}_${i}`;
-            const description = req.body[descriptionKey] || "No description";
+            // ✅ Use field name as key instead of 'path'
+            if (fileField.fieldName === "awards_certifications") {
+              const descriptionKey = `description_awards_certifications_${i}`;
+              const description = req.body[descriptionKey] || "No description";
 
-            savedPaths.push({
-              path: savedPath,
-              description: description,
-            });
+              savedPaths.push({
+                [fileField.fieldName]: savedPath,
+                description: description,
+              });
+            } else {
+              savedPaths.push({
+                [fileField.fieldName]: savedPath
+              });
+            }
           }
 
           // ✅ Store structured data in req.body
           if (fileField.multiple) {
-            req.body[fileField.fieldName] = savedPaths; // array of { path, description }
+            req.body[fileField.fieldName] = savedPaths;
           } else {
-            req.body[fileField.fieldName] = savedPaths[0]; // single object { path, description }
+            // For single files, store just the value directly
+            req.body[fileField.fieldName] = savedPaths[0]?.[fileField.fieldName];
           }
 
           uploadedFiles[fileField.fieldName] = savedPaths;
@@ -94,7 +108,7 @@ const uploadFileMiddleware = (options) => {
       next();
 
     } catch (error) {
-      console.error("Error uploading files:", error);
+      console.error("Error uploading files:", error.message);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   };
