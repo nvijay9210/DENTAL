@@ -134,6 +134,14 @@ const scanKeys = async (pattern) => {
 
 // Invalidate all cache entries matching a pattern
 const invalidateCacheByPattern = async (pattern) => {
+
+  //Only for dev not for production
+
+  if (!redisClient.isOpen || !redisConnected) {
+    console.warn("🚫 Redis is disconnected – skipping cache invalidation.");
+    return;
+  }
+
   console.log('patterns:',pattern)
   try {
     const keys = await scanKeys(pattern);
