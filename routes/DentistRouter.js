@@ -41,7 +41,8 @@ const dentistFileMiddleware = uploadFileMiddleware({
 // Add Dentist
 router.post(
   routerPath.ADD_DENTIST,
-  dentistUploadFields,
+  // dentistUploadFields,
+  upload.any(),
   dentistFileMiddleware,
   dentistController.createDentist
 );
@@ -66,7 +67,8 @@ router.get(
 // Update Dentist
 router.put(
   routerPath.UPDATE_DENTIST_TENANT,
-  dentistUploadFields,
+  // dentistUploadFields,
+  upload.any(),
   dentistFileMiddleware,
   dentistController.updateDentist
 );

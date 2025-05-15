@@ -35,12 +35,11 @@ const uploadFileMiddleware = (options) => {
         req.params.patient_id ||
         req.params.dentist_id;
 
-       
       if (id) {
-        console.log('update validation activated');
+        console.log("update validation activated");
         await updateValidationFn(id, req.body, tenant_id);
       } else {
-        console.log('create validation activated');
+        console.log("create validation activated");
         await createValidationFn(req.body);
       }
 
@@ -51,9 +50,10 @@ const uploadFileMiddleware = (options) => {
         folderName
       );
 
-      // Process each file field
+      // Process each file field definition
       for (const fileField of fileFields) {
-        const files = req.files?.[fileField.fieldName] || [];
+        // Filter uploaded files whose fieldname starts with this field name
+        const files = req.files?.filter(file => file.fieldname.startsWith(fileField.fieldName)) || [];
 
         if (files.length > 0) {
           const savedPaths = [];
@@ -69,14 +69,17 @@ const uploadFileMiddleware = (options) => {
               });
             }
 
-            // ✅ Save file
+            // ✅ Compress Image
             const resizedImage = await compressImage(file.buffer, 100);
-            const fieldTenantPath = path.join(baseTenantPath, fileField.subFolder);
 
-            const fileName = `${fileField.fieldName}_${Date.now()}_${Math.floor(Math.random() * 10000)}.jpg`;
+            // ✅ Construct File Path
+            const fieldTenantPath = path.join(baseTenantPath, fileField.subFolder);
+            const originalFileName = path.parse(file.originalname).name;
+            const extension = path.extname(file.originalname).toLowerCase();
+            const fileName = `${originalFileName}_${Date.now()}_${Math.floor(Math.random() * 10000)}${extension}`;
             const savedPath = await saveFile(resizedImage, fieldTenantPath, fileName);
 
-            // ✅ Use field name as key instead of 'path'
+            // ✅ Handle Descriptions
             if (fileField.fieldName === "awards_certifications") {
               const descriptionKey = `description_awards_certifications_${i}`;
               const description = req.body[descriptionKey] || "No description";
@@ -87,7 +90,7 @@ const uploadFileMiddleware = (options) => {
               });
             } else {
               savedPaths.push({
-                [fileField.fieldName]: savedPath
+                [fileField.fieldName]: savedPath,
               });
             }
           }
@@ -96,7 +99,6 @@ const uploadFileMiddleware = (options) => {
           if (fileField.multiple) {
             req.body[fileField.fieldName] = savedPaths;
           } else {
-            // For single files, store just the value directly
             req.body[fileField.fieldName] = savedPaths[0]?.[fileField.fieldName];
           }
 

@@ -92,8 +92,8 @@ const createDentist = async (data) => {
       columns,
       values
     );
-    await invalidateCacheByPattern("dentists:*");
-    await invalidateCacheByPattern("dentistsbyclinic:*");
+    // await invalidateCacheByPattern("dentists:*");
+    // await invalidateCacheByPattern("dentistsbyclinic:*");
     return dentistId;
   } catch (error) {
     console.error("Failed to create dentist:", error.message);
