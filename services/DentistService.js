@@ -153,14 +153,15 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
       );
     });
 
-    const parsed = decodeJsonFields(dentists, jsonFields);
-
-    parsed.forEach((d) => {
-      mapBooleanFields(d, booleanFields);
-      if (d.date_of_birth) {
-        d.date_of_birth = formatDateOnly(d.date_of_birth);
-      }
-    });
+    const parsed = decodeJsonFields(dentists, jsonFields)
+      .map(d => {
+        mapBooleanFields(d, booleanFields);
+        if (d.date_of_birth) {
+          d.date_of_birth = formatDateOnly(d.date_of_birth);
+        }
+        return d;
+      })
+      .map(flattenAwards);
 
     return parsed;
   } catch (err) {
@@ -168,6 +169,25 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
     throw new CustomError("Database error while fetching dentists", 500);
   }
 };
+
+function flattenAwards(dentist) {
+  const flattened = {};
+
+  if (Array.isArray(dentist.awards_certifications)) {
+    dentist.awards_certifications.forEach((cert, index) => {
+      flattened[`awards_certifications_${index}`] = cert.image || "";
+      flattened[`description_awards_certifications_${index}`] = cert.description || "";
+    });
+  }
+
+  // Remove original field if not needed
+  delete dentist.awards_certifications;
+
+  return {
+    ...dentist,
+    ...flattened
+  };
+}
 
 // -------------------- GET SINGLE --------------------
 const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
@@ -195,7 +215,8 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
 
     await decodeJsonFields([dentist], jsonFields);
     mapBooleanFields(dentist, booleanFields);
-    return dentist;
+    flattenAwards(dentist);
+    return {...dentist,flattenAwards};
   } catch (error) {
     throw new CustomError(`Failed to get dentist: ${error.message}`, 404);
   }
@@ -242,7 +263,8 @@ const getAllDentistsByTenantIdAndClinicId = async (
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = `dentistsbyclinic:${tenantId}:page:${page}:limit:${limit}`;
-  const jsonFields = ["specialization"];
+  const jsonFields = ["specialization", "awards_certifications"]; // ✅ Added awards
+
   try {
     const dentists = await getOrSetCache(cacheKey, async () => {
       return await dentistModel.getAllDentistsByTenantIdAndClinicId(
@@ -253,7 +275,11 @@ const getAllDentistsByTenantIdAndClinicId = async (
       );
     });
 
-    const parsed = decodeJsonFields(dentists, jsonFields);
+    const parsed = decodeJsonFields(dentists, jsonFields).map(dentist => {
+      // ✅ Optionally flatten for form use
+      return flattenAwards(dentist);
+    });
+
     return parsed;
   } catch (error) {
     throw new CustomError(

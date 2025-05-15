@@ -56,8 +56,6 @@ function validateInput(userInput, columnConfig) {
     throw new CustomError("No input provided", 400);
   }
 
-  console.log('userinput:',userInput)
-
   const sanitizedData = {};
 
   for (const column of columnConfig) {
@@ -71,7 +69,6 @@ function validateInput(userInput, columnConfig) {
     } = column;
 
     let value = userInput[columnname];
-    console.log('value:',columnname,value,typeof value,isNullable,typeof isNullable)
 
     // Skip empty/undefined if nullable
     if (

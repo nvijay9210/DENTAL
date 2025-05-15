@@ -10,10 +10,10 @@ const dentistValidation = require("../validations/DentistValidation");
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Common upload fields
-const dentistUploadFields = upload.fields([
-  { name: "profile_picture", maxCount: 1 },
-  { name: "awards_certifications", maxCount: 10 },
-]);
+// const dentistUploadFields = upload.fields([
+//   { name: "profile_picture", maxCount: 1 },
+//   { name: "awards_certifications", maxCount: 10 },
+// ]);
 
 // File middleware options
 const dentistFileMiddleware = uploadFileMiddleware({

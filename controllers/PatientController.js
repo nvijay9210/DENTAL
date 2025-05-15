@@ -3,7 +3,7 @@ const patientValidation = require("../validations/PatientValidation");
 
 exports.createPatient = async (req, res, next) => {
   const details = req.body;
-  console.log(details)
+
   try {
     // Validate patient data
     await patientValidation.createPatientValidation(details);
