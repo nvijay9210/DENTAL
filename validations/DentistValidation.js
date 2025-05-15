@@ -19,8 +19,20 @@ const validateTenant = async (tenantId) => {
 
 const createColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },
-  { columnname: "first_name", type: "varchar", size: 50, null: false,pattern:/^[a-zA-Z\s]{2,50}$/},
-  { columnname: "last_name", type: "varchar", size: 50, null: false,pattern:/^[a-zA-Z\s]{2,50}$/},
+  {
+    columnname: "first_name",
+    type: "varchar",
+    size: 50,
+    null: false,
+    pattern: /^[a-zA-Z\s]{2,50}$/,
+  },
+  {
+    columnname: "last_name",
+    type: "varchar",
+    size: 50,
+    null: false,
+    pattern: /^[a-zA-Z\s]{2,50}$/,
+  },
   { columnname: "gender", type: "varchar", size: 10, null: true },
   { columnname: "date_of_birth", type: "date", null: true },
   {
@@ -56,7 +68,7 @@ const createColumnConfig = [
     type: "varchar",
     size: 10,
     null: false,
-    pattern:  /^[A-Z]{2}[0-9]{4}[A-Z]{2}[0-9]{2}$/,
+    pattern: /^[A-Z]{2}[0-9]{4}[A-Z]{2}[0-9]{2}$/,
   },
   {
     columnname: "qualifications",
@@ -69,7 +81,13 @@ const createColumnConfig = [
   { columnname: "city", type: "varchar", size: 100, null: false },
   { columnname: "state", type: "varchar", size: 100, null: false },
   { columnname: "country", type: "varchar", size: 50, null: false },
-  { columnname: "pin_code", type: "varchar", size: 10, null: false,pattern:/^\d{6}$/ },
+  {
+    columnname: "pin_code",
+    type: "varchar",
+    size: 10,
+    null: false,
+    pattern: /^\d{6}$/,
+  },
   { columnname: "working_hours", type: "text", null: true, data_type: "json" },
   { columnname: "available_days", type: "text", null: true, data_type: "json" },
   { columnname: "consultation_fee", type: "decimal", size: "10,2", null: true },
@@ -96,12 +114,12 @@ const createColumnConfig = [
     null: true,
     data_type: "json",
   },
-  {
-    columnname: "awards_certifications",
-    type: "varchar",
-    size: 255,
-    null: true,
-  },
+  // {
+  //   columnname: "awards_certifications",
+  //   type: "text",
+  //   size: 255,
+  //   null: true,
+  // },
   { columnname: "social_links", type: "text", null: true, data_type: "json" },
   { columnname: "last_login", type: "timestamp", null: true },
   { columnname: "created_by", type: "varchar", size: 20, null: false },
@@ -109,8 +127,20 @@ const createColumnConfig = [
 
 const updateColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },
-  { columnname: "first_name", type: "varchar", size: 50, null: false,pattern:/^[a-zA-Z\s]{2,50}$/ },
-  { columnname: "last_name", type: "varchar", size: 50, null: false,pattern:/^[a-zA-Z\s]{2,50}$/ },
+  {
+    columnname: "first_name",
+    type: "varchar",
+    size: 50,
+    null: false,
+    pattern: /^[a-zA-Z\s]{2,50}$/,
+  },
+  {
+    columnname: "last_name",
+    type: "varchar",
+    size: 50,
+    null: false,
+    pattern: /^[a-zA-Z\s]{2,50}$/,
+  },
   { columnname: "gender", type: "varchar", size: 10, null: true },
   { columnname: "date_of_birth", type: "date", null: true },
   {
@@ -146,7 +176,7 @@ const updateColumnConfig = [
     type: "varchar",
     size: 10,
     null: false,
-    pattern:  /^[A-Z]{2}[0-9]{4}[A-Z]{2}[0-9]{2}$/,
+    pattern: /^[A-Z]{2}[0-9]{4}[A-Z]{2}[0-9]{2}$/,
   },
   {
     columnname: "qualifications",
@@ -159,7 +189,13 @@ const updateColumnConfig = [
   { columnname: "city", type: "varchar", size: 100, null: false },
   { columnname: "state", type: "varchar", size: 100, null: false },
   { columnname: "country", type: "varchar", size: 50, null: false },
-  { columnname: "pin_code", type: "varchar", size: 10, null: false,pattern:/^\d{6}$/ },
+  {
+    columnname: "pin_code",
+    type: "varchar",
+    size: 10,
+    null: false,
+    pattern: /^\d{6}$/,
+  },
   { columnname: "working_hours", type: "text", null: true, data_type: "json" },
   { columnname: "available_days", type: "text", null: true, data_type: "json" },
   { columnname: "consultation_fee", type: "decimal", size: "10,2", null: true },
@@ -188,7 +224,7 @@ const updateColumnConfig = [
   },
   {
     columnname: "awards_certifications",
-    type: "varchar",
+    type: "text",
     size: 255,
     null: true,
   },
@@ -261,6 +297,7 @@ const validateUniqueFields = async (
 
 // Create Dentist Validation
 const createDentistValidation = async (details) => {
+
   validateInput(details, createColumnConfig);
   await checkTenantExistsByTenantIdValidation(details.tenant_id);
   await validateDentistPhones(details);
@@ -269,7 +306,7 @@ const createDentistValidation = async (details) => {
 
 // Update Dentist Validation
 const updateDentistValidation = async (dentistId, details, tenant_id) => {
-  console.log("DentistRouter:", details);
+
   validateInput(details, updateColumnConfig);
   await validateTenant(tenant_id);
   // await checkIfIdExists('clinic','clinic_id',details.clinic_id||0)

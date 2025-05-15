@@ -26,16 +26,25 @@ function safeStringify(val) {
   }
 }
 
+function sanitizeValue(value) {
+  return ['null', '', undefined, NaN].includes(value) ? null : value;
+}
+
 const dentistFieldMap = {
   tenant_id: (val) => val,
-  clinic_id: (val) => val,
+  clinic_id: (val) => sanitizeValue(val),
   first_name: (val) => val,
   last_name: (val) => val,
   gender: (val) => val,
-  date_of_birth: (val) => val,
-  email: (val) => val,
+  date_of_birth: (val) => {
+    if (val === 'null' || !val) return null;
+    // Optional: validate date format
+    const date = new Date(val);
+    return isNaN(date.getTime()) ? null : date;
+  },
+  email: (val) => sanitizeValue(val),
   phone_number: (val) => val,
-  alternate_phone_number: (val) => val,
+  alternate_phone_number: (val) => sanitizeValue(val),
 
   specialization: safeStringify,
   qualifications: safeStringify,
@@ -45,33 +54,34 @@ const dentistFieldMap = {
   bio: safeStringify,
   social_links: safeStringify,
 
-  experience_years: (val) => val,
+  experience_years: (val) => parseInt(val) || 0,
   license_number: (val) => val,
-  clinic_name: (val) => val,
-  clinic_address: (val) => val,
+  clinic_name: (val) => sanitizeValue(val),
+  clinic_address: (val) => sanitizeValue(val),
   city: (val) => val,
   state: (val) => val,
   country: (val) => val,
   pin_code: (val) => val,
 
-  consultation_fee: (val) => val || 0,
-  ratings: (val) => val || 0,
-  reviews_count: (val) => val || 0,
-  appointment_count: (val) => val || 0,
+  consultation_fee: (val) => parseFloat(val) || 0,
+  ratings: (val) => parseFloat(val) || 0,
+  reviews_count: (val) => parseInt(val) || 0,
+  appointment_count: (val) => parseInt(val) || 0,
 
-  profile_picture: (val) => val || null,
+  profile_picture: (val) => sanitizeValue(val),
 
   teleconsultation_supported: parseBoolean,
   insurance_supported: parseBoolean,
 
-  awards_certifications: safeStringify, // or keep as raw string if needed
-  member_of:safeStringify,
+  awards_certifications: safeStringify,
+  member_of: safeStringify,
 
-  last_login: (val) => val || null,
-  duration:(val)=>val || null,
+  last_login: (val) => sanitizeValue(val),
+  duration: (val) => sanitizeValue(val),
   created_by: (val) => val,
-  updated_by: (val) => val || null,
+  updated_by: (val) => sanitizeValue(val),
 };
+
 
 // -------------------- CREATE --------------------
 const createDentist = async (data) => {

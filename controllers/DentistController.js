@@ -4,7 +4,7 @@ const dentistValidation = require("../validations/DentistValidation");
 
 exports.createDentist = async (req, res, next) => {
   const details = req.body;
-  console.log('details:', details);
+ 
   try {
     await dentistValidation.createDentistValidation(details);
 
@@ -42,7 +42,7 @@ exports.getDentistByTenantIdAndDentistId = async (req, res, next) => {
 exports.updateDentist = async (req, res, next) => {
   const { dentist_id, tenant_id } = req.params;
   const details = req.body;
-  console.log('details:', details);
+  
   try {
     await dentistValidation.updateDentistValidation(dentist_id, details, tenant_id);
 
@@ -69,7 +69,7 @@ exports.deleteDentistByTenantIdAndDentistId = async (req, res, next) => {
 exports.getAllDentistByTenantIdAndClientId = async (req, res, next) => {
   const { tenant_id,clinic_id } = req.params;
   const { page, limit } = req.query;
-  console.log(tenant_id,clinic_id,page,limit)
+
   try {
     const dentists = await dentistService.getAllDentistsByTenantIdAndClinicId(tenant_id,clinic_id, page, limit);
     res.status(200).json(dentists);
