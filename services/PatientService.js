@@ -47,7 +47,7 @@ const createPatient = async (data) => {
     return patientId;
   } catch (error) {
     console.trace(error);
-    throw new CustomError(`Failed to create patient: ${error.message}`, 500);
+    throw new CustomError(`Failed to create patient: ${error.message}`, 404);
   }
 };
 
@@ -92,7 +92,7 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
     return patients;
   } catch (error) {
     console.error(error);
-    throw new CustomError("Database error while fetching patients", 500);
+    throw new CustomError("Database error while fetching patients", 404);
   }
 };
 
@@ -104,7 +104,7 @@ const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
     const fieldsToDecode = ["emergency_contact", "pre_history", "treatment_history"];
     return decodeJsonFields(patient, fieldsToDecode);
   } catch (error) {
-    throw new CustomError("Failed to get patient: " + error.message, 500);
+    throw new CustomError("Failed to get patient: " + error.message, 404);
   }
 };
 
@@ -113,7 +113,7 @@ const checkPatientExistsByTenantIdAndPatientId = async (tenantId, patientId) => 
   try {
     return await patientModel.checkPatientExistsByTenantIdAndPatientId(tenantId, patientId);
   } catch (error) {
-    throw new CustomError("Failed to check patient: " + error.message, 500);
+    throw new CustomError("Failed to check patient: " + error.message, 404);
   }
 };
 
@@ -156,7 +156,7 @@ const updatePatient = async (patientId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update patient", 500);
+    throw new CustomError("Failed to update patient", 404);
   }
 };
 
@@ -171,7 +171,7 @@ const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
     await invalidateCacheByPattern("patients:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete patient: ${error.message}`, 500);
+    throw new CustomError(`Failed to delete patient: ${error.message}`, 404);
   }
 };
 

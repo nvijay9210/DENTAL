@@ -154,11 +154,10 @@ const createStatusTypeSubTable = async () => {
 };
 
 const createAssetTable = async () => {
-  const query = assetQuery.createTable;
+  const query =  assetQuery.createTable;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
-    await addStatusTypeTableData()
     console.log("Asset table created successfully.");
   } catch (error) {
     console.error("Error creating Asset table:", error);

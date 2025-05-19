@@ -30,7 +30,7 @@ const createStatusTypeSub = async (data) => {
     console.error("Failed to create statusTypeSub:", error);
     throw new CustomError(
       `Failed to create statusTypeSub: ${error.message}`,
-      500
+      404
     );
   }
 };
@@ -57,7 +57,7 @@ const getAllStatusTypeSubsByTenantId = async (
     return statusTypeSubs;
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
-    throw new CustomError("Failed to fetch statusTypeSubs", 500);
+    throw new CustomError("Failed to fetch statusTypeSubs", 404);
   }
 };
 const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
@@ -83,7 +83,7 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
     return statusTypeSubs;
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
-    throw new CustomError("Failed to fetch statusTypeSubs", 500);
+    throw new CustomError("Failed to fetch statusTypeSubs", 404);
   }
 };
 
@@ -111,7 +111,7 @@ const getAllStatusTypeSubByStatusTypeAndTenantId = async (
     return statusTypeSubs;
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
-    throw new CustomError("Failed to fetch statusTypeSubs", 500);
+    throw new CustomError("Failed to fetch statusTypeSubs", 404);
   }
 };
 
@@ -128,7 +128,7 @@ const getStatusTypeSubByTenantIdAndStatusTypeSubId = async (
       );
     return statusTypeSub;
   } catch (error) {
-    throw new CustomError("Failed to get statusTypeSub: " + error.message, 500);
+    throw new CustomError("Failed to get statusTypeSub: " + error.message, 404);
   }
 };
 
@@ -159,7 +159,7 @@ const updateStatusTypeSub = async (statusTypeSubId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update statusTypeSub", 500);
+    throw new CustomError("Failed to update statusTypeSub", 404);
   }
 };
 
@@ -183,7 +183,7 @@ const deleteStatusTypeSubByTenantIdAndStatusTypeSubId = async (
   } catch (error) {
     throw new CustomError(
       `Failed to delete statusTypeSub: ${error.message}`,
-      500
+      404
     );
   }
 };

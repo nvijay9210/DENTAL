@@ -50,7 +50,7 @@ const createTreatment = async (data) => {
     return treatmentId;
   } catch (error) {
     console.error("Failed to create treatment:", error);
-    throw new CustomError(`Failed to create treatment: ${error.message}`, 500);
+    throw new CustomError(`Failed to create treatment: ${error.message}`, 404);
   }
 };
 
@@ -74,7 +74,7 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
     return helper.decodeJsonFields(treatments, jsonFields);
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
-    throw new CustomError("Failed to fetch treatments", 500);
+    throw new CustomError("Failed to fetch treatments", 404);
   }
 };
 
@@ -107,7 +107,7 @@ const getAllTreatmentsByTenantAndPatientId = async (tenantId,patientId, page = 1
     }));
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
-    throw new CustomError("Failed to fetch treatments", 500);
+    throw new CustomError("Failed to fetch treatments", 404);
   }
 };
 
@@ -121,7 +121,7 @@ const getTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {
     const fieldsToDecode = ["description", "diagnosis", "notes"];
     return decodeJsonFields(treatment, fieldsToDecode);
   } catch (error) {
-    throw new CustomError("Failed to get treatment: " + error.message, 500);
+    throw new CustomError("Failed to get treatment: " + error.message, 404);
   }
 };
 
@@ -170,7 +170,7 @@ const updateTreatment = async (treatmentId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update treatment", 500);
+    throw new CustomError("Failed to update treatment", 404);
   }
 };
 
@@ -193,7 +193,7 @@ const deleteTreatmentByTenantIdAndTreatmentId = async (
     await invalidateCacheByPattern("treatment_patient:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete treatment: ${error.message}`, 500);
+    throw new CustomError(`Failed to delete treatment: ${error.message}`, 404);
   }
 };
 

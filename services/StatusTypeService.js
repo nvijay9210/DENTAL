@@ -27,7 +27,7 @@ const createStatusType = async (data) => {
     return statusTypeId;
   } catch (error) {
     console.error("Failed to create statusType:", error);
-    throw new CustomError(`Failed to create statusType: ${error.message}`, 500);
+    throw new CustomError(`Failed to create statusType: ${error.message}`, 404);
   }
 };
 
@@ -49,7 +49,7 @@ const getAllStatusTypesByTenantId = async (page = 1, limit = 10) => {
     return statusTypes
   } catch (err) {
     console.error("Database error while fetching statusTypes:", err);
-    throw new CustomError("Failed to fetch statusTypes", 500);
+    throw new CustomError("Failed to fetch statusTypes", 404);
   }
 };
 
@@ -61,7 +61,7 @@ const getStatusTypeByStatusTypeId = async ( statusTypeId) => {
     );
     return statusType;
   } catch (error) {
-    throw new CustomError("Failed to get statusType: " + error.message, 500);
+    throw new CustomError("Failed to get statusType: " + error.message, 404);
   }
 };
 
@@ -91,7 +91,7 @@ const updateStatusType = async (statusTypeId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update statusType", 500);
+    throw new CustomError("Failed to update statusType", 404);
   }
 };
 
@@ -114,7 +114,7 @@ const deleteStatusTypeByTenantIdAndStatusTypeId = async (
     await invalidateCacheByPattern("statusType_patient:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete statusType: ${error.message}`, 500);
+    throw new CustomError(`Failed to delete statusType: ${error.message}`, 404);
   }
 };
 

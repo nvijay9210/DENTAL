@@ -40,13 +40,12 @@ const createAsset = async (data) => {
       values
     );
     await invalidateCacheByPattern("asset:*");
-    await invalidateCacheByPattern("assetByPatientId:*");
     return assetId;
   } catch (error) {
     console.error("Failed to create asset:", error);
     throw new CustomError(
       `Failed to create asset: ${error.message}`,
-      500
+      404
     );
   }
 };
@@ -75,46 +74,7 @@ const getAllAssetsByTenantId = async (
     return helper.decodeJsonFields(assets, jsonFields);
   } catch (err) {
     console.error("Database error while fetching assets:", err);
-    throw new CustomError("Failed to fetch assets", 500);
-  }
-};
-
-const getAllAssetsByTenantAndPatientId = async (
-  tenantId,
-  patientId,
-  page = 1,
-  limit = 10
-) => {
-  const offset = (page - 1) * limit;
-  const cacheKey = `assetByPatientId:${tenantId}:page:${page}:limit:${limit}`;
-
-  const jsonFields = ["medication", "side_effects", "instructions", "notes"];
-  const booleanFields = ["refill_allowed", "is_active"];
-
-  try {
-    const assets = await getOrSetCache(cacheKey, async () => {
-      const result =
-        await assetModel.getAllAssetsByTenantAndPatientId(
-          tenantId,
-          patientId,
-          Number(limit),
-          offset
-        );
-      return result;
-    });
-
-    const parsed = helper.decodeJsonFields(assets, jsonFields);
-    parsed.forEach(async(p) => {
-      helper.mapBooleanFields(p, booleanFields);
-    });
-    return parsed.map((p) => ({
-      ...p,
-      start_date: formatDateOnly(p.start_date),
-      end_date: formatDateOnly(p.end_date),
-    }));
-  } catch (err) {
-    console.error("Database error while fetching assets:", err);
-    throw new CustomError("Failed to fetch assets", 500);
+    throw new CustomError("Failed to fetch assets", 404);
   }
 };
 
@@ -137,7 +97,7 @@ const getAssetByTenantIdAndAssetId = async (
     ];
     return decodeJsonFields(asset, fieldsToDecode);
   } catch (error) {
-    throw new CustomError("Failed to get asset: " + error.message, 500);
+    throw new CustomError("Failed to get asset: " + error.message, 404);
   }
 };
 
@@ -172,11 +132,10 @@ const updateAsset = async (assetId, data, tenant_id) => {
     }
 
     await invalidateCacheByPattern("asset:*");
-    await invalidateCacheByPattern("assetByPatientId:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update asset", 500);
+    throw new CustomError("Failed to update asset", 404);
   }
 };
 
@@ -196,12 +155,11 @@ const deleteAssetByTenantIdAndAssetId = async (
     }
 
     await invalidateCacheByPattern("asset:*");
-    await invalidateCacheByPattern("assetByPatientId:*");
     return affectedRows;
   } catch (error) {
     throw new CustomError(
       `Failed to delete asset: ${error.message}`,
-      500
+      404
     );
   }
 };

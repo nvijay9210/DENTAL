@@ -53,7 +53,7 @@ const createPrescription = async (data) => {
     console.error("Failed to create prescription:", error);
     throw new CustomError(
       `Failed to create prescription: ${error.message}`,
-      500
+      404
     );
   }
 };
@@ -82,7 +82,7 @@ const getAllPrescriptionsByTenantId = async (
     return helper.decodeJsonFields(prescriptions, jsonFields);
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
-    throw new CustomError("Failed to fetch prescriptions", 500);
+    throw new CustomError("Failed to fetch prescriptions", 404);
   }
 };
 
@@ -121,7 +121,7 @@ const getAllPrescriptionsByTenantAndPatientId = async (
     }));
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
-    throw new CustomError("Failed to fetch prescriptions", 500);
+    throw new CustomError("Failed to fetch prescriptions", 404);
   }
 };
 
@@ -144,7 +144,7 @@ const getPrescriptionByTenantIdAndPrescriptionId = async (
     ];
     return decodeJsonFields(prescription, fieldsToDecode);
   } catch (error) {
-    throw new CustomError("Failed to get prescription: " + error.message, 500);
+    throw new CustomError("Failed to get prescription: " + error.message, 404);
   }
 };
 
@@ -190,7 +190,7 @@ const updatePrescription = async (prescriptionId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update prescription", 500);
+    throw new CustomError("Failed to update prescription", 404);
   }
 };
 
@@ -215,7 +215,7 @@ const deletePrescriptionByTenantIdAndPrescriptionId = async (
   } catch (error) {
     throw new CustomError(
       `Failed to delete prescription: ${error.message}`,
-      500
+      404
     );
   }
 };

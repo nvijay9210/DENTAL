@@ -97,7 +97,7 @@ const createDentist = async (data) => {
     return dentistId;
   } catch (error) {
     console.error("Failed to create dentist:", error.message);
-    throw new CustomError(`Failed to create dentist: ${error.message}`, 500);
+    throw new CustomError(`Failed to create dentist: ${error.message}`, 404);
   }
 };
 
@@ -121,7 +121,7 @@ const updateDentist = async (dentistId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Failed to update dentist:", error.message);
-    throw new CustomError(`Failed to update dentist: ${error.message}`, 500);
+    throw new CustomError(`Failed to update dentist: ${error.message}`, 404);
   }
 };
 
@@ -166,7 +166,7 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
     return parsed;
   } catch (err) {
     console.error("Database error while fetching dentists:", err.message);
-    throw new CustomError("Database error while fetching dentists", 500);
+    throw new CustomError("Database error while fetching dentists", 404);
   }
 };
 
@@ -233,7 +233,7 @@ const deleteDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
     await invalidateCacheByPattern("dentistsbyclinic:*");
     return result;
   } catch (error) {
-    throw new CustomError(`Failed to delete dentist: ${error.message}`, 500);
+    throw new CustomError(`Failed to delete dentist: ${error.message}`, 404);
   }
 };
 
@@ -250,7 +250,7 @@ const checkDentistExistsByTenantIdAndDentistId = async (
   } catch (error) {
     throw new CustomError(
       `Failed to check dentist existence: ${error.message}`,
-      500
+      404
     );
   }
 };
@@ -284,7 +284,7 @@ const getAllDentistsByTenantIdAndClinicId = async (
   } catch (error) {
     throw new CustomError(
       `Failed to check dentist existence: ${error.message}`,
-      500
+      404
     );
   }
 };
@@ -298,7 +298,7 @@ const updateClinicIdAndNameAndAddress = async (tenantId,clinicId,clinic_name,cli
     await invalidateCacheByPattern("dentistsbyclinic:*");
     return result;
   } catch (error) {
-    throw new CustomError(`Failed to delete dentist: ${error.message}`, 500);
+    throw new CustomError(`Failed to delete dentist: ${error.message}`, 404);
   }
 };
 
@@ -311,7 +311,7 @@ const updateNullClinicInfoWithJoin = async (tenantId,clinicId, dentistId) => {
     await invalidateCacheByPattern("dentistsbyclinic:*");
     return result;
   } catch (error) {
-    throw new CustomError(`Failed to delete dentist: ${error.message}`, 500);
+    throw new CustomError(`Failed to delete dentist: ${error.message}`, 404);
   }
 };
 

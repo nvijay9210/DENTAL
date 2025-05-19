@@ -1,6 +1,6 @@
 const assetQuery = {
     createTable: `
-      CREATE TABLE IF NOT EXISTS statustype (
+      CREATE TABLE IF NOT EXISTS asset (
     asset_id int(11) NOT NULL AUTO_INCREMENT,
     tenant_id int(6) NOT NULL,
     asset_name varchar(100) NOT NULL,

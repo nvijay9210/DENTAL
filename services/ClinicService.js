@@ -236,7 +236,7 @@ const handleClinicAssignment = async (
 
       const dentistIds = details?.dentist_id;
       if (!Array.isArray(dentistIds) || dentistIds.length === 0) {
-        throw new CustomError("At least one dentistId is required", 400);
+        throw new CustomError("At least one dentistId is required", 404);
       }
 
       const updatedDentists = await Promise.all(
@@ -259,7 +259,7 @@ const handleClinicAssignment = async (
 
       const dentistIds = details?.dentist_id;
       if (!Array.isArray(dentistIds) || dentistIds.length === 0) {
-        throw new CustomError("At least one dentistId is required", 400);
+        throw new CustomError("At least one dentistId is required", 404);
       }
 
       await Promise.all(
@@ -275,7 +275,7 @@ const handleClinicAssignment = async (
     }
   } catch (error) {
     console.error("Error in handleClinicAssignment:", error);
-    throw new CustomError(`Failed to update clinic assignment: ${error.message}`, 500);
+    throw new CustomError(`Failed to update clinic assignment: ${error.message}`, 404);
   }
 };
 
