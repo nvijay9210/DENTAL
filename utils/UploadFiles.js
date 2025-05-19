@@ -35,13 +35,13 @@ const uploadFileMiddleware = (options) => {
         req.params.patient_id ||
         req.params.dentist_id;
 
-      if (id) {
-        console.log("update validation activated");
-        await updateValidationFn(id, req.body, tenant_id);
-      } else {
-        console.log("create validation activated");
-        await createValidationFn(req.body);
-      }
+      // if (id) {
+      //   console.log("update validation activated");
+      //   await updateValidationFn(id, req.body, tenant_id);
+      // } else {
+      //   console.log("create validation activated");
+      //   await createValidationFn(req.body);
+      // }
 
       const baseTenantPath = path.join(
         path.dirname(__dirname),
@@ -111,7 +111,7 @@ const uploadFileMiddleware = (options) => {
 
     } catch (error) {
       console.error("Error uploading files:", error.message);
-      return res.status(500).json({ message: "Internal Server Error" });
+      return res.status(500).json({ message: error.message});
     }
   };
 };

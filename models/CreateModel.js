@@ -7,6 +7,9 @@ const { patientQuery } = require("../query/PatientQuery");
 const { appointmentQuery } = require("../query/AppoinmentQuery");
 const { treatmentQuery } = require("../query/TreatmentQuery");
 const { prescriptionQuery } = require("../query/PrescriptionQuery");
+const { statusTypeQuery } = require("../query/StatusType");
+const { statusTypeSubQuery } = require("../query/StatusTypeSub");
+const { assetQuery } = require("../query/AssetQuery");
 
 const createTenantTable = async () => {
   const query = tenantQuery.createTenantTable;
@@ -117,6 +120,56 @@ const createPrescriptionTable = async () => {
   }
 };
 
+const createStatusTypeTable = async () => {
+  const query = statusTypeQuery.createTable;
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("statusType table created successfully.");
+  } catch (error) {
+    console.error("Error creating statusType table:", error);
+    throw new Error(
+      "Database error occurred while creating the statusType table."
+    );
+  } finally {
+    conn.release();
+  }
+};
+
+const createStatusTypeSubTable = async () => {
+  const query = statusTypeSubQuery.createTable;
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    await addStatusTypeTableData()
+    console.log("StatusTypeSub table created successfully.");
+  } catch (error) {
+    console.error("Error creating StatusTypeSub table:", error);
+    throw new Error(
+      "Database error occurred while creating the StatusTypeSub table."
+    );
+  } finally {
+    conn.release();
+  }
+};
+
+const createAssetTable = async () => {
+  const query = assetQuery.createTable;
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    await addStatusTypeTableData()
+    console.log("Asset table created successfully.");
+  } catch (error) {
+    console.error("Error creating Asset table:", error);
+    throw new Error(
+      "Database error occurred while creating the Asset table."
+    );
+  } finally {
+    conn.release();
+  }
+};
+
 const createUserTable = async () => {
   const query = userQuery.createUserTable;
   const conn = await pool.getConnection();
@@ -131,6 +184,29 @@ const createUserTable = async () => {
   }
 };
 
+async function addStatusTypeTableData() {
+  const conn = await pool.getConnection();
+  
+  const sql = `
+    INSERT IGNORE INTO statustype (status_type_id, Status_Type) 
+    VALUES 
+    (1, 'specialization'),
+    (2, 'qualifications'),
+    (3, 'languages_spoken'),
+    (4, 'treatement_type'),
+    (5, 'treatement_status')
+  `;
+
+  try {
+    await conn.query(sql);
+    console.log("StatusType data added successfully");
+  } catch (err) {
+    console.error("Error inserting data:", err.message);
+  } finally {
+    if (conn) conn.release();
+  }
+}
+
 module.exports = {
   createTenantTable,
   createClinicTable,
@@ -139,5 +215,8 @@ module.exports = {
   createPatientTable,
   createAppointmentTable,
   createTreatmentTable,
-  createPrescriptionTable
+  createPrescriptionTable,
+  createStatusTypeTable,
+  createStatusTypeSubTable,
+  createAssetTable
 };

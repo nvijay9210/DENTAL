@@ -1,6 +1,5 @@
 const pool = require("../config/db");
 const { CustomError } = require("../middlewares/CustomeError");
-const helper = require("../utils/Helpers");
 const record = require("../query/Records");
 
 const TABLE = "prescription";
@@ -8,7 +7,6 @@ const TABLE = "prescription";
 // Create Prescription
 const createPrescription = async (table,columns, values) => {
   try {
-    await helper.sameLengthChecker(columns, values);
     const prescription = await record.createRecord(table, columns, values);
     return prescription.insertId;
   } catch (error) {

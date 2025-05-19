@@ -92,8 +92,8 @@ const createDentist = async (data) => {
       columns,
       values
     );
-    // await invalidateCacheByPattern("dentists:*");
-    // await invalidateCacheByPattern("dentistsbyclinic:*");
+    await invalidateCacheByPattern("dentists:*");
+    await invalidateCacheByPattern("dentistsbyclinic:*");
     return dentistId;
   } catch (error) {
     console.error("Failed to create dentist:", error.message);
@@ -262,7 +262,7 @@ const getAllDentistsByTenantIdAndClinicId = async (
   limit
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `dentistsbyclinic:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = `dentistsbyclinic:${tenantId}:${clinicId}:page:${page}:limit:${limit}`;
   const jsonFields = ["specialization", "awards_certifications"]; // ✅ Added awards
 
   try {
@@ -289,6 +289,32 @@ const getAllDentistsByTenantIdAndClinicId = async (
   }
 };
 
+const updateClinicIdAndNameAndAddress = async (tenantId,clinicId,clinic_name,clinic_addrss,dentistId) => {
+  try {
+    const result = await dentistModel.updateClinicIdAndNameAndAddress(
+      tenantId,clinicId,clinic_name,clinic_addrss,dentistId
+    );
+    await invalidateCacheByPattern("dentists:*");
+    await invalidateCacheByPattern("dentistsbyclinic:*");
+    return result;
+  } catch (error) {
+    throw new CustomError(`Failed to delete dentist: ${error.message}`, 500);
+  }
+};
+
+const updateNullClinicInfoWithJoin = async (tenantId,clinicId, dentistId) => {
+  try {
+    const result = await dentistModel.updateNullClinicInfoWithJoin(
+      tenantId, clinicId,dentistId
+    );
+    await invalidateCacheByPattern("dentists:*");
+    await invalidateCacheByPattern("dentistsbyclinic:*");
+    return result;
+  } catch (error) {
+    throw new CustomError(`Failed to delete dentist: ${error.message}`, 500);
+  }
+};
+
 module.exports = {
   createDentist,
   updateDentist,
@@ -297,4 +323,6 @@ module.exports = {
   checkDentistExistsByTenantIdAndDentistId,
   deleteDentistByTenantIdAndDentistId,
   getAllDentistsByTenantIdAndClinicId,
+  updateClinicIdAndNameAndAddress,
+  updateNullClinicInfoWithJoin
 };

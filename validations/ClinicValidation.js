@@ -1,11 +1,9 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const clinicService = require("../services/ClinicService");
 const {
-  checkPhoneNumberExists,
-  checkPhoneNumberExistsWithId,
   checkIfExists,
   checkIfExistsWithoutId,
-  checkIfIdExists,
+
 } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
@@ -19,19 +17,46 @@ const validateTenant = async (tenantId) => {
   await checkTenantExistsByTenantIdValidation(tenantId);
 };
 
+// const validateClinicPhones = async (data, clinicId = 0) => {
+//   const tenantId = data.tenant_id || data.tenantId;
+
+//   if (!tenantId) {
+//     throw new CustomError("Tenant ID is required for phone validation", 400);
+//   }
+
+//   const checker = clinicId > 0
+//     ? checkPhoneNumberExistsWithId
+//     : checkPhoneNumberExists;
+
+//   // Validate primary phone number
+//   await checker("clinic", data.phone_number, "Phone Number", clinicId, tenantId);
+
+//   // Validate alternate phone number if present
+//   if (data.alternate_phone_number) {
+//     await checker(
+//       "clinic",
+//       data.alternate_phone_number,
+//       "Alternate Phone Number",
+//       clinicId,
+//       tenantId
+//     );
+//   }
+// };
+
+
 const validateClinicPhones = async (data, clinicId = 0) => {
-  const checker =
-    clinicId > 0 ? checkPhoneNumberExistsWithId : checkPhoneNumberExists;
-  await checker("clinic", data.phone_number, "Phone Number", clinicId);
-  if (data.alternate_phone_number) {
-    await checker(
-      "clinic",
-      data.alternate_phone_number,
-      "Alternate Phone Number",
-      clinicId
-    );
+  const tenantId = data.tenant_id;
+
+  await validatePhonesGlobally(data, clinicId, "clinic", tenantId);
+
+  if (
+    data.alternate_phone_number &&
+    data.phone_number === data.alternate_phone_number
+  ) {
+    throw new CustomError("Phone and alternate phone cannot be the same", 409);
   }
 };
+
 
 const validateUniqueFields = async (
   details,

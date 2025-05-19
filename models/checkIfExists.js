@@ -1,61 +1,100 @@
 const pool = require("../config/db");
 const { CustomError } = require("../middlewares/CustomeError");
 
-/**
- * Check if a phone number exists in a table for create operation
- */
-const checkPhoneNumberExists = async (table, phone_number, field) => {
-  const conn = await pool.getConnection();
-  try {
-    const [phoneResult] = await conn.query(
-      `SELECT 1 FROM ${table} WHERE phone_number = ? LIMIT 1`,
-      [phone_number]
-    );
-    const [alternateResult] = await conn.query(
-      `SELECT 1 FROM ${table} WHERE alternate_phone_number = ? LIMIT 1`,
-      [phone_number]
-    );
 
-    if (phoneResult.length > 0 || alternateResult.length > 0) {
-      throw new CustomError(`${field} Already Exists`, 409);
+const getPhonenumberAndAlternateNumberBytenantIdAndTableId = async (table, tenantId, id) => {
+  const tableField = `${table}_id`;
+
+  // Validate table name to prevent SQL injection
+  const allowedTables = ['clinic', 'dentist', 'patient', 'hospital'];
+  if (!allowedTables.includes(table)) {
+    throw new Error(`Invalid table name: ${table}`);
+  }
+
+  const query = `
+    SELECT phone_number, alternate_phone_number 
+    FROM ?? 
+    WHERE tenant_id = ? AND ?? = ?
+    LIMIT 1
+  `;
+
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(query, [table, tenantId, tableField, id]);
+
+    if (rows.length === 0) {
+      throw new Error(`${table} record not found`);
     }
 
-    return true;
-  } catch (err) {
-    console.trace(err);
-    throw new CustomError(err.message, 404);
+    return rows[0]; // { phone_number, alternate_phone_number }
+  } catch (error) {
+    console.error(`Error fetching phone data from ${table}:`, error.message);
+    throw new Error(`Failed to retrieve phone numbers for ${table}`);
   } finally {
     conn.release();
   }
 };
 
 /**
- * Check if a phone number exists in a table for update operation (excluding current record)
+ * Checks if a phone number already exists in ANY table under the same tenant
  */
-const checkPhoneNumberExistsWithId = async (table, idColumn, phone_number, field, id) => {
+const checkGlobalPhoneNumberExists = async (phoneNumber, tenantId) => {
   const conn = await pool.getConnection();
   try {
-    const [phoneResult] = await conn.query(
-      `SELECT 1 FROM ${table} WHERE phone_number = ? AND ${idColumn} != ? LIMIT 1`,
-      [phone_number, id]
-    );
-    const [alternateResult] = await conn.query(
-      `SELECT 1 FROM ${table} WHERE alternate_phone_number = ? AND ${idColumn} != ? LIMIT 1`,
-      [phone_number, id]
-    );
+    const tables = ["clinic", "dentist", "patient", "clinic"];
 
-    if (phoneResult.length > 0 || alternateResult.length > 0) {
-      throw new CustomError(`${field} Already Exists`, 409);
+    for (const table of tables) {
+      const [rows] = await conn.query(
+        `SELECT 1 FROM ${table} WHERE phone_number = ? AND tenant_id = ? LIMIT 1`,
+        [phoneNumber, tenantId]
+      );
+
+      if (rows.length > 0) {
+        throw new CustomError(`Phone number already exists in ${table}`, 409);
+      }
     }
 
     return true;
   } catch (err) {
-    console.trace(err);
-    throw new CustomError(err.message, 404);
+    console.error("Global phone check error:", err.message);
+    throw err;
   } finally {
     conn.release();
   }
 };
+
+
+
+/**
+ * Checks if a phone number already exists in ANY table under the same tenant, excluding current record
+ */
+const checkGlobalPhoneNumberExistsWithId = async (table, phoneNumber, id, tenantId) => {
+  const conn = await pool.getConnection();
+  try {
+    const idColumn = `${table}_id`;
+    const tables = ["clinic", "dentist", "patient"];
+
+    for (const targetTable of tables) {
+      const [rows] = await conn.query(
+        `SELECT 1 FROM ${targetTable} WHERE phone_number = ? AND tenant_id = ? AND ${idColumn} != ? LIMIT 1`,
+        [phoneNumber, tenantId, id]
+      );
+
+      if (rows.length > 0) {
+        throw new CustomError(`Phone number already exists in ${targetTable}`, 409);
+      }
+    }
+
+    return true;
+  } catch (err) {
+    console.error("Global phone check with ID error:", err.message);
+    throw err;
+  } finally {
+    conn.release();
+  }
+};
+
 
 const checkIfIdExists = async (table, field, value) => {
   const conn = await pool.getConnection();
@@ -89,7 +128,7 @@ const checkIfExists = async (table, field, value,tenantId) => {
   const conn = await pool.getConnection();
   try {
     // Sanitize table name to prevent SQL injection
-    const allowedTables = ['patient', 'dentist', 'clinic', 'tenant','appointment','treatment','prescription']; // Add your actual table names here
+    const allowedTables = ['patient', 'dentist', 'clinic', 'tenant','appointment','treatment','prescription','statustype','statustypesub']; // Add your actual table names here
     if (!allowedTables.includes(table)) {
       throw new Error(`Invalid table name: ${table}`);
     }
@@ -115,7 +154,7 @@ const checkIfExistsWithoutId = async (table, field, value, excludeField, exclude
   const conn = await pool.getConnection();
   try {
     // Sanitize table name to prevent SQL injection
-    const allowedTables = ['patient', 'dentist', 'clinic', 'tenant','appointment','treatment','prescription']; // Add your actual table names here
+    const allowedTables = ['patient', 'dentist', 'clinic', 'tenant','appointment','treatment','prescription','statustype','statustypesub']; // Add your actual table names here
     if (!allowedTables.includes(table)) {
       throw new Error(`Invalid table name: ${table}`);
     }
@@ -138,9 +177,10 @@ const checkIfExistsWithoutId = async (table, field, value, excludeField, exclude
 };
 
 module.exports = {
-  checkPhoneNumberExists,
-  checkPhoneNumberExistsWithId,
+  checkGlobalPhoneNumberExists,
+  checkGlobalPhoneNumberExistsWithId,
   checkIfIdExists,
   checkIfExists,
-  checkIfExistsWithoutId
+  checkIfExistsWithoutId,
+  getPhonenumberAndAlternateNumberBytenantIdAndTableId
 };

@@ -16,6 +16,9 @@ const patientRouter = require('./routes/PatientRouter');
 const appointmentRouter = require('./routes/AppointmentRouter');
 const treatmentRouter = require('./routes/TreatmentRouter');
 const prescriptionRouter=require('./routes/PrescriptionRouter')
+const statusTypeRouter=require('./routes/StatusTypeRouter')
+const statusTypeSubRouter=require('./routes/StatusTypeSubRouter')
+const assetRouter=require('./routes/AssetRouter')
 
 const compressionMiddleware = require('./middlewares/CompressionMiddleware');
 const { redisconnect } = require('./config/redisConfig');
@@ -41,6 +44,9 @@ async function initializeTables() {
       await createTable.createAppointmentTable();
       await createTable.createTreatmentTable();
       await createTable.createPrescriptionTable();
+      await createTable.createStatusTypeTable();
+      await createTable.createStatusTypeSubTable();
+      await createTable.createAssetTable();
   
       console.log('All tables created in order.');
     } catch (err) {
@@ -65,6 +71,8 @@ app.use('/patient', patientRouter);
 app.use('/appointment', appointmentRouter);
 app.use('/treatment', treatmentRouter);
 app.use('/prescription', prescriptionRouter);
+app.use('/statustype', statusTypeRouter);
+app.use('/statustypesub', statusTypeSubRouter);
 
 app.use(errorHandler);
 

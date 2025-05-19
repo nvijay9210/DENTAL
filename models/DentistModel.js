@@ -148,6 +148,7 @@ const updateClinicIdAndNameAndAddress=async(tenantId,clinicId,clinic_name,clinic
     conn.release();
   }
 }
+
 const updateNullClinicInfoWithJoin = async (tenantId, clinicId,dentistId) => {
 
   const query = `

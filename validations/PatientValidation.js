@@ -1,12 +1,11 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const patientService = require("../services/PatientService");
 const {
-  checkPhoneNumberExists,
-  checkPhoneNumberExistsWithId,
   checkIfExistsWithoutId,
 } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
+
 
 const uniqueFields = [
   "email",
@@ -40,14 +39,14 @@ const CreateColumnConfig = [
   {
     columnname: "phone_number",
     type: "varchar",
-    size: 15,
+    size: 10,
     null: false,
     pattern: /^\+?[0-9]{7,15}$/,
   },
   {
     columnname: "alternate_phone_number",
     type: "varchar",
-    size: 15,
+    size: 10,
     null: true,
     pattern: /^\+?[0-9]{7,15}$/,
   },
@@ -144,14 +143,14 @@ const UpdateColumnConfig = [
   {
     columnname: "phone_number",
     type: "varchar",
-    size: 15,
+    size: 10,
     null: false,
     pattern: /^\+?[0-9]{7,15}$/,
   },
   {
     columnname: "alternate_phone_number",
     type: "varchar",
-    size: 15,
+    size: 10,
     null: true,
     pattern: /^\+?[0-9]{7,15}$/,
   },
@@ -234,39 +233,19 @@ const UpdateColumnConfig = [
   { columnname: "first_visit_date", type: "timestamp", null: true },
 ];
 
-// Validate phone numbers
 const validatePatientPhones = async (data, patientId = 0) => {
-  const { phone_number, alternate_phone_number } = data;
+  const tenantId = data.tenant_id;
 
-  if (patientId > 0) {
-    await checkPhoneNumberExistsWithId(
-      "patient",
-      phone_number,
-      "Phone Number",
-      patientId
-    );
-    if (alternate_phone_number) {
-      await checkPhoneNumberExistsWithId(
-        "patient",
-        "patient_id",
-        "Alternate Phone Number",
-        alternate_phone_number,
-        patientId
-      );
-    }
-  } else {
-    await checkPhoneNumberExists("patient", phone_number, "Phone Number");
-    if (alternate_phone_number) {
-      await checkPhoneNumberExists(
-        "patient",
-        "patient_id",
-        alternate_phone_number,
-        "Alternate Phone Number",
-        patientId
-      );
-    }
+  await validatePhonesGlobally(data, patientId, "patient", tenantId);
+
+  if (
+    data.alternate_phone_number &&
+    data.phone_number === data.alternate_phone_number
+  ) {
+    throw new CustomError("Phone and alternate phone cannot be the same", 409);
   }
 };
+
 
 const validateUniqueFields = async (
   details,
@@ -304,7 +283,7 @@ const createPatientValidation = async (details) => {
 
 // Update Patient Validation
 const updatePatientValidation = async (patientId, details, tenantId) => {
-  await validateInput(details, UpdateColumnConfig);
+  validateInput(details, UpdateColumnConfig);
 
   await checkTenantExistsByTenantIdValidation(tenantId);
 

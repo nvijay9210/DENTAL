@@ -39,7 +39,8 @@ const patientFileMiddleware = uploadFileMiddleware({
 // Create Patient
 router.post(
   routerPath.ADD_PATIENT,
-  patientUploadFields,
+  // patientUploadFields,
+  upload.any(),
   patientFileMiddleware,
   patientController.createPatient
 );
@@ -59,7 +60,8 @@ router.get(
 // Update Patient
 router.put(
   routerPath.UPDATE_PATIENT_TENANT,
-  patientUploadFields,
+  // patientUploadFields,
+  upload.any(),
   patientFileMiddleware,
   patientController.updatePatient
 );

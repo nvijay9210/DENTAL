@@ -1,11 +1,10 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const appointmentModel = require("../models/AppointmentModel");
 const {
-  redisClient,
-  invalidateCacheByTenant,
   getOrSetCache,
+  invalidateCacheByPattern,
 } = require("../config/redisConfig");
-const { decodeJsonFields, getJsonValue } = require("../utils/Helpers");
+const { decodeJsonFields } = require("../utils/Helpers");
 const { formatDateOnly, formatTimeOnly, formatAppointments } = require("../utils/DateUtils");
 const { mapFields } = require("../query/Records");
 const { updatePatientCount } = require("../models/ClinicModel");
@@ -36,7 +35,10 @@ const createAppointment = async (data) => {
   try {
     const { columns, values } = mapFields(data, fieldMap);
     const appointmentId = await appointmentModel.createAppointment("appointment", columns, values);
-    await invalidateCacheByTenant("appointment", data.tenant_id);
+    await invalidateCacheByPattern("appointment:*");
+    await invalidateCacheByPattern("appointmentsdetails:*");
+    await invalidateCacheByPattern("patientvisitdetails:*");
+    await invalidateCacheByPattern("appointmentsmonthlysummary:*");
     if(appointmentId) await updatePatientCount(data.tenant_id,data.clinic_id,true)
     return appointmentId;
   } catch (error) {
@@ -118,7 +120,10 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
       throw new CustomError("Appointment not found or no changes made.", 404);
     }
 
-    await invalidateCacheByTenant("appointment", tenant_id);
+    await invalidateCacheByPattern("appointment:*");
+    await invalidateCacheByPattern("appointmentsdetails:*");
+    await invalidateCacheByPattern("patientvisitdetails:*");
+    await invalidateCacheByPattern("appointmentsmonthlysummary:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -134,7 +139,10 @@ const deleteAppointmentByTenantIdAndAppointmentId = async (tenantId, appointment
       throw new CustomError("Appointment not found.", 404);
     }
 
-    await invalidateCacheByTenant("appointment", tenantId);
+    await invalidateCacheByPattern("appointment:*");
+    await invalidateCacheByPattern("appointmentsdetails:*");
+    await invalidateCacheByPattern("patientvisitdetails:*");
+    await invalidateCacheByPattern("appointmentsmonthlysummary:*");
     return affectedRows;
   } catch (error) {
     throw new CustomError(`Failed to delete appointment: ${error.message}`, 500);

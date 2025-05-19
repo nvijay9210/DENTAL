@@ -11,7 +11,7 @@ const { mapFields } = require("../query/Records");
 const {
   updateClinicIdAndNameAndAddress,
   updateNullClinicInfoWithJoin,
-} = require("../models/DentistModel");
+} = require("../services/DentistService");
 
 // -------------------- CREATE --------------------
 const createClinic = async (data) => {

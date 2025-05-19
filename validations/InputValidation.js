@@ -50,6 +50,33 @@ function sanitizeInput(value, type) {
   }
 }
 
+// Utility: Validate pattern dynamically
+function validatePattern(value, pattern, fieldName) {
+  if (!pattern) return;
+
+  let regex;
+  if (pattern instanceof RegExp) {
+    regex = pattern;
+  } else if (typeof pattern === "string") {
+    try {
+      regex = new RegExp(pattern);
+    } catch (err) {
+      throw new CustomError(`Invalid regex pattern for ${fieldName}`, 400);
+    }
+  } else {
+    throw new CustomError(
+      `Pattern for ${fieldName} must be a string or RegExp`,
+      400
+    );
+  }
+
+  if (value !== undefined && value !== "null" && value !== "") {
+    if (!regex.test(String(value))) {
+      throw new CustomError(`${fieldName} has invalid format`, 400);
+    }
+  }
+}
+
 // Main validator function
 function validateInput(userInput, columnConfig) {
   if (!userInput) {
@@ -72,17 +99,16 @@ function validateInput(userInput, columnConfig) {
 
     // Skip empty/undefined if nullable
     if (
-      (value === undefined || value === 'null' || value === "") &&
+      (value === undefined || value === "null" || value === "") &&
       isNullable === true
     ) {
       sanitizedData[columnname] = null;
-      console.log("Continue Activated");
       continue;
     }
 
     // Enforce required fields
     if (
-      (value === undefined || value === 'null' || value === "") &&
+      (value === undefined || value === "null" || value === "") &&
       isNullable === false
     ) {
       throw new CustomError(`${columnname} is required`, 400);
@@ -100,10 +126,10 @@ function validateInput(userInput, columnConfig) {
       case "varchar":
       case "text":
       case "longtext":
-        if (typeof value !== "string" && typeof value !=='array' && typeof value !=='object') {
+        if (typeof value !== "string" && typeof value !== "object" && typeof value !== "array") {
           throw new CustomError(`${columnname} must be a string`, 400);
         }
-        if (size && value.length > parseInt(size)) {
+        if (size && String(value).length > parseInt(size)) {
           throw new CustomError(
             `${columnname} exceeds max length of ${size}`,
             400
@@ -178,12 +204,7 @@ function validateInput(userInput, columnConfig) {
     }
 
     // Pattern Check (Optional regex validation)
-    if (pattern && value !== 'null') {
-      const regex = pattern instanceof RegExp ? pattern : new RegExp(pattern);
-      if (!regex.test(value)) {
-        throw new CustomError(`${columnname} Invalid format`, 400);
-      }
-    }
+    validatePattern(value, pattern, columnname);
 
     sanitizedData[columnname] = value;
   }

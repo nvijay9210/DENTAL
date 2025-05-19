@@ -32,7 +32,8 @@ const clinicFileMiddleware = uploadFileMiddleware({
 // Add Clinic
 router.post(
   routerPath.ADD_CLINIC,
-  clinicUploadFields,
+  // clinicUploadFields,
+  upload.any(),
   clinicFileMiddleware,
   clinicController.createClinic
 );
@@ -52,7 +53,8 @@ router.get(
 // Update Clinic
 router.put(
   routerPath.UPDATE_CLINIC_TENANT,
-  clinicUploadFields,
+  // clinicUploadFields,
+  upload.any(),
   clinicFileMiddleware,
   clinicController.updateClinic
 );
