@@ -73,6 +73,7 @@ app.use('/treatment', treatmentRouter);
 app.use('/prescription', prescriptionRouter);
 app.use('/statustype', statusTypeRouter);
 app.use('/statustypesub', statusTypeSubRouter);
+app.use('/asset', assetRouter);
 
 app.use(errorHandler);
 

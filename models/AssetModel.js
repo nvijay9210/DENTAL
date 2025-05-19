@@ -8,7 +8,8 @@ const TABLE = "asset";
 const createAsset = async (table,columns, values) => {
   try {
     const asset = await record.createRecord(table, columns, values);
-    return asset.insertId;
+    console.log(asset)
+    return asset;
   } catch (error) {
     console.error("Error creating asset:", error);
     throw new CustomError("Database Query Error", 500);

@@ -6,18 +6,13 @@ const { recordExists } = require("../query/Records");
 // Asset Column Configuration for Validation
 const createColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 6, null: false },
-  { columnname: "asset_name", type: "varchar", size: 100, null: false },
-  { columnname: "asset_type", type: "varchar", size: 255, null: true },
-  { columnname: "asset_status", type: "varchar",size: 255, null: true },
-  { columnname: "asset_photo", type: "varchar",size: 255, null: true },
-  { columnname: "allocated_to", type: "varchar", null: true },
-  { columnname: "price", type: "int", null: true },
-  { columnname: "quantity", type: "int", null: true },
-  { columnname: "purchased_date", type: "date", null: true },
-  { columnname: "purchased_by", type: "varchar",size:100, null: true },
-  { columnname: "expired_date", type: "date", null: true },
-  { columnname: "invoice_number", type: "varchar", null: true },
-  { columnname: "description", type: "text", null: true },
+  { columnname: "expense_amount", type: "varchar", size: 100, null: false },
+  { columnname: "expense_category", type: "varchar", size: 255, null: true },
+  { columnname: "expense_reason", type: "varchar", size: 255, null: true },
+  { columnname: "expense_date", type: "varchar",size: 255, null: true },
+  { columnname: "mode_of_payment", type: "varchar",size: 255, null: true },
+  { columnname: "expense_number", type: "varchar", null: true },
+  { columnname: "receipt_number", type: "int", null: true },
   { columnname: "created_by", type: "varchar", size: 20, null: false },
 ];
 
