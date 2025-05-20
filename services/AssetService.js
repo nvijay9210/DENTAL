@@ -19,6 +19,7 @@ const {
 const createAsset = async (data) => {
   const fieldMap = {
     tenant_id: (val) => val,
+    clinic_id: (val) => val,
     asset_name:(val)=>val,
     asset_type:(val)=>val,
     asset_status:(val)=>val,
@@ -106,6 +107,7 @@ const getAssetByTenantIdAndAssetId = async (
 const updateAsset = async (assetId, data, tenant_id) => {
     const fieldMap = {
         tenant_id: (val) => val,
+        clinic_id: (val) => val,
         asset_name:(val)=>val,
         asset_type:(val)=>val,
         asset_status:(val)=>val,
