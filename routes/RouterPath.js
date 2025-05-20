@@ -23,7 +23,7 @@ module.exports = {
   GETALL_PATIENT_TENANT: "/getallpatients/:tenant_id",
   GET_PATIENT_TENANT: "/getpatient/:patient_id/:tenant_id",
   UPDATE_PATIENT_TENANT: "/updatepatient/:patient_id/:tenant_id",
-  UPDATE_PATIENT_TOOTH_DETAILS:"/updatepatients_tooth/:patient_id/:tenant_id",
+  UPDATE_PATIENT_TOOTH_DETAILS: "/updatepatients_tooth/:patient_id/:tenant_id",
   DELETE_PATIENT_TENANT: "/deletepatient/:patient_id/:tenant_id",
 
   ADD_APPOINTMENT: "/addappointment",
@@ -63,8 +63,9 @@ module.exports = {
   GETALL_STATUS_TYPE_SUB_TENANT: "/getallstatustypesub/:tenant_id",
   GET_STATUS_TYPE_SUB: "/getstatustypesub/:status_type_sub_id/:tenant_id",
   GET_STATUS_TYPE_SUB_STATUS_TYPE_ID:
-    "/getstatustypesub_statustype/:status_type_id/:tenant_id",
-  GET_STATUS_TYPE_SUB_STATUS_TYPE:"/getstatustypesub_statustype/:status_type/:tenant_id",
+    "/getstatustypesub_statustypeid/:status_type_id/:tenant_id",
+  GET_STATUS_TYPE_SUB_STATUS_TYPE:
+    "/getstatustypesub_statustype/:status_type/:tenant_id",
   UPDATE_STATUS_TYPE_SUB: "/updatestatustypesub/:status_type_sub_id/:tenant_id",
   DELETE_STATUS_TYPE_SUB: "/deletestatustypesub/:status_type_sub_id/:tenant_id",
 

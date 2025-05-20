@@ -6,7 +6,7 @@ const TABLE = "statustypesub";
 
 // Create StatusTypeSub
 const createStatusTypeSub = async (table, columns, values) => {
-  console.log('statusTypeSub',columns,values)
+  console.log("statusTypeSub", columns, values);
   try {
     const statusTypeSub = await record.createRecord(table, columns, values);
     return statusTypeSub.insertId;
@@ -17,7 +17,7 @@ const createStatusTypeSub = async (table, columns, values) => {
 };
 
 // Get all statusTypeSubs by tenant ID with pagination
-const getAllStatusTypeSubsByTenantId = async (tenantId,limit,offset) => {
+const getAllStatusTypeSubsByTenantId = async (tenantId, limit, offset) => {
   try {
     if (
       !Number.isInteger(limit) ||
@@ -27,7 +27,13 @@ const getAllStatusTypeSubsByTenantId = async (tenantId,limit,offset) => {
     ) {
       throw new CustomError("Invalid pagination parameters.", 400);
     }
-    return await record.getAllRecords(TABLE, "tenant_id", tenantId,limit,offset);
+    return await record.getAllRecords(
+      TABLE,
+      "tenant_id",
+      tenantId,
+      limit,
+      offset
+    );
   } catch (error) {
     console.error("Error fetching statusTypeSubs:", error);
     throw new CustomError("Error fetching statusTypeSubs.", 500);
@@ -126,35 +132,31 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
   limit = 10,
   offset = 0
 ) => {
+  const query = `
+    SELECT * FROM statustypesub WHERE status_type_id = ? AND tenant_id = ? ORDER BY status_type_sub_ref ASC LIMIT ? OFFSET ?
+  `;
+
   const conn = await pool.getConnection();
-
   try {
-    // Input validation
-    if (!tenant_id || !status_type_id) {
-      throw new CustomError("tenant_id and status_type_id are required", 400);
-    }
+    console.log(status_type_id, tenant_id, limit, offset);
+    const rows = await conn.query(query, [
+      status_type_id,
+      tenant_id,
+      limit,
+      offset,
+    ]);
 
-    if (typeof limit !== "number" || limit < 1 || limit > 100) {
-      limit = 10; // default
-    }
+    console.log("rows:", rows);
 
-    if (typeof offset !== "number" || offset < 0) {
-      offset = 0; // default
-    }
-
-    const [rows] = await conn.query(
-      "SELECT * FROM statustypesub WHERE status_type_id = ? AND tenant_id = ? ORDER BY status_type_sub_ref ASC LIMIT ? OFFSET ?",
-      [status_type_id, tenant_id, limit, offset]
-    );
-
-    return rows;
-  } catch (err) {
-    console.error("Error fetching statustypesub:", err.message);
-    throw new CustomError("Failed to fetch data", 500);
+    return rows[0];
+  } catch (error) {
+    console.error("Error fetching status_type_id:", error);
+    throw new Error("Database Query Error");
   } finally {
     conn.release();
   }
 };
+
 const getAllStatusTypeSubByTenantIdAndStatusType = async (
   tenant_id,
   status_type,
@@ -179,7 +181,7 @@ const getAllStatusTypeSubByTenantIdAndStatusType = async (
 
     const [rows] = await conn.query(
       "SELECT * FROM statustypesub WHERE status_type = ? AND tenant_id = ? ORDER BY status_type_sub_ref ASC LIMIT ? OFFSET ?",
-      [status_type_id, tenant_id, limit, offset]
+      [status_type, tenant_id, limit, offset]
     );
 
     return rows;
@@ -209,7 +211,6 @@ const checkStatusTypeSubExistsByStatusTypeIdAndStatusTypeSubAndTenantId =
       conn.release();
     }
   };
-
 
 //step3
 const checkStatusTypeSubRefExistsByStatusTypeIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId =
@@ -259,5 +260,5 @@ module.exports = {
   checkStatusTypeSubRefExistsByStatusTypeIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId,
   checkStatusTypeSubRefExistsByStatusTypeSubIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId,
   getAllStatusTypeSubByTenantIdAndStatusTypeId,
-  getAllStatusTypeSubByTenantIdAndStatusType
+  getAllStatusTypeSubByTenantIdAndStatusType,
 };

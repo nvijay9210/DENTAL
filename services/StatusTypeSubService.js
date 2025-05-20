@@ -94,6 +94,7 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
     throw new CustomError("Failed to fetch statusTypeSubs", 404);
   }
 };
+
 const getAllStatusTypeSubByTenantIdAndStatusType = async (
   tenantId,
   status_type,
@@ -106,6 +107,7 @@ const getAllStatusTypeSubByTenantIdAndStatusType = async (
   try {
     const statusTypeSubs = await getOrSetCache(cacheKey, async () => {
       const statusTypeId=await  getStatusTypeIdByTenantAndStatusType(status_type)
+      console.log(statusTypeId)
       const result = await statusTypeSubModel.getAllStatusTypeSubByTenantIdAndStatusTypeId(
         tenantId,
         statusTypeId,
