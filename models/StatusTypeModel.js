@@ -103,6 +103,27 @@ const deleteStatusTypeByTenantAndStatusTypeId = async (tenant_id, statusType_id)
   }
 };
 
+const getStatusTypeIdByTenantAndStatusType = async (status_type) => {
+  const query = `
+    SELECT status_type_id
+    FROM statustype
+    WHERE status_type = ?
+  `;
+  
+  const conn = await pool.getConnection();
+  try {
+    const rows = await conn.query(query, [status_type]);
+    console.log('stsid:',rows[0]);
+    
+    return rows[0][0].status_type_id;
+  } catch (error) {
+    console.error("Error fetching status_type_id:", error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+};
+
 
 
 module.exports = {
@@ -111,5 +132,6 @@ module.exports = {
   getStatusTypeByStatusTypeId,
   updateStatusType,
   deleteStatusTypeByTenantAndStatusTypeId,
-  getAllStatusTypesByTenantAndPatientId
+  getAllStatusTypesByTenantAndPatientId,
+  getStatusTypeIdByTenantAndStatusType
 };

@@ -8,13 +8,15 @@ const statusTypeSubValidation = require("../validations/StatusTypeSubValidation"
  */
 exports.createStatusTypeSub = async (req, res, next) => {
   const details = req.body;
+  console.log('details:controller,',details)
+  const {status_type}=req.params
 
   try {
     // Validate statusTypeSub data
     await statusTypeSubValidation.createStatusTypeSubValidation(details);
 
     // Create the statusTypeSub
-    const id = await statusTypeSubService.createStatusTypeSub(details);
+    const id = await statusTypeSubService.createStatusTypeSub(details,status_type);
     res.status(201).json({ message: "StatusTypeSub created", id });
   } catch (err) {
     next(err);

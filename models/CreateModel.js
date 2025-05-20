@@ -190,10 +190,17 @@ async function addStatusTypeTableData() {
     INSERT IGNORE INTO statustype (status_type_id, Status_Type) 
     VALUES 
     (1, 'specialization'),
-    (2, 'qualifications'),
-    (3, 'languages_spoken'),
-    (4, 'treatement_type'),
-    (5, 'treatement_status')
+(2, 'qualifications'),
+(3, 'available_services'),
+(4, 'alcohol_consumption'),
+(5, 'mode_of_payment'),
+(6, 'asset_type'),
+(7, 'asset_status'),
+(8, 'languages_spoken'),
+(9, 'tenant_app_font'),
+(10, 'treatment_type'),
+(11, 'treatment_status'),
+(12, 'smoking_status');
   `;
 
   try {

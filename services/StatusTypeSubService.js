@@ -5,10 +5,10 @@ const {
   invalidateCacheByPattern,
 } = require("../config/redisConfig");
 const { mapFields } = require("../query/Records");
+const { getStatusTypeIdByTenantAndStatusType } = require("../models/StatusTypeModel");
 
 // Create StatusTypeSub
-const createStatusTypeSub = async (data) => {
-  console.log("data:", data);
+const createStatusTypeSub = async (details,statusType) => {
   const fieldMap = {
     tenant_id: (val) => val,
     status_type_id: (val) => val,
@@ -18,7 +18,14 @@ const createStatusTypeSub = async (data) => {
   };
 
   try {
-    const { columns, values } = mapFields(data, fieldMap);
+
+    const status_type_id=await getStatusTypeIdByTenantAndStatusType(statusType)
+
+    console.log('status_type_id:',status_type_id)
+
+    details.status_type_id=status_type_id
+
+    const { columns, values } = mapFields(details, fieldMap);
     const statusTypeSubId = await statusTypeSubModel.createStatusTypeSub(
       "statustypesub",
       columns,

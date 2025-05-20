@@ -6,6 +6,7 @@ const TABLE = "statustypesub";
 
 // Create StatusTypeSub
 const createStatusTypeSub = async (table, columns, values) => {
+  console.log('statusTypeSub',columns,values)
   try {
     const statusTypeSub = await record.createRecord(table, columns, values);
     return statusTypeSub.insertId;
@@ -155,6 +156,7 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
   }
 };
 
+//step2
 const checkStatusTypeSubExistsByStatusTypeIdAndStatusTypeSubAndTenantId =
   async (tenant_id, status_type_id, status_type_sub) => {
     const conn = await pool.getConnection();
@@ -173,6 +175,8 @@ const checkStatusTypeSubExistsByStatusTypeIdAndStatusTypeSubAndTenantId =
     }
   };
 
+
+//step3
 const checkStatusTypeSubRefExistsByStatusTypeIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId =
   async (tenant_id, status_type_id, status_type_sub, status_type_sub_ref) => {
     const conn = await pool.getConnection();

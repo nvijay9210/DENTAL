@@ -58,7 +58,7 @@ module.exports = {
   UPDATE_STATUS_TYPE: "/updatestatustype/:statustype_id",
   DELETE_STATUS_TYPE: "/deletestatustype/:statustype_id",
 
-  ADD_STATUS_TYPE_SUB: "/addstatustypesub",
+  ADD_STATUS_TYPE_SUB: "/addstatustypesub/:status_type",
   GETALL_STATUS_TYPE_SUB_TENANT: "/getallstatustypesub/:tenant_id",
   GET_STATUS_TYPE_SUB: "/getstatustypesub/:status_type_sub_id/:tenant_id",
   GET_STATUS_TYPE_SUB_STATUS_TYPE:
@@ -71,6 +71,12 @@ module.exports = {
   GET_ASSET: "/getasset/:asset_id",
   UPDATE_ASSET: "/updateasset/:asset_id",
   DELETE_ASSET: "/deleteasset/:asset_id",
+
+  ADD_EXPENSE: "/addexpense",
+  GETALL_EXPENSE: "/getallexpenses",
+  GET_EXPENSE: "/getasset/:expense_id",
+  UPDATE_EXPENSE: "/updateasset/:expense_id",
+  DELETE_EXPENSE: "/deleteasset/:expense_id",
 };
 
 // GET /api/tenant?page=2&limit=10

@@ -35,6 +35,7 @@ const updateColumnConfig = [
 
 // Create StatusTypeSub Validation
 const createStatusTypeSubValidation = async (details) => {
+  console.log('details:',details)
   validateInput(details, createColumnConfig);
 
   await Promise.all([
@@ -42,9 +43,10 @@ const createStatusTypeSubValidation = async (details) => {
   ]);
 
   const statusTypeSub =
-    await statusTypeSubModel.checkStatusTypeSubRefExistsByStatusTypeSubIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId(
+    await statusTypeSubModel.checkStatusTypeSubRefExistsByStatusTypeIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId(
       details.tenant_id,
       details.status_type_id,
+      details.status_type_sub,
       details.status_type_sub_ref
     );
   if (statusTypeSub)
@@ -59,14 +61,21 @@ const updateStatusTypeSubValidation = async (
 ) => {
   validateInput(details, updateColumnConfig);
 
-  const statusTypeSub =
+  const idExists=await checkIfExists('statustypesub','status_type_sub_id',statusTypeSubId,tenantId)
+
+  if(!idExists) throw new CustomError('statusTypeSubId not exists')
+  
+    const statusTypeSubExists=await statusTypeSubModel.checkStatusTypeSubExistsByStatusTypeIdAndStatusTypeSubAndTenantId(tenantId,details.status_type_id,details.status_type_sub)
+    if(statusTypeSubExists) throw new CustomError('statusTypeSubject Already exists',409)
+
+  const statusTypeSubRefExists =
     await statusTypeSubModel.checkStatusTypeSubRefExistsByStatusTypeSubIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId(
       tenantId,
       statusTypeSubId,
       details.status_type_sub,
       details.status_type_sub_ref
     );
-  if (statusTypeSub) throw new CustomError("StatusTypeSub Already Exists", 404);
+  if (statusTypeSubRefExists) throw new CustomError("StatusTypeReference Already Exists", 409);
 };
 
 module.exports = {
