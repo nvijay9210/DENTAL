@@ -177,6 +177,23 @@ const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
   }
 };
 
+
+const updateToothDetails = async (data,patientId,tenant_id) => {
+  data=data?JSON.parse(data):null
+  try {
+    const affectedRows = await patientModel.updateToothDetails(data,patientId,tenant_id);
+    if (affectedRows === 0) {
+      throw new CustomError("Patient not found.", 404);
+    }
+
+    await invalidateCacheByPattern("patients:*");
+    return affectedRows;
+  } catch (error) {
+    throw new CustomError(`Failed to delete patient: ${error.message}`, 404);
+  }
+};
+
+
 module.exports = {
   createPatient,
   getAllPatientsByTenantId,
@@ -184,4 +201,5 @@ module.exports = {
   checkPatientExistsByTenantIdAndPatientId,
   updatePatient,
   deletePatientByTenantIdAndPatientId,
+  updateToothDetails
 };

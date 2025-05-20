@@ -155,6 +155,41 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
     conn.release();
   }
 };
+const getAllStatusTypeSubByTenantIdAndStatusType = async (
+  tenant_id,
+  status_type,
+  limit = 10,
+  offset = 0
+) => {
+  const conn = await pool.getConnection();
+
+  try {
+    // Input validation
+    if (!tenant_id || !status_type) {
+      throw new CustomError("tenant_id and status_type are required", 400);
+    }
+
+    if (typeof limit !== "number" || limit < 1 || limit > 100) {
+      limit = 10; // default
+    }
+
+    if (typeof offset !== "number" || offset < 0) {
+      offset = 0; // default
+    }
+
+    const [rows] = await conn.query(
+      "SELECT * FROM statustypesub WHERE status_type = ? AND tenant_id = ? ORDER BY status_type_sub_ref ASC LIMIT ? OFFSET ?",
+      [status_type_id, tenant_id, limit, offset]
+    );
+
+    return rows;
+  } catch (err) {
+    console.error("Error fetching statustypesub:", err.message);
+    throw new CustomError("Failed to fetch data", 500);
+  } finally {
+    conn.release();
+  }
+};
 
 //step2
 const checkStatusTypeSubExistsByStatusTypeIdAndStatusTypeSubAndTenantId =
@@ -223,5 +258,6 @@ module.exports = {
   checkStatusTypeSubExistsByStatusTypeIdAndStatusTypeSubAndTenantId,
   checkStatusTypeSubRefExistsByStatusTypeIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId,
   checkStatusTypeSubRefExistsByStatusTypeSubIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId,
-  getAllStatusTypeSubByTenantIdAndStatusTypeId
+  getAllStatusTypeSubByTenantIdAndStatusTypeId,
+  getAllStatusTypeSubByTenantIdAndStatusType
 };

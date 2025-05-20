@@ -66,6 +66,11 @@ router.put(
   patientController.updatePatient
 );
 
+router.put(
+  routerPath.UPDATE_PATIENT_TOOTH_DETAILS,
+  patientController.updateToothDetails
+);
+
 // Delete Patient
 router.delete(
   routerPath.DELETE_PATIENT_TENANT,

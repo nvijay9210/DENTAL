@@ -10,7 +10,8 @@ const {
   UPDATE_STATUS_TYPE_SUB_TENANT,
   DELETE_STATUS_TYPE_SUB_TENANT,
   GET_STATUS_TYPE_SUB_STATUS_TYPE,
-  UPDATE_STATUS_TYPE_SUB
+  UPDATE_STATUS_TYPE_SUB,
+  GET_STATUS_TYPE_SUB_STATUS_TYPE_ID
 } = require("./RouterPath");
 
 
@@ -33,8 +34,13 @@ router.get(
 );
 
 router.get(
-    GET_STATUS_TYPE_SUB_STATUS_TYPE,
+  GET_STATUS_TYPE_SUB_STATUS_TYPE_ID,
   StatusTypeSubController.getAllStatusTypeSubByTenantIdAndStatusTypeId
+);
+
+router.get(
+  GET_STATUS_TYPE_SUB_STATUS_TYPE,
+  StatusTypeSubController.getAllStatusTypeSubByTenantIdAndStatusType
 );
 
 // Update StatusTypeSub

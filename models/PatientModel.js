@@ -84,6 +84,21 @@ const checkPatientExistsByTenantIdAndPatientId = async (tenantId, patientId) => 
   }
 };
 
+const updateToothDetails = async (data,patientId,tenantId) => {
+  const query = 'update patient set tooth_details=? where patient_id=? and tenant_id';
+  const conn = await pool.getConnection();
+
+  try {
+    const rows = await conn.query(query, [tenantId, patientId]);
+    return rows[0].affectedRows// Ensure consistent return type (true/false)
+  } catch (error) {
+    console.error("Error checking patient existence:", error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+};
+
 
 module.exports = {
   createPatient,
@@ -91,5 +106,6 @@ module.exports = {
   getPatientByTenantIdAndPatientId,
   updatePatient,
   deletePatientByTenantIdAndPatientId,
-  checkPatientExistsByTenantIdAndPatientId
+  checkPatientExistsByTenantIdAndPatientId,
+  updateToothDetails
 };

@@ -49,6 +49,17 @@ exports.getAllStatusTypeSubByTenantIdAndStatusTypeId = async (req, res, next) =>
     next(err);
   }
 };
+exports.getAllStatusTypeSubByTenantIdAndStatusType = async (req, res, next) => {
+  const { tenant_id,status_type } = req.params;
+  const { page, limit } = req.query;
+
+  try {
+    const statusTypeSubs = await statusTypeSubService.getAllStatusTypeSubByTenantIdAndStatusType(tenant_id,status_type, page, limit);
+    res.status(200).json(statusTypeSubs);
+  } catch (err) {
+    next(err);
+  }
+};
 
 /**
  * Get statusTypeSub by tenant and statusTypeSub ID

@@ -78,9 +78,37 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
 
   try {
     const statusTypeSubs = await getOrSetCache(cacheKey, async () => {
+  
       const result = await statusTypeSubModel.getAllStatusTypeSubByTenantIdAndStatusTypeId(
         tenantId,
         status_type_id,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+
+    return statusTypeSubs;
+  } catch (err) {
+    console.error("Database error while fetching statusTypeSubs:", err);
+    throw new CustomError("Failed to fetch statusTypeSubs", 404);
+  }
+};
+const getAllStatusTypeSubByTenantIdAndStatusType = async (
+  tenantId,
+  status_type,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `statusTypeSub:${tenantId}:status_type:${status_type}:page:${page}:limit:${limit}`;
+
+  try {
+    const statusTypeSubs = await getOrSetCache(cacheKey, async () => {
+      const statusTypeId=await  getStatusTypeIdByTenantAndStatusType(status_type)
+      const result = await statusTypeSubModel.getAllStatusTypeSubByTenantIdAndStatusTypeId(
+        tenantId,
+        statusTypeId,
         Number(limit),
         offset
       );
@@ -202,5 +230,6 @@ module.exports = {
   updateStatusTypeSub,
   deleteStatusTypeSubByTenantIdAndStatusTypeSubId,
   getAllStatusTypeSubByStatusTypeAndTenantId,
-  getAllStatusTypeSubByTenantIdAndStatusTypeId
+  getAllStatusTypeSubByTenantIdAndStatusTypeId,
+  getAllStatusTypeSubByTenantIdAndStatusType
 };
