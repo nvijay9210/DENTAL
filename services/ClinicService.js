@@ -1,7 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const clinicModel = require("../models/ClinicModel");
 const {
-  redisClient,
   invalidateCacheByPattern,
   getOrSetCache,
 } = require("../config/redisConfig");
@@ -12,6 +11,8 @@ const {
   updateClinicIdAndNameAndAddress,
   updateNullClinicInfoWithJoin,
 } = require("../services/DentistService");
+
+const message=require('../middlewares/ErrorMessages')
 
 // -------------------- CREATE --------------------
 const createClinic = async (data) => {
@@ -62,7 +63,7 @@ const createClinic = async (data) => {
     return clinicId;
   } catch (error) {
     console.trace(error);
-    throw new CustomError(`Failed to create clinic: ${error.message}`, 404);
+    throw new CustomError(message.CLINIC_CREATE_FAIL, 404);
   }
 };
 
@@ -119,14 +120,14 @@ const updateClinic = async (clinicId, data, tenant_id) => {
     );
 
     if (affectedRows === 0) {
-      throw new CustomError("Clinic not found or no changes made.", 404);
+      throw new CustomError(message.CLINIC_UPDATE_FAIL, 404);
     }
 
     await invalidateCacheByPattern("clinics:*");
     return affectedRows;
   } catch (error) {
     console.log("Service Error:", error);
-    throw new CustomError("Failed to update clinic", 404);
+    throw new CustomError(message.CLINICS_FETCH_FAIL, 404);
   }
 };
 
@@ -160,7 +161,7 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
     return parsed;
   } catch (err) {
     console.error(err);
-    throw new CustomError("Database error while fetching clinics", 404);
+    throw new CustomError(message.CLINICS_FETCH_FAIL, 404);
   }
 };
 
@@ -187,7 +188,7 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
     }
     return clinic;
   } catch (error) {
-    throw new CustomError("Failed to get clinic: " + error.message, 404);
+    throw new CustomError(message.CLINIC_FETCH_FAIL, 404);
   }
 };
 
@@ -200,7 +201,7 @@ const deleteClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
     await invalidateCacheByPattern("clinics:*");
     return clinic;
   } catch (error) {
-    throw new CustomError("Failed to delete clinic: " + error.message, 404);
+    throw new CustomError(message.CLINIC_DELETE_FAIL, 404);
   }
 };
 
@@ -212,10 +213,7 @@ const checkClinicExistsByTenantIdAndClinicId = async (tenantId, clinicId) => {
       clinicId
     );
   } catch (error) {
-    throw new CustomError(
-      "Failed to check clinic existence: " + error.message,
-      404
-    );
+    throw new CustomError(message.CLINIC_CREATE_FAIL, 404);
   }
 };
 

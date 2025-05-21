@@ -323,7 +323,7 @@ CREATE TABLE IF NOT EXISTS expense (
   expense_category VARCHAR(255) NULL,
   expense_reason VARCHAR(255) NULL,
   expense_date DATE NULL,
-  mode_of_payment VARCHAR(255) NULL,
+  mode_of_payment VARCHAR(100) NULL,
   receipt_number VARCHAR(100) NULL,
   created_by VARCHAR(30) NOT NULL,
   created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP(),

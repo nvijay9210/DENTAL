@@ -62,7 +62,7 @@ const deletePatientByTenantIdAndPatientId = async (tenant_id, patient_id) => {
 
   try {
     const result = await record.deleteRecord('patient', conditionColumn, conditionValue);
-    return result[0].affectedRows;
+    return result.affectedRows;
   } catch (error) {
     console.error("Error executing query:", error);
     throw new Error("Error deleting patient.");

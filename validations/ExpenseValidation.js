@@ -12,7 +12,7 @@ const createColumnConfig = [
   { columnname: "expense_reason", type: "varchar", size: 255, null: true },
   { columnname: "expense_date", type: "varchar",size: 255, null: true },
   { columnname: "mode_of_payment", type: "varchar",size: 255, null: true },
-  { columnname: "receipt_number", type: "int", null: true },
+  { columnname: "receipt_number", type: "varchar",size:100, null: true },
   { columnname: "created_by", type: "varchar", size: 30, null: false },
 ];
 
@@ -24,7 +24,7 @@ const updateColumnConfig = [
   { columnname: "expense_reason", type: "varchar", size: 255, null: true },
   { columnname: "expense_date", type: "varchar",size: 255, null: true },
   { columnname: "mode_of_payment", type: "varchar",size: 255, null: true },
-  { columnname: "receipt_number", type: "int", null: true },
+  { columnname: "receipt_number", type: "varchar",size:100, null: true },
   { columnname: "updated_by", type: "varchar", size: 30, null: false },
   ];
 

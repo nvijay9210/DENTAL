@@ -92,10 +92,10 @@ const deleteStatusTypeSubByTenantAndStatusTypeSubId = async (tenant_id, statusTy
 
     const result = await record.deleteRecord(TABLE, conditionColumns, conditionValues);
   
-    return result.affectedRows || 0;
+    return result.affectedRows;
   } catch (error) {
     console.error("Error deleting statusTypeSub:", error);
-    throw new CustomError("Error deleting statusTypeSub.", 500);
+    throw new CustomError("Subject Not Exists", 500);
   }
 };
 

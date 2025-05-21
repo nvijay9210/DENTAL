@@ -86,7 +86,7 @@ const deleteDentistByTenantIdAndDentistId = async (tenant_id, dentist_id) => {
       conditionColumn,
       conditionValue
     );
-    return result[0].affectedRows;
+    return result.affectedRows;
   } catch (error) {
     console.error("Error executing query:", error);
     throw new Error("Error deleting dentist.");
