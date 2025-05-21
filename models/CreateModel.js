@@ -1,18 +1,10 @@
 const pool = require("../config/db");
-const { userQuery } = require("../query/userQuery");
-const { tenantQuery } = require("../query/TenantQuery");
-const { clinicQuery } = require("../query/ClinicQuery");
-const { dentistQuery } = require("../query/DentistQuery");
-const { patientQuery } = require("../query/PatientQuery");
-const { appointmentQuery } = require("../query/AppoinmentQuery");
-const { treatmentQuery } = require("../query/TreatmentQuery");
-const { prescriptionQuery } = require("../query/PrescriptionQuery");
-const { statusTypeQuery } = require("../query/StatusType");
-const { statusTypeSubQuery } = require("../query/StatusTypeSub");
-const { assetQuery } = require("../query/AssetQuery");
+
+const {createTableQuery}=require('../query/CreateTableQuery')
 
 const createTenantTable = async () => {
-  const query = tenantQuery.createTenantTable;
+  // const query = tenantQuery.createTenantTable;
+  const query = createTableQuery.addTenant
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -26,7 +18,7 @@ const createTenantTable = async () => {
 };
 
 const createClinicTable = async () => {
-  const query = clinicQuery.createClinicTable;
+  const query = createTableQuery.addClinic
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -42,7 +34,7 @@ const createClinicTable = async () => {
 };
 
 const createDentistTable = async () => {
-  const query = dentistQuery.createDentistTable;
+  const query = createTableQuery.addDentist
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -57,7 +49,7 @@ const createDentistTable = async () => {
   }
 };
 const createPatientTable = async () => {
-  const query = patientQuery.createPatientTable;
+  const query = createTableQuery.addPatient
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -73,7 +65,7 @@ const createPatientTable = async () => {
 };
 
 const createAppointmentTable = async () => {
-  const query = appointmentQuery.createAppointmnetTable;
+  const query = createTableQuery.addAppointment
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -89,7 +81,7 @@ const createAppointmentTable = async () => {
 };
 
 const createTreatmentTable = async () => {
-  const query = treatmentQuery.createTable;
+  const query = createTableQuery.addTreatment
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -105,7 +97,7 @@ const createTreatmentTable = async () => {
 };
 
 const createPrescriptionTable = async () => {
-  const query = prescriptionQuery.createTable;
+  const query = createTableQuery.addPrescription
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -121,7 +113,7 @@ const createPrescriptionTable = async () => {
 };
 
 const createStatusTypeTable = async () => {
-  const query = statusTypeQuery.createTable;
+  const query =createTableQuery.addStatusType
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -137,7 +129,7 @@ const createStatusTypeTable = async () => {
 };
 
 const createStatusTypeSubTable = async () => {
-  const query = statusTypeSubQuery.createTable;
+  const query = createTableQuery.addStatusTypeSub
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -154,7 +146,7 @@ const createStatusTypeSubTable = async () => {
 };
 
 const createAssetTable = async () => {
-  const query =  assetQuery.createTable;
+  const query =  createTableQuery.addAsset
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -163,6 +155,22 @@ const createAssetTable = async () => {
     console.error("Error creating Asset table:", error);
     throw new Error(
       "Database error occurred while creating the Asset table."
+    );
+  } finally {
+    conn.release();
+  }
+};
+
+const createExpenseTable = async () => {
+  const query =  createTableQuery.addAsset
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("Expense table created successfully.");
+  } catch (error) {
+    console.error("Error creating Expense table:", error);
+    throw new Error(
+      "Database error occurred while creating the Expense table."
     );
   } finally {
     conn.release();
@@ -224,5 +232,6 @@ module.exports = {
   createPrescriptionTable,
   createStatusTypeTable,
   createStatusTypeSubTable,
-  createAssetTable
+  createAssetTable,
+  createExpenseTable
 };

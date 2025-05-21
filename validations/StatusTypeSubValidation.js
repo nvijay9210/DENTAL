@@ -63,7 +63,7 @@ const updateStatusTypeSubValidation = async (
 
   const idExists=await checkIfExists('statustypesub','status_type_sub_id',statusTypeSubId,tenantId)
 
-  if(!idExists) throw new CustomError('statusTypeSubId not exists')
+  if(!idExists) throw new CustomError('statusTypeSubId not exists',404)
   
     const statusTypeSubExists=await statusTypeSubModel.checkStatusTypeSubExistsByStatusTypeSubAndTenantId(tenantId,details.status_type_sub)
     if(statusTypeSubExists) throw new CustomError('statusTypeSubject Already exists',409)

@@ -3,7 +3,7 @@ const clinicQuery = {
   CREATE TABLE IF NOT EXISTS clinic (
   clinic_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
-  clinic_name varchar(50) NOT NULL,
+  clinic_name varchar(100) NOT NULL,
   email varchar(255) DEFAULT NULL,
   phone_number varchar(15) NOT NULL,
   alternate_phone_number varchar(15) DEFAULT NULL,
@@ -41,7 +41,8 @@ const clinicQuery = {
   KEY fk_tenant (tenant_id),
   KEY idx_phone_number (phone_number),
   CONSTRAINT fk_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+ `
 
 ,
   addClinic: `INSERT INTO clinic (

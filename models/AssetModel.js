@@ -22,7 +22,7 @@ const getAllAssetsByTenantId = async (tenantId, limit, offset) => {
     if (!Number.isInteger(limit) || !Number.isInteger(offset) || limit < 1 || offset < 0) {
       throw new CustomError("Invalid pagination parameters.", 400);
     }
-    return await record.getAllRecords(TABLE, "tenant_id", tenantId, limit, offset);
+    return await record.getAllRecords("asset", "tenant_id", tenantId, limit, offset);
   } catch (error) {
     console.error("Error fetching assets:", error);
     throw new CustomError("Error fetching assets.", 500);

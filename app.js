@@ -19,6 +19,7 @@ const prescriptionRouter=require('./routes/PrescriptionRouter')
 const statusTypeRouter=require('./routes/StatusTypeRouter')
 const statusTypeSubRouter=require('./routes/StatusTypeSubRouter')
 const assetRouter=require('./routes/AssetRouter')
+const expenseRouter=require('./routes/ExpenseRouter')
 
 const compressionMiddleware = require('./middlewares/CompressionMiddleware');
 const { redisconnect } = require('./config/redisConfig');
@@ -47,6 +48,7 @@ async function initializeTables() {
       await createTable.createStatusTypeTable();
       await createTable.createStatusTypeSubTable();
       await createTable.createAssetTable();
+      await createTable.createExpenseTable();
   
       console.log('All tables created in order.');
     } catch (err) {
@@ -74,6 +76,7 @@ app.use('/prescription', prescriptionRouter);
 app.use('/statustype', statusTypeRouter);
 app.use('/statustypesub', statusTypeSubRouter);
 app.use('/asset', assetRouter);
+app.use('/expense', expenseRouter);
 
 app.use(errorHandler);
 

@@ -61,7 +61,7 @@ const getAllAssetsByTenantId = async (
   const offset = (page - 1) * limit;
   const cacheKey = `asset:${tenantId}:page:${page}:limit:${limit}`;
 
-  const jsonFields = ["medication", "side_effects", "instructions", "notes"];
+  const jsonFields = ["description"];
 
   try {
     const assets = await getOrSetCache(cacheKey, async () => {

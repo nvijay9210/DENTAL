@@ -70,16 +70,16 @@ module.exports = {
   DELETE_STATUS_TYPE_SUB: "/deletestatustypesub/:status_type_sub_id/:tenant_id",
 
   ADD_ASSET: "/addasset",
-  GETALL_ASSET: "/getallassets",
-  GET_ASSET: "/getasset/:asset_id",
-  UPDATE_ASSET: "/updateasset/:asset_id",
-  DELETE_ASSET: "/deleteasset/:asset_id",
+  GETALL_ASSET_TENANT: "/getallassets/:tenant_id",
+  GET_ASSET_TENANT: "/getasset/:asset_id/:tenant_id",
+  UPDATE_ASSET: "/updateasset/:asset_id/:tenant_id",
+  DELETE_ASSET: "/deleteasset/:asset_id/:tenant_id",
 
   ADD_EXPENSE: "/addexpense",
-  GETALL_EXPENSE: "/getallexpenses",
+  GETALL_EXPENSE_TENANT: "/getallexpenses",
   GET_EXPENSE: "/getasset/:expense_id",
-  UPDATE_EXPENSE: "/updateasset/:expense_id",
-  DELETE_EXPENSE: "/deleteasset/:expense_id",
+  UPDATE_EXPENSE_TENANT: "/updateasset/:expense_id",
+  DELETE_EXPENSE_TENANT: "/deleteasset/:expense_id",
 };
 
 // GET /api/tenant?page=2&limit=10

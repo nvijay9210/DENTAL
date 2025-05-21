@@ -7,7 +7,7 @@ const {
   GETALL_EXPENSE_TENANT,
   GET_EXPENSE_TENANT,
   UPDATE_EXPENSE_TENANT,
-  DELETE__TENANT,
+  DELETE_EXPENSE_TENANT,
 } = require("./RouterPath");
 const expensevalidation = require("../validations/ExpenseValidation");
 
