@@ -17,10 +17,6 @@ const {
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-const treatmentUploadFields = upload.fields([
-  { name: "treatment_images", maxCount: 1 },
-]);
-
 // File middleware options
 const treatmentFileMiddleware = uploadFileMiddleware({
   folderName: "Treatment",
@@ -39,7 +35,7 @@ const treatmentFileMiddleware = uploadFileMiddleware({
 // Create Treatment
 router.post(
   ADD_TREATMENT,
-  treatmentUploadFields,
+ upload.any(),
   treatmentFileMiddleware,
   treatmentController.createTreatment
 );
@@ -64,7 +60,7 @@ router.get(
 // Update Treatment
 router.put(
   UPDATE_TREATMENT_TENANT,
-  treatmentUploadFields,
+  upload.any(),
   treatmentFileMiddleware,
   treatmentController.updateTreatment
 );
