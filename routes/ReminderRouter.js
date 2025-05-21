@@ -9,7 +9,6 @@ const {
   UPDATE_EXPENSE_TENANT,
   DELETE_EXPENSE_TENANT,
 } = require("./RouterPath");
-const remindervalidation = require("../validations/ReminderValidation");
 
 // Create Reminder
 router.post(

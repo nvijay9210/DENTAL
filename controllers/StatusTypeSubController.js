@@ -13,7 +13,7 @@ exports.createStatusTypeSub = async (req, res, next) => {
 
   try {
     // Validate statusTypeSub data
-    await statusTypeSubValidation.createStatusTypeSubValidation(details);
+    await statusTypeSubValidation.createStatusTypeSubValidation(details,status_type);
 
     // Create the statusTypeSub
     const id = await statusTypeSubService.createStatusTypeSub(details,status_type);

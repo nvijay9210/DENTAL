@@ -6,7 +6,7 @@ const TABLE = "statustypesub";
 
 // Create StatusTypeSub
 const createStatusTypeSub = async (table, columns, values) => {
-  console.log("statusTypeSub", columns, values);
+
   try {
     const statusTypeSub = await record.createRecord(table, columns, values);
     return statusTypeSub.insertId;
@@ -91,7 +91,7 @@ const deleteStatusTypeSubByTenantAndStatusTypeSubId = async (tenant_id, statusTy
     const conditionValues = [tenant_id, statusTypeSub_id];
 
     const result = await record.deleteRecord(TABLE, conditionColumns, conditionValues);
-    console.log(result)
+  
     return result.affectedRows || 0;
   } catch (error) {
     console.error("Error deleting statusTypeSub:", error);
@@ -133,7 +133,7 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
 
   const conn = await pool.getConnection();
   try {
-    console.log(status_type_id, tenant_id, limit, offset);
+
     const rows = await conn.query(query, [
       status_type_id,
       tenant_id,
@@ -141,7 +141,7 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
       offset,
     ]);
 
-    console.log("rows:", rows);
+   
 
     return rows[0];
   } catch (error) {
@@ -211,7 +211,7 @@ const checkStatusTypeSubExistsByStatusTypeIdAndStatusTypeSubAndTenantId =
   async (tenant_id, status_type_id,status_type_sub_id, status_type_sub) => {
     const conn = await pool.getConnection();
     try {
-      console.log(tenant_id, status_type_id,status_type_sub_id, status_type_sub)
+      
       const result = await conn.query(
         "select 1 from goldloan.statustypesub where status_type_id=? and status_type_sub=? and tenant_id=? limit 1",
         [status_type_id, status_type_sub, tenant_id]
@@ -227,13 +227,13 @@ const checkStatusTypeSubExistsByStatusTypeIdAndStatusTypeSubAndTenantId =
   };
 
 //step3
-const checkStatusTypeSubRefExistsByStatusTypeIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId =
-  async (tenant_id, status_type_id, status_type_sub, status_type_sub_ref) => {
+const checkStatusTypeSubRefExistsByStatusTypeIdAndStatusTypeSubAndTenantId =
+  async (tenant_id, status_type_id, status_type_sub) => {
     const conn = await pool.getConnection();
     try {
       const result = await conn.query(
-        "select 1 from statustypesub where status_type_id=? and status_type_sub=? and status_type_sub_ref=? and tenant_id=? limit 1",
-        [status_type_id, status_type_sub, status_type_sub_ref, tenant_id]
+        "select 1 from statustypesub where status_type_id=? and status_type_sub=? and tenant_id=? limit 1",
+        [status_type_id, status_type_sub, tenant_id]
       );
 
       return result[0].length > 0 ? true : false;
@@ -272,7 +272,7 @@ module.exports = {
   getAllStatusTypeSubByStatusTypeAndTenantId,
   checkStatusTypeSubExistsByStatusTypeIdAndStatusTypeSubAndTenantId,
   checkStatusTypeSubExistsByStatusTypeSubIdAndStatusTypeIdAndStatusTypeSubAndTenantId,
-  checkStatusTypeSubRefExistsByStatusTypeIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId,
+  checkStatusTypeSubRefExistsByStatusTypeIdAndStatusTypeSubAndTenantId,
   checkStatusTypeSubRefExistsByStatusTypeSubIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId,
   getAllStatusTypeSubByTenantIdAndStatusTypeId,
   getAllStatusTypeSubByTenantIdAndStatusType,

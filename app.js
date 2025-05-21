@@ -20,6 +20,8 @@ const statusTypeRouter=require('./routes/StatusTypeRouter')
 const statusTypeSubRouter=require('./routes/StatusTypeSubRouter')
 const assetRouter=require('./routes/AssetRouter')
 const expenseRouter=require('./routes/ExpenseRouter')
+const supplierRouter=require('./routes/SupplierRouter')
+const reminderRouter=require('./routes/ReminderRouter')
 
 const compressionMiddleware = require('./middlewares/CompressionMiddleware');
 const { redisconnect } = require('./config/redisConfig');
@@ -49,6 +51,8 @@ async function initializeTables() {
       await createTable.createStatusTypeSubTable();
       await createTable.createAssetTable();
       await createTable.createExpenseTable();
+      await createTable.createSupplierTable();
+      await createTable.createReminderTable();
   
       console.log('All tables created in order.');
     } catch (err) {
@@ -77,6 +81,8 @@ app.use('/statustype', statusTypeRouter);
 app.use('/statustypesub', statusTypeSubRouter);
 app.use('/asset', assetRouter);
 app.use('/expense', expenseRouter);
+app.use('/supplier', supplierRouter);
+app.use('/reminder', reminderRouter);
 
 app.use(errorHandler);
 

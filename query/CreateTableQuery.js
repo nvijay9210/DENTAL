@@ -330,7 +330,7 @@ CREATE TABLE IF NOT EXISTS expense (
   updated_by VARCHAR(30) DEFAULT NULL,
   updated_time DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(),
   PRIMARY KEY (expense_id),
-  CONSTRAINT fk_expense_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE
+  CONSTRAINT fk_expense_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE,
   CONSTRAINT fk_expense_clinic FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
@@ -342,7 +342,7 @@ CREATE TABLE IF NOT EXISTS supplier (
   supplier_name VARCHAR(100) NULL,
   supplier_category VARCHAR(100) NULL,
   supplier_status VARCHAR(100) NULL,
-  supplier_contact VARACHAR(15) NULL,
+  supplier_contact VARCHAR(15) NULL,
   supplier_country VARCHAR(50) NULL,
   supplier_performance_rating DECIMAL(3,2) NULL,
   created_by VARCHAR(30) NOT NULL,
@@ -350,7 +350,7 @@ CREATE TABLE IF NOT EXISTS supplier (
   updated_by VARCHAR(30) DEFAULT NULL,
   updated_time DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(),
   PRIMARY KEY (supplier_id),
-  CONSTRAINT fk_supplier_clinic FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON UPDATE CASCADE
+  CONSTRAINT fk_supplier_clinic FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON UPDATE CASCADE,
   CONSTRAINT fk_supplier_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
@@ -363,11 +363,11 @@ CREATE TABLE IF NOT EXISTS reminder (
   title VARCHAR(255) NULL,
   description TEXT NULL,
   reminder_type VARCHAR(50) NULL,
-  category VARACHAR(100) NULL,
+  category VARCHAR(100) NULL,
   due_date DATE NULL,
   due_time TIME NULL,
-  repeat VARCHAR(20) NULL,
-  repeat_interval INT(20) NULL,
+  reminder_repeat VARCHAR(20) NULL,
+  repeat_interval INT(2) NULL,
   repeat_weekdays VARCHAR(20) NULL,
   repeat_end_date DATE NULL,
   notify TINYINT(1) NULL DEFAULT 0,
@@ -378,9 +378,9 @@ CREATE TABLE IF NOT EXISTS reminder (
   updated_by VARCHAR(30) DEFAULT NULL,
   updated_time DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(),
   PRIMARY KEY (reminder_id),
-  CONSTRAINT fk_reminder_clinic FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON UPDATE CASCADE
-  CONSTRAINT fk_reminder_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE
-  CONSTRAINT fk_reminder_tenant FOREIGN KEY (dentist_id) REFERENCES dentist(dentist_id) ON UPDATE CASCADE
+  CONSTRAINT fk_reminder_clinic FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_reminder_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_reminder_dentist FOREIGN KEY (dentist_id) REFERENCES dentist(dentist_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `
 

@@ -35,23 +35,23 @@ const updateColumnConfig = [
 ];
 
 // Create StatusTypeSub Validation
-const createStatusTypeSubValidation = async (details) => {
-  console.log('details:',details)
+const createStatusTypeSubValidation = async (details,status_type) => {
   validateInput(details, createColumnConfig);
 
   await Promise.all([
     checkIfIdExists("tenant", "tenant_id", details.tenant_id),
   ]);
 
+  const statusTypeId=await statusTypeModel.getStatusTypeIdByTenantAndStatusType(status_type)
+
   const statusTypeSub =
-    await statusTypeSubModel.checkStatusTypeSubRefExistsByStatusTypeIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId(
+    await statusTypeSubModel.checkStatusTypeSubRefExistsByStatusTypeIdAndStatusTypeSubAndTenantId(
       details.tenant_id,
-      details.status_type_id,
+      statusTypeId,
       details.status_type_sub,
-      details.status_type_sub_ref
     );
   if (statusTypeSub)
-    throw new CustomError("StatusTypeSubject Already Exists", 404);
+    throw new CustomError("StatusTypeSubject Already Exists", 409);
 };
 
 // Update StatusTypeSub Validation

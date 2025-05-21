@@ -5,10 +5,12 @@ const {
   invalidateCacheByPattern,
 } = require("../config/redisConfig");
 const { mapFields } = require("../query/Records");
-const { getStatusTypeIdByTenantAndStatusType } = require("../models/StatusTypeModel");
+const {
+  getStatusTypeIdByTenantAndStatusType,
+} = require("../models/StatusTypeModel");
 
 // Create StatusTypeSub
-const createStatusTypeSub = async (details,statusType) => {
+const createStatusTypeSub = async (details, statusType) => {
   const fieldMap = {
     tenant_id: (val) => val,
     status_type_id: (val) => val,
@@ -18,12 +20,11 @@ const createStatusTypeSub = async (details,statusType) => {
   };
 
   try {
+    const status_type_id = await getStatusTypeIdByTenantAndStatusType(
+      statusType
+    );
 
-    const status_type_id=await getStatusTypeIdByTenantAndStatusType(statusType)
-
-    console.log('status_type_id:',status_type_id)
-
-    details.status_type_id=status_type_id
+    details.status_type_id = status_type_id;
 
     const { columns, values } = mapFields(details, fieldMap);
     const statusTypeSubId = await statusTypeSubModel.createStatusTypeSub(
@@ -78,13 +79,13 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
 
   try {
     const statusTypeSubs = await getOrSetCache(cacheKey, async () => {
-  
-      const result = await statusTypeSubModel.getAllStatusTypeSubByTenantIdAndStatusTypeId(
-        tenantId,
-        status_type_id,
-        Number(limit),
-        offset
-      );
+      const result =
+        await statusTypeSubModel.getAllStatusTypeSubByTenantIdAndStatusTypeId(
+          tenantId,
+          status_type_id,
+          Number(limit),
+          offset
+        );
       return result;
     });
 
@@ -106,14 +107,17 @@ const getAllStatusTypeSubByTenantIdAndStatusType = async (
 
   try {
     const statusTypeSubs = await getOrSetCache(cacheKey, async () => {
-      const statusTypeId=await  getStatusTypeIdByTenantAndStatusType(status_type)
-      console.log(statusTypeId)
-      const result = await statusTypeSubModel.getAllStatusTypeSubByTenantIdAndStatusTypeId(
-        tenantId,
-        statusTypeId,
-        Number(limit),
-        offset
+      const statusTypeId = await getStatusTypeIdByTenantAndStatusType(
+        status_type
       );
+
+      const result =
+        await statusTypeSubModel.getAllStatusTypeSubByTenantIdAndStatusTypeId(
+          tenantId,
+          statusTypeId,
+          Number(limit),
+          offset
+        );
       return result;
     });
 
@@ -233,5 +237,5 @@ module.exports = {
   deleteStatusTypeSubByTenantIdAndStatusTypeSubId,
   getAllStatusTypeSubByStatusTypeAndTenantId,
   getAllStatusTypeSubByTenantIdAndStatusTypeId,
-  getAllStatusTypeSubByTenantIdAndStatusType
+  getAllStatusTypeSubByTenantIdAndStatusType,
 };
