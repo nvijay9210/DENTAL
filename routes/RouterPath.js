@@ -86,6 +86,12 @@ module.exports = {
   GET_SUPPLIER: "/getsupplier/:supplier_id",
   UPDATE_SUPPLIER_TENANT: "/updatesupplier/:supplier_id/:tenant_id",
   DELETE_SUPPLIER_TENANT: "/deletesupplier/:supplier_id/:tenant_id",
+
+  ADD_REMINDER: "/addreminder",
+  GETALL_REMINDER_TENANT: "/getallreminders/:tenant_id",
+  GET_REMINDER: "/getreminder/:reminder_id",
+  UPDATE_REMINDER_TENANT: "/updatereminder/:reminder_id/:tenant_id",
+  DELETE_REMINDER_TENANT: "/deletereminder/:reminder_id/:tenant_id",
 };
 
 // GET /api/tenant?page=2&limit=10

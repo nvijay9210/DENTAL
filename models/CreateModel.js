@@ -193,6 +193,22 @@ const createSupplierTable = async () => {
   }
 };
 
+const createReminderTable = async () => {
+  const query =  createTableQuery.addReminder
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("Reminder table created successfully.");
+  } catch (error) {
+    console.error("Error creating Reminder table:", error);
+    throw new Error(
+      "Database error occurred while creating the Reminder table."
+    );
+  } finally {
+    conn.release();
+  }
+};
+
 const createUserTable = async () => {
   const query = userQuery.createUserTable;
   const conn = await pool.getConnection();
@@ -250,5 +266,6 @@ module.exports = {
   createStatusTypeSubTable,
   createAssetTable,
   createExpenseTable,
-  createSupplierTable
+  createSupplierTable,
+  createReminderTable
 };
