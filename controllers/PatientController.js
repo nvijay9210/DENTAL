@@ -59,12 +59,13 @@ exports.updatePatient = async (req, res, next) => {
 exports.updateToothDetails = async (req, res, next) => {
   const {patient_id,tenant_id} = req.params;
   const details = req.body;
+  console.log('details:',details)
   try {
     // Validate update input
-    await patientValidation.updatePatientValidation(patient_id, details,tenant_id);
+    // await patientValidation.updatePatientValidation(patient_id, details,tenant_id);
 
     // Update patient
-    await patientService.updatePatient(data,patient_id,tenant_id);
+    await patientService.updateToothDetails(details,patient_id,tenant_id);
     res.status(200).json({ message: "Patient updated successfully" });
   } catch (err) {
     next(err);

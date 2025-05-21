@@ -179,7 +179,8 @@ const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
 
 
 const updateToothDetails = async (data,patientId,tenant_id) => {
-  data=data?JSON.parse(data):null
+  console.log(data)
+  data=data.length>0?JSON.stringify(data):null
   try {
     const affectedRows = await patientModel.updateToothDetails(data,patientId,tenant_id);
     if (affectedRows === 0) {

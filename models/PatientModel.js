@@ -85,11 +85,12 @@ const checkPatientExistsByTenantIdAndPatientId = async (tenantId, patientId) => 
 };
 
 const updateToothDetails = async (data,patientId,tenantId) => {
+  console.log(data,patientId,tenantId)
   const query = 'update patient set tooth_details=? where patient_id=? and tenant_id';
   const conn = await pool.getConnection();
 
   try {
-    const rows = await conn.query(query, [tenantId, patientId]);
+    const rows = await conn.query(query, [data,patientId,tenantId]);
     return rows[0].affectedRows// Ensure consistent return type (true/false)
   } catch (error) {
     console.error("Error checking patient existence:", error);
