@@ -1,12 +1,15 @@
 const pool = require("../config/db");
 const { CustomError } = require("../middlewares/CustomeError");
 
-
-const getPhonenumberAndAlternateNumberBytenantIdAndTableId = async (table, tenantId, id) => {
+const getPhonenumberAndAlternateNumberBytenantIdAndTableId = async (
+  table,
+  tenantId,
+  id
+) => {
   const tableField = `${table}_id`;
 
   // Validate table name to prevent SQL injection
-  const allowedTables = ['clinic', 'dentist', 'patient', 'hospital'];
+  const allowedTables = ["clinic", "dentist", "patient", "hospital"];
   if (!allowedTables.includes(table)) {
     throw new Error(`Invalid table name: ${table}`);
   }
@@ -64,12 +67,15 @@ const checkGlobalPhoneNumberExists = async (phoneNumber, tenantId) => {
   }
 };
 
-
-
 /**
  * Checks if a phone number already exists in ANY table under the same tenant, excluding current record
  */
-const checkGlobalPhoneNumberExistsWithId = async (table, phoneNumber, id, tenantId) => {
+const checkGlobalPhoneNumberExistsWithId = async (
+  table,
+  phoneNumber,
+  id,
+  tenantId
+) => {
   const conn = await pool.getConnection();
   try {
     const idColumn = `${table}_id`;
@@ -82,7 +88,10 @@ const checkGlobalPhoneNumberExistsWithId = async (table, phoneNumber, id, tenant
       );
 
       if (rows.length > 0) {
-        throw new CustomError(`Phone number already exists in ${targetTable}`, 409);
+        throw new CustomError(
+          `Phone number already exists in ${targetTable}`,
+          409
+        );
       }
     }
 
@@ -95,21 +104,29 @@ const checkGlobalPhoneNumberExistsWithId = async (table, phoneNumber, id, tenant
   }
 };
 
-
 const checkIfIdExists = async (table, field, value) => {
   const conn = await pool.getConnection();
   try {
     // Sanitize table name to prevent SQL injection
-    const allowedTables = ['patient', 'dentist', 'clinic', 'tenant','appointment','treatment','prescription']; // Add your actual table names here
+    const allowedTables = [
+      "patient",
+      "dentist",
+      "clinic",
+      "tenant",
+      "appointment",
+      "treatment",
+      "prescription",
+    ]; // Add your actual table names here
     if (!allowedTables.includes(table)) {
       throw new Error(`Invalid table name: ${table}`);
     }
 
     // Query using proper placeholder for column name and value
-    const [result] = await conn.query(
-      `SELECT 1 FROM ?? WHERE ?? = ? LIMIT 1`,
-      [table, field, value]
-    );
+    const [result] = await conn.query(`SELECT 1 FROM ?? WHERE ?? = ? LIMIT 1`, [
+      table,
+      field,
+      value,
+    ]);
 
     if (result.length === 0) {
       throw new CustomError(`${field} does not exist`, 404);
@@ -124,11 +141,25 @@ const checkIfIdExists = async (table, field, value) => {
   }
 };
 
-const checkIfExists = async (table, field, value,tenantId) => {
+const checkIfExists = async (table, field, value, tenantId) => {
   const conn = await pool.getConnection();
   try {
     // Sanitize table name to prevent SQL injection
-    const allowedTables = ['patient', 'dentist', 'clinic', 'tenant','appointment','treatment','prescription','statustype','statustypesub']; // Add your actual table names here
+    const allowedTables = [
+      "patient",
+      "dentist",
+      "clinic",
+      "tenant",
+      "appointment",
+      "treatment",
+      "prescription",
+      "statustype",
+      "statustypesub",
+      "asset",
+      "expense",
+      "supplier",
+      "reminder",
+    ]; // Add your actual table names here
     if (!allowedTables.includes(table)) {
       throw new Error(`Invalid table name: ${table}`);
     }
@@ -138,10 +169,8 @@ const checkIfExists = async (table, field, value,tenantId) => {
       `SELECT 1 FROM ?? WHERE ?? = ? AND tenant_id = ? LIMIT 1`,
       [table, field, value, tenantId]
     );
-    
 
-     return result.length>0 ? true : false
-
+    return result.length > 0 ? true : false;
   } catch (err) {
     console.error(err);
     throw new CustomError(`Database error: ${err.message}`, 500);
@@ -150,11 +179,28 @@ const checkIfExists = async (table, field, value,tenantId) => {
   }
 };
 
-const checkIfExistsWithoutId = async (table, field, value, excludeField, excludeValue, tenantId) => {
+const checkIfExistsWithoutId = async (
+  table,
+  field,
+  value,
+  excludeField,
+  excludeValue,
+  tenantId
+) => {
   const conn = await pool.getConnection();
   try {
     // Sanitize table name to prevent SQL injection
-    const allowedTables = ['patient', 'dentist', 'clinic', 'tenant','appointment','treatment','prescription','statustype','statustypesub']; // Add your actual table names here
+    const allowedTables = [
+      "patient",
+      "dentist",
+      "clinic",
+      "tenant",
+      "appointment",
+      "treatment",
+      "prescription",
+      "statustype",
+      "statustypesub",
+    ]; // Add your actual table names here
     if (!allowedTables.includes(table)) {
       throw new Error(`Invalid table name: ${table}`);
     }
@@ -164,10 +210,8 @@ const checkIfExistsWithoutId = async (table, field, value, excludeField, exclude
       `SELECT 1 FROM ?? WHERE ?? = ? AND ?? != ? AND tenant_id = ? LIMIT 1`,
       [table, field, value, excludeField, excludeValue, tenantId]
     );
-    
 
-     return result.length>0 ? true : false
-
+    return result.length > 0 ? true : false;
   } catch (err) {
     console.error(err);
     throw new CustomError(`Database error: ${err.message}`, 500);
@@ -182,5 +226,5 @@ module.exports = {
   checkIfIdExists,
   checkIfExists,
   checkIfExistsWithoutId,
-  getPhonenumberAndAlternateNumberBytenantIdAndTableId
+  getPhonenumberAndAlternateNumberBytenantIdAndTableId,
 };
