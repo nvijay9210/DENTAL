@@ -37,5 +37,10 @@ function formatAppointments(rows) {
   });
 }
 
+function isValidDate(dateStr) {
+  const date = new Date(dateStr);
+  return !isNaN(date.getTime());
+}
 
-module.exports = { formatDateOnly, formatAppointments };
+
+module.exports = { formatDateOnly, formatAppointments,isValidDate };

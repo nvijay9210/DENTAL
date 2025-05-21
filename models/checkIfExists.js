@@ -107,20 +107,6 @@ const checkGlobalPhoneNumberExistsWithId = async (
 const checkIfIdExists = async (table, field, value) => {
   const conn = await pool.getConnection();
   try {
-    // Sanitize table name to prevent SQL injection
-    const allowedTables = [
-      "patient",
-      "dentist",
-      "clinic",
-      "tenant",
-      "appointment",
-      "treatment",
-      "prescription",
-    ]; // Add your actual table names here
-    if (!allowedTables.includes(table)) {
-      throw new Error(`Invalid table name: ${table}`);
-    }
-
     // Query using proper placeholder for column name and value
     const [result] = await conn.query(`SELECT 1 FROM ?? WHERE ?? = ? LIMIT 1`, [
       table,

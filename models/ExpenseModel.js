@@ -65,11 +65,25 @@ const deleteExpenseByTenantAndExpenseId = async (tenant_id, expense_id) => {
     const conditionColumn = ["tenant_id", "expense_id"];
     const conditionValue = [tenant_id, expense_id];
 
-    const [result] = await record.deleteRecord(TABLE, conditionColumn, conditionValue);
+    const result = await record.deleteRecord(TABLE, conditionColumn, conditionValue);
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting expense:", error);
     throw new CustomError("Error deleting expense.", 500);
+  }
+};
+
+const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (tenantId, clinicId,startDate,endDate,limit,offset) => {
+  const query = `SELECT * FROM expense WHERE tenant_id = ? AND clinic_id = ? AND expense_date between ? AND ?  limit ? offset ?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, clinicId,startDate,endDate,limit,offset]);
+    return rows;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
   }
 };
 
@@ -81,4 +95,5 @@ module.exports = {
   getExpenseByTenantAndExpenseId,
   updateExpense,
   deleteExpenseByTenantAndExpenseId,
+  getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate
 };

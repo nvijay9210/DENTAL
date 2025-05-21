@@ -77,6 +77,7 @@ module.exports = {
 
   ADD_EXPENSE: "/addexpense",
   GETALL_EXPENSE_TENANT: "/getallexpenses/:tenant_id",
+  GETALL_EXPENSE_REPORT_TENANT_CLINIC: "/getallexpenses/:tenant_id/:clinic_id",
   GET_EXPENSE: "/getexpense/:expense_id",
   UPDATE_EXPENSE_TENANT: "/updateexpense/:expense_id/:tenant_id",
   DELETE_EXPENSE_TENANT: "/deleteexpense/:expense_id/:tenant_id",

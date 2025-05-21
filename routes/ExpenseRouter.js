@@ -8,6 +8,7 @@ const {
   GET_EXPENSE_TENANT,
   UPDATE_EXPENSE_TENANT,
   DELETE_EXPENSE_TENANT,
+  GETALL_EXPENSE_REPORT_TENANT_CLINIC,
 } = require("./RouterPath");
 const expensevalidation = require("../validations/ExpenseValidation");
 
@@ -19,6 +20,8 @@ router.post(
 
 // Get All Expenses by Tenant ID with Pagination
 router.get(GETALL_EXPENSE_TENANT, expenseController.getAllExpensesByTenantId);
+
+router.get(GETALL_EXPENSE_REPORT_TENANT_CLINIC, expenseController.getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate);
 
 // Get Single Expense by Tenant ID & Expense ID
 router.get(GET_EXPENSE_TENANT, expenseController.getExpenseByTenantIdAndExpenseId);

@@ -67,6 +67,54 @@ const getAllExpensesByTenantId = async (
       return result;
     });
 
+    if (expenses && expenses.length > 0) {
+      expenses.forEach((expense) => {
+      
+        // Handling date_of_birth field conversion
+        if (expense.expense_date) {
+          expense.expense_date = formatDateOnly(expense.expense_date);
+        }
+      });
+    }
+
+    return helper.decodeJsonFields(expenses, jsonFields);
+  } catch (err) {
+    console.error("Database error while fetching expenses:", err);
+    throw new CustomError("Failed to fetch expenses", 404);
+  }
+};
+
+const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
+  tenantId,
+  clinicId,
+  startDate,
+  endDate,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `expense:datewise:${tenantId}:page:${page}:limit:${limit}`;
+
+  const jsonFields = ["description"];
+
+  try {
+    const expenses = await getOrSetCache(cacheKey, async () => {
+      const result = await expenseModel.getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate(
+        tenantId, clinicId,startDate,endDate,limit,offset
+      );
+      return result;
+    });
+
+    if (expenses && expenses.length > 0) {
+      expenses.forEach((expense) => {
+      
+        // Handling date_of_birth field conversion
+        if (expense.expense_date) {
+          expense.expense_date = formatDateOnly(expense.expense_date);
+        }
+      });
+    }
+
     return helper.decodeJsonFields(expenses, jsonFields);
   } catch (err) {
     console.error("Database error while fetching expenses:", err);
@@ -161,5 +209,6 @@ module.exports = {
   getAllExpensesByTenantId,
   getExpenseByTenantIdAndExpenseId,
   updateExpense,
-  deleteExpenseByTenantIdAndExpenseId
+  deleteExpenseByTenantIdAndExpenseId,
+  getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate
 };
