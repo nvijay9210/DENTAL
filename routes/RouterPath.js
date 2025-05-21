@@ -76,10 +76,16 @@ module.exports = {
   DELETE_ASSET: "/deleteasset/:asset_id/:tenant_id",
 
   ADD_EXPENSE: "/addexpense",
-  GETALL_EXPENSE_TENANT: "/getallexpenses",
-  GET_EXPENSE: "/getasset/:expense_id",
-  UPDATE_EXPENSE_TENANT: "/updateasset/:expense_id",
-  DELETE_EXPENSE_TENANT: "/deleteasset/:expense_id",
+  GETALL_EXPENSE_TENANT: "/getallexpenses/:tenant_id",
+  GET_EXPENSE: "/getexpense/:expense_id",
+  UPDATE_EXPENSE_TENANT: "/updateexpense/:expense_id/:tenant_id",
+  DELETE_EXPENSE_TENANT: "/deleteexpense/:expense_id/:tenant_id",
+
+  ADD_SUPPLIER: "/addsupplier",
+  GETALL_SUPPLIER_TENANT: "/getallsuppliers/:tenant_id",
+  GET_SUPPLIER: "/getsupplier/:supplier_id",
+  UPDATE_SUPPLIER_TENANT: "/updatesupplier/:supplier_id/:tenant_id",
+  DELETE_SUPPLIER_TENANT: "/deletesupplier/:supplier_id/:tenant_id",
 };
 
 // GET /api/tenant?page=2&limit=10

@@ -330,7 +330,28 @@ CREATE TABLE IF NOT EXISTS expense (
   updated_by VARCHAR(30) DEFAULT NULL,
   updated_time DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(),
   PRIMARY KEY (expense_id),
+  CONSTRAINT fk_expense_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE
   CONSTRAINT fk_expense_clinic FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+`,
+addSupplier: `
+CREATE TABLE IF NOT EXISTS supplier (
+  supplier_id INT(11) NOT NULL AUTO_INCREMENT,
+  tenant_id INT(6) NOT NULL,
+  clinic_id INT(11) NOT NULL,
+  supplier_name VARCHAR(100) NULL,
+  supplier_category VARCHAR(100) NULL,
+  supplier_status VARCHAR(100) NULL,
+  supplier_contact VARACHAR(15) NULL,
+  supplier_country VARCHAR(50) NULL,
+  supplier_performance_rating DECIMAL(3,2) NULL,
+  created_by VARCHAR(30) NOT NULL,
+  created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  updated_by VARCHAR(30) DEFAULT NULL,
+  updated_time DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(),
+  PRIMARY KEY (supplier_id),
+  CONSTRAINT fk_supplier_clinic FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON UPDATE CASCADE
+  CONSTRAINT fk_supplier_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `
 

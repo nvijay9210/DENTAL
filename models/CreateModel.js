@@ -177,6 +177,22 @@ const createExpenseTable = async () => {
   }
 };
 
+const createSupplierTable = async () => {
+  const query =  createTableQuery.addSupplier
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("Supplier table created successfully.");
+  } catch (error) {
+    console.error("Error creating Supplier table:", error);
+    throw new Error(
+      "Database error occurred while creating the Supplier table."
+    );
+  } finally {
+    conn.release();
+  }
+};
+
 const createUserTable = async () => {
   const query = userQuery.createUserTable;
   const conn = await pool.getConnection();
@@ -233,5 +249,6 @@ module.exports = {
   createStatusTypeTable,
   createStatusTypeSubTable,
   createAssetTable,
-  createExpenseTable
+  createExpenseTable,
+  createSupplierTable
 };
