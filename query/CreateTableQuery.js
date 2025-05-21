@@ -314,25 +314,26 @@ CREATE TABLE IF NOT EXISTS tenant (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 `,
-  addExpense: `
-      CREATE TABLE IF NOT EXISTS asset (
-    expense_id int(11) NOT NULL AUTO_INCREMENT,
-    tenant_id int(6) NOT NULL,
-    clinic_id int(11) NOT NULL,
-    expense_amount decimal(10,2) NULL,
-    expense_category varchar(255)  NULL,
-    expense_reason varchar(255)  NULL,
-    expense_date Date  NULL,
-    mode_of_payment varchar(255) NULL,
-    receipt_number varchar(100) NULL,
-    created_by varchar(30) NOT NULL,
-    created_time datetime NOT NULL DEFAULT current_timestamp(),
-    updated_by varchar(30) DEFAULT NULL,
-    updated_time datetime DEFAULT NULL ON UPDATE current_timestamp(),
-    PRIMARY KEY (asset_id)
-      CONSTRAINT fk_expense_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
-    `,
+addExpense: `
+CREATE TABLE IF NOT EXISTS expense (
+  expense_id INT(11) NOT NULL AUTO_INCREMENT,
+  tenant_id INT(6) NOT NULL,
+  clinic_id INT(11) NOT NULL,
+  expense_amount DECIMAL(10,2) NULL,
+  expense_category VARCHAR(255) NULL,
+  expense_reason VARCHAR(255) NULL,
+  expense_date DATE NULL,
+  mode_of_payment VARCHAR(255) NULL,
+  receipt_number VARCHAR(100) NULL,
+  created_by VARCHAR(30) NOT NULL,
+  created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  updated_by VARCHAR(30) DEFAULT NULL,
+  updated_time DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(),
+  PRIMARY KEY (expense_id),
+  CONSTRAINT fk_expense_clinic FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+`
+
 };
 
 module.exports = { createTableQuery };

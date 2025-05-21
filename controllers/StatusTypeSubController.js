@@ -102,15 +102,15 @@ exports.updateStatusTypeSub = async (req, res, next) => {
  * Delete an statusTypeSub by ID and tenant ID
  */
 exports.deleteStatusTypeSubByTenantIdAndStatusTypeSubId = async (req, res, next) => {
-  const { statusTypeSub_id, tenant_id } = req.params;
+  const { status_type_sub_id, tenant_id } = req.params;
 
   try {
     // Validate if statusTypeSub exists
-    const statusTypeSub=await checkIfExists('statusTypeSub','statusTypeSub_id',statusTypeSub_id,tenant_id);
+    const statusTypeSub=await checkIfExists('statustypesub','status_type_sub_id',status_type_sub_id,tenant_id);
     if(!statusTypeSub) throw new CustomError('StatusTypeSubId not Exists',404)
 
     // Delete the statusTypeSub
-    await statusTypeSubService.deleteStatusTypeSubByTenantIdAndStatusTypeSubId(tenant_id, statusTypeSub_id);
+    await statusTypeSubService.deleteStatusTypeSubByTenantIdAndStatusTypeSubId(tenant_id, status_type_sub_id);
     res.status(200).json({ message: "StatusTypeSub deleted successfully" });
   } catch (err) {
     next(err);

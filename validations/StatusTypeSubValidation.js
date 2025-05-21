@@ -9,6 +9,7 @@ const {
   checkIfExistsWithoutId,
 } = require("../models/checkIfExists");
 const { recordExists } = require("../query/Records");
+const statusTypeModel = require("../models/StatusTypeModel");
 
 const createColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },
@@ -65,8 +66,8 @@ const updateStatusTypeSubValidation = async (
 
   if(!idExists) throw new CustomError('statusTypeSubId not exists',404)
   
-    const statusTypeSubExists=await statusTypeSubModel.checkStatusTypeSubExistsByStatusTypeSubAndTenantId(tenantId,details.status_type_sub)
-    if(statusTypeSubExists) throw new CustomError('statusTypeSubject Already exists',409)
+    // const statusTypeSubExists=await statusTypeSubModel.checkStatusTypeSubExistsByStatusTypeSubIdAndStatusTypeIdAndStatusTypeSubAndTenantId(tenantId,details.status_type_id,statusTypeSubId,details.status_type_sub)
+    // if(statusTypeSubExists) throw new CustomError('statusTypeSubject Already exists',409)
 
   const statusTypeSubRefExists =
     await statusTypeSubModel.checkStatusTypeSubRefExistsByStatusTypeSubIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId(

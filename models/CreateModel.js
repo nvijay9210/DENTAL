@@ -162,7 +162,7 @@ const createAssetTable = async () => {
 };
 
 const createExpenseTable = async () => {
-  const query =  createTableQuery.addAsset
+  const query =  createTableQuery.addExpense
   const conn = await pool.getConnection();
   try {
     await conn.query(query);

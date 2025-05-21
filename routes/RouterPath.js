@@ -67,7 +67,7 @@ module.exports = {
   GET_STATUS_TYPE_SUB_STATUS_TYPE:
     "/getstatustypesub_statustype/:status_type/:tenant_id",
   UPDATE_STATUS_TYPE_SUB: "/updatestatustypesub/:status_type_sub_id/:tenant_id",
-  DELETE_STATUS_TYPE_SUB: "/deletestatustypesub/:status_type_sub_id/:tenant_id",
+  DELETE_STATUS_TYPE_SUB_TENANT: "/deletestatustypesub/:status_type_sub_id/:tenant_id",
 
   ADD_ASSET: "/addasset",
   GETALL_ASSET_TENANT: "/getallassets/:tenant_id",

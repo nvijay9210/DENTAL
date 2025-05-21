@@ -85,25 +85,20 @@ const updateStatusTypeSub = async (
 };
 
 // Delete statusTypeSub
-const deleteStatusTypeSubByTenantAndStatusTypeSubId = async (
-  tenant_id,
-  statusTypeSub_id
-) => {
+const deleteStatusTypeSubByTenantAndStatusTypeSubId = async (tenant_id, statusTypeSub_id) => {
   try {
-    const conditionColumn = ["tenant_id", "statusTypeSub_id"];
-    const conditionValue = [tenant_id, statusTypeSub_id];
+    const conditionColumns = ["tenant_id", "status_type_sub_id"];
+    const conditionValues = [tenant_id, statusTypeSub_id];
 
-    const [result] = await record.deleteRecord(
-      TABLE,
-      conditionColumn,
-      conditionValue
-    );
-    return result.affectedRows;
+    const result = await record.deleteRecord(TABLE, conditionColumns, conditionValues);
+    console.log(result)
+    return result.affectedRows || 0;
   } catch (error) {
     console.error("Error deleting statusTypeSub:", error);
     throw new CustomError("Error deleting statusTypeSub.", 500);
   }
 };
+
 
 const getAllStatusTypeSubByStatusTypeAndTenantId = async (
   tenant_id,
@@ -212,6 +207,25 @@ const checkStatusTypeSubExistsByStatusTypeIdAndStatusTypeSubAndTenantId =
     }
   };
 
+  const checkStatusTypeSubExistsByStatusTypeSubIdAndStatusTypeIdAndStatusTypeSubAndTenantId =
+  async (tenant_id, status_type_id,status_type_sub_id, status_type_sub) => {
+    const conn = await pool.getConnection();
+    try {
+      console.log(tenant_id, status_type_id,status_type_sub_id, status_type_sub)
+      const result = await conn.query(
+        "select 1 from goldloan.statustypesub where status_type_id=? and status_type_sub=? and tenant_id=? limit 1",
+        [status_type_id, status_type_sub, tenant_id]
+      );
+
+      return result.length > 0 ? true : false;
+    } catch (err) {
+      console.log(err.message);
+      throw new CustomError(err.message, 404);
+    } finally {
+      conn.release();
+    }
+  };
+
 //step3
 const checkStatusTypeSubRefExistsByStatusTypeIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId =
   async (tenant_id, status_type_id, status_type_sub, status_type_sub_ref) => {
@@ -257,6 +271,7 @@ module.exports = {
   deleteStatusTypeSubByTenantAndStatusTypeSubId,
   getAllStatusTypeSubByStatusTypeAndTenantId,
   checkStatusTypeSubExistsByStatusTypeIdAndStatusTypeSubAndTenantId,
+  checkStatusTypeSubExistsByStatusTypeSubIdAndStatusTypeIdAndStatusTypeSubAndTenantId,
   checkStatusTypeSubRefExistsByStatusTypeIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId,
   checkStatusTypeSubRefExistsByStatusTypeSubIdAndStatusTypeSubAndStatusTypeSubRefAndTenantId,
   getAllStatusTypeSubByTenantIdAndStatusTypeId,
