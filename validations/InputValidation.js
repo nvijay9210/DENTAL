@@ -85,6 +85,7 @@ function validateInput(userInput, columnConfig) {
 
   const sanitizedData = {};
 
+
   for (const column of columnConfig) {
     const {
       columnname,
@@ -96,6 +97,8 @@ function validateInput(userInput, columnConfig) {
     } = column;
 
     let value = userInput[columnname];
+
+    console.log(columnname,type,value)
 
     // Skip empty/undefined if nullable
     if (

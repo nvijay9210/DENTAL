@@ -176,20 +176,20 @@ const checkIfExistsWithoutId = async (
   const conn = await pool.getConnection();
   try {
     // Sanitize table name to prevent SQL injection
-    const allowedTables = [
-      "patient",
-      "dentist",
-      "clinic",
-      "tenant",
-      "appointment",
-      "treatment",
-      "prescription",
-      "statustype",
-      "statustypesub",
-    ]; // Add your actual table names here
-    if (!allowedTables.includes(table)) {
-      throw new Error(`Invalid table name: ${table}`);
-    }
+    // const allowedTables = [
+    //   "patient",
+    //   "dentist",
+    //   "clinic",
+    //   "tenant",
+    //   "appointment",
+    //   "treatment",
+    //   "prescription",
+    //   "statustype",
+    //   "statustypesub",
+    // ]; // Add your actual table names here
+    // if (!allowedTables.includes(table)) {
+    //   throw new Error(`Invalid table name: ${table}`);
+    // }
 
     // Query using proper placeholder for column name and value
     const [result] = await conn.query(

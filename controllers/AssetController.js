@@ -63,7 +63,7 @@ exports.updateAsset = async (req, res, next) => {
   const details = req.body;
 
   try {
-  
+    
     // Validate update input
     await assetValidation.updateAssetValidation(asset_id, details);
 
@@ -89,6 +89,29 @@ exports.deleteAssetByTenantIdAndAssetId = async (req, res, next) => {
     // Delete the asset
     await assetService.deleteAssetByTenantIdAndAssetId(tenant_id, asset_id);
     res.status(200).json({ message: "Asset deleted successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (
+  req,
+  res,
+  next
+) => {
+  const { tenant_id, clinic_id } = req.params;
+  const {start_date, end_date } = req.query;
+  try {
+    if (!(isValidDate(start_date) && isValidDate(end_date)))
+      throw new CustomError("Startdate or enddate format invalid", 400);
+    const assets =
+      await assetService.getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate(
+        tenant_id,
+        clinic_id,
+        start_date,
+        end_date
+      );
+    res.status(200).json(assets);
   } catch (err) {
     next(err);
   }

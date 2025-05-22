@@ -72,8 +72,10 @@ module.exports = {
   ADD_ASSET: "/addasset",
   GETALL_ASSET_TENANT: "/getallassets/:tenant_id",
   GET_ASSET_TENANT: "/getasset/:asset_id/:tenant_id",
-  UPDATE_ASSET: "/updateasset/:asset_id/:tenant_id",
-  DELETE_ASSET: "/deleteasset/:asset_id/:tenant_id",
+  UPDATE_ASSET_TENANT: "/updateasset/:asset_id/:tenant_id",
+  DELETE_ASSET_TENANT: "/deleteasset/:asset_id/:tenant_id",
+  GETALL_ASSET_REPORT_TENANT_CLINIC:"/getallassets/:tenant_id/:clinic_id",
+  GET_EXPENSE: "/getexpense/:expense_id",
 
   ADD_EXPENSE: "/addexpense",
   GETALL_EXPENSE_TENANT: "/getallexpenses/:tenant_id",

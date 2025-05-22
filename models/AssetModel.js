@@ -51,7 +51,7 @@ const updateAsset = async (asset_id, columns, values, tenant_id) => {
   try {
     const conditionColumn = ["tenant_id", "asset_id"];
     const conditionValue = [tenant_id, asset_id];
-
+ 
     return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
     console.error("Error updating asset:", error);
@@ -65,11 +65,25 @@ const deleteAssetByTenantAndAssetId = async (tenant_id, asset_id) => {
     const conditionColumn = ["tenant_id", "asset_id"];
     const conditionValue = [tenant_id, asset_id];
 
-    const [result] = await record.deleteRecord(TABLE, conditionColumn, conditionValue);
+    const result = await record.deleteRecord(TABLE, conditionColumn, conditionValue);
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting asset:", error);
     throw new CustomError("Error deleting asset.", 500);
+  }
+};
+
+const getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (tenantId, clinicId,startDate,endDate) => {
+  const query = `SELECT * FROM asset WHERE tenant_id = ? AND clinic_id = ? AND purchased_date between ? AND ?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, clinicId,startDate,endDate]);
+    return rows;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
   }
 };
 
@@ -81,4 +95,5 @@ module.exports = {
   getAssetByTenantAndAssetId,
   updateAsset,
   deleteAssetByTenantAndAssetId,
+  getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate
 };

@@ -90,10 +90,7 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   startDate,
   endDate
 ) => {
-  const offset = (page - 1) * limit;
   const cacheKey = `expense:datewise:${tenantId}`;
-
-  const jsonFields = ["description"];
 
   try {
     const expenses = await getOrSetCache(cacheKey, async () => {
@@ -113,7 +110,7 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
       });
     }
 
-    return helper.decodeJsonFields(expenses, jsonFields);
+    return expenses
   } catch (err) {
     console.error("Database error while fetching expenses:", err);
     throw new CustomError("Failed to fetch expenses", 404);
@@ -127,17 +124,11 @@ const getExpenseByTenantIdAndExpenseId = async (
 ) => {
   try {
     const expense =
-      await expenseModel.getExpenseByTenantIdAndExpenseId(
+      await expenseModel.getExpenseByTenantAndExpenseId(
         tenantId,
         expenseId
       );
-    const fieldsToDecode = [
-      "medication",
-      "side_effects",
-      "instructions",
-      "notes",
-    ];
-    return decodeJsonFields(expense, fieldsToDecode);
+    return expense
   } catch (error) {
     throw new CustomError("Failed to get expense: " + error.message, 404);
   }

@@ -9,6 +9,7 @@ const {
   GET_ASSET_TENANT,
   UPDATE_ASSET_TENANT,
   DELETE_ASSET_TENANT,
+  GETALL_ASSET_REPORT_TENANT_CLINIC,
 } = require("./RouterPath");
 const assetvalidation = require("../validations/AssetValidation");
 const { uploadFileMiddleware } = require("../utils/UploadFiles");
@@ -39,6 +40,8 @@ router.post(
 
 // Get All Assets by Tenant ID with Pagination
 router.get(GETALL_ASSET_TENANT, assetController.getAllAssetsByTenantId);
+
+router.get(GETALL_ASSET_REPORT_TENANT_CLINIC, assetController.getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate);
 
 // Get Single Asset by Tenant ID & Asset ID
 router.get(GET_ASSET_TENANT, assetController.getAssetByTenantIdAndAssetId);

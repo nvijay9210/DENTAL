@@ -73,6 +73,19 @@ const getAllAssetsByTenantId = async (
       return result;
     });
 
+    if (assets && assets.length > 0) {
+      assets.forEach((asset) => {
+      
+        // Handling date_of_birth field conversion
+        if (asset.purchased_date) {
+          asset.purchased_date = formatDateOnly(asset.purchased_date);
+        }
+        if (asset.expired_date) {
+          asset.expired_date = formatDateOnly(asset.expired_date);
+        }
+      });
+    }
+
     return helper.decodeJsonFields(assets, jsonFields);
   } catch (err) {
     console.error("Database error while fetching assets:", err);
@@ -91,13 +104,14 @@ const getAssetByTenantIdAndAssetId = async (
         tenantId,
         assetId
       );
-    const fieldsToDecode = [
-      "medication",
-      "side_effects",
-      "instructions",
-      "notes",
-    ];
-    return decodeJsonFields(asset, fieldsToDecode);
+      const jsonFields = ["description"];
+      if (asset.purchased_date) {
+        asset.purchased_date = formatDateOnly(asset.purchased_date);
+      }
+      if (asset.expired_date) {
+        asset.expired_date = formatDateOnly(asset.expired_date);
+      }
+      return helper.decodeJsonFields(asset, jsonFields);
   } catch (error) {
     throw new CustomError("Failed to get asset: " + error.message, 404);
   }
@@ -124,6 +138,7 @@ const updateAsset = async (assetId, data, tenant_id) => {
       };
   try {
     const { columns, values } = mapFields(data, fieldMap);
+    
     const affectedRows = await assetModel.updateAsset(
       assetId,
       columns,
@@ -168,10 +183,49 @@ const deleteAssetByTenantIdAndAssetId = async (
   }
 };
 
+const getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (
+  tenantId,
+  clinicId,
+  startDate,
+  endDate
+) => {
+  const cacheKey = `asset:datewise:${tenantId}`;
+
+  const jsonFields = ["description"];
+
+  try {
+    const assets = await getOrSetCache(cacheKey, async () => {
+      const result = await assetModel.getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate(
+        tenantId, clinicId,startDate,endDate
+      );
+      return result;
+    });
+
+    if (assets && assets.length > 0) {
+      assets.forEach((asset) => {
+      
+        // Handling date_of_birth field conversion
+        if (asset.purchased_date) {
+          asset.purchased_date = formatDateOnly(asset.purchased_date);
+        }
+        if (asset.expired_date) {
+          asset.expired_date = formatDateOnly(asset.expired_date);
+        }
+      });
+    }
+
+    return helper.decodeJsonFields(assets, jsonFields);
+  } catch (err) {
+    console.error("Database error while fetching assets:", err);
+    throw new CustomError("Failed to fetch assets", 404);
+  }
+};
+
 module.exports = {
   createAsset,
   getAllAssetsByTenantId,
   getAssetByTenantIdAndAssetId,
   updateAsset,
-  deleteAssetByTenantIdAndAssetId
+  deleteAssetByTenantIdAndAssetId,
+  getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate
 };
