@@ -20,12 +20,13 @@ const createSupplier = async (data) => {
   const fieldMap = {
     tenant_id: (val) => val,
     clinic_id: (val) => val,
-    supplier_date:(val)=>val,
+    supplier_name:(val)=>val,
     supplier_category:(val)=>val,
-    supplier_reason:(val)=>val,
-    supplier_amount:(val)=>val,
-    mode_of_payment:(val)=>val,
-    receipt_number:(val)=>val,
+    supplier_status:(val)=>val,
+    payment_status:(val)=>val,
+    supplier_contact:(val)=>val,
+    supplier_country:(val)=>val,
+    supplier_performance_rating:(val)=>val,
     created_by: (val) => val,
   };
   try {
@@ -99,17 +100,18 @@ const getSupplierByTenantIdAndSupplierId = async (
 
 // Update Supplier
 const updateSupplier = async (supplierId, data, tenant_id) => {
-    const fieldMap = {
-        tenant_id: (val) => val,
-        clinic_id: (val) => val,
-        supplier_date:(val)=>val,
-        supplier_category:(val)=>val,
-        supplier_reason:(val)=>val,
-        supplier_amount:(val)=>val,
-        mode_of_payment:(val)=>val,
-        receipt_number:(val)=>val,
-        updated_by: (val) => val,
-      };
+  const fieldMap = {
+    tenant_id: (val) => val,
+    clinic_id: (val) => val,
+    supplier_name:(val)=>val,
+    supplier_category:(val)=>val,
+    supplier_status:(val)=>val,
+    payment_status:(val)=>val,
+    supplier_contact:(val)=>val,
+    supplier_country:(val)=>val,
+    supplier_performance_rating:(val)=>val,
+    updated_by: (val) => val,
+  };
   try {
     const { columns, values } = mapFields(data, fieldMap);
     const affectedRows = await supplierModel.updateSupplier(

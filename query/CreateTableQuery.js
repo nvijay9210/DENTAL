@@ -342,6 +342,7 @@ CREATE TABLE IF NOT EXISTS supplier (
   supplier_name VARCHAR(100) NULL,
   supplier_category VARCHAR(100) NULL,
   supplier_status VARCHAR(100) NULL,
+  payment_status VARCHAR(100) NULL,
   supplier_contact VARCHAR(15) NULL,
   supplier_country VARCHAR(50) NULL,
   supplier_performance_rating DECIMAL(3,2) NULL,
