@@ -3,7 +3,8 @@ const dentistService = require("../services/DentistService");
 const { validatePhonesGlobally } = require("../utils/PhoneValidationHelper");
 const {
   checkIfExistsWithoutId,
-  checkIfExists
+  checkIfExists,
+  checkIfIdExists
 } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
@@ -29,7 +30,7 @@ const createColumnConfig = [
     type: "varchar",
     size: 50,
     null: false,
-    pattern: /^[a-zA-Z\s]{2,50}$/,
+    pattern: /^[a-zA-Z\s]{1,50}$/,
   },
   { columnname: "gender", type: "varchar", size: 10, null: true },
   { columnname: "date_of_birth", type: "date", null: true },
@@ -112,12 +113,12 @@ const createColumnConfig = [
     null: true,
     data_type: "json",
   },
-  // {
-  //   columnname: "awards_certifications",
-  //   type: "text",
-  //   size: 255,
-  //   null: true,
-  // },
+  {
+    columnname: "awards_certifications",
+    type: "text",
+    size: 255,
+    null: true,
+  },
   { columnname: "social_links", type: "text", null: true, data_type: "json" },
   { columnname: "last_login", type: "timestamp", null: true },
   { columnname: "created_by", type: "varchar", size: 20, null: false },
@@ -275,7 +276,7 @@ const validateUniqueFields = async (
 const createDentistValidation = async (details) => {
 
   validateInput(details, createColumnConfig);
-  await checkTenantExistsByTenantIdValidation(details.tenant_id);
+  await checkIfIdExists("tenant",'tenant_id',details.tenant_id);
   await validateDentistPhones(details);
   await validateUniqueFields(details);
 };

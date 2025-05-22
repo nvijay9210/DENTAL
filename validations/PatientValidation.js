@@ -27,7 +27,7 @@ const CreateColumnConfig = [
     type: "varchar",
     size: 50,
     null: false,
-    pattern: /^[a-zA-Z\s]{2,50}$/,
+    pattern: /^[a-zA-Z\s]{1,50}$/,
   },
   {
     columnname: "email",

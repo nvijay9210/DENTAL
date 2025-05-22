@@ -98,8 +98,6 @@ function validateInput(userInput, columnConfig) {
 
     let value = userInput[columnname];
 
-    console.log(columnname,type,value)
-
     // Skip empty/undefined if nullable
     if (
       (value === undefined || value === "null" || value === "") &&

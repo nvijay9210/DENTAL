@@ -65,7 +65,7 @@ const deleteSupplierByTenantAndSupplierId = async (tenant_id, supplier_id) => {
     const conditionColumn = ["tenant_id", "supplier_id"];
     const conditionValue = [tenant_id, supplier_id];
 
-    const [result] = await record.deleteRecord(TABLE, conditionColumn, conditionValue);
+    const result = await record.deleteRecord(TABLE, conditionColumn, conditionValue);
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting supplier:", error);

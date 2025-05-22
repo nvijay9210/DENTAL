@@ -30,18 +30,31 @@ const uploadFileMiddleware = (options) => {
 
       const uploadedFiles = {};
       const tenant_id = req.body.tenant_id || req.params.tenant_id;
-      const id =
-        req.params.clinic_id ||
-        req.params.patient_id ||
-        req.params.dentist_id;
+      switch (folderName) {
+        case "Clinic":
+          id = req.params.clinic_id;
+          break;
+        case "Dentist":
+          id = req.params.dentist_id;
+          break;
+        case "Patient":
+          id = req.params.patient_id;
+          break;
+        case "Treatment":
+          id = req.params.treatment_id;
+          break;
 
-      // if (id) {
-      //   console.log("update validation activated");
-      //   await updateValidationFn(id, req.body, tenant_id);
-      // } else {
-      //   console.log("create validation activated");
-      //   await createValidationFn(req.body);
-      // }
+        default:
+          break;
+      }
+  
+      if (id) {
+        console.log("update validation activated");
+        await updateValidationFn(id, req.body, tenant_id);
+      } else {
+        console.log("create validation activated");
+        await createValidationFn(req.body);
+      }
 
       const baseTenantPath = path.join(
         path.dirname(__dirname),
@@ -53,7 +66,10 @@ const uploadFileMiddleware = (options) => {
       // Process each file field definition
       for (const fileField of fileFields) {
         // Filter uploaded files whose fieldname starts with this field name
-        const files = req.files?.filter(file => file.fieldname.startsWith(fileField.fieldName)) || [];
+        const files =
+          req.files?.filter((file) =>
+            file.fieldname.startsWith(fileField.fieldName)
+          ) || [];
 
         if (files.length > 0) {
           const savedPaths = [];
@@ -65,7 +81,10 @@ const uploadFileMiddleware = (options) => {
             const maxSizeBytes = fileField.maxSizeMB * 1024 * 1024;
             if (file.size > maxSizeBytes) {
               return res.status(400).json({
-                message: `${fileField.fieldName.replace(/_/g, " ")} must be less than ${fileField.maxSizeMB}MB`,
+                message: `${fileField.fieldName.replace(
+                  /_/g,
+                  " "
+                )} must be less than ${fileField.maxSizeMB}MB`,
               });
             }
 
@@ -73,11 +92,20 @@ const uploadFileMiddleware = (options) => {
             const resizedImage = await compressImage(file.buffer, 100);
 
             // ✅ Construct File Path
-            const fieldTenantPath = path.join(baseTenantPath, fileField.subFolder);
+            const fieldTenantPath = path.join(
+              baseTenantPath,
+              fileField.subFolder
+            );
             const originalFileName = path.parse(file.originalname).name;
             const extension = path.extname(file.originalname).toLowerCase();
-            const fileName = `${originalFileName}_${Date.now()}_${Math.floor(Math.random() * 10000)}${extension}`;
-            const savedPath = await saveFile(resizedImage, fieldTenantPath, fileName);
+            const fileName = `${originalFileName}_${Date.now()}_${Math.floor(
+              Math.random() * 10000
+            )}${extension}`;
+            const savedPath = await saveFile(
+              resizedImage,
+              fieldTenantPath,
+              fileName
+            );
 
             // ✅ Handle Descriptions
             if (fileField.fieldName === "awards_certifications") {
@@ -99,7 +127,8 @@ const uploadFileMiddleware = (options) => {
           if (fileField.multiple) {
             req.body[fileField.fieldName] = savedPaths;
           } else {
-            req.body[fileField.fieldName] = savedPaths[0]?.[fileField.fieldName];
+            req.body[fileField.fieldName] =
+              savedPaths[0]?.[fileField.fieldName];
           }
 
           uploadedFiles[fileField.fieldName] = savedPaths;
@@ -108,10 +137,9 @@ const uploadFileMiddleware = (options) => {
 
       console.log("Uploaded files:", uploadedFiles);
       next();
-
     } catch (error) {
       console.error("Error uploading files:", error.message);
-      return res.status(500).json({ message: error.message});
+      return res.status(500).json({ message: error.message });
     }
   };
 };

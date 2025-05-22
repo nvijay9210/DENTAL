@@ -13,7 +13,6 @@ const validateColumnValueLengthMatch = (columns, values) => {
 
 const createDentist = async (table, columns, values) => {
   try {
-    validateColumnValueLengthMatch(columns, values);
     const dentist = await record.createRecord(table, columns, values);
     return dentist.insertId;
   } catch (error) {
