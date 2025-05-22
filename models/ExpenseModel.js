@@ -73,11 +73,11 @@ const deleteExpenseByTenantAndExpenseId = async (tenant_id, expense_id) => {
   }
 };
 
-const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (tenantId, clinicId,startDate,endDate,limit,offset) => {
-  const query = `SELECT * FROM expense WHERE tenant_id = ? AND clinic_id = ? AND expense_date between ? AND ?  limit ? offset ?`;
+const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (tenantId, clinicId,startDate,endDate) => {
+  const query = `SELECT * FROM expense WHERE tenant_id = ? AND clinic_id = ? AND expense_date between ? AND ?`;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, clinicId,startDate,endDate,limit,offset]);
+    const [rows] = await conn.query(query, [tenantId, clinicId,startDate,endDate]);
     return rows;
   } catch (error) {
     console.error(error);
