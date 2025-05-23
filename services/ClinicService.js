@@ -48,6 +48,44 @@ const clinicFieldMap = {
   wifi: helper.parseBoolean,
 };
 
+const clinicFieldReverseMap = {
+  tenant_id: val => val,
+  clinic_name: val => val,
+  email: val => val,
+  phone_number: val => val,
+  alternate_phone_number: val => val,
+  branch: val => val,
+  website: val => val,
+  address: val => val,
+  city: val => val,
+  state: val => val,
+  country: val => val,
+  pin_code: val => val,
+  license_number: val => val,
+  gst_number: val => val,
+  pan_number: val => val,
+  established_year: val => parseInt(val) || 0,
+  total_doctors: val => parseInt(val) || null,
+  total_patients: val => parseInt(val) || null,
+  total_dental_chairs: val => parseInt(val) || null,
+  number_of_assistants: val => parseInt(val) || null,
+  available_services: val => helper.safeJsonParse(val),
+  operating_hours: val => helper.safeJsonParse(val),
+  insurance_supported: val => Boolean(val),
+  ratings: val => parseFloat(val) || 0,
+  reviews_count: val => parseInt(val) || 0,
+  emergency_support: val => Boolean(val),
+  teleconsultation_supported: val => Boolean(val),
+  clinic_logo: val => val,
+  parking_availability: val => Boolean(val),
+  pharmacy: val => Boolean(val),
+  wifi: val => Boolean(val),
+  created_by: val => val,
+  created_time: val => val ? new Date(val).toISOString() : null,
+  updated_by: val => val,
+  updated_time: val => val ? new Date(val).toISOString() : null
+};
+
 // -------------------- CREATE --------------------
 const createClinic = async (data) => {
   const createClinicFieldMap = {
@@ -100,15 +138,15 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `clinics:${tenantId}:page:${page}:limit:${limit}`;
 
-  const jsonFields = ["available_services", "operating_hours"];
-  const booleanFields = [
-    "insurance_supported",
-    "emergency_support",
-    "teleconsultation_supported",
-    "parking_availability",
-    "pharmacy",
-    "wifi",
-  ];
+  // const jsonFields = ["available_services", "operating_hours"];
+  // const booleanFields = [
+  //   "insurance_supported",
+  //   "emergency_support",
+  //   "teleconsultation_supported",
+  //   "parking_availability",
+  //   "pharmacy",
+  //   "wifi",
+  // ];
 
   try {
     const clinics = await getOrSetCache(cacheKey, async () => {
@@ -120,9 +158,12 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const parsed = helper.decodeJsonFields(clinics, jsonFields);
-    parsed.forEach((c) => helper.mapBooleanFields(c, booleanFields));
-    return parsed;
+  //   const parsed = helper.decodeJsonFields(clinics, jsonFields);
+  //   parsed.forEach((c) => helper.mapBooleanFields(c, booleanFields));
+
+  const convertedRows = clinics.map(clinic => helper.convertDbToFrontend(clinic, clinicFieldReverseMap));
+
+    return convertedRows;
   } catch (err) {
     console.error(err);
     throw new CustomError(message.CLINICS_FETCH_FAIL, 404);

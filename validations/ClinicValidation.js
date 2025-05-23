@@ -10,6 +10,7 @@ const { recordExists } = require("../query/Records");
 const {
   checkDentistExistsUsingTenantIdAndClinicIdAnddentistId,
 } = require("../models/DentistModel");
+const { validatePhonesGlobally } = require("../utils/PhoneValidationHelper");
 
 const uniqueFields = ["email", "gst_number", "license_number", "pan_number"];
 

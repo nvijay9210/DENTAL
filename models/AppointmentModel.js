@@ -1,6 +1,4 @@
 const pool = require("../config/db");
-const { CustomError } = require("../middlewares/CustomeError");
-const { appointmentQuery } = require("../query/AppoinmentQuery");
 const helper = require("../utils/Helpers");
 const record = require("../query/Records");
 
@@ -101,32 +99,6 @@ const deleteAppointmentByTenantIdAndAppointmentId = async (
   } catch (error) {
     console.error("Error executing query:", error);
     throw new Error("Error deleting appointment.");
-  }
-};
-
-const checkAppointmentExistsByAppointmentId = async (
-  tenantId,
-  clinic_id,
-  patient_id,
-  dentist_id,
-  appointmentId
-) => {
-  const query = `SELECT EXISTS(SELECT 1 FROM appointment WHERE tenant_id=? and clinic_id=? and patient_id=? and dentist_id=? AND appointment_id=?) as exists`;
-  const conn = await pool.getConnection();
-  try {
-    const [rows] = await conn.query(query, [
-      tenantId,
-      clinic_id,
-      patient_id,
-      dentist_id,
-      appointmentId,
-    ]);
-    return rows[0].exists;
-  } catch (error) {
-    console.log(error);
-    throw new Error("Database Query Error");
-  } finally {
-    conn.release();
   }
 };
 

@@ -1,7 +1,4 @@
 const pool = require("../config/db");
-const { CustomError } = require("../middlewares/CustomeError");
-const { patientQuery } = require("../query/PatientQuery");
-const helper = require('../utils/Helpers');
 const record = require('../query/Records');
 
 // Assuming Helper method for column/value length match

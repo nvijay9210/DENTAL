@@ -1,15 +1,6 @@
 const pool = require("../config/db");
-const { CustomError } = require("../middlewares/CustomeError");
-const { dentistQuery } = require("../query/DentistQuery");
 const helper = require("../utils/Helpers");
 const record = require("../query/Records");
-
-// Assuming Helper method for column/value length match
-const validateColumnValueLengthMatch = (columns, values) => {
-  if (columns.length !== values.length) {
-    throw new Error("Columns and values do not match in length.");
-  }
-};
 
 const createDentist = async (table, columns, values) => {
   try {
@@ -106,7 +97,7 @@ const checkDentistExistsByTenantIdAndDentistId = async (
 };
 
 const getAllDentistsByTenantIdAndClinicId = async (tenantId, clinicId,limit,offset) => {
-  const query = `SELECT d.dentist_id, CONCAT(d.first_name, ' ', d.last_name) AS doctor_name,d.specialization,d.profile_picture FROM dentist d join clinic c on c.clinic_id = d.clinic_id WHERE d.tenant_id = ? AND d.clinic_id = ? limit ? offset ?`;
+  const query = `SELECT d.dentist_id, CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,d.specialisation,d.profile_picture FROM dentist d join clinic c on c.clinic_id = d.clinic_id WHERE d.tenant_id = ? AND d.clinic_id = ? limit ? offset ?`;
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query, [tenantId, clinicId,limit,offset]);
