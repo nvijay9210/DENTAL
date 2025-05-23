@@ -211,7 +211,7 @@ const createTableQuery = {
   medication text DEFAULT NULL,
   generic_name varchar(255) DEFAULT NULL,
   brand_name varchar(255) DEFAULT NULL,
-  dosage text DEFAULT NULL,
+  dosage int(4) DEFAULT NULL,
   frequency varchar(50) DEFAULT NULL,
   quantity int(11) DEFAULT NULL,
   refill_allowed tinyint(1) DEFAULT 0,

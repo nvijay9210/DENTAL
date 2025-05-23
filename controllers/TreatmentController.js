@@ -27,9 +27,13 @@ exports.createTreatment = async (req, res, next) => {
 exports.getAllTreatmentsByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
   const { page, limit } = req.query;
-
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
-    const treatments = await treatmentService.getAllTreatmentsByTenantId(tenant_id, page, limit);
+    const treatments = await treatmentService.getAllTreatmentsByTenantId(
+      tenant_id,
+      page,
+      limit
+    );
     res.status(200).json(treatments);
   } catch (err) {
     next(err);
@@ -37,11 +41,24 @@ exports.getAllTreatmentsByTenantId = async (req, res, next) => {
 };
 
 exports.getAllTreatmentsByTenantAndPatientId = async (req, res, next) => {
-  const { tenant_id,patient_id } = req.params;
+  const { tenant_id, patient_id } = req.params;
   const { page, limit } = req.query;
+  const patient1 = await checkIfExists(
+    "patient",
+    "patient_id",
+    patient_id,
+    tenant_id
+  );
 
+  if (!patient1) throw new CustomError("Patient not found", 404);
   try {
-    const treatments = await treatmentService.getAllTreatmentsByTenantAndPatientId(tenant_id, patient_id,page, limit);
+    const treatments =
+      await treatmentService.getAllTreatmentsByTenantAndPatientId(
+        tenant_id,
+        patient_id,
+        page,
+        limit
+      );
     res.status(200).json(treatments);
   } catch (err) {
     next(err);
@@ -53,13 +70,27 @@ exports.getAllTreatmentsByTenantAndPatientId = async (req, res, next) => {
  */
 exports.getTreatmentByTenantIdAndTreatmentId = async (req, res, next) => {
   const { treatment_id, tenant_id } = req.params;
+  const treatment = await checkIfExists(
+    "treatment",
+    "treatment_id",
+    treatment_id,
+    tenant_id
+  );
+  if (!treatment) throw new CustomError("Treatment not found", 404);
 
   try {
     // Validate if treatment exists
-    await treatmentValidation.checkTreatmentExistsByIdValidation(tenant_id, treatment_id);
+    await treatmentValidation.checkTreatmentExistsByIdValidation(
+      tenant_id,
+      treatment_id
+    );
 
     // Fetch treatment details
-    const treatment = await treatmentService.getTreatmentByTenantIdAndTreatmentId(tenant_id, treatment_id);
+    const treatment =
+      await treatmentService.getTreatmentByTenantIdAndTreatmentId(
+        tenant_id,
+        treatment_id
+      );
     res.status(200).json(treatment);
   } catch (err) {
     next(err);
@@ -74,9 +105,12 @@ exports.updateTreatment = async (req, res, next) => {
   const details = req.body;
 
   try {
-
     // Validate update input
-    await treatmentValidation.updateTreatmentValidation(treatment_id,details, tenant_id);
+    await treatmentValidation.updateTreatmentValidation(
+      treatment_id,
+      details,
+      tenant_id
+    );
 
     // Update the treatment
     await treatmentService.updateTreatment(treatment_id, details, tenant_id);
@@ -94,13 +128,21 @@ exports.deleteTreatmentByTenantIdAndTreatmentId = async (req, res, next) => {
 
   try {
     // Validate if treatment exists
-    const treatment=await checkIfExists('treatment','treatment_id',treatment_id,tenant_id);
-    if(!treatment) throw new CustomError('TreatmentId not Exists',404)
+    const treatment = await checkIfExists(
+      "treatment",
+      "treatment_id",
+      treatment_id,
+      tenant_id
+    );
+    if (!treatment) throw new CustomError("TreatmentId not Exists", 404);
 
     // Delete the treatment
-    await treatmentService.deleteTreatmentByTenantIdAndTreatmentId(tenant_id, treatment_id);
+    await treatmentService.deleteTreatmentByTenantIdAndTreatmentId(
+      tenant_id,
+      treatment_id
+    );
     res.status(200).json({ message: "Treatment deleted successfully" });
   } catch (err) {
     next(err);
   }
-}
+};

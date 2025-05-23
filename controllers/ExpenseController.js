@@ -2,6 +2,9 @@ const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
 const expenseService = require("../services/ExpenseService");
 const { isValidDate } = require("../utils/DateUtils");
+const {
+  validateTenantIdAndPageAndLimit,
+} = require("../validations/CommonValidations");
 const expenseValidation = require("../validations/ExpenseValidation");
 
 /**
@@ -28,6 +31,7 @@ exports.createExpense = async (req, res, next) => {
 exports.getAllExpensesByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
   const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
     const expenses = await expenseService.getAllExpensesByTenantId(
       tenant_id,
@@ -46,7 +50,7 @@ exports.getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   next
 ) => {
   const { tenant_id, clinic_id } = req.params;
-  const {start_date, end_date } = req.query;
+  const { start_date, end_date } = req.query;
   try {
     if (!(isValidDate(start_date) && isValidDate(end_date)))
       throw new CustomError("Startdate or enddate format invalid", 400);

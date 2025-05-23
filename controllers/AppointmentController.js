@@ -1,5 +1,7 @@
+const { checkIfIdExists } = require("../models/checkIfExists");
 const appointmentService = require("../services/AppointmentService");
 const appointmentValidation = require("../validations/AppointmentValidation");
+const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 
 /**
  * Create a new appointment
@@ -25,9 +27,13 @@ exports.createAppointment = async (req, res, next) => {
 exports.getAllAppointmentsByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
   const { page, limit } = req.query;
-
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
-    const appointments = await appointmentService.getAllAppointmentsByTenantId(tenant_id, page, limit);
+    const appointments = await appointmentService.getAllAppointmentsByTenantId(
+      tenant_id,
+      page,
+      limit
+    );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
@@ -41,11 +47,21 @@ exports.getAppointmentByTenantIdAndAppointmentId = async (req, res, next) => {
   const { appointment_id, tenant_id } = req.params;
 
   try {
-    // Validate if appointment exists
-    await appointmentValidation.checkAppointmentExistsByIdValidation(tenant_id, appointment_id);
+    const appointment1 = await checkIfExists(
+      "appointment",
+      "appointment_id",
+      appointment_id,
+      tenant_id
+    );
+
+    if (!appointment1) throw new CustomError("Appointment not found", 404);
 
     // Fetch appointment details
-    const appointment = await appointmentService.getAppointmentByTenantIdAndAppointmentId(tenant_id, appointment_id);
+    const appointment =
+      await appointmentService.getAppointmentByTenantIdAndAppointmentId(
+        tenant_id,
+        appointment_id
+      );
     res.status(200).json(appointment);
   } catch (err) {
     next(err);
@@ -61,10 +77,21 @@ exports.updateAppointment = async (req, res, next) => {
 
   try {
     // Validate if appointment exists before update
-    await appointmentValidation.checkAppointmentExistsByIdValidation(tenant_id, appointment_id);
+    const appointment1 = await checkIfExists(
+      "appointment",
+      "appointment_id",
+      appointment_id,
+      tenant_id
+    );
+
+    if (!appointment1) throw new CustomError("Appointment not found", 404);
 
     // Validate update input
-    await appointmentValidation.updateAppointmentValidation(appointment_id, details, tenant_id);
+    await appointmentValidation.updateAppointmentValidation(
+      appointment_id,
+      details,
+      tenant_id
+    );
 
     // Check for overlapping appointments (skipping current one)
     const isOverlapping = await appointmentService.checkOverlappingAppointment(
@@ -81,11 +108,17 @@ exports.updateAppointment = async (req, res, next) => {
     );
 
     if (isOverlapping) {
-      throw new Error("Updated appointment overlaps with another existing appointment.");
+      throw new Error(
+        "Updated appointment overlaps with another existing appointment."
+      );
     }
 
     // Update the appointment
-    await appointmentService.updateAppointment(appointment_id, details, tenant_id);
+    await appointmentService.updateAppointment(
+      appointment_id,
+      details,
+      tenant_id
+    );
     res.status(200).json({ message: "Appointment updated successfully" });
   } catch (err) {
     next(err);
@@ -95,15 +128,28 @@ exports.updateAppointment = async (req, res, next) => {
 /**
  * Delete an appointment by ID and tenant ID
  */
-exports.deleteAppointmentByTenantIdAndAppointmentId = async (req, res, next) => {
+exports.deleteAppointmentByTenantIdAndAppointmentId = async (
+  req,
+  res,
+  next
+) => {
   const { appointment_id, tenant_id } = req.params;
 
   try {
     // Validate if appointment exists
-    await appointmentValidation.checkAppointmentExistsByIdValidation(tenant_id, appointment_id);
+    const appointment1 = await checkIfExists(
+      "appointment",
+      "appointment_id",
+      appointment_id,
+      tenant_id
+    );
 
+    if (!appointment1) throw new CustomError("Appointment not found", 404);
     // Delete the appointment
-    await appointmentService.deleteAppointmentByTenantIdAndAppointmentId(tenant_id, appointment_id);
+    await appointmentService.deleteAppointmentByTenantIdAndAppointmentId(
+      tenant_id,
+      appointment_id
+    );
     res.status(200).json({ message: "Appointment deleted successfully" });
   } catch (err) {
     next(err);
@@ -111,10 +157,19 @@ exports.deleteAppointmentByTenantIdAndAppointmentId = async (req, res, next) => 
 };
 
 exports.getAppointmentsWithDetails = async (req, res, next) => {
-  const { tenant_id,clinic_id,dentist_id } = req.params;
-  const {page,limit}=req.query
+  const { tenant_id, clinic_id, dentist_id } = req.params;
+  const { page, limit } = req.query;
   try {
-    const appointments = await appointmentService.getAppointmentsWithDetails(tenant_id,clinic_id,dentist_id, page, limit);
+    await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+    await checkIfIdExists('clinic','clinic_id',clinic_id)
+    await checkIfIdExists('dentist','dentist_id',dentist_id)
+    const appointments = await appointmentService.getAppointmentsWithDetails(
+      tenant_id,
+      clinic_id,
+      dentist_id,
+      page,
+      limit
+    );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
@@ -122,22 +177,43 @@ exports.getAppointmentsWithDetails = async (req, res, next) => {
 };
 
 exports.getAppointmentMonthlySummary = async (req, res, next) => {
-  const { tenant_id,clinic_id,dentist_id } = req.params;
-
+  const { tenant_id, clinic_id, dentist_id } = req.params;
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  await checkIfIdExists('dentist','dentist_id',dentist_id)
   try {
-    const appointments = await appointmentService.getAppointmentMonthlySummary(tenant_id,clinic_id,dentist_id);
+    const appointments = await appointmentService.getAppointmentMonthlySummary(
+      tenant_id,
+      clinic_id,
+      dentist_id
+    );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
   }
 };
 
-exports.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (req, res, next) => {
-  const { tenant_id,clinic_id,patient_id } = req.params;
-  const {limit,page}=req.query
+exports.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
+  req,
+  res,
+  next
+) => {
+  const { tenant_id, clinic_id, patient_id } = req.params;
+  const { limit, page } = req.query;
+
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+    await checkIfIdExists('clinic','clinic_id',clinic_id)
+    await checkIfIdExists('patient','patient_id',patient_id)
 
   try {
-    const appointments = await appointmentService.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId(tenant_id,clinic_id,patient_id,page,limit);
+    const appointments =
+      await appointmentService.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId(
+        tenant_id,
+        clinic_id,
+        patient_id,
+        page,
+        limit
+      );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);

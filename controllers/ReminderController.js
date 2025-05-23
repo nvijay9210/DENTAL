@@ -26,8 +26,13 @@ exports.createReminder = async (req, res, next) => {
 exports.getAllRemindersByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
   const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
-    const reminders = await reminderService.getAllRemindersByTenantId(tenant_id, page, limit);
+    const reminders = await reminderService.getAllRemindersByTenantId(
+      tenant_id,
+      page,
+      limit
+    );
     res.status(200).json(reminders);
   } catch (err) {
     next(err);
@@ -41,8 +46,14 @@ exports.getReminderByTenantIdAndReminderId = async (req, res, next) => {
   const { reminder_id, tenant_id } = req.params;
 
   try {
-    // Validate if reminder exists
-    await reminderValidation.checkReminderExistsByIdValidation(tenant_id, reminder_id);
+    const reminder1 = await checkIfExists(
+      "reminder",
+      "reminder_id",
+      reminder_id,
+      tenant_id
+    );
+
+    if (!reminder1) throw new CustomError("Reminder not found", 404);
 
     // Fetch reminder details
     const reminder = await reminderService.getReminderByTenantIdAndReminderId(
@@ -59,11 +70,10 @@ exports.getReminderByTenantIdAndReminderId = async (req, res, next) => {
  * Update an existing reminder
  */
 exports.updateReminder = async (req, res, next) => {
-  const { reminder_id,tenant_id } = req.params;
+  const { reminder_id, tenant_id } = req.params;
   const details = req.body;
 
   try {
-  
     // Validate update input
     await reminderValidation.updateReminderValidation(reminder_id, details);
 
@@ -83,11 +93,20 @@ exports.deleteReminderByTenantIdAndReminderId = async (req, res, next) => {
 
   try {
     // Validate if reminder exists
-    const treatment=await checkIfExists('reminder','reminder_id',reminder_id,tenant_id);
-    if(!treatment) throw new CustomError('reminderId not Exists',404)
+    const reminder1 = await checkIfExists(
+      "reminder",
+      "reminder_id",
+      reminder_id,
+      tenant_id
+    );
+
+    if (!reminder1) throw new CustomError("Reminder not found", 404);
 
     // Delete the reminder
-    await reminderService.deleteReminderByTenantIdAndReminderId(tenant_id, reminder_id);
+    await reminderService.deleteReminderByTenantIdAndReminderId(
+      tenant_id,
+      reminder_id
+    );
     res.status(200).json({ message: "Reminder deleted successfully" });
   } catch (err) {
     next(err);

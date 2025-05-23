@@ -22,7 +22,7 @@ const prescriptionFields = {
   medication: helper.safeStringify,
   generic_name: (val) => val || null,
   brand_name: (val) => val || null,
-  dosage: helper.safeStringify,
+  dosage: val=>parseInt(val),
   frequency: (val) => val || null,
   quantity: (val) => val || null,
   refill_allowed: helper.parseBoolean,
@@ -35,6 +35,7 @@ const prescriptionFields = {
   is_active: helper.parseBoolean,
 };
 const prescriptionFieldsReversMap = {
+  prescription_id:val=>val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   patient_id: (val) => val,
@@ -43,7 +44,7 @@ const prescriptionFieldsReversMap = {
   medication: helper.safeJsonParse,
   generic_name: (val) => val || null,
   brand_name: (val) => val || null,
-  dosage: helper.safeJsonParse,
+  dosage: val=>val,
   frequency: (val) => val || null,
   quantity: (val) => val || null,
   refill_allowed: val => Boolean(val),

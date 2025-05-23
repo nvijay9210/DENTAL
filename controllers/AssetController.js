@@ -1,6 +1,7 @@
 const { checkIfExists } = require("../models/checkIfExists");
 const assetService = require("../services/AssetService");
 const assetValidation = require("../validations/AssetValidation");
+const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 
 /**
  * Create a new asset
@@ -27,6 +28,7 @@ exports.getAllAssetsByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
   const { page, limit } = req.query;
   try {
+    await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
     const assets = await assetService.getAllAssetsByTenantId(tenant_id, page, limit);
     res.status(200).json(assets);
   } catch (err) {
@@ -41,8 +43,8 @@ exports.getAssetByTenantIdAndAssetId = async (req, res, next) => {
   const { asset_id, tenant_id } = req.params;
 
   try {
-    // Validate if asset exists
-    await assetValidation.checkAssetExistsByIdValidation(tenant_id, asset_id);
+    const asset1=await checkIfExists('asset','asset_id',asset_id,tenant_id);
+    if(!asset1) throw new CustomError('Asset not found',404)
 
     // Fetch asset details
     const asset = await assetService.getAssetByTenantIdAndAssetId(
@@ -83,8 +85,8 @@ exports.deleteAssetByTenantIdAndAssetId = async (req, res, next) => {
 
   try {
     // Validate if asset exists
-    const treatment=await checkIfExists('asset','asset_id',asset_id,tenant_id);
-    if(!treatment) throw new CustomError('assetId not Exists',404)
+    const asset1=await checkIfExists('asset','asset_id',asset_id,tenant_id);
+    if(!asset1) throw new CustomError('Asset not found',404)
 
     // Delete the asset
     await assetService.deleteAssetByTenantIdAndAssetId(tenant_id, asset_id);

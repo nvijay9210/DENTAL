@@ -26,8 +26,14 @@ exports.createPrescription = async (req, res, next) => {
 exports.getAllPrescriptionsByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
   const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
-    const prescriptions = await prescriptionService.getAllPrescriptionsByTenantId(tenant_id, page, limit);
+    const prescriptions =
+      await prescriptionService.getAllPrescriptionsByTenantId(
+        tenant_id,
+        page,
+        limit
+      );
     res.status(200).json(prescriptions);
   } catch (err) {
     next(err);
@@ -35,10 +41,24 @@ exports.getAllPrescriptionsByTenantId = async (req, res, next) => {
 };
 
 exports.getAllPrescriptionsByTenantAndPatientId = async (req, res, next) => {
-  const { tenant_id,patient_id } = req.params;
+  const { tenant_id, patient_id } = req.params;
   const { page, limit } = req.query;
+  const patient1 = await checkIfExists(
+    "patient",
+    "patient_id",
+    patient_id,
+    tenant_id
+  );
+
+  if (!patient1) throw new CustomError("Patient not found", 404);
   try {
-    const prescriptions = await prescriptionService.getAllPrescriptionsByTenantAndPatientId(tenant_id,patient_id, page, limit);
+    const prescriptions =
+      await prescriptionService.getAllPrescriptionsByTenantAndPatientId(
+        tenant_id,
+        patient_id,
+        page,
+        limit
+      );
     res.status(200).json(prescriptions);
   } catch (err) {
     next(err);
@@ -51,15 +71,28 @@ exports.getAllPrescriptionsByTenantAndPatientId = async (req, res, next) => {
 exports.getPrescriptionByTenantIdAndPrescriptionId = async (req, res, next) => {
   const { prescription_id, tenant_id } = req.params;
 
+  const prescription = await checkIfExists(
+    "prescription",
+    "prescription_id",
+    prescription_id,
+    tenant_id
+  );
+
+  if (!prescription) throw new CustomError("prescription not found", 404);
+
   try {
     // Validate if prescription exists
-    await prescriptionValidation.checkPrescriptionExistsByIdValidation(tenant_id, prescription_id);
-
-    // Fetch prescription details
-    const prescription = await prescriptionService.getPrescriptionByTenantIdAndPrescriptionId(
+    await prescriptionValidation.checkPrescriptionExistsByIdValidation(
       tenant_id,
       prescription_id
     );
+
+    // Fetch prescription details
+    const prescription =
+      await prescriptionService.getPrescriptionByTenantIdAndPrescriptionId(
+        tenant_id,
+        prescription_id
+      );
     res.status(200).json(prescription);
   } catch (err) {
     next(err);
@@ -70,16 +103,22 @@ exports.getPrescriptionByTenantIdAndPrescriptionId = async (req, res, next) => {
  * Update an existing prescription
  */
 exports.updatePrescription = async (req, res, next) => {
-  const { prescription_id,tenant_id } = req.params;
+  const { prescription_id, tenant_id } = req.params;
   const details = req.body;
 
   try {
-  
     // Validate update input
-    await prescriptionValidation.updatePrescriptionValidation(prescription_id, details);
+    await prescriptionValidation.updatePrescriptionValidation(
+      prescription_id,
+      details
+    );
 
     // Update the prescription
-    await prescriptionService.updatePrescription(prescription_id, details, tenant_id);
+    await prescriptionService.updatePrescription(
+      prescription_id,
+      details,
+      tenant_id
+    );
     res.status(200).json({ message: "Prescription updated successfully" });
   } catch (err) {
     next(err);
@@ -89,16 +128,29 @@ exports.updatePrescription = async (req, res, next) => {
 /**
  * Delete a prescription by ID and tenant ID
  */
-exports.deletePrescriptionByTenantIdAndPrescriptionId = async (req, res, next) => {
+exports.deletePrescriptionByTenantIdAndPrescriptionId = async (
+  req,
+  res,
+  next
+) => {
   const { prescription_id, tenant_id } = req.params;
 
   try {
     // Validate if prescription exists
-    const treatment=await checkIfExists('prescription','prescription_id',prescription_id,tenant_id);
-    if(!treatment) throw new CustomError('prescriptionId not Exists',404)
+    const prescription = await checkIfExists(
+      "prescription",
+      "prescription_id",
+      prescription_id,
+      tenant_id
+    );
+
+    if (!prescription) throw new CustomError("prescription not found", 404);
 
     // Delete the prescription
-    await prescriptionService.deletePrescriptionByTenantIdAndPrescriptionId(tenant_id, prescription_id);
+    await prescriptionService.deletePrescriptionByTenantIdAndPrescriptionId(
+      tenant_id,
+      prescription_id
+    );
     res.status(200).json({ message: "Prescription deleted successfully" });
   } catch (err) {
     next(err);

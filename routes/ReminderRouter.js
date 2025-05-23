@@ -3,34 +3,34 @@ const router = express.Router();
 
 const reminderController = require("../controllers/ReminderController");
 const {
-  ADD_EXPENSE,
-  GETALL_EXPENSE_TENANT,
-  GET_EXPENSE_TENANT,
-  UPDATE_EXPENSE_TENANT,
-  DELETE_EXPENSE_TENANT,
+  ADD_REMINDER,
+  GETALL_REMINDER_TENANT,
+  GET_REMINDER_TENANT,
+  UPDATE_REMINDER_TENANT,
+  DELETE_REMINDER_TENANT,
 } = require("./RouterPath");
 
 // Create Reminder
-router.post(
-  ADD_EXPENSE,
-  reminderController.createReminder
-);
+router.post(ADD_REMINDER, reminderController.createReminder);
 
 // Get All Reminders by Tenant ID with Pagination
-router.get(GETALL_EXPENSE_TENANT, reminderController.getAllRemindersByTenantId);
+router.get(
+  GETALL_REMINDER_TENANT,
+  reminderController.getAllRemindersByTenantId
+);
 
 // Get Single Reminder by Tenant ID & Reminder ID
-router.get(GET_EXPENSE_TENANT, reminderController.getReminderByTenantIdAndReminderId);
+router.get(
+  GET_REMINDER_TENANT,
+  reminderController.getReminderByTenantIdAndReminderId
+);
 
 // Update Reminder
-router.put(
-  UPDATE_EXPENSE_TENANT,
-  reminderController.updateReminder
-);
+router.put(UPDATE_REMINDER_TENANT, reminderController.updateReminder);
 
 // Delete Reminder
 router.delete(
-  DELETE_EXPENSE_TENANT,
+  DELETE_REMINDER_TENANT,
   reminderController.deleteReminderByTenantIdAndReminderId
 );
 

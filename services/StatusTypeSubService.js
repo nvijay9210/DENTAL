@@ -8,6 +8,7 @@ const { mapFields } = require("../query/Records");
 const {
   getStatusTypeIdByTenantAndStatusType,
 } = require("../models/StatusTypeModel");
+const helper = require("../utils/Helpers");
 const statusTypeSubFields = {
   tenant_id: (val) => val,
   status_type_id: (val) => val,

@@ -1,7 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { validateInput } = require("./InputValidation");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
-const { recordExists } = require("../query/Records");
 
 const prescriptionColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },
@@ -11,7 +10,7 @@ const prescriptionColumnConfig = [
   { columnname: "medication", type: "text", null: true },
   { columnname: "generic_name", type: "varchar", size: 255, null: true },
   { columnname: "brand_name", type: "varchar", size: 255, null: true },
-  { columnname: "dosage", type: "text", null: true },
+  { columnname: "dosage", type: "int", null: true },
   { columnname: "frequency", type: "varchar", size: 50, null: true },
   { columnname: "quantity", type: "int", null: true },
   {

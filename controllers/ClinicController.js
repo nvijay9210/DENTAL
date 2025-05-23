@@ -1,6 +1,10 @@
-const { checkIfExists } = require("../models/checkIfExists");
+const { CustomError } = require("../middlewares/CustomeError");
+const { checkIfExists, checkIfIdExists } = require("../models/checkIfExists");
 const clinicService = require("../services/ClinicService");
 const clinicValidation = require("../validations/ClinicValidation");
+const {
+  validateTenantIdAndPageAndLimit,
+} = require("../validations/CommonValidations");
 
 exports.createClinic = async (req, res, next) => {
   const details = req.body;
@@ -18,6 +22,7 @@ exports.createClinic = async (req, res, next) => {
 exports.getAllClinicByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
   const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
     const clinics = await clinicService.getAllClinicsByTenantId(
       tenant_id,
@@ -33,10 +38,13 @@ exports.getAllClinicByTenantId = async (req, res, next) => {
 exports.getClinicByTenantIdAndClinicId = async (req, res, next) => {
   const { clinic_id, tenant_id } = req.params;
   try {
-    await clinicValidation.checkClinicExistsByClinicIdValidation(
-      tenant_id,
-      clinic_id
+    const clinic = await checkIfExists(
+      "clinic",
+      "clinic_id",
+      clinic_id,
+      tenant_id
     );
+    if (clinic) throw new CustomError("Clinic not exists", 404);
     const clinics = await clinicService.getClinicByTenantIdAndClinicId(
       tenant_id,
       clinic_id

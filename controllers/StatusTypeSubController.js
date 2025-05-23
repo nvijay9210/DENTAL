@@ -8,15 +8,21 @@ const statusTypeSubValidation = require("../validations/StatusTypeSubValidation"
  */
 exports.createStatusTypeSub = async (req, res, next) => {
   const details = req.body;
-  console.log('details:controller,',details)
-  const {status_type}=req.params
+  console.log("details:controller,", details);
+  const { status_type } = req.params;
 
   try {
     // Validate statusTypeSub data
-    await statusTypeSubValidation.createStatusTypeSubValidation(details,status_type);
+    await statusTypeSubValidation.createStatusTypeSubValidation(
+      details,
+      status_type
+    );
 
     // Create the statusTypeSub
-    const id = await statusTypeSubService.createStatusTypeSub(details,status_type);
+    const id = await statusTypeSubService.createStatusTypeSub(
+      details,
+      status_type
+    );
     res.status(201).json({ message: "StatusTypeSub created", id });
   } catch (err) {
     next(err);
@@ -29,21 +35,45 @@ exports.createStatusTypeSub = async (req, res, next) => {
 exports.getAllStatusTypeSubsByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
   const { page, limit } = req.query;
-
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
-    const statusTypeSubs = await statusTypeSubService.getAllStatusTypeSubsByTenantId(tenant_id, page, limit);
+    const statusTypeSubs =
+      await statusTypeSubService.getAllStatusTypeSubsByTenantId(
+        tenant_id,
+        page,
+        limit
+      );
     res.status(200).json(statusTypeSubs);
   } catch (err) {
     next(err);
   }
 };
 
-exports.getAllStatusTypeSubByTenantIdAndStatusTypeId = async (req, res, next) => {
-  const { tenant_id,status_type_id } = req.params;
+exports.getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
+  req,
+  res,
+  next
+) => {
+  const { tenant_id, status_type_id } = req.params;
   const { page, limit } = req.query;
 
+  const statusType = await checkIfExists(
+    "statustype",
+    "status_type_id",
+    status_type_id,
+    tenant_id
+  );
+
+  if (!statusType) throw new CustomError("Statustype not found", 404);
+
   try {
-    const statusTypeSubs = await statusTypeSubService.getAllStatusTypeSubByTenantIdAndStatusTypeId(tenant_id,status_type_id, page, limit);
+    const statusTypeSubs =
+      await statusTypeSubService.getAllStatusTypeSubByTenantIdAndStatusTypeId(
+        tenant_id,
+        status_type_id,
+        page,
+        limit
+      );
     res.status(200).json(statusTypeSubs);
   } catch (err) {
     next(err);
@@ -51,11 +81,26 @@ exports.getAllStatusTypeSubByTenantIdAndStatusTypeId = async (req, res, next) =>
 };
 
 exports.getAllStatusTypeSubByTenantIdAndStatusType = async (req, res, next) => {
-  const { tenant_id,status_type } = req.params;
+  const { tenant_id, status_type } = req.params;
   const { page, limit } = req.query;
 
+  const statusType = await checkIfExists(
+    "statustype",
+    "status_type",
+    status_type,
+    tenant_id
+  );
+
+  if (!statusType) throw new CustomError("Statustype not found", 404);
+
   try {
-    const statusTypeSubs = await statusTypeSubService.getAllStatusTypeSubByTenantIdAndStatusType(tenant_id,status_type, page, limit);
+    const statusTypeSubs =
+      await statusTypeSubService.getAllStatusTypeSubByTenantIdAndStatusType(
+        tenant_id,
+        status_type,
+        page,
+        limit
+      );
     res.status(200).json(statusTypeSubs);
   } catch (err) {
     next(err);
@@ -65,13 +110,29 @@ exports.getAllStatusTypeSubByTenantIdAndStatusType = async (req, res, next) => {
 /**
  * Get statusTypeSub by tenant and statusTypeSub ID
  */
-exports.getStatusTypeSubByTenantIdAndStatusTypeSubId = async (req, res, next) => {
-  const { statusTypeSub_id, tenant_id } = req.params;
+exports.getStatusTypeSubByTenantIdAndStatusTypeSubId = async (
+  req,
+  res,
+  next
+) => {
+  const { status_type_sub_id, tenant_id } = req.params;
+
+  const statusType = await checkIfExists(
+    "statustypesub",
+    "status_type_sub_id",
+    status_type_sub_id,
+    tenant_id
+  );
+
+  if (!statusType) throw new CustomError("Statustypesubject not found", 404);
 
   try {
-
     // Fetch statusTypeSub details
-    const statusTypeSub = await statusTypeSubService.getStatusTypeSubByTenantIdAndStatusTypeSubId(tenant_id, statusTypeSub_id);
+    const statusTypeSub =
+      await statusTypeSubService.getStatusTypeSubByTenantIdAndStatusTypeSubId(
+        tenant_id,
+        status_type_sub_id
+      );
     res.status(200).json(statusTypeSub);
   } catch (err) {
     next(err);
@@ -86,12 +147,19 @@ exports.updateStatusTypeSub = async (req, res, next) => {
   const details = req.body;
 
   try {
-
     // Validate update input
-    await statusTypeSubValidation.updateStatusTypeSubValidation(status_type_sub_id,details, tenant_id);
+    await statusTypeSubValidation.updateStatusTypeSubValidation(
+      status_type_sub_id,
+      details,
+      tenant_id
+    );
 
     // Update the statusTypeSub
-    await statusTypeSubService.updateStatusTypeSub(status_type_sub_id, details, tenant_id);
+    await statusTypeSubService.updateStatusTypeSub(
+      status_type_sub_id,
+      details,
+      tenant_id
+    );
     res.status(200).json({ message: "StatusTypeSub updated successfully" });
   } catch (err) {
     next(err);
@@ -101,18 +169,31 @@ exports.updateStatusTypeSub = async (req, res, next) => {
 /**
  * Delete an statusTypeSub by ID and tenant ID
  */
-exports.deleteStatusTypeSubByTenantIdAndStatusTypeSubId = async (req, res, next) => {
+exports.deleteStatusTypeSubByTenantIdAndStatusTypeSubId = async (
+  req,
+  res,
+  next
+) => {
   const { status_type_sub_id, tenant_id } = req.params;
 
   try {
     // Validate if statusTypeSub exists
-    const statusTypeSub=await checkIfExists('statustypesub','status_type_sub_id',status_type_sub_id,tenant_id);
-    if(!statusTypeSub) throw new CustomError('StatusTypeSubId not Exists',404)
+    const statusTypeSub = await checkIfExists(
+      "statustypesub",
+      "status_type_sub_id",
+      status_type_sub_id,
+      tenant_id
+    );
+    if (!statusTypeSub)
+      throw new CustomError("StatusTypeSubId not Exists", 404);
 
     // Delete the statusTypeSub
-    await statusTypeSubService.deleteStatusTypeSubByTenantIdAndStatusTypeSubId(tenant_id, status_type_sub_id);
+    await statusTypeSubService.deleteStatusTypeSubByTenantIdAndStatusTypeSubId(
+      tenant_id,
+      status_type_sub_id
+    );
     res.status(200).json({ message: "StatusTypeSub deleted successfully" });
   } catch (err) {
     next(err);
   }
-}
+};

@@ -26,8 +26,13 @@ exports.createSupplier = async (req, res, next) => {
 exports.getAllSuppliersByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
   const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
-    const suppliers = await supplierService.getAllSuppliersByTenantId(tenant_id, page, limit);
+    const suppliers = await supplierService.getAllSuppliersByTenantId(
+      tenant_id,
+      page,
+      limit
+    );
     res.status(200).json(suppliers);
   } catch (err) {
     next(err);
@@ -41,8 +46,14 @@ exports.getSupplierByTenantIdAndSupplierId = async (req, res, next) => {
   const { supplier_id, tenant_id } = req.params;
 
   try {
-    // Validate if supplier exists
-    await supplierValidation.checkSupplierExistsByIdValidation(tenant_id, supplier_id);
+    const supplier1 = await checkIfExists(
+      "supplier",
+      "supplier_id",
+      supplier_id,
+      tenant_id
+    );
+
+    if (!supplier1) throw new CustomError("Supplier not found", 404);
 
     // Fetch supplier details
     const supplier = await supplierService.getSupplierByTenantIdAndSupplierId(
@@ -59,11 +70,10 @@ exports.getSupplierByTenantIdAndSupplierId = async (req, res, next) => {
  * Update an existing supplier
  */
 exports.updateSupplier = async (req, res, next) => {
-  const { supplier_id,tenant_id } = req.params;
+  const { supplier_id, tenant_id } = req.params;
   const details = req.body;
 
   try {
-  
     // Validate update input
     await supplierValidation.updateSupplierValidation(supplier_id, details);
 
@@ -83,11 +93,19 @@ exports.deleteSupplierByTenantIdAndSupplierId = async (req, res, next) => {
 
   try {
     // Validate if supplier exists
-    const treatment=await checkIfExists('supplier','supplier_id',supplier_id,tenant_id);
-    if(!treatment) throw new CustomError('supplierId not Exists',404)
+    const treatment = await checkIfExists(
+      "supplier",
+      "supplier_id",
+      supplier_id,
+      tenant_id
+    );
+    if (!treatment) throw new CustomError("supplierId not Exists", 404);
 
     // Delete the supplier
-    await supplierService.deleteSupplierByTenantIdAndSupplierId(tenant_id, supplier_id);
+    await supplierService.deleteSupplierByTenantIdAndSupplierId(
+      tenant_id,
+      supplier_id
+    );
     res.status(200).json({ message: "Supplier deleted successfully" });
   } catch (err) {
     next(err);

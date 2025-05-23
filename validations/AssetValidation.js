@@ -15,7 +15,7 @@ const assetColumnConfig = [
   { columnname: "purchased_date", type: "date", null: true },
   { columnname: "purchased_by", type: "varchar", size: 100, null: true },
   { columnname: "expired_date", type: "date", null: true },
-  { columnname: "invoice_number", type: "int", null: true },
+  { columnname: "invoice_number", type: "varchar",size:16, null: true },
   { columnname: "description", type: "text", null: true },
 ];
 // Asset Column Configuration for Validation
