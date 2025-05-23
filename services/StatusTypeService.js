@@ -6,12 +6,15 @@ const {
 } = require("../config/redisConfig");
 const { decodeJsonFields } = require("../utils/Helpers");
 
+const statusTypeField = {
+  tenant_id: (val) => val,
+  statusType_type: (val) => val,
+};
 // Create StatusType
 const createStatusType = async (data) => {
   console.log("data:", data);
   const fieldMap = {
-    tenant_id: (val) => val,
-    statusType_type: (val) => val,
+    statusTypeField,
     created_by: (val) => val,
   };
 
@@ -39,14 +42,13 @@ const getAllStatusTypesByTenantId = async (page = 1, limit = 10) => {
   try {
     const statusTypes = await getOrSetCache(cacheKey, async () => {
       const result = await statusTypeModel.getAllStatusTypesByTenantId(
-      
         Number(limit),
         offset
       );
       return result;
     });
 
-    return statusTypes
+    return statusTypes;
   } catch (err) {
     console.error("Database error while fetching statusTypes:", err);
     throw new CustomError("Failed to fetch statusTypes", 404);
@@ -54,7 +56,7 @@ const getAllStatusTypesByTenantId = async (page = 1, limit = 10) => {
 };
 
 // Get StatusType by ID & Tenant
-const getStatusTypeByStatusTypeId = async ( statusTypeId) => {
+const getStatusTypeByStatusTypeId = async (statusTypeId) => {
   try {
     const statusType = await statusTypeModel.getStatusTypeByStatusTypeId(
       statusTypeId
@@ -67,11 +69,10 @@ const getStatusTypeByStatusTypeId = async ( statusTypeId) => {
 
 // Update StatusType
 const updateStatusType = async (statusTypeId, data, tenant_id) => {
-    const fieldMap = {
-        tenant_id: (val) => val,
-        statusType_type: (val) => val,
-        updated_by: (val) => val,
-      };
+  const fieldMap = {
+    statusTypeField,
+    updated_by: (val) => val,
+  };
 
   try {
     const { columns, values } = mapFields(data, fieldMap);
@@ -123,5 +124,5 @@ module.exports = {
   getAllStatusTypesByTenantId,
   getStatusTypeByStatusTypeId,
   updateStatusType,
-  deleteStatusTypeByTenantIdAndStatusTypeId
+  deleteStatusTypeByTenantIdAndStatusTypeId,
 };

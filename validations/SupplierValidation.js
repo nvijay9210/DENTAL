@@ -3,28 +3,29 @@ const { validateInput } = require("./InputValidation");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
 const { recordExists } = require("../query/Records");
 
-// Supplier Column Configuration for Validation
-const createColumnConfig = [
+const supplierColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 6, null: false },
   { columnname: "clinic_id", type: "int", size: 11, null: false },
   { columnname: "supplier_name", type: "varchar", size: 100, null: false },
   { columnname: "supplier_category", type: "varchar", size: 100, null: true },
-  { columnname: "supplier_contact_number", type: "varchar", size: 15, null: true },
+  {
+    columnname: "supplier_contact_number",
+    type: "varchar",
+    size: 15,
+    null: true,
+  },
   { columnname: "supplier_status", type: "varchar", size: 100, null: true },
   { columnname: "supplier_country", type: "varchar", size: 50, null: true },
   { columnname: "supplier_performance_rating", type: "int", null: true },
+];
+// Supplier Column Configuration for Validation
+const createColumnConfig = [
+  ...supplierColumnConfig,
   { columnname: "created_by", type: "varchar", size: 30, null: false },
 ];
 
 const updateColumnConfig = [
-  { columnname: "tenant_id", type: "int", size: 6, null: false },
-  { columnname: "clinic_id", type: "int", size: 11, null: false },
-  { columnname: "supplier_name", type: "varchar", size: 100, null: false },
-  { columnname: "supplier_category", type: "varchar", size: 100, null: true },
-  { columnname: "supplier_contact_number", type: "varchar", size: 15, null: true },
-  { columnname: "supplier_status", type: "varchar", size: 100, null: true },
-  { columnname: "supplier_country", type: "varchar", size: 50, null: true },
-  { columnname: "supplier_performance_rating", type: "int", null: true },
+  ...supplierColumnConfig,
   { columnname: "updated_by", type: "varchar", size: 30, null: false },
 ];
 /**
@@ -44,7 +45,7 @@ const createSupplierValidation = async (details) => {
  * Validate Update Supplier Input with Tenant Scope
  */
 const updateSupplierValidation = async (supplierId, details) => {
-   validateInput(details, updateColumnConfig);
+  validateInput(details, updateColumnConfig);
 
   const exists = await checkIfExists(
     "supplier",

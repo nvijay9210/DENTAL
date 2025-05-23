@@ -3,8 +3,8 @@ const tenantModel = require("../models/TenantModel");
 // Create tenant service (calls the model function)
 const createTenant = async (data) => {
   try {
-    const utcNow = new Date().toISOString().replace('T', ' ').slice(0, 19);
-    data['created_time']=utcNow
+    const utcNow = new Date().toISOString().replace("T", " ").slice(0, 19);
+    data["created_time"] = utcNow;
     const tenantId = await tenantModel.createTenant(data); // Call model function to insert tenant
     return tenantId;
   } catch (error) {
@@ -31,7 +31,6 @@ const getTenantByTenantId = async (tenantId) => {
     throw new Error("Failed to get tenants: " + error.message);
   }
 };
-
 
 // Update tenant service
 const updateTenant = async (tenantId, data) => {

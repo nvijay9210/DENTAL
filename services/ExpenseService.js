@@ -9,23 +9,25 @@ const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
-const {
-  formatDateOnly,
-} = require("../utils/DateUtils");
+const { formatDateOnly } = require("../utils/DateUtils");
 
 // Field mapping for expenses (similar to treatment)
+
+const expenseFields = {
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
+  expense_date: (val) => val,
+  expense_category: (val) => val,
+  expense_reason: (val) => val,
+  expense_amount: (val) => val,
+  mode_of_payment: (val) => val,
+  receipt_number: (val) => val,
+};
 
 // Create Expense
 const createExpense = async (data) => {
   const fieldMap = {
-    tenant_id: (val) => val,
-    clinic_id: (val) => val,
-    expense_date:(val)=>val,
-    expense_category:(val)=>val,
-    expense_reason:(val)=>val,
-    expense_amount:(val)=>val,
-    mode_of_payment:(val)=>val,
-    receipt_number:(val)=>val,
+    ...expenseFields,
     created_by: (val) => val,
   };
   try {
@@ -39,19 +41,12 @@ const createExpense = async (data) => {
     return expenseId;
   } catch (error) {
     console.error("Failed to create expense:", error);
-    throw new CustomError(
-      `Failed to create expense: ${error.message}`,
-      404
-    );
+    throw new CustomError(`Failed to create expense: ${error.message}`, 404);
   }
 };
 
 // Get All Expenses by Tenant ID with Caching
-const getAllExpensesByTenantId = async (
-  tenantId,
-  page = 1,
-  limit = 10
-) => {
+const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `expense:${tenantId}:page:${page}:limit:${limit}`;
 
@@ -69,7 +64,6 @@ const getAllExpensesByTenantId = async (
 
     if (expenses && expenses.length > 0) {
       expenses.forEach((expense) => {
-      
         // Handling date_of_birth field conversion
         if (expense.expense_date) {
           expense.expense_date = formatDateOnly(expense.expense_date);
@@ -94,15 +88,18 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
 
   try {
     const expenses = await getOrSetCache(cacheKey, async () => {
-      const result = await expenseModel.getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate(
-        tenantId, clinicId,startDate,endDate
-      );
+      const result =
+        await expenseModel.getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate(
+          tenantId,
+          clinicId,
+          startDate,
+          endDate
+        );
       return result;
     });
 
     if (expenses && expenses.length > 0) {
       expenses.forEach((expense) => {
-      
         // Handling date_of_birth field conversion
         if (expense.expense_date) {
           expense.expense_date = formatDateOnly(expense.expense_date);
@@ -110,7 +107,7 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
       });
     }
 
-    return expenses
+    return expenses;
   } catch (err) {
     console.error("Database error while fetching expenses:", err);
     throw new CustomError("Failed to fetch expenses", 404);
@@ -118,17 +115,13 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
 };
 
 // Get Expense by ID & Tenant
-const getExpenseByTenantIdAndExpenseId = async (
-  tenantId,
-  expenseId
-) => {
+const getExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
   try {
-    const expense =
-      await expenseModel.getExpenseByTenantAndExpenseId(
-        tenantId,
-        expenseId
-      );
-    return expense
+    const expense = await expenseModel.getExpenseByTenantAndExpenseId(
+      tenantId,
+      expenseId
+    );
+    return expense;
   } catch (error) {
     throw new CustomError("Failed to get expense: " + error.message, 404);
   }
@@ -136,17 +129,10 @@ const getExpenseByTenantIdAndExpenseId = async (
 
 // Update Expense
 const updateExpense = async (expenseId, data, tenant_id) => {
-    const fieldMap = {
-        tenant_id: (val) => val,
-        clinic_id: (val) => val,
-        expense_date:(val)=>val,
-        expense_category:(val)=>val,
-        expense_reason:(val)=>val,
-        expense_amount:(val)=>val,
-        mode_of_payment:(val)=>val,
-        receipt_number:(val)=>val,
-        updated_by: (val) => val,
-      };
+  const fieldMap = {
+    ...expenseFields,
+    updated_by: (val) => val,
+  };
   try {
     const { columns, values } = mapFields(data, fieldMap);
     const affectedRows = await expenseModel.updateExpense(
@@ -169,16 +155,12 @@ const updateExpense = async (expenseId, data, tenant_id) => {
 };
 
 // Delete Expense
-const deleteExpenseByTenantIdAndExpenseId = async (
-  tenantId,
-  expenseId
-) => {
+const deleteExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
   try {
-    const affectedRows =
-      await expenseModel.deleteExpenseByTenantAndExpenseId(
-        tenantId,
-        expenseId
-      );
+    const affectedRows = await expenseModel.deleteExpenseByTenantAndExpenseId(
+      tenantId,
+      expenseId
+    );
     if (affectedRows === 0) {
       throw new CustomError("Expense not found.", 404);
     }
@@ -186,10 +168,7 @@ const deleteExpenseByTenantIdAndExpenseId = async (
     await invalidateCacheByPattern("expense:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(
-      `Failed to delete expense: ${error.message}`,
-      404
-    );
+    throw new CustomError(`Failed to delete expense: ${error.message}`, 404);
   }
 };
 
@@ -199,5 +178,5 @@ module.exports = {
   getExpenseByTenantIdAndExpenseId,
   updateExpense,
   deleteExpenseByTenantIdAndExpenseId,
-  getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate
+  getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate,
 };

@@ -1,11 +1,9 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const patientService = require("../services/PatientService");
-const {
-  checkIfExistsWithoutId,
-} = require("../models/checkIfExists");
+const { checkIfExistsWithoutId } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
-
+const { validatePhonesGlobally } = require("../utils/PhoneValidationHelper");
 
 const uniqueFields = [
   "email",
@@ -13,7 +11,7 @@ const uniqueFields = [
   "insurance_policy_number",
 ];
 
-const CreateColumnConfig = [
+const patientColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },
   {
     columnname: "first_name",
@@ -130,117 +128,17 @@ const CreateColumnConfig = [
   { columnname: "appointment_count", type: "int", null: true },
   { columnname: "last_appointment_date", type: "timestamp", null: true },
   { columnname: "profile_picture", type: "text", null: true },
-  { columnname: "created_by", type: "varchar", size: 20, null: false },
   { columnname: "first_visit_date", type: "timestamp", null: true },
 ];
 
+const CreateColumnConfig = [
+  ...patientColumnConfig,
+  { columnname: "created_by", type: "varchar", size: 30, null: false },
+];
+
 const UpdateColumnConfig = [
-  { columnname: "tenant_id", type: "int", size: 11, null: false },
-  { columnname: "first_name", type: "varchar", size: 50, null: false },
-  { columnname: "last_name", type: "varchar", size: 50, null: false },
-  {
-    columnname: "email",
-    type: "varchar",
-    size: 255,
-    null: true,
-    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  },
-  {
-    columnname: "phone_number",
-    type: "varchar",
-    size: 10,
-    null: false,
-    pattern: /^\+?[0-9]{7,15}$/,
-  },
-  {
-    columnname: "alternate_phone_number",
-    type: "varchar",
-    size: 10,
-    null: true,
-    pattern: /^\+?[0-9]{7,15}$/,
-  },
-  { columnname: "date_of_birth", type: "date", null: false },
-  {
-    columnname: "gender",
-    type: "enum",
-    enum_values: ["M", "F", "TG"],
-    null: false,
-  },
-  { columnname: "blood_group", type: "varchar", size: 10, null: true },
-  { columnname: "address", type: "text", null: false },
-  { columnname: "city", type: "varchar", size: 100, null: false },
-  { columnname: "state", type: "varchar", size: 100, null: false },
-  { columnname: "country", type: "varchar", size: 50, null: false },
-  {
-    columnname: "pin_code",
-    type: "varchar",
-    size: 10,
-    null: false,
-    pattern: /^\d{6}$/,
-  },
-  {
-    columnname: "referred_by",
-    type: "varchar",
-    size: 100,
-    null: true,
-  },
-  {
-    columnname: "profession",
-    type: "varchar",
-    size: 100,
-    null: true,
-  },
-  {
-    columnname: "tooth_details",
-    type: "text",
-    null: true,
-  },
-  { columnname: "pre_history", type: "text", null: true },
-  { columnname: "current_medications", type: "text", null: true },
-  {
-    columnname: "dentist_preference",
-    type: "int",
-    null: true,
-    foreign_key: true,
-  },
-  {
-    columnname: "smoking_status",
-    type: "enum",
-    enum_values: ["N", "F", "C"],
-    null: false,
-  },
-  {
-    columnname: "alcohol_consumption",
-    type: "enum",
-    enum_values: ["N", "OC", "R"],
-    null: false,
-  },
-  {
-    columnname: "emergency_contact_name",
-    type: "varchar",
-    size: 255,
-    null: false,
-  },
-  {
-    columnname: "emergency_contact_phone",
-    type: "varchar",
-    size: 15,
-    null: false,
-  },
-  { columnname: "insurance_provider", type: "varchar", size: 255, null: true },
-  {
-    columnname: "insurance_policy_number",
-    type: "varchar",
-    size: 255,
-    null: true,
-    pattern: /^[A-Z0-9]{10,20}$/,
-  },
-  { columnname: "treatment_history", type: "json", null: true },
-  { columnname: "appointment_count", type: "int", null: true },
-  { columnname: "last_appointment_date", type: "timestamp", null: true },
-  { columnname: "profile_picture", type: "text", null: true },
-  { columnname: "updated_by", type: "varchar", size: 20, null: false },
-  { columnname: "first_visit_date", type: "timestamp", null: true },
+  ...patientColumnConfig,
+  { columnname: "updated_by", type: "varchar", size: 30, null: false },
 ];
 
 const validatePatientPhones = async (data, patientId = 0) => {
@@ -255,7 +153,6 @@ const validatePatientPhones = async (data, patientId = 0) => {
     throw new CustomError("Phone and alternate phone cannot be the same", 409);
   }
 };
-
 
 const validateUniqueFields = async (
   details,
@@ -285,7 +182,7 @@ const validateUniqueFields = async (
 
 // Create Patient Validation
 const createPatientValidation = async (details) => {
-   validateInput(details, CreateColumnConfig);
+  validateInput(details, CreateColumnConfig);
   await checkTenantExistsByTenantIdValidation(details.tenant_id);
   await validatePatientPhones(details);
   await validateUniqueFields(details);

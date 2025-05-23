@@ -12,52 +12,51 @@ const {
   updateNullClinicInfoWithJoin,
 } = require("../services/DentistService");
 
-const message=require('../middlewares/ErrorMessages')
+const message = require("../middlewares/ErrorMessages");
+
+const clinicFieldMap = {
+  tenant_id: (val) => val,
+  clinic_name: (val) => val,
+  email: (val) => val || null,
+  phone_number: (val) => val,
+  alternate_phone_number: (val) => val || null,
+  branch: (val) => val || null,
+  website: (val) => val || null,
+  address: (val) => val,
+  city: (val) => val,
+  state: (val) => val,
+  country: (val) => val,
+  pin_code: (val) => val,
+  license_number: (val) => val,
+  gst_number: (val) => val || null,
+  pan_number: (val) => val || null,
+  established_year: (val) => val,
+  total_doctors: (val) => val || null,
+  total_patients: (val) => val || null,
+  total_dental_chairs: (val) => val || null,
+  number_of_assistants: (val) => val || null,
+  available_services: (val) => (val ? JSON.stringify(val) : null),
+  operating_hours: (val) => (val ? JSON.stringify(val) : null),
+  insurance_supported: helper.parseBoolean,
+  ratings: (val) => val || 0,
+  reviews_count: (val) => val || 0,
+  emergency_support: helper.parseBoolean,
+  teleconsultation_supported: helper.parseBoolean,
+  clinic_logo: (val) => val || null,
+  parking_availability: helper.parseBoolean,
+  pharmacy: helper.parseBoolean,
+  wifi: helper.parseBoolean,
+};
 
 // -------------------- CREATE --------------------
 const createClinic = async (data) => {
-  const parseBoolean = (val) => {
-    if (val === true || val === "true" || val === 1 || val === "1") return 1;
-    return 0;
-  };
-
-  const clinicFieldMap = {
-    tenant_id: (val) => val,
-    clinic_name: (val) => val,
-    email: (val) => val || null,
-    phone_number: (val) => val,
-    alternate_phone_number: (val) => val || null,
-    branch: (val) => val || null,
-    website: (val) => val || null,
-    address: (val) => val,
-    city: (val) => val,
-    state: (val) => val,
-    country: (val) => val,
-    pin_code: (val) => val,
-    license_number: (val) => val,
-    gst_number: (val) => val || null,
-    pan_number: (val) => val || null,
-    established_year: (val) => val,
-    total_doctors: (val) => val || null,
-    total_patients: (val) => val || null,
-    total_dental_chairs: (val) => val || null,
-    number_of_assistants: (val) => val || null,
-    available_services: (val) => (val ? JSON.stringify(val) : null),
-    operating_hours: (val) => (val ? JSON.stringify(val) : null),
-    insurance_supported: parseBoolean,
-    ratings: (val) => val || 0,
-    reviews_count: (val) => val || 0,
-    emergency_support: parseBoolean,
-    teleconsultation_supported: parseBoolean,
-    clinic_logo: (val) => val || null,
-    parking_availability: parseBoolean,
-    pharmacy: parseBoolean,
-    wifi: parseBoolean,
+  const createClinicFieldMap = {
+    ...clinicFieldMap,
     created_by: (val) => val,
   };
 
   try {
-    const { columns, values } = mapFields(data, clinicFieldMap);
+    const { columns, values } = mapFields(data, createClinicFieldMap);
     const clinicId = await clinicModel.createClinic("clinic", columns, values);
     await invalidateCacheByPattern("clinics:*");
     return clinicId;
@@ -69,49 +68,14 @@ const createClinic = async (data) => {
 
 // -------------------- UPDATE --------------------
 const updateClinic = async (clinicId, data, tenant_id) => {
-  const parseBoolean = (val) => {
-    if (val === true || val === "true" || val === 1 || val === "1") return 1;
-    return 0;
-  };
-
-  const clinicFieldMap = {
-    tenant_id: (val) => val,
-    clinic_name: (val) => val,
-    email: (val) => val || null,
-    phone_number: (val) => val,
-    alternate_phone_number: (val) => val || null,
-    branch: (val) => val || null,
-    website: (val) => val || null,
-    address: (val) => val,
-    city: (val) => val,
-    state: (val) => val,
-    country: (val) => val,
-    pin_code: (val) => val,
-    license_number: (val) => val,
-    gst_number: (val) => val || null,
-    pan_number: (val) => val || null,
-    established_year: (val) => val,
-    total_doctors: (val) => val || null,
-    total_patients: (val) => val || null,
-    total_dental_chairs: (val) => val || null,
-    number_of_assistants: (val) => val || null,
-    available_services: (val) => (val ? JSON.stringify(val) : null),
-    operating_hours: (val) => (val ? JSON.stringify(val) : null),
-    insurance_supported: parseBoolean,
-    ratings: (val) => val || 0,
-    reviews_count: (val) => val || 0,
-    emergency_support: parseBoolean,
-    teleconsultation_supported: parseBoolean,
-    clinic_logo: (val) => val || null,
-    parking_availability: parseBoolean,
-    pharmacy: parseBoolean,
-    wifi: parseBoolean,
+  const updateClinicFieldMap = {
+    ...clinicFieldMap,
     updated_by: (val) => val,
   };
 
   try {
-    const { columns, values } = mapFields(data, clinicFieldMap);
-    
+    const { columns, values } = mapFields(data, updateClinicFieldMap);
+
     const affectedRows = await clinicModel.updateClinic(
       clinicId,
       columns,
@@ -224,9 +188,7 @@ const handleClinicAssignment = async (
   assign = true
 ) => {
   try {
-
-    if (assign==='true') {
-
+    if (assign === "true") {
       const clinic = await clinicModel.getClinicNameAndAddressByClinicId(
         tenantId,
         clinicId
@@ -254,7 +216,6 @@ const handleClinicAssignment = async (
 
       return "Dentists Added Successfully";
     } else {
-
       const dentistIds = details?.dentist_id;
       if (!Array.isArray(dentistIds) || dentistIds.length === 0) {
         throw new CustomError("At least one dentistId is required", 404);
@@ -273,7 +234,10 @@ const handleClinicAssignment = async (
     }
   } catch (error) {
     console.error("Error in handleClinicAssignment:", error);
-    throw new CustomError(`Failed to update clinic assignment: ${error.message}`, 404);
+    throw new CustomError(
+      `Failed to update clinic assignment: ${error.message}`,
+      404
+    );
   }
 };
 

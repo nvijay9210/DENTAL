@@ -3,12 +3,13 @@ const clinicService = require("../services/ClinicService");
 const {
   checkIfExists,
   checkIfExistsWithoutId,
-
 } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
 const { recordExists } = require("../query/Records");
-const { checkDentistExistsUsingTenantIdAndClinicIdAnddentistId } = require("../models/DentistModel");
+const {
+  checkDentistExistsUsingTenantIdAndClinicIdAnddentistId,
+} = require("../models/DentistModel");
 
 const uniqueFields = ["email", "gst_number", "license_number", "pan_number"];
 
@@ -43,7 +44,6 @@ const validateTenant = async (tenantId) => {
 //   }
 // };
 
-
 const validateClinicPhones = async (data, clinicId = 0) => {
   const tenantId = data.tenant_id;
 
@@ -56,7 +56,6 @@ const validateClinicPhones = async (data, clinicId = 0) => {
     throw new CustomError("Phone and alternate phone cannot be the same", 409);
   }
 };
-
 
 const validateUniqueFields = async (
   details,
@@ -91,9 +90,15 @@ const validatePhonesNotSame = (details) => {
   }
 };
 
-const createClinicColumnConfig = [
+const clinicColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },
-  { columnname: "clinic_name", type: "varchar", size: 255, null: false,pattern:/^[a-zA-Z\s]{2,50}$/},
+  {
+    columnname: "clinic_name",
+    type: "varchar",
+    size: 255,
+    null: false,
+    pattern: /^[a-zA-Z\s]{2,50}$/,
+  },
   {
     columnname: "email",
     type: "varchar",
@@ -106,14 +111,14 @@ const createClinicColumnConfig = [
     type: "varchar",
     size: 15,
     null: false,
-    pattern: /^\+?[0-9]{7,15}$/,
+    pattern: /^\+?[1-9]{7,15}$/,
   },
   {
     columnname: "alternate_phone_number",
     type: "varchar",
     size: 15,
     null: true,
-    pattern: /^\+?[0-9]{7,15}$/,
+    pattern: /^\+?[1-9]{7,15}$/,
   },
   { columnname: "branch", type: "varchar", size: 50, null: true },
   {
@@ -121,14 +126,19 @@ const createClinicColumnConfig = [
     type: "varchar",
     size: 255,
     null: true,
-    pattern:
-      /^(https?:\/\/)?([\w\-]+\.)+[\w]{2,}\/?$/,
+    pattern: /^(https?:\/\/)?([\w\-]+\.)+[\w]{2,}\/?$/,
   },
   { columnname: "address", type: "text", null: false },
   { columnname: "city", type: "varchar", size: 100, null: false },
   { columnname: "state", type: "varchar", size: 100, null: false },
   { columnname: "country", type: "varchar", size: 50, null: false },
-  { columnname: "pin_code", type: "varchar", size: 10, null: false,pattern:/^\d{6}$/ },
+  {
+    columnname: "pin_code",
+    type: "varchar",
+    size: 10,
+    null: false,
+    pattern: /^\d{6}$/,
+  },
   {
     columnname: "license_number",
     type: "varchar",
@@ -151,7 +161,7 @@ const createClinicColumnConfig = [
     pattern: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
   },
   { columnname: "established_year", type: "int", size: 11, null: false },
-  { columnname: "total_doctors", type: "int", size: 11, null: true },
+  { columnname: "total_doctors", type: "int", size: 4, null: true },
   { columnname: "total_patients", type: "int", size: 11, null: true },
   { columnname: "total_dental_chairs", type: "int", size: 11, null: true },
   { columnname: "number_of_assistants", type: "int", size: 11, null: true },
@@ -196,115 +206,16 @@ const createClinicColumnConfig = [
   },
   { columnname: "pharmacy", type: "tinyint", null: true, is_boolean: true },
   { columnname: "wifi", type: "tinyint", null: false, is_boolean: true },
-  { columnname: "created_by", type: "varchar", size: 20, null: false },
+];
+
+const createClinicColumnConfig = [
+  ...clinicColumnConfig,
+  { columnname: "created_by", type: "varchar", size: 30, null: false },
 ];
 
 const updateClinicColumnConfig = [
-  { columnname: "tenant_id", type: "int", size: 11, null: false },
-  { columnname: "clinic_name", type: "varchar", size: 255, null: false,pattern:/^[a-zA-Z\s]{2,50}$/},
-  {
-    columnname: "email",
-    type: "varchar",
-    size: 255,
-    null: true,
-    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  },
-  {
-    columnname: "phone_number",
-    type: "varchar",
-    size: 15,
-    null: false,
-    pattern: /^\+?[0-9]{7,15}$/,
-  },
-  {
-    columnname: "alternate_phone_number",
-    type: "varchar",
-    size: 15,
-    null: true,
-    pattern: /^\+?[0-9]{7,15}$/,
-  },
-  { columnname: "branch", type: "varchar", size: 50, null: true },
-  {
-    columnname: "website",
-    type: "varchar",
-    size: 255,
-    null: true,
-    pattern:
-      /^(https?:\/\/)?([\w\-]+\.)+[\w]{2,}\/?$/,
-  },
-  { columnname: "address", type: "text", null: false },
-  { columnname: "city", type: "varchar", size: 100, null: false },
-  { columnname: "state", type: "varchar", size: 100, null: false },
-  { columnname: "country", type: "varchar", size: 50, null: false },
-  { columnname: "pin_code", type: "varchar", size: 10, null: false,pattern:/^\d{6}$/ },
-  {
-    columnname: "license_number",
-    type: "varchar",
-    size: 10,
-    null: false,
-    // pattern:/^[A-Z]{2}[0-9]{4}[A-Z]{2}[0-9]{2}$ //For Standard Pattern not found
-  },
-  {
-    columnname: "gst_number",
-    type: "varchar",
-    size: 15,
-    null: true,
-    pattern: /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
-  },
-  {
-    columnname: "pan_number",
-    type: "varchar",
-    size: 10,
-    null: true,
-    pattern: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
-  },
-  { columnname: "established_year", type: "int", size: 11, null: false },
-  { columnname: "total_doctors", type: "int", size: 11, null: true },
-  { columnname: "total_patients", type: "int", size: 11, null: true },
-  { columnname: "total_dental_chairs", type: "int", size: 11, null: true },
-  { columnname: "number_of_assistants", type: "int", size: 11, null: true },
-  {
-    columnname: "available_services",
-    type: "longtext",
-    null: false,
-    data_type: "json",
-  },
-  {
-    columnname: "operating_hours",
-    type: "longtext",
-    null: true,
-    data_type: "json",
-  },
-  {
-    columnname: "insurance_supported",
-    type: "tinyint",
-    null: false,
-    is_boolean: true,
-  },
-  { columnname: "ratings", type: "decimal", size: "3,2", null: true },
-  { columnname: "reviews_count", type: "int", size: 11, null: true },
-  {
-    columnname: "emergency_support",
-    type: "tinyint",
-    null: false,
-    is_boolean: true,
-  },
-  {
-    columnname: "teleconsultation_supported",
-    type: "tinyint",
-    null: false,
-    is_boolean: true,
-  },
-  { columnname: "clinic_logo", type: "varchar", size: 255, null: true },
-  {
-    columnname: "parking_availability",
-    type: "tinyint",
-    null: false,
-    is_boolean: true,
-  },
-  { columnname: "pharmacy", type: "tinyint", null: true, is_boolean: true },
-  { columnname: "wifi", type: "tinyint", null: false, is_boolean: true },
-  { columnname: "updated_by", type: "varchar", size: 20, null: false },
+  ...clinicColumnConfig,
+  { columnname: "updated_by", type: "varchar", size: 30, null: false },
 ];
 
 // Main validations
@@ -331,23 +242,35 @@ const updateClinicValidation = async (clinicId, details, tenantId) => {
   await validateUniqueFields(details, true, clinicId);
 };
 
-const handleClinicAssignmentValidation = async (tenantId, clinicId, details, assign) => {
+const handleClinicAssignmentValidation = async (
+  tenantId,
+  clinicId,
+  details,
+  assign
+) => {
   // Validate required fields
   if (!tenantId) throw new CustomError("tenantId is required", 400);
   if (!clinicId) throw new CustomError("clinicId is required", 400);
-  if (!details?.dentist_id || !Array.isArray(details.dentist_id) || details.dentist_id.length === 0) {
+  if (
+    !details?.dentist_id ||
+    !Array.isArray(details.dentist_id) ||
+    details.dentist_id.length === 0
+  ) {
     throw new CustomError("At least one dentistId is required", 400);
   }
-  if (assign === undefined || assign === null) throw new CustomError("assign is required", 400);
+  if (assign === undefined || assign === null)
+    throw new CustomError("assign is required", 400);
 
   // Normalize assign to boolean
-  const isAssignTrue = String(assign).toLowerCase() === 'true';
+  const isAssignTrue = String(assign).toLowerCase() === "true";
 
   // Check if tenant, clinic, and all dentists exist
   const existenceChecks = [
     checkIfExists("tenant", "tenant_id", tenantId),
     checkIfExists("clinic", "clinic_id", clinicId),
-    ...details.dentist_id.map(id => checkIfExists("dentist", "dentist_id", id))
+    ...details.dentist_id.map((id) =>
+      checkIfExists("dentist", "dentist_id", id)
+    ),
   ];
 
   await Promise.all(existenceChecks);
@@ -355,14 +278,18 @@ const handleClinicAssignmentValidation = async (tenantId, clinicId, details, ass
   // If assigning, ensure dentist is NOT already assigned to this clinic
   if (isAssignTrue) {
     for (const id of details.dentist_id) {
-      const exists = await checkDentistExistsUsingTenantIdAndClinicIdAnddentistId(id, tenantId, clinicId);
+      const exists =
+        await checkDentistExistsUsingTenantIdAndClinicIdAnddentistId(
+          id,
+          tenantId,
+          clinicId
+        );
       if (exists) {
-        throw new CustomError('Dentist Already Exists In This Clinic', 400);
+        throw new CustomError("Dentist Already Exists In This Clinic", 400);
       }
     }
   }
 };
-
 
 const checkClinicExistsByClinicIdValidation = async (tenantId, clinicId) => {
   await validateTenant(tenantId);
@@ -377,5 +304,5 @@ module.exports = {
   createClinicValidation,
   updateClinicValidation,
   checkClinicExistsByClinicIdValidation,
-  handleClinicAssignmentValidation
+  handleClinicAssignmentValidation,
 };

@@ -9,38 +9,40 @@ const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
-const {
-  formatDateOnly,
-} = require("../utils/DateUtils");
+const { formatDateOnly } = require("../utils/DateUtils");
 
 // Field mapping for prescriptions (similar to treatment)
 
+const prescriptionFields = {
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
+  patient_id: (val) => val,
+  dentist_id: (val) => val,
+  treatment_id: (val) => val,
+  medication: helper.safeStringify,
+  generic_name: (val) => val || null,
+  brand_name: (val) => val || null,
+  dosage: helper.safeStringify,
+  frequency: (val) => val || null,
+  quantity: (val) => val || null,
+  refill_allowed: helper.parseBoolean,
+  refill_count: (val) => val || 0,
+  side_effects: helper.safeStringify,
+  start_date: (val) => val || null,
+  end_date: (val) => val || null,
+  instructions: helper.safeStringify,
+  notes: helper.safeStringify,
+  is_active: helper.parseBoolean,
+};
+
 // Create Prescription
 const createPrescription = async (data) => {
-  const fieldMap = {
-    tenant_id: (val) => val,
-    clinic_id: (val) => val,
-    patient_id: (val) => val,
-    dentist_id: (val) => val,
-    treatment_id: (val) => val,
-    medication: helper.safeStringify,
-    generic_name: (val) => val || null,
-    brand_name: (val) => val || null,
-    dosage: helper.safeStringify,
-    frequency: (val) => val || null,
-    quantity: (val) => val || null,
-    refill_allowed: helper.parseBoolean,
-    refill_count: (val) => val || 0,
-    side_effects: helper.safeStringify,
-    start_date: (val) => val || null,
-    end_date: (val) => val || null,
-    instructions: helper.safeStringify,
-    notes: helper.safeStringify,
-    is_active: helper.parseBoolean,
+  const create = {
+    ...prescriptionFields,
     created_by: (val) => val,
   };
   try {
-    const { columns, values } = mapFields(data, fieldMap);
+    const { columns, values } = mapFields(data, create);
     const prescriptionId = await prescriptionModel.createPrescription(
       "prescription",
       columns,
@@ -111,7 +113,7 @@ const getAllPrescriptionsByTenantAndPatientId = async (
     });
 
     const parsed = helper.decodeJsonFields(prescriptions, jsonFields);
-    parsed.forEach(async(p) => {
+    parsed.forEach(async (p) => {
       helper.mapBooleanFields(p, booleanFields);
     });
     return parsed.map((p) => ({
@@ -150,30 +152,12 @@ const getPrescriptionByTenantIdAndPrescriptionId = async (
 
 // Update Prescription
 const updatePrescription = async (prescriptionId, data, tenant_id) => {
-  const fieldMap = {
-    tenant_id: (val) => val,
-    clinic_id: (val) => val,
-    patient_id: (val) => val,
-    dentist_id: (val) => val,
-    treatment_id: (val) => val,
-    medication: helper.safeStringify,
-    generic_name: (val) => val || null,
-    brand_name: (val) => val || null,
-    dosage: helper.safeStringify,
-    frequency: (val) => val || null,
-    quantity: (val) => val || null,
-    refill_allowed: helper.parseBoolean,
-    refill_count: (val) => val || 0,
-    side_effects: helper.safeStringify,
-    start_date: (val) => val || null,
-    end_date: (val) => val || null,
-    instructions: helper.safeStringify,
-    notes: helper.safeStringify,
-    is_active: helper.parseBoolean,
+  const update = {
+    ...prescriptionFields,
     updated_by: (val) => val,
   };
   try {
-    const { columns, values } = mapFields(data, fieldMap);
+    const { columns, values } = mapFields(data, update);
     const affectedRows = await prescriptionModel.updatePrescription(
       prescriptionId,
       columns,
@@ -226,5 +210,5 @@ module.exports = {
   getPrescriptionByTenantIdAndPrescriptionId,
   updatePrescription,
   deletePrescriptionByTenantIdAndPrescriptionId,
-  getAllPrescriptionsByTenantAndPatientId
+  getAllPrescriptionsByTenantAndPatientId,
 };

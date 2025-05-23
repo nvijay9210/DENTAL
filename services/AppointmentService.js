@@ -5,45 +5,61 @@ const {
   invalidateCacheByPattern,
 } = require("../config/redisConfig");
 const { decodeJsonFields } = require("../utils/Helpers");
-const { formatDateOnly, formatTimeOnly, formatAppointments } = require("../utils/DateUtils");
+const {
+  formatDateOnly,
+  formatTimeOnly,
+  formatAppointments,
+} = require("../utils/DateUtils");
 const { mapFields } = require("../query/Records");
 const { updatePatientCount } = require("../models/ClinicModel");
+
+const appointmentFields = {
+  tenant_id: (val) => val,
+  patient_id: (val) => val,
+  dentist_id: (val) => val,
+  clinic_id: (val) => val,
+  appointment_date: (val) => formatDateOnly(val),
+  start_time: (val) => val,
+  end_time: (val) => val,
+  status: (val) => val,
+  appointment_type: (val) => val,
+  consultation_fee: (val) => val || null,
+  discount_applied: (val) => val || 0.0,
+  payment_status: (val) => val || "P",
+  payment_method: (val) => val || null,
+  visit_reason: (val) => val || null,
+  follow_up_needed: (val) => Boolean(val),
+  reminder_method: (val) => val || null,
+  notes: (val) => val || null,
+};
 
 // Create Appointment
 const createAppointment = async (data) => {
   const fieldMap = {
-    tenant_id: (val) => val,
-    patient_id: (val) => val,
-    dentist_id: (val) => val,
-    clinic_id: (val) => val,
-    appointment_date: (val) => formatDateOnly(val),
-    start_time: (val) => val,
-    end_time: (val) => val,
-    status: (val) => val,
-    appointment_type: (val) => val,
-    consultation_fee: (val) => val || null,
-    discount_applied: (val) => val || 0.00,
-    payment_status: (val) => val || "P",
-    payment_method: (val) => val || null,
-    visit_reason: (val) => val || null,
-    follow_up_needed: (val) => Boolean(val),
-    reminder_method: (val) => val || null,
-    notes: (val) => val || null,
+    ...appointmentFields,
     created_by: (val) => val,
   };
 
   try {
     const { columns, values } = mapFields(data, fieldMap);
-    const appointmentId = await appointmentModel.createAppointment("appointment", columns, values);
+    const appointmentId = await appointmentModel.createAppointment(
+      "appointment",
+      columns,
+      values
+    );
     await invalidateCacheByPattern("appointment:*");
     await invalidateCacheByPattern("appointmentsdetails:*");
     await invalidateCacheByPattern("patientvisitdetails:*");
     await invalidateCacheByPattern("appointmentsmonthlysummary:*");
-    if(appointmentId) await updatePatientCount(data.tenant_id,data.clinic_id,true)
+    if (appointmentId)
+      await updatePatientCount(data.tenant_id, data.clinic_id, true);
     return appointmentId;
   } catch (error) {
     console.error("Failed to create appointment:", error);
-    throw new CustomError(`Failed to create appointment: ${error.message}`, 404);
+    throw new CustomError(
+      `Failed to create appointment: ${error.message}`,
+      404
+    );
   }
 };
 
@@ -55,7 +71,11 @@ const getAllAppointmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
 
   try {
     const appointment = await getOrSetCache(cacheKey, async () => {
-      const result = await appointmentModel.getAllAppointmentsByTenantId(tenantId, Number(limit), offset);
+      const result = await appointmentModel.getAllAppointmentsByTenantId(
+        tenantId,
+        Number(limit),
+        offset
+      );
       return decodeJsonFields(result, fieldsToDecode);
     });
     return appointment;
@@ -66,12 +86,16 @@ const getAllAppointmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
 };
 
 // Get Appointment by Tenant & ID
-const getAppointmentByTenantIdAndAppointmentId = async (tenantId, appointmentId) => {
+const getAppointmentByTenantIdAndAppointmentId = async (
+  tenantId,
+  appointmentId
+) => {
   try {
-    const appointment = await appointmentModel.getAppointmentByTenantIdAndAppointmentId(
-      tenantId,
-      appointmentId
-    );
+    const appointment =
+      await appointmentModel.getAppointmentByTenantIdAndAppointmentId(
+        tenantId,
+        appointmentId
+      );
     const fieldsToDecode = ["notes", "visit_reason"];
     return decodeJsonFields(appointment, fieldsToDecode);
   } catch (error) {
@@ -80,41 +104,38 @@ const getAppointmentByTenantIdAndAppointmentId = async (tenantId, appointmentId)
 };
 
 // Check if Appointment Exists
-const checkAppointmentExistsByTenantIdAndAppointmentId = async (tenantId, appointmentId) => {
+const checkAppointmentExistsByTenantIdAndAppointmentId = async (
+  tenantId,
+  appointmentId
+) => {
   try {
-    return await appointmentModel.checkAppointmentExistsByTenantIdAndAppointmentId(tenantId, appointmentId);
+    return await appointmentModel.checkAppointmentExistsByTenantIdAndAppointmentId(
+      tenantId,
+      appointmentId
+    );
   } catch (error) {
-    throw new CustomError("Failed to check appointment existence: " + error.message, 404);
+    throw new CustomError(
+      "Failed to check appointment existence: " + error.message,
+      404
+    );
   }
 };
 
 // Update Appointment
 const updateAppointment = async (appointmentId, data, tenant_id) => {
   const fieldMap = {
-    tenant_id: (val) => val,
-    patient_id: (val) => val,
-    dentist_id: (val) => val,
-    hospital_id: (val) => val,
-    clinic_id: (val) => val,
-    appointment_date: (val) => formatDateOnly(val),
-    start_time: (val) => formatTimeOnly(val),
-    end_time: (val) => formatTimeOnly(val),
-    status: (val) => val,
-    appointment_type: (val) => val,
-    consultation_fee: (val) => val || null,
-    discount_applied: (val) => val || 0.00,
-    payment_status: (val) => val || null,
-    payment_method: (val) => val || null,
-    visit_reason: (val) => val || null,
-    follow_up_needed: (val) => Boolean(val),
-    reminder_method: (val) => val || null,
-    notes: (val) => val || null,
+    ...appointmentFields,
     updated_by: (val) => val,
   };
 
   try {
     const { columns, values } = mapFields(data, fieldMap);
-    const affectedRows = await appointmentModel.updateAppointment(appointmentId, columns, values, tenant_id);
+    const affectedRows = await appointmentModel.updateAppointment(
+      appointmentId,
+      columns,
+      values,
+      tenant_id
+    );
 
     if (affectedRows === 0) {
       throw new CustomError("Appointment not found or no changes made.", 404);
@@ -132,9 +153,16 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
 };
 
 // Delete Appointment
-const deleteAppointmentByTenantIdAndAppointmentId = async (tenantId, appointmentId) => {
+const deleteAppointmentByTenantIdAndAppointmentId = async (
+  tenantId,
+  appointmentId
+) => {
   try {
-    const affectedRows = await appointmentModel.deleteAppointmentByTenantIdAndAppointmentId(tenantId, appointmentId);
+    const affectedRows =
+      await appointmentModel.deleteAppointmentByTenantIdAndAppointmentId(
+        tenantId,
+        appointmentId
+      );
     if (affectedRows === 0) {
       throw new CustomError("Appointment not found.", 404);
     }
@@ -145,7 +173,10 @@ const deleteAppointmentByTenantIdAndAppointmentId = async (tenantId, appointment
     await invalidateCacheByPattern("appointmentsmonthlysummary:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete appointment: ${error.message}`, 404);
+    throw new CustomError(
+      `Failed to delete appointment: ${error.message}`,
+      404
+    );
   }
 };
 
@@ -172,7 +203,13 @@ const checkAppointmentExistsByStartTimeAndEndTimeAndDate = async (
   }
 };
 
-const getAppointmentsWithDetails = async (tenantId, clinic_id, dentist_id, page = 1, limit = 10) => {
+const getAppointmentsWithDetails = async (
+  tenantId,
+  clinic_id,
+  dentist_id,
+  page = 1,
+  limit = 10
+) => {
   const offset = (page - 1) * limit;
   const cacheKey = `appointmentsdetails:${tenantId}/${clinic_id}/${dentist_id}:page:${page}:limit:${limit}`;
   const fieldsToDecode = ["visit_reason"];
@@ -197,7 +234,11 @@ const getAppointmentsWithDetails = async (tenantId, clinic_id, dentist_id, page 
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
-const getAppointmentMonthlySummary = async (tenantId, clinic_id, dentist_id) => {
+const getAppointmentMonthlySummary = async (
+  tenantId,
+  clinic_id,
+  dentist_id
+) => {
   try {
     const cacheKey = `appointmentsmonthlysummary:${tenantId}/${clinic_id}/${dentist_id}`;
     const appointment = await getOrSetCache(cacheKey, async () => {
@@ -216,14 +257,25 @@ const getAppointmentMonthlySummary = async (tenantId, clinic_id, dentist_id) => 
   }
 };
 
-const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (tenantId,clinicId, patientId,page,limit) => {
+const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
+  tenantId,
+  clinicId,
+  patientId,
+  page,
+  limit
+) => {
   try {
     const offset = (page - 1) * limit;
     const cacheKey = `patientvisitdetails:${tenantId}/${clinicId}/${patientId}`;
     const appointment = await getOrSetCache(cacheKey, async () => {
-      const result = await appointmentModel.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId(
-        tenantId,clinicId, patientId,limit,offset
-      );
+      const result =
+        await appointmentModel.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId(
+          tenantId,
+          clinicId,
+          patientId,
+          limit,
+          offset
+        );
       return result; // 🔁 Important: return from cache function
     });
 
@@ -233,8 +285,6 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (tenantId,
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
-
-
 
 module.exports = {
   createAppointment,
@@ -246,5 +296,5 @@ module.exports = {
   checkAppointmentExistsByStartTimeAndEndTimeAndDate,
   getAppointmentsWithDetails,
   getAppointmentMonthlySummary,
-  getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId
+  getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId,
 };

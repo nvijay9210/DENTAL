@@ -8,14 +8,16 @@ const { mapFields } = require("../query/Records");
 const {
   getStatusTypeIdByTenantAndStatusType,
 } = require("../models/StatusTypeModel");
-
+const statusTypeSubFields = {
+  tenant_id: (val) => val,
+  status_type_id: (val) => val,
+  status_type_sub: (val) => val,
+  status_type_sub_ref: (val) => val,
+};
 // Create StatusTypeSub
 const createStatusTypeSub = async (details, statusType) => {
   const fieldMap = {
-    tenant_id: (val) => val,
-    status_type_id: (val) => val,
-    status_type_sub: (val) => val,
-    status_type_sub_ref: (val) => val,
+    ...statusTypeSubFields,
     created_by: (val) => val,
   };
 
@@ -176,10 +178,7 @@ const getStatusTypeSubByTenantIdAndStatusTypeSubId = async (
 // Update StatusTypeSub
 const updateStatusTypeSub = async (statusTypeSubId, data, tenant_id) => {
   const fieldMap = {
-    tenant_id: (val) => val,
-    status_type_id: (val) => val,
-    status_type_sub: (val) => val,
-    status_type_sub_ref: (val) => val,
+    ...statusTypeSubFields,
     updated_by: (val) => val,
   };
 

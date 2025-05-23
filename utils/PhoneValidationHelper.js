@@ -59,5 +59,5 @@ const validatePhonesGlobally = async (data, entityId = 0, entityType, tenantId) 
 };
 
 module.exports = {
-  validatePhonesGlobally,
+  validatePhonesGlobally
 };

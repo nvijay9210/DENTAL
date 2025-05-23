@@ -10,59 +10,111 @@ const { formatDateOnly } = require("../utils/DateUtils");
 
 const helper = require("../utils/Helpers");
 
-// function sanitizeValue(value) {
-//   return ['null', '', undefined, NaN].includes(value) ? null : value;
-// }
+const dentistFieldMap = {
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
+  first_name: (val) => val,
+  last_name: (val) => val,
+  gender: (val) => val,
+  date_of_birth: formatDateOnly,
+  email: (val) => val,
+  phone_number: (val) => val,
+  alternate_phone_number: (val) => val,
+
+  specialisation: helper.safeStringify,
+  designation: helper.safeStringify,
+  languages_spoken: helper.safeStringify,
+  working_hours: helper.safeStringify,
+  available_days: helper.safeStringify,
+  bio: helper.safeStringify,
+  social_links: helper.safeStringify,
+  social_activities: helper.safeStringify,
+  internship: helper.safeStringify,
+  position_held: helper.safeStringify,
+  research_projects: helper.safeStringify,
+  publication: helper.safeStringify,
+  awards_certifications: helper.safeStringify,
+  member_of: helper.safeStringify,
+
+  experience_years: (val) => parseInt(val) || 0,
+  license_number: (val) => val,
+  clinic_name: (val) => val,
+  clinic_address: (val) => val,
+  city: (val) => val,
+  state: (val) => val,
+  country: (val) => val,
+  pin_code: (val) => val,
+
+  consultation_fee: (val) => parseFloat(val) || 0,
+  ratings: (val) => parseFloat(val) || 0,
+  reviews_count: (val) => parseInt(val) || 0,
+  appointment_count: (val) => parseInt(val) || 0,
+
+  profile_picture: (val) => val || null,
+
+  teleconsultation_supported: helper.parseBoolean,
+  insurance_supported: helper.parseBoolean,
+
+  last_login: (val) => val,
+  duration: helper.duration,
+};
+const dentistFieldReverseMap = {
+  tenant_id: val => val,
+  clinic_id: val => val,
+  first_name: val => val,
+  last_name: val => val,
+  gender: val => val,
+  date_of_birth: val => val ? new Date(val).toISOString().split('T')[0] : null,
+  email: val => val,
+  phone_number: val => val,
+  alternate_phone_number: val => val,
+
+  specialisation: val => helper.safeJsonParse(val),
+  designation: val => helper.safeJsonParse(val),
+  languages_spoken: val => helper.safeJsonParse(val),
+  working_hours: val => helper.safeJsonParse(val),
+  available_days: val => helper.safeJsonParse(val),
+  bio: val => helper.safeJsonParse(val),
+  social_links: val => helper.safeJsonParse(val),
+  social_activities: val => helper.safeJsonParse(val),
+  internship: val => helper.safeJsonParse(val),
+  position_held: val => helper.safeJsonParse(val),
+  research_projects: val => helper.safeJsonParse(val),
+  publication: val => helper.safeJsonParse(val),
+  awards_certifications: val => helper.safeJsonParse(val),
+  member_of: val => helper.safeJsonParse(val),
+
+  experience_years: val => parseInt(val) || 0,
+  license_number: val => val,
+  clinic_name: val => val,
+  clinic_address: val => val,
+  city: val => val,
+  state: val => val,
+  country: val => val,
+  pin_code: val => val,
+
+  consultation_fee: val => parseFloat(val) || 0,
+  ratings: val => parseFloat(val) || 0,
+  reviews_count: val => parseInt(val) || 0,
+  appointment_count: val => parseInt(val) || 0,
+
+  profile_picture: val => val,
+  teleconsultation_supported: val => Boolean(val),
+  insurance_supported: val => Boolean(val),
+
+  last_login: val => val,
+  duration: val => val,
+};
+
 
 // -------------------- CREATE --------------------
 const createDentist = async (data) => {
-  const fieldMap = {
-    tenant_id: (val) => val,
-    clinic_id: (val) => val,
-    first_name: (val) => val,
-    last_name: (val) => val,
-    gender: (val) => val,
-    date_of_birth: (val) => val,
-    email: (val) => val,
-    phone_number: (val) => val,
-    alternate_phone_number: (val) => val,
-
-    specialization: helper.safeStringify,
-    qualifications: helper.safeStringify,
-    languages_spoken: helper.safeStringify,
-    working_hours: helper.safeStringify,
-    available_days: helper.safeStringify,
-    bio: helper.safeStringify,
-    social_links: helper.safeStringify,
-
-    experience_years: (val) => parseInt(val) || 0,
-    license_number: (val) => val,
-    clinic_name: (val) => val,
-    clinic_address: (val) => val,
-    city: (val) => val,
-    state: (val) => val,
-    country: (val) => val,
-    pin_code: (val) => val,
-
-    consultation_fee: (val) => parseFloat(val) || 0,
-    ratings: (val) => parseFloat(val) || 0,
-    reviews_count: (val) => parseInt(val) || 0,
-    appointment_count: (val) => parseInt(val) || 0,
-
-    profile_picture: (val) => val || null,
-
-    teleconsultation_supported: helper.parseBoolean,
-    insurance_supported: helper.parseBoolean,
-
-    awards_certifications: helper.safeStringify,
-    member_of: helper.safeStringify,
-
-    last_login: (val) => val,
-    duration: helper.duration,
+  const create = {
+    ...dentistFieldMap,
     created_by: (val) => val,
   };
   try {
-    const { columns, values } = mapFields(data, fieldMap);
+    const { columns, values } = mapFields(data, create);
     const dentistId = await dentistModel.createDentist(
       "dentist",
       columns,
@@ -79,53 +131,12 @@ const createDentist = async (data) => {
 
 // -------------------- UPDATE --------------------
 const updateDentist = async (dentistId, data, tenant_id) => {
-  const fieldMap = {
-    tenant_id: (val) => val,
-    clinic_id: (val) => val,
-    first_name: (val) => val,
-    last_name: (val) => val,
-    gender: (val) => val,
-    date_of_birth: formatDateOnly,
-    email: (val) => val,
-    phone_number: (val) => val,
-    alternate_phone_number: (val) => val,
-
-    specialization: helper.safeStringify,
-    qualifications: helper.safeStringify,
-    languages_spoken: helper.safeStringify,
-    working_hours: helper.safeStringify,
-    available_days: helper.safeStringify,
-    bio: helper.safeStringify,
-    social_links: helper.safeStringify,
-
-    experience_years: (val) => parseInt(val) || 0,
-    license_number: (val) => val,
-    clinic_name: (val) => val,
-    clinic_address: (val) => val,
-    city: (val) => val,
-    state: (val) => val,
-    country: (val) => val,
-    pin_code: (val) => val,
-
-    consultation_fee: (val) => parseFloat(val) || 0,
-    ratings: (val) => parseFloat(val) || 0,
-    reviews_count: (val) => parseInt(val) || 0,
-    appointment_count: (val) => parseInt(val) || 0,
-
-    profile_picture: (val) => val || null,
-
-    teleconsultation_supported: helper.parseBoolean,
-    insurance_supported: helper.parseBoolean,
-
-    awards_certifications: helper.safeStringify,
-    member_of: helper.safeStringify,
-
-    last_login: (val) => val,
-    duration: helper.duration,
+  const update = {
+    ...dentistFieldMap,
     updated_by: (val) => val,
   };
   try {
-    const { columns, values } = mapFields(data, fieldMap);
+    const { columns, values } = mapFields(data, update);
     const affectedRows = await dentistModel.updateDentist(
       dentistId,
       columns,
@@ -151,20 +162,7 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `dentists:${tenantId}:page:${page}:limit:${limit}`;
 
-  const jsonFields = [
-    "specialization",
-    "qualifications",
-    "working_hours",
-    "available_days",
-    "bio",
-    "languages_spoken",
-    "social_links",
-    "awards_certifications",
-    "duration",
-    "member_of",
-  ];
-  const booleanFields = ["teleconsultation_supported", "insurance_supported"];
-
+  
   try {
     const dentists = await getOrSetCache(cacheKey, async () => {
       return await dentistModel.getAllDentistsByTenantId(
@@ -174,17 +172,36 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
       );
     });
 
-    const parsed = decodeJsonFields(dentists, jsonFields)
-      .map((d) => {
-        mapBooleanFields(d, booleanFields);
-        if (d.date_of_birth) {
-          d.date_of_birth = formatDateOnly(d.date_of_birth);
-        }
-        return d;
-      })
-      .map(flattenAwards);
+    const convertedRows = dentists.map(dentist => helper.convertDbToFrontend(dentist, dentistFieldReverseMap));
 
-    return parsed;
+    // const jsonFields = [
+    //   "specialisation",
+    //   "designation",
+    //   "working_hours",
+    //   "available_days",
+    //   "bio",
+    //   "languages_spoken",
+    //   "social_links",
+    //   "duration",
+    //   "member_of",
+    //   'social_activites',
+    //   'internship',
+    //   'publication',
+    //   'research_project'
+    // ];
+    // const booleanFields = ["teleconsultation_supported", "insurance_supported"];
+
+    // const parsed = decodeJsonFields(dentists, jsonFields)
+    //   .map((d) => {
+    //     mapBooleanFields(d, booleanFields);
+    //     if (d.date_of_birth) {
+    //       d.date_of_birth = formatDateOnly(d.date_of_birth);
+    //     }
+    //     return d;
+    //   })
+    //   .map(flattenAwards);
+
+    return convertedRows;
   } catch (err) {
     console.error("Database error while fetching dentists:", err.message);
     throw new CustomError("Database error while fetching dentists", 404);

@@ -10,36 +10,38 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly } = require("../utils/DateUtils");
 
+const treatmentFields = {
+  tenant_id: (val) => val,
+  patient_id: (val) => val,
+  dentist_id: (val) => val,
+  clinic_id: (val) => val,
+  diagnosis: helper.safeStringify,
+  treatment_procedure: (val) => val,
+  treatment_type: (val) => val,
+  treatment_status: (val) => val,
+  treatment_date: (val) => val,
+  cost: (val) => val || 0,
+  duration: (val) => val || null,
+  teeth_involved: (val) => val || null,
+  complications: helper.safeStringify,
+  follow_up_required: helper.parseBoolean,
+  follow_up_date: (val) => val || null,
+  follow_up_notes: helper.safeStringify,
+  anesthesia_used: helper.parseBoolean,
+  anesthesia_type: (val) => val || null,
+  technician_assisted: (val) => val || null,
+  treatment_images: (val) => val || null,
+  notes: helper.safeStringify,
+};
 // Create Treatment
 const createTreatment = async (data) => {
-  console.log("data:", data);
-  const fieldMap = {
-    tenant_id: (val) => val,
-    patient_id: (val) => val,
-    dentist_id: (val) => val,
-    clinic_id: (val) => val,
-    diagnosis: helper.safeStringify,
-    treatment_procedure: (val) => val,
-    treatment_type: (val) => val,
-    treatment_status: (val) => val,
-    treatment_date: (val) => val,
-    cost: (val) => val || 0,
-    duration: (val) => val || null,
-    teeth_involved: (val) => val || null,
-    complications: helper.safeStringify,
-    follow_up_required: helper.parseBoolean,
-    follow_up_date: (val) => val || null,
-    follow_up_notes: helper.safeStringify,
-    anesthesia_used: helper.parseBoolean,
-    anesthesia_type: (val) => val || null,
-    technician_assisted: (val) => val || null,
-    treatment_images: (val) => val || null,
-    notes: helper.safeStringify,
+  const create = {
+    ...treatmentFields,
     created_by: (val) => val,
   };
 
   try {
-    const { columns, values } = mapFields(data, fieldMap);
+    const { columns, values } = mapFields(data, create);
     const treatmentId = await treatmentModel.createTreatment(
       "treatment",
       columns,
@@ -78,7 +80,12 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
   }
 };
 
-const getAllTreatmentsByTenantAndPatientId = async (tenantId,patientId, page = 1, limit = 10) => {
+const getAllTreatmentsByTenantAndPatientId = async (
+  tenantId,
+  patientId,
+  page = 1,
+  limit = 10
+) => {
   const offset = (page - 1) * limit;
   const cacheKey = `treatment_patient:${tenantId}:page:${page}:limit:${limit}`;
 
@@ -96,9 +103,9 @@ const getAllTreatmentsByTenantAndPatientId = async (tenantId,patientId, page = 1
       return result;
     });
 
-    const parsed= helper.decodeJsonFields(treatments, jsonFields);
-    parsed.forEach(p => {
-      helper.mapBooleanFields(p,booleanFields)
+    const parsed = helper.decodeJsonFields(treatments, jsonFields);
+    parsed.forEach((p) => {
+      helper.mapBooleanFields(p, booleanFields);
     });
     return parsed.map((p) => ({
       ...p,
@@ -127,33 +134,13 @@ const getTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {
 
 // Update Treatment
 const updateTreatment = async (treatmentId, data, tenant_id) => {
-  const fieldMap = {
-    tenant_id: (val) => val,
-    patient_id: (val) => val,
-    dentist_id: (val) => val,
-    clinic_id: (val) => val,
-    diagnosis: helper.safeStringify,
-    treatment_procedure:(val) => val,
-    treatment_type: (val) => val,
-    treatment_status: (val) => val,
-    treatment_date: (val) => val,
-    cost: (val) => val || 0,
-    duration: (val) => val || null,
-    teeth_involved: (val) => val || null,
-    complications: helper.safeStringify,
-    follow_up_required: helper.parseBoolean,
-    follow_up_date: (val) => val || null,
-    follow_up_notes: helper.safeStringify,
-    anesthesia_used: helper.parseBoolean,
-    anesthesia_type: (val) => val || null,
-    technician_assisted: (val) => val || null,
-    treatment_images: (val) => val || null,
-    notes: helper.safeStringify,
+  const update = {
+    ...treatmentFields,
     updated_by: (val) => val,
   };
 
   try {
-    const { columns, values } = mapFields(data, fieldMap);
+    const { columns, values } = mapFields(data, update);
     const affectedRows = await treatmentModel.updateTreatment(
       treatmentId,
       columns,
@@ -203,5 +190,5 @@ module.exports = {
   getTreatmentByTenantIdAndTreatmentId,
   updateTreatment,
   deleteTreatmentByTenantIdAndTreatmentId,
-  getAllTreatmentsByTenantAndPatientId
+  getAllTreatmentsByTenantAndPatientId,
 };

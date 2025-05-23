@@ -2,25 +2,30 @@ const { CustomError } = require("../middlewares/CustomeError");
 const tenantModel = require("../models/TenantModel");
 const { validateInput } = require("./InputValidation");
 
-const createColumnConfig = [
+const tenantColumnConfig = [
   { columnname: "tenant_name", type: "varchar", size: 50, null: false },
   { columnname: "tenant_domain", type: "varchar", size: 255, null: false },
+  { columnname: "tenant_app_name", type: "varchar", size: 100, null: true },
+  { columnname: "tenant_app_logo", type: "varchar", size: 50, null: true },
+  { columnname: "tenant_app_themes", type: "longtext", null: true },
+  { columnname: "tenant_app_font", type: "varchar", size: 255, null: true },
+];
+const createColumnConfig = [
+  ...tenantColumnConfig,
   { columnname: "created_by", type: "varchar", size: 30, null: false },
 ];
 
 const updateColumnConfig = [
-  { columnname: "tenant_name", type: "varchar", size: 50, null: false },
-  { columnname: "tenant_domain", type: "varchar", size: 255, null: false },
+  ...tenantColumnConfig,
   { columnname: "updated_by", type: "varchar", size: 30, null: false },
 ];
 
 const createTenantValidation = async (details) => {
   validateInput(details, createColumnConfig);
-  const tenant =
-    await tenantModel.checkTenantExistsByTenantnameAndTenantdomain(
-      details.tenant_name,
-      details.tenant_domain
-    );
+  const tenant = await tenantModel.checkTenantExistsByTenantnameAndTenantdomain(
+    details.tenant_name,
+    details.tenant_domain
+  );
   if (tenant) throw new CustomError("Tenant Already Exists", 409);
 };
 

@@ -8,42 +8,49 @@ const {
 const { decodeJsonFields } = require("../utils/Helpers");
 const { formatDateOnly } = require("../utils/DateUtils");
 const { mapFields } = require("../query/Records");
-const helper=require('../utils/Helpers')
+const helper = require("../utils/Helpers");
+
+const patiendFields = {
+  tenant_id: (val) => val,
+  first_name: (val) => val,
+  last_name: (val) => val,
+  email: (val) => val || null,
+  phone_number: (val) => val,
+  alternate_phone_number: (val) => val || null,
+  date_of_birth: (val) => val.split("T")[0] || null,
+  gender: (val) => val,
+  blood_group: (val) => val || null,
+  address: (val) => val || null,
+  city: (val) => val || null,
+  state: (val) => val || null,
+  country: (val) => val || null,
+  pin_code: (val) => val || null,
+  profession: (val) => val || null,
+  referred_by: (val) => val || null,
+  tooth_details: helper.safeStringify,
+  smoking_status: (val) => val,
+  alcohol_consumption: (val) => val,
+  emergency_contact_name: (val) => val || null,
+  emergency_contact_phone: (val) => val || null,
+  insurance_provider: (val) => val || null,
+  insurance_policy_number: (val) => val || null,
+  profile_picture: (val) => val || null,
+};
 
 // Create patient
 const createPatient = async (data) => {
-
-  const fieldMap = {
-    tenant_id: (val) => val,
-    first_name: (val) => val,
-    last_name: (val) => val,
-    email: (val) => val || null,
-    phone_number: (val) => val,
-    alternate_phone_number: (val) => val || null,
-    date_of_birth: (val) => val.split('T')[0] || null,
-    gender: (val) => val,
-    blood_group: (val) => val || null,
-    address: (val) => val || null,
-    city: (val) => val || null,
-    state: (val) => val || null,
-    country: (val) => val || null,
-    pin_code: (val) => val || null,
-    profession: (val) => val || null,
-    referred_by: (val) => val || null,
-    tooth_details:helper.safeStringify,
-    smoking_status: (val) => val,
-    alcohol_consumption: (val) => val,
-    emergency_contact_name: (val) => val || null,
-    emergency_contact_phone: (val) => val || null,
-    insurance_provider: (val) => val || null,
-    insurance_policy_number: (val) => val || null,
-    profile_picture: (val) => val || null,
+  const create = {
+    ...patiendFields,
     created_by: (val) => val,
   };
 
   try {
-    const {columns,values}=mapFields(data,fieldMap)
-    const patientId = await patientModel.createPatient("patient", columns, values);
+    const { columns, values } = mapFields(data, create);
+    const patientId = await patientModel.createPatient(
+      "patient",
+      columns,
+      values
+    );
     await invalidateCacheByPattern("patients:*");
     return patientId;
   } catch (error) {
@@ -56,7 +63,7 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `patients:${tenantId}:page:${page}:limit:${limit}`;
 
-  const jsonFields = ["pre_history","treatment_history",'tooth_details'];
+  const jsonFields = ["pre_history", "treatment_history", "tooth_details"];
   const booleanFields = []; // Add boolean fields here if needed in the future
 
   try {
@@ -97,12 +104,18 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
   }
 };
 
-
 // Get single patient
 const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
   try {
-    const patient = await patientModel.getPatientByTenantIdAndPatientId(tenantId, patientId);
-    const fieldsToDecode = [ "pre_history", "treatment_history","tooth_details"];
+    const patient = await patientModel.getPatientByTenantIdAndPatientId(
+      tenantId,
+      patientId
+    );
+    const fieldsToDecode = [
+      "pre_history",
+      "treatment_history",
+      "tooth_details",
+    ];
     return decodeJsonFields(patient, fieldsToDecode);
   } catch (error) {
     throw new CustomError("Failed to get patient: " + error.message, 404);
@@ -110,9 +123,15 @@ const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
 };
 
 // Check existence
-const checkPatientExistsByTenantIdAndPatientId = async (tenantId, patientId) => {
+const checkPatientExistsByTenantIdAndPatientId = async (
+  tenantId,
+  patientId
+) => {
   try {
-    return await patientModel.checkPatientExistsByTenantIdAndPatientId(tenantId, patientId);
+    return await patientModel.checkPatientExistsByTenantIdAndPatientId(
+      tenantId,
+      patientId
+    );
   } catch (error) {
     throw new CustomError("Failed to check patient: " + error.message, 404);
   }
@@ -120,36 +139,18 @@ const checkPatientExistsByTenantIdAndPatientId = async (tenantId, patientId) => 
 
 // Update patient
 const updatePatient = async (patientId, data, tenant_id) => {
-  const fieldMap = {
-    tenant_id: (val) => val,
-    first_name: (val) => val,
-    last_name: (val) => val,
-    email: (val) => val || null,
-    phone_number: (val) => val,
-    alternate_phone_number: (val) => val || null,
-    date_of_birth: (val) => val.split('T')[0] || null,
-    gender: (val) => val,
-    blood_group: (val) => val || null,
-    address: (val) => val || null,
-    city: (val) => val || null,
-    state: (val) => val || null,
-    country: (val) => val || null,
-    pin_code: (val) => val || null,
-    profession: (val) => val || null,
-    referred_by: (val) => val || null,
-    tooth_details:helper.safeStringify,
-    smoking_status: (val) => val || null,
-    alcohol_consumption: (val) => val || null,
-    emergency_contact_name: (val) => val || null,
-    emergency_contact_phone: (val) => val || null,
-    insurance_provider: (val) => val || null,
-    insurance_policy_number: (val) => val || null,
-    profile_picture: (val) => val || null,
+  const update = {
+    ...patiendFields,
     updated_by: (val) => val,
   };
   try {
-    const {columns,values}=mapFields(data,fieldMap)
-    const affectedRows = await patientModel.updatePatient(patientId, columns, values, tenant_id);
+    const { columns, values } = mapFields(data, update);
+    const affectedRows = await patientModel.updatePatient(
+      patientId,
+      columns,
+      values,
+      tenant_id
+    );
     if (affectedRows === 0) {
       throw new CustomError("Patient not found or no changes made.", 404);
     }
@@ -165,7 +166,10 @@ const updatePatient = async (patientId, data, tenant_id) => {
 // Delete patient
 const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
   try {
-    const affectedRows = await patientModel.deletePatientByTenantIdAndPatientId(tenantId, patientId);
+    const affectedRows = await patientModel.deletePatientByTenantIdAndPatientId(
+      tenantId,
+      patientId
+    );
     if (affectedRows === 0) {
       throw new CustomError("Patient not found.", 404);
     }
@@ -177,12 +181,15 @@ const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
   }
 };
 
-
-const updateToothDetails = async (data,patientId,tenant_id) => {
-  console.log(data)
-  data=data.length>0?JSON.stringify(data):null
+const updateToothDetails = async (data, patientId, tenant_id) => {
+  console.log(data);
+  data = data.length > 0 ? JSON.stringify(data) : null;
   try {
-    const affectedRows = await patientModel.updateToothDetails(data,patientId,tenant_id);
+    const affectedRows = await patientModel.updateToothDetails(
+      data,
+      patientId,
+      tenant_id
+    );
     if (affectedRows === 0) {
       throw new CustomError("Patient not found.", 404);
     }
@@ -193,7 +200,6 @@ const updateToothDetails = async (data,patientId,tenant_id) => {
     throw new CustomError(`Failed to delete patient: ${error.message}`, 404);
   }
 };
-
 
 module.exports = {
   createPatient,
@@ -202,5 +208,5 @@ module.exports = {
   checkPatientExistsByTenantIdAndPatientId,
   updatePatient,
   deletePatientByTenantIdAndPatientId,
-  updateToothDetails
+  updateToothDetails,
 };

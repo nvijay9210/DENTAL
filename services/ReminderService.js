@@ -9,32 +9,32 @@ const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
-const {
-  formatDateOnly,
-} = require("../utils/DateUtils");
+const { formatDateOnly } = require("../utils/DateUtils");
 
 // Field mapping for reminders (similar to treatment)
-
+const reminderFields = {
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
+  dentist_id: (val) => val,
+  title: (val) => val,
+  description: helper.safeStringify,
+  reminder_reason: (val) => val,
+  reminder_type: (val) => val,
+  category: (val) => val,
+  due_date: (val) => val,
+  due_time: (val) => val,
+  reminder_repeat: (val) => val,
+  repeat_interval: (val) => val,
+  repeat_weekdays: (val) => val,
+  repeat_end_date: (val) => val,
+  notify: helper.parseBoolean,
+  notification_tone: (val) => val,
+  status: (val) => val,
+};
 // Create Reminder
 const createReminder = async (data) => {
   const fieldMap = {
-    tenant_id: (val) => val,
-    clinic_id: (val) => val,
-    dentist_id: (val) => val,
-    title:(val)=>val,
-    description:helper.safeStringify,
-    reminder_reason:(val)=>val,
-    reminder_type:(val)=>val,
-    category:(val)=>val,
-    due_date:(val)=>val,
-    due_time:(val)=>val,
-    reminder_repeat:(val)=>val,
-    repeat_interval:(val)=>val,
-    repeat_weekdays:(val)=>val,
-    repeat_end_date:(val)=>val,
-    notify:helper.parseBoolean,
-    notification_tone:(val)=>val,
-    status:(val)=>val,
+    ...reminderFields,
     created_by: (val) => val,
   };
   try {
@@ -48,19 +48,12 @@ const createReminder = async (data) => {
     return reminderId;
   } catch (error) {
     console.error("Failed to create reminder:", error);
-    throw new CustomError(
-      `Failed to create reminder: ${error.message}`,
-      404
-    );
+    throw new CustomError(`Failed to create reminder: ${error.message}`, 404);
   }
 };
 
 // Get All Reminders by Tenant ID with Caching
-const getAllRemindersByTenantId = async (
-  tenantId,
-  page = 1,
-  limit = 10
-) => {
+const getAllRemindersByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `reminder:${tenantId}:page:${page}:limit:${limit}`;
 
@@ -84,16 +77,12 @@ const getAllRemindersByTenantId = async (
 };
 
 // Get Reminder by ID & Tenant
-const getReminderByTenantIdAndReminderId = async (
-  tenantId,
-  reminderId
-) => {
+const getReminderByTenantIdAndReminderId = async (tenantId, reminderId) => {
   try {
-    const reminder =
-      await reminderModel.getReminderByTenantIdAndReminderId(
-        tenantId,
-        reminderId
-      );
+    const reminder = await reminderModel.getReminderByTenantIdAndReminderId(
+      tenantId,
+      reminderId
+    );
     const fieldsToDecode = [
       "medication",
       "side_effects",
@@ -108,26 +97,10 @@ const getReminderByTenantIdAndReminderId = async (
 
 // Update Reminder
 const updateReminder = async (reminderId, data, tenant_id) => {
-    const fieldMap = {
-        tenant_id: (val) => val,
-        clinic_id: (val) => val,
-        dentist_id: (val) => val,
-        title:(val)=>val,
-        description:helper.safeStringify,
-        reminder_reason:(val)=>val,
-        reminder_type:(val)=>val,
-        category:(val)=>val,
-        due_date:(val)=>val,
-        due_time:(val)=>val,
-        reminder_repeat:(val)=>val,
-        repeat_interval:(val)=>val,
-        repeat_weekdays:(val)=>val,
-        repeat_end_date:(val)=>val,
-        notify:helper.parseBoolean,
-        notification_tone:(val)=>val,
-        status:(val)=>val,
-        updated_by: (val) => val,
-      };
+  const fieldMap = {
+    ...reminderFields,
+    updated_by: (val) => val,
+  };
   try {
     const { columns, values } = mapFields(data, fieldMap);
     const affectedRows = await reminderModel.updateReminder(
@@ -150,10 +123,7 @@ const updateReminder = async (reminderId, data, tenant_id) => {
 };
 
 // Delete Reminder
-const deleteReminderByTenantIdAndReminderId = async (
-  tenantId,
-  reminderId
-) => {
+const deleteReminderByTenantIdAndReminderId = async (tenantId, reminderId) => {
   try {
     const affectedRows =
       await reminderModel.deleteReminderByTenantAndReminderId(
@@ -167,10 +137,7 @@ const deleteReminderByTenantIdAndReminderId = async (
     await invalidateCacheByPattern("reminder:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(
-      `Failed to delete reminder: ${error.message}`,
-      404
-    );
+    throw new CustomError(`Failed to delete reminder: ${error.message}`, 404);
   }
 };
 
@@ -179,5 +146,5 @@ module.exports = {
   getAllRemindersByTenantId,
   getReminderByTenantIdAndReminderId,
   updateReminder,
-  deleteReminderByTenantIdAndReminderId
+  deleteReminderByTenantIdAndReminderId,
 };

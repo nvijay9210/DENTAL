@@ -9,24 +9,25 @@ const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
-const {
-  formatDateOnly,
-} = require("../utils/DateUtils");
+const { formatDateOnly } = require("../utils/DateUtils");
 
 // Field mapping for suppliers (similar to treatment)
 
+const supplierFields = {
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
+  supplier_name: (val) => val,
+  supplier_category: (val) => val,
+  supplier_status: (val) => val,
+  payment_status: (val) => val,
+  supplier_contact_number: (val) => val,
+  supplier_country: (val) => val,
+  supplier_performance_rating: (val) => val,
+};
 // Create Supplier
 const createSupplier = async (data) => {
   const fieldMap = {
-    tenant_id: (val) => val,
-    clinic_id: (val) => val,
-    supplier_name:(val)=>val,
-    supplier_category:(val)=>val,
-    supplier_status:(val)=>val,
-    payment_status:(val)=>val,
-    supplier_contact_number:(val)=>val,
-    supplier_country:(val)=>val,
-    supplier_performance_rating:(val)=>val,
+    ...supplierFields,
     created_by: (val) => val,
   };
   try {
@@ -40,19 +41,12 @@ const createSupplier = async (data) => {
     return supplierId;
   } catch (error) {
     console.error("Failed to create supplier:", error);
-    throw new CustomError(
-      `Failed to create supplier: ${error.message}`,
-      404
-    );
+    throw new CustomError(`Failed to create supplier: ${error.message}`, 404);
   }
 };
 
 // Get All Suppliers by Tenant ID with Caching
-const getAllSuppliersByTenantId = async (
-  tenantId,
-  page = 1,
-  limit = 10
-) => {
+const getAllSuppliersByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `supplier:${tenantId}:page:${page}:limit:${limit}`;
 
@@ -76,16 +70,12 @@ const getAllSuppliersByTenantId = async (
 };
 
 // Get Supplier by ID & Tenant
-const getSupplierByTenantIdAndSupplierId = async (
-  tenantId,
-  supplierId
-) => {
+const getSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
   try {
-    const supplier =
-      await supplierModel.getSupplierByTenantIdAndSupplierId(
-        tenantId,
-        supplierId
-      );
+    const supplier = await supplierModel.getSupplierByTenantIdAndSupplierId(
+      tenantId,
+      supplierId
+    );
     const fieldsToDecode = [
       "medication",
       "side_effects",
@@ -101,15 +91,7 @@ const getSupplierByTenantIdAndSupplierId = async (
 // Update Supplier
 const updateSupplier = async (supplierId, data, tenant_id) => {
   const fieldMap = {
-    tenant_id: (val) => val,
-    clinic_id: (val) => val,
-    supplier_name:(val)=>val,
-    supplier_category:(val)=>val,
-    supplier_status:(val)=>val,
-    payment_status:(val)=>val,
-    supplier_contact_number:(val)=>val,
-    supplier_country:(val)=>val,
-    supplier_performance_rating:(val)=>val,
+    ...supplierFields,
     updated_by: (val) => val,
   };
   try {
@@ -134,10 +116,7 @@ const updateSupplier = async (supplierId, data, tenant_id) => {
 };
 
 // Delete Supplier
-const deleteSupplierByTenantIdAndSupplierId = async (
-  tenantId,
-  supplierId
-) => {
+const deleteSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
   try {
     const affectedRows =
       await supplierModel.deleteSupplierByTenantAndSupplierId(
@@ -151,10 +130,7 @@ const deleteSupplierByTenantIdAndSupplierId = async (
     await invalidateCacheByPattern("supplier:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(
-      `Failed to delete supplier: ${error.message}`,
-      404
-    );
+    throw new CustomError(`Failed to delete supplier: ${error.message}`, 404);
   }
 };
 
@@ -163,5 +139,5 @@ module.exports = {
   getAllSuppliersByTenantId,
   getSupplierByTenantIdAndSupplierId,
   updateSupplier,
-  deleteSupplierByTenantIdAndSupplierId
+  deleteSupplierByTenantIdAndSupplierId,
 };

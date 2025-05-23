@@ -119,6 +119,16 @@ function duration(val) {
   return 0;
 }
 
+function convertDbToFrontend(row, reverseMap) {
+  const result = {};
+  for (const key in reverseMap) {
+    const converter = reverseMap[key];
+    result[key] = row.hasOwnProperty(key) ? converter(row[key]) : null;
+  }
+  return result;
+}
+
+
 // -------------------- EXPORTS --------------------
 
 module.exports = {
@@ -131,5 +141,6 @@ module.exports = {
   buildUpdatedData,
   safeStringify,
   parseBoolean,
-  duration
+  duration,
+  convertDbToFrontend
 };
