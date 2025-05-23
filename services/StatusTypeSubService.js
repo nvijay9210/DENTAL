@@ -14,6 +14,17 @@ const statusTypeSubFields = {
   status_type_sub: (val) => val,
   status_type_sub_ref: (val) => val,
 };
+const statusTypeSubFieldsReverseMap = {
+  status_type_sub_id: (val) => val,
+  tenant_id: (val) => val,
+  status_type_id: (val) => val,
+  status_type_sub: (val) => val,
+  status_type_sub_ref: (val) => val,
+  created_by: (val) => val,
+  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_by: (val) => val,
+  updated_time: (val) => (val ? new Date(val).toISOString() : null),
+};
 // Create StatusTypeSub
 const createStatusTypeSub = async (details, statusType) => {
   const fieldMap = {
@@ -64,7 +75,11 @@ const getAllStatusTypeSubsByTenantId = async (
       return result;
     });
 
-    return statusTypeSubs;
+    const convertedRows = statusTypeSubs.map((statusTypeSub) =>
+      helper.convertDbToFrontend(statusTypeSub, statusTypeSubFieldsReverseMap)
+    );
+
+    return convertedRows;
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
     throw new CustomError("Failed to fetch statusTypeSubs", 404);
@@ -91,7 +106,12 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
       return result;
     });
 
-    return statusTypeSubs;
+    const convertedRows = helper.convertDbToFrontend(
+      statusTypeSubs,
+      statusTypeSubFieldsReverseMap
+    );
+
+    return convertedRows;
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
     throw new CustomError("Failed to fetch statusTypeSubs", 404);
@@ -123,7 +143,11 @@ const getAllStatusTypeSubByTenantIdAndStatusType = async (
       return result;
     });
 
-    return statusTypeSubs;
+    const convertedRows = statusTypeSubs.map((statusTypeSub) =>
+      helper.convertDbToFrontend(statusTypeSub, statusTypeSubFieldsReverseMap)
+    );
+
+    return convertedRows;
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
     throw new CustomError("Failed to fetch statusTypeSubs", 404);
@@ -151,7 +175,11 @@ const getAllStatusTypeSubByStatusTypeAndTenantId = async (
       return result;
     });
 
-    return statusTypeSubs;
+    const convertedRows = statusTypeSubs.map((statusTypeSub) =>
+      helper.convertDbToFrontend(statusTypeSub, statusTypeSubFieldsReverseMap)
+    );
+
+    return convertedRows;
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
     throw new CustomError("Failed to fetch statusTypeSubs", 404);
@@ -169,7 +197,12 @@ const getStatusTypeSubByTenantIdAndStatusTypeSubId = async (
         tenantId,
         statusTypeSubId
       );
-    return statusTypeSub;
+    const convertedRows = helper.convertDbToFrontend(
+      statusTypeSub,
+      statusTypeSubFieldsReverseMap
+    );
+
+    return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get statusTypeSub: " + error.message, 404);
   }

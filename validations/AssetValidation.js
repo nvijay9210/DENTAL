@@ -21,12 +21,12 @@ const assetColumnConfig = [
 // Asset Column Configuration for Validation
 const createColumnConfig = [
   ...assetColumnConfig,
-  { columnname: "created_by", type: "varchar", size: 20, null: false },
+  { columnname: "created_by", type: "varchar", size: 30, null: false },
 ];
 
 const updateColumnConfig = [
   ...assetColumnConfig,
-  { columnname: "updated_by", type: "varchar", size: 20, null: false },
+  { columnname: "updated_by", type: "varchar", size: 30, null: false },
 ];
 
 /**

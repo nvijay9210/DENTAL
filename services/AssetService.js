@@ -28,6 +28,28 @@ const assetFields = {
   description: helper.safeStringify,
 };
 
+const assetFieldsReverseMap = {
+  asset_id:val=>val,
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
+  asset_name: (val) => val,
+  asset_type: (val) => val,
+  asset_status: (val) => val,
+  asset_photo: (val) => val,
+  allocated_to: (val) => val,
+  quantity: (val) => val,
+  price: (val) => val,
+  purchased_date: val => val ? new Date(val).toISOString().split('T')[0] : null,
+  purchased_by: (val) => val,
+  expired_date: val => val ? new Date(val).toISOString().split('T')[0] : null,
+  invoice_number: (val) => val,
+  description:val=> helper.safeJsonParse(val),
+  created_by: val => val,
+  created_time: val => val ? new Date(val).toISOString() : null,
+  updated_by: val => val,
+  updated_time: val => val ? new Date(val).toISOString() : null
+};
+
 // Field mapping for assets (similar to treatment)
 
 // Create Asset
@@ -52,8 +74,6 @@ const getAllAssetsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `asset:${tenantId}:page:${page}:limit:${limit}`;
 
-  const jsonFields = ["description"];
-
   try {
     const assets = await getOrSetCache(cacheKey, async () => {
       const result = await assetModel.getAllAssetsByTenantId(
@@ -64,19 +84,10 @@ const getAllAssetsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    if (assets && assets.length > 0) {
-      assets.forEach((asset) => {
-        // Handling date_of_birth field conversion
-        if (asset.purchased_date) {
-          asset.purchased_date = formatDateOnly(asset.purchased_date);
-        }
-        if (asset.expired_date) {
-          asset.expired_date = formatDateOnly(asset.expired_date);
-        }
-      });
-    }
-
-    return helper.decodeJsonFields(assets, jsonFields);
+    const convertedRows = assets.map(asset => helper.convertDbToFrontend(asset, assetFieldsReverseMap));
+    
+        return convertedRows;
+     
   } catch (err) {
     console.error("Database error while fetching assets:", err);
     throw new CustomError("Failed to fetch assets", 404);
@@ -90,14 +101,9 @@ const getAssetByTenantIdAndAssetId = async (tenantId, assetId) => {
       tenantId,
       assetId
     );
-    const jsonFields = ["description"];
-    if (asset.purchased_date) {
-      asset.purchased_date = formatDateOnly(asset.purchased_date);
-    }
-    if (asset.expired_date) {
-      asset.expired_date = formatDateOnly(asset.expired_date);
-    }
-    return helper.decodeJsonFields(asset, jsonFields);
+    const convertedRows = helper.convertDbToFrontend(asset, assetFieldsReverseMap);
+    
+        return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get asset: " + error.message, 404);
   }
@@ -157,8 +163,6 @@ const getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (
 ) => {
   const cacheKey = `asset:datewise:${tenantId}`;
 
-  const jsonFields = ["description"];
-
   try {
     const assets = await getOrSetCache(cacheKey, async () => {
       const result =
@@ -171,19 +175,9 @@ const getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (
       return result;
     });
 
-    if (assets && assets.length > 0) {
-      assets.forEach((asset) => {
-        // Handling date_of_birth field conversion
-        if (asset.purchased_date) {
-          asset.purchased_date = formatDateOnly(asset.purchased_date);
-        }
-        if (asset.expired_date) {
-          asset.expired_date = formatDateOnly(asset.expired_date);
-        }
-      });
-    }
-
-    return helper.decodeJsonFields(assets, jsonFields);
+    const convertedRows = assets.map(asset => helper.convertDbToFrontend(asset, assetFieldsReverseMap));
+    
+      return convertedRows;
   } catch (err) {
     console.error("Database error while fetching assets:", err);
     throw new CustomError("Failed to fetch assets", 404);

@@ -31,6 +31,31 @@ const reminderFields = {
   notification_tone: (val) => val,
   status: (val) => val,
 };
+
+const reminderFieldsReverseMap = {
+  reminder_id: (val) => val,
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
+  dentist_id: (val) => val,
+  title: (val) => val,
+  description: helper.safeJsonParse,
+  reminder_reason: (val) => val,
+  reminder_type: (val) => val,
+  category: (val) => val,
+  due_date: (val) => val,
+  due_time: (val) => val,
+  reminder_repeat: (val) => val,
+  repeat_interval: (val) => val,
+  repeat_weekdays: (val) => val,
+  repeat_end_date: (val) => val,
+  notify: (val) => Boolean(val),
+  notification_tone: (val) => val,
+  status: (val) => val,
+  created_by: (val) => val,
+  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_by: (val) => val,
+  updated_time: (val) => (val ? new Date(val).toISOString() : null),
+};
 // Create Reminder
 const createReminder = async (data) => {
   const fieldMap = {
@@ -57,8 +82,6 @@ const getAllRemindersByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `reminder:${tenantId}:page:${page}:limit:${limit}`;
 
-  const jsonFields = ["description"];
-
   try {
     const reminders = await getOrSetCache(cacheKey, async () => {
       const result = await reminderModel.getAllRemindersByTenantId(
@@ -69,7 +92,11 @@ const getAllRemindersByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    return helper.decodeJsonFields(reminders, jsonFields);
+    const convertedRows = reminders.map((reminder) =>
+      helper.convertDbToFrontend(reminder, reminderFieldsReverseMap)
+    );
+
+    return convertedRows;
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
     throw new CustomError("Failed to fetch reminders", 404);
@@ -79,17 +106,16 @@ const getAllRemindersByTenantId = async (tenantId, page = 1, limit = 10) => {
 // Get Reminder by ID & Tenant
 const getReminderByTenantIdAndReminderId = async (tenantId, reminderId) => {
   try {
-    const reminder = await reminderModel.getReminderByTenantIdAndReminderId(
+    const reminder = await reminderModel.getReminderByTenantAndReminderId(
       tenantId,
       reminderId
     );
-    const fieldsToDecode = [
-      "medication",
-      "side_effects",
-      "instructions",
-      "notes",
-    ];
-    return decodeJsonFields(reminder, fieldsToDecode);
+    
+    const convertedRows = 
+      helper.convertDbToFrontend(reminder, reminderFieldsReverseMap)
+  
+
+    return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get reminder: " + error.message, 404);
   }

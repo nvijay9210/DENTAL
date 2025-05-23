@@ -37,6 +37,42 @@ const patiendFields = {
   profile_picture: (val) => val || null,
 };
 
+const patientFieldsReverseMap = {
+  patient_id: (val) => val,
+  tenant_id: (val) => val,
+  first_name: (val) => val,
+  last_name: (val) => val,
+  email: (val) => val || null,
+  phone_number: (val) => val,
+  alternate_phone_number: (val) => val || null,
+  date_of_birth: (val) =>
+    val ? new Date(val).toISOString().split("T")[0] : null,
+  gender: (val) => val,
+  blood_group: (val) => val || null,
+  address: (val) => val || null,
+  city: (val) => val || null,
+  state: (val) => val || null,
+  country: (val) => val || null,
+  pin_code: (val) => val || null,
+  profession: (val) => val || null,
+  referred_by: (val) => val || null,
+  tooth_details: helper.safeJsonParse,
+  treatment_history: helper.safeJsonParse,
+  pre_history: helper.safeJsonParse,
+  current_medication: helper.safeJsonParse,
+  smoking_status: (val) => val,
+  alcohol_consumption: (val) => val,
+  emergency_contact_name: (val) => val || null,
+  emergency_contact_number: (val) => val || null,
+  insurance_provider: (val) => val || null,
+  insurance_policy_number: (val) => val || null,
+  profile_picture: (val) => val || null,
+  created_by: (val) => val,
+  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_by: (val) => val,
+  updated_time: (val) => (val ? new Date(val).toISOString() : null),
+};
+
 // Create patient
 const createPatient = async (data) => {
   const create = {
@@ -63,9 +99,6 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `patients:${tenantId}:page:${page}:limit:${limit}`;
 
-  const jsonFields = ["pre_history", "treatment_history", "tooth_details"];
-  const booleanFields = []; // Add boolean fields here if needed in the future
-
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
       const result = await patientModel.getAllPatientsByTenantId(
@@ -77,27 +110,11 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    if (patients && patients.length > 0) {
-      patients.forEach((patient) => {
-        jsonFields.forEach((field) => {
-          if (patient[field] !== undefined) {
-            patient[field] = helper.safeJsonParse(patient[field]);
-          }
-        });
+    const convertedRows = patients.map((patient) =>
+      helper.convertDbToFrontend(patient, patientFieldsReverseMap)
+    );
 
-        // Optional: Boolean mapping if needed
-        if (booleanFields.length > 0) {
-          helper.mapBooleanFields(patient, booleanFields);
-        }
-
-        // Handling date_of_birth field conversion
-        if (patient.date_of_birth) {
-          patient.date_of_birth = formatDateOnly(patient.date_of_birth);
-        }
-      });
-    }
-
-    return patients;
+    return convertedRows;
   } catch (error) {
     console.error(error);
     throw new CustomError("Database error while fetching patients", 404);
@@ -111,12 +128,12 @@ const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
       tenantId,
       patientId
     );
-    const fieldsToDecode = [
-      "pre_history",
-      "treatment_history",
-      "tooth_details",
-    ];
-    return decodeJsonFields(patient, fieldsToDecode);
+    const convertedRows = helper.convertDbToFrontend(
+      patient,
+      patientFieldsReverseMap
+    );
+
+    return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get patient: " + error.message, 404);
   }

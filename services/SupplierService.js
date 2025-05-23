@@ -24,6 +24,22 @@ const supplierFields = {
   supplier_country: (val) => val,
   supplier_performance_rating: (val) => val,
 };
+const supplierFieldsReverseMap = {
+  supplier_id: (val) => val,
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
+  supplier_name: (val) => val,
+  supplier_category: (val) => val,
+  supplier_status: (val) => val,
+  payment_status: (val) => val,
+  supplier_contact_number: (val) => val,
+  supplier_country: (val) => val,
+  supplier_performance_rating: (val) => val,
+  created_by: (val) => val,
+  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_by: (val) => val,
+  updated_time: (val) => (val ? new Date(val).toISOString() : null),
+};
 // Create Supplier
 const createSupplier = async (data) => {
   const fieldMap = {
@@ -50,8 +66,6 @@ const getAllSuppliersByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `supplier:${tenantId}:page:${page}:limit:${limit}`;
 
-  const jsonFields = ["description"];
-
   try {
     const suppliers = await getOrSetCache(cacheKey, async () => {
       const result = await supplierModel.getAllSuppliersByTenantId(
@@ -62,7 +76,11 @@ const getAllSuppliersByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    return helper.decodeJsonFields(suppliers, jsonFields);
+    const convertedRows = suppliers.map((supplier) =>
+      helper.convertDbToFrontend(supplier, supplierFieldsReverseMap)
+    );
+
+    return convertedRows;
   } catch (err) {
     console.error("Database error while fetching suppliers:", err);
     throw new CustomError("Failed to fetch suppliers", 404);
@@ -76,13 +94,13 @@ const getSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
       tenantId,
       supplierId
     );
-    const fieldsToDecode = [
-      "medication",
-      "side_effects",
-      "instructions",
-      "notes",
-    ];
-    return decodeJsonFields(supplier, fieldsToDecode);
+
+    const convertedRows = helper.convertDbToFrontend(
+      supplier,
+      supplierFieldsReverseMap
+    );
+
+    return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get supplier: " + error.message, 404);
   }

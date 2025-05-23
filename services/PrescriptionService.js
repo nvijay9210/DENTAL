@@ -34,6 +34,31 @@ const prescriptionFields = {
   notes: helper.safeStringify,
   is_active: helper.parseBoolean,
 };
+const prescriptionFieldsReversMap = {
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
+  patient_id: (val) => val,
+  dentist_id: (val) => val,
+  treatment_id: (val) => val,
+  medication: helper.safeJsonParse,
+  generic_name: (val) => val || null,
+  brand_name: (val) => val || null,
+  dosage: helper.safeJsonParse,
+  frequency: (val) => val || null,
+  quantity: (val) => val || null,
+  refill_allowed: val => Boolean(val),
+  refill_count: (val) => val || 0,
+  side_effects: helper.safeJsonParse,
+  start_date: (val) => val ? formatDateOnly(val) : null,
+  end_date: (val) => val ? formatDateOnly(val) : null,
+  instructions: helper.safeJsonParse,
+  notes: helper.safeJsonParse,
+  is_active: val => Boolean(val),
+  created_by: (val) => val,
+  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_by: (val) => val,
+  updated_time: (val) => (val ? new Date(val).toISOString() : null)
+};
 
 // Create Prescription
 const createPrescription = async (data) => {
@@ -69,8 +94,6 @@ const getAllPrescriptionsByTenantId = async (
   const offset = (page - 1) * limit;
   const cacheKey = `prescription:${tenantId}:page:${page}:limit:${limit}`;
 
-  const jsonFields = ["medication", "side_effects", "instructions", "notes"];
-
   try {
     const prescriptions = await getOrSetCache(cacheKey, async () => {
       const result = await prescriptionModel.getAllPrescriptionsByTenantId(
@@ -81,7 +104,11 @@ const getAllPrescriptionsByTenantId = async (
       return result;
     });
 
-    return helper.decodeJsonFields(prescriptions, jsonFields);
+     const convertedRows = prescriptions.map((prescription) =>
+          helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
+        );
+    
+        return convertedRows;
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
     throw new CustomError("Failed to fetch prescriptions", 404);
@@ -97,9 +124,6 @@ const getAllPrescriptionsByTenantAndPatientId = async (
   const offset = (page - 1) * limit;
   const cacheKey = `prescriptionByPatientId:${tenantId}:page:${page}:limit:${limit}`;
 
-  const jsonFields = ["medication", "side_effects", "instructions", "notes"];
-  const booleanFields = ["refill_allowed", "is_active"];
-
   try {
     const prescriptions = await getOrSetCache(cacheKey, async () => {
       const result =
@@ -112,15 +136,11 @@ const getAllPrescriptionsByTenantAndPatientId = async (
       return result;
     });
 
-    const parsed = helper.decodeJsonFields(prescriptions, jsonFields);
-    parsed.forEach(async (p) => {
-      helper.mapBooleanFields(p, booleanFields);
-    });
-    return parsed.map((p) => ({
-      ...p,
-      start_date: formatDateOnly(p.start_date),
-      end_date: formatDateOnly(p.end_date),
-    }));
+    const convertedRows = prescriptions.map((prescription) =>
+          helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
+        );
+    
+        return convertedRows;
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
     throw new CustomError("Failed to fetch prescriptions", 404);
@@ -134,17 +154,16 @@ const getPrescriptionByTenantIdAndPrescriptionId = async (
 ) => {
   try {
     const prescription =
-      await prescriptionModel.getPrescriptionByTenantIdAndPrescriptionId(
+      await prescriptionModel.getPrescriptionByTenantAndPrescriptionId(
         tenantId,
         prescriptionId
       );
-    const fieldsToDecode = [
-      "medication",
-      "side_effects",
-      "instructions",
-      "notes",
-    ];
-    return decodeJsonFields(prescription, fieldsToDecode);
+
+    const convertedRows =
+      helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
+
+    return convertedRows;
+    
   } catch (error) {
     throw new CustomError("Failed to get prescription: " + error.message, 404);
   }

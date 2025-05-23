@@ -23,6 +23,22 @@ const expenseFields = {
   mode_of_payment: (val) => val,
   receipt_number: (val) => val,
 };
+const expenseFieldsReverseMap = {
+  expense_id:val=>val,
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
+  expense_date: (val) =>
+    val ? new Date(val).toISOString().split("T")[0] : null,
+  expense_category: (val) => val,
+  expense_reason: (val) => val,
+  expense_amount: (val) => val,
+  mode_of_payment: (val) => val,
+  receipt_number: (val) => val,
+  created_by: (val) => val,
+  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_by: (val) => val,
+  updated_time: (val) => (val ? new Date(val).toISOString() : null),
+};
 
 // Create Expense
 const createExpense = async (data) => {
@@ -50,8 +66,6 @@ const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `expense:${tenantId}:page:${page}:limit:${limit}`;
 
-  const jsonFields = ["description"];
-
   try {
     const expenses = await getOrSetCache(cacheKey, async () => {
       const result = await expenseModel.getAllExpensesByTenantId(
@@ -62,16 +76,11 @@ const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    if (expenses && expenses.length > 0) {
-      expenses.forEach((expense) => {
-        // Handling date_of_birth field conversion
-        if (expense.expense_date) {
-          expense.expense_date = formatDateOnly(expense.expense_date);
-        }
-      });
-    }
+    const convertedRows = expenses.map((expense) =>
+      helper.convertDbToFrontend(expense, expenseFieldsReverseMap)
+    );
 
-    return helper.decodeJsonFields(expenses, jsonFields);
+    return convertedRows;
   } catch (err) {
     console.error("Database error while fetching expenses:", err);
     throw new CustomError("Failed to fetch expenses", 404);
@@ -97,17 +106,11 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
         );
       return result;
     });
+    const convertedRows = expenses.map((expense) =>
+      helper.convertDbToFrontend(expense, expenseFieldsReverseMap)
+    );
 
-    if (expenses && expenses.length > 0) {
-      expenses.forEach((expense) => {
-        // Handling date_of_birth field conversion
-        if (expense.expense_date) {
-          expense.expense_date = formatDateOnly(expense.expense_date);
-        }
-      });
-    }
-
-    return expenses;
+    return convertedRows;
   } catch (err) {
     console.error("Database error while fetching expenses:", err);
     throw new CustomError("Failed to fetch expenses", 404);
@@ -121,7 +124,12 @@ const getExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
       tenantId,
       expenseId
     );
-    return expense;
+    const convertedRows = helper.convertDbToFrontend(
+      expense,
+      expenseFieldsReverseMap
+    );
+
+    return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get expense: " + error.message, 404);
   }

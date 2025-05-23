@@ -33,6 +33,31 @@ const treatmentFields = {
   treatment_images: (val) => val || null,
   notes: helper.safeStringify,
 };
+
+const treatmentFieldsReverseMap = {
+  treatment_id: (val) => val,
+  tenant_id: (val) => val,
+  patient_id: (val) => val,
+  dentist_id: (val) => val,
+  clinic_id: (val) => val,
+  diagnosis: helper.safeJsonParse,
+  treatment_procedure: (val) => val,
+  treatment_type: (val) => val,
+  treatment_status: (val) => val,
+  treatment_date: (val) => formatDateOnly(val),
+  cost: (val) => val,
+  duration: (val) => val,
+  teeth_involved: (val) => val,
+  complications: helper.safeJsonParse,
+  follow_up_required: (val) => Boolean(val),
+  follow_up_date: (val) => formatDateOnly(val),
+  follow_up_notes: helper.safeJsonParse,
+  anesthesia_used: (val) => Boolean(val),
+  anesthesia_type: (val) => val,
+  technician_assisted: (val) => val,
+  treatment_images: (val) => val,
+  notes: helper.safeJsonParse,
+};
 // Create Treatment
 const createTreatment = async (data) => {
   const create = {
@@ -61,8 +86,6 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `treatment:${tenantId}:page:${page}:limit:${limit}`;
 
-  const jsonFields = ["description", "diagnosis", "notes"];
-
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
       const result = await treatmentModel.getAllTreatmentsByTenantId(
@@ -73,7 +96,11 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    return helper.decodeJsonFields(treatments, jsonFields);
+    const convertedRows = treatments.map((treatment) =>
+      helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
+    );
+
+    return convertedRows;
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
     throw new CustomError("Failed to fetch treatments", 404);
@@ -89,9 +116,6 @@ const getAllTreatmentsByTenantAndPatientId = async (
   const offset = (page - 1) * limit;
   const cacheKey = `treatment_patient:${tenantId}:page:${page}:limit:${limit}`;
 
-  const jsonFields = ["description", "diagnosis", "notes"];
-  const booleanFields = ["follow_up_required", "anesthesia_used"];
-
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
       const result = await treatmentModel.getAllTreatmentsByTenantAndPatientId(
@@ -103,15 +127,11 @@ const getAllTreatmentsByTenantAndPatientId = async (
       return result;
     });
 
-    const parsed = helper.decodeJsonFields(treatments, jsonFields);
-    parsed.forEach((p) => {
-      helper.mapBooleanFields(p, booleanFields);
-    });
-    return parsed.map((p) => ({
-      ...p,
-      treatment_date: formatDateOnly(p.treatment_date),
-      follow_up_date: formatDateOnly(p.follow_up_date),
-    }));
+    const convertedRows = treatments.map((treatment) =>
+      helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
+    );
+
+    return convertedRows;
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
     throw new CustomError("Failed to fetch treatments", 404);
@@ -121,12 +141,16 @@ const getAllTreatmentsByTenantAndPatientId = async (
 // Get Treatment by ID & Tenant
 const getTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {
   try {
-    const treatment = await treatmentModel.getTreatmentByTenantIdAndTreatmentId(
+    const treatment = await treatmentModel.getTreatmentByTenantAndTreatmentId(
       tenantId,
       treatmentId
     );
-    const fieldsToDecode = ["description", "diagnosis", "notes"];
-    return decodeJsonFields(treatment, fieldsToDecode);
+    const convertedRows = helper.convertDbToFrontend(
+      treatment,
+      treatmentFieldsReverseMap
+    );
+
+    return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get treatment: " + error.message, 404);
   }

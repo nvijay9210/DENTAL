@@ -4,11 +4,19 @@ const {
   getOrSetCache,
   invalidateCacheByPattern,
 } = require("../config/redisConfig");
-const { decodeJsonFields } = require("../utils/Helpers");
 
 const statusTypeField = {
   tenant_id: (val) => val,
-  statusType_type: (val) => val,
+  status_type: (val) => val,
+};
+const statusTypeFieldReverseMap = {
+  status_type_id:val=>val,
+  tenant_id: (val) => val,
+  status_type: (val) => val,
+  created_by: (val) => val,
+  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_by: (val) => val,
+  updated_time: (val) => (val ? new Date(val).toISOString() : null),
 };
 // Create StatusType
 const createStatusType = async (data) => {
@@ -48,7 +56,11 @@ const getAllStatusTypesByTenantId = async (page = 1, limit = 10) => {
       return result;
     });
 
-    return statusTypes;
+    const convertedRows = statusTypes.map((statusType) =>
+          helper.convertDbToFrontend(statusType, statusTypeFieldReverseMap)
+        );
+    
+        return convertedRows;
   } catch (err) {
     console.error("Database error while fetching statusTypes:", err);
     throw new CustomError("Failed to fetch statusTypes", 404);
@@ -61,7 +73,8 @@ const getStatusTypeByStatusTypeId = async (statusTypeId) => {
     const statusType = await statusTypeModel.getStatusTypeByStatusTypeId(
       statusTypeId
     );
-    return statusType;
+    const convertedRows=helper.convertDbToFrontend(statusType, statusTypeFieldReverseMap)
+    return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get statusType: " + error.message, 404);
   }
