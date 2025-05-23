@@ -30,6 +30,7 @@ const uploadFileMiddleware = (options) => {
 
       const uploadedFiles = {};
       const tenant_id = req.body.tenant_id || req.params.tenant_id;
+      let id=0;
       switch (folderName) {
         case "Clinic":
           id = req.params.clinic_id;

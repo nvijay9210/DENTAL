@@ -139,16 +139,6 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `clinics:${tenantId}:page:${page}:limit:${limit}`;
 
-  // const jsonFields = ["available_services", "operating_hours"];
-  // const booleanFields = [
-  //   "insurance_supported",
-  //   "emergency_support",
-  //   "teleconsultation_supported",
-  //   "parking_availability",
-  //   "pharmacy",
-  //   "wifi",
-  // ];
-
   try {
     const clinics = await getOrSetCache(cacheKey, async () => {
       const result = await clinicModel.getAllClinicsByTenantId(
@@ -158,10 +148,6 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
       );
       return result;
     });
-
-  //   const parsed = helper.decodeJsonFields(clinics, jsonFields);
-  //   parsed.forEach((c) => helper.mapBooleanFields(c, booleanFields));
-
   const convertedRows = clinics.map(clinic => helper.convertDbToFrontend(clinic, clinicFieldReverseMap));
 
     return convertedRows;
@@ -173,26 +159,17 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
 
 // -------------------- GET SINGLE --------------------
 const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
-  const fieldsToDecode = ["available_services", "operating_hours"];
-  const booleanFields = [
-    "insurance_supported",
-    "emergency_support",
-    "teleconsultation_supported",
-    "parking_availability",
-    "pharmacy",
-    "wifi",
-  ];
 
   try {
     const clinic = await clinicModel.getClinicByTenantIdAndClinicId(
       tenantId,
       clinicId
     );
-    if (clinic) {
-      await decodeJsonFields(clinic, fieldsToDecode);
-      helper.mapBooleanFields(clinic, booleanFields);
-    }
-    return clinic;
+   
+    const convertedRows = helper.convertDbToFrontend(clinic, clinicFieldReverseMap);
+
+    return convertedRows;
+
   } catch (error) {
     throw new CustomError(message.CLINIC_FETCH_FAIL, 404);
   }

@@ -74,7 +74,7 @@ const deleteAssetByTenantAndAssetId = async (tenant_id, asset_id) => {
 };
 
 const getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (tenantId, clinicId,startDate,endDate) => {
-  const query = `SELECT * FROM asset WHERE tenant_id = ? AND clinic_id = ? AND purchased_date between ? AND ?`;
+  const query = `SELECT * FROM asset WHERE tenant_id = ? AND clinic_id = ? AND created_time between ? AND ?`;
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query, [tenantId, clinicId,startDate,endDate]);

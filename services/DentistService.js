@@ -173,34 +173,7 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
       );
     });
 
-    const convertedRows = dentists.map(dentist => helper.convertDbToFrontend(dentist, dentistFieldReverseMap));
-
-    // const jsonFields = [
-    //   "specialisation",
-    //   "designation",
-    //   "working_hours",
-    //   "available_days",
-    //   "bio",
-    //   "languages_spoken",
-    //   "social_links",
-    //   "duration",
-    //   "member_of",
-    //   'social_activites',
-    //   'internship',
-    //   'publication',
-    //   'research_project'
-    // ];
-    // const booleanFields = ["teleconsultation_supported", "insurance_supported"];
-
-    // const parsed = decodeJsonFields(dentists, jsonFields)
-    //   .map((d) => {
-    //     mapBooleanFields(d, booleanFields);
-    //     if (d.date_of_birth) {
-    //       d.date_of_birth = formatDateOnly(d.date_of_birth);
-    //     }
-    //     return d;
-    //   })
-    //   .map(flattenAwards);
+    const convertedRows = dentists.map(dentist => helper.convertDbToFrontend(dentist, dentistFieldReverseMap)).map(flattenAwards);
 
     return convertedRows;
   } catch (err) {
@@ -231,19 +204,6 @@ function flattenAwards(dentist) {
 
 // -------------------- GET SINGLE --------------------
 const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
-  const jsonFields = [
-    "specialization",
-    "qualifications",
-    "working_hours",
-    "available_days",
-    "bio",
-    "languages_spoken",
-    "social_links",
-    "duration",
-    "member_of",
-  ];
-  const booleanFields = ["teleconsultation_supported", "insurance_supported"];
-
   try {
     const dentist = await dentistModel.getDentistByTenantIdAndDentistId(
       tenantId,
@@ -253,10 +213,9 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
       throw new CustomError("Dentist not found", 404);
     }
 
-    await decodeJsonFields([dentist], jsonFields);
-    mapBooleanFields(dentist, booleanFields);
+    const convertedRows= converthelper.convertDbToFrontend(dentist, dentistFieldReverseMap)
     flattenAwards(dentist);
-    return { ...dentist, flattenAwards };
+    return { ...convertedRows, flattenAwards };
   } catch (error) {
     throw new CustomError(`Failed to get dentist: ${error.message}`, 404);
   }
