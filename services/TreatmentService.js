@@ -1,11 +1,9 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const treatmentModel = require("../models/TreatmentModel");
 const {
-  redisClient,
   getOrSetCache,
   invalidateCacheByPattern,
 } = require("../config/redisConfig");
-const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly } = require("../utils/DateUtils");
@@ -57,6 +55,10 @@ const treatmentFieldsReverseMap = {
   technician_assisted: (val) => val,
   treatment_images: (val) => val,
   notes: helper.safeJsonParse,
+  created_by: (val) => val,
+  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_by: (val) => val,
+  updated_time: (val) => (val ? new Date(val).toISOString() : null),
 };
 // Create Treatment
 const createTreatment = async (data) => {

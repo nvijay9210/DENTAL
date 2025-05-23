@@ -4,12 +4,12 @@ const {
   getOrSetCache,
   invalidateCacheByPattern,
 } = require("../config/redisConfig");
-const { decodeJsonFields } = require("../utils/Helpers");
 const {
-  formatDateOnly,
-  formatTimeOnly,
-  formatAppointments,
-} = require("../utils/DateUtils");
+  decodeJsonFields,
+  duration,
+  safeJsonParse,
+} = require("../utils/Helpers");
+const { formatDateOnly, formatAppointments } = require("../utils/DateUtils");
 const { mapFields } = require("../query/Records");
 const { updatePatientCount } = require("../models/ClinicModel");
 
@@ -31,6 +31,30 @@ const appointmentFields = {
   follow_up_needed: (val) => Boolean(val),
   reminder_method: (val) => val || null,
   notes: (val) => val || null,
+};
+
+const appointmentFieldsReverseMap = {
+  tenant_id: (val) => val,
+  patient_id: (val) => val,
+  dentist_id: (val) => val,
+  clinic_id: (val) => val,
+  appointment_date: (val) => formatDateOnly(val),
+  start_time: (val) => duration(val),
+  end_time: (val) => duration(val),
+  status: (val) => val,
+  appointment_type: (val) => val,
+  consultation_fee: (val) => val,
+  discount_applied: (val) => val || 0.0,
+  payment_status: (val) => val,
+  payment_method: (val) => val,
+  visit_reason: (val) => (val ? safeJsonParse(val) : null),
+  follow_up_needed: (val) => Boolean(val),
+  reminder_method: (val) => val,
+  notes: (val) => (val ? safeJsonParse(val) : null),
+  created_by: (val) => val,
+  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_by: (val) => val,
+  updated_time: (val) => (val ? new Date(val).toISOString() : null),
 };
 
 // Create Appointment
@@ -67,18 +91,21 @@ const createAppointment = async (data) => {
 const getAllAppointmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `appointment:${tenantId}:page:${page}:limit:${limit}`;
-  const fieldsToDecode = ["notes", "visit_reason"];
 
   try {
-    const appointment = await getOrSetCache(cacheKey, async () => {
+    const appointments = await getOrSetCache(cacheKey, async () => {
       const result = await appointmentModel.getAllAppointmentsByTenantId(
         tenantId,
         Number(limit),
         offset
       );
-      return decodeJsonFields(result, fieldsToDecode);
+      return result;
     });
-    return appointment;
+    const convertedRows = appointments.map((appointment) =>
+      helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
+    );
+
+    return convertedRows;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
     throw new CustomError("Failed to fetch appointment", 404);
@@ -96,28 +123,14 @@ const getAppointmentByTenantIdAndAppointmentId = async (
         tenantId,
         appointmentId
       );
-    const fieldsToDecode = ["notes", "visit_reason"];
-    return decodeJsonFields(appointment, fieldsToDecode);
+    
+      const convertedRows = 
+        helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
+      
+  
+      return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get appointment: " + error.message, 404);
-  }
-};
-
-// Check if Appointment Exists
-const checkAppointmentExistsByTenantIdAndAppointmentId = async (
-  tenantId,
-  appointmentId
-) => {
-  try {
-    return await appointmentModel.checkAppointmentExistsByTenantIdAndAppointmentId(
-      tenantId,
-      appointmentId
-    );
-  } catch (error) {
-    throw new CustomError(
-      "Failed to check appointment existence: " + error.message,
-      404
-    );
   }
 };
 
@@ -290,7 +303,6 @@ module.exports = {
   createAppointment,
   getAllAppointmentsByTenantId,
   getAppointmentByTenantIdAndAppointmentId,
-  checkAppointmentExistsByTenantIdAndAppointmentId,
   updateAppointment,
   deleteAppointmentByTenantIdAndAppointmentId,
   checkAppointmentExistsByStartTimeAndEndTimeAndDate,
