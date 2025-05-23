@@ -49,6 +49,7 @@ const clinicFieldMap = {
 };
 
 const clinicFieldReverseMap = {
+  clinic_id:val=>val,
   tenant_id: val => val,
   clinic_name: val => val,
   email: val => val,

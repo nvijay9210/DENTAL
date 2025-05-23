@@ -71,9 +71,9 @@ const dentistColumnConfig = [
   },
   {
     columnname: "designation",
-    type: "longtext",
+    type: "varchar",
     null: true,
-    data_type: "json",
+    size: 100,
   },
   {
     columnname: "member_of",

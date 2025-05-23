@@ -59,6 +59,7 @@ const dentistFieldMap = {
   duration: helper.duration,
 };
 const dentistFieldReverseMap = {
+  dentist_id:val=>val,
   tenant_id: val => val,
   clinic_id: val => val,
   first_name: val => val,
@@ -68,8 +69,8 @@ const dentistFieldReverseMap = {
   email: val => val,
   phone_number: val => val,
   alternate_phone_number: val => val,
+  specialisation: val => (val),
 
-  specialisation: val => helper.safeJsonParse(val),
   designation: val => helper.safeJsonParse(val),
   languages_spoken: val => helper.safeJsonParse(val),
   working_hours: val => helper.safeJsonParse(val),

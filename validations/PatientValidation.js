@@ -94,7 +94,7 @@ const patientColumnConfig = [
     null: false,
   },
   {
-    columnname: "emergency_contact_phone",
+    columnname: "emergency_contact_number",
     type: "varchar",
     size: 15,
     null: false,
