@@ -1,5 +1,6 @@
 const { checkIfExists } = require("../models/checkIfExists");
 const prescriptionService = require("../services/PrescriptionService");
+const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 const prescriptionValidation = require("../validations/PrescriptionValidation");
 
 /**

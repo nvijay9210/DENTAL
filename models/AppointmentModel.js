@@ -243,6 +243,28 @@ WHERE
   }
 };
 
+const updateAppoinmentStatusCancelled = async (appointment_id,tenantId,clinicId) => {
+  const query = `UPDATE appointment 
+    SET 
+      status='CL'
+    WHERE 
+    appointment_id=? 
+      AND tenant_id = ?  
+      AND clinic_id = ?
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [appointment_id,tenantId,clinicId, patientId]);
+    console.log('appoinments:',rows)
+    return rows.affectedRows > 0;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+};
+
 module.exports = {
   createAppointment,
   getAllAppointmentsByTenantId,
@@ -252,5 +274,6 @@ module.exports = {
   checkAppointmentExistsByStartTimeAndEndTimeAndDate,
   getAppointmentsWithDetails,
   getAppointmentMonthlySummary,
-  getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId
+  getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId,
+  updateAppoinmentStatusCancelled
 };

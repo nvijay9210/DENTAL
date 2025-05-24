@@ -37,6 +37,7 @@ module.exports = {
     "/getallappointments/monthlysummary/:tenant_id/:clinic_id/:dentist_id",
   GETALL_PATIENT_VISITEDETAILS:
     "/getallvisitdetails/:tenant_id/:clinic_id/:patient_id",
+  UPDATE_APPOINTMENT_SCHEDULE_CANCELED:'updateappointment_cancelstatus/:tenant_id/:clinic_id/:patient_id',
 
   ADD_TREATMENT: "/addtreatment",
   GETALL_TREATMENT_TENANT: "/getalltreatments/:tenant_id",

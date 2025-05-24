@@ -18,7 +18,7 @@ const reminderColumnConfig = [
   { columnname: "repeat_weekends", type: "varchar", size: 20, null: true },
   { columnname: "repeat_end_date", type: "date", null: true },
   { columnname: "notify", type: "boolean", null: true },
-  { columnname: "notification_tone", type: "varchar", size: 300, null: true },
+  { columnname: "reminder_reason", type: "varchar", size: 255, null: true },
   { columnname: "status", type: "varchar", size: 20, null: true },
 ];
 // Reminder Column Configuration for Validation

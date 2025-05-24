@@ -1,5 +1,6 @@
 const { checkIfExists } = require("../models/checkIfExists");
 const reminderService = require("../services/ReminderService");
+const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 const reminderValidation = require("../validations/RemainderValidation");
 
 /**

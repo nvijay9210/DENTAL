@@ -164,6 +164,30 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
     throw new CustomError("Failed to update appointment", 404);
   }
 };
+const updateAppoinmentStatusCancelled = async (appointment_id,tenant_id,
+  clinic_id) => {
+
+  try {
+    const affectedRows = await appointmentModel.updateAppoinmentStatusCancelled(
+      appointment_id,
+      tenant_id,
+      clinic_id
+    );
+
+    if (affectedRows === 0) {
+      throw new CustomError("Appointment not found or no changes made.", 404);
+    }
+
+    await invalidateCacheByPattern("appointment:*");
+    await invalidateCacheByPattern("appointmentsdetails:*");
+    await invalidateCacheByPattern("patientvisitdetails:*");
+    await invalidateCacheByPattern("appointmentsmonthlysummary:*");
+    return affectedRows;
+  } catch (error) {
+    console.error("Update Error:", error);
+    throw new CustomError("Failed to update appointment", 404);
+  }
+};
 
 // Delete Appointment
 const deleteAppointmentByTenantIdAndAppointmentId = async (
@@ -309,4 +333,5 @@ module.exports = {
   getAppointmentsWithDetails,
   getAppointmentMonthlySummary,
   getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId,
+  updateAppoinmentStatusCancelled
 };

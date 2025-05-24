@@ -1,5 +1,5 @@
 const { CustomError } = require("../middlewares/CustomeError");
-const { checkIfExists } = require("../models/checkIfExists");
+const { checkIfExists, checkIfIdExists } = require("../models/checkIfExists");
 const statusTypeSubService = require("../services/StatusTypeSubService");
 const statusTypeSubValidation = require("../validations/StatusTypeSubValidation");
 
@@ -84,11 +84,10 @@ exports.getAllStatusTypeSubByTenantIdAndStatusType = async (req, res, next) => {
   const { tenant_id, status_type } = req.params;
   const { page, limit } = req.query;
 
-  const statusType = await checkIfExists(
+  const statusType = await checkIfIdExists(
     "statustype",
     "status_type",
-    status_type,
-    tenant_id
+    status_type
   );
 
   if (!statusType) throw new CustomError("Statustype not found", 404);

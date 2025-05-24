@@ -1,4 +1,4 @@
-const { checkIfIdExists } = require("../models/checkIfExists");
+const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
 const appointmentService = require("../services/AppointmentService");
 const appointmentValidation = require("../validations/AppointmentValidation");
 const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
@@ -120,6 +120,30 @@ exports.updateAppointment = async (req, res, next) => {
       tenant_id
     );
     res.status(200).json({ message: "Appointment updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+exports.updateAppoinmentStatusCancelled = async (req, res, next) => {
+  const { appointment_id, tenant_id,clinic_id } = req.params;
+  try {
+    // Validate if appointment exists before update
+    const appointment1 = await checkIfExists(
+      "appointment",
+      "appointment_id",
+      appointment_id,
+      tenant_id
+    );
+
+    if (!appointment1) throw new CustomError("Appointment not found", 404);
+
+    // Update the appointment
+    await appointmentService.updateAppoinmentStatusCancelled(
+      appointment_id,
+      tenant_id,
+      clinic_id
+    );
+    res.status(200).json({ message: "Appointment status updated successfully" });
   } catch (err) {
     next(err);
   }
