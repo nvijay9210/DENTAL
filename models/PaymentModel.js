@@ -44,11 +44,11 @@ const getPaymentByTenantAndPaymentId = async (tenant_id, payment_id) => {
 };
 
 const getPaymentByTenantAndAppointmentId = async (tenant_id, appointment_id) => {
-  const query = `SELECT * FROM payment WHERE tenant_id = ? AND appointment_id`;
+  const query = `SELECT * FROM payment WHERE tenant_id = ? AND appointment_id=?`;
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query, [tenant_id, appointment_id]);
-    return rows;
+    return rows?.[0];
   } catch (error) {
     console.error(error);
     throw new Error("Database Query Error");

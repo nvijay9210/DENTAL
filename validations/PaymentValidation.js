@@ -36,8 +36,7 @@ const paymentColumnConfig = [
     columnname: "payment_status",
     type: "varchar",
     size: 100,
-    null: false,
-    default: "F",
+    null: false
   },
   {
     columnname: "payment_verified",
@@ -50,7 +49,7 @@ const paymentColumnConfig = [
   {
     columnname: "insurance_number",
     type: "varchar",
-    size: 20,
+    size: 25,
     pattern: "^P\\/\\d{6}\\/\\d{2}\\/\\d{4}\\/\\d{6,8}$",
     null: true,
   },

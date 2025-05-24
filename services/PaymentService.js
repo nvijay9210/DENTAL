@@ -126,12 +126,16 @@ const getPaymentByTenantAndAppointmentId = async (tenantId, appointment_id) => {
     const payment = await paymentModel.getPaymentByTenantAndAppointmentId(
       tenantId, appointment_id
     );
-    const convertedRows = helper.convertDbToFrontend(
-      payment,
-      paymentFieldsReverseMap
-    );
-
-    return convertedRows;
+    console.log(payment,paymentFieldsReverseMap)
+    let result=payment;
+    if(payment){
+      result = helper.convertDbToFrontend(
+        payment,
+        paymentFieldsReverseMap
+      );
+    }
+    
+    return result;
   } catch (error) {
     throw new CustomError("Failed to get payment: " + error.message, 404);
   }

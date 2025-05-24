@@ -51,7 +51,7 @@ exports.getPaymentByTenantIdAndPaymentId = async (req, res, next) => {
 
   try {
     // Validate if payment exists
-    const payment1=await paymentValidation.checkIfExists(
+    const payment1=await checkIfExists(
       "payment",
       "payment_id",
       payment_id,
@@ -74,7 +74,7 @@ exports.getPaymentByTenantAndAppointmentId = async (req, res, next) => {
 
   try {
     // Validate if payment exists
-    const appointment1=await paymentValidation.checkIfExists(
+    const appointment1=await checkIfExists(
       "appointment",
       "appointment_id",
       appointment_id,
