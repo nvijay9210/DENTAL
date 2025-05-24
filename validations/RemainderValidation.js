@@ -1,7 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { validateInput } = require("./InputValidation");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
-const { recordExists } = require("../query/Records");
 
 const reminderColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 6, null: false },

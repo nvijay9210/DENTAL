@@ -43,6 +43,8 @@ function sanitizeInput(value, type) {
     case "date":
     case "datetime":
     case "timestamp":
+      console.log('due_date:',value,typeof value)
+      if (value === null || value === "") return null;
       return value;
 
     default:
@@ -100,7 +102,7 @@ function validateInput(userInput, columnConfig) {
 
     // Skip empty/undefined if nullable
     if (
-      (value === undefined || value === "null" || value === "") &&
+      (value === undefined || value === "null" || value === "" || value===null) &&
       isNullable === true
     ) {
       sanitizedData[columnname] = null;
@@ -109,7 +111,7 @@ function validateInput(userInput, columnConfig) {
 
     // Enforce required fields
     if (
-      (value === undefined || value === "null" || value === "") &&
+      (value === undefined || value === "null" || value === "" || value===null ) &&
       isNullable === false
     ) {
       throw new CustomError(`${columnname} is required`, 400);

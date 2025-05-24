@@ -407,6 +407,32 @@ CREATE TABLE IF NOT EXISTS reminder (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 `,
+addPayment: `
+CREATE TABLE IF NOT EXISTS payment (
+  payment_id int(11) NOT NULL AUTO_INCREMENT,
+  tenant_id int(6) NOT NULL,
+  clinic_id int(11) NOT NULL,
+  patient_id int(11) NOT NULL,
+  dentist_id int(11) NOT NULL,
+  appointment_id int(11) NOT NULL,
+  amount decimal(10,2) NOT NULL DEFAULT 0.00,
+  discount_applied decimal(10,2) NULL DEFAULT 0.00,
+  final_amount decimal(10,2) NOT NULL DEFAULT 0.00,
+  payment_method varchar(100) NOT NULL ,
+  payment_source varchar(100) NOT NULL ,
+  payment_reference varchar(255) NULL ,
+  payment_status VARCHAR(100) NULL,
+  expense_date date DEFAULT NULL,
+  mode_of_payment varchar(100) DEFAULT NULL,
+  receipt_number varchar(100) DEFAULT NULL,
+  created_by varchar(30) NOT NULL,
+  created_time datetime NOT NULL DEFAULT current_timestamp(),
+  updated_by varchar(30) DEFAULT NULL,
+  updated_time datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  PRIMARY KEY (expense_id),
+  KEY fk_expense_clinic (clinic_id),
+  CONSTRAINT fk_expense_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;`
 };
 
 module.exports = { createTableQuery };
