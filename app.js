@@ -22,8 +22,9 @@ const assetRouter=require('./routes/AssetRouter')
 const expenseRouter=require('./routes/ExpenseRouter')
 const supplierRouter=require('./routes/SupplierRouter')
 const reminderRouter=require('./routes/ReminderRouter')
+const paymentRouter=require('./routes/PaymentRouter')
 
-const compressionMiddleware = require('./middlewares/CompressionMiddleware');
+// const compressionMiddleware = require('./middlewares/CompressionMiddleware');
 const { redisconnect } = require('./config/redisConfig');
 
 const app = express();
@@ -53,6 +54,7 @@ async function initializeTables() {
       await createTable.createExpenseTable();
       await createTable.createSupplierTable();
       await createTable.createReminderTable();
+      await createTable.createPaymentTable();
   
       console.log('All tables created in order.');
     } catch (err) {

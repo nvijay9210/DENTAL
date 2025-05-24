@@ -283,5 +283,6 @@ module.exports = {
   createAssetTable,
   createExpenseTable,
   createSupplierTable,
-  createReminderTable
+  createReminderTable,
+  createPaymentTable
 };

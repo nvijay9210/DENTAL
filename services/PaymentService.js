@@ -23,8 +23,6 @@ const paymentFields = {
     payment_source: (val) => val,
     payment_reference: (val) => val,
     payment_status: (val) => val,
-    refund_status: (val) => val,
-    refund_amount: (val) => val,
     payment_verified: (val) => val,
     receipt_number: (val) => val,
     insurance_number: (val) => val,
@@ -45,8 +43,6 @@ const paymentFields = {
     payment_source: (val) => val,
     payment_reference: (val) => val,
     payment_status: (val) => val,
-    refund_status: (val) => val,
-    refund_amount: (val) => val,
     payment_verified: (val) => val,
     receipt_number: (val) => val,
     insurance_number: (val) => val,
@@ -176,6 +172,5 @@ module.exports = {
   getAllPaymentsByTenantId,
   getPaymentByTenantIdAndPaymentId,
   updatePayment,
-  deletePaymentByTenantIdAndPaymentId,
-  getAllPaymentsByTenantIdAndClinicIdAndStartDateAndEndDate,
+  deletePaymentByTenantIdAndPaymentId
 };

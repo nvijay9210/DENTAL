@@ -34,24 +34,10 @@ const paymentColumnConfig = [
   { columnname: "payment_reference", type: "varchar", size: 255, null: true },
   {
     columnname: "payment_status",
-    type: "enum",
-    values: ["CP", "P", "F"],
+    type: "varchar",
+    size: 100,
     null: false,
     default: "F",
-  },
-  {
-    columnname: "refund_status",
-    type: "enum",
-    values: ["NR", "P", "PR"],
-    null: false,
-    default: "NR",
-  },
-  {
-    columnname: "refund_amount",
-    type: "decimal",
-    size: "10,2",
-    null: true,
-    default: 0.0,
   },
   {
     columnname: "payment_verified",
