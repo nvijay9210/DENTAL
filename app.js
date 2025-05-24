@@ -85,6 +85,7 @@ app.use('/asset', assetRouter);
 app.use('/expense', expenseRouter);
 app.use('/supplier', supplierRouter);
 app.use('/reminder', reminderRouter);
+app.use('/payment', paymentRouter);
 
 app.use(errorHandler);
 

@@ -121,6 +121,21 @@ const getPaymentByTenantIdAndPaymentId = async (tenantId, paymentId) => {
     throw new CustomError("Failed to get payment: " + error.message, 404);
   }
 };
+const getPaymentByTenantAndAppointmentId = async (tenantId, appointment_id) => {
+  try {
+    const payment = await paymentModel.getPaymentByTenantAndAppointmentId(
+      tenantId, appointment_id
+    );
+    const convertedRows = helper.convertDbToFrontend(
+      payment,
+      paymentFieldsReverseMap
+    );
+
+    return convertedRows;
+  } catch (error) {
+    throw new CustomError("Failed to get payment: " + error.message, 404);
+  }
+};
 
 // Update Payment
 const updatePayment = async (paymentId, data, tenant_id) => {
@@ -172,5 +187,6 @@ module.exports = {
   getAllPaymentsByTenantId,
   getPaymentByTenantIdAndPaymentId,
   updatePayment,
-  deletePaymentByTenantIdAndPaymentId
+  deletePaymentByTenantIdAndPaymentId,
+  getPaymentByTenantAndAppointmentId
 };

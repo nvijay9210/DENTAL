@@ -43,6 +43,20 @@ const getPaymentByTenantAndPaymentId = async (tenant_id, payment_id) => {
   }
 };
 
+const getPaymentByTenantAndAppointmentId = async (tenant_id, appointment_id) => {
+  const query = `SELECT * FROM payment WHERE tenant_id = ? AND appointment_id`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenant_id, appointment_id]);
+    return rows;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+};
+
 // Update payment
 const updatePayment = async (payment_id, columns, values, tenant_id) => {
   try {
@@ -77,5 +91,6 @@ module.exports = {
   getAllPaymentsByTenantId,
   getPaymentByTenantAndPaymentId,
   updatePayment,
-  deletePaymentByTenantAndPaymentId
+  deletePaymentByTenantAndPaymentId,
+  getPaymentByTenantAndAppointmentId
 };

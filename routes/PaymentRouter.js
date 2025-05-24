@@ -9,6 +9,7 @@ const {
   UPDATE_PAYMENT_TENANT,
   DELETE_PAYMENT_TENANT,
   GETALL_PAYMENT_REPORT_TENANT_CLINIC,
+  GET_PAYEMENT_TENANT_APPOINTMENT,
 } = require("./RouterPath");
 const paymentvalidation = require("../validations/PaymentValidation");
 
@@ -23,6 +24,8 @@ router.get(GETALL_PAYMENT_TENANT, paymentController.getAllPaymentsByTenantId);
 
 // Get Single Payment by Tenant ID & Payment ID
 router.get(GET_PAYMENT_TENANT, paymentController.getPaymentByTenantIdAndPaymentId);
+
+router.get(GET_PAYEMENT_TENANT_APPOINTMENT, paymentController.getPaymentByTenantAndAppointmentId);
 
 // Update Payment
 router.put(
