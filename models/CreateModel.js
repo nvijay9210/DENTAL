@@ -209,6 +209,22 @@ const createReminderTable = async () => {
   }
 };
 
+const createPaymentTable = async () => {
+  const query =  createTableQuery.addPayment
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("Payment table created successfully.");
+  } catch (error) {
+    console.error("Error creating Payment table:", error);
+    throw new Error(
+      "Database error occurred while creating the Payment table."
+    );
+  } finally {
+    conn.release();
+  }
+};
+
 const createUserTable = async () => {
   const query = userQuery.createUserTable;
   const conn = await pool.getConnection();

@@ -34,6 +34,7 @@ const appointmentFields = {
 };
 
 const appointmentFieldsReverseMap = {
+  appointment_id:(val)=>val,
   tenant_id: (val) => val,
   patient_id: (val) => val,
   dentist_id: (val) => val,

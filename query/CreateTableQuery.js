@@ -416,23 +416,31 @@ CREATE TABLE IF NOT EXISTS payment (
   dentist_id int(11) NOT NULL,
   appointment_id int(11) NOT NULL,
   amount decimal(10,2) NOT NULL DEFAULT 0.00,
-  discount_applied decimal(10,2) NULL DEFAULT 0.00,
+  discount_applied decimal(10,2) DEFAULT 0.00,
   final_amount decimal(10,2) NOT NULL DEFAULT 0.00,
-  payment_method varchar(100) NOT NULL ,
-  payment_source varchar(100) NOT NULL ,
-  payment_reference varchar(255) NULL ,
-  payment_status VARCHAR(100) NULL,
-  expense_date date DEFAULT NULL,
-  mode_of_payment varchar(100) DEFAULT NULL,
-  receipt_number varchar(100) DEFAULT NULL,
+  mode_of_payment varchar(100) NOT NULL,
+  payment_source varchar(100) NOT NULL,
+  payment_reference varchar(255) DEFAULT NULL,
+  payment_status enum('CP','P','F') NOT NULL DEFAULT 'F',
+  refund_status enum('NR','P','PR') NOT NULL DEFAULT 'NR',
+  refund_amount decimal(10,2) DEFAULT 0.00,
+  payment_verified TINYINT(1) DEFAULT 0,
+  receipt_number varchar(25) DEFAULT NULL,
+  insurance_number varchar(20) DEFAULT NULL,
+  payment_date DATE DEFAULT NULL,
   created_by varchar(30) NOT NULL,
   created_time datetime NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
   updated_time datetime DEFAULT NULL ON UPDATE current_timestamp(),
-  PRIMARY KEY (expense_id),
-  KEY fk_expense_clinic (clinic_id),
-  CONSTRAINT fk_expense_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;`
+  PRIMARY KEY (payment_id),
+  KEY fk_payment_tenant (tenant_id),
+  CONSTRAINT fk_payment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_payment_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_payment_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_payment_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_payment_appointment FOREIGN KEY (appointment_id) REFERENCES appointment (appointment_id) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+`
 };
 
 module.exports = { createTableQuery };

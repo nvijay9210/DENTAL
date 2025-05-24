@@ -96,6 +96,12 @@ module.exports = {
   GET_REMINDER: "/getreminder/:reminder_id",
   UPDATE_REMINDER_TENANT: "/updatereminder/:reminder_id/:tenant_id",
   DELETE_REMINDER_TENANT: "/deletereminder/:reminder_id/:tenant_id",
+
+  ADD_PAYMENT: "/addexpense",
+  GETALL_PAYMENT_TENANT: "/getallexpenses/:tenant_id",
+  GET_PAYMENT: "/getexpense/:expense_id",
+  UPDATE_PAYMENT_TENANT: "/updateexpense/:expense_id/:tenant_id",
+  DELETE_PAYMENT_TENANT: "/deleteexpense/:expense_id/:tenant_id",
 };
 
 // GET /api/tenant?page=2&limit=10
