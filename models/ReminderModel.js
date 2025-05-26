@@ -73,6 +73,47 @@ const deleteReminderByTenantAndReminderId = async (tenant_id, reminder_id) => {
   }
 };
 
+const getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (
+  tenant_id,
+  clinic_id,
+  dentist_id,
+  reminder_id
+) => {
+  const query = `
+    SELECT * 
+    FROM reminder 
+    WHERE tenant_id = ? 
+      AND clinic_id = ? 
+      AND dentist_id = ? 
+      AND reminder_id = ?`;
+
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(query, [
+      tenant_id,
+      clinic_id,
+      dentist_id,
+      reminder_id
+    ]);
+
+    if (!rows || rows.length === 0) return null;
+
+    console.log('models:',rows[0])
+
+    return rows[0];
+  } catch (error) {
+    console.error("Database error in getReminderBy...:", error);
+    throw new CustomError("Error fetching reminder.", 500);
+  } finally {
+    conn.release();
+  }
+};
+
+
+
+
+
 
 
 module.exports = {
@@ -81,4 +122,5 @@ module.exports = {
   getReminderByTenantAndReminderId,
   updateReminder,
   deleteReminderByTenantAndReminderId,
+  getReminderByTenantAndClinicIdAndDentistIdAndReminderId
 };

@@ -94,6 +94,7 @@ module.exports = {
   ADD_REMINDER: "/addreminder",
   GETALL_REMINDER_TENANT: "/getallreminders/:tenant_id",
   GET_REMINDER: "/getreminder/:reminder_id",
+  GET_REMINDER_SCHEDULE: "/getreminder/:tenant_id/:clinic_id/:dentist_id/:reminder_id",
   UPDATE_REMINDER_TENANT: "/updatereminder/:reminder_id/:tenant_id",
   DELETE_REMINDER_TENANT: "/deletereminder/:reminder_id/:tenant_id",
 

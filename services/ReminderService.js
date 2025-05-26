@@ -8,6 +8,16 @@ const {
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
+const dayjs = require('dayjs');
+const weekday = require('dayjs/plugin/weekday');
+const isSameOrBefore = require('dayjs/plugin/isSameOrBefore');
+const isSameOrAfter = require('dayjs/plugin/isSameOrAfter');
+const customParseFormat = require('dayjs/plugin/customParseFormat');
+dayjs.extend(weekday);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(customParseFormat);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(weekday);
 
 const { formatDateOnly } = require("../utils/DateUtils");
 
@@ -167,10 +177,146 @@ const deleteReminderByTenantIdAndReminderId = async (tenantId, reminderId) => {
   }
 };
 
+const WEEKDAYS = {
+  Sunday: 0,
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6
+};
+
+const getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (
+  tenantId, clinicId, dentistId, reminderId
+) => {
+  try {
+    const reminder = await reminderModel.getReminderByTenantAndClinicIdAndDentistIdAndReminderId(
+      tenantId, clinicId, dentistId, reminderId
+    );
+
+    const {
+      due_date,
+      due_time,
+      repeat_end_date,
+      reminder_repeat,
+      repeat_weekdays,
+      title,
+      reminder_type,
+      category,
+      description,
+      
+    } = reminder;
+
+    const schedule = [];
+    const end = dayjs(repeat_end_date);
+    const start = dayjs(due_date);
+    const repeatType = (reminder_repeat || '').toLowerCase().trim();
+
+    if (repeatType === 'daily') {
+      let current = start;
+      while (current.isSameOrBefore(end)) {
+        schedule.push({
+          date: current.format('YYYY-MM-DD'),
+          weekday: current.format('dddd'),
+          title,
+          description: JSON.parse(description),
+        });
+        current = current.add(1, 'day'); // fixed 1-day step
+      }
+
+    } else if (repeatType === 'every week' || repeatType === 'weekly') {
+      const weekdaysArray = repeat_weekdays
+        ? repeat_weekdays.split(',').map(w => w.trim())
+        : [start.format('dddd')]; // default to due_date's weekday
+
+      let current = start.startOf('week');
+
+      while (current.isSameOrBefore(end)) {
+        for (const wd of weekdaysArray) {
+          const targetDay = WEEKDAYS[wd];
+          if (targetDay !== undefined) {
+            const reminderDate = current.add(targetDay, 'day');
+            if (
+              reminderDate.isSameOrAfter(start) &&
+              reminderDate.isSameOrBefore(end)
+            ) {
+              schedule.push({
+                date: reminderDate.format('YYYY-MM-DD'),
+                due_time,
+                weekday: reminderDate.format('dddd'),
+                title,
+                reminder_type,
+                category,
+                description: JSON.parse(description),
+              });
+            }
+          }
+        }
+        current = current.add(1, 'week'); // fixed 1-week step
+      }
+
+    } else if (repeatType === 'every month' || repeatType === 'monthly') {
+      let current = start;
+      const dayOfMonth = start.date();
+
+      while (current.isSameOrBefore(end)) {
+        let reminderDate = current.date(dayOfMonth);
+
+        if (reminderDate.month() !== current.month()) {
+          // Adjust if invalid (e.g., Feb 30)
+          reminderDate = current.endOf('month');
+        }
+
+        if (
+          reminderDate.isSameOrAfter(start) &&
+          reminderDate.isSameOrBefore(end)
+        ) {
+          schedule.push({
+            date: reminderDate.format('YYYY-MM-DD'),
+            due_time,
+            weekday: reminderDate.format('dddd'),
+            title,
+            reminder_type,
+            category,
+            description: JSON.parse(description),
+          });
+        }
+
+        current = current.add(1, 'month'); // fixed 1-month step
+      }
+
+    } else {
+      // Fallback: one-time reminder
+      schedule.push({
+        date: start.format('YYYY-MM-DD'),
+        due_time,
+        weekday: start.format('dddd'),
+        title,
+        reminder_type,
+        category,
+        due_time,
+        description: JSON.parse(description),
+      });
+    }
+
+    return schedule;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to generate reminder schedule");
+  }
+};
+
+
+
+
+
+
 module.exports = {
   createReminder,
   getAllRemindersByTenantId,
   getReminderByTenantIdAndReminderId,
   updateReminder,
   deleteReminderByTenantIdAndReminderId,
+  getReminderByTenantAndClinicIdAndDentistIdAndReminderId
 };
