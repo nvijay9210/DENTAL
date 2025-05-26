@@ -153,7 +153,7 @@ const createTableQuery = {
   KEY clinic_id (clinic_id),
   CONSTRAINT fk_dentist_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_dentist_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 `,
 
   addPatient: `CREATE TABLE IF NOT EXISTS patient (

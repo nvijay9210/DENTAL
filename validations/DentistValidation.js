@@ -228,6 +228,7 @@ const validateUniqueFields = async (
 
 // Create Dentist Validation
 const createDentistValidation = async (details) => {
+  console.log('details:',details)
   validateInput(details, createColumnConfig);
   await checkIfIdExists("tenant", "tenant_id", details.tenant_id);
   await validateDentistPhones(details);
@@ -236,6 +237,7 @@ const createDentistValidation = async (details) => {
 
 // Update Dentist Validation
 const updateDentistValidation = async (dentistId, details, tenant_id) => {
+  console.log('details:',details)
   validateInput(details, updateColumnConfig);
   await validateTenant(tenant_id);
   // await checkIfIdExists('clinic','clinic_id',details.clinic_id||0)
