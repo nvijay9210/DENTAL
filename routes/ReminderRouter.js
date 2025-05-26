@@ -9,6 +9,7 @@ const {
   UPDATE_REMINDER_TENANT,
   DELETE_REMINDER_TENANT,
   GET_REMINDER_SCHEDULE,
+  GET_REMINDER_SCHEDULE_MONTHLY,
 } = require("./RouterPath");
 
 // Create Reminder
@@ -30,6 +31,11 @@ router.get(
 router.get(
   GET_REMINDER_SCHEDULE,
   reminderController.getReminderByTenantAndClinicIdAndDentistIdAndReminderId
+);
+
+router.get(
+  GET_REMINDER_SCHEDULE_MONTHLY,
+  reminderController.getMonthlywiseRemindersByTenantAndClinicIdAndDentistId
 );
 
 // Update Reminder

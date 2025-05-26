@@ -61,7 +61,18 @@ const updateReminderValidation = async (remainderId, details) => {
   }
 };
 
+const getMonthlyWiseReminderValidation=async(month,year)=>{
+  if (!month || !year) throw new CustomError('Month and Year are required', 400);
+      if (isNaN(month) || isNaN(year)) throw new CustomError('Month and Year must be numbers', 400);
+  
+      const monthInt = parseInt(month, 10);
+      const yearInt = parseInt(year, 10);
+  
+      if (monthInt < 1 || monthInt > 12) throw new CustomError('Month must be between 1 and 12', 400);
+}
+
 module.exports = {
   createReminderValidation,
   updateReminderValidation,
+  getMonthlyWiseReminderValidation
 };

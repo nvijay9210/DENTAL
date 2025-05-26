@@ -1,6 +1,8 @@
 const pool = require("../config/db");
 const { CustomError } = require("../middlewares/CustomeError");
 const record = require("../query/Records");
+const dayjs = require('dayjs');
+
 
 const TABLE = "reminder";
 
@@ -110,6 +112,59 @@ const getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (
   }
 };
 
+const getMonthlywiseRemindersByTenantAndClinicIdAndDentistId = async (
+  tenant_id,
+  clinic_id,
+  dentist_id,
+  month,
+  year
+) => {
+  const conn = await pool.getConnection();
+
+  try {
+    const startDate = dayjs(`${year}-${month}-01`);
+    const endDate = startDate.endOf('month');
+
+    const query = `
+      SELECT * FROM reminder
+      WHERE tenant_id = ?
+        AND clinic_id = ?
+        AND dentist_id = ?
+        AND (
+          (due_date BETWEEN ? AND ?)
+          OR (repeat_end_date BETWEEN ? AND ?)
+          OR (due_date <= ? AND (repeat_end_date IS NULL OR repeat_end_date >= ?))
+        )
+    `;
+
+    const [reminders] = await conn.query(query, [
+      tenant_id,
+      clinic_id,
+      dentist_id,
+      startDate.format('YYYY-MM-DD'),
+      endDate.format('YYYY-MM-DD'),
+      startDate.format('YYYY-MM-DD'),
+      endDate.format('YYYY-MM-DD'),
+      endDate.format('YYYY-MM-DD'),
+      startDate.format('YYYY-MM-DD')
+    ]);
+
+    return reminders;
+  } catch (error) {
+    console.error("Database error in getMonthlywiseReminders:", error);
+    throw new CustomError("Error fetching reminders.", 500);
+  } finally {
+    conn.release();
+  }
+};
+
+module.exports = {
+  getMonthlywiseRemindersByTenantAndClinicIdAndDentistId
+};
+
+
+
+
 
 
 
@@ -122,5 +177,6 @@ module.exports = {
   getReminderByTenantAndReminderId,
   updateReminder,
   deleteReminderByTenantAndReminderId,
-  getReminderByTenantAndClinicIdAndDentistIdAndReminderId
+  getReminderByTenantAndClinicIdAndDentistIdAndReminderId,
+  getMonthlywiseRemindersByTenantAndClinicIdAndDentistId
 };

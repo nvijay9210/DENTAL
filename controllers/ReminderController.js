@@ -1,7 +1,11 @@
 const { checkIfExists, checkIfIdExists } = require("../models/checkIfExists");
 const reminderService = require("../services/ReminderService");
-const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
+
 const reminderValidation = require("../validations/RemainderValidation");
+const {
+  validateTenantIdAndPageAndLimit,
+} = require("../validations/CommonValidations");
+const { CustomError } = require("../middlewares/CustomeError");
 
 /**
  * Create a new reminder
@@ -27,8 +31,8 @@ exports.createReminder = async (req, res, next) => {
 exports.getAllRemindersByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
   const { page, limit } = req.query;
-  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
+    await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
     const reminders = await reminderService.getAllRemindersByTenantId(
       tenant_id,
       page,
@@ -66,8 +70,12 @@ exports.getReminderByTenantIdAndReminderId = async (req, res, next) => {
     next(err);
   }
 };
-exports.getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (req, res, next) => {
-  const { reminder_id, tenant_id,clinic_id,dentist_id } = req.params;
+exports.getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (
+  req,
+  res,
+  next
+) => {
+  const { reminder_id, tenant_id, clinic_id, dentist_id } = req.params;
 
   try {
     const reminder1 = await checkIfExists(
@@ -79,17 +87,50 @@ exports.getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (req, re
 
     if (!reminder1) throw new CustomError("Reminder not found", 404);
 
-    await checkIfIdExists('clinic','clinic_id',clinic_id)
-    await checkIfIdExists('dentist','dentist_id',dentist_id)
+    await checkIfIdExists("clinic", "clinic_id", clinic_id);
+    await checkIfIdExists("dentist", "dentist_id", dentist_id);
 
     // Fetch reminder details
-    const reminder = await reminderService.getReminderByTenantAndClinicIdAndDentistIdAndReminderId(
-      tenant_id,
-      clinic_id,
-      dentist_id,
-      reminder_id
-    );
+    const reminder =
+      await reminderService.getReminderByTenantAndClinicIdAndDentistIdAndReminderId(
+        tenant_id,
+        clinic_id,
+        dentist_id,
+        reminder_id
+      );
     res.status(200).json(reminder);
+  } catch (err) {
+    next(err);
+  }
+};
+exports.getMonthlywiseRemindersByTenantAndClinicIdAndDentistId = async (
+  req,
+  res,
+  next
+) => {
+  const { tenant_id, clinic_id, dentist_id } = req.params;
+  const { month, year } = req.query;
+
+  try {
+    await reminderValidation.getMonthlyWiseReminderValidation(month, year);
+    const monthInt = parseInt(month, 10);
+    const yearInt = parseInt(year, 10);
+    // Validation checks
+    await checkIfIdExists("tenant", "tenant_id", tenant_id);
+    await checkIfIdExists("clinic", "clinic_id", clinic_id);
+    await checkIfIdExists("dentist", "dentist_id", dentist_id);
+
+    // Fetch monthly reminders
+    const reminders =
+      await reminderService.getMonthlywiseRemindersByTenantAndClinicIdAndDentistId(
+        tenant_id,
+        clinic_id,
+        dentist_id,
+        monthInt,
+        yearInt
+      );
+
+    res.status(200).json(reminders);
   } catch (err) {
     next(err);
   }

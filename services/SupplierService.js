@@ -90,7 +90,7 @@ const getAllSuppliersByTenantId = async (tenantId, page = 1, limit = 10) => {
 // Get Supplier by ID & Tenant
 const getSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
   try {
-    const supplier = await supplierModel.getSupplierByTenantIdAndSupplierId(
+    const supplier = await supplierModel.getSupplierByTenantAndSupplierId(
       tenantId,
       supplierId
     );
