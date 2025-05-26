@@ -30,7 +30,7 @@ const uploadFileMiddleware = (options) => {
 
       const uploadedFiles = {};
       const tenant_id = req.body.tenant_id || req.params.tenant_id;
-      let id=0;
+      let id = 0;
       switch (folderName) {
         case "Clinic":
           id = req.params.clinic_id;
@@ -44,16 +44,13 @@ const uploadFileMiddleware = (options) => {
         case "Treatment":
           id = req.params.treatment_id;
           break;
-
         default:
           break;
       }
-  
+
       if (id) {
-        console.log("update validation activated");
         await updateValidationFn(id, req.body, tenant_id);
       } else {
-        console.log("create validation activated");
         await createValidationFn(req.body);
       }
 
@@ -64,79 +61,85 @@ const uploadFileMiddleware = (options) => {
         folderName
       );
 
-      // Process each file field definition
       for (const fileField of fileFields) {
-        // Filter uploaded files whose fieldname starts with this field name
-        const files =
-          req.files?.filter((file) =>
-            file.fieldname.startsWith(fileField.fieldName)
-          ) || [];
+        if (fileField.fieldName === "awards_certifications") {
+          // --- Handle dynamic awards_certifications fields ---
+          const awards = [];
+          let idx = 0;
+          while (true) {
+            const fileFieldName = `awards_certifications_${idx}`;
+            const descFieldName = `description_awards_certifications_${idx}`;
 
-        if (files.length > 0) {
-          const savedPaths = [];
+            // Find file for this index (if any)
+            const file = req.files?.find(f => f.fieldname === fileFieldName);
+            const description = req.body[descFieldName];
 
-          for (let i = 0; i < files.length; i++) {
-            const file = files[i];
+            // If nothing for this index, break (end of awards)
+            if (!file && !req.body[fileFieldName] && !description) break;
 
-            // ✅ Size Check
-            const maxSizeBytes = fileField.maxSizeMB * 1024 * 1024;
-            if (file.size > maxSizeBytes) {
-              return res.status(400).json({
-                message: `${fileField.fieldName.replace(
-                  /_/g,
-                  " "
-                )} must be less than ${fileField.maxSizeMB}MB`,
-              });
-            }
+            if (file) {
+              // New file uploaded, process and save
+              const maxSizeBytes = fileField.maxSizeMB * 1024 * 1024;
+              if (file.size > maxSizeBytes) {
+                return res.status(400).json({
+                  message: `Award certification image must be less than ${fileField.maxSizeMB}MB`,
+                });
+              }
+              const resizedImage = await compressImage(file.buffer, 100);
+              const fieldTenantPath = path.join(baseTenantPath, fileField.subFolder);
+              const originalFileName = path.parse(file.originalname).name;
+              const extension = path.extname(file.originalname).toLowerCase();
+              const fileName = `${originalFileName}_${Date.now()}_${Math.floor(Math.random() * 10000)}${extension}`;
+              const savedPath = await saveFile(resizedImage, fieldTenantPath, fileName);
 
-            // ✅ Compress Image
-            const resizedImage = await compressImage(file.buffer, 100);
-
-            // ✅ Construct File Path
-            const fieldTenantPath = path.join(
-              baseTenantPath,
-              fileField.subFolder
-            );
-            const originalFileName = path.parse(file.originalname).name;
-            const extension = path.extname(file.originalname).toLowerCase();
-            const fileName = `${originalFileName}_${Date.now()}_${Math.floor(
-              Math.random() * 10000
-            )}${extension}`;
-            const savedPath = await saveFile(
-              resizedImage,
-              fieldTenantPath,
-              fileName
-            );
-
-            // ✅ Handle Descriptions
-            if (fileField.fieldName === "awards_certifications") {
-              const descriptionKey = `description_awards_certifications_${i}`;
-              const description = req.body[descriptionKey] || "No description";
-
-              savedPaths.push({
+              awards.push({
                 image: savedPath,
-                description: description,
+                description: description || "",
               });
-            } else {
-              savedPaths.push({
-                [fileField.fieldName]: savedPath,
+            } else if (req.body[fileFieldName]) {
+              // Existing image path (keep old image, maybe new description)
+              awards.push({
+                image: req.body[fileFieldName],
+                description: description || "",
               });
             }
+            // If neither file nor existing image path, item is omitted (deleted)
+            idx++;
           }
+          req.body.awards_certifications = awards;
+          uploadedFiles.awards_certifications = awards;
+        } else {
+          // --- Handle other file fields as before ---
+          const files = req.files?.filter(file => file.fieldname === fileField.fieldName) || [];
+          if (files.length > 0) {
+            const savedPaths = [];
+            for (let i = 0; i < files.length; i++) {
+              const file = files[i];
+              const maxSizeBytes = fileField.maxSizeMB * 1024 * 1024;
+              if (file.size > maxSizeBytes) {
+                return res.status(400).json({
+                  message: `${fileField.fieldName.replace(/_/g, " ")} must be less than ${fileField.maxSizeMB}MB`,
+                });
+              }
+              const resizedImage = await compressImage(file.buffer, 100);
+              const fieldTenantPath = path.join(baseTenantPath, fileField.subFolder);
+              const originalFileName = path.parse(file.originalname).name;
+              const extension = path.extname(file.originalname).toLowerCase();
+              const fileName = `${originalFileName}_${Date.now()}_${Math.floor(Math.random() * 10000)}${extension}`;
+              const savedPath = await saveFile(resizedImage, fieldTenantPath, fileName);
 
-          // ✅ Store structured data in req.body
-          if (fileField.multiple) {
-            req.body[fileField.fieldName] = savedPaths;
-          } else {
-            req.body[fileField.fieldName] =
-              savedPaths[0]?.[fileField.fieldName];
+              savedPaths.push({ [fileField.fieldName]: savedPath });
+            }
+            if (fileField.multiple) {
+              req.body[fileField.fieldName] = savedPaths;
+            } else {
+              req.body[fileField.fieldName] = savedPaths[0]?.[fileField.fieldName];
+            }
+            uploadedFiles[fileField.fieldName] = savedPaths;
           }
-
-          uploadedFiles[fileField.fieldName] = savedPaths;
         }
       }
 
-      console.log("Uploaded files:", uploadedFiles);
       next();
     } catch (error) {
       console.error("Error uploading files:", error.message);

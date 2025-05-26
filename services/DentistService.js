@@ -136,12 +136,6 @@ const updateDentist = async (dentistId, data, tenant_id) => {
     ...dentistFieldMap,
     updated_by: (val) => val,
   };
-
-  if (!data.awards_certifications) {
-    const existing = await dentistModel.getDentistByTenantIdAndDentistId( tenant_id,dentistId);
-    data.awards_certifications = existing.awards_certifications;
-  }
-  
   try {
     const { columns, values } = mapFields(data, update);
     const affectedRows = await dentistModel.updateDentist(

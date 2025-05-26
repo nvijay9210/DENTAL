@@ -128,6 +128,54 @@ function convertDbToFrontend(row, reverseMap) {
   return result;
 }
 
+async function getExistingAwardsIfNoneUploaded(req, dentistId, tenant_id) {
+  if (!req.body.awards_certifications && !req.files?.some(f => f.fieldname.startsWith("awards_certifications"))) {
+    const existingDentist = await dentistModel.getDentistByTenantIdAndDentistId(tenant_id, dentistId);
+    if (existingDentist?.awards_certifications) {
+      req.body.awards_certifications = JSON.parse(existingDentist.awards_certifications);
+    }
+  }
+}
+
+function unflattenAwards(data) {
+  const awards = [];
+  const processedIndexes = new Set();
+
+  // Loop through all keys and find awards and descriptions
+  Object.keys(data).forEach((key) => {
+    const awardMatch = key.match(/^awards_certifications_(\d+)$/);
+    const descMatch = key.match(/^description_awards_certifications_(\d+)$/);
+
+    if (awardMatch || descMatch) {
+      const index = awardMatch ? awardMatch[1] : descMatch[1];
+
+      if (!processedIndexes.has(index)) {
+        processedIndexes.add(index);
+
+        const image = data[`awards_certifications_${index}`] || "";
+        const description =
+          data[`description_awards_certifications_${index}`] || "";
+
+        awards.push({
+          image,
+          description,
+        });
+
+        // Optional: remove the flat keys from the object
+        delete data[`awards_certifications_${index}`];
+        delete data[`description_awards_certifications_${index}`];
+      }
+    }
+  });
+
+  // Only set if there are any awards
+  if (awards.length > 0) {
+    data.awards_certifications = awards;
+  }
+
+  return data;
+}
+
 
 // -------------------- EXPORTS --------------------
 
@@ -142,5 +190,7 @@ module.exports = {
   safeStringify,
   parseBoolean,
   duration,
-  convertDbToFrontend
+  convertDbToFrontend,
+  getExistingAwardsIfNoneUploaded,
+  unflattenAwards
 };
