@@ -219,14 +219,31 @@ exports.getAppointmentMonthlySummary = async (req, res, next) => {
 };
 
 exports.getAppointmentSummary = async (req, res, next) => {
-  const { tenant_id, clinic_id, dentist_id } = req.params;
+  const { tenant_id, clinic_id } = req.params;
+  const{period}=req.query
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  if(period!=='monthly' && period!=='yearly' && period!=='weekly') throw new CustomError('Period mustbe a weekly,monthly or yearly',400)
+  try {
+    const appointments = await appointmentService.getAppointmentSummary(
+      tenant_id,
+      clinic_id,
+      period
+    );
+    res.status(200).json(appointments);
+  } catch (err) {
+    next(err);
+  }
+};
+exports.getAppointmentSummaryByDentist = async (req, res, next) => {
+  const { tenant_id, clinic_id,dentist_id } = req.params;
   const{period}=req.query
   await checkIfIdExists('tenant','tenant_id',tenant_id)
   await checkIfIdExists('clinic','clinic_id',clinic_id)
   await checkIfIdExists('dentist','dentist_id',dentist_id)
-  if(period!=='monthly' && period!=='yearly' && period!=='weekly') throw new CustomError('Period mustbe a weekly,monthly or yearly',400)
+  if(period!=='monthly' && period!=='yearly') throw new CustomError('Period mustbe a monthly or yearly',400)
   try {
-    const appointments = await appointmentService.getAppointmentSummary(
+    const appointments = await appointmentService.getAppointmentSummaryByDentist(
       tenant_id,
       clinic_id,
       dentist_id,

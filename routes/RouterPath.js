@@ -35,8 +35,6 @@ module.exports = {
     "/getallappointments/:tenant_id/:clinic_id/:dentist_id",
   GET_APPOINTMENT_MONTHLY_SUMMARY:
     "/getallappointments/monthlysummary/:tenant_id/:clinic_id/:dentist_id",
-  GET_APPOINTMENT_SUMMARY_PERIOD:
-    "/getallappointments/periodsummary/:tenant_id/:clinic_id/:dentist_id",
   GETALL_PATIENT_VISITEDETAILS:
     "/getallvisitdetails/:tenant_id/:clinic_id/:patient_id",
   UPDATE_APPOINTMENT_SCHEDULE_CANCELED:'/updateappointment_cancelstatus/:appointment_id/:tenant_id/:clinic_id/',
@@ -107,6 +105,17 @@ module.exports = {
   GET_PAYMENT: "/getpayment/:payment_id",
   UPDATE_PAYMENT_TENANT: "/updatepayment/:payment_id/:tenant_id",
   DELETE_PAYMENT_TENANT: "/deletepayment/:payment_id/:tenant_id",
+
+  //dashboard Routes
+
+  GET_APPOINTMENT_SUMMARY_PERIOD:
+    "/getallappointments/periodsummary/:tenant_id/:clinic_id",
+
+    GET_APPOINTMENT_SUMMARY_PERIOD_DENTIST:
+    "/getallappointments/dentistperiodsummary/:tenant_id/:clinic_id/:dentist_id",
+
+    GET_APPOINTMENT_SUMMARY_PERIOD_PATIENT:
+    "/getallpatients/patientperiodsummary/:tenant_id/:clinic_id/:dentist_id",
 };
 
 // GET /api/tenant?page=2&limit=10

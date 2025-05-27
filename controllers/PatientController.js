@@ -1,5 +1,5 @@
 const { CustomError } = require("../middlewares/CustomeError");
-const { checkIfExists } = require("../models/checkIfExists");
+const { checkIfExists, checkIfIdExists } = require("../models/checkIfExists");
 const patientService = require("../services/PatientService");
 const {
   validateTenantIdAndPageAndLimit,
@@ -30,6 +30,22 @@ exports.getAllPatientsByTenantId = async (req, res, next) => {
       tenant_id,
       page,
       limit
+    );
+    res.status(200).json(patients);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getPeriodSummaryByPatient = async (req, res, next) => {
+  const { tenant_id,clinic_id,dentist_id } = req.params;
+  const {period} = req.query
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  try {
+    const patients = await patientService.getPeriodSummaryByPatient(
+      tenant_id,clinic_id,dentist_id,period
     );
     res.status(200).json(patients);
   } catch (err) {

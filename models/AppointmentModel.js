@@ -38,6 +38,30 @@ const getAllAppointmentsByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
+const getAllAppointmentsByTenantIdAndClinicIdAndDentistId = async (tenantId, clinicId, dentistId) => {
+  const query = `SELECT 
+    app.appointment_date
+FROM 
+    appointment AS app
+WHERE 
+    app.tenant_id = ? 
+    AND app.clinic_id = ? 
+    AND app.dentist_id = ?
+
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, clinicId, dentistId]);
+    console.log('appoinments:',rows)
+    return rows;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+};
+
 const getAppointmentByTenantIdAndAppointmentId = async (
   tenant_id,
   appointment_id
@@ -215,7 +239,7 @@ WHERE
 
 //query based on monthly and yearly and weekly
 
-const getAppointmentSummary = async (tenantId, clinic_id, dentist_id, period = 'monthly') => {
+const getAppointmentSummary = async (tenantId, clinic_id, period = 'monthly') => {
   let startDateCondition;
 
   // Determine date range condition based on the period
@@ -248,14 +272,13 @@ const getAppointmentSummary = async (tenantId, clinic_id, dentist_id, period = '
     WHERE 
       app.tenant_id = ?
       AND app.clinic_id = ?
-      AND app.dentist_id = ?
       AND ${startDateCondition}
       AND ${endDateCondition};
   `;
 
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, clinic_id, dentist_id]);
+    const [rows] = await conn.query(query, [tenantId, clinic_id]);
     console.log(`Appointments (${period} summary):`, rows);
     return rows[0]; // Return the first row since it's an aggregate result
   } catch (error) {
@@ -332,5 +355,6 @@ module.exports = {
   getAppointmentMonthlySummary,
   getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId,
   updateAppoinmentStatusCancelled,
-  getAppointmentSummary
+  getAppointmentSummary,
+  getAllAppointmentsByTenantIdAndClinicIdAndDentistId
 };

@@ -13,7 +13,7 @@ const reminderColumnConfig = [
   { columnname: "due_date", type: "date", null: true },
   { columnname: "due_time", type: "time", null: true },
   { columnname: "reminder_repeat", type: "varchar", size: 20, null: true },
-  { columnname: "repeat_interval", type: "int", null: true },
+  { columnname: "repeat_interval", type: "int", null: false },
   { columnname: "repeat_weekends", type: "varchar", size: 20, null: true },
   { columnname: "repeat_end_date", type: "date", null: true },
   { columnname: "notify", type: "boolean", null: true },

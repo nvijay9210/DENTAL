@@ -1,4 +1,5 @@
 const { CustomError } = require("../middlewares/CustomeError");
+const moment = require('moment');
 const patientModel = require("../models/PatientModel");
 const {
   redisClient,
@@ -121,6 +122,74 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
   }
 };
 
+
+const getPeriodSummaryByPatient = async (tenantId, clinicId, dentistId, period = 'monthly') => {
+  try {
+    const rows = await patientModel.getPeriodSummaryByPatient(tenantId, clinicId, dentistId);
+
+    if (!['weekly', 'monthly'].includes(period)) {
+      throw new Error("Invalid period. Use 'weekly' or 'monthly'");
+    }
+
+    if (period === 'monthly') {
+      // Monthly count of patients
+      const monthlyData = {};
+
+      for (const row of rows) {
+        const created = moment(row.created_time);
+        const monthName = created.format("MMMM");
+
+        if (!monthlyData[monthName]) {
+          monthlyData[monthName] = 0;
+        }
+
+        monthlyData[monthName] += 1;
+      }
+
+      const monthlySummary = Object.entries(monthlyData).map(([month, count]) => ({
+        month,
+        count,
+      }));
+
+      return { period: 'monthly', summary: monthlySummary };
+
+    } else if (period === 'weekly') {
+      // Weekly count grouped within each month
+      const weeklyData = {};
+
+      for (const row of rows) {
+        const created = moment(row.created_time);
+        const monthName = created.format("MMMM");
+        const weekOfMonth = Math.ceil(created.date() / 7);
+
+        if (!weeklyData[monthName]) weeklyData[monthName] = {};
+        if (!weeklyData[monthName][weekOfMonth]) weeklyData[monthName][weekOfMonth] = 0;
+
+        weeklyData[monthName][weekOfMonth] += 1;
+      }
+
+      const weeklySummary = {};
+
+      for (const month in weeklyData) {
+        weeklySummary[month] = Object.entries(weeklyData[month])
+          .sort((a, b) => a[0] - b[0])
+          .map(([week, count]) => ({
+            week: `Week ${week}`,
+            count,
+          }));
+      }
+
+      return { period: 'weekly', summary: weeklySummary };
+    }
+
+  } catch (error) {
+    console.error("Error fetching patient period summary:", error);
+    throw error;
+  }
+};
+
+
+
 // Get single patient
 const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
   try {
@@ -226,4 +295,5 @@ module.exports = {
   updatePatient,
   deletePatientByTenantIdAndPatientId,
   updateToothDetails,
+  getPeriodSummaryByPatient
 };

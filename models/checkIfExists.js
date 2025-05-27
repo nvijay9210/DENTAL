@@ -105,6 +105,7 @@ const checkGlobalPhoneNumberExistsWithId = async (
 };
 
 const checkIfIdExists = async (table, field, value) => {
+
   const conn = await pool.getConnection();
   try {
     // Query using proper placeholder for column name and value

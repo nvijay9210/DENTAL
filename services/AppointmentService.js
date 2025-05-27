@@ -1,5 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const appointmentModel = require("../models/AppointmentModel");
+const pool = require("../config/db");
 const {
   getOrSetCache,
   invalidateCacheByPattern,
@@ -294,19 +295,18 @@ const getAppointmentMonthlySummary = async (
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
+
 const getAppointmentSummary = async (
   tenantId,
   clinic_id,
-  dentist_id,
   period
 ) => {
   try {
-    const cacheKey = `getAppointmentSummary:${tenantId}/${clinic_id}/${dentist_id}`;
+    const cacheKey = `getAppointmentSummary:${tenantId}/${clinic_id}`;
     const appointment = await getOrSetCache(cacheKey, async () => {
       const result = await appointmentModel.getAppointmentSummary(
         tenantId,
         clinic_id,
-        dentist_id,
         period
       );
       return result; // 🔁 Important: return from cache function
@@ -318,6 +318,79 @@ const getAppointmentSummary = async (
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
+
+const getAppointmentSummaryByDentist = async (
+  tenant_id,
+  clinic_id,
+  dentist_id,
+  period = 'monthly'
+) => {
+  const conn = await pool.getConnection();
+
+  try {
+    const rows = await appointmentModel.getAllAppointmentsByTenantIdAndClinicIdAndDentistId(tenant_id,
+      clinic_id,
+      dentist_id)
+
+    const summary = {};
+
+    if (period.toLowerCase() === 'monthly') {
+      // Group by year and month
+      for (const row of rows) {
+        const date = moment(row.appointment_date);
+        const year = date.year();
+        const month = date.format('MMMM');
+
+        if (!summary[year]) summary[year] = {};
+
+        if (!summary[year][month]) summary[year][month] = 1;
+        else summary[year][month]++;
+      }
+
+      // Format output
+      const formattedSummary = {};
+      for (const [year, months] of Object.entries(summary)) {
+        formattedSummary[year] = Object.entries(months).map(([month, count]) => ({
+          month,
+          count,
+        }));
+      }
+
+      return {
+        period: 'monthly',
+        summary: formattedSummary,
+      };
+    }
+
+    if (period.toLowerCase() === 'yearly') {
+      // Group by year only
+      for (const row of rows) {
+        const year = moment(row.appointment_date).year();
+        if (!summary[year]) summary[year] = 1;
+        else summary[year]++;
+      }
+
+      const formatted = Object.entries(summary).map(([year, count]) => ({
+        year: parseInt(year),
+        count,
+      }));
+
+      return {
+        period: 'yearly',
+        summary: { 'All Years': formatted },
+      };
+    }
+
+    throw new Error("Unsupported period. Use 'monthly' or 'yearly'.");
+
+  } catch (error) {
+    console.error("Error fetching appointment summary:", error);
+    throw new Error("Failed to fetch appointment summary");
+  } finally {
+    conn.release();
+  }
+};
+
 
 const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
   tenantId,
@@ -359,5 +432,6 @@ module.exports = {
   getAppointmentMonthlySummary,
   getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId,
   updateAppoinmentStatusCancelled,
-  getAppointmentSummary
+  getAppointmentSummary,
+  getAppointmentSummaryByDentist
 };

@@ -97,6 +97,32 @@ const updateToothDetails = async (data,patientId,tenantId) => {
   }
 };
 
+const getPeriodSummaryByPatient = async (tenantId, clinicId,dentistId) => {
+  const query = `SELECT 
+  CONCAT(p.first_name, ' ', p.last_name) AS name, 
+  p.created_time 
+FROM 
+  patient p
+JOIN 
+  appointment app ON app.patient_id = p.patient_id
+WHERE 
+  app.tenant_id = ? 
+  AND app.clinic_id = ? 
+  AND app.dentist_id = ?
+`;
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(query, [tenantId, clinicId,dentistId]);
+    return rows; // Ensure consistent return type (true/false)
+  } catch (error) {
+    console.error("Error checking patient existence:", error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+};
+
 
 module.exports = {
   createPatient,
@@ -105,5 +131,6 @@ module.exports = {
   updatePatient,
   deletePatientByTenantIdAndPatientId,
   checkPatientExistsByTenantIdAndPatientId,
-  updateToothDetails
+  updateToothDetails,
+  getPeriodSummaryByPatient
 };
