@@ -1,3 +1,4 @@
+const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
 const appointmentService = require("../services/AppointmentService");
 const appointmentValidation = require("../validations/AppointmentValidation");
@@ -210,6 +211,26 @@ exports.getAppointmentMonthlySummary = async (req, res, next) => {
       tenant_id,
       clinic_id,
       dentist_id
+    );
+    res.status(200).json(appointments);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAppointmentSummary = async (req, res, next) => {
+  const { tenant_id, clinic_id, dentist_id } = req.params;
+  const{period}=req.query
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  if(period!=='monthly' && period!=='yearly' && period!=='weekly') throw new CustomError('Period mustbe a weekly,monthly or yearly',400)
+  try {
+    const appointments = await appointmentService.getAppointmentSummary(
+      tenant_id,
+      clinic_id,
+      dentist_id,
+      period
     );
     res.status(200).json(appointments);
   } catch (err) {

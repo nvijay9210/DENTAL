@@ -211,6 +211,59 @@ WHERE
   } finally {
     conn.release();
   }
+}; 
+
+//query based on monthly and yearly and weekly
+
+const getAppointmentSummary = async (tenantId, clinic_id, dentist_id, period = 'monthly') => {
+  let startDateCondition;
+
+  // Determine date range condition based on the period
+  switch (period.toLowerCase()) {
+    case 'weekly':
+      startDateCondition = `app.appointment_date >= DATE_FORMAT(CURDATE() - INTERVAL WEEKDAY(CURDATE()) DAY, '%Y-%m-%d')`;
+      break;
+    case 'yearly':
+      startDateCondition = `app.appointment_date >= DATE_FORMAT(CURDATE(), '%Y-01-01')`;
+      break;
+    case 'daily':
+      startDateCondition = `app.appointment_date >= CURDATE()`;
+      break;
+    case 'monthly':
+    default:
+      startDateCondition = `app.appointment_date >= DATE_FORMAT(CURDATE(), '%Y-%m-01')`;
+      break;
+  }
+
+  const endDateCondition = `app.appointment_date < DATE_FORMAT(CURDATE() + INTERVAL 1 ${period === 'yearly' ? 'YEAR' : period === 'monthly' ? 'MONTH' : 'WEEK'}, '%Y-%m-01')`;
+
+  const query = `
+    SELECT 
+      COUNT(*) AS total_appointments,
+      SUM(CASE WHEN app.status = 'CP' THEN 1 ELSE 0 END) AS completed_appointments,
+      SUM(CASE WHEN app.status = 'SC' THEN 1 ELSE 0 END) AS pending_appointments,
+      SUM(CASE WHEN app.status = 'CL' THEN 1 ELSE 0 END) AS cancelled_appointments
+    FROM 
+      appointment AS app
+    WHERE 
+      app.tenant_id = ?
+      AND app.clinic_id = ?
+      AND app.dentist_id = ?
+      AND ${startDateCondition}
+      AND ${endDateCondition};
+  `;
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, clinic_id, dentist_id]);
+    console.log(`Appointments (${period} summary):`, rows);
+    return rows[0]; // Return the first row since it's an aggregate result
+  } catch (error) {
+    console.error("Database Query Error:", error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
 };
 
 const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (tenantId,clinicId, patientId,limit,offset) => {
@@ -278,5 +331,6 @@ module.exports = {
   getAppointmentsWithDetails,
   getAppointmentMonthlySummary,
   getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId,
-  updateAppoinmentStatusCancelled
+  updateAppoinmentStatusCancelled,
+  getAppointmentSummary
 };

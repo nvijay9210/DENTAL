@@ -23,6 +23,7 @@ const expenseRouter=require('./routes/ExpenseRouter')
 const supplierRouter=require('./routes/SupplierRouter')
 const reminderRouter=require('./routes/ReminderRouter')
 const paymentRouter=require('./routes/PaymentRouter')
+const dashboardRouter=require('./routes/DashboardRouter')
 
 // const compressionMiddleware = require('./middlewares/CompressionMiddleware');
 const { redisconnect } = require('./config/redisConfig');
@@ -86,6 +87,7 @@ app.use('/expense', expenseRouter);
 app.use('/supplier', supplierRouter);
 app.use('/reminder', reminderRouter);
 app.use('/payment', paymentRouter);
+app.use('/dashboard', dashboardRouter);
 
 app.use(errorHandler);
 
