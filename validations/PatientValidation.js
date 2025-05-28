@@ -1,6 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const patientService = require("../services/PatientService");
-const { checkIfExistsWithoutId } = require("../models/checkIfExists");
+const { checkIfExistsWithoutId, checkIfExists } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
 const { validatePhonesGlobally } = require("../utils/PhoneValidationHelper");
@@ -77,14 +77,14 @@ const patientColumnConfig = [
   },
   {
     columnname: "smoking_status",
-    type: "enum",
-    enum_values: ["N", "F", "C"],
+    type: "varchar",
+    size:100,
     null: false,
   },
   {
     columnname: "alcohol_consumption",
-    type: "enum",
-    enum_values: ["N", "OC", "R"],
+    type: "varchar",
+    size:100,
     null: false,
   },
   {

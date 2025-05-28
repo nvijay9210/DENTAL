@@ -97,26 +97,51 @@ const updateToothDetails = async (data,patientId,tenantId) => {
   }
 };
 
-const getPeriodSummaryByPatient = async (tenantId, clinicId,dentistId) => {
-  const query = `SELECT 
-  CONCAT(p.first_name, ' ', p.last_name) AS name, 
-  p.created_time 
-FROM 
-  patient p
-JOIN 
-  appointment app ON app.patient_id = p.patient_id
-WHERE 
-  app.tenant_id = ? 
-  AND app.clinic_id = ? 
-  AND app.dentist_id = ?
-`;
+const updatePatientAppointmentCount = async (tenantId, patientId, assign = true) => {
+  const modifier = assign ? 1 : -1;
+
+  const query = `
+    UPDATE patient
+    SET appointment_count = GREATEST(appointment_count + ?, 0)
+    WHERE tenant_id = ? AND patient_id = ?;
+  `;
+
+  const conn = await pool.getConnection();
+  try {
+    const [result] = await conn.query(query, [modifier, tenantId, patientId]);
+    return result.affectedRows > 0;
+  } catch (error) {
+    console.error("Error updating appointment count:", error);
+    throw new Error(`Database Query Error while ${assign ? 'incrementing' : 'decrementing'} appointment count`);
+  } finally {
+    conn.release();
+  }
+};
+
+const getPeriodSummaryByPatient = async (tenantId, clinicId, dentistId) => {
+  const query = `
+    SELECT 
+      CONCAT(p.first_name, ' ', p.last_name) AS name,
+      p.created_time
+    FROM 
+      patient p
+    INNER JOIN appointment app 
+      ON p.patient_id = app.patient_id
+    WHERE 
+      app.tenant_id = ? AND
+      app.clinic_id = ? AND
+      app.dentist_id = ?
+    GROUP BY 
+      p.patient_id, p.first_name, p.last_name, p.created_time
+  `;
+
   const conn = await pool.getConnection();
 
   try {
-    const [rows] = await conn.query(query, [tenantId, clinicId,dentistId]);
-    return rows; // Ensure consistent return type (true/false)
+    const [rows] = await conn.query(query, [tenantId, clinicId, dentistId]);
+    return rows; // Returns list of { name, created_time }
   } catch (error) {
-    console.error("Error checking patient existence:", error);
+    console.error("Error fetching patient summary:", error);
     throw new Error("Database Query Error");
   } finally {
     conn.release();
@@ -132,5 +157,6 @@ module.exports = {
   deletePatientByTenantIdAndPatientId,
   checkPatientExistsByTenantIdAndPatientId,
   updateToothDetails,
-  getPeriodSummaryByPatient
+  getPeriodSummaryByPatient,
+  updatePatientAppointmentCount
 };

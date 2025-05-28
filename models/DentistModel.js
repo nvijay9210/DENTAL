@@ -186,6 +186,27 @@ const checkDentistExistsUsingTenantIdAndClinicIdAnddentistId = async (dentistId,
   }
 };
 
+const updateDentistAppointmentCount = async (tenantId, clinicId,dentistId, assign = true) => {
+  const modifier = assign ? 1 : -1;
+
+  const query = `
+    UPDATE dentist
+    SET appointment_count = GREATEST(appointment_count + ?, 0)
+    WHERE tenant_id = ? AND clinic_id=? AND dentist_id = ?;
+  `;
+
+  const conn = await pool.getConnection();
+  try {
+    const [result] = await conn.query(query, [modifier, tenantId, clinicId,dentistId]);
+    return result.affectedRows > 0;
+  } catch (error) {
+    console.error(`Error ${assign ? 'incrementing' : 'decrementing'} dentist appointment count:`, error);
+    throw new Error(`Database Query Error while updating dentist appointment count`);
+  } finally {
+    conn.release();
+  }
+};
+
 
 
 module.exports = {
@@ -199,5 +220,6 @@ module.exports = {
   updateClinicIdAndNameAndAddress,
   getAllDentistsByClinicId,
   updateNullClinicInfoWithJoin,
-  checkDentistExistsUsingTenantIdAndClinicIdAnddentistId
+  checkDentistExistsUsingTenantIdAndClinicIdAnddentistId,
+  updateDentistAppointmentCount
 };

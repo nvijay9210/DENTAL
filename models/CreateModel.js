@@ -245,8 +245,8 @@ async function addStatusTypeTableData() {
   const sql = `
     INSERT IGNORE INTO statustype (status_type_id, Status_Type) 
     VALUES 
-    (1, 'specialization'),
-(2, 'qualifications'),
+    (1, 'specialisation'),
+(2, 'designation'),
 (3, 'available_services'),
 (4, 'alcohol_consumption'),
 (5, 'mode_of_payment'),

@@ -1,3 +1,4 @@
+const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
 const prescriptionService = require("../services/PrescriptionService");
 const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");

@@ -19,32 +19,6 @@ const validateTenant = async (tenantId) => {
   await checkTenantExistsByTenantIdValidation(tenantId);
 };
 
-// const validateClinicPhones = async (data, clinicId = 0) => {
-//   const tenantId = data.tenant_id || data.tenantId;
-
-//   if (!tenantId) {
-//     throw new CustomError("Tenant ID is required for phone validation", 400);
-//   }
-
-//   const checker = clinicId > 0
-//     ? checkPhoneNumberExistsWithId
-//     : checkPhoneNumberExists;
-
-//   // Validate primary phone number
-//   await checker("clinic", data.phone_number, "Phone Number", clinicId, tenantId);
-
-//   // Validate alternate phone number if present
-//   if (data.alternate_phone_number) {
-//     await checker(
-//       "clinic",
-//       data.alternate_phone_number,
-//       "Alternate Phone Number",
-//       clinicId,
-//       tenantId
-//     );
-//   }
-// };
-
 const validateClinicPhones = async (data, clinicId = 0) => {
   const tenantId = data.tenant_id;
 
@@ -164,7 +138,7 @@ const clinicColumnConfig = [
   { columnname: "established_year", type: "int", size: 11, null: false },
   { columnname: "total_doctors", type: "int", size: 4, null: true },
   { columnname: "total_patients", type: "int", size: 11, null: true },
-  { columnname: "total_dental_chairs", type: "int", size: 11, null: true },
+  { columnname: "seating_capacity", type: "int", size: 4, null: true },
   { columnname: "number_of_assistants", type: "int", size: 11, null: true },
   {
     columnname: "available_services",

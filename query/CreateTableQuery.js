@@ -13,7 +13,7 @@ const createTableQuery = {
   consultation_fee decimal(10,2) DEFAULT NULL,
   discount_applied decimal(10,2) NOT NULL DEFAULT 0.00,
   payment_status enum('P','UP','PD') NOT NULL DEFAULT 'P',
-  payment_method varchar(100) NOT NULL,
+  mode_of_payment varchar(100) NOT NULL,
   visit_reason text DEFAULT NULL,
   follow_up_needed tinyint(1) NOT NULL DEFAULT 0,
   reminder_method varchar(100) DEFAULT NULL,
@@ -31,7 +31,7 @@ const createTableQuery = {
   CONSTRAINT fk_appointment_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
   CONSTRAINT fk_appointment_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id) ON UPDATE CASCADE,
   CONSTRAINT fk_appointment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;`,
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;`,
 
   addAsset: `CREATE TABLE IF NOT EXISTS asset (
   asset_id int(11) NOT NULL AUTO_INCREMENT,
@@ -54,7 +54,7 @@ const createTableQuery = {
   updated_by varchar(30) DEFAULT NULL,
   updated_time datetime DEFAULT NULL ON UPDATE current_timestamp(),
   PRIMARY KEY (asset_id)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
 
   addClinic: `CREATE TABLE IF NOT EXISTS clinic (
@@ -75,15 +75,15 @@ const createTableQuery = {
   gst_number varchar(15) DEFAULT NULL,
   pan_number varchar(10) DEFAULT NULL,
   established_year int(4) NOT NULL,
-  total_doctors int(3) DEFAULT NULL,
-  total_patients int(11) DEFAULT NULL,
-  total_dental_chairs int(4) DEFAULT NULL,
-  number_of_assistants int(4) DEFAULT NULL,
+  total_doctors int(3) DEFAULT 0,
+  total_patients int(11) DEFAULT 0,
+  seating_capacity int(4) DEFAULT 0,
+  number_of_assistants int(4) DEFAULT 0,
   available_services longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(available_services)),
   operating_hours longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(operating_hours)),
   insurance_supported tinyint(1) NOT NULL DEFAULT 0,
-  ratings decimal(3,2) DEFAULT NULL,
-  reviews_count int(11) DEFAULT NULL,
+  ratings decimal(3,2) DEFAULT 0,
+  reviews_count int(11) DEFAULT 0,
   emergency_support tinyint(1) NOT NULL DEFAULT 0,
   teleconsultation_supported tinyint(1) NOT NULL DEFAULT 0,
   clinic_logo varchar(255) DEFAULT NULL,
@@ -98,7 +98,7 @@ const createTableQuery = {
   KEY fk_tenant (tenant_id),
   KEY idx_phone_number (phone_number),
   CONSTRAINT fk_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 `,
 
   addDentist: `CREATE TABLE IF NOT EXISTS dentist (
@@ -113,7 +113,7 @@ const createTableQuery = {
   phone_number varchar(15) NOT NULL,
   alternate_phone_number varchar(15) DEFAULT NULL,
   specialisation longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-  designation longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  designation varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
   member_of longtext DEFAULT NULL,
   experience_years int(2) NOT NULL,
   license_number varchar(20) NOT NULL,
@@ -125,10 +125,11 @@ const createTableQuery = {
   pin_code varchar(6) NOT NULL,
   working_hours longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(working_hours)),
   available_days longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(available_days)),
-  consultation_fee decimal(10,2) DEFAULT NULL,
-  ratings decimal(3,2) DEFAULT NULL,
-  reviews_count int(11) DEFAULT NULL,
-  appointment_count int(11) DEFAULT NULL,
+  consultation_fee decimal(10,2) DEFAULT 0,
+  min_booking_fee decimal(10,2) DEFAULT 0,
+  ratings decimal(3,2) DEFAULT 0,
+  reviews_count int(11) DEFAULT 0,
+  appointment_count int(11) DEFAULT 0,
   profile_picture varchar(255) DEFAULT NULL,
   bio longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(bio)),
   teleconsultation_supported tinyint(1) NOT NULL DEFAULT 0,
@@ -198,7 +199,7 @@ const createTableQuery = {
   KEY fk_patient_dentist (dentist_preference),
   CONSTRAINT fk_patient_dentist FOREIGN KEY (dentist_preference) REFERENCES dentist (dentist_id) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT fk_patient_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
 
   addPrescription: `CREATE TABLE IF NOT EXISTS prescription (
@@ -211,9 +212,9 @@ const createTableQuery = {
   medication text DEFAULT NULL,
   generic_name varchar(255) DEFAULT NULL,
   brand_name varchar(255) DEFAULT NULL,
-  dosage int(4) DEFAULT NULL,
+  dosage int(4) DEFAULT 0,
   frequency varchar(50) DEFAULT NULL,
-  quantity int(11) DEFAULT NULL,
+  quantity int(11) DEFAULT 0,
   refill_allowed tinyint(1) DEFAULT 0,
   refill_count int(11) DEFAULT 0,
   side_effects text DEFAULT NULL,
@@ -237,7 +238,7 @@ const createTableQuery = {
   CONSTRAINT fk_prescription_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id) ON UPDATE CASCADE,
   CONSTRAINT fk_prescription_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_prescription_treatment FOREIGN KEY (treatment_id) REFERENCES treatment (treatment_id) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
 
   addStatusType: `
@@ -250,7 +251,7 @@ const createTableQuery = {
   updated_time datetime DEFAULT NULL ON UPDATE current_timestamp(),
   PRIMARY KEY (status_type_id),
   UNIQUE KEY status_type (status_type)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 
 `,
@@ -268,7 +269,7 @@ CREATE TABLE IF NOT EXISTS statustypesub (
   PRIMARY KEY (status_type_sub_id),
   KEY status_type_id (status_type_id),
   CONSTRAINT statustypesub_ibfk_1 FOREIGN KEY (status_type_id) REFERENCES statustype (status_type_id) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 
 `,
@@ -286,7 +287,7 @@ CREATE TABLE IF NOT EXISTS tenant (
   tenant_app_font varchar(50) DEFAULT NULL,
   tenant_app_themes longtext DEFAULT NULL,
   PRIMARY KEY (tenant_id)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 
 `,
@@ -301,7 +302,7 @@ CREATE TABLE IF NOT EXISTS tenant (
   treatment_type varchar(100) NOT NULL,
   treatment_status varchar(100) NOT NULL,
   treatment_date date NOT NULL,
-  cost decimal(10,2) NOT NULL,
+  cost decimal(10,2) NOT NULL DEFAULT 0.00,
   duration varchar(50) NOT NULL,
   teeth_involved varchar(255) NOT NULL,
   complications text DEFAULT NULL,
@@ -326,15 +327,14 @@ CREATE TABLE IF NOT EXISTS tenant (
   CONSTRAINT fk_treatment_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
   CONSTRAINT fk_treatment_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id) ON UPDATE CASCADE,
   CONSTRAINT fk_treatment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
-
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
   addExpense: `
 CREATE TABLE IF NOT EXISTS expense (
   expense_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
   clinic_id int(11) NOT NULL,
-  expense_amount decimal(10,2) DEFAULT NULL,
+  expense_amount decimal(10,2) DEFAULT 0.00,
   expense_category varchar(255) DEFAULT NULL,
   expense_reason varchar(255) DEFAULT NULL,
   expense_date date DEFAULT NULL,
@@ -347,7 +347,7 @@ CREATE TABLE IF NOT EXISTS expense (
   PRIMARY KEY (expense_id),
   KEY fk_expense_clinic (clinic_id),
   CONSTRAINT fk_expense_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 `,
   addSupplier: `
@@ -371,7 +371,7 @@ CREATE TABLE IF NOT EXISTS supplier (
   KEY fk_supplier_tenant (tenant_id),
   CONSTRAINT fk_supplier_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
   CONSTRAINT fk_supplier_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 `,
   addReminder: `
@@ -387,11 +387,11 @@ CREATE TABLE IF NOT EXISTS reminder (
   due_date date DEFAULT NULL,
   due_time time DEFAULT NULL,
   reminder_repeat varchar(20) DEFAULT NULL,
-  repeat_interval int(2) DEFAULT NULL,
+  repeat_interval int(2) NOT NULL DEFAULT 1,
   repeat_weekdays varchar(20) DEFAULT NULL,
   repeat_end_date date DEFAULT NULL,
   notify tinyint(1) DEFAULT 0,
-  notification_tone varchar(300) DEFAULT NULL,
+  reminder_reason varchar(255) DEFAULT NULL,
   status varchar(20) DEFAULT NULL,
   created_by varchar(30) NOT NULL,
   created_time datetime NOT NULL DEFAULT current_timestamp(),
@@ -405,7 +405,6 @@ CREATE TABLE IF NOT EXISTS reminder (
   CONSTRAINT fk_reminder_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
   CONSTRAINT fk_reminder_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
-
 `,
 addPayment: `
 CREATE TABLE IF NOT EXISTS payment (
@@ -421,22 +420,26 @@ CREATE TABLE IF NOT EXISTS payment (
   mode_of_payment varchar(100) NOT NULL,
   payment_source varchar(100) NOT NULL,
   payment_reference varchar(255) DEFAULT NULL,
-  payment_status VARCHAR(100) NOT NULL,
-  payment_verified TINYINT(1) DEFAULT 0,
+  payment_status varchar(100) NOT NULL,
+  payment_verified tinyint(1) DEFAULT 0,
   receipt_number varchar(25) DEFAULT NULL,
-  insurance_number varchar(20) DEFAULT NULL,
-  payment_date DATE DEFAULT NULL,
+  insurance_number varchar(25) DEFAULT NULL,
+  payment_date date DEFAULT NULL,
   created_by varchar(30) NOT NULL,
   created_time datetime NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
   updated_time datetime DEFAULT NULL ON UPDATE current_timestamp(),
   PRIMARY KEY (payment_id),
   KEY fk_payment_tenant (tenant_id),
-  CONSTRAINT fk_payment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE,
+  KEY fk_payment_clinic (clinic_id),
+  KEY fk_payment_patient (patient_id),
+  KEY fk_payment_dentist (dentist_id),
+  KEY fk_payment_appointment (appointment_id),
+  CONSTRAINT fk_payment_appointment FOREIGN KEY (appointment_id) REFERENCES appointment (appointment_id) ON UPDATE CASCADE,
   CONSTRAINT fk_payment_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
-  CONSTRAINT fk_payment_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id) ON UPDATE CASCADE,
   CONSTRAINT fk_payment_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
-  CONSTRAINT fk_payment_appointment FOREIGN KEY (appointment_id) REFERENCES appointment (appointment_id) ON UPDATE CASCADE
+  CONSTRAINT fk_payment_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_payment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `
 };

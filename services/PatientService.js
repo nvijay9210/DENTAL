@@ -122,75 +122,186 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
   }
 };
 
-
-const getPeriodSummaryByPatient = async (tenantId, clinicId, dentistId, period = 'monthly') => {
+const getPeriodSummaryByPatient = async (tenantId, clinicId, dentistId) => {
   try {
     const rows = await patientModel.getPeriodSummaryByPatient(tenantId, clinicId, dentistId);
+    const now = moment().utc();
+    const result = {};
+    const topN = 5;
 
-    if (!['weekly', 'monthly'].includes(period)) {
-      throw new Error("Invalid period. Use 'weekly' or 'monthly'");
+    // --- Weekly Data for Current Month (1w-5w) ---
+    let cumulativeWeekly = 0;
+    const weeksInMonth = Math.ceil(now.daysInMonth() / 7);
+    for (let w = 1; w <= weeksInMonth; w++) {
+      const filtered = rows.filter(row => {
+        const created = moment(row.created_time).utc();
+        return (
+          created.year() === now.year() &&
+          created.month() === now.month() &&
+          Math.ceil(created.date() / 7) === w
+        );
+      });
+
+      const nameCount = {};
+      for (const row of filtered) {
+        nameCount[row.name] = (nameCount[row.name] || 0) + 1;
+      }
+      const sorted = Object.entries(nameCount).sort((a, b) => b[1] - a[1]);
+      const labels = sorted.slice(0, topN).map(([name]) => name);
+      const data = sorted.slice(0, topN).map(([, count]) => count);
+
+      const thisWeekTotal = data.reduce((a, b) => a + b, 0);
+      cumulativeWeekly += thisWeekTotal;
+
+      result[`${w}w`] = {
+        labels,
+        datasets: [{ data }],
+        cumulative: cumulativeWeekly
+      };
     }
 
-    if (period === 'monthly') {
-      // Monthly count of patients
-      const monthlyData = {};
+    // --- Monthly Data for Past 12 Months (1m-12m) ---
+    let cumulativeMonthly = 0;
+    for (let m = 1; m <= 12; m++) {
+      const periodStart = now.clone().startOf('month').subtract(m - 1, 'months');
+      const periodEnd = periodStart.clone().endOf('month');
 
-      for (const row of rows) {
-        const created = moment(row.created_time);
-        const monthName = created.format("MMMM");
+      const filtered = rows.filter(row => {
+        const created = moment(row.created_time).utc();
+        return created.isBetween(periodStart, periodEnd, null, '[]');
+      });
 
-        if (!monthlyData[monthName]) {
-          monthlyData[monthName] = 0;
-        }
-
-        monthlyData[monthName] += 1;
+      const nameCount = {};
+      for (const row of filtered) {
+        nameCount[row.name] = (nameCount[row.name] || 0) + 1;
       }
+      const sorted = Object.entries(nameCount).sort((a, b) => b[1] - a[1]);
+      const labels = sorted.slice(0, topN).map(([name]) => name);
+      const data = sorted.slice(0, topN).map(([, count]) => count);
 
-      const monthlySummary = Object.entries(monthlyData).map(([month, count]) => ({
-        month,
-        count,
-      }));
+      const thisMonthTotal = data.reduce((a, b) => a + b, 0);
+      cumulativeMonthly += thisMonthTotal;
 
-      return { period: 'monthly', summary: monthlySummary };
-
-    } else if (period === 'weekly') {
-      // Weekly count grouped within each month
-      const weeklyData = {};
-
-      for (const row of rows) {
-        const created = moment(row.created_time);
-        const monthName = created.format("MMMM");
-        const weekOfMonth = Math.ceil(created.date() / 7);
-
-        if (!weeklyData[monthName]) weeklyData[monthName] = {};
-        if (!weeklyData[monthName][weekOfMonth]) weeklyData[monthName][weekOfMonth] = 0;
-
-        weeklyData[monthName][weekOfMonth] += 1;
-      }
-
-      const weeklySummary = {};
-
-      for (const month in weeklyData) {
-        weeklySummary[month] = Object.entries(weeklyData[month])
-          .sort((a, b) => a[0] - b[0])
-          .map(([week, count]) => ({
-            week: `Week ${week}`,
-            count,
-          }));
-      }
-
-      return { period: 'weekly', summary: weeklySummary };
+      result[`${m}m`] = {
+        labels,
+        datasets: [{ data }],
+        cumulative: cumulativeMonthly
+      };
     }
 
+    // --- Yearly Data for Past 4 Years (1y-4y) ---
+    let cumulativeYearly = 0;
+    for (let y = 1; y <= 4; y++) {
+      const periodStart = now.clone().startOf('year').subtract(y - 1, 'years');
+      const periodEnd = periodStart.clone().endOf('year');
+
+      const filtered = rows.filter(row => {
+        const created = moment(row.created_time).utc();
+        return created.isBetween(periodStart, periodEnd, null, '[]');
+      });
+
+      const nameCount = {};
+      for (const row of filtered) {
+        nameCount[row.name] = (nameCount[row.name] || 0) + 1;
+      }
+      const sorted = Object.entries(nameCount).sort((a, b) => b[1] - a[1]);
+      const labels = sorted.slice(0, topN).map(([name]) => name);
+      const data = sorted.slice(0, topN).map(([, count]) => count);
+
+      const thisYearTotal = data.reduce((a, b) => a + b, 0);
+      cumulativeYearly += thisYearTotal;
+
+      result[`${y}y`] = {
+        labels,
+        datasets: [{ data }],
+        cumulative: cumulativeYearly
+      };
+    }
+
+    return result;
   } catch (error) {
-    console.error("Error fetching patient period summary:", error);
-    throw error;
+    console.error("Error checking patient existence:", error);
+    throw new Error("Database Query Error");
   }
 };
 
 
 
+
+
+
+
+// const getPeriodSummaryByPatient = async (tenantId, clinicId, dentistId, userInput) => {
+//   try {
+//     const rows = await patientModel.getPeriodSummaryByPatient(tenantId, clinicId, dentistId);
+
+//     // Check for week input (e.g., '1w', '2w')
+//     const weekMatch = /^(\d+)w$/i.exec(userInput);
+//     // Check for month range input (e.g., '2m' means current + next month)
+//     const monthMatch = /^(\d+)m$/i.exec(userInput);
+
+//     if (weekMatch) {
+//       // User wants a specific week of the current month
+//       const weekNumber = parseInt(weekMatch[1], 10);
+//       const currentMonth = moment().format("MMMM");
+
+//       let count = 0;
+//       for (const row of rows) {
+//         const created = moment(row.created_time);
+//         if (created.format("MMMM") === currentMonth && Math.ceil(created.date() / 7) === weekNumber) {
+//           count += 1;
+//         }
+//       }
+
+//       return [{
+//         period: 'weekly',
+//         month: currentMonth,
+//         week: `Week ${weekNumber}`,
+//         count,
+//       }];
+//     } else if (monthMatch) {
+//       // User wants a range: current month + (n-1) months
+//       const monthRange = parseInt(monthMatch[1], 10);
+//       const startMonth = moment().month(); // 0-indexed
+//       const results = [];
+
+//       for (let i = 0; i < monthRange; i++) {
+//         const monthIndex = (startMonth + i) % 12;
+//         const yearOffset = Math.floor((startMonth + i) / 12);
+//         const monthName = moment().month(monthIndex).format("MMMM");
+//         const year = moment().add(yearOffset, 'years').year();
+
+//         let count = 0;
+//         for (const row of rows) {
+//           const created = moment(row.created_time);
+//           if (created.month() === monthIndex && created.year() === year) {
+//             count += 1;
+//           }
+//         }
+
+//         results.push({
+//           period: 'monthly',
+//           month: monthName,
+//           year,
+//           count,
+//         });
+//       }
+
+//       return results;
+//     } else {
+//       throw new Error("Invalid input. Use '1w', '2w', ..., '2m', '3m', ...");
+//     }
+//   } catch (error) {
+//     console.error("Error fetching patient period summary:", error);
+//     throw error;
+//   }
+// };
+
+
+
+
 // Get single patient
+
 const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
   try {
     const patient = await patientModel.getPatientByTenantIdAndPatientId(

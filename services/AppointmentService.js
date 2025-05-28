@@ -13,6 +13,8 @@ const {
 const { formatDateOnly, formatAppointments } = require("../utils/DateUtils");
 const { mapFields } = require("../query/Records");
 const { updatePatientCount } = require("../models/ClinicModel");
+const { updatePatientAppointmentCount } = require("../models/PatientModel");
+const { updateDentistAppointmentCount } = require("../models/DentistModel");
 
 const appointmentFields = {
   tenant_id: (val) => val,
@@ -79,6 +81,8 @@ const createAppointment = async (data) => {
     await invalidateCacheByPattern("appointmentsmonthlysummary:*");
     if (appointmentId)
       await updatePatientCount(data.tenant_id, data.clinic_id, true);
+      await updatePatientAppointmentCount(data.tenant_id, data.patient_id, true);
+      await updateDentistAppointmentCount(data.tenant_id,data.clinic_id, data.dentist_id, true);
     return appointmentId;
   } catch (error) {
     console.error("Failed to create appointment:", error);
