@@ -114,8 +114,23 @@ module.exports = {
     GET_APPOINTMENT_SUMMARY_PERIOD_DENTIST:
     "/getallappointments/dentistperiodsummary/:tenant_id/:clinic_id/:dentist_id",
 
-    GET_APPOINTMENT_SUMMARY_PERIOD_PATIENT:
-    "/getallpatients/patientperiodsummary/:tenant_id/:clinic_id/:dentist_id",
+    GET_PATIENT_SUMMARY_DENTIST:
+    "/getallpatients/patientsummarydentist/:tenant_id/:clinic_id/:dentist_id",
+
+    GET_PATIENT_SUMMARY_CLINIC:
+    "/getallpatients/patientsummaryclinic/:tenant_id/:clinic_id",
+
+    GET_NEW_PATIENT_SUMMARY_CLINIC:
+    "/getallpatients/newpatientsummaryclinic/:tenant_id/:clinic_id",
+
+    GET_NEW_PATIENT_SUMMARY_DENTIST:
+    "/getallpatients/newpatientsummarydentist/:tenant_id/:clinic_id/:dentist_id",
+
+    GET_AGE_GENDER_SUMMARY_DENTIST:
+    "/getallpatients/agegendersummarydentist/:tenant_id/:clinic_id/:dentist_id",
+
+    GET_AGE_GENDER_SUMMARY_CLINIC:
+    "/getallpatients/agegendersummaryclinic/:tenant_id/:clinic_id",
 };
 
 // GET /api/tenant?page=2&limit=10

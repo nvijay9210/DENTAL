@@ -37,15 +37,104 @@ exports.getAllPatientsByTenantId = async (req, res, next) => {
   }
 };
 
-exports.getPeriodSummaryByPatient = async (req, res, next) => {
+// getTopPatientsByAppointmentPeriod
+// exports.getPeriodSummaryByPatient = async (req, res, next) => {
+//   const { tenant_id,clinic_id,dentist_id } = req.params;
+//   // const {period} = req.query
+//   await checkIfIdExists('tenant','tenant_id',tenant_id)
+//   await checkIfIdExists('clinic','clinic_id',clinic_id)
+//   await checkIfIdExists('dentist','dentist_id',dentist_id)
+//   try {
+//     const patients = await patientService.getPeriodSummaryByPatient(
+//       tenant_id,clinic_id
+//     );
+//     res.status(200).json(patients);
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
+exports.getMostVisitedPatientsByDentistPeriods = async (req, res, next) => {
   const { tenant_id,clinic_id,dentist_id } = req.params;
-  const {period} = req.query
+  // const {period} = req.query
   await checkIfIdExists('tenant','tenant_id',tenant_id)
   await checkIfIdExists('clinic','clinic_id',clinic_id)
   await checkIfIdExists('dentist','dentist_id',dentist_id)
   try {
-    const patients = await patientService.getPeriodSummaryByPatient(
-      tenant_id,clinic_id,dentist_id,period
+    const patients = await patientService.getMostVisitedPatientsByDentistPeriods(
+      tenant_id,dentist_id,clinic_id
+    );
+    res.status(200).json(patients);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getMostVisitedPatientsByClinicPeriods = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  try {
+    const patients = await patientService.getMostVisitedPatientsByClinicPeriods(
+      tenant_id,clinic_id
+    );
+    res.status(200).json(patients);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getNewPatientsByClinicPeriods = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  try {
+    const patients = await patientService.getNewPatientsTrends(
+      tenant_id,clinic_id
+    );
+    res.status(200).json(patients);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getNewPatientsTrendsByDentistAndClinic = async (req, res, next) => {
+  const { tenant_id,clinic_id,dentist_id } = req.params;
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  try {
+    const patients = await patientService.getNewPatientsTrendsByDentistAndClinic(
+      tenant_id,clinic_id,dentist_id
+    );
+    res.status(200).json(patients);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAgeGenderByDentist = async (req, res, next) => {
+  const { tenant_id,clinic_id,dentist_id } = req.params;
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  try {
+    const patients = await patientService.getAgeGenderByDentist(
+      tenant_id,clinic_id,dentist_id
+    );
+    res.status(200).json(patients);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAgeGenderByClinic = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  try {
+    const patients = await patientService.getAgeGenderByClinic(
+      tenant_id,clinic_id
     );
     res.status(200).json(patients);
   } catch (err) {

@@ -12,7 +12,7 @@ const createTableQuery = {
   appointment_type enum('IP','TC') NOT NULL DEFAULT 'TC',
   consultation_fee decimal(10,2) DEFAULT NULL,
   discount_applied decimal(10,2) NOT NULL DEFAULT 0.00,
-  payment_status enum('P','UP','PD') NOT NULL DEFAULT 'P',
+  payment_status varchar(100) NOT NULL,
   mode_of_payment varchar(100) NOT NULL,
   visit_reason text DEFAULT NULL,
   follow_up_needed tinyint(1) NOT NULL DEFAULT 0,

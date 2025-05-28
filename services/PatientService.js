@@ -1,5 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const moment = require('moment');
+const pool = require("../config/db");
 const patientModel = require("../models/PatientModel");
 const {
   redisClient,
@@ -122,185 +123,606 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
   }
 };
 
-const getPeriodSummaryByPatient = async (tenantId, clinicId, dentistId) => {
-  try {
-    const rows = await patientModel.getPeriodSummaryByPatient(tenantId, clinicId, dentistId);
-    const now = moment().utc();
-    const result = {};
-    const topN = 5;
-
-    // --- Weekly Data for Current Month (1w-5w) ---
-    let cumulativeWeekly = 0;
-    const weeksInMonth = Math.ceil(now.daysInMonth() / 7);
-    for (let w = 1; w <= weeksInMonth; w++) {
-      const filtered = rows.filter(row => {
-        const created = moment(row.created_time).utc();
-        return (
-          created.year() === now.year() &&
-          created.month() === now.month() &&
-          Math.ceil(created.date() / 7) === w
-        );
-      });
-
-      const nameCount = {};
-      for (const row of filtered) {
-        nameCount[row.name] = (nameCount[row.name] || 0) + 1;
-      }
-      const sorted = Object.entries(nameCount).sort((a, b) => b[1] - a[1]);
-      const labels = sorted.slice(0, topN).map(([name]) => name);
-      const data = sorted.slice(0, topN).map(([, count]) => count);
-
-      const thisWeekTotal = data.reduce((a, b) => a + b, 0);
-      cumulativeWeekly += thisWeekTotal;
-
-      result[`${w}w`] = {
-        labels,
-        datasets: [{ data }],
-        cumulative: cumulativeWeekly
-      };
-    }
-
-    // --- Monthly Data for Past 12 Months (1m-12m) ---
-    let cumulativeMonthly = 0;
-    for (let m = 1; m <= 12; m++) {
-      const periodStart = now.clone().startOf('month').subtract(m - 1, 'months');
-      const periodEnd = periodStart.clone().endOf('month');
-
-      const filtered = rows.filter(row => {
-        const created = moment(row.created_time).utc();
-        return created.isBetween(periodStart, periodEnd, null, '[]');
-      });
-
-      const nameCount = {};
-      for (const row of filtered) {
-        nameCount[row.name] = (nameCount[row.name] || 0) + 1;
-      }
-      const sorted = Object.entries(nameCount).sort((a, b) => b[1] - a[1]);
-      const labels = sorted.slice(0, topN).map(([name]) => name);
-      const data = sorted.slice(0, topN).map(([, count]) => count);
-
-      const thisMonthTotal = data.reduce((a, b) => a + b, 0);
-      cumulativeMonthly += thisMonthTotal;
-
-      result[`${m}m`] = {
-        labels,
-        datasets: [{ data }],
-        cumulative: cumulativeMonthly
-      };
-    }
-
-    // --- Yearly Data for Past 4 Years (1y-4y) ---
-    let cumulativeYearly = 0;
-    for (let y = 1; y <= 4; y++) {
-      const periodStart = now.clone().startOf('year').subtract(y - 1, 'years');
-      const periodEnd = periodStart.clone().endOf('year');
-
-      const filtered = rows.filter(row => {
-        const created = moment(row.created_time).utc();
-        return created.isBetween(periodStart, periodEnd, null, '[]');
-      });
-
-      const nameCount = {};
-      for (const row of filtered) {
-        nameCount[row.name] = (nameCount[row.name] || 0) + 1;
-      }
-      const sorted = Object.entries(nameCount).sort((a, b) => b[1] - a[1]);
-      const labels = sorted.slice(0, topN).map(([name]) => name);
-      const data = sorted.slice(0, topN).map(([, count]) => count);
-
-      const thisYearTotal = data.reduce((a, b) => a + b, 0);
-      cumulativeYearly += thisYearTotal;
-
-      result[`${y}y`] = {
-        labels,
-        datasets: [{ data }],
-        cumulative: cumulativeYearly
-      };
-    }
-
-    return result;
-  } catch (error) {
-    console.error("Error checking patient existence:", error);
-    throw new Error("Database Query Error");
+const getMostVisitedPatientsByDentistPeriods = async (tenantId, dentistId, clinicId = null, topN = 5) => {
+  // Fetch all appointments for the dentist (and optionally clinic)
+  let query = `
+    SELECT
+      a.patient_id,
+      CONCAT(p.first_name, ' ', p.last_name) AS name,
+      a.appointment_date
+    FROM
+      appointment a
+    JOIN
+      patient p ON a.patient_id = p.patient_id
+    WHERE
+      a.tenant_id = ?
+      AND a.dentist_id = ?
+  `;
+  const params = [tenantId, dentistId];
+  if (clinicId) {
+    query += ' AND a.clinic_id = ?';
+    params.push(clinicId);
   }
+  const conn = await pool.getConnection();
+  let rows;
+  try {
+    [rows] = await conn.query(query, params);
+  } finally {
+    conn.release();
+  }
+
+  console.log(rows)
+
+  const now = moment().utc();
+  const result = {};
+
+  // --- Weekly Data for Current Month (1w-5w) ---
+  const weeksInMonth = Math.ceil(now.daysInMonth() / 7);
+  for (let w = 1; w <= weeksInMonth; w++) {
+    const weekStart = now.clone().startOf('month').add((w - 1) * 7, 'days');
+    let weekEnd = weekStart.clone().add(6, 'days').endOf('day');
+    const monthEnd = now.clone().endOf('month');
+    if (weekEnd.isAfter(monthEnd)) weekEnd = monthEnd;
+
+    const filtered = rows.filter(row => {
+      const apptDate = moment(row.appointment_date).utc();
+      return apptDate.isBetween(weekStart, weekEnd, null, '[]');
+    });
+
+    const nameCount = {};
+    for (const row of filtered) {
+      nameCount[row.name] = (nameCount[row.name] || 0) + 1;
+    }
+    const sorted = Object.entries(nameCount).sort((a, b) => b[1] - a[1]);
+    const labels = sorted.slice(0, topN).map(([name]) => name);
+    const data = sorted.slice(0, topN).map(([, count]) => count);
+
+    result[`${w}w`] = {
+      labels,
+      datasets: [{ data }]
+    };
+  }
+
+  // --- Monthly Data for Past 12 Months (1m = current, 12m = 11 months ago) ---
+  for (let m = 1; m <= 12; m++) {
+    const periodStart = now.clone().startOf('month').subtract(m - 1, 'months');
+    const periodEnd = periodStart.clone().endOf('month');
+
+    const filtered = rows.filter(row => {
+      const apptDate = moment(row.appointment_date).utc();
+      return apptDate.isBetween(periodStart, periodEnd, null, '[]');
+    });
+
+    const nameCount = {};
+    for (const row of filtered) {
+      nameCount[row.name] = (nameCount[row.name] || 0) + 1;
+    }
+    const sorted = Object.entries(nameCount).sort((a, b) => b[1] - a[1]);
+    const labels = sorted.slice(0, topN).map(([name]) => name);
+    const data = sorted.slice(0, topN).map(([, count]) => count);
+
+    result[`${m}m`] = {
+      labels,
+      datasets: [{ data }]
+    };
+  }
+
+  // --- Yearly Data for Past 4 Years (1y = current, 4y = 3 years ago) ---
+  for (let y = 1; y <= 4; y++) {
+    const periodStart = now.clone().startOf('year').subtract(y - 1, 'years');
+    const periodEnd = periodStart.clone().endOf('year');
+
+    const filtered = rows.filter(row => {
+      const apptDate = moment(row.appointment_date).utc();
+      return apptDate.isBetween(periodStart, periodEnd, null, '[]');
+    });
+
+    const nameCount = {};
+    for (const row of filtered) {
+      nameCount[row.name] = (nameCount[row.name] || 0) + 1;
+    }
+    const sorted = Object.entries(nameCount).sort((a, b) => b[1] - a[1]);
+    const labels = sorted.slice(0, topN).map(([name]) => name);
+    const data = sorted.slice(0, topN).map(([, count]) => count);
+
+    result[`${y}y`] = {
+      labels,
+      datasets: [{ data }]
+    };
+  }
+
+  return result;
+};
+
+const getMostVisitedPatientsByClinicPeriods = async (tenantId, clinicId, topN = 5) => {
+  // Fetch all appointments for the clinic
+  const query = `
+    SELECT
+      a.patient_id,
+      CONCAT(p.first_name, ' ', p.last_name) AS name,
+      a.appointment_date
+    FROM
+      appointment a
+    JOIN
+      patient p ON a.patient_id = p.patient_id
+    WHERE
+      a.tenant_id = ?
+      AND a.clinic_id = ?
+  `;
+  const conn = await pool.getConnection();
+  let rows;
+  try {
+    [rows] = await conn.query(query, [tenantId, clinicId]);
+  } finally {
+    conn.release();
+  }
+
+  console.log(rows)
+
+  const now = moment().utc();
+  const result = {};
+
+  // --- Weekly Data for Current Month (1w-5w) ---
+  const weeksInMonth = Math.ceil(now.daysInMonth() / 7);
+  for (let w = 1; w <= weeksInMonth; w++) {
+    const weekStart = now.clone().startOf('month').add((w - 1) * 7, 'days');
+    let weekEnd = weekStart.clone().add(6, 'days').endOf('day');
+    const monthEnd = now.clone().endOf('month');
+    if (weekEnd.isAfter(monthEnd)) weekEnd = monthEnd;
+
+    const filtered = rows.filter(row => {
+      const apptDate = moment(row.appointment_date).utc();
+      return apptDate.isBetween(weekStart, weekEnd, null, '[]');
+    });
+
+    const nameCount = {};
+    for (const row of filtered) {
+      nameCount[row.name] = (nameCount[row.name] || 0) + 1;
+    }
+    const sorted = Object.entries(nameCount).sort((a, b) => b[1] - a[1]);
+    const labels = sorted.slice(0, topN).map(([name]) => name);
+    const data = sorted.slice(0, topN).map(([, count]) => count);
+
+    result[`${w}w`] = {
+      labels,
+      datasets: [{ data }]
+    };
+  }
+
+  // --- Monthly Data for Past 12 Months (1m = current, 12m = 11 months ago) ---
+  for (let m = 1; m <= 12; m++) {
+    const periodStart = now.clone().startOf('month').subtract(m - 1, 'months');
+    const periodEnd = periodStart.clone().endOf('month');
+
+    const filtered = rows.filter(row => {
+      const apptDate = moment(row.appointment_date).utc();
+      return apptDate.isBetween(periodStart, periodEnd, null, '[]');
+    });
+
+    const nameCount = {};
+    for (const row of filtered) {
+      nameCount[row.name] = (nameCount[row.name] || 0) + 1;
+    }
+    const sorted = Object.entries(nameCount).sort((a, b) => b[1] - a[1]);
+    const labels = sorted.slice(0, topN).map(([name]) => name);
+    const data = sorted.slice(0, topN).map(([, count]) => count);
+
+    result[`${m}m`] = {
+      labels,
+      datasets: [{ data }]
+    };
+  }
+
+  // --- Yearly Data for Past 4 Years (1y = current, 4y = 3 years ago) ---
+  for (let y = 1; y <= 4; y++) {
+    const periodStart = now.clone().startOf('year').subtract(y - 1, 'years');
+    const periodEnd = periodStart.clone().endOf('year');
+
+    const filtered = rows.filter(row => {
+      const apptDate = moment(row.appointment_date).utc();
+      return apptDate.isBetween(periodStart, periodEnd, null, '[]');
+    });
+
+    const nameCount = {};
+    for (const row of filtered) {
+      nameCount[row.name] = (nameCount[row.name] || 0) + 1;
+    }
+    const sorted = Object.entries(nameCount).sort((a, b) => b[1] - a[1]);
+    const labels = sorted.slice(0, topN).map(([name]) => name);
+    const data = sorted.slice(0, topN).map(([, count]) => count);
+
+    result[`${y}y`] = {
+      labels,
+      datasets: [{ data }]
+    };
+  }
+
+  return result;
+};
+
+const getNewPatientsTrends = async (tenantId, clinicId) => {
+  const query = `
+    SELECT
+      patient_id,
+      created_time
+    FROM
+      patient
+    WHERE
+      tenant_id = ?
+      AND EXISTS (
+        SELECT 1 FROM appointment a
+        WHERE a.patient_id = patient.patient_id AND a.clinic_id = ?
+      )
+  `;
+  const conn = await pool.getConnection();
+  let rows;
+  try {
+    [rows] = await conn.query(query, [tenantId, clinicId]);
+  } finally {
+    conn.release();
+  }
+
+  const now = moment().utc();
+  const result = {};
+
+  // --- 1w: Current week, daily counts (Mon-Sun) ---
+  {
+    const weekStart = now.clone().startOf('isoWeek');
+    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const data = [];
+    for (let d = 0; d < 7; d++) {
+      const dayStart = weekStart.clone().add(d, 'days').startOf('day');
+      const dayEnd = dayStart.clone().endOf('day');
+      const count = rows.filter(row => {
+        const created = moment(row.created_time).utc();
+        return created.isBetween(dayStart, dayEnd, null, '[]');
+      }).length;
+      data.push(count);
+    }
+    result['1w'] = { labels, datasets: [{ data }] };
+  }
+
+  // --- 4w: Last 4 weeks (labels: "1w", "2w", "3w", "4w") ---
+  {
+    const labels = [];
+    const data = [];
+    for (let w = 4; w >= 1; w--) {
+      const weekStart = now.clone().startOf('isoWeek').subtract(w - 1, 'weeks');
+      const weekEnd = weekStart.clone().endOf('isoWeek');
+      const count = rows.filter(row => {
+        const created = moment(row.created_time).utc();
+        return created.isBetween(weekStart, weekEnd, null, '[]');
+      }).length;
+      labels.push(`${5 - w}w`);
+      data.push(count);
+    }
+    result['4w'] = { labels, datasets: [{ data }] };
+  }
+
+  // --- 4m: Last 4 months (labels: month names) ---
+  {
+    const labels = [];
+    const data = [];
+    for (let m = 4; m >= 1; m--) {
+      const monthStart = now.clone().startOf('month').subtract(m - 1, 'months');
+      const monthEnd = monthStart.clone().endOf('month');
+      const count = rows.filter(row => {
+        const created = moment(row.created_time).utc();
+        return created.isBetween(monthStart, monthEnd, null, '[]');
+      }).length;
+      labels.push(monthStart.format('MMM'));
+      data.push(count);
+    }
+    result['4m'] = { labels, datasets: [{ data }] };
+  }
+
+  // --- 12m: Last 12 months (labels: month names) ---
+  {
+    const labels = [];
+    const data = [];
+    for (let m = 12; m >= 1; m--) {
+      const monthStart = now.clone().startOf('month').subtract(m - 1, 'months');
+      const monthEnd = monthStart.clone().endOf('month');
+      const count = rows.filter(row => {
+        const created = moment(row.created_time).utc();
+        return created.isBetween(monthStart, monthEnd, null, '[]');
+      }).length;
+      labels.push(monthStart.format('MMM'));
+      data.push(count);
+    }
+    result['12m'] = { labels, datasets: [{ data }] };
+  }
+
+  // --- 4y: Last 4 years (labels: years) ---
+  {
+    const labels = [];
+    const data = [];
+    for (let y = 4; y >= 1; y--) {
+      const yearStart = now.clone().startOf('year').subtract(y - 1, 'years');
+      const yearEnd = yearStart.clone().endOf('year');
+      const count = rows.filter(row => {
+        const created = moment(row.created_time).utc();
+        return created.isBetween(yearStart, yearEnd, null, '[]');
+      }).length;
+      labels.push(yearStart.format('YYYY'));
+      data.push(count);
+    }
+    result['4y'] = { labels, datasets: [{ data }] };
+  }
+
+  return result;
+};
+
+const getNewPatientsTrendsByDentistAndClinic = async (tenantId, clinicId, dentistId) => {
+  // Fetch all patients who have their FIRST appointment with this dentist in this clinic
+  const query = `
+    SELECT
+      p.patient_id,
+      MIN(a.appointment_date) AS first_appt_date
+    FROM
+      appointment a
+    JOIN
+      patient p ON a.patient_id = p.patient_id
+    WHERE
+      a.tenant_id = ?
+      AND a.clinic_id = ?
+      AND a.dentist_id = ?
+    GROUP BY
+      p.patient_id
+  `;
+  const conn = await pool.getConnection();
+  let rows;
+  try {
+    [rows] = await conn.query(query, [tenantId, clinicId, dentistId]);
+  } finally {
+    conn.release();
+  }
+
+  const now = moment().utc();
+  const result = {};
+
+  // --- 1w: Current week, daily counts (Mon-Sun) ---
+  {
+    const weekStart = now.clone().startOf('isoWeek');
+    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const data = [];
+    for (let d = 0; d < 7; d++) {
+      const dayStart = weekStart.clone().add(d, 'days').startOf('day');
+      const dayEnd = dayStart.clone().endOf('day');
+      const count = rows.filter(row => {
+        const created = moment(row.first_appt_date).utc();
+        return created.isBetween(dayStart, dayEnd, null, '[]');
+      }).length;
+      data.push(count);
+    }
+    result['1w'] = { labels, datasets: [{ data }] };
+  }
+
+  // --- 4w: Last 4 weeks (labels: "1w", "2w", "3w", "4w") ---
+  {
+    const labels = [];
+    const data = [];
+    for (let w = 4; w >= 1; w--) {
+      const weekStart = now.clone().startOf('isoWeek').subtract(w - 1, 'weeks');
+      const weekEnd = weekStart.clone().endOf('isoWeek');
+      const count = rows.filter(row => {
+        const created = moment(row.first_appt_date).utc();
+        return created.isBetween(weekStart, weekEnd, null, '[]');
+      }).length;
+      labels.push(`${5 - w}w`);
+      data.push(count);
+    }
+    result['4w'] = { labels, datasets: [{ data }] };
+  }
+
+  // --- 4m: Last 4 months (labels: month names) ---
+  {
+    const labels = [];
+    const data = [];
+    for (let m = 4; m >= 1; m--) {
+      const monthStart = now.clone().startOf('month').subtract(m - 1, 'months');
+      const monthEnd = monthStart.clone().endOf('month');
+      const count = rows.filter(row => {
+        const created = moment(row.first_appt_date).utc();
+        return created.isBetween(monthStart, monthEnd, null, '[]');
+      }).length;
+      labels.push(monthStart.format('MMM'));
+      data.push(count);
+    }
+    result['4m'] = { labels, datasets: [{ data }] };
+  }
+
+  // --- 12m: Last 12 months (labels: month names) ---
+  {
+    const labels = [];
+    const data = [];
+    for (let m = 12; m >= 1; m--) {
+      const monthStart = now.clone().startOf('month').subtract(m - 1, 'months');
+      const monthEnd = monthStart.clone().endOf('month');
+      const count = rows.filter(row => {
+        const created = moment(row.first_appt_date).utc();
+        return created.isBetween(monthStart, monthEnd, null, '[]');
+      }).length;
+      labels.push(monthStart.format('MMM'));
+      data.push(count);
+    }
+    result['12m'] = { labels, datasets: [{ data }] };
+  }
+
+  // --- 4y: Last 4 years (labels: years) ---
+  {
+    const labels = [];
+    const data = [];
+    for (let y = 4; y >= 1; y--) {
+      const yearStart = now.clone().startOf('year').subtract(y - 1, 'years');
+      const yearEnd = yearStart.clone().endOf('year');
+      const count = rows.filter(row => {
+        const created = moment(row.first_appt_date).utc();
+        return created.isBetween(yearStart, yearEnd, null, '[]');
+      }).length;
+      labels.push(yearStart.format('YYYY'));
+      data.push(count);
+    }
+    result['4y'] = { labels, datasets: [{ data }] };
+  }
+
+  return result;
+};
+
+const getAgeGenderByDentist = async (tenantId, clinicId, dentistId) => {
+  const query = `
+    SELECT
+      p.date_of_birth,
+      p.gender
+    FROM
+      appointment a
+    JOIN
+      patient p ON a.patient_id = p.patient_id
+    WHERE
+      a.tenant_id = ?
+      AND a.clinic_id = ?
+      AND a.dentist_id = ?
+    GROUP BY
+      p.patient_id
+  `;
+  const conn = await pool.getConnection();
+  let patients;
+  try {
+    [patients] = await conn.query(query, [tenantId, clinicId, dentistId]);
+  } finally {
+    conn.release();
+  }
+
+  const ageGroups = [
+    { label: "2-12", min: 2, max: 12 },
+    { label: "13-19", min: 13, max: 19 },
+    { label: "20-35", min: 20, max: 35 },
+    { label: "35-50", min: 36, max: 50 },
+    { label: "50-70", min: 51, max: 70 }
+  ];
+
+  const maleCounts = Array(ageGroups.length).fill(0);
+  const femaleCounts = Array(ageGroups.length).fill(0);
+
+  // Fixed current date as per your requirement
+  const today = new Date(2025, 4, 28); // May is 4 (0-based in JS)
+
+  function getAge(dateString) {
+    const birth = new Date(dateString);
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
+  patients.forEach(patient => {
+    if (!patient.date_of_birth || !patient.gender) return;
+    const age = getAge(patient.date_of_birth);
+    const groupIdx = ageGroups.findIndex(g => age >= g.min && age <= g.max);
+    if (groupIdx === -1) return;
+
+    const gender = patient.gender.toLowerCase();
+    if (gender.startsWith("m")) {
+      maleCounts[groupIdx]++;
+    } else if (gender.startsWith("f")) {
+      femaleCounts[groupIdx]++;
+    }
+  });
+
+  return {
+    labels: ageGroups.map(g => g.label),
+    datasets: [
+      {
+        label: "Male",
+        data: maleCounts
+      },
+      {
+        label: "Female",
+        data: femaleCounts
+      }
+    ]
+  };
+};
+
+const getAgeGenderByClinic = async (tenantId, clinicId) => {
+  const query = `
+    SELECT
+      p.date_of_birth,
+      p.gender
+    FROM
+      appointment a
+    JOIN
+      patient p ON a.patient_id = p.patient_id
+    WHERE
+      a.tenant_id = ?
+      AND a.clinic_id = ?
+    GROUP BY
+      p.patient_id
+  `;
+  const conn = await pool.getConnection();
+  let patients;
+  try {
+    [patients] = await conn.query(query, [tenantId, clinicId]);
+  } finally {
+    conn.release();
+  }
+
+  const ageGroups = [
+    { label: "2-12", min: 2, max: 12 },
+    { label: "13-19", min: 13, max: 19 },
+    { label: "20-35", min: 20, max: 35 },
+    { label: "35-50", min: 36, max: 50 },
+    { label: "50-70", min: 51, max: 70 }
+  ];
+
+  const maleCounts = Array(ageGroups.length).fill(0);
+  const femaleCounts = Array(ageGroups.length).fill(0);
+
+  // Use fixed current date as per your requirement
+  const today = new Date(2025, 4, 28); // May is 4 (0-based in JS)
+
+  function getAge(dateString) {
+    const birth = new Date(dateString);
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
+  patients.forEach(patient => {
+    if (!patient.date_of_birth || !patient.gender) return;
+    const age = getAge(patient.date_of_birth);
+    const groupIdx = ageGroups.findIndex(g => age >= g.min && age <= g.max);
+    if (groupIdx === -1) return;
+
+    const gender = patient.gender.toLowerCase();
+    if (gender.startsWith("m")) {
+      maleCounts[groupIdx]++;
+    } else if (gender.startsWith("f")) {
+      femaleCounts[groupIdx]++;
+    }
+  });
+
+  return {
+    labels: ageGroups.map(g => g.label),
+    datasets: [
+      {
+        label: "Male",
+        data: maleCounts
+      },
+      {
+        label: "Female",
+        data: femaleCounts
+      }
+    ]
+  };
 };
 
 
-
-
-
-
-
-// const getPeriodSummaryByPatient = async (tenantId, clinicId, dentistId, userInput) => {
-//   try {
-//     const rows = await patientModel.getPeriodSummaryByPatient(tenantId, clinicId, dentistId);
-
-//     // Check for week input (e.g., '1w', '2w')
-//     const weekMatch = /^(\d+)w$/i.exec(userInput);
-//     // Check for month range input (e.g., '2m' means current + next month)
-//     const monthMatch = /^(\d+)m$/i.exec(userInput);
-
-//     if (weekMatch) {
-//       // User wants a specific week of the current month
-//       const weekNumber = parseInt(weekMatch[1], 10);
-//       const currentMonth = moment().format("MMMM");
-
-//       let count = 0;
-//       for (const row of rows) {
-//         const created = moment(row.created_time);
-//         if (created.format("MMMM") === currentMonth && Math.ceil(created.date() / 7) === weekNumber) {
-//           count += 1;
-//         }
-//       }
-
-//       return [{
-//         period: 'weekly',
-//         month: currentMonth,
-//         week: `Week ${weekNumber}`,
-//         count,
-//       }];
-//     } else if (monthMatch) {
-//       // User wants a range: current month + (n-1) months
-//       const monthRange = parseInt(monthMatch[1], 10);
-//       const startMonth = moment().month(); // 0-indexed
-//       const results = [];
-
-//       for (let i = 0; i < monthRange; i++) {
-//         const monthIndex = (startMonth + i) % 12;
-//         const yearOffset = Math.floor((startMonth + i) / 12);
-//         const monthName = moment().month(monthIndex).format("MMMM");
-//         const year = moment().add(yearOffset, 'years').year();
-
-//         let count = 0;
-//         for (const row of rows) {
-//           const created = moment(row.created_time);
-//           if (created.month() === monthIndex && created.year() === year) {
-//             count += 1;
-//           }
-//         }
-
-//         results.push({
-//           period: 'monthly',
-//           month: monthName,
-//           year,
-//           count,
-//         });
-//       }
-
-//       return results;
-//     } else {
-//       throw new Error("Invalid input. Use '1w', '2w', ..., '2m', '3m', ...");
-//     }
-//   } catch (error) {
-//     console.error("Error fetching patient period summary:", error);
-//     throw error;
-//   }
-// };
-
-
-
-
-// Get single patient
 
 const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
   try {
@@ -406,5 +828,11 @@ module.exports = {
   updatePatient,
   deletePatientByTenantIdAndPatientId,
   updateToothDetails,
-  getPeriodSummaryByPatient
+  // getTopPatientsByAppointmentPeriod,
+  getMostVisitedPatientsByDentistPeriods,
+  getMostVisitedPatientsByClinicPeriods,
+  getNewPatientsTrends,
+  getNewPatientsTrendsByDentistAndClinic,
+  getAgeGenderByDentist,
+  getAgeGenderByClinic
 };

@@ -130,7 +130,8 @@ const getPeriodSummaryByPatient = async (tenantId, clinicId, dentistId) => {
     WHERE 
       app.tenant_id = ? AND
       app.clinic_id = ? AND
-      app.dentist_id = ?
+      app.dentist_id = ? AND 
+      p.appointment_count>0
     GROUP BY 
       p.patient_id, p.first_name, p.last_name, p.created_time
   `;
@@ -148,6 +149,33 @@ const getPeriodSummaryByPatient = async (tenantId, clinicId, dentistId) => {
   }
 };
 
+const getAppointmentsForAnalytics = async (tenantId, clinicId, dentistId) => {
+  const query = `
+    SELECT
+      a.appointment_id,
+      a.patient_id,
+      CONCAT(p.first_name, ' ', p.last_name) AS name,
+      a.appointment_date,
+      a.created_time
+    FROM
+      appointment a
+    JOIN
+      patient p ON a.patient_id = p.patient_id
+    WHERE
+      a.tenant_id = ?
+      AND a.clinic_id = ?
+      AND a.dentist_id = ?
+  `;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, clinicId, dentistId]);
+    return rows;
+  } finally {
+    conn.release();
+  }
+};
+
+
 
 module.exports = {
   createPatient,
@@ -158,5 +186,6 @@ module.exports = {
   checkPatientExistsByTenantIdAndPatientId,
   updateToothDetails,
   getPeriodSummaryByPatient,
-  updatePatientAppointmentCount
+  updatePatientAppointmentCount,
+  getAppointmentsForAnalytics
 };
