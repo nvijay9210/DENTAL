@@ -35,6 +35,35 @@ exports.getAllClinicByTenantId = async (req, res, next) => {
   }
 };
 
+exports.getFinanceSummary = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  try {
+    const clinics = await clinicService.getFinanceSummary(
+      tenant_id, clinic_id
+    );
+    res.status(200).json(clinics);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getFinanceSummarybyDentist = async (req, res, next) => {
+  const { tenant_id,clinic_id,dentist_id } = req.params;
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  try {
+    const clinics = await clinicService.getFinanceSummarybyDentist(
+      tenant_id, clinic_id
+    );
+    res.status(200).json(clinics);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getClinicByTenantIdAndClinicId = async (req, res, next) => {
   const { clinic_id, tenant_id } = req.params;
   try {

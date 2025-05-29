@@ -2,7 +2,9 @@ const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
 const appointmentService = require("../services/AppointmentService");
 const appointmentValidation = require("../validations/AppointmentValidation");
-const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
+const {
+  validateTenantIdAndPageAndLimit,
+} = require("../validations/CommonValidations");
 
 /**
  * Create a new appointment
@@ -126,7 +128,7 @@ exports.updateAppointment = async (req, res, next) => {
   }
 };
 exports.updateAppoinmentStatusCancelled = async (req, res, next) => {
-  const { appointment_id, tenant_id,clinic_id } = req.params;
+  const { appointment_id, tenant_id, clinic_id } = req.params;
   try {
     // Validate if appointment exists before update
     const appointment1 = await checkIfExists(
@@ -144,7 +146,9 @@ exports.updateAppoinmentStatusCancelled = async (req, res, next) => {
       tenant_id,
       clinic_id
     );
-    res.status(200).json({ message: "Appointment status updated successfully" });
+    res
+      .status(200)
+      .json({ message: "Appointment status updated successfully" });
   } catch (err) {
     next(err);
   }
@@ -186,8 +190,8 @@ exports.getAppointmentsWithDetails = async (req, res, next) => {
   const { page, limit } = req.query;
   try {
     await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
-    await checkIfIdExists('clinic','clinic_id',clinic_id)
-    await checkIfIdExists('dentist','dentist_id',dentist_id)
+    await checkIfIdExists("clinic", "clinic_id", clinic_id);
+    await checkIfIdExists("dentist", "dentist_id", dentist_id);
     const appointments = await appointmentService.getAppointmentsWithDetails(
       tenant_id,
       clinic_id,
@@ -203,9 +207,9 @@ exports.getAppointmentsWithDetails = async (req, res, next) => {
 
 exports.getAppointmentMonthlySummary = async (req, res, next) => {
   const { tenant_id, clinic_id, dentist_id } = req.params;
-  await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('clinic','clinic_id',clinic_id)
-  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
+  await checkIfIdExists("dentist", "dentist_id", dentist_id);
   try {
     const appointments = await appointmentService.getAppointmentMonthlySummary(
       tenant_id,
@@ -220,35 +224,75 @@ exports.getAppointmentMonthlySummary = async (req, res, next) => {
 
 exports.getAppointmentSummary = async (req, res, next) => {
   const { tenant_id, clinic_id } = req.params;
-  const{period}=req.query
-  await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('clinic','clinic_id',clinic_id)
-  if(period!=='monthly' && period!=='yearly' && period!=='weekly') throw new CustomError('Period mustbe a weekly,monthly or yearly',400)
+  // const{period}=req.query
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
+  // if(period!=='monthly' && period!=='yearly' && period!=='weekly') throw new CustomError('Period mustbe a weekly,monthly or yearly',400)
   try {
     const appointments = await appointmentService.getAppointmentSummary(
       tenant_id,
-      clinic_id,
-      period
+      clinic_id
+      // period
     );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
   }
 };
+
 exports.getAppointmentSummaryByDentist = async (req, res, next) => {
-  const { tenant_id, clinic_id,dentist_id } = req.params;
-  const{period}=req.query
-  await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('clinic','clinic_id',clinic_id)
-  await checkIfIdExists('dentist','dentist_id',dentist_id)
-  if(period!=='monthly' && period!=='yearly') throw new CustomError('Period mustbe a monthly or yearly',400)
+  const { tenant_id, clinic_id, dentist_id } = req.params;
+  const { period } = req.query;
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
+  await checkIfIdExists("dentist", "dentist_id", dentist_id);
+  if (period !== "monthly" && period !== "yearly")
+    throw new CustomError("Period mustbe a monthly or yearly", 400);
   try {
-    const appointments = await appointmentService.getAppointmentSummaryByDentist(
-      tenant_id,
-      clinic_id,
-      dentist_id,
-      period
-    );
+    const appointments =
+      await appointmentService.getAppointmentSummaryByDentist(
+        tenant_id,
+        clinic_id,
+        dentist_id,
+        period
+      );
+    res.status(200).json(appointments);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAppointmentSummaryChartByClinic = async (req, res, next) => {
+  const { tenant_id, clinic_id } = req.params;
+  // const{period}=req.query
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
+  // if(period!=='monthly' && period!=='yearly' && period!=='weekly') throw new CustomError('Period mustbe a weekly,monthly or yearly',400)
+  try {
+    const appointments =
+      await appointmentService.getAppointmentSummaryChartByClinic(
+        tenant_id,
+        clinic_id
+      );
+    res.status(200).json(appointments);
+  } catch (err) {
+    next(err);
+  }
+};
+exports.getAppointmentSummaryChartByDentist = async (req, res, next) => {
+  const { tenant_id, clinic_id, dentist_id } = req.params;
+  // const{period}=req.query
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
+  await checkIfIdExists("dentist", "dentist_id", dentist_id);
+
+  try {
+    const appointments =
+      await appointmentService.getAppointmentSummaryChartByDentist(
+        tenant_id,
+        clinic_id,
+        dentist_id
+      );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
@@ -264,8 +308,8 @@ exports.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
   const { limit, page } = req.query;
 
   await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
-    await checkIfIdExists('clinic','clinic_id',clinic_id)
-    await checkIfIdExists('patient','patient_id',patient_id)
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
+  await checkIfIdExists("patient", "patient_id", patient_id);
 
   try {
     const appointments =

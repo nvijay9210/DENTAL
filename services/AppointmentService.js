@@ -1,6 +1,7 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const appointmentModel = require("../models/AppointmentModel");
 const pool = require("../config/db");
+const dayjs = require("dayjs");
 const {
   getOrSetCache,
   invalidateCacheByPattern,
@@ -300,101 +301,77 @@ const getAppointmentMonthlySummary = async (
   }
 };
 
-const getAppointmentSummary = async (
-  tenantId,
-  clinic_id,
-  period
-) => {
-  try {
-    const cacheKey = `getAppointmentSummary:${tenantId}/${clinic_id}`;
-    const appointment = await getOrSetCache(cacheKey, async () => {
-      const result = await appointmentModel.getAppointmentSummary(
-        tenantId,
-        clinic_id,
-        period
-      );
-      return result; // 🔁 Important: return from cache function
-    });
+// const getAppointmentSummaryByDentist = async (
+//   tenant_id,
+//   clinic_id,
+//   dentist_id,
+//   period = 'monthly'
+// ) => {
+//   const conn = await pool.getConnection();
 
-    return appointment;
-  } catch (error) {
-    console.error("Database error while fetching appointment:", error);
-    throw new CustomError("Failed to fetch appointment", 404);
-  }
-};
+//   try {
+//     const rows = await appointmentModel.getAllAppointmentsByTenantIdAndClinicIdAndDentistId(tenant_id,
+//       clinic_id,
+//       dentist_id)
 
-const getAppointmentSummaryByDentist = async (
-  tenant_id,
-  clinic_id,
-  dentist_id,
-  period = 'monthly'
-) => {
-  const conn = await pool.getConnection();
+//     const summary = {};
 
-  try {
-    const rows = await appointmentModel.getAllAppointmentsByTenantIdAndClinicIdAndDentistId(tenant_id,
-      clinic_id,
-      dentist_id)
+//     if (period.toLowerCase() === 'monthly') {
+//       // Group by year and month
+//       for (const row of rows) {
+//         const date = moment(row.appointment_date);
+//         const year = date.year();
+//         const month = date.format('MMMM');
 
-    const summary = {};
+//         if (!summary[year]) summary[year] = {};
 
-    if (period.toLowerCase() === 'monthly') {
-      // Group by year and month
-      for (const row of rows) {
-        const date = moment(row.appointment_date);
-        const year = date.year();
-        const month = date.format('MMMM');
+//         if (!summary[year][month]) summary[year][month] = 1;
+//         else summary[year][month]++;
+//       }
 
-        if (!summary[year]) summary[year] = {};
+//       // Format output
+//       const formattedSummary = {};
+//       for (const [year, months] of Object.entries(summary)) {
+//         formattedSummary[year] = Object.entries(months).map(([month, count]) => ({
+//           month,
+//           count,
+//         }));
+//       }
 
-        if (!summary[year][month]) summary[year][month] = 1;
-        else summary[year][month]++;
-      }
+//       return {
+//         period: 'monthly',
+//         summary: formattedSummary,
+//       };
+//     }
 
-      // Format output
-      const formattedSummary = {};
-      for (const [year, months] of Object.entries(summary)) {
-        formattedSummary[year] = Object.entries(months).map(([month, count]) => ({
-          month,
-          count,
-        }));
-      }
+//     if (period.toLowerCase() === 'yearly') {
+//       // Group by year only
+//       for (const row of rows) {
+//         const year = moment(row.appointment_date).year();
+//         if (!summary[year]) summary[year] = 1;
+//         else summary[year]++;
+//       }
 
-      return {
-        period: 'monthly',
-        summary: formattedSummary,
-      };
-    }
+//       const formatted = Object.entries(summary).map(([year, count]) => ({
+//         year: parseInt(year),
+//         count,
+//       }));
 
-    if (period.toLowerCase() === 'yearly') {
-      // Group by year only
-      for (const row of rows) {
-        const year = moment(row.appointment_date).year();
-        if (!summary[year]) summary[year] = 1;
-        else summary[year]++;
-      }
+//       return {
+//         period: 'yearly',
+//         summary: { 'All Years': formatted },
+//       };
+//     }
 
-      const formatted = Object.entries(summary).map(([year, count]) => ({
-        year: parseInt(year),
-        count,
-      }));
+//     throw new Error("Unsupported period. Use 'monthly' or 'yearly'.");
 
-      return {
-        period: 'yearly',
-        summary: { 'All Years': formatted },
-      };
-    }
-
-    throw new Error("Unsupported period. Use 'monthly' or 'yearly'.");
-
-  } catch (error) {
-    console.error("Error fetching appointment summary:", error);
-    throw new Error("Failed to fetch appointment summary");
-  } finally {
-    conn.release();
-  }
-};
-
+//   } catch (error) {
+//     console.error("Error fetching appointment summary:", error);
+//     throw new Error("Failed to fetch appointment summary");
+//   } finally {
+//     conn.release();
+//   }
+// };
 
 const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
   tenantId,
@@ -425,6 +402,387 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
   }
 };
 
+const getAppointmentSummary = async (tenant_id, clinic_id) => {
+  const now = dayjs();
+  const summary = {};
+
+  const ranges = {
+    weeks: Array.from({ length: 4 }, (_, i) => ({
+      label: `${4 - i}w`, // Reverse order to have "4w", "3w", ... (optional)
+      from: now.subtract(4 - i, "week").startOf("week").toDate(),
+      to: now.subtract(3 - i, "week").endOf("week").toDate(),
+    })),
+
+    months: Array.from({ length: 12 }, (_, i) => ({
+      label: `${12 - i}m`,
+      from: now.subtract(12 - i, "month").startOf("month").toDate(),
+      to: now.subtract(11 - i, "month").endOf("month").toDate(),
+    })),
+
+    years: Array.from({ length: 4 }, (_, i) => ({
+      label: `${4 - i}y`,
+      from: now.subtract(4 - i, "year").startOf("year").toDate(),
+      to: now.subtract(3 - i, "year").endOf("year").toDate(),
+    })),
+  };
+
+  const fetchDataForRange = async (from, to) => {
+    const [rows] = await pool.query(
+      `SELECT status, COUNT(*) as count
+       FROM appointment
+       WHERE tenant_id = ? AND clinic_id = ? AND created_time BETWEEN ? AND ?
+       GROUP BY status`,
+      [tenant_id, clinic_id, from, to]
+    );
+
+    const result = {
+      total_appointments: 0,
+      completed_appointments: "0",
+      pending_appointments: "0",
+      cancelled_appointments: "0",
+    };
+
+    rows.forEach(row => {
+      result.total_appointments += row.count;
+      if (row.status === "CP") result.completed_appointments = row.count.toString();
+      else if (row.status === "SC") result.pending_appointments = row.count.toString();
+      else if (row.status === "CL") result.cancelled_appointments = row.count.toString();
+    });
+
+    return result;
+  };
+
+  // Instead of summary[periodType] = {}, just put directly at root
+  for (const items of Object.values(ranges)) {
+    for (const item of items) {
+      summary[item.label] = await fetchDataForRange(item.from, item.to);
+    }
+  }
+
+  return summary;
+};
+
+const getAppointmentSummaryByDentist = async (tenant_id, clinic_id,dentist_id) => {
+  const now = dayjs();
+  const summary = {};
+
+  const ranges = {
+    weeks: Array.from({ length: 4 }, (_, i) => ({
+      label: `${4 - i}w`, // Reverse order to have "4w", "3w", ... (optional)
+      from: now.subtract(4 - i, "week").startOf("week").toDate(),
+      to: now.subtract(3 - i, "week").endOf("week").toDate(),
+    })),
+
+    months: Array.from({ length: 12 }, (_, i) => ({
+      label: `${12 - i}m`,
+      from: now.subtract(12 - i, "month").startOf("month").toDate(),
+      to: now.subtract(11 - i, "month").endOf("month").toDate(),
+    })),
+
+    years: Array.from({ length: 4 }, (_, i) => ({
+      label: `${4 - i}y`,
+      from: now.subtract(4 - i, "year").startOf("year").toDate(),
+      to: now.subtract(3 - i, "year").endOf("year").toDate(),
+    })),
+  };
+
+  const fetchDataForRange = async (from, to) => {
+    const [rows] = await pool.query(
+      `SELECT status, COUNT(*) as count
+       FROM appointment
+       WHERE tenant_id = ? AND clinic_id = ? AND dentist_id=? AND created_time BETWEEN ? AND ?
+       GROUP BY status`,
+      [tenant_id, clinic_id,dentist_id, from, to]
+    );
+
+    const result = {
+      total_appointments: 0,
+      completed_appointments: "0",
+      pending_appointments: "0",
+      cancelled_appointments: "0",
+    };
+
+    rows.forEach(row => {
+      result.total_appointments += row.count;
+      if (row.status === "CP") result.completed_appointments = row.count.toString();
+      else if (row.status === "SC") result.pending_appointments = row.count.toString();
+      else if (row.status === "CL") result.cancelled_appointments = row.count.toString();
+    });
+
+    return result;
+  };
+
+  // Instead of summary[periodType] = {}, just put directly at root
+  for (const items of Object.values(ranges)) {
+    for (const item of items) {
+      summary[item.label] = await fetchDataForRange(item.from, item.to);
+    }
+  }
+
+  return summary;
+};
+
+const getAppointmentSummaryChartByClinic = async (tenant_id, clinic_id) => {
+  const fetchDataForRange = async (from, to) => {
+    const [rows] = await pool.query(
+      `SELECT status, COUNT(*) as count
+       FROM appointment
+       WHERE tenant_id = ? AND clinic_id = ? AND created_time BETWEEN ? AND ?
+       GROUP BY status`,
+      [tenant_id, clinic_id, from, to]
+    );
+    const result = { CP: 0, SC: 0, CL: 0 };
+    rows.forEach(row => {
+      result[row.status] = row.count;
+    });
+    return result;
+  };
+
+  const now = dayjs();
+
+  // === 1W: current week Mon-Sun ===
+  const weekStart = now.startOf("week"); // Mon
+  const weekLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const weekData = { CP: [], SC: [], CL: [] };
+  for (let i = 0; i < 7; i++) {
+    const dayStart = weekStart.add(i, "day").startOf("day").toDate();
+    const dayEnd = weekStart.add(i, "day").endOf("day").toDate();
+    const counts = await fetchDataForRange(dayStart, dayEnd);
+    weekData.CP.push(counts.CP || 0);
+    weekData.SC.push(counts.SC || 0);
+    weekData.CL.push(counts.CL || 0);
+  }
+
+  const maxWeeks = 4;
+const fourWeeks = [];
+const fourWeekLabels = [];
+
+// Build labels from oldest (4w) to latest (1w)
+for (let i = maxWeeks; i >= 1; i--) {
+  fourWeekLabels.push(`${i}w`);
+}
+
+// Fetch counts for each week (oldest to latest)
+for (let i = maxWeeks - 1; i >= 0; i--) {
+  const from = now.subtract(i, "week").startOf("week").toDate();
+  const to = now.subtract(i, "week").endOf("week").toDate();
+  const counts = await fetchDataForRange(from, to);
+  const total = (counts.CP || 0) + (counts.SC || 0) + (counts.CL || 0);
+  fourWeeks.push(total);
+}
+
+
+  // === Months 1m to 12m: month names and total counts ===
+  const maxMonths = 12;
+  const monthLabels = [];
+  const monthTotals = [];
+
+  for (let i = maxMonths - 1; i >= 0; i--) {
+    const from = now.subtract(i, "month").startOf("month").toDate();
+    const to = now.subtract(i, "month").endOf("month").toDate();
+    const counts = await fetchDataForRange(from, to);
+    const total = (counts.CP || 0) + (counts.SC || 0) + (counts.CL || 0);
+    monthTotals.push(total);
+    monthLabels.push(dayjs(from).format("MMM")); // "Jan", "Feb", etc.
+  }
+
+  // === Years for 1y to 4y: current year + previous years ===
+  const maxYears = 4;
+  const yearLabels = [];
+  const yearDataTotal = [];
+  for (let i = maxYears - 1; i >= 0; i--) {
+    const from = now.subtract(i, "year").startOf("year").toDate();
+    const to = now.subtract(i, "year").endOf("year").toDate();
+    yearLabels.push(dayjs(from).format("YYYY"));
+    const counts = await fetchDataForRange(from, to);
+    const total = (counts.CP || 0) + (counts.SC || 0) + (counts.CL || 0);
+    yearDataTotal.push(total);
+  }
+
+  // === Helper for monthly total charts ===
+  const buildMonthlyTotalChart = (count) => ({
+    labels: monthLabels.slice(-count),
+    datasets: [{ label: "Total", data: monthTotals.slice(-count) }],
+  });
+
+  // === Helper for yearly total charts ===
+  const buildChartTotalOnly = (labels, dataArr, count) => ({
+    labels: labels.slice(-count),
+    datasets: [{ label: "Total", data: dataArr.slice(-count) }],
+  });
+
+  return {
+    "1w": {
+      labels: weekLabels,
+      datasets: [
+        { label: "Completed", data: weekData.CP },
+        { label: "Scheduled", data: weekData.SC },
+        { label: "Cancelled", data: weekData.CL },
+      ],
+    },
+    "2w": {
+      labels: fourWeekLabels.slice(-2),
+      datasets: [{ label: "Total", data: fourWeeks.slice(-2) }],
+    },
+    "3w": {
+      labels: fourWeekLabels.slice(-3),
+      datasets: [{ label: "Total", data: fourWeeks.slice(-3) }],
+    },
+    "4w": {
+      labels: fourWeekLabels,
+      datasets: [{ label: "Total", data: fourWeeks }],
+    },
+    "1m": buildMonthlyTotalChart(1),
+    "2m": buildMonthlyTotalChart(2),
+    "3m": buildMonthlyTotalChart(3),
+    "4m": buildMonthlyTotalChart(4),
+    "5m": buildMonthlyTotalChart(5),
+    "6m": buildMonthlyTotalChart(6),
+    "7m": buildMonthlyTotalChart(7),
+    "8m": buildMonthlyTotalChart(8),
+    "9m": buildMonthlyTotalChart(9),
+    "10m": buildMonthlyTotalChart(10),
+    "11m": buildMonthlyTotalChart(11),
+    "12m": buildMonthlyTotalChart(12),
+    "1y": buildChartTotalOnly(yearLabels, yearDataTotal, 1),
+    "2y": buildChartTotalOnly(yearLabels, yearDataTotal, 2),
+    "3y": buildChartTotalOnly(yearLabels, yearDataTotal, 3),
+    "4y": buildChartTotalOnly(yearLabels, yearDataTotal, 4),
+  };
+};
+
+const getAppointmentSummaryChartByDentist = async (tenant_id, clinic_id,dentist_id) => {
+  const fetchDataForRange = async (from, to) => {
+    const [rows] = await pool.query(
+      `SELECT status, COUNT(*) as count
+       FROM appointment
+       WHERE tenant_id = ? AND clinic_id = ? AND dentist_id=? AND created_time BETWEEN ? AND ?
+       GROUP BY status`,
+      [tenant_id, clinic_id, dentist_id, from, to]
+    );
+    const result = { CP: 0, SC: 0, CL: 0 };
+    rows.forEach(row => {
+      result[row.status] = row.count;
+    });
+    return result;
+  };
+
+  const now = dayjs();
+
+  // === 1W: current week Mon-Sun ===
+  const weekStart = now.startOf("week"); // Mon
+  const weekLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const weekData = { CP: [], SC: [], CL: [] };
+  for (let i = 0; i < 7; i++) {
+    const dayStart = weekStart.add(i, "day").startOf("day").toDate();
+    const dayEnd = weekStart.add(i, "day").endOf("day").toDate();
+    const counts = await fetchDataForRange(dayStart, dayEnd);
+    weekData.CP.push(counts.CP || 0);
+    weekData.SC.push(counts.SC || 0);
+    weekData.CL.push(counts.CL || 0);
+  }
+
+  const maxWeeks = 4;
+const fourWeeks = [];
+const fourWeekLabels = [];
+
+// Build labels from oldest (4w) to latest (1w)
+for (let i = maxWeeks; i >= 1; i--) {
+  fourWeekLabels.push(`${i}w`);
+}
+
+// Fetch counts for each week (oldest to latest)
+for (let i = maxWeeks - 1; i >= 0; i--) {
+  const from = now.subtract(i, "week").startOf("week").toDate();
+  const to = now.subtract(i, "week").endOf("week").toDate();
+  const counts = await fetchDataForRange(from, to);
+  const total = (counts.CP || 0) + (counts.SC || 0) + (counts.CL || 0);
+  fourWeeks.push(total);
+}
+
+
+  // === Months 1m to 12m: month names and total counts ===
+  const maxMonths = 12;
+  const monthLabels = [];
+  const monthTotals = [];
+
+  for (let i = maxMonths - 1; i >= 0; i--) {
+    const from = now.subtract(i, "month").startOf("month").toDate();
+    const to = now.subtract(i, "month").endOf("month").toDate();
+    const counts = await fetchDataForRange(from, to);
+    const total = (counts.CP || 0) + (counts.SC || 0) + (counts.CL || 0);
+    monthTotals.push(total);
+    monthLabels.push(dayjs(from).format("MMM")); // "Jan", "Feb", etc.
+  }
+
+  // === Years for 1y to 4y: current year + previous years ===
+  const maxYears = 4;
+  const yearLabels = [];
+  const yearDataTotal = [];
+  for (let i = maxYears - 1; i >= 0; i--) {
+    const from = now.subtract(i, "year").startOf("year").toDate();
+    const to = now.subtract(i, "year").endOf("year").toDate();
+    yearLabels.push(dayjs(from).format("YYYY"));
+    const counts = await fetchDataForRange(from, to);
+    const total = (counts.CP || 0) + (counts.SC || 0) + (counts.CL || 0);
+    yearDataTotal.push(total);
+  }
+
+  // === Helper for monthly total charts ===
+  const buildMonthlyTotalChart = (count) => ({
+    labels: monthLabels.slice(-count),
+    datasets: [{ label: "Total", data: monthTotals.slice(-count) }],
+  });
+
+  // === Helper for yearly total charts ===
+  const buildChartTotalOnly = (labels, dataArr, count) => ({
+    labels: labels.slice(-count),
+    datasets: [{ label: "Total", data: dataArr.slice(-count) }],
+  });
+
+  return {
+    "1w": {
+      labels: weekLabels,
+      datasets: [
+        { label: "Completed", data: weekData.CP },
+        { label: "Scheduled", data: weekData.SC },
+        { label: "Cancelled", data: weekData.CL },
+      ],
+    },
+    "2w": {
+      labels: fourWeekLabels.slice(-2),
+      datasets: [{ label: "Total", data: fourWeeks.slice(-2) }],
+    },
+    "3w": {
+      labels: fourWeekLabels.slice(-3),
+      datasets: [{ label: "Total", data: fourWeeks.slice(-3) }],
+    },
+    "4w": {
+      labels: fourWeekLabels,
+      datasets: [{ label: "Total", data: fourWeeks }],
+    },
+    "1m": buildMonthlyTotalChart(1),
+    "2m": buildMonthlyTotalChart(2),
+    "3m": buildMonthlyTotalChart(3),
+    "4m": buildMonthlyTotalChart(4),
+    "5m": buildMonthlyTotalChart(5),
+    "6m": buildMonthlyTotalChart(6),
+    "7m": buildMonthlyTotalChart(7),
+    "8m": buildMonthlyTotalChart(8),
+    "9m": buildMonthlyTotalChart(9),
+    "10m": buildMonthlyTotalChart(10),
+    "11m": buildMonthlyTotalChart(11),
+    "12m": buildMonthlyTotalChart(12),
+    "1y": buildChartTotalOnly(yearLabels, yearDataTotal, 1),
+    "2y": buildChartTotalOnly(yearLabels, yearDataTotal, 2),
+    "3y": buildChartTotalOnly(yearLabels, yearDataTotal, 3),
+    "4y": buildChartTotalOnly(yearLabels, yearDataTotal, 4),
+  };
+};
+
+
+
+
 module.exports = {
   createAppointment,
   getAllAppointmentsByTenantId,
@@ -437,5 +795,7 @@ module.exports = {
   getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId,
   updateAppoinmentStatusCancelled,
   getAppointmentSummary,
-  getAppointmentSummaryByDentist
+  getAppointmentSummaryByDentist,
+  getAppointmentSummaryChartByClinic,
+  getAppointmentSummaryChartByDentist
 };

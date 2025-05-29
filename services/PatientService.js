@@ -137,6 +137,7 @@ const getMostVisitedPatientsByDentistPeriods = async (tenantId, dentistId, clini
     WHERE
       a.tenant_id = ?
       AND a.dentist_id = ?
+      AND p.appointment_count>0
   `;
   const params = [tenantId, dentistId];
   if (clinicId) {

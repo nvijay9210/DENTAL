@@ -344,6 +344,7 @@ const updateAppoinmentStatusCancelled = async (appointment_id, tenantId, clinicI
   }
 };
 
+
 module.exports = {
   createAppointment,
   getAllAppointmentsByTenantId,

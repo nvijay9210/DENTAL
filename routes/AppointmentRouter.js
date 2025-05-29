@@ -59,4 +59,9 @@ router.get(
   appointmentController.getAppointmentMonthlySummary
 );
 
+router.get(
+  GET_APPOINTMENT_MONTHLY_SUMMARY,
+  appointmentController.getAppointmentMonthlySummary
+);
+
 module.exports = router;
