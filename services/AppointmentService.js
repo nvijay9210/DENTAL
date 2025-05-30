@@ -575,123 +575,84 @@ const getAppointmentSummaryChartByClinic = async (tenant_id, clinic_id) => {
        GROUP BY status`,
       [tenant_id, clinic_id, from, to]
     );
+
     const result = { CP: 0, SC: 0, CL: 0 };
     rows.forEach(row => {
       result[row.status] = row.count;
     });
-    return result;
+
+    const total = result.CP + result.SC + result.CL;
+    return total; // return just the total count
   };
 
   const now = dayjs();
 
-  // === 1W: current week Mon-Sun ===
-  const weekStart = now.startOf("week"); // Mon
-  const weekLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const weekData = { CP: [], SC: [], CL: [] };
+  // === Weekly data ===
+  const weekStart = now.startOf("week");
+  const weekData = [];
   for (let i = 0; i < 7; i++) {
     const dayStart = weekStart.add(i, "day").startOf("day").toDate();
     const dayEnd = weekStart.add(i, "day").endOf("day").toDate();
-    const counts = await fetchDataForRange(dayStart, dayEnd);
-    weekData.CP.push(counts.CP || 0);
-    weekData.SC.push(counts.SC || 0);
-    weekData.CL.push(counts.CL || 0);
+    const total = await fetchDataForRange(dayStart, dayEnd);
+    weekData.push(total);
   }
 
-  const maxWeeks = 4;
-const fourWeeks = [];
-const fourWeekLabels = [];
+  // === 4 Weeks Data (cumulative per week) ===
+  const fourWeeks = [];
+  for (let i = 3; i >= 0; i--) {
+    const from = now.subtract(i, "week").startOf("week").toDate();
+    const to = now.subtract(i, "week").endOf("week").toDate();
+    const total = await fetchDataForRange(from, to);
+    fourWeeks.push(total);
+  }
 
-// Build labels from oldest (4w) to latest (1w)
-for (let i = maxWeeks; i >= 1; i--) {
-  fourWeekLabels.push(`${i}w`);
-}
-
-// Fetch counts for each week (oldest to latest)
-for (let i = maxWeeks - 1; i >= 0; i--) {
-  const from = now.subtract(i, "week").startOf("week").toDate();
-  const to = now.subtract(i, "week").endOf("week").toDate();
-  const counts = await fetchDataForRange(from, to);
-  const total = (counts.CP || 0) + (counts.SC || 0) + (counts.CL || 0);
-  fourWeeks.push(total);
-}
-
-
-  // === Months 1m to 12m: month names and total counts ===
-  const maxMonths = 12;
-  const monthLabels = [];
+  // === Monthly data ===
   const monthTotals = [];
-
-  for (let i = maxMonths - 1; i >= 0; i--) {
+  for (let i = 11; i >= 0; i--) {
     const from = now.subtract(i, "month").startOf("month").toDate();
     const to = now.subtract(i, "month").endOf("month").toDate();
-    const counts = await fetchDataForRange(from, to);
-    const total = (counts.CP || 0) + (counts.SC || 0) + (counts.CL || 0);
+    const total = await fetchDataForRange(from, to);
     monthTotals.push(total);
-    monthLabels.push(dayjs(from).format("MMM")); // "Jan", "Feb", etc.
   }
 
-  // === Years for 1y to 4y: current year + previous years ===
-  const maxYears = 4;
-  const yearLabels = [];
-  const yearDataTotal = [];
-  for (let i = maxYears - 1; i >= 0; i--) {
+  // === Yearly data ===
+  const yearTotals = [];
+  for (let i = 3; i >= 0; i--) {
     const from = now.subtract(i, "year").startOf("year").toDate();
     const to = now.subtract(i, "year").endOf("year").toDate();
-    yearLabels.push(dayjs(from).format("YYYY"));
-    const counts = await fetchDataForRange(from, to);
-    const total = (counts.CP || 0) + (counts.SC || 0) + (counts.CL || 0);
-    yearDataTotal.push(total);
+    const total = await fetchDataForRange(from, to);
+    yearTotals.push(total);
   }
 
-  // === Helper for monthly total charts ===
-  const buildMonthlyTotalChart = (count) => ({
-    labels: monthLabels.slice(-count),
-    datasets: [{ label: "Total", data: monthTotals.slice(-count) }],
-  });
-
-  // === Helper for yearly total charts ===
-  const buildChartTotalOnly = (labels, dataArr, count) => ({
-    labels: labels.slice(-count),
-    datasets: [{ label: "Total", data: dataArr.slice(-count) }],
-  });
-
+  // Build final output
   return {
-    "1w": {
-      labels: weekLabels,
-      datasets: [
-        { label: "Completed", data: weekData.CP },
-        { label: "Scheduled", data: weekData.SC },
-        { label: "Cancelled", data: weekData.CL },
-      ],
-    },
-    "2w": {
-      labels: fourWeekLabels.slice(-2),
-      datasets: [{ label: "Total", data: fourWeeks.slice(-2) }],
-    },
-    "3w": {
-      labels: fourWeekLabels.slice(-3),
-      datasets: [{ label: "Total", data: fourWeeks.slice(-3) }],
-    },
-    "4w": {
-      labels: fourWeekLabels,
-      datasets: [{ label: "Total", data: fourWeeks }],
-    },
-    "1m": buildMonthlyTotalChart(1),
-    "2m": buildMonthlyTotalChart(2),
-    "3m": buildMonthlyTotalChart(3),
-    "4m": buildMonthlyTotalChart(4),
-    "5m": buildMonthlyTotalChart(5),
-    "6m": buildMonthlyTotalChart(6),
-    "7m": buildMonthlyTotalChart(7),
-    "8m": buildMonthlyTotalChart(8),
-    "9m": buildMonthlyTotalChart(9),
-    "10m": buildMonthlyTotalChart(10),
-    "11m": buildMonthlyTotalChart(11),
-    "12m": buildMonthlyTotalChart(12),
-    "1y": buildChartTotalOnly(yearLabels, yearDataTotal, 1),
-    "2y": buildChartTotalOnly(yearLabels, yearDataTotal, 2),
-    "3y": buildChartTotalOnly(yearLabels, yearDataTotal, 3),
-    "4y": buildChartTotalOnly(yearLabels, yearDataTotal, 4),
+    // Daily breakdown for current week
+    "1w": weekData,
+
+    // Weekly totals
+    "2w": fourWeeks.slice(-2),
+    "3w": fourWeeks.slice(-3),
+    "4w": fourWeeks.slice(-4),
+
+    // Monthly totals
+    "1m": monthTotals.slice(-1),
+    "2m": monthTotals.slice(-2),
+    "3m": monthTotals.slice(-3),
+    "4m": monthTotals.slice(-4),
+    "5m": monthTotals.slice(-5),
+    "6m": monthTotals.slice(-6),
+    "7m": monthTotals.slice(-7),
+    "8m": monthTotals.slice(-8),
+    "9m": monthTotals.slice(-9),
+    "10m": monthTotals.slice(-10),
+    "11m": monthTotals.slice(-11),
+    "12m": monthTotals.slice(-12),
+
+    // Yearly totals
+    "1y": yearTotals.slice(-1),
+    "2y": yearTotals.slice(-2),
+    "3y": yearTotals.slice(-3),
+    "4y": yearTotals.slice(-4),
   };
 };
 
