@@ -278,6 +278,7 @@ const getAppointmentsWithDetails = async (
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
+
 const getAppointmentMonthlySummary = async (
   tenantId,
   clinic_id,
@@ -507,27 +508,35 @@ const getAppointmentSummary = async (tenant_id, clinic_id) => {
 };
 
 const getAppointmentSummaryByDentist = async (tenant_id, clinic_id,dentist_id) => {
-  const now = dayjs();
   const summary = {};
 
   const ranges = {
-    weeks: Array.from({ length: 4 }, (_, i) => ({
-      label: `${4 - i}w`, // Reverse order to have "4w", "3w", ... (optional)
-      from: now.subtract(4 - i, "week").startOf("week").toDate(),
-      to: now.subtract(3 - i, "week").endOf("week").toDate(),
-    })),
+    weeks: Array.from({ length: 4 }, (_, i) => {
+      const targetWeek = dayjs().subtract(i, 'week');
+      return {
+        label: `${i + 1}w`,
+        from: targetWeek.startOf('week').toDate(),
+        to: targetWeek.endOf('week').toDate()
+      };
+    }),
 
-    months: Array.from({ length: 12 }, (_, i) => ({
-      label: `${12 - i}m`,
-      from: now.subtract(12 - i, "month").startOf("month").toDate(),
-      to: now.subtract(11 - i, "month").endOf("month").toDate(),
-    })),
+    months: Array.from({ length: 12 }, (_, i) => {
+      const targetMonth = dayjs().subtract(i, 'month');
+      return {
+        label: `${i + 1}m`,
+        from: targetMonth.startOf('month').toDate(),
+        to: targetMonth.endOf('month').toDate()
+      };
+    }),
 
-    years: Array.from({ length: 4 }, (_, i) => ({
-      label: `${4 - i}y`,
-      from: now.subtract(4 - i, "year").startOf("year").toDate(),
-      to: now.subtract(3 - i, "year").endOf("year").toDate(),
-    })),
+    years: Array.from({ length: 4 }, (_, i) => {
+      const targetYear = dayjs().subtract(i, 'year');
+      return {
+        label: `${i + 1}y`,
+        from: targetYear.startOf('year').toDate(),
+        to: targetYear.endOf('year').toDate()
+      };
+    }),
   };
 
   const fetchDataForRange = async (from, to) => {
@@ -541,25 +550,57 @@ const getAppointmentSummaryByDentist = async (tenant_id, clinic_id,dentist_id) =
 
     const result = {
       total_appointments: 0,
-      completed_appointments: "0",
-      pending_appointments: "0",
-      cancelled_appointments: "0",
+      completed_appointments: 0,
+      pending_appointments: 0,
+      cancelled_appointments: 0,
     };
 
     rows.forEach(row => {
       result.total_appointments += row.count;
-      if (row.status === "CP") result.completed_appointments = row.count.toString();
-      else if (row.status === "SC") result.pending_appointments = row.count.toString();
-      else if (row.status === "CL") result.cancelled_appointments = row.count.toString();
+      if (row.status === "CP") result.completed_appointments = row.count;
+      else if (row.status === "SC") result.pending_appointments = row.count;
+      else if (row.status === "CL") result.cancelled_appointments = row.count;
     });
 
-    return result;
+    return {
+      total_appointments: result.total_appointments,
+      completed_appointments: result.completed_appointments.toString(),
+      pending_appointments: result.pending_appointments.toString(),
+      cancelled_appointments: result.cancelled_appointments.toString(),
+    };
   };
 
-  // Instead of summary[periodType] = {}, just put directly at root
-  for (const items of Object.values(ranges)) {
-    for (const item of items) {
-      summary[item.label] = await fetchDataForRange(item.from, item.to);
+  const mergeStats = (acc, newStats) => {
+    acc.total_appointments += parseInt(newStats.total_appointments || 0);
+    acc.completed_appointments += parseInt(newStats.completed_appointments || 0);
+    acc.pending_appointments += parseInt(newStats.pending_appointments || 0);
+    acc.cancelled_appointments += parseInt(newStats.cancelled_appointments || 0);
+    return acc;
+  };
+
+  // Process each time range type
+  for (const [periodType, items] of Object.entries(ranges)) {
+    let cumulativeStats = {
+      total_appointments: 0,
+      completed_appointments: 0,
+      pending_appointments: 0,
+      cancelled_appointments: 0,
+    };
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const currentStats = await fetchDataForRange(item.from, item.to);
+
+      // Merge into cumulative stats
+      cumulativeStats = mergeStats({...cumulativeStats}, currentStats);
+
+      // Save cumulative value directly under the label (e.g., "2w", "3m", "1y")
+      summary[item.label] = {
+        total_appointments: cumulativeStats.total_appointments,
+        completed_appointments: cumulativeStats.completed_appointments.toString(),
+        pending_appointments: cumulativeStats.pending_appointments.toString(),
+        cancelled_appointments: cumulativeStats.cancelled_appointments.toString(),
+      };
     }
   }
 
@@ -581,13 +622,12 @@ const getAppointmentSummaryChartByClinic = async (tenant_id, clinic_id) => {
       result[row.status] = row.count;
     });
 
-    const total = result.CP + result.SC + result.CL;
-    return total; // return just the total count
+    return result.CP + result.SC + result.CL;
   };
 
   const now = dayjs();
 
-  // === Weekly data ===
+  // === Daily data for current week (Mon - Sun) - already newest to oldest (today first) ===
   const weekStart = now.startOf("week");
   const weekData = [];
   for (let i = 0; i < 7; i++) {
@@ -597,62 +637,61 @@ const getAppointmentSummaryChartByClinic = async (tenant_id, clinic_id) => {
     weekData.push(total);
   }
 
-  // === 4 Weeks Data (cumulative per week) ===
+  // === Weekly totals (4 weeks): newest -> oldest ===
   const fourWeeks = [];
-  for (let i = 3; i >= 0; i--) {
+  for (let i = 0; i < 4; i++) {
     const from = now.subtract(i, "week").startOf("week").toDate();
     const to = now.subtract(i, "week").endOf("week").toDate();
     const total = await fetchDataForRange(from, to);
-    fourWeeks.push(total);
+    fourWeeks.push(total); // [this week, last week, ...]
   }
 
-  // === Monthly data ===
+  // === Monthly totals (12 months): newest -> oldest ===
   const monthTotals = [];
-  for (let i = 11; i >= 0; i--) {
+  for (let i = 0; i < 12; i++) {
     const from = now.subtract(i, "month").startOf("month").toDate();
     const to = now.subtract(i, "month").endOf("month").toDate();
     const total = await fetchDataForRange(from, to);
-    monthTotals.push(total);
+    monthTotals.push(total); // [current month, last month, ...]
   }
 
-  // === Yearly data ===
+  // === Yearly totals (4 years): newest -> oldest ===
   const yearTotals = [];
-  for (let i = 3; i >= 0; i--) {
+  for (let i = 0; i < 4; i++) {
     const from = now.subtract(i, "year").startOf("year").toDate();
     const to = now.subtract(i, "year").endOf("year").toDate();
     const total = await fetchDataForRange(from, to);
-    yearTotals.push(total);
+    yearTotals.push(total); // [current year, last year, ...]
   }
 
-  // Build final output
   return {
-    // Daily breakdown for current week
+    // Daily breakdown for current week (Mon - Sun)
     "1w": weekData,
 
-    // Weekly totals
-    "2w": fourWeeks.slice(-2),
-    "3w": fourWeeks.slice(-3),
-    "4w": fourWeeks.slice(-4),
+    // Weekly totals (newest to oldest)
+    "2w": fourWeeks.slice(0, 2),
+    "3w": fourWeeks.slice(0, 3),
+    "4w": fourWeeks.slice(0, 4),
 
-    // Monthly totals
-    "1m": monthTotals.slice(-1),
-    "2m": monthTotals.slice(-2),
-    "3m": monthTotals.slice(-3),
-    "4m": monthTotals.slice(-4),
-    "5m": monthTotals.slice(-5),
-    "6m": monthTotals.slice(-6),
-    "7m": monthTotals.slice(-7),
-    "8m": monthTotals.slice(-8),
-    "9m": monthTotals.slice(-9),
-    "10m": monthTotals.slice(-10),
-    "11m": monthTotals.slice(-11),
-    "12m": monthTotals.slice(-12),
+    // Monthly totals (newest to oldest)
+    "1m": monthTotals.slice(0, 1),
+    "2m": monthTotals.slice(0, 2),
+    "3m": monthTotals.slice(0, 3),
+    "4m": monthTotals.slice(0, 4),
+    "5m": monthTotals.slice(0, 5),
+    "6m": monthTotals.slice(0, 6),
+    "7m": monthTotals.slice(0, 7),
+    "8m": monthTotals.slice(0, 8),
+    "9m": monthTotals.slice(0, 9),
+    "10m": monthTotals.slice(0, 10),
+    "11m": monthTotals.slice(0, 11),
+    "12m": monthTotals.slice(0, 12),
 
-    // Yearly totals
-    "1y": yearTotals.slice(-1),
-    "2y": yearTotals.slice(-2),
-    "3y": yearTotals.slice(-3),
-    "4y": yearTotals.slice(-4),
+    // Yearly totals (newest to oldest)
+    "1y": yearTotals.slice(0, 1),
+    "2y": yearTotals.slice(0, 2),
+    "3y": yearTotals.slice(0, 3),
+    "4y": yearTotals.slice(0, 4),
   };
 };
 
