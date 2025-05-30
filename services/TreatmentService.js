@@ -109,6 +109,23 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
   }
 };
 
+function flattenTreatmentImages(treatment) {
+  const flattened = {};
+
+  if (Array.isArray(treatment.treatment_images)) {
+    treatment.treatment_images.forEach((item, index) => {
+      flattened[`treatment_images${index}`] = item || "";
+    });
+  }
+
+  delete treatment.treatment_images;
+
+  return {
+    ...treatment,
+    ...flattened
+  };
+}
+
 const getAllTreatmentsByTenantAndPatientId = async (
   tenantId,
   patientId,
@@ -131,7 +148,7 @@ const getAllTreatmentsByTenantAndPatientId = async (
 
     const convertedRows = treatments.map((treatment) =>
       helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
-    );
+    ).map(flattenTreatmentImages);
 
     return convertedRows;
   } catch (err) {
@@ -151,8 +168,8 @@ const getTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {
       treatment,
       treatmentFieldsReverseMap
     );
-
-    return convertedRows;
+    flattenTreatmentImages(treatment);
+    return { ...convertedRows, flattenTreatmentImages };
   } catch (error) {
     throw new CustomError("Failed to get treatment: " + error.message, 404);
   }
