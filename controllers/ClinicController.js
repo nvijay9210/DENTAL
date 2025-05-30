@@ -56,7 +56,7 @@ exports.getFinanceSummarybyDentist = async (req, res, next) => {
   await checkIfIdExists('dentist','dentist_id',dentist_id)
   try {
     const clinics = await clinicService.getFinanceSummarybyDentist(
-      tenant_id, clinic_id
+      tenant_id, clinic_id,dentist_id
     );
     res.status(200).json(clinics);
   } catch (err) {

@@ -510,8 +510,8 @@ const getFinanceSummarybyDentist = async (tenant_id, clinic_id,dentist_id, usePa
         [new Date(now.getTime() - 365 * 4 * 24 * 60 * 60 * 1000), tenant_id, clinic_id,dentist_id]
       ),
       conn.query(
-        `SELECT expense_date AS date, expense_amount AS amount FROM expense 
-         WHERE expense_date >= ? AND tenant_id = ? AND clinic_id = ? AND dentist_id=?`,
+        `SELECT e.expense_date AS date, e.expense_amount AS amount FROM expense e INNER JOIN treatment t ON t.clinic_id=e.clinic_id
+         WHERE e.expense_date >= ? AND e.tenant_id = ? AND e.clinic_id = ? AND t.dentist_id=?`,
         [new Date(now.getTime() - 365 * 4 * 24 * 60 * 60 * 1000), tenant_id, clinic_id,dentist_id]
       ),
       usePaymentTable ? conn.query(
