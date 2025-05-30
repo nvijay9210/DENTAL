@@ -32,17 +32,17 @@ const uploadFileMiddleware = (options) => {
       const tenant_id = req.body.tenant_id || req.params.tenant_id;
       let id = 0;
       switch (folderName) {
-        case "Clinic":
-          id = req.params.clinic_id;
-          break;
-        case "Dentist":
-          id = req.params.dentist_id;
+        case "Treatment":
+          id = req.params.treatment_id;
           break;
         case "Patient":
           id = req.params.patient_id;
           break;
-        case "Treatment":
-          id = req.params.treatment_id;
+        case "Dentist":
+          id = req.params.dentist_id;
+          break;
+        case "Clinic":
+          id = req.params.clinic_id;
           break;
         default:
           break;
@@ -71,7 +71,7 @@ const uploadFileMiddleware = (options) => {
             const descFieldName = `description_awards_certifications_${idx}`;
 
             // Find file for this index (if any)
-            const file = req.files?.find(f => f.fieldname === fileFieldName);
+            const file = req.files?.find((f) => f.fieldname === fileFieldName);
             const description = req.body[descFieldName];
 
             // If nothing for this index, break (end of awards)
@@ -86,11 +86,20 @@ const uploadFileMiddleware = (options) => {
                 });
               }
               const resizedImage = await compressImage(file.buffer, 100);
-              const fieldTenantPath = path.join(baseTenantPath, fileField.subFolder);
+              const fieldTenantPath = path.join(
+                baseTenantPath,
+                fileField.subFolder
+              );
               const originalFileName = path.parse(file.originalname).name;
               const extension = path.extname(file.originalname).toLowerCase();
-              const fileName = `${originalFileName}_${Date.now()}_${Math.floor(Math.random() * 10000)}${extension}`;
-              const savedPath = await saveFile(resizedImage, fieldTenantPath, fileName);
+              const fileName = `${originalFileName}_${Date.now()}_${Math.floor(
+                Math.random() * 10000
+              )}${extension}`;
+              const savedPath = await saveFile(
+                resizedImage,
+                fieldTenantPath,
+                fileName
+              );
 
               awards.push({
                 image: savedPath,
@@ -108,9 +117,58 @@ const uploadFileMiddleware = (options) => {
           }
           req.body.awards_certifications = awards;
           uploadedFiles.awards_certifications = awards;
-        } else {
+        }
+        else if (fileField.fieldName === "treatment_image") {
+          // --- Handle dynamic treatment_image fields (no description) ---
+          const treatments = [];
+          let idx = 0;
+          while (true) {
+            const fileFieldName = `treatment_image${idx}`;
+        
+            const file = req.files?.find((f) => f.fieldname === fileFieldName);
+            const existingImagePath = req.body[fileFieldName];
+        
+            // If neither new file nor old path, stop the loop
+            if (!file && !existingImagePath) break;
+        
+            if (file) {
+              const maxSizeBytes = fileField.maxSizeMB * 1024 * 1024;
+              if (file.size > maxSizeBytes) {
+                return res.status(400).json({
+                  message: `Treatment image must be less than ${fileField.maxSizeMB}MB`,
+                });
+              }
+        
+              const resizedImage = await compressImage(file.buffer, 100);
+              const fieldTenantPath = path.join(
+                baseTenantPath,
+                fileField.subFolder
+              );
+              const originalFileName = path.parse(file.originalname).name;
+              const extension = path.extname(file.originalname).toLowerCase();
+              const fileName = `${originalFileName}_${Date.now()}_${Math.floor(
+                Math.random() * 10000
+              )}${extension}`;
+              const savedPath = await saveFile(resizedImage, fieldTenantPath, fileName);
+              console.log('treatmentimage:',savedPath)
+        
+              treatments.push(savedPath);
+            } else if (existingImagePath) {
+              treatments.push(existingImagePath);
+            }
+        
+            idx++;
+          }
+        
+          req.body.treatment_images = treatments;
+          uploadedFiles.treatment_image = treatments;
+        }
+         else {
           // --- Handle other file fields as before ---
-          const files = req.files?.filter(file => file.fieldname === fileField.fieldName) || [];
+          const files =
+            req.files?.filter(
+              (file) => file.fieldname === fileField.fieldName
+            ) || [];
           if (files.length > 0) {
             const savedPaths = [];
             for (let i = 0; i < files.length; i++) {
@@ -118,22 +176,35 @@ const uploadFileMiddleware = (options) => {
               const maxSizeBytes = fileField.maxSizeMB * 1024 * 1024;
               if (file.size > maxSizeBytes) {
                 return res.status(400).json({
-                  message: `${fileField.fieldName.replace(/_/g, " ")} must be less than ${fileField.maxSizeMB}MB`,
+                  message: `${fileField.fieldName.replace(
+                    /_/g,
+                    " "
+                  )} must be less than ${fileField.maxSizeMB}MB`,
                 });
               }
               const resizedImage = await compressImage(file.buffer, 100);
-              const fieldTenantPath = path.join(baseTenantPath, fileField.subFolder);
+              const fieldTenantPath = path.join(
+                baseTenantPath,
+                fileField.subFolder
+              );
               const originalFileName = path.parse(file.originalname).name;
               const extension = path.extname(file.originalname).toLowerCase();
-              const fileName = `${originalFileName}_${Date.now()}_${Math.floor(Math.random() * 10000)}${extension}`;
-              const savedPath = await saveFile(resizedImage, fieldTenantPath, fileName);
+              const fileName = `${originalFileName}_${Date.now()}_${Math.floor(
+                Math.random() * 10000
+              )}${extension}`;
+              const savedPath = await saveFile(
+                resizedImage,
+                fieldTenantPath,
+                fileName
+              );
 
               savedPaths.push({ [fileField.fieldName]: savedPath });
             }
             if (fileField.multiple) {
               req.body[fileField.fieldName] = savedPaths;
             } else {
-              req.body[fileField.fieldName] = savedPaths[0]?.[fileField.fieldName];
+              req.body[fileField.fieldName] =
+                savedPaths[0]?.[fileField.fieldName];
             }
             uploadedFiles[fileField.fieldName] = savedPaths;
           }
