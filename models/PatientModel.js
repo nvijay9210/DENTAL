@@ -175,6 +175,49 @@ const getAppointmentsForAnalytics = async (tenantId, clinicId, dentistId) => {
   }
 };
 
+const groupToothProceduresByTimeRangeCumulative = async (tenantId, clinicId) => {
+  const query = `
+    SELECT
+      p.tooth_details
+    FROM
+      appointment a
+    JOIN
+      patient p ON a.patient_id = p.patient_id
+    WHERE
+      a.tenant_id = ?
+      AND a.clinic_id = ?
+  `;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, clinicId]);
+    return rows;
+  } finally {
+    conn.release();
+  }
+};
+
+const groupToothProceduresByTimeRangeCumulativeByDentist = async (tenantId, clinicId,dentistId) => {
+  const query = `
+    SELECT
+      p.tooth_details
+    FROM
+      appointment a
+    JOIN
+      patient p ON a.patient_id = p.patient_id
+    WHERE
+      a.tenant_id = ?
+      AND a.clinic_id = ?
+      AND a.dentist_id=?
+  `;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, clinicId,dentistId]);
+    return rows;
+  } finally {
+    conn.release();
+  }
+};
+
 
 
 module.exports = {
@@ -187,5 +230,7 @@ module.exports = {
   updateToothDetails,
   getPeriodSummaryByPatient,
   updatePatientAppointmentCount,
-  getAppointmentsForAnalytics
+  getAppointmentsForAnalytics,
+  groupToothProceduresByTimeRangeCumulative,
+  groupToothProceduresByTimeRangeCumulativeByDentist
 };

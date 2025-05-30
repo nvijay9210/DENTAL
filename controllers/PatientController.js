@@ -141,6 +141,34 @@ exports.getAgeGenderByClinic = async (req, res, next) => {
     next(err);
   }
 };
+exports.groupToothProceduresByTimeRangeCumulative = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  try {
+    const patients = await patientService.groupToothProceduresByTimeRangeCumulative(
+      tenant_id,clinic_id
+    );
+    res.status(200).json(patients);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.groupToothProceduresByTimeRangeCumulativeByDentist = async (req, res, next) => {
+  const { tenant_id,clinic_id,dentist_id } = req.params;
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  try {
+    const patients = await patientService.groupToothProceduresByTimeRangeCumulativeByDentist(
+      tenant_id,clinic_id,dentist_id
+    );
+    res.status(200).json(patients);
+  } catch (err) {
+    next(err);
+  }
+};
 
 exports.getPatientByTenantIdAndPatientId = async (req, res, next) => {
   const { patient_id, tenant_id } = req.params;

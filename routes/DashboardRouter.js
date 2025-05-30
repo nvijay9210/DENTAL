@@ -14,6 +14,8 @@ const {
   GET_APPOINTMENT_SUMMARY_CHART_CLINIC,
   GET_CLINIC_FINANACE_SUMMARY_DENTIST,
   GET_APPOINTMENT_SUMMARY_CHART_DENTIST,
+  GET_TOOTH_DETAILS_CLINIC,
+  GET_TOOTH_DETAILS_DENTIST,
 } = require("./RouterPath");
 const {
   getPeriodSummaryByPatient,
@@ -24,6 +26,8 @@ const {
   getAgeGenderChartData,
   getAgeGenderByDentist,
   getAgeGenderByClinic,
+  groupToothProceduresByTimeRangeCumulative,
+  groupToothProceduresByTimeRangeCumulativeByDentist,
 } = require("../controllers/PatientController");
 const {
   getFinanceSummary,
@@ -62,6 +66,16 @@ router.get(
 router.get(
   GET_APPOINTMENT_SUMMARY_CHART_DENTIST,
   appointmentController.getAppointmentSummaryChartByDentist
+);
+
+router.get(
+  GET_TOOTH_DETAILS_CLINIC,
+  groupToothProceduresByTimeRangeCumulative
+);
+
+router.get(
+  GET_TOOTH_DETAILS_DENTIST,
+  groupToothProceduresByTimeRangeCumulativeByDentist
 );
 
 module.exports = router;

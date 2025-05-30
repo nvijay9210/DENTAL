@@ -312,7 +312,7 @@ CREATE TABLE IF NOT EXISTS tenant (
   anesthesia_used tinyint(1) NOT NULL DEFAULT 0,
   anesthesia_type varchar(100) DEFAULT NULL,
   technician_assisted varchar(255) DEFAULT NULL,
-  treatment_images varchar(255) DEFAULT NULL,
+  treatment_images longtext DEFAULT NULL,
   notes text DEFAULT NULL,
   created_by varchar(30) NOT NULL,
   created_time timestamp NOT NULL DEFAULT current_timestamp(),

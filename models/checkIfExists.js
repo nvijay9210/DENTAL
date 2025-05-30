@@ -122,7 +122,7 @@ const checkIfIdExists = async (table, field, value) => {
     return true;
   } catch (err) {
     console.error(err);
-    throw new CustomError(`Database error: ${err.message}`, 404);
+    throw new CustomError(`Error: ${err.message}`, 404);
   } finally {
     conn.release();
   }
@@ -161,7 +161,7 @@ const checkIfExists = async (table, field, value, tenantId) => {
     return result.length > 0 ? true : false;
   } catch (err) {
     console.error(err);
-    throw new CustomError(`Database error: ${err.message}`, 500);
+    throw new CustomError(`Error: ${err.message}`, 500);
   } finally {
     conn.release();
   }
@@ -202,7 +202,7 @@ const checkIfExistsWithoutId = async (
     return result.length > 0 ? true : false;
   } catch (err) {
     console.error(err);
-    throw new CustomError(`Database error: ${err.message}`, 500);
+    throw new CustomError(`Error: ${err.message}`, 500);
   } finally {
     conn.release();
   }

@@ -141,6 +141,9 @@ module.exports = {
     GET_CLINIC_FINANACE_SUMMARY_CLINIC:"/getallclinics/financesummary/:tenant_id/:clinic_id",
 
     GET_CLINIC_FINANACE_SUMMARY_DENTIST:"/getallclinics/financesummary/:tenant_id/:clinic_id/:dentist_id",
+
+    GET_TOOTH_DETAILS_CLINIC:"/toothdetails/:tenant_id/:clinic_id",
+    GET_TOOTH_DETAILS_DENTIST:"/toothdetails/:tenant_id/:clinic_id/:dentist_id",
 };
 
 // GET /api/tenant?page=2&limit=10
