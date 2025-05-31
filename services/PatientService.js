@@ -361,7 +361,7 @@ const getNewPatientsTrends = async (tenantId, clinicId) => {
     conn.release();
   }
 
-  console.log(rows)
+  // console.log(rows)
 
   const now = moment().utc();
   const result = {};
