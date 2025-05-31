@@ -152,7 +152,7 @@ const getMostVisitedPatientsByDentistPeriods = async (tenantId, dentistId, clini
     conn.release();
   }
 
-  console.log(rows)
+  //console.log(rows)
 
   const now = moment().utc();
   const result = {};
@@ -258,8 +258,6 @@ const getMostVisitedPatientsByClinicPeriods = async (tenantId, clinicId, topN = 
     conn.release();
   }
 
-  console.log(rows)
-
   const now = moment().utc();
   const result = {};
 
@@ -363,6 +361,108 @@ const getNewPatientsTrends = async (tenantId, clinicId) => {
     conn.release();
   }
 
+  console.log(rows)
+
+  const now = moment().utc();
+  const result = {};
+
+  // --- 1w: Current week, daily counts (Mon-Sun) ---
+  {
+    const weekStart = now.clone().startOf('isoWeek');
+    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const data = [];
+    for (let d = 0; d < 7; d++) {
+      const dayStart = weekStart.clone().add(d, 'days').startOf('day');
+      const dayEnd = dayStart.clone().endOf('day');
+      const count = rows.filter(row => {
+        const created = moment(row.created_time).utc();
+        return created.isBetween(dayStart, dayEnd, null, '[]');
+      }).length;
+      data.push(count);
+    }
+    result["1w"] = { labels, datasets: [{ data }] };
+  }
+
+  // --- 2w, 3w, 4w: Weekly totals for last N weeks ---
+  [2, 3, 4].forEach(nWeeks => {
+    const labels = [];
+    const data = [];
+    for (let w = nWeeks - 1; w >= 0; w--) {
+      const weekStart = now.clone().startOf('isoWeek').subtract(w, 'weeks');
+      const weekEnd = weekStart.clone().endOf('isoWeek');
+      const count = rows.filter(row => {
+        const created = moment(row.created_time).utc();
+        return created.isBetween(weekStart, weekEnd, null, '[]');
+      }).length;
+      labels.push(`${nWeeks - w}w`);
+      data.push(count);
+    }
+    result[`${nWeeks}w`] = { labels, datasets: [{ data }] };
+  });
+
+  // --- 2m to 12m: Monthly totals for last N months ---
+  [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].forEach(nMonths => {
+    const labels = [];
+    const data = [];
+    for (let m = nMonths - 1; m >= 0; m--) {
+      const monthStart = now.clone().startOf('month').subtract(m, 'months');
+      const monthEnd = monthStart.clone().endOf('month');
+      const count = rows.filter(row => {
+        const created = moment(row.created_time).utc();
+        return created.isBetween(monthStart, monthEnd, null, '[]');
+      }).length;
+      labels.push(monthStart.format('MMM'));
+      data.push(count);
+    }
+    result[`${nMonths}m`] = { labels, datasets: [{ data }] };
+  });
+
+  // --- 2y, 3y, 4y: Yearly totals for last N years ---
+  [2, 3, 4].forEach(nYears => {
+    const labels = [];
+    const data = [];
+    for (let y = nYears - 1; y >= 0; y--) {
+      const yearStart = now.clone().startOf('year').subtract(y, 'years');
+      const yearEnd = yearStart.clone().endOf('year');
+      const count = rows.filter(row => {
+        const created = moment(row.created_time).utc();
+        return created.isBetween(yearStart, yearEnd, null, '[]');
+      }).length;
+      labels.push(yearStart.format('YYYY'));
+      data.push(count);
+    }
+    result[`${nYears}y`] = { labels, datasets: [{ data }] };
+  });
+
+  return result;
+};
+
+const getNewPatientsTrendsByDentistAndClinic = async (tenantId, clinicId,dentist_id) => {
+  const query = `
+    SELECT
+      p.patient_id,
+      MIN(a.appointment_date) AS first_appt_date
+    FROM
+      appointment a
+    JOIN
+      patient p ON a.patient_id = p.patient_id
+    WHERE
+      a.tenant_id = ?
+      AND a.clinic_id = ?
+      AND a.dentist_id = ?
+    GROUP BY
+      p.patient_id
+  `;
+  const conn = await pool.getConnection();
+  let rows;
+  try {
+    [rows] = await conn.query(query, [tenantId, clinicId,dentist_id]);
+  } finally {
+    conn.release();
+  }
+
+  console.log(rows)
+
   const now = moment().utc();
   const result = {};
 
@@ -438,125 +538,121 @@ const getNewPatientsTrends = async (tenantId, clinicId) => {
 };
 
 
+// const getNewPatientsTrendsByDentistAndClinic = async (tenantId, clinicId, dentistId) => {
+//   // Fetch all patients who have their FIRST appointment with this dentist in this clinic
+//   const query = `
+//     SELECT
+//       p.patient_id,
+//       MIN(a.appointment_date) AS first_appt_date
+//     FROM
+//       appointment a
+//     JOIN
+//       patient p ON a.patient_id = p.patient_id
+//     WHERE
+//       a.tenant_id = ?
+//       AND a.clinic_id = ?
+//       AND a.dentist_id = ?
+//     GROUP BY
+//       p.patient_id
+//   `;
+//   const conn = await pool.getConnection();
+//   let rows;
+//   try {
+//     [rows] = await conn.query(query, [tenantId, clinicId, dentistId]);
+//   } finally {
+//     conn.release();
+//   }
 
+//   const now = moment().utc();
+//   const result = {};
 
+//   // --- 1w: Current week, daily counts (Mon-Sun) ---
+//   {
+//     const weekStart = now.clone().startOf('isoWeek');
+//     const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+//     const data = [];
+//     for (let d = 0; d < 7; d++) {
+//       const dayStart = weekStart.clone().add(d, 'days').startOf('day');
+//       const dayEnd = dayStart.clone().endOf('day');
+//       const count = rows.filter(row => {
+//         const created = moment(row.first_appt_date).utc();
+//         return created.isBetween(dayStart, dayEnd, null, '[]');
+//       }).length;
+//       data.push(count);
+//     }
+//     result['1w'] = { labels, datasets: [{ data }] };
+//   }
 
+//   // --- 4w: Last 4 weeks (labels: "1w", "2w", "3w", "4w") ---
+//   {
+//     const labels = [];
+//     const data = [];
+//     for (let w = 4; w >= 1; w--) {
+//       const weekStart = now.clone().startOf('isoWeek').subtract(w - 1, 'weeks');
+//       const weekEnd = weekStart.clone().endOf('isoWeek');
+//       const count = rows.filter(row => {
+//         const created = moment(row.first_appt_date).utc();
+//         return created.isBetween(weekStart, weekEnd, null, '[]');
+//       }).length;
+//       labels.push(`${5 - w}w`);
+//       data.push(count);
+//     }
+//     result['4w'] = { labels, datasets: [{ data }] };
+//   }
 
-const getNewPatientsTrendsByDentistAndClinic = async (tenantId, clinicId, dentistId) => {
-  // Fetch all patients who have their FIRST appointment with this dentist in this clinic
-  const query = `
-    SELECT
-      p.patient_id,
-      MIN(a.appointment_date) AS first_appt_date
-    FROM
-      appointment a
-    JOIN
-      patient p ON a.patient_id = p.patient_id
-    WHERE
-      a.tenant_id = ?
-      AND a.clinic_id = ?
-      AND a.dentist_id = ?
-    GROUP BY
-      p.patient_id
-  `;
-  const conn = await pool.getConnection();
-  let rows;
-  try {
-    [rows] = await conn.query(query, [tenantId, clinicId, dentistId]);
-  } finally {
-    conn.release();
-  }
+//   // --- 4m: Last 4 months (labels: month names) ---
+//   {
+//     const labels = [];
+//     const data = [];
+//     for (let m = 4; m >= 1; m--) {
+//       const monthStart = now.clone().startOf('month').subtract(m - 1, 'months');
+//       const monthEnd = monthStart.clone().endOf('month');
+//       const count = rows.filter(row => {
+//         const created = moment(row.first_appt_date).utc();
+//         return created.isBetween(monthStart, monthEnd, null, '[]');
+//       }).length;
+//       labels.push(monthStart.format('MMM'));
+//       data.push(count);
+//     }
+//     result['4m'] = { labels, datasets: [{ data }] };
+//   }
 
-  const now = moment().utc();
-  const result = {};
+//   // --- 12m: Last 12 months (labels: month names) ---
+//   {
+//     const labels = [];
+//     const data = [];
+//     for (let m = 12; m >= 1; m--) {
+//       const monthStart = now.clone().startOf('month').subtract(m - 1, 'months');
+//       const monthEnd = monthStart.clone().endOf('month');
+//       const count = rows.filter(row => {
+//         const created = moment(row.first_appt_date).utc();
+//         return created.isBetween(monthStart, monthEnd, null, '[]');
+//       }).length;
+//       labels.push(monthStart.format('MMM'));
+//       data.push(count);
+//     }
+//     result['12m'] = { labels, datasets: [{ data }] };
+//   }
 
-  // --- 1w: Current week, daily counts (Mon-Sun) ---
-  {
-    const weekStart = now.clone().startOf('isoWeek');
-    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const data = [];
-    for (let d = 0; d < 7; d++) {
-      const dayStart = weekStart.clone().add(d, 'days').startOf('day');
-      const dayEnd = dayStart.clone().endOf('day');
-      const count = rows.filter(row => {
-        const created = moment(row.first_appt_date).utc();
-        return created.isBetween(dayStart, dayEnd, null, '[]');
-      }).length;
-      data.push(count);
-    }
-    result['1w'] = { labels, datasets: [{ data }] };
-  }
+//   // --- 4y: Last 4 years (labels: years) ---
+//   {
+//     const labels = [];
+//     const data = [];
+//     for (let y = 4; y >= 1; y--) {
+//       const yearStart = now.clone().startOf('year').subtract(y - 1, 'years');
+//       const yearEnd = yearStart.clone().endOf('year');
+//       const count = rows.filter(row => {
+//         const created = moment(row.first_appt_date).utc();
+//         return created.isBetween(yearStart, yearEnd, null, '[]');
+//       }).length;
+//       labels.push(yearStart.format('YYYY'));
+//       data.push(count);
+//     }
+//     result['4y'] = { labels, datasets: [{ data }] };
+//   }
 
-  // --- 4w: Last 4 weeks (labels: "1w", "2w", "3w", "4w") ---
-  {
-    const labels = [];
-    const data = [];
-    for (let w = 4; w >= 1; w--) {
-      const weekStart = now.clone().startOf('isoWeek').subtract(w - 1, 'weeks');
-      const weekEnd = weekStart.clone().endOf('isoWeek');
-      const count = rows.filter(row => {
-        const created = moment(row.first_appt_date).utc();
-        return created.isBetween(weekStart, weekEnd, null, '[]');
-      }).length;
-      labels.push(`${5 - w}w`);
-      data.push(count);
-    }
-    result['4w'] = { labels, datasets: [{ data }] };
-  }
-
-  // --- 4m: Last 4 months (labels: month names) ---
-  {
-    const labels = [];
-    const data = [];
-    for (let m = 4; m >= 1; m--) {
-      const monthStart = now.clone().startOf('month').subtract(m - 1, 'months');
-      const monthEnd = monthStart.clone().endOf('month');
-      const count = rows.filter(row => {
-        const created = moment(row.first_appt_date).utc();
-        return created.isBetween(monthStart, monthEnd, null, '[]');
-      }).length;
-      labels.push(monthStart.format('MMM'));
-      data.push(count);
-    }
-    result['4m'] = { labels, datasets: [{ data }] };
-  }
-
-  // --- 12m: Last 12 months (labels: month names) ---
-  {
-    const labels = [];
-    const data = [];
-    for (let m = 12; m >= 1; m--) {
-      const monthStart = now.clone().startOf('month').subtract(m - 1, 'months');
-      const monthEnd = monthStart.clone().endOf('month');
-      const count = rows.filter(row => {
-        const created = moment(row.first_appt_date).utc();
-        return created.isBetween(monthStart, monthEnd, null, '[]');
-      }).length;
-      labels.push(monthStart.format('MMM'));
-      data.push(count);
-    }
-    result['12m'] = { labels, datasets: [{ data }] };
-  }
-
-  // --- 4y: Last 4 years (labels: years) ---
-  {
-    const labels = [];
-    const data = [];
-    for (let y = 4; y >= 1; y--) {
-      const yearStart = now.clone().startOf('year').subtract(y - 1, 'years');
-      const yearEnd = yearStart.clone().endOf('year');
-      const count = rows.filter(row => {
-        const created = moment(row.first_appt_date).utc();
-        return created.isBetween(yearStart, yearEnd, null, '[]');
-      }).length;
-      labels.push(yearStart.format('YYYY'));
-      data.push(count);
-    }
-    result['4y'] = { labels, datasets: [{ data }] };
-  }
-
-  return result;
-};
+//   return result;
+// };
 
 const getAgeGenderByDentist = async (tenantId, clinicId, dentistId) => {
   const query = `
@@ -790,7 +886,7 @@ const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
 };
 
 const updateToothDetails = async (data, patientId, tenant_id) => {
-  console.log(data);
+  //console.log(data);
   data = data.length > 0 ? JSON.stringify(data) : null;
   try {
     const affectedRows = await patientModel.updateToothDetails(
@@ -850,7 +946,7 @@ async function groupToothProceduresByTimeRangeCumulative(tenant_id, clinic_id, r
     })
     .flat();
 
-    console.log(allToothDetails)
+    //console.log(allToothDetails)
 
   const rawCounts = {};
   const allTypesSet = new Set();
@@ -947,7 +1043,7 @@ async function groupToothProceduresByTimeRangeCumulativeByDentist(tenant_id, cli
     })
     .flat();
 
-    console.log(allToothDetails)
+    //console.log(allToothDetails)
 
   const rawCounts = {};
   const allTypesSet = new Set();
