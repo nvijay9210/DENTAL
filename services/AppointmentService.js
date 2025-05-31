@@ -2,6 +2,7 @@ const { CustomError } = require("../middlewares/CustomeError");
 const appointmentModel = require("../models/AppointmentModel");
 const pool = require("../config/db");
 const dayjs = require("dayjs");
+const helper = require("../utils/Helpers");
 const {
   getOrSetCache,
   invalidateCacheByPattern,
@@ -103,6 +104,57 @@ const getAllAppointmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
     const appointments = await getOrSetCache(cacheKey, async () => {
       const result = await appointmentModel.getAllAppointmentsByTenantId(
         tenantId,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+    const convertedRows = appointments.map((appointment) =>
+      helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
+    );
+
+    return convertedRows;
+  } catch (error) {
+    console.error("Database error while fetching appointment:", error);
+    throw new CustomError("Failed to fetch appointment", 404);
+  }
+};
+
+const getAllAppointmentsByTenantIdAndClinicId = async (tenantId,clinic_id, page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `appointment:${tenantId}:clinicid:${clinic_id}:page:${page}:limit:${limit}`;
+
+  try {
+    const appointments = await getOrSetCache(cacheKey, async () => {
+      const result = await appointmentModel.getAllAppointmentsByTenantIdAndClinicId(
+        tenantId,
+        clinic_id,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+    const convertedRows = appointments.map((appointment) =>
+      helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
+    );
+
+    return convertedRows;
+  } catch (error) {
+    console.error("Database error while fetching appointment:", error);
+    throw new CustomError("Failed to fetch appointment", 404);
+  }
+};
+
+const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (tenantId,clinic_id,dentist_id, page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `appointment:${tenantId}:clinicid:${clinic_id}:dentist:${dentist_id}:page:${page}:limit:${limit}`;
+
+  try {
+    const appointments = await getOrSetCache(cacheKey, async () => {
+      const result = await appointmentModel.getAllAppointmentsByTenantIdAndClinicIdByDentist(
+        tenantId,
+        clinic_id,
+        dentist_id,
         Number(limit),
         offset
       );
@@ -841,5 +893,7 @@ module.exports = {
   getAppointmentSummary,
   getAppointmentSummaryByDentist,
   getAppointmentSummaryChartByClinic,
-  getAppointmentSummaryChartByDentist
+  getAppointmentSummaryChartByDentist,
+  getAllAppointmentsByTenantIdAndClinicId,
+  getAllAppointmentsByTenantIdAndClinicIdByDentist
 };

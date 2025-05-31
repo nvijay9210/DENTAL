@@ -9,6 +9,8 @@ const {
   UPDATE_PRESCRIPTION_TENANT,
   DELETE_PRESCRIPTION_TENANT,
   GETALL_PRESCRIPTION_TENANT_PATIENT,
+  GETALL_PRESCRIPTION_TENANT_CLINIC_DENTIST_TREATMENT,
+  GETALL_PRESCRIPTION_TENANT_CLINIC_TREATMENT,
 } = require("./RouterPath");
 
 // Create Prescription
@@ -21,8 +23,13 @@ router.get(
 );
 
 router.get(
-  GETALL_PRESCRIPTION_TENANT_PATIENT,
-  prescriptionController.getAllPrescriptionsByTenantAndPatientId
+  GETALL_PRESCRIPTION_TENANT_CLINIC_TREATMENT,
+  prescriptionController.getAllPrescriptionsByTenantAndClinicIdAndTreatmentId
+);
+
+router.get(
+  GETALL_PRESCRIPTION_TENANT_CLINIC_DENTIST_TREATMENT,
+  prescriptionController.getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId
 );
 
 // Get Single Prescription by Tenant ID & Prescription ID

@@ -124,13 +124,13 @@ function flattenTreatmentImages(treatment) {
 
   return {
     ...treatment,
-    ...flattened
+    ...flattened,
   };
 }
 
-const getAllTreatmentsByTenantAndPatientId = async (
+const getAllTreatmentsByTenantAndClinicIdAndPatientId = async (
   tenantId,
-  patientId,
+  clinic_id,
   appointment_id,
   page = 1,
   limit = 10
@@ -140,9 +140,9 @@ const getAllTreatmentsByTenantAndPatientId = async (
 
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
-      const result = await treatmentModel.getAllTreatmentsByTenantAndPatientId(
+      const result = await treatmentModel.getAllTreatmentsByTenantAndClinicIdAndPatientId(
         tenantId,
-        patientId,
+        clinic_id,
         appointment_id,
         Number(limit),
         offset
@@ -150,9 +150,48 @@ const getAllTreatmentsByTenantAndPatientId = async (
       return result;
     });
 
-    const convertedRows = treatments.map((treatment) =>
-      helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
-    ).map(flattenTreatmentImages);
+    const convertedRows = treatments
+      .map((treatment) =>
+        helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
+      )
+      .map(flattenTreatmentImages);
+
+    return convertedRows;
+  } catch (err) {
+    console.error("Database error while fetching treatments:", err);
+    throw new CustomError("Failed to fetch treatments", 404);
+  }
+};
+
+const getAllTreatmentsByTenantAndClinicIdAndDentistAndPatientId = async (
+  tenantId,
+  clinic_id,
+  dentist_id,
+  appointment_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `treatment_patient:${tenantId}:page:${page}:limit:${limit}`;
+
+  try {
+    const treatments = await getOrSetCache(cacheKey, async () => {
+      const result = await treatmentModel.getAllTreatmentsByTenantAndClinicIdAndDentistAndPatientId(
+        tenantId,
+        clinic_id,
+        dentist_id,
+        appointment_id,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+
+    const convertedRows = treatments
+      .map((treatment) =>
+        helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
+      )
+      .map(flattenTreatmentImages);
 
     return convertedRows;
   } catch (err) {
@@ -237,5 +276,6 @@ module.exports = {
   getTreatmentByTenantIdAndTreatmentId,
   updateTreatment,
   deleteTreatmentByTenantIdAndTreatmentId,
-  getAllTreatmentsByTenantAndPatientId,
+  getAllTreatmentsByTenantAndClinicIdAndPatientId,
+  getAllTreatmentsByTenantAndClinicIdAndDentistAndPatientId,
 };

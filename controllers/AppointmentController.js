@@ -42,6 +42,42 @@ exports.getAllAppointmentsByTenantId = async (req, res, next) => {
     next(err);
   }
 };
+exports.getAllAppointmentsByTenantIdAndClinicId = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  try {
+    const appointments = await appointmentService.getAllAppointmentsByTenantIdAndClinicId(
+      tenant_id,
+      clinic_id,
+      page,
+      limit
+    );
+    res.status(200).json(appointments);
+  } catch (err) {
+    next(err);
+  }
+};
+exports.getAllAppointmentsByTenantIdAndClinicIdByDentist = async (req, res, next) => {
+  const { tenant_id,clinic_id,dentist_id } = req.params;
+  const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  try {
+    const appointments = await appointmentService.getAllAppointmentsByTenantIdAndClinicIdByDentist(
+      tenant_id,
+      clinic_id,
+      dentist_id,
+      page,
+      limit
+    );
+    res.status(200).json(appointments);
+  } catch (err) {
+    next(err);
+  }
+};
 
 /**
  * Get appointment by tenant and appointment ID

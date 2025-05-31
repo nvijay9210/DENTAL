@@ -28,6 +28,9 @@ module.exports = {
 
   ADD_APPOINTMENT: "/addappointment",
   GETALL_APPOINTMENT_TENANT: "/getallappointments/:tenant_id",
+  GETALL_APPOINTMENT_TENANT_CLINIC: "/getallappointments/:tenant_id/:clinic_id",
+  GETALL_APPOINTMENTS_TENANT_CLINIC_DENTIST:
+    "/getallappointments_dentist/:tenant_id/:clinic_id/:dentist_id",
   GET_APPOINTMENT_TENANT: "/getappointment/:appointment_id/:tenant_id",
   UPDATE_APPOINTMENT_TENANT: "/updateappointment/:appointment_id/:tenant_id",
   DELETE_APPOINTMENT_TENANT: "/deleteappointment/:appointment_id/:tenant_id",
@@ -37,11 +40,15 @@ module.exports = {
     "/getallappointments/monthlysummary/:tenant_id/:clinic_id/:dentist_id",
   GETALL_PATIENT_VISITEDETAILS:
     "/getallvisitdetails/:tenant_id/:clinic_id/:patient_id",
-  UPDATE_APPOINTMENT_SCHEDULE_CANCELED:'/updateappointment_cancelstatus/:appointment_id/:tenant_id/:clinic_id/',
+  UPDATE_APPOINTMENT_SCHEDULE_CANCELED:
+    "/updateappointment_cancelstatus/:appointment_id/:tenant_id/:clinic_id/",
 
   ADD_TREATMENT: "/addtreatment",
   GETALL_TREATMENT_TENANT: "/getalltreatments/:tenant_id",
-  GETALL_TREATMENT_TENANT_PATIENT: "/getalltreatments/:tenant_id/:patient_id/:appointment_id",
+  GETALL_TREATMENT_TENANT_CLIENT_APPOINTEMENT:
+    "/getalltreatments/:tenant_id/:clinic_id/:appointment_id",
+  GETALL_TREATMENT_TENANT_CLINIC_DENTIST_APPOINTEMENT:
+    "/getalltreatments/:tenant_id/:clinic_id/:dentist_id/:appointment_id",
   GET_TREATMENT_TENANT: "/gettreatment/:treatment_id/:tenant_id",
   UPDATE_TREATMENT_TENANT: "/updatetreatment/:treatment_id/:tenant_id",
   DELETE_TREATMENT_TENANT: "/deletetreatment/:treatment_id/:tenant_id",
@@ -49,8 +56,10 @@ module.exports = {
   ADD_PRESCRIPTION: "/addprescription",
   GETALL_PRESCRIPTION_TENANT: "/getallprescriptions/:tenant_id",
   GET_PRESCRIPTION_TENANT: "/getprescription/:prescription_id/:tenant_id",
-  GETALL_PRESCRIPTION_TENANT_PATIENT:
-    "/getallprescriptions/:tenant_id/:patient_id/:treatment_id",
+  GETALL_PRESCRIPTION_TENANT_CLINIC_TREATMENT:
+    "/getallprescriptions/:tenant_id/:clinic_id/:treatment_id",
+  GETALL_PRESCRIPTION_TENANT_CLINIC_DENTIST_TREATMENT:
+    "/getallprescriptions/:tenant_id/:clinic_id/:dentist_id/:treatment_id",
   UPDATE_PRESCRIPTION_TENANT: "/updateprescription/:prescription_id/:tenant_id",
   DELETE_PRESCRIPTION_TENANT: "/deleteprescription/:prescription_id/:tenant_id",
 
@@ -68,14 +77,15 @@ module.exports = {
   GET_STATUS_TYPE_SUB_STATUS_TYPE:
     "/getstatustypesub_statustype/:status_type/:tenant_id",
   UPDATE_STATUS_TYPE_SUB: "/updatestatustypesub/:status_type_sub_id/:tenant_id",
-  DELETE_STATUS_TYPE_SUB_TENANT: "/deletestatustypesub/:status_type_sub_id/:tenant_id",
+  DELETE_STATUS_TYPE_SUB_TENANT:
+    "/deletestatustypesub/:status_type_sub_id/:tenant_id",
 
   ADD_ASSET: "/addasset",
   GETALL_ASSET_TENANT: "/getallassets/:tenant_id",
   GET_ASSET_TENANT: "/getasset/:asset_id/:tenant_id",
   UPDATE_ASSET_TENANT: "/updateasset/:asset_id/:tenant_id",
   DELETE_ASSET_TENANT: "/deleteasset/:asset_id/:tenant_id",
-  GETALL_ASSET_REPORT_TENANT_CLINIC:"/getallassets/:tenant_id/:clinic_id",
+  GETALL_ASSET_REPORT_TENANT_CLINIC: "/getallassets/:tenant_id/:clinic_id",
   GET_EXPENSE: "/getexpense/:expense_id",
 
   ADD_EXPENSE: "/addexpense",
@@ -94,8 +104,10 @@ module.exports = {
   ADD_REMINDER: "/addreminder",
   GETALL_REMINDER_TENANT: "/getallreminders/:tenant_id",
   GET_REMINDER: "/getreminder/:reminder_id",
-  GET_REMINDER_SCHEDULE: "/getreminder/:tenant_id/:clinic_id/:dentist_id/:reminder_id",
-  GET_REMINDER_SCHEDULE_MONTHLY: "/getreminder/:tenant_id/:clinic_id/:dentist_id",
+  GET_REMINDER_SCHEDULE:
+    "/getreminder/:tenant_id/:clinic_id/:dentist_id/:reminder_id",
+  GET_REMINDER_SCHEDULE_MONTHLY:
+    "/getreminder/:tenant_id/:clinic_id/:dentist_id",
   UPDATE_REMINDER_TENANT: "/updatereminder/:reminder_id/:tenant_id",
   DELETE_REMINDER_TENANT: "/deletereminder/:reminder_id/:tenant_id",
 
@@ -111,39 +123,41 @@ module.exports = {
   GET_APPOINTMENT_SUMMARY_PERIOD:
     "/getallappointments/periodsummary/:tenant_id/:clinic_id",
 
-    GET_APPOINTMENT_SUMMARY_PERIOD_DENTIST:
+  GET_APPOINTMENT_SUMMARY_PERIOD_DENTIST:
     "/getallappointments/dentistperiodsummary/:tenant_id/:clinic_id/:dentist_id",
 
-    GET_APPOINTMENT_SUMMARY_CHART_CLINIC:
+  GET_APPOINTMENT_SUMMARY_CHART_CLINIC:
     "/getallappointments/summarychartclinic/:tenant_id/:clinic_id",
 
-    GET_APPOINTMENT_SUMMARY_CHART_DENTIST:
+  GET_APPOINTMENT_SUMMARY_CHART_DENTIST:
     "/getallappointments/summarychartdentist/:tenant_id/:clinic_id/:dentist_id",
 
-    GET_PATIENT_SUMMARY_DENTIST:
+  GET_PATIENT_SUMMARY_DENTIST:
     "/getallpatients/patientsummarydentist/:tenant_id/:clinic_id/:dentist_id",
 
-    GET_PATIENT_SUMMARY_CLINIC:
+  GET_PATIENT_SUMMARY_CLINIC:
     "/getallpatients/patientsummaryclinic/:tenant_id/:clinic_id",
 
-    GET_NEW_PATIENT_SUMMARY_CLINIC:
+  GET_NEW_PATIENT_SUMMARY_CLINIC:
     "/getallpatients/newpatientsummaryclinic/:tenant_id/:clinic_id",
 
-    GET_NEW_PATIENT_SUMMARY_DENTIST:
+  GET_NEW_PATIENT_SUMMARY_DENTIST:
     "/getallpatients/newpatientsummarydentist/:tenant_id/:clinic_id/:dentist_id",
 
-    GET_AGE_GENDER_SUMMARY_DENTIST:
+  GET_AGE_GENDER_SUMMARY_DENTIST:
     "/getallpatients/agegendersummarydentist/:tenant_id/:clinic_id/:dentist_id",
 
-    GET_AGE_GENDER_SUMMARY_CLINIC:
+  GET_AGE_GENDER_SUMMARY_CLINIC:
     "/getallpatients/agegendersummaryclinic/:tenant_id/:clinic_id",
 
-    GET_CLINIC_FINANACE_SUMMARY_CLINIC:"/getallclinics/financesummary/:tenant_id/:clinic_id",
+  GET_CLINIC_FINANACE_SUMMARY_CLINIC:
+    "/getallclinics/financesummary/:tenant_id/:clinic_id",
 
-    GET_CLINIC_FINANACE_SUMMARY_DENTIST:"/getallclinics/financesummary/:tenant_id/:clinic_id/:dentist_id",
+  GET_CLINIC_FINANACE_SUMMARY_DENTIST:
+    "/getallclinics/financesummary/:tenant_id/:clinic_id/:dentist_id",
 
-    GET_TOOTH_DETAILS_CLINIC:"/toothdetails/:tenant_id/:clinic_id",
-    GET_TOOTH_DETAILS_DENTIST:"/toothdetails/:tenant_id/:clinic_id/:dentist_id",
+  GET_TOOTH_DETAILS_CLINIC: "/toothdetails/:tenant_id/:clinic_id",
+  GET_TOOTH_DETAILS_DENTIST: "/toothdetails/:tenant_id/:clinic_id/:dentist_id",
 };
 
 // GET /api/tenant?page=2&limit=10

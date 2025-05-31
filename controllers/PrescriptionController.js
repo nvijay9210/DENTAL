@@ -1,5 +1,5 @@
 const { CustomError } = require("../middlewares/CustomeError");
-const { checkIfExists } = require("../models/checkIfExists");
+const { checkIfExists, checkIfIdExists } = require("../models/checkIfExists");
 const prescriptionService = require("../services/PrescriptionService");
 const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 const prescriptionValidation = require("../validations/PrescriptionValidation");
@@ -42,17 +42,13 @@ exports.getAllPrescriptionsByTenantId = async (req, res, next) => {
   }
 };
 
-exports.getAllPrescriptionsByTenantAndPatientId = async (req, res, next) => {
-  const { tenant_id, patient_id,treatment_id } = req.params;
+exports.getAllPrescriptionsByTenantAndClinicIdAndTreatmentId = async (req, res, next) => {
+  const { tenant_id, clinic_id,treatment_id } = req.params;
   const { page, limit } = req.query;
-  const patient1 = await checkIfExists(
-    "patient",
-    "patient_id",
-    patient_id,
-    tenant_id
-  );
 
-  if (!patient1) throw new CustomError("Patient not found", 404);
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  
   const treatment1 = await checkIfExists(
     "treatment",
     "treatment_id",
@@ -63,9 +59,41 @@ exports.getAllPrescriptionsByTenantAndPatientId = async (req, res, next) => {
   if (!treatment1) throw new CustomError("Treatment not found", 404);
   try {
     const prescriptions =
-      await prescriptionService.getAllPrescriptionsByTenantAndPatientId(
+      await prescriptionService.getAllPrescriptionsByTenantAndClinicIdAndTreatmentId(
         tenant_id,
-        patient_id,
+        clinic_id,
+        treatment_id,
+        page,
+        limit
+      );
+    res.status(200).json(prescriptions);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (req, res, next) => {
+  const { tenant_id, clinic_id,dentist_id,treatment_id } = req.params;
+  const { page, limit } = req.query;
+
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  
+  const treatment1 = await checkIfExists(
+    "treatment",
+    "treatment_id",
+    treatment_id,
+    tenant_id
+  );
+
+  if (!treatment1) throw new CustomError("Treatment not found", 404);
+  try {
+    const prescriptions =
+      await prescriptionService.getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId(
+        tenant_id,
+        clinic_id,
+        dentist_id,
         treatment_id,
         page,
         limit

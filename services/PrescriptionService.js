@@ -116,9 +116,9 @@ const getAllPrescriptionsByTenantId = async (
   }
 };
 
-const getAllPrescriptionsByTenantAndPatientId = async (
+const getAllPrescriptionsByTenantAndClinicIdAndTreatmentId = async (
   tenantId,
-  patientId,
+  clinic_id,
   treatment_id,
   page = 1,
   limit = 10
@@ -129,9 +129,45 @@ const getAllPrescriptionsByTenantAndPatientId = async (
   try {
     const prescriptions = await getOrSetCache(cacheKey, async () => {
       const result =
-        await prescriptionModel.getAllPrescriptionsByTenantAndPatientId(
+        await prescriptionModel.getAllPrescriptionsByTenantAndClinicIdAndTreatmentId(
           tenantId,
-          patientId,
+          clinic_id,
+          treatment_id,
+          Number(limit),
+          offset
+        );
+      return result;
+    });
+
+    const convertedRows = prescriptions.map((prescription) =>
+          helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
+        );
+    
+        return convertedRows;
+  } catch (err) {
+    console.error("Database error while fetching prescriptions:", err);
+    throw new CustomError("Failed to fetch prescriptions", 404);
+  }
+};
+
+const getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (
+  tenantId,
+  clinic_id,
+  dentist_id,
+  treatment_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `prescriptionByPatientId:${tenantId}:page:${page}:limit:${limit}`;
+
+  try {
+    const prescriptions = await getOrSetCache(cacheKey, async () => {
+      const result =
+        await prescriptionModel.getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId(
+          tenantId,
+          clinic_id,
+          dentist_id,
           treatment_id,
           Number(limit),
           offset
@@ -232,5 +268,6 @@ module.exports = {
   getPrescriptionByTenantIdAndPrescriptionId,
   updatePrescription,
   deletePrescriptionByTenantIdAndPrescriptionId,
-  getAllPrescriptionsByTenantAndPatientId,
+  getAllPrescriptionsByTenantAndClinicIdAndTreatmentId,
+  getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId,
 };

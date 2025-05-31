@@ -38,6 +38,53 @@ const getAllAppointmentsByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
+const getAllAppointmentsByTenantIdAndClinicId = async (tenantId, clinicId) => {
+  const query = `SELECT 
+    *
+FROM 
+    appointment AS app
+WHERE 
+    app.tenant_id = ? 
+    AND app.clinic_id = ? 
+
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, clinicId]);
+    console.log('appoinments:',rows)
+    return rows;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+};
+
+const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (tenantId, clinicId,dentist_id) => {
+  const query = `SELECT 
+    *
+FROM 
+    appointment AS app
+WHERE 
+    app.tenant_id = ? 
+    AND app.clinic_id = ? 
+    AND app.dentist_id=?
+
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, clinicId,dentist_id]);
+    console.log('appoinments:',rows)
+    return rows;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+};
+
 const getAllAppointmentsByTenantIdAndClinicIdAndDentistId = async (tenantId, clinicId, dentistId) => {
   const query = `SELECT 
     app.appointment_date
@@ -357,5 +404,7 @@ module.exports = {
   getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId,
   updateAppoinmentStatusCancelled,
   getAppointmentSummary,
+  getAllAppointmentsByTenantIdAndClinicId,
+  getAllAppointmentsByTenantIdAndClinicIdByDentist,
   getAllAppointmentsByTenantIdAndClinicIdAndDentistId
 };

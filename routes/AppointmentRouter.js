@@ -13,7 +13,8 @@ const {
   GET_APPOINTMENT_MONTHLY_SUMMARY,
   GETALL_PATIENT_VISITEDETAILS,
   UPDATE_APPOINTMENT_SCHEDULE_CANCELED,
-  GET_APPOINTMENT_SUMMARY_PERIOD
+  GETALL_APPOINTMENT_TENANT_CLINIC,
+  GETALL_APPOINTMENTS_TENANT_CLINIC_DENTIST
 } = require("./RouterPath");
 
 // File upload middleware can be added here if needed (e.g. reports, prescriptions)
@@ -25,6 +26,14 @@ router.post(ADD_APPOINTMENT, appointmentController.createAppointment);
 router.get(
   GETALL_APPOINTMENT_TENANT,
   appointmentController.getAllAppointmentsByTenantId
+);
+router.get(
+  GETALL_APPOINTMENT_TENANT_CLINIC,
+  appointmentController.getAllAppointmentsByTenantIdAndClinicId
+);
+router.get(
+  GETALL_APPOINTMENTS_TENANT_CLINIC_DENTIST,
+  appointmentController.getAllAppointmentsByTenantIdAndClinicIdByDentist
 );
 
 // Get Single Appointment by Tenant & Appointment ID

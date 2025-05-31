@@ -72,29 +72,19 @@ const deletePrescriptionByTenantAndPrescriptionId = async (tenant_id, prescripti
   }
 };
 
-const getAllPrescriptionsByTenantClinicAndDentistAndPatientId = async (tenantId,clinicId,dentistId, patientId,limit,offset) => {
-  const query = `SELECT 
-    p.patient_id,
-     CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
-     app.appointment_date,
-     app.reason
+const getAllPrescriptionsByTenantAndClinicIdAndTreatmentId = async (tenantId, clinic_id,treatment_id,limit,offset) => {
+  const query = `SELECT *
 FROM 
-    prescription AS app
-JOIN 
-    patient as p 
-ON
-  p.patient_id=app.patient_id
+    prescription 
 WHERE 
-    app.tenant_id = ? AND 
-    app.clinic_id = ? AND 
-    app.patient_id=? AND
-    app.status='CP'
+    tenant_id = ? AND 
+    clinic_id = ? AND 
+     treatment_id=?
     limit ? offset ? 
 `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId,clinicId, patientId,limit,offset]);
-    console.log('appoinments:',rows)
+    const [rows] = await conn.query(query, [tenantId, clinic_id,treatment_id,limit,offset]);
     return rows;
   } catch (error) {
     console.log(error);
@@ -104,18 +94,20 @@ WHERE
   }
 };
 
-const getAllPrescriptionsByTenantAndPatientId = async (tenantId, patientId,treatment_id,limit,offset) => {
+const getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (tenantId, clinic_id,dentist_id,treatment_id,limit,offset) => {
   const query = `SELECT *
 FROM 
     prescription 
 WHERE 
     tenant_id = ? AND 
-    patient_id=? AND treatment_id=?
+    clinic_id = ? AND 
+    dentist_id = ? AND 
+     treatment_id=?
     limit ? offset ? 
 `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, patientId,treatment_id,limit,offset]);
+    const [rows] = await conn.query(query, [tenantId, clinic_id,dentist_id,treatment_id,limit,offset]);
     return rows;
   } catch (error) {
     console.log(error);
@@ -132,5 +124,6 @@ module.exports = {
   getPrescriptionByTenantAndPrescriptionId,
   updatePrescription,
   deletePrescriptionByTenantAndPrescriptionId,
-  getAllPrescriptionsByTenantAndPatientId
+  getAllPrescriptionsByTenantAndClinicIdAndTreatmentId,
+  getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId
 };

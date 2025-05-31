@@ -40,17 +40,11 @@ exports.getAllTreatmentsByTenantId = async (req, res, next) => {
   }
 };
 
-exports.getAllTreatmentsByTenantAndPatientId = async (req, res, next) => {
-  const { tenant_id, patient_id,appointment_id } = req.params;
+exports.getAllTreatmentsByTenantAndClinicIdAndPatientId = async (req, res, next) => {
+  const { tenant_id,clinic_id,appointment_id } = req.params;
   const { page, limit } = req.query;
-  const patient1 = await checkIfExists(
-    "patient",
-    "patient_id",
-    patient_id,
-    tenant_id
-  );
-
-  if (!patient1) throw new CustomError("Patient not found", 404);
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
 
   const appointment = await checkIfExists(
     "appointment",
@@ -62,9 +56,41 @@ exports.getAllTreatmentsByTenantAndPatientId = async (req, res, next) => {
   if (!appointment) throw new CustomError("Appointment not found", 404);
   try {
     const treatments =
-      await treatmentService.getAllTreatmentsByTenantAndPatientId(
+      await treatmentService.getAllTreatmentsByTenantAndClinicIdAndPatientId(
         tenant_id,
-        patient_id,
+        clinic_id,
+        appointment_id,
+        page,
+        limit
+      );
+    res.status(200).json(treatments);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllTreatmentsByTenantAndClinicIdAndDentistAndPatientId = async (req, res, next) => {
+  const { tenant_id,clinic_id,dentist_id,appointment_id } = req.params;
+  const { page, limit } = req.query;
+
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  await checkIfIdExists('dentist','dentist_id',dentist_id)
+
+  const appointment = await checkIfExists(
+    "appointment",
+    "appointment_id",
+    appointment_id,
+    tenant_id
+  );
+
+  if (!appointment) throw new CustomError("Appointment not found", 404);
+  try {
+    const treatments =
+      await treatmentService.getAllTreatmentsByTenantAndClinicIdAndDentistAndPatientId(
+        tenant_id,
+        clinic_id,
+        dentist_id,
         appointment_id,
         page,
         limit
