@@ -8,6 +8,7 @@ const { recordExists } = require("../query/Records");
 
 const treatmentColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },
+  { columnname: "appointment_id", type: "int", size: 11, null: false },
   { columnname: "patient_id", type: "int", size: 11, null: false },
   { columnname: "dentist_id", type: "int", size: 11, null: false },
   { columnname: "clinic_id", type: "int", size: 11, null: false },

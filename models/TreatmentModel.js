@@ -47,18 +47,19 @@ const getTreatmentByTenantAndTreatmentId = async (tenant_id, treatment_id) => {
   }
 };
 
-const getAllTreatmentsByTenantAndPatientId = async (tenantId, patientId,limit,offset) => {
+const getAllTreatmentsByTenantAndPatientId = async (tenantId, patientId,appointment_id,limit,offset) => {
   const query = `SELECT *
 FROM 
     treatment 
 WHERE 
     tenant_id = ? AND 
-    patient_id=?
+    patient_id=? AND
+    appointment_id=?
     limit ? offset ? 
 `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, patientId,limit,offset]);
+    const [rows] = await conn.query(query, [tenantId, patientId,appointment_id,limit,offset]);
     return rows;
   } catch (error) {
     console.log(error);

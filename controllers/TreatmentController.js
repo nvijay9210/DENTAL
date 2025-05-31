@@ -41,7 +41,7 @@ exports.getAllTreatmentsByTenantId = async (req, res, next) => {
 };
 
 exports.getAllTreatmentsByTenantAndPatientId = async (req, res, next) => {
-  const { tenant_id, patient_id } = req.params;
+  const { tenant_id, patient_id,appointment_id } = req.params;
   const { page, limit } = req.query;
   const patient1 = await checkIfExists(
     "patient",
@@ -51,11 +51,21 @@ exports.getAllTreatmentsByTenantAndPatientId = async (req, res, next) => {
   );
 
   if (!patient1) throw new CustomError("Patient not found", 404);
+
+  const appointment = await checkIfExists(
+    "appointment",
+    "appointment_id",
+    appointment_id,
+    tenant_id
+  );
+
+  if (!appointment) throw new CustomError("Appointment not found", 404);
   try {
     const treatments =
       await treatmentService.getAllTreatmentsByTenantAndPatientId(
         tenant_id,
         patient_id,
+        appointment_id,
         page,
         limit
       );

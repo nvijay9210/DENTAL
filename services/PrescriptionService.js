@@ -119,6 +119,7 @@ const getAllPrescriptionsByTenantId = async (
 const getAllPrescriptionsByTenantAndPatientId = async (
   tenantId,
   patientId,
+  treatment_id,
   page = 1,
   limit = 10
 ) => {
@@ -131,6 +132,7 @@ const getAllPrescriptionsByTenantAndPatientId = async (
         await prescriptionModel.getAllPrescriptionsByTenantAndPatientId(
           tenantId,
           patientId,
+          treatment_id,
           Number(limit),
           offset
         );

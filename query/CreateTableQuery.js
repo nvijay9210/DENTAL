@@ -294,6 +294,7 @@ CREATE TABLE IF NOT EXISTS tenant (
   addTreatment: `CREATE TABLE IF NOT EXISTS treatment (
   treatment_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
+  appointment_id int(11) NOT NULL,
   patient_id int(11) NOT NULL,
   dentist_id int(11) NOT NULL,
   clinic_id int(11) NOT NULL,
@@ -326,6 +327,7 @@ CREATE TABLE IF NOT EXISTS tenant (
   CONSTRAINT fk_treatment_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
   CONSTRAINT fk_treatment_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
   CONSTRAINT fk_treatment_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_treatment_appointment FOREIGN KEY (patient_id) REFERENCES appointment (appointment_id) ON UPDATE CASCADE,
   CONSTRAINT fk_treatment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,

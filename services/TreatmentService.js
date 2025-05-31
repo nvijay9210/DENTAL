@@ -11,6 +11,7 @@ const { formatDateOnly } = require("../utils/DateUtils");
 const treatmentFields = {
   tenant_id: (val) => val,
   patient_id: (val) => val,
+  appointment_id: (val) => val,
   dentist_id: (val) => val,
   clinic_id: (val) => val,
   diagnosis: helper.safeStringify,
@@ -35,6 +36,7 @@ const treatmentFields = {
 const treatmentFieldsReverseMap = {
   treatment_id: (val) => val,
   tenant_id: (val) => val,
+  appointment_id: (val) => val,
   patient_id: (val) => val,
   dentist_id: (val) => val,
   clinic_id: (val) => val,
@@ -129,6 +131,7 @@ function flattenTreatmentImages(treatment) {
 const getAllTreatmentsByTenantAndPatientId = async (
   tenantId,
   patientId,
+  appointment_id,
   page = 1,
   limit = 10
 ) => {
@@ -140,6 +143,7 @@ const getAllTreatmentsByTenantAndPatientId = async (
       const result = await treatmentModel.getAllTreatmentsByTenantAndPatientId(
         tenantId,
         patientId,
+        appointment_id,
         Number(limit),
         offset
       );

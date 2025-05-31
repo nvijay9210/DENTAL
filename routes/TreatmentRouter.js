@@ -25,7 +25,7 @@ const treatmentFileMiddleware = uploadFileMiddleware({
       fieldName: "treatment_image",
       subFolder: "Photos",
       maxSizeMB: 10,
-      multiple: false,
+      multiple: true,
     },
   ],
   createValidationFn: treatmentValidation.createTreatmentValidation,
