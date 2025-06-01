@@ -268,150 +268,201 @@ const handleClinicAssignment = async (
 const getFinanceSummary = async (
   tenant_id,
   clinic_id,
+  
   usePaymentTable = false
 ) => {
   let conn;
-  const now = dayjs();
+
   try {
     conn = await pool.getConnection();
 
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // Normalize current date
+
     // Fetch raw data
-    let [appointments, treatments, expenses, payments] = await Promise.all([
+    let [appointments, treatments, expenses] = await Promise.all([
       usePaymentTable
         ? []
         : conn.query(
             `SELECT appointment_date AS date, (consultation_fee - discount_applied) AS amount FROM appointment 
-         WHERE status = 'CP' AND appointment_date >= ? AND tenant_id = ? AND clinic_id = ?`,
-            [now.subtract(4, "year").toDate(), tenant_id, clinic_id]
+             WHERE status = 'CP' AND appointment_date >= ? AND tenant_id = ? AND clinic_id = ?`,
+            [
+              new Date(now.getTime() - 365 * 4 * 24 * 60 * 60 * 1000),
+              tenant_id,
+              clinic_id,
+              
+            ]
           ),
       usePaymentTable
         ? []
         : conn.query(
             `SELECT treatment_date AS date, cost AS amount FROM treatment 
-         WHERE treatment_date >= ? AND tenant_id = ? AND clinic_id = ?`,
-            [now.subtract(4, "year").toDate(), tenant_id, clinic_id]
+             WHERE treatment_date >= ? AND tenant_id = ? AND clinic_id = ?`,
+            [
+              new Date(now.getTime() - 365 * 4 * 24 * 60 * 60 * 1000),
+              tenant_id,
+              clinic_id,
+              
+            ]
           ),
       conn.query(
-        `SELECT e.expense_date AS date, e.expense_amount AS amount FROM expense e
+        `SELECT e.expense_date AS date, e.expense_amount AS amount
+         FROM expense e
          WHERE e.expense_date >= ? AND e.tenant_id = ? AND e.clinic_id = ?`,
-        [now.subtract(4, "year").toDate(), tenant_id, clinic_id]
+        [
+          new Date(now.getFullYear() - 4, now.getMonth(), now.getDate()),
+          tenant_id,
+          clinic_id,
+        ]
       ),
-      usePaymentTable
-        ? conn.query(
-            `SELECT payment_date AS date, amount AS amount FROM payment 
-         WHERE payment_date >= ? AND tenant_id = ? AND clinic_id = ?`,
-            [now.subtract(4, "year").toDate(), tenant_id, clinic_id]
-          )
-        : [],
     ]);
 
     appointments = usePaymentTable ? [] : appointments[0];
     treatments = usePaymentTable ? [] : treatments[0];
     expenses = expenses[0];
-    payments = payments.length > 0 ? payments[0] : [];
 
-    console.log(
-      "appointments:",
-      appointments,
-      "treatments:",
-      treatments,
-      "expenses:",
-      expenses
-    );
-
-    // Convert to uniform format
-    const incomeData = [...appointments, ...treatments].map((item) => ({
-      date: new Date(item.date),
-      amount: parseFloat(item.amount),
-    }));
+    // Convert to uniform format and normalize dates
+    const incomeData = [...appointments, ...treatments].map((item) => {
+      const d = new Date(item.date);
+      d.setHours(0, 0, 0, 0);
+      return {
+        date: d,
+        amount: parseFloat(item.amount) || 0,
+      };
+    });
 
     const expenseData = expenses.map((item) => ({
-      date: new Date(item.date),
-      amount: parseFloat(item.amount),
+      date: normalizeDate(item.date),
+      amount: parseFloat(item.amount) || 0,
     }));
 
-    const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const monthLabels = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
+    console.log(expenses)
+    console.log(expenseData)
 
     function groupByDay(data) {
       const result = Array(7).fill(0);
+      const now = new Date();
+      now.setHours(0, 0, 0, 0); // Normalize to midnight
+    
+      // Ensure we only include dates from the last 7 days
+      const sevenDaysAgo = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000); // Go back exactly 6 days (today + 6 days ago = 7-day range)
+    
       for (const entry of data) {
-        result[entry.date.getDay()] += entry.amount;
+        const entryDate = new Date(entry.date);
+        entryDate.setHours(0, 0, 0, 0);
+    
+        if (entryDate >= sevenDaysAgo && entryDate <= now) {
+          const dayIndex = entryDate.getDay(); // 0 = Sunday
+          result[dayIndex] += entry.amount;
+        }
       }
+    
+      const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       return dayLabels.map((label, i) => ({ label, amount: result[i] }));
+    }
+
+    function normalizeDate(date) {
+      const d = new Date(date);
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
     }
 
     function groupByWeek(data, numWeeks = 4) {
       const today = new Date();
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-
+      today.setHours(0, 0, 0, 0); // Normalize time
+    
+      // Start from last full week (Sunday)
+      let currentSunday = new Date(today);
+      currentSunday.setDate(today.getDate() - today.getDay() - 7); // Go back one full week
+    
       const result = Array(numWeeks).fill(0);
-
+    
+      // Generate past N weeks from oldest to newest
+      const weekRanges = [];
+      for (let i = 0; i < numWeeks; i++) {
+        const start = new Date(currentSunday);
+        start.setDate(currentSunday.getDate() - i * 7);
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+    
+        weekRanges.push({ start, end });
+      }
+    
+      // Match each entry to a week
       for (const entry of data) {
-        const diff = Math.floor(
-          (startOfWeek - entry.date) / (7 * 24 * 60 * 60 * 1000)
-        );
-        const weekIndex = numWeeks - diff - 1;
-        if (weekIndex >= 0 && weekIndex < numWeeks) {
-          result[weekIndex] += entry.amount;
+        const entryDate = new Date(entry.date);
+        entryDate.setHours(0, 0, 0, 0);
+    
+        for (let i = 0; i < numWeeks; i++) {
+          const { start, end } = weekRanges[i];
+    
+          if (entryDate >= start && entryDate <= end) {
+            result[i] += entry.amount;
+            break;
+          }
         }
       }
-
+    
+      // Return with "Week 1", "Week 2", ..., "Week N"
       return result.map((amount, i) => ({
         label: `Week ${i + 1}`,
         amount,
       }));
     }
 
-    function groupByMonth(data, numMonths = 12) {
+    function groupByMonth(data, numMonths = 3) {
       const today = new Date();
       const result = Array(numMonths).fill(0);
+      const monthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+      // Build reference dates for each bucket (from oldest to newest)
+      const refDates = [];
+      for (let i = numMonths - 1; i >= 0; i--) {
+        const refDate = new Date(today.getFullYear(), today.getMonth() - (numMonths - i - 1), 1); // First of month
+        refDates.push({
+          year: refDate.getFullYear(),
+          month: refDate.getMonth(), // 0 = Jan, ..., 4 = May
+          label: monthLabels[refDate.getMonth()]
+        });
+      }
+    
+      // Match entries to months
       for (const entry of data) {
-        const diff =
-          (today.getFullYear() - entry.date.getFullYear()) * 12 +
-          (today.getMonth() - entry.date.getMonth());
-        const monthIndex = numMonths - diff - 1;
-        if (monthIndex >= 0 && monthIndex < numMonths) {
-          result[monthIndex] += entry.amount;
+        const entryDate = new Date(entry.date);
+        const entryYear = entryDate.getFullYear();
+        const entryMonth = entryDate.getMonth();
+    
+        for (let i = 0; i < numMonths; i++) {
+          const ref = refDates[i];
+          if (entryYear === ref.year && entryMonth === ref.month) {
+            result[i] += entry.amount;
+            break;
+          }
         }
       }
-      return result.map((amount, i) => {
-        const monthDate = new Date(
-          today.getFullYear(),
-          today.getMonth() - (numMonths - i - 1)
-        );
-        return {
-          label: monthLabels[monthDate.getMonth()],
-          amount,
-        };
-      });
+    
+      return result.map((amount, i) => ({
+        label: refDates[i].label,
+        amount
+      }));
     }
 
     function groupByYear(data, numYears = 4) {
-      const currentYear = new Date().getFullYear();
       const result = Array(numYears).fill(0);
+      const currentYear = now.getFullYear();
+
       for (const entry of data) {
-        const yearIndex = currentYear - entry.date.getFullYear();
+        const entryYear = entry.date.getFullYear();
+        const offset = currentYear - entryYear;
+
+        const yearIndex = numYears - offset - 1;
+
         if (yearIndex >= 0 && yearIndex < numYears) {
-          result[numYears - yearIndex - 1] += entry.amount;
+          result[yearIndex] += entry.amount;
         }
       }
+
       return result.map((amount, i) => ({
-        label: `${currentYear - (numYears - i - 1)}`,
+        date: `${currentYear - (numYears - i - 1)}`,
         amount,
       }));
     }
@@ -455,7 +506,7 @@ const getFinanceSummary = async (
       },
       "6m": {
         income: groupByMonth(incomeData, 6),
-        expense: groupByMonth(expenseData, 6),
+        expense: groupByWeek(expenseData, 6),
       },
       "7m": {
         income: groupByMonth(incomeData, 7),
@@ -498,12 +549,12 @@ const getFinanceSummary = async (
         expense: groupByYear(expenseData, 4),
       },
     };
+
     return finalResult;
   } finally {
     if (conn) conn.release();
   }
 };
-
 const getFinanceSummarybyDentist = async (
   tenant_id,
   clinic_id,
@@ -511,19 +562,20 @@ const getFinanceSummarybyDentist = async (
   usePaymentTable = false
 ) => {
   let conn;
+
   try {
     conn = await pool.getConnection();
 
     const now = new Date();
-    now.setHours(0, 0, 0, 0); // Normalize date
+    now.setHours(0, 0, 0, 0); // Normalize current date
 
     // Fetch raw data
-    let [appointments, treatments, expenses, payments] = await Promise.all([
+    let [appointments, treatments, expenses] = await Promise.all([
       usePaymentTable
         ? []
         : conn.query(
             `SELECT appointment_date AS date, (consultation_fee - discount_applied) AS amount FROM appointment 
-         WHERE status = 'CP' AND appointment_date >= ? AND tenant_id = ? AND clinic_id = ? AND dentist_id=?`,
+             WHERE status = 'CP' AND appointment_date >= ? AND tenant_id = ? AND clinic_id = ? AND dentist_id=?`,
             [
               new Date(now.getTime() - 365 * 4 * 24 * 60 * 60 * 1000),
               tenant_id,
@@ -535,7 +587,7 @@ const getFinanceSummarybyDentist = async (
         ? []
         : conn.query(
             `SELECT treatment_date AS date, cost AS amount FROM treatment 
-         WHERE treatment_date >= ? AND tenant_id = ? AND clinic_id = ? AND dentist_id=?`,
+             WHERE treatment_date >= ? AND tenant_id = ? AND clinic_id = ? AND dentist_id=?`,
             [
               new Date(now.getTime() - 365 * 4 * 24 * 60 * 60 * 1000),
               tenant_id,
@@ -544,136 +596,163 @@ const getFinanceSummarybyDentist = async (
             ]
           ),
       conn.query(
-        `SELECT e.expense_date AS date, e.expense_amount AS amount FROM expense e INNER JOIN treatment t ON t.clinic_id=e.clinic_id
-         WHERE e.expense_date >= ? AND e.tenant_id = ? AND e.clinic_id = ? AND t.dentist_id=?`,
+        `SELECT e.expense_date AS date, e.expense_amount AS amount
+         FROM expense e
+         WHERE e.expense_date >= ? AND e.tenant_id = ? AND e.clinic_id = ?`,
         [
-          new Date(now.getTime() - 365 * 4 * 24 * 60 * 60 * 1000),
+          new Date(now.getFullYear() - 4, now.getMonth(), now.getDate()),
           tenant_id,
           clinic_id,
-          dentist_id,
         ]
       ),
-      usePaymentTable
-        ? conn.query(
-            `SELECT payment_date AS date, amount AS amount FROM payment 
-         WHERE payment_date >= ? AND tenant_id = ? AND clinic_id = ? AND dentist_id=?`,
-            [
-              new Date(now.getTime() - 365 * 4 * 24 * 60 * 60 * 1000),
-              tenant_id,
-              clinic_id,
-              dentist_id,
-            ]
-          )
-        : [],
     ]);
 
     appointments = usePaymentTable ? [] : appointments[0];
     treatments = usePaymentTable ? [] : treatments[0];
     expenses = expenses[0];
-    payments = payments.length > 0 ? payments[0] : [];
 
-    console.log(
-      "appointments:",
-      appointments,
-      "treatments:",
-      treatments,
-      "expenses:",
-      expenses
-    );
-
-    // Convert to uniform format
-    const incomeData = [...appointments, ...treatments].map((item) => ({
-      date: new Date(item.date),
-      amount: parseFloat(item.amount),
-    }));
+    // Convert to uniform format and normalize dates
+    const incomeData = [...appointments, ...treatments].map((item) => {
+      const d = new Date(item.date);
+      d.setHours(0, 0, 0, 0);
+      return {
+        date: d,
+        amount: parseFloat(item.amount) || 0,
+      };
+    });
 
     const expenseData = expenses.map((item) => ({
-      date: new Date(item.date),
-      amount: parseFloat(item.amount),
+      date: normalizeDate(item.date),
+      amount: parseFloat(item.amount) || 0,
     }));
 
-    const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const monthLabels = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
+    console.log(expenses)
+    console.log(expenseData)
 
     function groupByDay(data) {
       const result = Array(7).fill(0);
+      const now = new Date();
+      now.setHours(0, 0, 0, 0); // Normalize to midnight
+    
+      // Ensure we only include dates from the last 7 days
+      const sevenDaysAgo = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000); // Go back exactly 6 days (today + 6 days ago = 7-day range)
+    
       for (const entry of data) {
-        result[entry.date.getDay()] += entry.amount;
+        const entryDate = new Date(entry.date);
+        entryDate.setHours(0, 0, 0, 0);
+    
+        if (entryDate >= sevenDaysAgo && entryDate <= now) {
+          const dayIndex = entryDate.getDay(); // 0 = Sunday
+          result[dayIndex] += entry.amount;
+        }
       }
+    
+      const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       return dayLabels.map((label, i) => ({ label, amount: result[i] }));
+    }
+
+    function normalizeDate(date) {
+      const d = new Date(date);
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
     }
 
     function groupByWeek(data, numWeeks = 4) {
       const today = new Date();
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-
+      today.setHours(0, 0, 0, 0); // Normalize time
+    
+      // Start from last full week (Sunday)
+      let currentSunday = new Date(today);
+      currentSunday.setDate(today.getDate() - today.getDay() - 7); // Go back one full week
+    
       const result = Array(numWeeks).fill(0);
-
+    
+      // Generate past N weeks from oldest to newest
+      const weekRanges = [];
+      for (let i = 0; i < numWeeks; i++) {
+        const start = new Date(currentSunday);
+        start.setDate(currentSunday.getDate() - i * 7);
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+    
+        weekRanges.push({ start, end });
+      }
+    
+      // Match each entry to a week
       for (const entry of data) {
-        const diff = Math.floor(
-          (startOfWeek - entry.date) / (7 * 24 * 60 * 60 * 1000)
-        );
-        const weekIndex = numWeeks - diff - 1;
-        if (weekIndex >= 0 && weekIndex < numWeeks) {
-          result[weekIndex] += entry.amount;
+        const entryDate = new Date(entry.date);
+        entryDate.setHours(0, 0, 0, 0);
+    
+        for (let i = 0; i < numWeeks; i++) {
+          const { start, end } = weekRanges[i];
+    
+          if (entryDate >= start && entryDate <= end) {
+            result[i] += entry.amount;
+            break;
+          }
         }
       }
-
+    
+      // Return with "Week 1", "Week 2", ..., "Week N"
       return result.map((amount, i) => ({
         label: `Week ${i + 1}`,
         amount,
       }));
     }
 
-    function groupByMonth(data, numMonths = 12) {
+    function groupByMonth(data, numMonths = 3) {
       const today = new Date();
       const result = Array(numMonths).fill(0);
+      const monthLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+      // Build reference dates for each bucket (from oldest to newest)
+      const refDates = [];
+      for (let i = numMonths - 1; i >= 0; i--) {
+        const refDate = new Date(today.getFullYear(), today.getMonth() - (numMonths - i - 1), 1); // First of month
+        refDates.push({
+          year: refDate.getFullYear(),
+          month: refDate.getMonth(), // 0 = Jan, ..., 4 = May
+          label: monthLabels[refDate.getMonth()]
+        });
+      }
+    
+      // Match entries to months
       for (const entry of data) {
-        const diff =
-          (today.getFullYear() - entry.date.getFullYear()) * 12 +
-          (today.getMonth() - entry.date.getMonth());
-        const monthIndex = numMonths - diff - 1;
-        if (monthIndex >= 0 && monthIndex < numMonths) {
-          result[monthIndex] += entry.amount;
+        const entryDate = new Date(entry.date);
+        const entryYear = entryDate.getFullYear();
+        const entryMonth = entryDate.getMonth();
+    
+        for (let i = 0; i < numMonths; i++) {
+          const ref = refDates[i];
+          if (entryYear === ref.year && entryMonth === ref.month) {
+            result[i] += entry.amount;
+            break;
+          }
         }
       }
-      return result.map((amount, i) => {
-        const monthDate = new Date(
-          today.getFullYear(),
-          today.getMonth() - (numMonths - i - 1)
-        );
-        return {
-          label: monthLabels[monthDate.getMonth()],
-          amount,
-        };
-      });
+    
+      return result.map((amount, i) => ({
+        label: refDates[i].label,
+        amount
+      }));
     }
 
     function groupByYear(data, numYears = 4) {
-      const currentYear = new Date().getFullYear();
       const result = Array(numYears).fill(0);
+      const currentYear = now.getFullYear();
+
       for (const entry of data) {
-        const yearIndex = currentYear - entry.date.getFullYear();
+        const entryYear = entry.date.getFullYear();
+        const offset = currentYear - entryYear;
+
+        const yearIndex = numYears - offset - 1;
+
         if (yearIndex >= 0 && yearIndex < numYears) {
-          result[numYears - yearIndex - 1] += entry.amount;
+          result[yearIndex] += entry.amount;
         }
       }
+
       return result.map((amount, i) => ({
-        label: `${currentYear - (numYears - i - 1)}`,
+        date: `${currentYear - (numYears - i - 1)}`,
         amount,
       }));
     }
@@ -717,7 +796,7 @@ const getFinanceSummarybyDentist = async (
       },
       "6m": {
         income: groupByMonth(incomeData, 6),
-        expense: groupByMonth(expenseData, 6),
+        expense: groupByWeek(expenseData, 6),
       },
       "7m": {
         income: groupByMonth(incomeData, 7),
@@ -760,11 +839,13 @@ const getFinanceSummarybyDentist = async (
         expense: groupByYear(expenseData, 4),
       },
     };
+
     return finalResult;
   } finally {
     if (conn) conn.release();
   }
 };
+
 
 module.exports = {
   createClinic,

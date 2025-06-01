@@ -18,12 +18,10 @@ const {
   GET_TOOTH_DETAILS_DENTIST,
 } = require("./RouterPath");
 const {
-  getPeriodSummaryByPatient,
   getMostVisitedPatientsByDentistPeriods,
   getMostVisitedPatientsByClinicPeriods,
   getNewPatientsByClinicPeriods,
   getNewPatientsTrendsByDentistAndClinic,
-  getAgeGenderChartData,
   getAgeGenderByDentist,
   getAgeGenderByClinic,
   groupToothProceduresByTimeRangeCumulative,
@@ -68,10 +66,7 @@ router.get(
   appointmentController.getAppointmentSummaryChartByDentist
 );
 
-router.get(
-  GET_TOOTH_DETAILS_CLINIC,
-  groupToothProceduresByTimeRangeCumulative
-);
+router.get(GET_TOOTH_DETAILS_CLINIC, groupToothProceduresByTimeRangeCumulative);
 
 router.get(
   GET_TOOTH_DETAILS_DENTIST,
