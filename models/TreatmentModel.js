@@ -47,7 +47,7 @@ const getTreatmentByTenantAndTreatmentId = async (tenant_id, treatment_id) => {
   }
 };
 
-const getAllTreatmentsByTenantAndClinicIdAndPatientId = async (tenantId,clinic_id,appointment_id,limit,offset) => {
+const getAllTreatmentsByTenantAndClinicId = async (tenantId,clinic_id,appointment_id,limit,offset) => {
   const query = `SELECT *
 FROM 
     treatment 
@@ -69,7 +69,7 @@ WHERE
   }
 };
 
-const getAllTreatmentsByTenantAndClinicIdAndDentistAndPatientId = async (tenantId,clinic_id,dentist_id,appointment_id,limit,offset) => {
+const getAllTreatmentsByTenantAndClinicIdAndDentist = async (tenantId,clinic_id,dentist_id,appointment_id,limit,offset) => {
   const query = `SELECT *
 FROM 
     treatment 
@@ -127,6 +127,6 @@ module.exports = {
   getTreatmentByTenantAndTreatmentId,
   updateTreatment,
   deleteTreatmentByTenantAndTreatmentId,
-  getAllTreatmentsByTenantAndClinicIdAndPatientId,
-  getAllTreatmentsByTenantAndClinicIdAndDentistAndPatientId,
+  getAllTreatmentsByTenantAndClinicId,
+  getAllTreatmentsByTenantAndClinicIdAndDentist,
 };

@@ -128,7 +128,7 @@ function flattenTreatmentImages(treatment) {
   };
 }
 
-const getAllTreatmentsByTenantAndClinicIdAndPatientId = async (
+const getAllTreatmentsByTenantAndClinicId = async (
   tenantId,
   clinic_id,
   appointment_id,
@@ -140,7 +140,7 @@ const getAllTreatmentsByTenantAndClinicIdAndPatientId = async (
 
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
-      const result = await treatmentModel.getAllTreatmentsByTenantAndClinicIdAndPatientId(
+      const result = await treatmentModel.getAllTreatmentsByTenantAndClinicId(
         tenantId,
         clinic_id,
         appointment_id,
@@ -163,7 +163,7 @@ const getAllTreatmentsByTenantAndClinicIdAndPatientId = async (
   }
 };
 
-const getAllTreatmentsByTenantAndClinicIdAndDentistAndPatientId = async (
+const getAllTreatmentsByTenantAndClinicIdAndDentist = async (
   tenantId,
   clinic_id,
   dentist_id,
@@ -176,7 +176,7 @@ const getAllTreatmentsByTenantAndClinicIdAndDentistAndPatientId = async (
 
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
-      const result = await treatmentModel.getAllTreatmentsByTenantAndClinicIdAndDentistAndPatientId(
+      const result = await treatmentModel.getAllTreatmentsByTenantAndClinicIdAndDentist(
         tenantId,
         clinic_id,
         dentist_id,
@@ -276,6 +276,6 @@ module.exports = {
   getTreatmentByTenantIdAndTreatmentId,
   updateTreatment,
   deleteTreatmentByTenantIdAndTreatmentId,
-  getAllTreatmentsByTenantAndClinicIdAndPatientId,
-  getAllTreatmentsByTenantAndClinicIdAndDentistAndPatientId,
+  getAllTreatmentsByTenantAndClinicId,
+  getAllTreatmentsByTenantAndClinicIdAndDentist,
 };

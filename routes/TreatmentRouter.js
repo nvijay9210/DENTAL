@@ -12,9 +12,10 @@ const {
   GET_TREATMENT_TENANT,
   UPDATE_TREATMENT_TENANT,
   DELETE_TREATMENT_TENANT,
-  GETALL_TREATMENT_TENANT_PATIENT,
-  GETALL_TREATMENT_TENANT_CLIENT_PATIENT,
-  GETALL_TREATMENT_TENANT_DENTIST_PATIENT,
+  GETALL_TREATMENT_TENANT_CLIENT,
+  GETALL_TREATMENT_TENANT_CLINIC_DENTIST,
+  GETALL_TREATMENT_TENANT_CLIENT_APPOINTEMENT,
+  GETALL_TREATMENT_TENANT_CLINIC_DENTIST_APPOINTEMENT,
 } = require("./RouterPath");
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -24,7 +25,7 @@ const treatmentFileMiddleware = uploadFileMiddleware({
   folderName: "Treatment",
   fileFields: [
     {
-      fieldName: "treatment_image",
+      fieldName: "treatment_images",
       subFolder: "Photos",
       maxSizeMB: 10,
       multiple: true,
@@ -49,13 +50,13 @@ router.get(
 );
 
 router.get(
-  GETALL_TREATMENT_TENANT_CLIENT_PATIENT,
-  treatmentController.getAllTreatmentsByTenantAndClinicIdAndPatientId
+  GETALL_TREATMENT_TENANT_CLIENT_APPOINTEMENT,
+  treatmentController.getAllTreatmentsByTenantAndClinicId
 );
 
 router.get(
-  GETALL_TREATMENT_TENANT_DENTIST_PATIENT,
-  treatmentController.getAllTreatmentsByTenantAndClinicIdAndDentistAndPatientId
+  GETALL_TREATMENT_TENANT_CLINIC_DENTIST_APPOINTEMENT,
+  treatmentController.getAllTreatmentsByTenantAndClinicIdAndDentist
 );
 
 // Get Single Treatment by Tenant ID & Treatment ID

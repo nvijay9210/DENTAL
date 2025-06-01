@@ -118,12 +118,13 @@ const uploadFileMiddleware = (options) => {
           req.body.awards_certifications = awards;
           uploadedFiles.awards_certifications = awards;
         }
-        else if (fileField.fieldName === "treatment_image") {
+        else if (fileField.fieldName==="treatment_images") {
+          console.log('treatment_images place')
           // --- Handle dynamic treatment_image fields (no description) ---
           const treatments = [];
           let idx = 0;
           while (true) {
-            const fileFieldName = `treatment_image${idx}`;
+            const fileFieldName = `treatment_images${idx}`;
         
             const file = req.files?.find((f) => f.fieldname === fileFieldName);
             const existingImagePath = req.body[fileFieldName];
@@ -165,6 +166,7 @@ const uploadFileMiddleware = (options) => {
         }
          else {
           // --- Handle other file fields as before ---
+          console.log('else place')
           const files =
             req.files?.filter(
               (file) => file.fieldname === fileField.fieldName
