@@ -43,6 +43,40 @@ exports.getAllReminderPingsByTenantId = async (req, res, next) => {
     next(err);
   }
 };
+exports.getAllReminderPingsByTenantIdAndClinicId = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  try {
+    const reminderPings = await reminderPingService.getAllReminderPingsByTenantIdAndClinicId(
+      tenant_id,
+      clinic_id,
+      page,
+      limit
+    );
+    res.status(200).json(reminderPings);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllReminderPingsByTenantIdAndClinicIdAndDentistId = async (req, res, next) => {
+  const { tenant_id,clinic_id,dentist_id } = req.params;
+  const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  try {
+    const reminderPings = await reminderPingService.getAllReminderPingsByTenantIdAndClinicIdAndDentistId(
+      tenant_id,
+      clinic_id,
+      dentist_id,
+      page,
+      limit
+    );
+    res.status(200).json(reminderPings);
+  } catch (err) {
+    next(err);
+  }
+};
 /**
  * Get reminderPing by tenant and reminderPing ID
  */

@@ -25,6 +25,32 @@ const getAllReminderPingsByTenantId = async (tenantId, limit, offset) => {
     throw new CustomError("Error fetching reminderpings.", 500);
   }
 };
+const getAllReminderPingsByTenantIdAndClinicId = async (tenantId,clinicId, limit, offset) => {
+  const query = `SELECT * FROM reminderping WHERE tenant_id = ? AND clinic_id = ? limit ? offset ?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, clinicId,limit,offset]);
+    return rows;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+};
+const getAllReminderPingsByTenantIdAndClinicIdAndDentistId = async (tenantId,clinicId,dentistId, limit, offset) => {
+  const query = `SELECT * FROM reminderping WHERE tenant_id = ? AND clinic_id = ? AND dentist_id=? limit ? offset ?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, clinicId,dentistId,limit,offset]);
+    return rows;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Query Error");
+  } finally {
+    conn.release();
+  }
+};
 
 // Get reminderping by tenant ID and reminderping ID
 const getReminderPingByTenantAndReminderPingId = async (tenant_id, reminderping_id) => {
@@ -77,5 +103,7 @@ module.exports = {
   getAllReminderPingsByTenantId,
   getReminderPingByTenantAndReminderPingId,
   updateReminderPing,
-  deleteReminderPingByTenantAndReminderPingId
+  deleteReminderPingByTenantAndReminderPingId,
+  getAllReminderPingsByTenantIdAndClinicIdAndDentistId,
+  getAllReminderPingsByTenantIdAndClinicId
 };

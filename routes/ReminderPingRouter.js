@@ -8,6 +8,8 @@ const {
   GET_REMINDERPING_TENANT,
   UPDATE_REMINDERPING_TENANT,
   DELETE_REMINDERPING_TENANT,
+  GETALL_REMINDERPING_TENANT_CLINIC,
+  GETALL_REMINDERPING_TENANT_CLINIC_DENTIST,
 } = require("./RouterPath");
 const reminderPingvalidation = require("../validations/ReminderPingValidation");
 
@@ -20,10 +22,12 @@ router.post(
 // Get All ReminderPings by Tenant ID with Pagination
 router.get(GETALL_REMINDERPING_TENANT, reminderPingController.getAllReminderPingsByTenantId);
 
+router.get(GETALL_REMINDERPING_TENANT_CLINIC, reminderPingController.getAllReminderPingsByTenantIdAndClinicId);
+
+router.get(GETALL_REMINDERPING_TENANT_CLINIC_DENTIST, reminderPingController.getAllReminderPingsByTenantIdAndClinicIdAndDentistId);
+
 // Get Single ReminderPing by Tenant ID & ReminderPing ID
 router.get(GET_REMINDERPING_TENANT, reminderPingController.getReminderPingByTenantIdAndReminderPingId);
-
-router.get(GET_REMINDERPING_TENANT_APPOINTMENT, reminderPingController.getReminderPingByTenantAndAppointmentId);
 
 // Update ReminderPing
 router.put(

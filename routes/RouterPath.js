@@ -120,6 +120,8 @@ module.exports = {
 
   ADD_REMINDERPING: "/addreminderping",
   GETALL_REMINDERPING_TENANT: "/getallreminderpings/:tenant_id",
+  GETALL_REMINDERPING_TENANT_CLINIC: "/getallreminderpings/:tenant_id/:clinic_id",
+  GETALL_REMINDERPING_TENANT_CLINIC_DENTIST: "/getallreminderpings/:tenant_id/:clinic_id/:dentist_id",
   GET_REMINDERPING: "/getreminderping/:reminderping_id",
   UPDATE_REMINDERPING_TENANT: "/updatereminderping/:reminderping_id/:tenant_id",
   DELETE_REMINDERPING_TENANT: "/deletereminderping/:reminderping_id/:tenant_id",

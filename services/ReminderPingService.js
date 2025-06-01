@@ -89,6 +89,69 @@ const getAllReminderPingsByTenantId = async (
     throw new CustomError("Failed to fetch reminderPings", 404);
   }
 };
+const getAllReminderPingsByTenantIdAndClinicId = async (
+  tenantId,
+  clinic_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `reminderPing:${tenantId}:clinic:${clinic_id}:page:${page}:limit:${limit}`;
+
+  try {
+    const reminderPings = await getOrSetCache(cacheKey, async () => {
+      const result = await reminderPingModel.getAllReminderPingsByTenantIdAndClinicId(
+        tenantId,
+        clinic_id,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+
+    const convertedRows = reminderPings.map((reminderPing) =>
+      helper.convertDbToFrontend(reminderPing, reminderPingFieldsReverseMap)
+    );
+
+    return convertedRows;
+  } catch (err) {
+    console.error("Database error while fetching reminderPings:", err);
+    throw new CustomError("Failed to fetch reminderPings", 404);
+  }
+};
+
+const getAllReminderPingsByTenantIdAndClinicIdAndDentistId = async (
+  tenantId,
+  clinic_id,
+  dentist_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `reminderPing:${tenantId}:dentist:${dentist_id}:page:${page}:limit:${limit}`;
+
+  try {
+    const reminderPings = await getOrSetCache(cacheKey, async () => {
+      const result = await reminderPingModel.getAllReminderPingsByTenantIdAndClinicIdAndDentistId(
+        tenantId,
+        clinic_id,
+        dentist_id,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+
+    const convertedRows = reminderPings.map((reminderPing) =>
+      helper.convertDbToFrontend(reminderPing, reminderPingFieldsReverseMap)
+    );
+
+    return convertedRows;
+  } catch (err) {
+    console.error("Database error while fetching reminderPings:", err);
+    throw new CustomError("Failed to fetch reminderPings", 404);
+  }
+};
 
 // Get ReminderPing by ID & Tenant
 const getReminderPingByTenantIdAndReminderPingId = async (
@@ -169,5 +232,7 @@ module.exports = {
   getAllReminderPingsByTenantId,
   getReminderPingByTenantIdAndReminderPingId,
   updateReminderPing,
-  deleteReminderPingByTenantIdAndReminderPingId
+  deleteReminderPingByTenantIdAndReminderPingId,]
+  getAllReminderPingsByTenantIdAndClinicIdAndDentistId,
+  getAllReminderPingsByTenantIdAndClinicId
 };
