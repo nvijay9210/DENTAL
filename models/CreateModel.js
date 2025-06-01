@@ -208,6 +208,21 @@ const createReminderTable = async () => {
     conn.release();
   }
 };
+const createReminderPingTable = async () => {
+  const query =  createTableQuery.addReminderPing
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("ReminderPing table created successfully.");
+  } catch (error) {
+    console.error("Error creating ReminderPing table:", error);
+    throw new Error(
+      "Database error occurred while creating the ReminderPing table."
+    );
+  } finally {
+    conn.release();
+  }
+};
 
 const createPaymentTable = async () => {
   const query =  createTableQuery.addPayment
@@ -284,5 +299,6 @@ module.exports = {
   createExpenseTable,
   createSupplierTable,
   createReminderTable,
-  createPaymentTable
+  createPaymentTable,
+  createReminderPingTable
 };

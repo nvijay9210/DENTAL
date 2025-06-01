@@ -118,6 +118,12 @@ module.exports = {
   UPDATE_PAYMENT_TENANT: "/updatepayment/:payment_id/:tenant_id",
   DELETE_PAYMENT_TENANT: "/deletepayment/:payment_id/:tenant_id",
 
+  ADD_REMINDERPING: "/addreminderping",
+  GETALL_REMINDERPING_TENANT: "/getallreminderpings/:tenant_id",
+  GET_REMINDERPING: "/getreminderping/:reminderping_id",
+  UPDATE_REMINDERPING_TENANT: "/updatereminderping/:reminderping_id/:tenant_id",
+  DELETE_REMINDERPING_TENANT: "/deletereminderping/:reminderping_id/:tenant_id",
+
   //dashboard Routes
 
   GET_APPOINTMENT_SUMMARY_PERIOD:

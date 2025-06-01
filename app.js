@@ -56,6 +56,7 @@ async function initializeTables() {
       await createTable.createSupplierTable();
       await createTable.createReminderTable();
       await createTable.createPaymentTable();
+      await createTable.createReminderPingTable();
   
       console.log('All tables created in order.');
     } catch (err) {
