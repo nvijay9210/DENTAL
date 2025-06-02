@@ -15,7 +15,7 @@ const reminderPingFields = {
   clinic_id: (val) => val,
   dentist_id: (val) => val,
   reminder_ping_description: helper.safeStringify,
-  reminder_type: (val) => val,
+  reminder_ping_type: (val) => val,
   reminder_ping_date: (val) => (val ? formatDateOnly(val) : null),
   reminder_ping_time: (val) => val,
 };
@@ -25,7 +25,7 @@ const reminderPingFieldsReverseMap = {
   clinic_id: (val) => val,
   dentist_id: (val) => val,
   reminder_ping_description: helper.safeJsonParse,
-  reminder_type: (val) => val,
+  reminder_ping_type: (val) => val,
   reminder_ping_date: (val) => (val ? formatDateOnly(val) : null),
   reminder_ping_time: (val) => val,
   created_by: (val) => val,
