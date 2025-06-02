@@ -271,7 +271,7 @@ const getFinanceSummary = async (
   
   usePaymentTable = false
 ) => {
-  let conn;
+  let conn
 
   try {
     conn = await pool.getConnection();
@@ -555,6 +555,7 @@ const getFinanceSummary = async (
     if (conn) conn.release();
   }
 };
+
 const getFinanceSummarybyDentist = async (
   tenant_id,
   clinic_id,

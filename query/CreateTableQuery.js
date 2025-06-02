@@ -409,7 +409,7 @@ CREATE TABLE IF NOT EXISTS reminder (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
   addReminderPing: `
-CREATE TABLE IF NOT EXISTS reminder (
+CREATE TABLE IF NOT EXISTS reminderping (
   reminder_ping_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
   clinic_id int(11) NOT NULL,
@@ -422,13 +422,13 @@ CREATE TABLE IF NOT EXISTS reminder (
   created_time datetime NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
   updated_time datetime DEFAULT NULL ON UPDATE current_timestamp(),
-  PRIMARY KEY (reminder_id),
-  KEY fk_reminder_clinic (clinic_id),
-  KEY fk_reminder_tenant (tenant_id),
-  KEY fk_reminder_dentist (dentist_id),
-  CONSTRAINT fk_reminder_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
-  CONSTRAINT fk_reminder_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
-  CONSTRAINT fk_reminder_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
+  PRIMARY KEY (reminder_ping_id),
+  KEY fk_reminderping_clinic (clinic_id),
+  KEY fk_reminderping_tenant (tenant_id),
+  KEY fk_reminderping_dentist (dentist_id),
+  CONSTRAINT fk_reminderping_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_reminderping_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_reminderping_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
 addPayment: `
