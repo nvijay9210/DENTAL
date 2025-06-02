@@ -131,6 +131,100 @@ const updatePatientCount = async (tenantId, clinicId, assign = true) => {
   }
 };
 
+const getFinanceSummary=async(tenant_id,clinic_id)=>{
+  const conn = await pool.getConnection();
+
+  const now = new Date();
+  now.setHours(0, 0, 0, 0); // Normalize current date
+
+  // Fetch raw data
+  let [appointments, treatments, expenses] = await Promise.all([
+     conn.query(
+          `SELECT appointment_date AS date, (consultation_fee - discount_applied) AS amount FROM appointment 
+           WHERE status = 'CP' AND appointment_date >= ? AND tenant_id = ? AND clinic_id = ?`,
+          [
+            new Date(now.getTime() - 365 * 4 * 24 * 60 * 60 * 1000),
+            tenant_id,
+            clinic_id,
+            
+          ]
+        ),
+     conn.query(
+          `SELECT treatment_date AS date, cost AS amount FROM treatment 
+           WHERE treatment_date >= ? AND tenant_id = ? AND clinic_id = ?`,
+          [
+            new Date(now.getTime() - 365 * 4 * 24 * 60 * 60 * 1000),
+            tenant_id,
+            clinic_id,
+            
+          ]
+        ),
+    conn.query(
+      `SELECT e.expense_date AS date, e.expense_amount AS amount
+       FROM expense e
+       WHERE e.expense_date >= ? AND e.tenant_id = ? AND e.clinic_id = ?`,
+      [
+        new Date(now.getFullYear() - 4, now.getMonth(), now.getDate()),
+        tenant_id,
+        clinic_id,
+      ]
+    ),
+  ]);
+
+  appointments = appointments[0];
+  treatments = treatments[0];
+  expenses = expenses[0];
+
+  return {appointments,treatments,expenses}
+}
+
+const getFinanceSummarybyDentist=async(tenant_id,clinic_id,dentist_id)=>{
+  const conn = await pool.getConnection();
+
+  const now = new Date();
+  now.setHours(0, 0, 0, 0); // Normalize current date
+
+  // Fetch raw data
+  let [appointments, treatments, expenses] = await Promise.all([
+     conn.query(
+          `SELECT appointment_date AS date, (consultation_fee - discount_applied) AS amount FROM appointment 
+           WHERE status = 'CP' AND appointment_date >= ? AND tenant_id = ? AND clinic_id = ? AND dentist_id=?`,
+          [
+            new Date(now.getTime() - 365 * 4 * 24 * 60 * 60 * 1000),
+            tenant_id,
+            clinic_id,
+            dentist_id
+          ]
+        ),
+     conn.query(
+          `SELECT treatment_date AS date, cost AS amount FROM treatment 
+           WHERE treatment_date >= ? AND tenant_id = ? AND clinic_id = ? AND dentist_id=?`,
+          [
+            new Date(now.getTime() - 365 * 4 * 24 * 60 * 60 * 1000),
+            tenant_id,
+            clinic_id,
+            dentist_id
+          ]
+        ),
+    conn.query(
+      `SELECT e.expense_date AS date, e.expense_amount AS amount
+         FROM expense e
+         WHERE e.expense_date >= ? AND e.tenant_id = ? AND e.clinic_id = ?`,
+      [
+        new Date(now.getFullYear() - 4, now.getMonth(), now.getDate()),
+        tenant_id,
+        clinic_id,
+      ]
+    ),
+  ]);
+
+  appointments = appointments[0];
+  treatments = treatments[0];
+  expenses = expenses[0];
+
+  return {appointments,treatments,expenses}
+}
+
 
 module.exports = {
   createClinic,
@@ -142,5 +236,7 @@ module.exports = {
   getClinicNameAndAddressByClinicId,
   updateDoctorCount,
   updatePatientCount,
+  getFinanceSummary,
+  getFinanceSummarybyDentist
   // getTotalDentistCountByClinicId
 };
