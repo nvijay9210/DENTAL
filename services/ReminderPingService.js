@@ -232,7 +232,7 @@ module.exports = {
   getAllReminderPingsByTenantId,
   getReminderPingByTenantIdAndReminderPingId,
   updateReminderPing,
-  deleteReminderPingByTenantIdAndReminderPingId,]
+  deleteReminderPingByTenantIdAndReminderPingId,
   getAllReminderPingsByTenantIdAndClinicIdAndDentistId,
   getAllReminderPingsByTenantIdAndClinicId
 };
