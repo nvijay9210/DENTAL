@@ -138,7 +138,7 @@ const dentistColumnConfig = [
     data_type: "json",
   },
   { columnname: "consultation_fee", type: "decimal", size: "10,2", null: true },
-  { columnname: "min_booking_fee", type: "decimal", size: "5,2", null: true },
+  { columnname: "min_booking_fee", type: "int", size: 6 , null: true },
   { columnname: "ratings", type: "decimal", size: "3,2", null: true },
   { columnname: "reviews_count", type: "int", null: true },
   { columnname: "appointment_count", type: "int", null: true },

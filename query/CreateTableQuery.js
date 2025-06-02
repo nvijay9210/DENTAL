@@ -8,11 +8,14 @@ const createTableQuery = {
   appointment_date date NOT NULL,
   start_time time NOT NULL,
   end_time time NOT NULL,
-  status enum('SC','CP','CL') NOT NULL DEFAULT 'SC',
-  appointment_type enum('IP','TC') NOT NULL DEFAULT 'TC',
+  status enum('pending', 'confirmed', 'checkedin', 'inprogress', 'completed', 'cancelled', 'clinic_cancelled', 'noshow', 'rescheduled', 'followup', 'rejected', 'expired', 'payment_pending', 'paid')
+" NOT NULL DEFAULT 'pending',
+  appointment_type enum('online','offline') NOT NULL DEFAULT 'online',
   consultation_fee decimal(10,2) DEFAULT NULL,
-  discount_applied decimal(10,2) NOT NULL DEFAULT 0.00,
+  discount_applied decimal(6,2) NOT NULL DEFAULT 0.00,
   payment_status varchar(100) NOT NULL,
+  min_booking_fee int(11) NULL,
+  paid_amount int(11) NULL,
   mode_of_payment varchar(100) NOT NULL,
   visit_reason text DEFAULT NULL,
   follow_up_needed tinyint(1) NOT NULL DEFAULT 0,
@@ -126,7 +129,7 @@ const createTableQuery = {
   working_hours longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(working_hours)),
   available_days longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(available_days)),
   consultation_fee decimal(10,2) DEFAULT 0,
-  min_booking_fee decimal(10,2) DEFAULT 0,
+  min_booking_fee decimal(6,2) DEFAULT 0,
   ratings decimal(3,2) DEFAULT 0,
   reviews_count int(11) DEFAULT 0,
   appointment_count int(11) DEFAULT 0,
@@ -360,7 +363,6 @@ CREATE TABLE IF NOT EXISTS supplier (
   supplier_name varchar(100) DEFAULT NULL,
   supplier_category varchar(100) DEFAULT NULL,
   supplier_status varchar(100) DEFAULT NULL,
-  payment_status varchar(100) DEFAULT NULL,
   supplier_contact_number varchar(15) DEFAULT NULL,
   supplier_country varchar(50) DEFAULT NULL,
   supplier_performance_rating decimal(3,2) DEFAULT NULL,
@@ -431,7 +433,7 @@ CREATE TABLE IF NOT EXISTS reminderping (
   CONSTRAINT fk_reminderping_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
-addPayment: `
+  addPayment: `
 CREATE TABLE IF NOT EXISTS payment (
   payment_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
@@ -466,7 +468,7 @@ CREATE TABLE IF NOT EXISTS payment (
   CONSTRAINT fk_payment_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id) ON UPDATE CASCADE,
   CONSTRAINT fk_payment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
-`
+`,
 };
 
 module.exports = { createTableQuery };

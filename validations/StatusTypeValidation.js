@@ -1,10 +1,8 @@
 const { CustomError } = require("../middlewares/CustomeError");
-const statusTypeService = require("../services/StatusTypeService");
-const statusTypeModel = require("../models/StatusTypeModel");
-const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
+
 const { validateInput } = require("./InputValidation");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
-const { recordExists } = require("../query/Records");
+
 
 const statusTypeColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },

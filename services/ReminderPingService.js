@@ -21,6 +21,7 @@ const reminderPingFields = {
 };
 
 const reminderPingFieldsReverseMap = {
+  reminder_ping_id:(val)=>val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   dentist_id: (val) => val,

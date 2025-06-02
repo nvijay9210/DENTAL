@@ -21,20 +21,20 @@ const appoinmentColumnConfig = [
   {
     columnname: "status",
     type: "enum",
-    enum_values: ["Scheduled", "Completed", "Cancelled"],
+    enum_values: ['pending', 'confirmed', 'checkedin', 'inprogress', 'completed', 'cancelled', 'clinic_cancelled', 'noshow', 'rescheduled', 'followup', 'rejected', 'expired', 'payment_pending', 'paid'],
     null: false,
   },
   {
     columnname: "appointment_type",
     type: "enum",
-    enum_values: ["In-person", "Teleconsultation"],
+    enum_values: ['online','offline'],
     null: false,
   },
   { columnname: "consultation_fee", type: "decimal", size: "10,2", null: true },
   {
     columnname: "discount_applied",
     type: "decimal",
-    size: "10,2",
+    size: "6,2",
     null: true,
     default: 0.0,
   },
@@ -43,6 +43,18 @@ const appoinmentColumnConfig = [
     type: "varchar",
     size:100,
     null: false,
+  },
+  {
+    columnname: "min_booking_fee",
+    type: "int",
+    size:11,
+    null: true,
+  },
+  {
+    columnname: "paid_amount",
+    type: "int",
+    size:11,
+    null: true,
   },
   {
     columnname: "mode_of_payment",

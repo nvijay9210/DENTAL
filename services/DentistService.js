@@ -70,7 +70,7 @@ const dentistFieldReverseMap = {
   email: val => val,
   phone_number: val => val,
   alternate_phone_number: val => val,
-  specialisation: val => (val),
+  specialisation: val => helper.safeJsonParse(val),
 
   designation: val => helper.safeJsonParse(val),
   languages_spoken: val => helper.safeJsonParse(val),
