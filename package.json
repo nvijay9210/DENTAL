@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "cross-env NODE_ENV=production node server.js",
+    "dev": "cross-env NODE_ENV=development nodemon server.js",
+    "test": "cross-env NODE_ENV=test jest"
   },
   "author": "VIJAY N",
   "license": "ISC",
@@ -28,5 +28,8 @@
     "rate-limit": "^0.1.1",
     "redis": "^4.7.0",
     "sharp": "^0.34.1"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }
