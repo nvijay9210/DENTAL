@@ -4,6 +4,7 @@ const { checkIfExistsWithoutId, checkIfExists } = require("../models/checkIfExis
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
 const { validatePhonesGlobally } = require("../utils/PhoneValidationHelper");
+const { globalValidationEmail } = require("../utils/GlobalValidationEmail");
 
 const uniqueFields = [
   "email",
@@ -185,6 +186,7 @@ const createPatientValidation = async (details) => {
   validateInput(details, CreateColumnConfig);
   await checkTenantExistsByTenantIdValidation(details.tenant_id);
   await validatePatientPhones(details);
+  if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email);
   await validateUniqueFields(details);
 };
 
@@ -205,6 +207,7 @@ const updatePatientValidation = async (patientId, details, tenantId) => {
   }
 
   await validatePatientPhones(details, patientId);
+  if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email,patientId);
   await validateUniqueFields(details, true, patientId);
 };
 

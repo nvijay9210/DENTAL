@@ -9,7 +9,6 @@ const { recordExists } = require("../query/Records");
 const treatmentColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },
   { columnname: "appointment_id", type: "int", size: 11, null: false },
-  { columnname: "patient_id", type: "int", size: 11, null: false },
   { columnname: "dentist_id", type: "int", size: 11, null: false },
   { columnname: "clinic_id", type: "int", size: 11, null: false },
   { columnname: "diagnosis", type: "text", null: true },
@@ -68,7 +67,7 @@ const createTreatmentValidation = async (details) => {
   await Promise.all([
     checkIfIdExists("tenant", "tenant_id", details.tenant_id),
     checkIfIdExists("clinic", "clinic_id", details.clinic_id),
-    checkIfIdExists("patient", "patient_id", details.patient_id),
+    checkIfIdExists("appointment", "appointment_id", details.appointment_id),
     checkIfIdExists("dentist", "dentist_id", details.dentist_id),
   ]);
 };

@@ -11,6 +11,7 @@ const {
   checkDentistExistsUsingTenantIdAndClinicIdAnddentistId,
 } = require("../models/DentistModel");
 const { validatePhonesGlobally } = require("../utils/PhoneValidationHelper");
+const { globalValidationEmail } = require("../utils/GlobalValidationEmail");
 
 const uniqueFields = ["email", "gst_number", "license_number", "pan_number"];
 
@@ -198,6 +199,7 @@ const createClinicValidation = async (details) => {
   validateInput(details, createClinicColumnConfig);
   await validateTenant(details.tenant_id);
   await validateClinicPhones(details);
+  if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email);
   await validateUniqueFields(details);
 };
 
@@ -214,6 +216,7 @@ const updateClinicValidation = async (clinicId, details, tenantId) => {
 
   validatePhonesNotSame(details);
   await validateClinicPhones(details, clinicId);
+  if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email,clinicId);
   await validateUniqueFields(details, true, clinicId);
 };
 

@@ -8,6 +8,7 @@ const {
 } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
+const { globalValidationEmail } = require("../utils/GlobalValidationEmail");
 
 const uniqueFields = ["email", "license_number"];
 
@@ -233,6 +234,8 @@ const createDentistValidation = async (details) => {
   validateInput(details, createColumnConfig);
   await checkIfIdExists("tenant", "tenant_id", details.tenant_id);
   await validateDentistPhones(details);
+  
+  if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email);
   await validateUniqueFields(details);
 };
 
@@ -242,6 +245,8 @@ const updateDentistValidation = async (dentistId, details, tenant_id) => {
   validateInput(details, updateColumnConfig);
   await validateTenant(tenant_id);
   // await checkIfIdExists('clinic','clinic_id',details.clinic_id||0)
+
+  if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email,dentistId);
   await validateUniqueFields(details, true, dentistId);
 
   if (

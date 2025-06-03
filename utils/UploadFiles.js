@@ -215,6 +215,7 @@ const uploadFileMiddleware = (options) => {
 
       next();
     } catch (error) {
+      console.log(error)
       console.error("Error uploading files:", error.message);
       return res.status(500).json({ message: error.message });
     }

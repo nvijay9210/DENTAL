@@ -24,7 +24,7 @@ const supplierRouter=require('./routes/SupplierRouter')
 const reminderRouter=require('./routes/ReminderRouter')
 const paymentRouter=require('./routes/PaymentRouter')
 const dashboardRouter=require('./routes/DashboardRouter')
-const remiderPingRouter=require('./routes/ReminderPingRouter')
+const remiderPingRouter=require('./routes/AppointmentReschedulesRouter')
 
 // const compressionMiddleware = require('./middlewares/CompressionMiddleware');
 const { redisconnect } = require('./config/redisConfig');
@@ -57,7 +57,7 @@ async function initializeTables() {
       await createTable.createSupplierTable();
       await createTable.createReminderTable();
       await createTable.createPaymentTable();
-      await createTable.createReminderPingTable();
+      await createTable.createAppointmentReschedulesTable();
   
       console.log('All tables created in order.');
     } catch (err) {
@@ -90,7 +90,7 @@ app.use('/supplier', supplierRouter);
 app.use('/reminder', reminderRouter);
 app.use('/payment', paymentRouter);
 app.use('/dashboard', dashboardRouter);
-app.use('/reminderping', remiderPingRouter);
+app.use('/appointment_reschedules', remiderPingRouter);
 
 app.use(errorHandler);
 

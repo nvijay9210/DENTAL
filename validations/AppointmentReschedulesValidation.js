@@ -12,7 +12,7 @@ const reminderPingColumnConfig = [
     { columnname: "reminder_ping_time", type: "time", null: true },
   ];
 
-// ReminderPing Column Configuration for Validation
+// AppointmentReschedules Column Configuration for Validation
 const createColumnConfig = [
   ...reminderPingColumnConfig,
   { columnname: "created_by", type: "varchar", size: 30, null: false },
@@ -24,9 +24,9 @@ const updateColumnConfig = [
 ];
 
 /**
- * Validate Create ReminderPing Input with Tenant Scope
+ * Validate Create AppointmentReschedules Input with Tenant Scope
  */
-const createReminderPingValidation = async (details) => {
+const createAppointmentReschedulesValidation = async (details) => {
   validateInput(details, createColumnConfig);
 
   // Check if referenced records exist within the same tenant
@@ -36,9 +36,9 @@ const createReminderPingValidation = async (details) => {
 };
 
 /**
- * Validate Update ReminderPing Input with Tenant Scope
+ * Validate Update AppointmentReschedules Input with Tenant Scope
  */
-const updateReminderPingValidation = async (reminderPingId, details) => {
+const updateAppointmentReschedulesValidation = async (reminderPingId, details) => {
   await validateInput(details, updateColumnConfig);
 
   const exists = await checkIfExists(
@@ -48,11 +48,11 @@ const updateReminderPingValidation = async (reminderPingId, details) => {
     details.tenant_id
   );
   if (!exists) {
-    throw new CustomError("ReminderPing not found", 404);
+    throw new CustomError("AppointmentReschedules not found", 404);
   }
 };
 
 module.exports = {
-  createReminderPingValidation,
-  updateReminderPingValidation,
+  createAppointmentReschedulesValidation,
+  updateAppointmentReschedulesValidation,
 };

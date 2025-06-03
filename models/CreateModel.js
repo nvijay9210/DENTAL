@@ -208,16 +208,16 @@ const createReminderTable = async () => {
     conn.release();
   }
 };
-const createReminderPingTable = async () => {
-  const query =  createTableQuery.addReminderPing
+const createAppointmentReschedulesTable = async () => {
+  const query =  createTableQuery.addAppointmentReschedules
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
-    console.log("ReminderPing table created successfully.");
+    console.log("AppointmentReschedules table created successfully.");
   } catch (error) {
-    console.error("Error creating ReminderPing table:", error);
+    console.error("Error creating AppointmentReschedules table:", error);
     throw new Error(
-      "Database error occurred while creating the ReminderPing table."
+      "Database error occurred while creating the AppointmentReschedules table."
     );
   } finally {
     conn.release();
@@ -300,5 +300,5 @@ module.exports = {
   createSupplierTable,
   createReminderTable,
   createPaymentTable,
-  createReminderPingTable
+  createAppointmentReschedulesTable
 };

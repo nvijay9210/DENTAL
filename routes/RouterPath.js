@@ -118,15 +118,15 @@ module.exports = {
   UPDATE_PAYMENT_TENANT: "/updatepayment/:payment_id/:tenant_id",
   DELETE_PAYMENT_TENANT: "/deletepayment/:payment_id/:tenant_id",
 
-  ADD_REMINDERPING: "/addreminderping",
-  GETALL_REMINDERPING_TENANT: "/getallreminderpings/:tenant_id",
-  GETALL_REMINDERPING_TENANT_CLINIC:
-    "/getallreminderpings/:tenant_id/:clinic_id",
-  GETALL_REMINDERPING_TENANT_CLINIC_DENTIST:
-    "/getallreminderpings/:tenant_id/:clinic_id/:dentist_id",
-  GET_REMINDERPING: "/getreminderping/:reminderping_id",
-  UPDATE_REMINDERPING_TENANT: "/updatereminderping/:reminderping_id/:tenant_id",
-  DELETE_REMINDERPING_TENANT: "/deletereminderping/:reminderping_id/:tenant_id",
+  ADD_APPOINTMENT_RESCHEDULES: "/addappointment_reschedules",
+  GETALL_APPOINTMENT_RESCHEDULES_TENANT: "/getallappointment_reschedules/:tenant_id",
+  GETALL_APPOINTMENT_RESCHEDULES_TENANT_CLINIC:
+    "/getallappointment_rescheduless/:tenant_id/:clinic_id",
+  GETALL_APPOINTMENT_RESCHEDULES_TENANT_CLINIC_DENTIST:
+    "/getallappointment_reschedules/:tenant_id/:clinic_id/:dentist_id",
+  GET_APPOINTMENT_RESCHEDULES: "/getappointment_reschedules/:appointment_reschedules_id",
+  UPDATE_APPOINTMENT_RESCHEDULES_TENANT: "/updateappointment_reschedules/:appointment_reschedules_id/:tenant_id",
+  DELETE_APPOINTMENT_RESCHEDULES_TENANT: "/deleteappointment_reschedules/:appointment_reschedules_id/:tenant_id",
 
   //dashboard Routes
 
