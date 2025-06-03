@@ -430,7 +430,7 @@ const getFinanceSummarybyDentist = async (
 ) => {
   let conn
   const now = new Date();
-
+  const cacheKey = `financeSummary:${tenant_id}:${clinic_id}:${dentist_id}`;
   try {
     const {appointments,treatments,expenses}=await clinicModel.getFinanceSummarybyDentist(tenant_id,clinic_id,dentist_id)
 
@@ -664,8 +664,9 @@ const getFinanceSummarybyDentist = async (
     };
 
     return finalResult;
-  } finally {
-    if (conn) conn.release();
+  }catch (err) {
+    console.error("Finance summary dentist error", err);
+    throw err;
   }
 };
 

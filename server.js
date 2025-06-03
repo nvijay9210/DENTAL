@@ -1,8 +1,19 @@
 const app = require('./app');
-const userModel= require('./models/userModel');
+const dotenv = require('dotenv');
 
-const PORT = process.env.PORT || 5000;
+const env = process.env.NODE_ENV || 'development';
 
-// userModel.createUserTable()
+// Load base .env
+dotenv.config();
 
-app.listen(PORT, () => console.log(`Server running on ${process.env.NODE_ENV} port ${PORT}`));
+// Load env-specific .env file
+dotenv.config({ path: `.env.${env}` });
+
+// Now require config so process.env is ready
+const config = require('./config/Config');
+
+const PORT = config.port || 5000;
+
+console.log(`Using DB Host: ${config.db.host}`);
+
+app.listen(PORT, () => console.log(`Server running on ${config.db.host} port ${PORT}`));
