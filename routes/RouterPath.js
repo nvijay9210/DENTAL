@@ -1,4 +1,7 @@
 module.exports = {
+  
+  TEST_URL:"/test",
+  
   ADD_TENANT: "/addtenant",
   GETALL_TENTANT: "/getalltenants",
   GET_TENANT: "/gettenant/:tenant_id",

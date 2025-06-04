@@ -23,6 +23,7 @@ const getAllTenant = async () => {
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query);
+  
     return rows;
   } catch (error) {
     console.error("Error fetching Tenants:", error);

@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 
 const errorHandler = require('./middlewares/errorHandler');
 const createTable=require('./models/CreateModel')
@@ -34,6 +35,7 @@ const app = express();
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads/", express.static(path.join(__dirname, "uploads")));
 app.use("/files", express.static("uploads/"));
@@ -75,22 +77,26 @@ async function initializeTables() {
 //     });
 //   } }), userRouter);
 
-app.use('/tenant', tenantRouter);
-app.use('/clinic', clinicRouter);
-app.use('/dentist', dentistRouter);
-app.use('/patient', patientRouter);
-app.use('/appointment', appointmentRouter);
-app.use('/treatment', treatmentRouter);
-app.use('/prescription', prescriptionRouter);
-app.use('/statustype', statusTypeRouter);
-app.use('/statustypesub', statusTypeSubRouter);
-app.use('/asset', assetRouter);
-app.use('/expense', expenseRouter);
-app.use('/supplier', supplierRouter);
-app.use('/reminder', reminderRouter);
-app.use('/payment', paymentRouter);
-app.use('/dashboard', dashboardRouter);
-app.use('/appointment_reschedules', remiderPingRouter);
+app.use('/test',async(req,res)=>{
+  res.status(200).json({status:'OK',message:'Successfully Running'})
+})
+
+app.use('/v1/tenant', tenantRouter);
+app.use('/v1/clinic', clinicRouter);
+app.use('/v1/dentist', dentistRouter);
+app.use('/v1/patient', patientRouter);
+app.use('/v1/appointment', appointmentRouter);
+app.use('/v1/treatment', treatmentRouter);
+app.use('/v1/prescription', prescriptionRouter);
+app.use('/v1/statustype', statusTypeRouter);
+app.use('/v1/statustypesub', statusTypeSubRouter);
+app.use('/v1/asset', assetRouter);
+app.use('/v1/expense', expenseRouter);
+app.use('/v1/supplier', supplierRouter);
+app.use('/v1/reminder', reminderRouter);
+app.use('/v1/payment', paymentRouter);
+app.use('/v1/dashboard', dashboardRouter);
+app.use('/v1/appointment_reschedules', remiderPingRouter);
 
 app.use(errorHandler);
 

@@ -5,6 +5,7 @@ const clinicController = require("../controllers/ClinicController");
 const { uploadFileMiddleware } = require("../utils/UploadFiles");
 const clinicValidation = require("../validations/ClinicValidation");
 const routerPath = require("./RouterPath");
+const { multiTenantAuthMiddleware } = require("../middlewares/AuthToken");
 
 // Setup multer memory storage once
 const upload = multer({ storage: multer.memoryStorage() });
@@ -41,6 +42,7 @@ router.post(
 // Get All Clinics by Tenant
 router.get(
   routerPath.GETALL_CLINIC_TENANT,
+  //  multiTenantAuthMiddleware,
   clinicController.getAllClinicByTenantId
 );
 

@@ -23,8 +23,8 @@ const checkGlobalEmailUniqueness = async (conn, tenantId, email, id = null) => {
 
     try {
       const rows = await conn.query(query, params);
-      console.log(rows)
-      if (rows.length > 0) {
+      console.log(rows[0])
+      if (rows[0].length > 0) {
         throw new CustomError(`Email already exists in ${table}`, 409);
       }
     } catch (err) {

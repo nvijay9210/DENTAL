@@ -1,8 +1,9 @@
 const mysql = require('mysql2/promise');
-require('dotenv').config();
+
+require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` });
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
+  host:process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
@@ -11,5 +12,15 @@ const pool = mysql.createPool({
   queueLimit: 0,
   timezone: 'Z',
 });
+
+(async () => {
+  try {
+    const conn = await pool.getConnection();
+    console.log('✅ MySQL connection established.');
+    conn.release();
+  } catch (err) {
+    console.error('❌ MySQL connection failed:', err.message);
+  }
+})();
 
 module.exports = pool;
