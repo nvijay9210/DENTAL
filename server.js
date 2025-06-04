@@ -3,17 +3,17 @@ const dotenv = require('dotenv');
 
 const env = process.env.NODE_ENV || 'development';
 
-// Load base .env
-dotenv.config();
+dotenv.config(); // Load base .env first
+dotenv.config({ path: `.env.${env}` }); // Then env-specific override
 
-// Load env-specific .env file
-dotenv.config({ path: `.env.${env}` });
-
-// Now require config so process.env is ready
 const config = require('./config/Config');
 
-const PORT = config.port || 5000;
+const PORT = process.env.PORT || 5000;
 
-console.log(`Using DB Host: ${config.db.host}`);
+console.log(`Environment: ${env}`);
+console.log(`Using DB Host: ${process.env.DB_HOST}`);
+console.log(`Server listening on port: ${PORT}`);
 
-app.listen(PORT, () => console.log(`Server running on ${config.db.host} port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`✅ Server running on ${process.env.DB_HOST} port ${PORT}`);
+});
