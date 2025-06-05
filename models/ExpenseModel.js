@@ -9,7 +9,7 @@ const createExpense = async (table,columns, values) => {
   try {
     const expense = await record.createRecord(table, columns, values);
     console.log(expense)
-    return expense;
+    return expense.insertId;
   } catch (error) {
     console.error("Error creating expense:", error);
     throw new CustomError("Database Query Error", 500);

@@ -6,10 +6,10 @@ const { recordExists } = require("../query/Records");
 const expenseColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 6, null: false },
   { columnname: "clinic_id", type: "int", size: 11, null: false },
-  { columnname: "expense_amount", type: "varchar", size: 100, null: false },
+  { columnname: "expense_amount", type: "decimal", null: false },
   { columnname: "expense_category", type: "varchar", size: 255, null: true },
   { columnname: "expense_reason", type: "varchar", size: 255, null: true },
-  { columnname: "expense_date", type: "varchar", size: 255, null: true },
+  { columnname: "expense_date", type: "date", size: 255, null: true },
   { columnname: "mode_of_payment", type: "varchar", size: 255, null: true },
   { columnname: "receipt_number", type: "varchar", size: 100, null: true },
 ];

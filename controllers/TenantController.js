@@ -1,3 +1,4 @@
+const { CustomError } = require("../middlewares/CustomeError");
 const tenantService = require("../services/TenantService");
 const tenantValidation = require("../validations/TenantValidation");
 
@@ -27,6 +28,17 @@ exports.getTenantByTenantId = async (req, res, next) => {
   try {
     await tenantValidation.checkTenantExistsByTenantIdValidation(tenant_id)
     const tenants = await tenantService.getTenantByTenantId(tenant_id);
+    res.status(200).json(tenants);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
+    const {tenant_name,tenant_domain}=req.params
+  try {
+    if(!tenant_name || !tenant_domain) throw new CustomError('Tenantname and domain is requried',400)
+    const tenants = await tenantService.getTenantByTenantNameAndTenantDomain(tenant_name,tenant_domain);
     res.status(200).json(tenants);
   } catch (err) {
     next(err);
