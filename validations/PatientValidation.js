@@ -194,6 +194,8 @@ const createPatientValidation = async (details) => {
 const updatePatientValidation = async (patientId, details, tenantId) => {
   validateInput(details, UpdateColumnConfig);
 
+  const patient=await checkIfExists('patient','patient_id',patientId,tenantId)
+  if(!patient) throw new CustomError('PatientId not found',400)
   await checkTenantExistsByTenantIdValidation(tenantId);
 
   if (

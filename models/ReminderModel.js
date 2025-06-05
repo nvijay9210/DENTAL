@@ -8,13 +8,14 @@ const TABLE = "reminder";
 
 // Create Reminder
 const createReminder = async (table,columns, values) => {
+  console.log(columns,values)
   try {
     const reminder = await record.createRecord(table, columns, values);
     console.log(reminder)
-    return reminder;
+    return reminder.insertId;
   } catch (error) {
     console.error("Error creating reminder:", error);
-    throw new CustomError("Database Query Error", 500);
+    throw new CustomError(error.message, 500);
   }
 };
 
