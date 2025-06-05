@@ -5,6 +5,7 @@ module.exports = {
   ADD_TENANT: "/addtenant",
   GETALL_TENTANT: "/getalltenants",
   GET_TENANT: "/gettenant/:tenant_id",
+  GET_TENANT_NAME_DOMAIN: "/gettenant/:tenant_name/:tenant_domain",
   UPDATE_TENANT: "/updatetenant/:tenant_id",
   DELETE_TENANT: "/deletetenant/:tenant_id",
 

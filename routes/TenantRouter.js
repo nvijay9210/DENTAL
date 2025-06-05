@@ -30,6 +30,7 @@ const TenantFileMiddleware = uploadFileMiddleware({
 router.post(routerPath.ADD_TENANT,TenantUploadFields,TenantFileMiddleware, tenantController.addTenant);
 router.get(routerPath.GETALL_TENTANT, tenantController.getAllTenant);
 router.get(routerPath.GET_TENANT, tenantController.getTenantByTenantId);
+router.get(routerPath.GET_TENANT_NAME_DOMAIN, tenantController.getTenantByTenantNameAndTenantDomain);
 router.put(routerPath.UPDATE_TENANT,TenantUploadFields,TenantFileMiddleware,  tenantController.updateTenant);
 router.delete(routerPath.DELETE_TENANT, tenantController.deleteTenant);
 

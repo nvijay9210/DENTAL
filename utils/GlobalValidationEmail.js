@@ -2,7 +2,7 @@ const { CustomError } = require("../middlewares/CustomeError");
 const pool = require("../config/db");
 
 // Helper function to validate email uniqueness across tables
-const checkGlobalEmailUniqueness = async (conn, tenantId, email, id = null) => {
+const checkGlobalEmailUniqueness = async (conn, tenantId, email,currentTable, id = null) => {
   const tableIdMap = {
     clinic: "clinic_id",
     dentist: "dentist_id",
@@ -14,9 +14,19 @@ const checkGlobalEmailUniqueness = async (conn, tenantId, email, id = null) => {
     const params = [table, email, tenantId];
 
     // Exclude current record during update
-    if (id !== null && id !== undefined && id !== 0) {
-      query += ` AND ?? != ?`;
-      params.push(idColumn, id);
+    if (id !== null && id !== undefined && id !== 0 && currentTable===table) {
+      let query = `SELECT 1 FROM ?? WHERE email = ? AND tenant_id = ? AND ?? !=? LIMIT 1`;
+      const params = [currentTable, email, tenantId,`${currentTable}_id`,id];
+      try {
+        const rows = await conn.query(query, params);
+        console.log(rows[0])
+        if (rows[0].length > 0) {
+          throw new CustomError(`Email already exists in ${table}`, 409);
+        }
+      } catch (err) {
+        console.error(`Error checking email in ${table}:`, err.message);
+        throw new CustomError(`Email already exists in ${table}`, 409);
+      }
     }
 
     query += ` LIMIT 1`;
@@ -35,7 +45,7 @@ const checkGlobalEmailUniqueness = async (conn, tenantId, email, id = null) => {
 };
 
 // Main validator function
-const globalValidationEmail = async (tenantId, email, id = null) => {
+const globalValidationEmail = async (tenantId, email,currentTable, id = null) => {
   const conn = await pool.getConnection();
 
   console.log('tenant_id:',tenantId,'email:',email,'id:',id)
@@ -55,7 +65,7 @@ const globalValidationEmail = async (tenantId, email, id = null) => {
       }
 
       // Run the uniqueness check
-      await checkGlobalEmailUniqueness(conn, tenantId, email, id);
+      await checkGlobalEmailUniqueness(conn, tenantId, email,currentTable, id);
     } else {
       console.log("No email provided; skipping email uniqueness check.");
     }

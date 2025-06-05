@@ -32,6 +32,15 @@ const getTenantByTenantId = async (tenantId) => {
   }
 };
 
+const getTenantByTenantNameAndTenantDomain = async (tenant_name,tenant_domain) => {
+  try {
+    const tenant = await tenantModel.getTenantByTenantNameAndTenantDomain(tenant_name,tenant_domain); // Call model function to get tenants
+    return tenant;
+  } catch (error) {
+    throw new Error("Failed to get tenants: " + error.message);
+  }
+};
+
 // Update tenant service
 const updateTenant = async (tenantId, data) => {
   try {
@@ -64,4 +73,5 @@ module.exports = {
   getTenantByTenantId,
   updateTenant,
   deleteTenant,
+  getTenantByTenantNameAndTenantDomain
 };

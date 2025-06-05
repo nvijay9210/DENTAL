@@ -72,6 +72,19 @@ const checkTenantExistsByTenantnameAndTenantdomain = async (tenantName,tenantDom
   }
 };
 
+const getTenantByTenantNameAndTenantDomain = async (tenantName,tenantDomain) => {
+  const query = 'select * from tenant where tenant_name=? and tenant_domain=?limit 1';
+  const conn = await pool.getConnection();
+  try {
+    const rows = await conn.query(query, [tenantName,tenantDomain]);
+    return rows[0];
+  } catch (error) {
+    throw new CustomeError("Database error occurred while fetching the Tenant.");
+  } finally {
+    conn.release();
+  }
+};
+
 
 const updateTenant = async (tenant_id, data) => {
   const query = tenantQuery.updateTenant;
@@ -111,4 +124,5 @@ module.exports = {
   checkTenantExistsByTenantnameAndTenantdomain,
   updateTenant,
   deleteTenant,
+  getTenantByTenantNameAndTenantDomain
 };
