@@ -9,13 +9,13 @@ const reminderColumnConfig = [
   { columnname: "title", type: "varchar", size: 255, null: false },
   { columnname: "description", type: "text", null: true },
   { columnname: "category", type: "varchar", size: 100, null: true },
-  { columnname: "start_date", type: "date", null: true },
-  { columnname: "time", type: "time", null: true },
+  { columnname: "start_date", type: "date", null: false },
+  { columnname: "time", type: "time", null: false },
   { columnname: "reminder_repeat", type: "varchar", null: true },
   { columnname: "reminder_type", type: "varchar", null: true },
   { columnname: "repeat_interval", type: "int", null: false },
   { columnname: "repeat_count", type: "int", null: false },
-  { columnname: "notify_before_hours", type: "int", null: false },
+  { columnname: "notify_before_hours", type: "int", null: true },
   { columnname: "repeat_weekends", type: "varchar", size: 20, null: true },
   { columnname: "monthly_option", type: "varchar", size: 20, null: true },
   { columnname: "repeat_end_date", type: "date", null: true },
@@ -46,6 +46,8 @@ const createReminderValidation = async (details) => {
     checkIfIdExists("clinic", "clinic_id", details.clinic_id),
     checkIfIdExists("dentist", "dentist_id", details.dentist_id),
   ]);
+
+  if(isNaN(details.repeat_interval) || details.repeat_interval==0) throw new CustomError('Repeat interval must greater than 0')
 };
 
 /**

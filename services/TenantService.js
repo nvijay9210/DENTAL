@@ -1,11 +1,32 @@
 const tenantModel = require("../models/TenantModel");
+const { safeStringify, safeJsonParse } = require("../utils/Helpers");
+
+const tenantFields = {
+  tenant_name: (val) => val,
+  tenant_domain: (val) => val,
+  tenant_app_name: (val) => val,
+  tenant_app_logo: (val) => val,
+  tenant_app_font: (val) => val,
+  tenant_app_themes: safeStringify,
+};
+const tenantFieldsReverseMap = {
+  tenant_id:val=>val,
+  tenant_name: (val) => val,
+  tenant_domain: (val) => val,
+  tenant_app_name: (val) => val,
+  tenant_app_logo: (val) => val,
+  tenant_app_font: (val) => val,
+  tenant_app_themes: safeJsonParse,
+};
 
 // Create tenant service (calls the model function)
 const createTenant = async (data) => {
+  const create = {
+    ...tenantFields,
+    created_by: (val) => val,
+  };
   try {
-    const utcNow = new Date().toISOString().replace("T", " ").slice(0, 19);
-    data["created_time"] = utcNow;
-    const tenantId = await tenantModel.createTenant(data); // Call model function to insert tenant
+    const tenantId = await tenantModel.createTenant(create); // Call model function to insert tenant
     return tenantId;
   } catch (error) {
     throw new Error("Failed to create tenant: " + error.message);
@@ -44,7 +65,11 @@ const getTenantByTenantNameAndTenantDomain = async (tenant_name,tenant_domain) =
 // Update tenant service
 const updateTenant = async (tenantId, data) => {
   try {
-    const affectedRows = await tenantModel.updateTenant(tenantId, data);
+    const update = {
+      ...tenantFields,
+      updated_by: (val) => val,
+    };
+    const affectedRows = await tenantModel.updateTenant(tenantId, update);
     if (affectedRows === 0) {
       throw new Error("Tenant not found or no changes made.");
     }

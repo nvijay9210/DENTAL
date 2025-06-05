@@ -8,9 +8,6 @@ const { uploadFileMiddleware } = require("../utils/UploadFiles");
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Common upload fields
-const TenantUploadFields = upload.fields([
-  { name: "tenant_app_logo", maxCount: 1 }
-]);
 
 // File middleware options
 const TenantFileMiddleware = uploadFileMiddleware({
@@ -27,11 +24,11 @@ const TenantFileMiddleware = uploadFileMiddleware({
     updateValidationFn: tenantValidation.updateTenantValidation,
   });
 
-router.post(routerPath.ADD_TENANT,TenantUploadFields,TenantFileMiddleware, tenantController.addTenant);
+router.post(routerPath.ADD_TENANT,upload.any(),TenantFileMiddleware, tenantController.addTenant);
 router.get(routerPath.GETALL_TENTANT, tenantController.getAllTenant);
 router.get(routerPath.GET_TENANT, tenantController.getTenantByTenantId);
 router.get(routerPath.GET_TENANT_NAME_DOMAIN, tenantController.getTenantByTenantNameAndTenantDomain);
-router.put(routerPath.UPDATE_TENANT,TenantUploadFields,TenantFileMiddleware,  tenantController.updateTenant);
+router.put(routerPath.UPDATE_TENANT,upload.any(),TenantFileMiddleware,  tenantController.updateTenant);
 router.delete(routerPath.DELETE_TENANT, tenantController.deleteTenant);
 
 module.exports = router;

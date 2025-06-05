@@ -46,6 +46,7 @@ const createAssetValidation = async (details) => {
  * Validate Update Asset Input with Tenant Scope
  */
 const updateAssetValidation = async (assetId, details) => {
+  console.log(details)
   validateInput(details, updateColumnConfig);
 
   const exists = await checkIfExists(

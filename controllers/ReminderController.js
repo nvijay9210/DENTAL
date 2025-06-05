@@ -17,8 +17,6 @@ exports.createReminder = async (req, res, next) => {
     // Validate reminder data
     await reminderValidation.createReminderValidation(details);
 
-    if(isNaN(details.repeat_interval) || details.repeat_interval==0) throw new CustomError('Repeat interval must greater than 0')
-
     // Create the reminder
     const id = await reminderService.createReminder(details);
     res.status(201).json({ message: "Reminder created", id });

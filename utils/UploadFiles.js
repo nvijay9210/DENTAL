@@ -32,6 +32,9 @@ const uploadFileMiddleware = (options) => {
       const tenant_id = req.body.tenant_id || req.params.tenant_id;
       let id = 0;
       switch (folderName) {
+        case "Asset":
+          id = req.params.asset_id;
+          break;
         case "Treatment":
           id = req.params.treatment_id;
           break;
@@ -43,6 +46,9 @@ const uploadFileMiddleware = (options) => {
           break;
         case "Clinic":
           id = req.params.clinic_id;
+          break;
+        case "Tenant":
+          id = req.params.tenant_id;
           break;
         default:
           break;
