@@ -93,11 +93,11 @@ const getAllPaymentsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = payments.map((payment) =>
+    const convertedRows = payments.data.map((payment) =>
       helper.convertDbToFrontend(payment, paymentFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:payments.total};;
   } catch (err) {
     console.error("Database error while fetching payments:", err);
     throw new CustomError("Failed to fetch payments", 404);
@@ -116,7 +116,7 @@ const getPaymentByTenantIdAndPaymentId = async (tenantId, paymentId) => {
       paymentFieldsReverseMap
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:payment.total};;
   } catch (error) {
     throw new CustomError("Failed to get payment: " + error.message, 404);
   }

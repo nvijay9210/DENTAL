@@ -4,6 +4,7 @@ const {
   getOrSetCache,
   invalidateCacheByPattern,
 } = require("../config/redisConfig");
+const helper = require("../utils/Helpers");
 
 const statusTypeField = {
   tenant_id: (val) => val,
@@ -60,7 +61,7 @@ const getAllStatusTypesByTenantId = async (page = 1, limit = 10) => {
           helper.convertDbToFrontend(statusType, statusTypeFieldReverseMap)
         );
     
-        return convertedRows;
+        return {data:convertedRows,total:statusTypes.total};;
   } catch (err) {
     console.error("Database error while fetching statusTypes:", err);
     throw new CustomError("Failed to fetch statusTypes", 404);
@@ -74,7 +75,7 @@ const getStatusTypeByStatusTypeId = async (statusTypeId) => {
       statusTypeId
     );
     const convertedRows=helper.convertDbToFrontend(statusType, statusTypeFieldReverseMap)
-    return convertedRows;
+    return {data:convertedRows,total:statusType.total};;
   } catch (error) {
     throw new CustomError("Failed to get statusType: " + error.message, 404);
   }

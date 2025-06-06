@@ -36,7 +36,7 @@ exports.getAllPrescriptionsByTenantId = async (req, res, next) => {
         page,
         limit
       );
-    res.status(200).json(prescriptions);
+    res.status(200).json({data:prescriptions.data,total:prescriptions.total,page});
   } catch (err) {
     next(err);
   }
@@ -66,7 +66,7 @@ exports.getAllPrescriptionsByTenantAndClinicIdAndTreatmentId = async (req, res, 
         page,
         limit
       );
-    res.status(200).json(prescriptions);
+    res.status(200).json({data:prescriptions.data,total:prescriptions.total,page});
   } catch (err) {
     next(err);
   }
@@ -98,7 +98,7 @@ exports.getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async
         page,
         limit
       );
-    res.status(200).json(prescriptions);
+    res.status(200).json({data:prescriptions.data,total:prescriptions.total,page});
   } catch (err) {
     next(err);
   }

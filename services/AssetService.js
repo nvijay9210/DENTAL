@@ -84,9 +84,9 @@ const getAllAssetsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = assets.map(asset => helper.convertDbToFrontend(asset, assetFieldsReverseMap));
+    const convertedRows = assets.data.map(asset => helper.convertDbToFrontend(asset, assetFieldsReverseMap));
     
-        return convertedRows;
+        return {data:convertedRows,total:assets.total};;
      
   } catch (err) {
     console.error("Database error while fetching assets:", err);
@@ -103,7 +103,7 @@ const getAssetByTenantIdAndAssetId = async (tenantId, assetId) => {
     );
     const convertedRows = helper.convertDbToFrontend(asset, assetFieldsReverseMap);
     
-        return convertedRows;
+        return {data:convertedRows,total:assets.total};;
   } catch (error) {
     throw new CustomError("Failed to get asset: " + error.message, 404);
   }
@@ -175,9 +175,9 @@ const getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (
       return result;
     });
 
-    const convertedRows = assets.map(asset => helper.convertDbToFrontend(asset, assetFieldsReverseMap));
+    const convertedRows = assets.data.map(asset => helper.convertDbToFrontend(asset, assetFieldsReverseMap));
     
-      return convertedRows;
+      return {data:convertedRows,total:assets.total};;
   } catch (err) {
     console.error("Database error while fetching assets:", err);
     throw new CustomError("Failed to fetch assets", 404);

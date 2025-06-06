@@ -150,11 +150,11 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
       );
       return result;
     });
-    const convertedRows = clinics.map((clinic) =>
+    const convertedRows = clinics.data.map((clinic) =>
       helper.convertDbToFrontend(clinic, clinicFieldReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:clinics.total};
   } catch (err) {
     console.error(err);
     throw new CustomError(message.CLINICS_FETCH_FAIL, 404);
@@ -174,7 +174,7 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
       clinicFieldReverseMap
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:clinics.total};;
   } catch (error) {
     throw new CustomError(message.CLINIC_FETCH_FAIL, 404);
   }

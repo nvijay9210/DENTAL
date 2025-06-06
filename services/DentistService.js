@@ -175,9 +175,9 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
       );
     });
 
-    const convertedRows = dentists.map(dentist => helper.convertDbToFrontend(dentist, dentistFieldReverseMap)).map(flattenAwards);
+    const convertedRows = dentists.data.map(dentist => helper.convertDbToFrontend(dentist, dentistFieldReverseMap)).map(flattenAwards);
 
-    return convertedRows;
+    return {data:convertedRows,total:dentists.total};;
   } catch (err) {
     console.error("Database error while fetching dentists:", err.message);
     throw new CustomError("Database error while fetching dentists", 404);
@@ -276,7 +276,7 @@ const getAllDentistsByTenantIdAndClinicId = async (
       );
     });
 
-    const parsed = decodeJsonFields(dentists, jsonFields).map((dentist) => {
+    const parsed = decodeJsonFields(dentists, jsonFields).data.map((dentist) => {
       // ✅ Optionally flatten for form use
       return flattenAwards(dentist);
     });

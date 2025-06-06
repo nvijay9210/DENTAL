@@ -29,7 +29,7 @@ exports.getAllDentistsByTenantId = async (req, res, next) => {
       page,
       limit
     );
-    res.status(200).json(dentists);
+    res.status(200).json({data:dentists.data,total:dentists.total,page});
   } catch (err) {
     next(err);
   }
@@ -101,7 +101,7 @@ exports.getAllDentistByTenantIdAndClientId = async (req, res, next) => {
       page,
       limit
     );
-    res.status(200).json(dentists);
+    res.status(200).json({data:dentists.data,total:dentists.total,page});
   } catch (err) {
     next(err);
   }

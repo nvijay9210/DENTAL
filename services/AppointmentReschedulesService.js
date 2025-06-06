@@ -93,11 +93,11 @@ const getAllAppointmentReschedulessByTenantId = async (
       return result;
     });
 
-    const convertedRows = appointmentReschedules.map((appointmentReschedule) =>
+    const convertedRows = appointmentReschedules.data.map((appointmentReschedule) =>
       helper.convertDbToFrontend(appointmentReschedule, appointmentRescheduleFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:appointmentReschedules.total};;
   } catch (err) {
     console.error("Database error while fetching appointmentReschedules:", err);
     throw new CustomError("Failed to fetch appointmentReschedules", 404);
@@ -123,11 +123,11 @@ const getAllAppointmentReschedulessByTenantIdAndClinicId = async (
       return result;
     });
 
-    const convertedRows = appointmentReschedules.map((appointmentReschedule) =>
+    const convertedRows = appointmentReschedules.data.map((appointmentReschedule) =>
       helper.convertDbToFrontend(appointmentReschedule, appointmentRescheduleFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:appointmentReschedules.total};;
   } catch (err) {
     console.error("Database error while fetching appointmentReschedules:", err);
     throw new CustomError("Failed to fetch appointmentReschedules", 404);
@@ -156,11 +156,11 @@ const getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId = async (
       return result;
     });
 
-    const convertedRows = appointmentReschedules.map((appointmentReschedule) =>
+    const convertedRows = appointmentReschedules.data.map((appointmentReschedule) =>
       helper.convertDbToFrontend(appointmentReschedule, appointmentRescheduleFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:appointmentReschedules.total};;
   } catch (err) {
     console.error("Database error while fetching appointmentReschedules:", err);
     throw new CustomError("Failed to fetch appointmentReschedules", 404);
@@ -183,7 +183,7 @@ const getAppointmentReschedulesByTenantIdAndAppointmentReschedulesId = async (
       appointmentRescheduleFieldsReverseMap
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:appointmentReschedules.total};;
   } catch (error) {
     throw new CustomError("Failed to get appointmentReschedule: " + error.message, 404);
   }
