@@ -76,11 +76,11 @@ const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = expenses.map((expense) =>
+    const convertedRows = expenses.data.map((expense) =>
       helper.convertDbToFrontend(expense, expenseFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:expenses.total};;
   } catch (err) {
     console.error("Database error while fetching expenses:", err);
     throw new CustomError("Failed to fetch expenses", 404);
@@ -106,11 +106,11 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
         );
       return result;
     });
-    const convertedRows = expenses.map((expense) =>
+    const convertedRows = expenses.data.map((expense) =>
       helper.convertDbToFrontend(expense, expenseFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:expenses.total};;
   } catch (err) {
     console.error("Database error while fetching expenses:", err);
     throw new CustomError("Failed to fetch expenses", 404);
@@ -129,7 +129,7 @@ const getExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
       expenseFieldsReverseMap
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:expense.total};;
   } catch (error) {
     throw new CustomError("Failed to get expense: " + error.message, 404);
   }

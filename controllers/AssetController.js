@@ -30,7 +30,7 @@ exports.getAllAssetsByTenantId = async (req, res, next) => {
   try {
     await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
     const assets = await assetService.getAllAssetsByTenantId(tenant_id, page, limit);
-    res.status(200).json(assets);
+    res.status(200).json({data:assets.data,total:assets.total,page})
   } catch (err) {
     next(err);
   }
@@ -113,7 +113,7 @@ exports.getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (
         start_date,
         end_date
       );
-    res.status(200).json(assets);
+    res.status(200).json({data:assets.data,total:assets.total,page})
   } catch (err) {
     next(err);
   }

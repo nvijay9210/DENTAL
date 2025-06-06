@@ -37,7 +37,7 @@ exports.getAllAppointmentsByTenantId = async (req, res, next) => {
       page,
       limit
     );
-    res.status(200).json(appointments);
+    res.status(200).json({data:appointments.data,total:appointments.total,page});
   } catch (err) {
     next(err);
   }
@@ -53,7 +53,7 @@ exports.getAllAppointmentsByTenantIdAndClinicId = async (req, res, next) => {
       page,
       limit
     );
-    res.status(200).json(appointments);
+    res.status(200).json({data:appointments.data,total:appointments.total,page});
   } catch (err) {
     next(err);
   }
@@ -73,7 +73,7 @@ exports.getAllAppointmentsByTenantIdAndClinicIdByDentist = async (req, res, next
       page,
       limit
     );
-    res.status(200).json(appointments);
+    res.status(200).json({data:appointments.data,total:appointments.total,page})
   } catch (err) {
     next(err);
   }

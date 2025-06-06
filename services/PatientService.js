@@ -112,11 +112,11 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = patients.map((patient) =>
+    const convertedRows = patients.data.map((patient) =>
       helper.convertDbToFrontend(patient, patientFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:patients.total};;
   } catch (error) {
     console.error(error);
     throw new CustomError("Database error while fetching patients", 404);
@@ -820,7 +820,7 @@ const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
       patientFieldsReverseMap
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:patient.total};;
   } catch (error) {
     throw new CustomError("Failed to get patient: " + error.message, 404);
   }

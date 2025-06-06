@@ -100,11 +100,11 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = treatments.map((treatment) =>
+    const convertedRows = treatments.data.map((treatment) =>
       helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:treatments.total};;
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
     throw new CustomError("Failed to fetch treatments", 404);
@@ -151,12 +151,12 @@ const getAllTreatmentsByTenantAndClinicId = async (
     });
 
     const convertedRows = treatments
-      .map((treatment) =>
+      .data.map((treatment) =>
         helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
       )
       .map(flattenTreatmentImages);
 
-    return convertedRows;
+    return {data:convertedRows,total:treatments.total};;
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
     throw new CustomError("Failed to fetch treatments", 404);
@@ -188,12 +188,12 @@ const getAllTreatmentsByTenantAndClinicIdAndDentist = async (
     });
 
     const convertedRows = treatments
-      .map((treatment) =>
+      .data.map((treatment) =>
         helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
       )
       .map(flattenTreatmentImages);
 
-    return convertedRows;
+    return {data:convertedRows,total:treatments.total};;
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
     throw new CustomError("Failed to fetch treatments", 404);

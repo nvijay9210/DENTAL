@@ -1,6 +1,7 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists, checkIfIdExists } = require("../models/checkIfExists");
 const statusTypeSubService = require("../services/StatusTypeSubService");
+const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 const statusTypeSubValidation = require("../validations/StatusTypeSubValidation");
 
 /**
@@ -43,7 +44,7 @@ exports.getAllStatusTypeSubsByTenantId = async (req, res, next) => {
         page,
         limit
       );
-    res.status(200).json(statusTypeSubs);
+    res.status(200).json({data:statusTypeSubs.data,total:statusTypeSubs.total,page});
   } catch (err) {
     next(err);
   }
@@ -74,7 +75,7 @@ exports.getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
         page,
         limit
       );
-    res.status(200).json(statusTypeSubs);
+    res.status(200).json({data:statusTypeSubs.data,total:statusTypeSubs.total,page});
   } catch (err) {
     next(err);
   }
@@ -100,7 +101,7 @@ exports.getAllStatusTypeSubByTenantIdAndStatusType = async (req, res, next) => {
         page,
         limit
       );
-    res.status(200).json(statusTypeSubs);
+    res.status(200).json({data:statusTypeSubs.data,total:statusTypeSubs.total,page});
   } catch (err) {
     next(err);
   }

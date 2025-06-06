@@ -38,7 +38,7 @@ exports.getAllRemindersByTenantId = async (req, res, next) => {
       page,
       limit
     );
-    res.status(200).json(reminders);
+    res.status(200).json({data:reminders.data,total:reminders.total,page})
   } catch (err) {
     next(err);
   }

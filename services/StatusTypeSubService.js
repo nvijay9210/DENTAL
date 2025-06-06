@@ -76,11 +76,11 @@ const getAllStatusTypeSubsByTenantId = async (
       return result;
     });
 
-    const convertedRows = statusTypeSubs.map((statusTypeSub) =>
+    const convertedRows = statusTypeSubs.data.map((statusTypeSub) =>
       helper.convertDbToFrontend(statusTypeSub, statusTypeSubFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:statusTypeSubs.total};;
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
     throw new CustomError("Failed to fetch statusTypeSubs", 404);
@@ -112,7 +112,7 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
       statusTypeSubFieldsReverseMap
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:statusTypeSubs.total};;
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
     throw new CustomError("Failed to fetch statusTypeSubs", 404);
@@ -144,11 +144,11 @@ const getAllStatusTypeSubByTenantIdAndStatusType = async (
       return result;
     });
 
-    const convertedRows = statusTypeSubs.map((statusTypeSub) =>
+    const convertedRows = statusTypeSubs.data.map((statusTypeSub) =>
       helper.convertDbToFrontend(statusTypeSub, statusTypeSubFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:statusTypeSubs.total};;
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
     throw new CustomError("Failed to fetch statusTypeSubs", 404);
@@ -176,11 +176,11 @@ const getAllStatusTypeSubByStatusTypeAndTenantId = async (
       return result;
     });
 
-    const convertedRows = statusTypeSubs.map((statusTypeSub) =>
+    const convertedRows = statusTypeSubs.data.map((statusTypeSub) =>
       helper.convertDbToFrontend(statusTypeSub, statusTypeSubFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:statusTypeSubs.total};;
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
     throw new CustomError("Failed to fetch statusTypeSubs", 404);
@@ -203,7 +203,7 @@ const getStatusTypeSubByTenantIdAndStatusTypeSubId = async (
       statusTypeSubFieldsReverseMap
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:statusTypeSub.total};;
   } catch (error) {
     throw new CustomError("Failed to get statusTypeSub: " + error.message, 404);
   }

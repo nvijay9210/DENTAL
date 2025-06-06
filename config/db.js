@@ -13,14 +13,14 @@ const pool = mysql.createPool({
   timezone: 'Z',
 });
 
-(async () => {
-  try {
-    const conn = await pool.getConnection();
-    console.log('✅ MySQL connection established.');
-    conn.release();
-  } catch (err) {
-    console.error('❌ MySQL connection failed:', err.message);
-  }
-})();
+// (async () => {
+//   try {
+//     const conn = await pool.getConnection();
+//     console.log('✅ MySQL connection established.');
+//     conn.release();
+//   } catch (err) {
+//     console.error('❌ MySQL connection failed:', err.message);
+//   }
+// })();
 
 module.exports = pool;

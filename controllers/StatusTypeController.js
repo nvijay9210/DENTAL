@@ -30,7 +30,7 @@ exports.getAllStatusTypesByTenantId = async (req, res, next) => {
 
   try {
     const statusTypes = await statusTypeService.getAllStatusTypesByTenantId( page, limit);
-    res.status(200).json(statusTypes);
+    res.status(200).json({data:statusTypes.data,total:statusTypes.total,page})
   } catch (err) {
     next(err);
   }
