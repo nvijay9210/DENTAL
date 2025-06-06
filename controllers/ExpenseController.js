@@ -38,7 +38,7 @@ exports.getAllExpensesByTenantId = async (req, res, next) => {
       page,
       limit
     );
-    res.status(200).json(expenses);
+    res.status(200).json({expenses,total:expenses.length,page});
   } catch (err) {
     next(err);
   }
@@ -61,7 +61,7 @@ exports.getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
         start_date,
         end_date
       );
-    res.status(200).json(expenses);
+    res.status(200).json({expenses,total:expenses.length,page});
   } catch (err) {
     next(err);
   }

@@ -34,17 +34,17 @@ exports.getAllTreatmentsByTenantId = async (req, res, next) => {
       page,
       limit
     );
-    res.status(200).json(treatments);
+    res.status(200).json({ treatments, total: treatments.length, page });
   } catch (err) {
     next(err);
   }
 };
 
 exports.getAllTreatmentsByTenantAndClinicId = async (req, res, next) => {
-  const { tenant_id,clinic_id,appointment_id } = req.params;
+  const { tenant_id, clinic_id, appointment_id } = req.params;
   const { page, limit } = req.query;
-  await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
 
   const appointment = await checkIfExists(
     "appointment",
@@ -63,19 +63,23 @@ exports.getAllTreatmentsByTenantAndClinicId = async (req, res, next) => {
         page,
         limit
       );
-    res.status(200).json(treatments);
+    res.status(200).json({ treatments, total: treatments.length, page });
   } catch (err) {
     next(err);
   }
 };
 
-exports.getAllTreatmentsByTenantAndClinicIdAndDentist= async (req, res, next) => {
-  const { tenant_id,clinic_id,dentist_id,appointment_id } = req.params;
+exports.getAllTreatmentsByTenantAndClinicIdAndDentist = async (
+  req,
+  res,
+  next
+) => {
+  const { tenant_id, clinic_id, dentist_id, appointment_id } = req.params;
   const { page, limit } = req.query;
 
-  await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('clinic','clinic_id',clinic_id)
-  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
+  await checkIfIdExists("dentist", "dentist_id", dentist_id);
 
   const appointment = await checkIfExists(
     "appointment",
@@ -95,7 +99,7 @@ exports.getAllTreatmentsByTenantAndClinicIdAndDentist= async (req, res, next) =>
         page,
         limit
       );
-    res.status(200).json(treatments);
+    res.status(200).json({ treatments, total: treatments.length, page });
   } catch (err) {
     next(err);
   }

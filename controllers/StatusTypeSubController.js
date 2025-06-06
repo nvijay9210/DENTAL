@@ -43,7 +43,7 @@ exports.getAllStatusTypeSubsByTenantId = async (req, res, next) => {
         page,
         limit
       );
-    res.status(200).json(statusTypeSubs);
+    res.status(200).json({statusTypeSubs,total:statusTypeSubs.length,page});
   } catch (err) {
     next(err);
   }
@@ -74,7 +74,7 @@ exports.getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
         page,
         limit
       );
-    res.status(200).json(statusTypeSubs);
+      res.status(200).json({statusTypeSubs,total:statusTypeSubs.length,page});
   } catch (err) {
     next(err);
   }
@@ -100,7 +100,7 @@ exports.getAllStatusTypeSubByTenantIdAndStatusType = async (req, res, next) => {
         page,
         limit
       );
-    res.status(200).json(statusTypeSubs);
+      res.status(200).json({statusTypeSubs,total:statusTypeSubs.length,page});
   } catch (err) {
     next(err);
   }

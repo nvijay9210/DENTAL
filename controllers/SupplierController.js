@@ -34,7 +34,7 @@ exports.getAllSuppliersByTenantId = async (req, res, next) => {
       page,
       limit
     );
-    res.status(200).json(suppliers);
+    res.status(200).json({suppliers,total:suppliers.length,page});
   } catch (err) {
     next(err);
   }
