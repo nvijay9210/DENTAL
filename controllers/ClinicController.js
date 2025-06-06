@@ -29,9 +29,9 @@ exports.getAllClinicByTenantId = async (req, res, next) => {
       page,
       limit
     );
-    res.status(200).json(clinics);
+    res.status(200).json({clinics,total:clinics.length,page});
   } catch (err) {
-    next(err);
+    next(err); 
   }
 };
 
