@@ -38,7 +38,7 @@ const reminderFields = {
   reminder_repeat: (val) => val,
   repeat_interval: (val) => parseInt(val),
   repeat_count: (val) => parseInt(val),
-  repeat_weekdays: (val) => val,
+  repeat_weekdays: (val) => helper.safeStringify(val),
   monthly_option: (val) => val,
   repeat_end_date: (val) => val?formatDateOnly(val):null,
   notify: helper.parseBoolean,
@@ -61,7 +61,7 @@ const reminderFieldsReverseMap = {
   time: (val) => val,
   reminder_repeat: (val) => val,
   repeat_interval: (val) => parseInt(val),
-  repeat_weekdays: (val) => val,
+  repeat_weekdays: (val) => helper.safeJsonParse(val),
   repeat_end_date: (val) => formatDateOnly(val),
   notify: (val) => Boolean(val),
   is_recurring:(val)=>val,
@@ -111,11 +111,11 @@ const getAllRemindersByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = reminders.map((reminder) =>
+    const convertedRows = reminders.data.map((reminder) =>
       helper.convertDbToFrontend(reminder, reminderFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:reminders.total};;
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
     throw new CustomError("Failed to fetch reminders", 404);
@@ -134,7 +134,7 @@ const getReminderByTenantIdAndReminderId = async (tenantId, reminderId) => {
       helper.convertDbToFrontend(reminder, reminderFieldsReverseMap)
   
 
-    return convertedRows;
+    return {data:convertedRows,total:reminder.total};;
   } catch (error) {
     throw new CustomError("Failed to get reminder: " + error.message, 404);
   }
@@ -226,7 +226,7 @@ const getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (
 
     } else if (repeatType === 'every week' || repeatType === 'weekly') {
       const weekdaysArray = repeat_weekdays
-        ? repeat_weekdays.split(',').map(w => w.trim())
+        ? repeat_weekdays.split(',').data.map(w => w.trim())
         : [start.format('dddd')]; // default to due_date's weekday
 
       let current = start.startOf('week');
@@ -346,7 +346,7 @@ const getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (
 
 //     } else if (repeatType === 'every week' || repeatType === 'weekly') {
 //       const weekdaysArray = repeat_weekdays
-//         ? repeat_weekdays.split(',').map(w => w.trim())
+//         ? repeat_weekdays.split(',').data.map(w => w.trim())
 //         : [start.format('dddd')]; // default to due_date's weekday
 
 //       let current = start.startOf('week');
@@ -476,7 +476,7 @@ const WEEKDAYS = {
 
 //       if (repeatType === "every week" || repeatType === "weekly") {
 //         const weekdays = repeat_weekdays
-//           ? repeat_weekdays.split(",").map((d) => d.trim())
+//           ? repeat_weekdays.split(",").data.map((d) => d.trim())
 //           : [];
 
 //         weekdays.forEach((weekdayName) => {
@@ -619,7 +619,7 @@ const getMonthlywiseRemindersByTenantAndClinicIdAndDentistId = async (tenant_id,
         }
       } else if (repeatType === 'weekly' || repeatType === 'every week') {
         const weekdays = repeat_weekdays
-          ? repeat_weekdays.split(',').map((d) => d.trim())
+          ? repeat_weekdays.split(',').data.map((d) => d.trim())
           : [];
 
         while (current.isSameOrBefore(end)) {

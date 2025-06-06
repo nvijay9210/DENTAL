@@ -1,6 +1,7 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists, checkIfIdExists } = require("../models/checkIfExists");
 const statusTypeSubService = require("../services/StatusTypeSubService");
+const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 const statusTypeSubValidation = require("../validations/StatusTypeSubValidation");
 
 /**

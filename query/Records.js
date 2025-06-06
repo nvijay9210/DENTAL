@@ -172,20 +172,31 @@ const createRecord = async (table, columns, values) => {
 
 // ✅ READ ALL
 const getAllRecords = async (table, tenantColumn, tenantId, limit = 100, offset = 0) => {
+  const dataSql = `SELECT * FROM \`${table}\` WHERE \`${tenantColumn}\` = ? LIMIT ? OFFSET ?`;
+  const countSql = `SELECT COUNT(*) AS total FROM \`${table}\` WHERE \`${tenantColumn}\` = ?`;
 
-  const sql = `SELECT * FROM \`${table}\` WHERE \`${tenantColumn}\` = ? LIMIT ? OFFSET ?`;
   let conn;
   try {
     conn = await pool.getConnection();
-    const [rows] = await conn.query(sql, [tenantId, limit, offset]);
-    return rows;
+
+    // 1. Get total count
+    const [countResult] = await conn.query(countSql, [tenantId]);
+    const total = countResult[0].total;
+
+    // 2. Get paginated data
+    const [data] = await conn.query(dataSql, [tenantId, limit, offset]);
+
+    console.log(total,data)
+
+    return { total, data };
   } catch (error) {
-    console.error("Error executing SELECT ALL:", error);
+    console.error("Error executing SELECT ALL with count:", error);
     throw error;
   } finally {
     if (conn) conn.release();
   }
 };
+
 
 // ✅ READ BY ID
 const getRecordByIdAndTenantId = async (
