@@ -131,11 +131,11 @@ const getAllAppointmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
       );
       return result;
     });
-    const convertedRows = appointments.map((appointment) =>
+    const convertedRows = appointments.data.map((appointment) =>
       helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:appointments.total};;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
     throw new CustomError("Failed to fetch appointment", 404);
@@ -156,11 +156,11 @@ const getAllAppointmentsByTenantIdAndClinicId = async (tenantId,clinic_id, page 
       );
       return result;
     });
-    const convertedRows = appointments.map((appointment) =>
+    const convertedRows = appointments.data.map((appointment) =>
       helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:appointments.total};;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
     throw new CustomError("Failed to fetch appointment", 404);
@@ -182,11 +182,11 @@ const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (tenantId,clinic_
       );
       return result;
     });
-    const convertedRows = appointments.map((appointment) =>
+    const convertedRows = appointments.data.map((appointment) =>
       helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:appointments.total};;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
     throw new CustomError("Failed to fetch appointment", 404);
@@ -209,7 +209,7 @@ const getAppointmentByTenantIdAndAppointmentId = async (
         helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
       
   
-      return convertedRows;
+      return {data:convertedRows,total:appointment.total};;
   } catch (error) {
     throw new CustomError("Failed to get appointment: " + error.message, 404);
   }
@@ -407,7 +407,7 @@ const getAppointmentMonthlySummary = async (
 //       // Format output
 //       const formattedSummary = {};
 //       for (const [year, months] of Object.entries(summary)) {
-//         formattedSummary[year] = Object.entries(months).map(([month, count]) => ({
+//         formattedSummary[year] = Object.entries(months).data.map(([month, count]) => ({
 //           month,
 //           count,
 //         }));
@@ -427,7 +427,7 @@ const getAppointmentMonthlySummary = async (
 //         else summary[year]++;
 //       }
 
-//       const formatted = Object.entries(summary).map(([year, count]) => ({
+//       const formatted = Object.entries(summary).data.map(([year, count]) => ({
 //         year: parseInt(year),
 //         count,
 //       }));

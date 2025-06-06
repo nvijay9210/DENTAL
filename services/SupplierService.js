@@ -74,11 +74,11 @@ const getAllSuppliersByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = suppliers.map((supplier) =>
+    const convertedRows = suppliers.data.map((supplier) =>
       helper.convertDbToFrontend(supplier, supplierFieldsReverseMap)
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:suppliers.total};;
   } catch (err) {
     console.error("Database error while fetching suppliers:", err);
     throw new CustomError("Failed to fetch suppliers", 404);
@@ -98,7 +98,7 @@ const getSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
       supplierFieldsReverseMap
     );
 
-    return convertedRows;
+    return {data:convertedRows,total:supplier.total};;
   } catch (error) {
     throw new CustomError("Failed to get supplier: " + error.message, 404);
   }

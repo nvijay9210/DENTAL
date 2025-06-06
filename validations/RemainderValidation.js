@@ -14,7 +14,7 @@ const reminderColumnConfig = [
   { columnname: "reminder_repeat", type: "varchar", null: true },
   { columnname: "reminder_type", type: "varchar", null: true },
   { columnname: "repeat_interval", type: "int", null: false },
-  { columnname: "repeat_count", type: "int", null: false },
+  { columnname: "repeat_count", type: "int", null: true },
   { columnname: "notify_before_hours", type: "int", null: true },
   { columnname: "repeat_weekends", type: "varchar", size: 20, null: true },
   { columnname: "monthly_option", type: "varchar", size: 20, null: true },

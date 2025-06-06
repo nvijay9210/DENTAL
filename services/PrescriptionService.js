@@ -105,11 +105,11 @@ const getAllPrescriptionsByTenantId = async (
       return result;
     });
 
-     const convertedRows = prescriptions.map((prescription) =>
+     const convertedRows = prescriptions.data.map((prescription) =>
           helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
         );
     
-        return convertedRows;
+        return {data:convertedRows,total:prescriptions.total};;
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
     throw new CustomError("Failed to fetch prescriptions", 404);
@@ -139,11 +139,11 @@ const getAllPrescriptionsByTenantAndClinicIdAndTreatmentId = async (
       return result;
     });
 
-    const convertedRows = prescriptions.map((prescription) =>
+    const convertedRows = prescriptions.data.map((prescription) =>
           helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
         );
     
-        return convertedRows;
+        return {data:convertedRows,total:prescriptions.total};;
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
     throw new CustomError("Failed to fetch prescriptions", 404);
@@ -175,11 +175,11 @@ const getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (
       return result;
     });
 
-    const convertedRows = prescriptions.map((prescription) =>
+    const convertedRows = prescriptions.data.map((prescription) =>
           helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
         );
     
-        return convertedRows;
+        return {data:convertedRows,total:prescriptions.total};;
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
     throw new CustomError("Failed to fetch prescriptions", 404);
@@ -201,7 +201,7 @@ const getPrescriptionByTenantIdAndPrescriptionId = async (
     const convertedRows =
       helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
 
-    return convertedRows;
+    return {data:convertedRows,total:prescription.total};;
     
   } catch (error) {
     throw new CustomError("Failed to get prescription: " + error.message, 404);
