@@ -104,7 +104,7 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
       helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
     );
 
-    return {data:convertedRows,total:treatments.total};;
+    return {data:convertedRows,total:treatments.total};
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
     throw new CustomError("Failed to fetch treatments", 404);

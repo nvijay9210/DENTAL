@@ -154,7 +154,10 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
       helper.convertDbToFrontend(clinic, clinicFieldReverseMap)
     );
 
-    return {data:convertedRows,total:clinics.total};
+    return {
+      data: convertedRows,
+      total: clinics.total
+    };
   } catch (err) {
     console.error(err);
     throw new CustomError(message.CLINICS_FETCH_FAIL, 404);

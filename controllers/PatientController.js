@@ -31,7 +31,7 @@ exports.getAllPatientsByTenantId = async (req, res, next) => {
       page,
       limit
     );
-    res.status(200).json({patients,total:patients.length,page});
+    res.status(200).json(patients);
   } catch (err) {
     next(err);
   }
