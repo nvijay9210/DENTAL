@@ -34,7 +34,7 @@ exports.getAllTreatmentsByTenantId = async (req, res, next) => {
       page,
       limit
     );
-    res.status(200).json({ treatments, total: treatments.length, page });
+    res.status(200).json(treatments);
   } catch (err) {
     next(err);
   }
@@ -63,7 +63,7 @@ exports.getAllTreatmentsByTenantAndClinicId = async (req, res, next) => {
         page,
         limit
       );
-    res.status(200).json({ treatments, total: treatments.length, page });
+    res.status(200).json(treatments);
   } catch (err) {
     next(err);
   }
@@ -99,7 +99,7 @@ exports.getAllTreatmentsByTenantAndClinicIdAndDentist = async (
         page,
         limit
       );
-    res.status(200).json({ treatments, total: treatments.length, page });
+    res.status(200).json(treatments);
   } catch (err) {
     next(err);
   }

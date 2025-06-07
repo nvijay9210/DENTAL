@@ -89,7 +89,6 @@ const getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (
       AND clinic_id = ? 
       AND dentist_id = ? 
       AND reminder_id = ?`;
-
   const conn = await pool.getConnection();
 
   try {

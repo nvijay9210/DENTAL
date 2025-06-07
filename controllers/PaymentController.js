@@ -38,7 +38,7 @@ exports.getAllPaymentsByTenantId = async (req, res, next) => {
       page,
       limit
     );
-    res.status(200).json({payments,total:payments.length,page});
+    res.status(200).json(payments);
   } catch (err) {
     next(err);
   }

@@ -22,7 +22,8 @@ const getAllExpensesByTenantId = async (tenantId, limit, offset) => {
     if (!Number.isInteger(limit) || !Number.isInteger(offset) || limit < 1 || offset < 0) {
       throw new CustomError("Invalid pagination parameters.", 400);
     }
-    return await record.getAllRecords("expense", "tenant_id", tenantId, limit, offset);
+    const expenes=await record.getAllRecords("expense", "tenant_id", tenantId, limit, offset);
+    return expenes
   } catch (error) {
     console.error("Error fetching expenses:", error);
     throw new CustomError("Error fetching expenses.", 500);

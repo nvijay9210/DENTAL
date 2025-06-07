@@ -177,7 +177,7 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
 
     const convertedRows = dentists.data.map(dentist => helper.convertDbToFrontend(dentist, dentistFieldReverseMap)).map(flattenAwards);
 
-    return {data:convertedRows,total:dentists.total};;
+    return {data:convertedRows,total:dentists.total};
   } catch (err) {
     console.error("Database error while fetching dentists:", err.message);
     throw new CustomError("Database error while fetching dentists", 404);
@@ -264,7 +264,6 @@ const getAllDentistsByTenantIdAndClinicId = async (
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = `dentistsbyclinic:${tenantId}:${clinicId}:page:${page}:limit:${limit}`;
-  const jsonFields = ["specialization", "awards_certifications"]; // ✅ Added awards
 
   try {
     const dentists = await getOrSetCache(cacheKey, async () => {
@@ -276,12 +275,9 @@ const getAllDentistsByTenantIdAndClinicId = async (
       );
     });
 
-    const parsed = decodeJsonFields(dentists, jsonFields).data.map((dentist) => {
-      // ✅ Optionally flatten for form use
-      return flattenAwards(dentist);
-    });
+    const convertedRows = dentists.data.map(dentist => helper.convertDbToFrontend(dentist, dentistFieldReverseMap)).map(flattenAwards);
 
-    return parsed;
+    return {data:convertedRows,total:dentists.total};
   } catch (error) {
     throw new CustomError(
       `Failed to check dentist existence: ${error.message}`,

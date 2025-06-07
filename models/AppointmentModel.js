@@ -38,9 +38,19 @@ const getAllAppointmentsByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
-const getAllAppointmentsByTenantIdAndClinicId = async (tenantId, clinicId) => {
-  const query = `SELECT 
+const getAllAppointmentsByTenantIdAndClinicId = async (tenantId, clinicId,limit,offset) => {
+  const query1 = `SELECT 
     *
+FROM 
+    appointment AS app
+WHERE 
+    app.tenant_id = ? 
+    AND app.clinic_id = ? 
+    limit=? offset=?
+
+`;
+  const query2 = `SELECT 
+    COUNT(*) as total
 FROM 
     appointment AS app
 WHERE 
@@ -50,9 +60,10 @@ WHERE
 `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, clinicId]);
+    const [rows] = await conn.query(query1, [tenantId, clinicId,limit,offset]);
+    const [count] = await conn.query(query2, [tenantId, clinicId]);
     console.log('appoinments:',rows)
-    return rows;
+    return {data:rows,total:count[0].total};
   } catch (error) {
     console.log(error);
     throw new Error("Database Query Error");
@@ -61,8 +72,8 @@ WHERE
   }
 };
 
-const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (tenantId, clinicId,dentist_id) => {
-  const query = `SELECT 
+const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (tenantId, clinicId,dentist_id,limit,offset) => {
+  const query1 = `SELECT 
     *
 FROM 
     appointment AS app
@@ -70,13 +81,24 @@ WHERE
     app.tenant_id = ? 
     AND app.clinic_id = ? 
     AND app.dentist_id=?
+    limit=? offset=?
 
+`;
+  const query2= `SELECT 
+    COUNT(*) AS total
+FROM 
+    appointment AS app
+WHERE 
+    app.tenant_id = ? 
+    AND app.clinic_id = ? 
+    AND app.dentist_id=?
 `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, clinicId,dentist_id]);
+    const [rows] = await conn.query(query1, [tenantId, clinicId,dentist_id,limit,offset]);
+    const [counts] = await conn.query(query2, [tenantId, clinicId,dentist_id]);
     console.log('appoinments:',rows)
-    return rows;
+    return {data:rows,total:counts[0].total};
   } catch (error) {
     console.log(error);
     throw new Error("Database Query Error");
@@ -85,8 +107,8 @@ WHERE
   }
 };
 
-const getAllAppointmentsByTenantIdAndClinicIdAndDentistId = async (tenantId, clinicId, dentistId) => {
-  const query = `SELECT 
+const getAllAppointmentsByTenantIdAndClinicIdAndDentistId = async (tenantId, clinicId, dentistId,limit,offset) => {
+  const query1 = `SELECT 
     app.appointment_date
 FROM 
     appointment AS app
@@ -94,13 +116,23 @@ WHERE
     app.tenant_id = ? 
     AND app.clinic_id = ? 
     AND app.dentist_id = ?
-
+    limit=? offset=?
+`;
+  const query2 = `SELECT 
+    app.appointment_date
+FROM 
+    appointment AS app
+WHERE 
+    app.tenant_id = ? 
+    AND app.clinic_id = ? 
+    AND app.dentist_id = ?
 `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, clinicId, dentistId]);
+    const [rows] = await conn.query(query1, [tenantId, clinicId, dentistId,limit,offset]);
+    const [counts] = await conn.query(query2, [tenantId, clinicId, dentistId,limit,offset]);
     console.log('appoinments:',rows)
-    return rows;
+    return {data:rows,total:counts[0].total};
   } catch (error) {
     console.log(error);
     throw new Error("Database Query Error");
