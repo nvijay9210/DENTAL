@@ -21,8 +21,8 @@ const dentistFieldMap = {
   phone_number: (val) => val,
   alternate_phone_number: (val) => val,
 
-  specialisation: helper.safeStringify,
-  designation: helper.safeStringify,
+  specialisation: (val) => val,
+  designation: (val) => val,
   languages_spoken: helper.safeStringify,
   working_hours: helper.safeStringify,
   available_days: helper.safeStringify,
@@ -70,9 +70,9 @@ const dentistFieldReverseMap = {
   email: val => val,
   phone_number: val => val,
   alternate_phone_number: val => val,
-  specialisation: val => helper.safeJsonParse(val),
+  specialisation: (val) => val,
 
-  designation: val => helper.safeJsonParse(val),
+  designation: (val) => val,
   languages_spoken: val => helper.safeJsonParse(val),
   working_hours: val => helper.safeJsonParse(val),
   available_days: val => helper.safeJsonParse(val),

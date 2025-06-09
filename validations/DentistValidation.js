@@ -58,9 +58,8 @@ const dentistColumnConfig = [
   },
   {
     columnname: "specialisation",
-    type: "longtext",
+    type: "varchar",
     null: false,
-    data_type: "json",
   },
   { columnname: "experience_years", type: "int", size: 2, null: false },
   {
@@ -73,8 +72,7 @@ const dentistColumnConfig = [
   {
     columnname: "designation",
     type: "varchar",
-    null: true,
-    size: 100,
+    null: true
   },
   {
     columnname: "member_of",
