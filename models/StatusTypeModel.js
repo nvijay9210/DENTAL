@@ -18,16 +18,15 @@ const createStatusType = async (table,columns, values) => {
 
 // Get all statusTypes by tenant ID with pagination
 
-const getAllStatusTypesByTenantId = async (limit,offset) => {
+const getAllStatusTypesByTenantId = async () => {
   const query = `SELECT 
    *
 FROM 
     statustype
-    limit ? offset ? 
 `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [limit,offset]);
+    const [rows] = await conn.query(query,[]);
    
     return rows;
   } catch (error) {

@@ -51,8 +51,6 @@ const getAllStatusTypesByTenantId = async (page = 1, limit = 10) => {
   try {
     const statusTypes = await getOrSetCache(cacheKey, async () => {
       const result = await statusTypeModel.getAllStatusTypesByTenantId(
-        Number(limit),
-        offset
       );
       return result;
     });
@@ -61,7 +59,7 @@ const getAllStatusTypesByTenantId = async (page = 1, limit = 10) => {
           helper.convertDbToFrontend(statusType, statusTypeFieldReverseMap)
         );
     
-        return {data:convertedRows,total:statusTypes.total};;
+        return convertedRows;
   } catch (err) {
     console.error("Database error while fetching statusTypes:", err);
     throw new CustomError("Failed to fetch statusTypes", 404);
