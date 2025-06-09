@@ -144,7 +144,7 @@ const getAllStatusTypeSubByTenantIdAndStatusType = async (
       return result;
     });
 
-    const convertedRows = statusTypeSubs.data.map((statusTypeSub) =>
+    const convertedRows = statusTypeSubs.map((statusTypeSub) =>
       helper.convertDbToFrontend(statusTypeSub, statusTypeSubFieldsReverseMap)
     );
 
