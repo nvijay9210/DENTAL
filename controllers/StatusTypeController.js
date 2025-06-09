@@ -26,11 +26,10 @@ exports.createStatusType = async (req, res, next) => {
  * Get all statusTypes by tenant ID with pagination
  */
 exports.getAllStatusTypesByTenantId = async (req, res, next) => {
-  const { page, limit } = req.query;
 
   try {
-    const statusTypes = await statusTypeService.getAllStatusTypesByTenantId( page, limit);
-    res.status(200).json({statusTypes,total:statusTypes.length,page});
+    const statusTypes = await statusTypeService.getAllStatusTypesByTenantId();
+    res.status(200).json(statusTypes);
   } catch (err) {
     next(err);
   }
