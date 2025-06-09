@@ -13,6 +13,7 @@ const reminderColumnConfig = [
   { columnname: "time", type: "time", null: false },
   { columnname: "reminder_repeat", type: "varchar", null: true },
   { columnname: "reminder_type", type: "varchar", null: true },
+  { columnname: "type", type: "varchar", null: false },
   { columnname: "repeat_interval", type: "int", null: false },
   { columnname: "repeat_count", type: "int", null: true },
   { columnname: "notify_before_hours", type: "int", null: true },
