@@ -110,6 +110,8 @@ module.exports = {
   GET_REMINDER: "/getreminder/:reminder_id",
   GET_REMINDER_SCHEDULE:
     "/getreminder/:tenant_id/:clinic_id/:dentist_id/:reminder_id",
+  GET_REMINDER_DENTIST_TYPE:
+    "/getreminderbytype/:tenant_id/:clinic_id/:dentist_id",
   GET_REMINDER_SCHEDULE_MONTHLY:
     "/getreminder/:tenant_id/:clinic_id/:dentist_id",
   UPDATE_REMINDER_TENANT: "/updatereminder/:reminder_id/:tenant_id",
