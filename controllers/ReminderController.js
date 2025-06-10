@@ -103,6 +103,37 @@ exports.getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (
     next(err);
   }
 };
+exports.getAllRemindersByTenantAndClinicAndDentistAndType = async (
+  req,
+  res,
+  next
+) => {
+  const {  tenant_id, clinic_id, dentist_id } = req.params;
+  const {type,page,limit}=req.query
+  if(type!=='reminder' && type!=='todo') throw new CustomError('Type must in reminder or todo only',400)
+
+  try {
+
+    await checkIfIdExists("clinic", "clinic_id", clinic_id);
+    await checkIfIdExists("tenant", "tenant_id", tenant_id);
+    await checkIfIdExists("dentist", "dentist_id", dentist_id);
+
+    // Fetch reminder details
+    const reminder =
+      await reminderService.getAllRemindersByTenantAndClinicAndDentistAndType(
+        tenant_id,
+        clinic_id,
+        dentist_id,
+        page,
+        limit,
+        type
+      );
+    res.status(200).json(reminder);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getMonthlywiseRemindersByTenantAndClinicIdAndDentistId = async (
   req,
   res,
