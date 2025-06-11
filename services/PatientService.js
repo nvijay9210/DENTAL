@@ -757,12 +757,13 @@ const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
       tenantId,
       patientId
     );
+    console.log(patient)
     const convertedRows = helper.convertDbToFrontend(
       patient,
       patientFieldsReverseMap
     );
 
-    return { data: convertedRows, total: patient.total };
+    return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get patient: " + error.message, 404);
   }

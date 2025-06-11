@@ -5,7 +5,7 @@ const record = require("../query/Records");
 const TABLE = "prescription";
 
 // Create Prescription
-const createPrescription = async (table,columns, values) => {
+const createPrescription = async (table, columns, values) => {
   try {
     const prescription = await record.createRecord(table, columns, values);
     return prescription.insertId;
@@ -18,10 +18,21 @@ const createPrescription = async (table,columns, values) => {
 // Get all prescriptions by tenant ID with pagination
 const getAllPrescriptionsByTenantId = async (tenantId, limit, offset) => {
   try {
-    if (!Number.isInteger(limit) || !Number.isInteger(offset) || limit < 1 || offset < 0) {
+    if (
+      !Number.isInteger(limit) ||
+      !Number.isInteger(offset) ||
+      limit < 1 ||
+      offset < 0
+    ) {
       throw new CustomError("Invalid pagination parameters.", 400);
     }
-    return await record.getAllRecords(TABLE, "tenant_id", tenantId, limit, offset);
+    return await record.getAllRecords(
+      TABLE,
+      "tenant_id",
+      tenantId,
+      limit,
+      offset
+    );
   } catch (error) {
     console.error("Error fetching prescriptions:", error);
     throw new CustomError("Error fetching prescriptions.", 500);
@@ -29,16 +40,19 @@ const getAllPrescriptionsByTenantId = async (tenantId, limit, offset) => {
 };
 
 // Get prescription by tenant ID and prescription ID
-const getPrescriptionByTenantAndPrescriptionId = async (tenant_id, prescription_id) => {
+const getPrescriptionByTenantAndPrescriptionId = async (
+  tenant_id,
+  prescription_id
+) => {
   try {
-    const [rows] = await record.getRecordByIdAndTenantId(
+    const rows = await record.getRecordByIdAndTenantId(
       TABLE,
       "tenant_id",
       tenant_id,
       "prescription_id",
       prescription_id
     );
-    return rows?.[0] ?? null;
+    return rows;
   } catch (error) {
     console.error("Error fetching prescription:", error);
     throw new CustomError("Error fetching prescription.", 500);
@@ -46,12 +60,23 @@ const getPrescriptionByTenantAndPrescriptionId = async (tenant_id, prescription_
 };
 
 // Update prescription
-const updatePrescription = async (prescription_id, columns, values, tenant_id) => {
+const updatePrescription = async (
+  prescription_id,
+  columns,
+  values,
+  tenant_id
+) => {
   try {
     const conditionColumn = ["tenant_id", "prescription_id"];
     const conditionValue = [tenant_id, prescription_id];
 
-    return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
+    return await record.updateRecord(
+      TABLE,
+      columns,
+      values,
+      conditionColumn,
+      conditionValue
+    );
   } catch (error) {
     console.error("Error updating prescription:", error);
     throw new CustomError("Error updating prescription.", 500);
@@ -59,12 +84,20 @@ const updatePrescription = async (prescription_id, columns, values, tenant_id) =
 };
 
 // Delete prescription
-const deletePrescriptionByTenantAndPrescriptionId = async (tenant_id, prescription_id) => {
+const deletePrescriptionByTenantAndPrescriptionId = async (
+  tenant_id,
+  prescription_id
+) => {
   try {
     const conditionColumn = ["tenant_id", "prescription_id"];
     const conditionValue = [tenant_id, prescription_id];
 
-    const [result] = await record.deleteRecord(TABLE, conditionColumn, conditionValue);
+    const [result] = await record.deleteRecord(
+      TABLE,
+      conditionColumn,
+      conditionValue
+    );
+    console.log(result);
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting prescription:", error);
@@ -72,7 +105,13 @@ const deletePrescriptionByTenantAndPrescriptionId = async (tenant_id, prescripti
   }
 };
 
-const getAllPrescriptionsByTenantAndClinicIdAndTreatmentId = async (tenantId, clinic_id,treatment_id,limit,offset) => {
+const getAllPrescriptionsByTenantAndClinicIdAndTreatmentId = async (
+  tenantId,
+  clinic_id,
+  treatment_id,
+  limit,
+  offset
+) => {
   const query1 = `SELECT *
 FROM 
     prescription 
@@ -92,9 +131,19 @@ WHERE
 `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query1, [tenantId, clinic_id,treatment_id,limit,offset]);
-    const [counts] = await conn.query(query2, [tenantId, clinic_id,treatment_id]);
-    return {data:rows,total:counts[0].total};
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      clinic_id,
+      treatment_id,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [
+      tenantId,
+      clinic_id,
+      treatment_id,
+    ]);
+    return { data: rows, total: counts[0].total };
   } catch (error) {
     console.log(error);
     throw new Error("Database Operation Failed");
@@ -103,7 +152,14 @@ WHERE
   }
 };
 
-const getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (tenantId, clinic_id,dentist_id,treatment_id,limit,offset) => {
+const getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (
+  tenantId,
+  clinic_id,
+  dentist_id,
+  treatment_id,
+  limit,
+  offset
+) => {
   const query1 = `SELECT *
 FROM 
     prescription 
@@ -122,13 +178,24 @@ WHERE
     clinic_id = ? AND 
     dentist_id = ? AND 
      treatment_id=?
-    limit ? offset ? 
 `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query1, [tenantId, clinic_id,dentist_id,treatment_id,limit,offset]);
-    const [counts] = await conn.query(query1, [tenantId, clinic_id,dentist_id,treatment_id]);
-    return {data:rows,total:counts[0].total};
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      clinic_id,
+      dentist_id,
+      treatment_id,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [
+      tenantId,
+      clinic_id,
+      dentist_id,
+      treatment_id,
+    ]);
+    return { data: rows, total: counts.total };
   } catch (error) {
     console.log(error);
     throw new Error("Database Operation Failed");
@@ -137,7 +204,6 @@ WHERE
   }
 };
 
-
 module.exports = {
   createPrescription,
   getAllPrescriptionsByTenantId,
@@ -145,5 +211,5 @@ module.exports = {
   updatePrescription,
   deletePrescriptionByTenantAndPrescriptionId,
   getAllPrescriptionsByTenantAndClinicIdAndTreatmentId,
-  getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId
+  getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId,
 };

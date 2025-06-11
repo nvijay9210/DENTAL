@@ -25,8 +25,8 @@ const appointmentFields = {
   clinic_id: (val) => val,
   room_id: (val) => val,
   appointment_date: (val) => formatDateOnly(val),
-  start_time: (val) => val,
-  end_time: (val) => val,
+  start_time: (val) => duration(val),
+  end_time: (val) => duration(val),
   status: (val) => val,
   appointment_type: (val) => val,
   consultation_fee: (val) => val || null,
@@ -211,7 +211,7 @@ const getAppointmentByTenantIdAndAppointmentId = async (
         helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
       
   
-      return {data:convertedRows,total:appointment.total};;
+      return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get appointment: " + error.message, 404);
   }
@@ -249,13 +249,14 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
   }
 };
 const updateAppoinmentStatusCancelled = async (appointment_id,tenant_id,
-  clinic_id) => {
+  clinic_id,details) => {
 
   try {
     const affectedRows = await appointmentModel.updateAppoinmentStatusCancelled(
       appointment_id,
       tenant_id,
-      clinic_id
+      clinic_id,
+      details
     );
 
     if (affectedRows === 0) {

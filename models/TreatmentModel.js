@@ -33,14 +33,14 @@ const getAllTreatmentsByTenantId = async (tenantId, limit, offset) => {
 // Get treatment by tenant ID and treatment ID
 const getTreatmentByTenantAndTreatmentId = async (tenant_id, treatment_id) => {
   try {
-    const [rows] = await record.getRecordByIdAndTenantId(
+    const rows = await record.getRecordByIdAndTenantId(
       TABLE,
       "tenant_id",
       tenant_id,
       "treatment_id",
       treatment_id
     );
-    return rows?.[0] ?? null;
+    return rows;
   } catch (error) {
     console.error("Error fetching treatment:", error);
     throw new CustomError("Error fetching treatment.", 500);
@@ -131,6 +131,7 @@ const deleteTreatmentByTenantAndTreatmentId = async (tenant_id, treatment_id) =>
     const conditionValue = [tenant_id, treatment_id];
 
     const [result] = await record.deleteRecord(TABLE, conditionColumn, conditionValue);
+    console.log(result)
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting treatment:", error);

@@ -39,14 +39,14 @@ const getAllPatientsByTenantId = async (tenantId, limit, offset) => {
 
 const getPatientByTenantIdAndPatientId = async (tenant_id, patient_id) => {
   try {
-    const [rows] = await record.getRecordByIdAndTenantId(
+    const rows = await record.getRecordByIdAndTenantId(
       "patient",
       "tenant_id",
       tenant_id,
       "patient_id",
       patient_id
     );
-    return rows[0] || null;
+    return rows || null;
   } catch (error) {
     console.error("Error executing query:", error);
     throw new Error("Error fetching patient.");

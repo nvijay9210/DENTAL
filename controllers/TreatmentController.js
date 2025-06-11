@@ -119,12 +119,7 @@ exports.getTreatmentByTenantIdAndTreatmentId = async (req, res, next) => {
   if (!treatment) throw new CustomError("Treatment not found", 404);
 
   try {
-    // Validate if treatment exists
-    await treatmentValidation.checkTreatmentExistsByIdValidation(
-      tenant_id,
-      treatment_id
-    );
-
+    
     // Fetch treatment details
     const treatment =
       await treatmentService.getTreatmentByTenantIdAndTreatmentId(

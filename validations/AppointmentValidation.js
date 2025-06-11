@@ -73,7 +73,7 @@ const appoinmentColumnConfig = [
     columnname: "reminder_method",
     type: "varchar",
     size:100,
-    null: false,
+    null: true,
   },
   { columnname: "notes", type: "text", null: true },
 ];
@@ -91,7 +91,7 @@ const updateColumnConfig = [
 // Create Appointment Validation
 const createAppointmentValidation = async (details) => {
   validateInput(details, createColumnConfig);
-  await checkTenantExistsByTenantIdValidation(details.tenant_id);
+  await checkIfIdExists("tenant", "tenant_id", details.tenant_id);
   await checkIfIdExists("clinic", "clinic_id", details.clinic_id);
   await checkIfIdExists("dentist", "dentist_id", details.dentist_id);
   await checkIfIdExists("patient", "patient_id", details.patient_id);
@@ -99,7 +99,7 @@ const createAppointmentValidation = async (details) => {
     await appointmentModel.checkAppointmentExistsByStartTimeAndEndTimeAndDate(
       details
     );
-  if (appointment) throw new CustomError("Appointment Alredy Scheduled");
+  if (appointment) throw new CustomError("Appointment Alredy Scheduled",409);
 };
 
 // Update Appointment Validation

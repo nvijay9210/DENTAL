@@ -32,14 +32,14 @@ const getAllAssetsByTenantId = async (tenantId, limit, offset) => {
 // Get asset by tenant ID and asset ID
 const getAssetByTenantAndAssetId = async (tenant_id, asset_id) => {
   try {
-    const [rows] = await record.getRecordByIdAndTenantId(
+    const rows = await record.getRecordByIdAndTenantId(
       TABLE,
       "tenant_id",
       tenant_id,
       "asset_id",
       asset_id
     );
-    return rows?.[0] ?? null;
+    return rows;
   } catch (error) {
     console.error("Error fetching asset:", error);
     throw new CustomError("Error fetching asset.", 500);

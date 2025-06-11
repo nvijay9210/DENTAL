@@ -74,11 +74,6 @@ exports.getExpenseByTenantIdAndExpenseId = async (req, res, next) => {
   const { expense_id, tenant_id } = req.params;
 
   try {
-    // Validate if expense exists
-    await expenseValidation.checkExpenseExistsByIdValidation(
-      tenant_id,
-      expense_id
-    );
 
     // Fetch expense details
     const expense = await expenseService.getExpenseByTenantIdAndExpenseId(

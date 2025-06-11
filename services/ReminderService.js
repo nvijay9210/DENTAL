@@ -172,7 +172,7 @@ const getReminderByTenantIdAndReminderId = async (tenantId, reminderId) => {
       reminderFieldsReverseMap
     );
 
-    return { data: convertedRows, total: reminder.total };
+    return convertedRows
   } catch (error) {
     throw new CustomError("Failed to get reminder: " + error.message, 404);
   }
