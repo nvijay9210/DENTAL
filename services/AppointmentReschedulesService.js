@@ -72,8 +72,6 @@ const createAppointmentReschedules = async (details) => {
     appointment.end_time=details.new_end_time || '00:00:00',//If new add
     appointment.rescheduled_from=appointment.appointment_id
 
-    console.log(appointment)
-
     await createAppointmentValidation(appointment)
 
 
