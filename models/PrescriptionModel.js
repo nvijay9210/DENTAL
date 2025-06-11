@@ -11,7 +11,7 @@ const createPrescription = async (table,columns, values) => {
     return prescription.insertId;
   } catch (error) {
     console.error("Error creating prescription:", error);
-    throw new CustomError("Database Query Error", 500);
+    throw new CustomError("Database Operation Failed", 500);
   }
 };
 
@@ -97,7 +97,7 @@ WHERE
     return {data:rows,total:counts[0].total};
   } catch (error) {
     console.log(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -131,7 +131,7 @@ WHERE
     return {data:rows,total:counts[0].total};
   } catch (error) {
     console.log(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }

@@ -12,7 +12,7 @@ const createStatusType = async (table,columns, values) => {
     return statusType.insertId;
   } catch (error) {
     console.error("Error creating statusType:", error);
-    throw new CustomError("Database Query Error", 500);
+    throw new CustomError("Database Operation Failed", 500);
   }
 };
 
@@ -31,7 +31,7 @@ FROM
     return rows;
   } catch (error) {
     console.log(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -47,7 +47,7 @@ const getStatusTypeByStatusTypeId = async (status_type_id) => {
     return rows[0];
   } catch (error) {
     console.log(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -69,7 +69,7 @@ WHERE
     return rows;
   } catch (error) {
     console.log(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -118,7 +118,7 @@ const getStatusTypeIdByTenantAndStatusType = async (status_type) => {
     return rows[0][0].status_type_id;
   } catch (error) {
     console.error("Error fetching status_type_id:", error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }

@@ -54,6 +54,7 @@ const createExpense = async (data) => {
       values
     );
     await invalidateCacheByPattern("expense:*");
+    await invalidateCacheByPattern("financeSummary:*");
     return expenseId;
   } catch (error) {
     console.error("Failed to create expense:", error);
@@ -155,6 +156,7 @@ const updateExpense = async (expenseId, data, tenant_id) => {
     }
 
     await invalidateCacheByPattern("expense:*");
+    await invalidateCacheByPattern("financeSummary:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -174,6 +176,7 @@ const deleteExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
     }
 
     await invalidateCacheByPattern("expense:*");
+    await invalidateCacheByPattern("financeSummary:*");
     return affectedRows;
   } catch (error) {
     throw new CustomError(`Failed to delete expense: ${error.message}`, 404);

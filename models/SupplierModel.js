@@ -12,7 +12,7 @@ const createSupplier = async (table,columns, values) => {
     return supplier.insertId;
   } catch (error) {
     console.error("Error creating supplier:", error);
-    throw new CustomError("Database Query Error", 500);
+    throw new CustomError("Database Operation Failed", 500);
   }
 };
 

@@ -127,7 +127,7 @@
 //     return rows[0].exists > 0;
 //   } catch (error) {
 //     console.error(error);
-//     throw new Error("Database Query Error in recordExists");
+//     throw new Error("Database Operation Failed in recordExists");
 //   } finally {
 //     conn.release();
 //   }
@@ -293,7 +293,7 @@ const recordExists = async (table, conditions) => {
     return rows[0].exists > 0;
   } catch (error) {
     console.error(error);
-    throw new Error("Database Query Error in recordExists");
+    throw new Error("Database Operation Failed in recordExists");
   } finally {
     if (conn) conn.release();
   }

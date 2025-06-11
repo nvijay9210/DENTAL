@@ -12,7 +12,7 @@ const createPayment = async (table,columns, values) => {
     return payment;
   } catch (error) {
     console.error("Error creating payment:", error);
-    throw new CustomError("Database Query Error", 500);
+    throw new CustomError("Database Operation Failed", 500);
   }
 };
 
@@ -51,7 +51,7 @@ const getPaymentByTenantAndAppointmentId = async (tenant_id, appointment_id) => 
     return rows?.[0];
   } catch (error) {
     console.error(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }

@@ -21,7 +21,7 @@ getAllTenant:`select * from tenant order by tenant_id`,
 getTenantByTenantId:`select * from tenant where tenant_id=?`,
 checkTenantExistsByTenantId:`select 1 from tenant where tenant_id=?`,
 checkTenantExistsByTenantnameAndTenantdomain:`select 1 from tenant where tenant_name=? and tenant_domain=?`,
-updateTenant:`update goldloan.tenant set tenant_name=?,tenant_domain=?,updated_by=? where tenant_id=?`,
+updateTenant:`update dental.tenant set tenant_name=?,tenant_domain=?,updated_by=? where tenant_id=?`,
 deleteTenantByTenantId:`delete from tenant where tenant_id=?`
 }
 

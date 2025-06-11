@@ -1,5 +1,5 @@
 const pool = require("../config/db");
-const record = require('../query/Records');
+const record = require("../query/Records");
 
 // Assuming Helper method for column/value length match
 const validateColumnValueLengthMatch = (columns, values) => {
@@ -15,14 +15,21 @@ const createPatient = async (table, columns, values) => {
     return patient.insertId;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw new Error('Database Query Error');
+    throw new Error("Database Operation Failed");
   }
 };
 
 const getAllPatientsByTenantId = async (tenantId, limit, offset) => {
   try {
-    if (limit < 1 || offset < 0) throw new Error("Invalid pagination parameters.");
-    const patients = await record.getAllRecords('patient', 'tenant_id', tenantId, limit, offset);
+    if (limit < 1 || offset < 0)
+      throw new Error("Invalid pagination parameters.");
+    const patients = await record.getAllRecords(
+      "patient",
+      "tenant_id",
+      tenantId,
+      limit,
+      offset
+    );
     return patients;
   } catch (error) {
     console.error("Error executing query:", error);
@@ -32,7 +39,13 @@ const getAllPatientsByTenantId = async (tenantId, limit, offset) => {
 
 const getPatientByTenantIdAndPatientId = async (tenant_id, patient_id) => {
   try {
-    const [rows] = await record.getRecordByIdAndTenantId('patient', 'tenant_id', tenant_id, 'patient_id', patient_id);
+    const [rows] = await record.getRecordByIdAndTenantId(
+      "patient",
+      "tenant_id",
+      tenant_id,
+      "patient_id",
+      patient_id
+    );
     return rows[0] || null;
   } catch (error) {
     console.error("Error executing query:", error);
@@ -41,11 +54,17 @@ const getPatientByTenantIdAndPatientId = async (tenant_id, patient_id) => {
 };
 
 const updatePatient = async (patient_id, columns, values, tenant_id) => {
-  const conditionColumn = ['tenant_id', 'patient_id'];
+  const conditionColumn = ["tenant_id", "patient_id"];
   const conditionValue = [tenant_id, patient_id];
 
   try {
-    const result = await record.updateRecord('patient', columns, values, conditionColumn, conditionValue);
+    const result = await record.updateRecord(
+      "patient",
+      columns,
+      values,
+      conditionColumn,
+      conditionValue
+    );
     return result.affectedRows;
   } catch (error) {
     console.error("Error executing query:", error);
@@ -54,11 +73,15 @@ const updatePatient = async (patient_id, columns, values, tenant_id) => {
 };
 
 const deletePatientByTenantIdAndPatientId = async (tenant_id, patient_id) => {
-  const conditionColumn = ['tenant_id', 'patient_id'];
+  const conditionColumn = ["tenant_id", "patient_id"];
   const conditionValue = [tenant_id, patient_id];
 
   try {
-    const result = await record.deleteRecord('patient', conditionColumn, conditionValue);
+    const result = await record.deleteRecord(
+      "patient",
+      conditionColumn,
+      conditionValue
+    );
     return result.affectedRows;
   } catch (error) {
     console.error("Error executing query:", error);
@@ -66,7 +89,10 @@ const deletePatientByTenantIdAndPatientId = async (tenant_id, patient_id) => {
   }
 };
 
-const checkPatientExistsByTenantIdAndPatientId = async (tenantId, patientId) => {
+const checkPatientExistsByTenantIdAndPatientId = async (
+  tenantId,
+  patientId
+) => {
   const query = `SELECT EXISTS(SELECT 1 FROM patient WHERE tenant_id = ? AND patient_id = ?) AS \`exists\``;
   const conn = await pool.getConnection();
 
@@ -75,29 +101,34 @@ const checkPatientExistsByTenantIdAndPatientId = async (tenantId, patientId) => 
     return Boolean(rows[0].exists); // Ensure consistent return type (true/false)
   } catch (error) {
     console.error("Error checking patient existence:", error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
 };
 
-const updateToothDetails = async (data,patientId,tenantId) => {
+const updateToothDetails = async (data, patientId, tenantId) => {
   //console.log(data,patientId,tenantId)
-  const query = 'update patient set tooth_details=? where patient_id=? and tenant_id';
+  const query =
+    "update patient set tooth_details=? where patient_id=? and tenant_id";
   const conn = await pool.getConnection();
 
   try {
-    const rows = await conn.query(query, [data,patientId,tenantId]);
-    return rows[0].affectedRows// Ensure consistent return type (true/false)
+    const rows = await conn.query(query, [data, patientId, tenantId]);
+    return rows[0].affectedRows; // Ensure consistent return type (true/false)
   } catch (error) {
     console.error("Error checking patient existence:", error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
 };
 
-const updatePatientAppointmentCount = async (tenantId, patientId, assign = true) => {
+const updatePatientAppointmentCount = async (
+  tenantId,
+  patientId,
+  assign = true
+) => {
   const modifier = assign ? 1 : -1;
 
   const query = `
@@ -112,7 +143,11 @@ const updatePatientAppointmentCount = async (tenantId, patientId, assign = true)
     return result.affectedRows > 0;
   } catch (error) {
     console.error("Error updating appointment count:", error);
-    throw new Error(`Database Query Error while ${assign ? 'incrementing' : 'decrementing'} appointment count`);
+    throw new Error(
+      `Database Operation Failed while ${
+        assign ? "incrementing" : "decrementing"
+      } appointment count`
+    );
   } finally {
     conn.release();
   }
@@ -143,7 +178,7 @@ const getPeriodSummaryByPatient = async (tenantId, clinicId, dentistId) => {
     return rows; // Returns list of { name, created_time }
   } catch (error) {
     console.error("Error fetching patient summary:", error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -170,12 +205,18 @@ const getAppointmentsForAnalytics = async (tenantId, clinicId, dentistId) => {
   try {
     const [rows] = await conn.query(query, [tenantId, clinicId, dentistId]);
     return rows;
+  } catch (error) {
+    console.error("Error fetching appointment analytics:", error);
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
 };
 
-const groupToothProceduresByTimeRangeCumulative = async (tenantId, clinicId) => {
+const groupToothProceduresByTimeRangeCumulative = async (
+  tenantId,
+  clinicId
+) => {
   const query = `
     SELECT
       p.patient_id,
@@ -194,59 +235,222 @@ const groupToothProceduresByTimeRangeCumulative = async (tenantId, clinicId) => 
   try {
     const [rows] = await conn.query(query, [tenantId, clinicId]);
     return rows;
+  } catch (error) {
+    console.error("Error fetching tooth details:", error);
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
 };
-const groupToothProceduresByTimeRangeCumulativeByDentist = async (tenantId, clinicId,dentistId) => {
+
+const groupToothProceduresByTimeRangeCumulativeByDentist = async (
+  tenantId,
+  clinicId,
+  dentistId
+) => {
   const query = `
     SELECT
-      p.patient_id,
-      p.tooth_details
-    FROM
-      patient p
-    WHERE
-      p.tenant_id = ?
-      AND EXISTS (
-        SELECT 1 FROM appointment a
-        WHERE a.patient_id = p.patient_id
-          AND a.clinic_id = ?
-          a.dentist_id=?
-      )
+  p.patient_id,
+  p.tooth_details
+FROM
+  patient p
+WHERE
+  p.tenant_id = ?
+  AND EXISTS (
+    SELECT 1 FROM appointment a
+    WHERE a.patient_id = p.patient_id
+      AND a.clinic_id = ?
+      AND a.dentist_id = ?
+  )
+
   `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, clinicId,dentistId]);
+    const [rows] = await conn.query(query, [tenantId, clinicId, dentistId]);
     return rows;
+  } catch (error) {
+    console.error("Error fetching tooth details:", error);
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
 };
 
+const getMostVisitedPatientsByDentistPeriods = async (
+  tenantId,
+  clinicId,
+  dentistId
+) => {
+  let query = `
+      SELECT
+        a.patient_id,
+        CONCAT(p.first_name, ' ', p.last_name) AS name,
+        a.appointment_date
+      FROM
+        appointment a
+      JOIN
+        patient p ON a.patient_id = p.patient_id
+      WHERE
+        a.tenant_id = ?
+        AND a.dentist_id = ?
+        AND p.appointment_count>0
+    `;
+  const params = [tenantId, dentistId];
+  if (clinicId) {
+    query += " AND a.clinic_id = ?";
+    params.push(clinicId);
+  }
+  const conn = await pool.getConnection();
+  let rows;
+  try {
+    [rows] = await conn.query(query, params);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching tooth details:", error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+const getMostVisitedPatientsByClinicPeriods = async (tenantId, clinicId) => {
+  const query = `
+      SELECT
+        a.patient_id,
+        CONCAT(p.first_name, ' ', p.last_name) AS name,
+        a.appointment_date
+      FROM
+        appointment a
+      JOIN
+        patient p ON a.patient_id = p.patient_id
+      WHERE
+        a.tenant_id = ?
+        AND a.clinic_id = ?
+    `;
+  const conn = await pool.getConnection();
+  let rows;
+  try {
+    [rows] = await conn.query(query, [tenantId, clinicId]);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching tooth details:", error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+const getNewPatientsTrends = async (tenantId, clinicId) => {
+  const query = `
+      SELECT
+        patient_id,
+        created_time
+      FROM
+        patient
+      WHERE
+        tenant_id = ?
+        AND EXISTS (
+          SELECT 1 FROM appointment a
+          WHERE a.patient_id = patient.patient_id AND a.clinic_id = ?
+        )
+    `;
+  const conn = await pool.getConnection();
+  let rows;
+  try {
+    [rows] = await conn.query(query, [tenantId, clinicId]);
+    return rows;
+  } catch (error) {
+    console.error("Error fetching tooth details:", error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+const getNewPatientsTrendsByDentistAndClinic = async (
+  tenantId,
+  clinicId,
+  dentistId
+) => {
+  const query = `
+  SELECT
+    p.patient_id,
+    MIN(a.appointment_date) AS first_appt_date
+  FROM
+    appointment a
+  JOIN
+    patient p ON a.patient_id = p.patient_id
+  WHERE
+    a.tenant_id = ?
+    AND a.clinic_id = ?
+    AND a.dentist_id = ?
+  GROUP BY
+    p.patient_id
+`;
+  const conn = await pool.getConnection();
+  let rows;
+  try {
+    [rows] = await conn.query(query, [tenantId, clinicId, dentistId]);
+  } catch (error) {
+    console.error("Error fetching new patients:", error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
 
-// const groupToothProceduresByTimeRangeCumulativeByDentist = async (tenantId, clinicId,dentistId) => {
-//   const query = `
-//     SELECT
-//       p.tooth_details
-//     FROM
-//       appointment a
-//     JOIN
-//       patient p ON a.patient_id = p.patient_id
-//     WHERE
-//       a.tenant_id = ?
-//       AND a.clinic_id = ?
-//       AND a.dentist_id=?
-//   `;
-//   const conn = await pool.getConnection();
-//   try {
-//     const [rows] = await conn.query(query, [tenantId, clinicId,dentistId]);
-//     return rows;
-//   } finally {
-//     conn.release();
-//   }
-// };
-
-
+const getAgeGenderByDentist = async (tenantId, clinicId, dentistId) => {
+  const query = `
+    SELECT
+      p.date_of_birth,
+      p.gender
+    FROM
+      appointment a
+    JOIN
+      patient p ON a.patient_id = p.patient_id
+    WHERE
+      a.tenant_id = ?
+      AND a.clinic_id = ?
+      AND a.dentist_id = ?
+    GROUP BY
+      p.patient_id
+  `;
+  const conn = await pool.getConnection();
+  let patients;
+  try {
+    [patients] = await conn.query(query, [tenantId, clinicId, dentistId]);
+    return patients;
+  } catch (error) {
+    console.error("Error fetching by agegender:", error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+const getAgeGenderByClinic = async (tenantId, clinicId) => {
+  const query = `
+    SELECT
+      p.date_of_birth,
+      p.gender
+    FROM
+      appointment a
+    JOIN
+      patient p ON a.patient_id = p.patient_id
+    WHERE
+      a.tenant_id = ?
+      AND a.clinic_id = ?
+    GROUP BY
+      p.patient_id
+  `;
+  const conn = await pool.getConnection();
+  let patients;
+  try {
+    [patients] = await conn.query(query, [tenantId, clinicId]);
+    return patients;
+  } catch (error) {
+    console.error("Error fetching by agegender:", error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
 
 module.exports = {
   createPatient,
@@ -260,5 +464,11 @@ module.exports = {
   updatePatientAppointmentCount,
   getAppointmentsForAnalytics,
   groupToothProceduresByTimeRangeCumulative,
-  groupToothProceduresByTimeRangeCumulativeByDentist
+  groupToothProceduresByTimeRangeCumulativeByDentist,
+  getMostVisitedPatientsByDentistPeriods,
+  getMostVisitedPatientsByClinicPeriods,
+  getNewPatientsTrends,
+  getNewPatientsTrendsByDentistAndClinic,
+  getAgeGenderByDentist,
+  getAgeGenderByClinic,
 };

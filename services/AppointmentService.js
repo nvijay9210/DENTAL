@@ -12,7 +12,7 @@ const {
   duration,
   safeJsonParse,
 } = require("../utils/Helpers");
-const { formatDateOnly, formatAppointments } = require("../utils/DateUtils");
+const { formatDateOnly, formatAppointments, isoToSqlDatetime } = require("../utils/DateUtils");
 const { mapFields } = require("../query/Records");
 const { updatePatientCount } = require("../models/ClinicModel");
 const { updatePatientAppointmentCount } = require("../models/PatientModel");
@@ -43,10 +43,10 @@ const appointmentFields = {
   cancelled_by:(val)=>val || null,
   cancellation_reason:helper.safeStringify,
   is_virtual:helper.parseBoolean,
-  reminder_sent:helper.parseBoolean,
+  reminder_send:helper.parseBoolean,
   meeting_link:(val)=>val || null,
-  checkin_time:(val)=>val || null,
-  checkout_time:(val)=>val || null
+  checkin_time:(val)=>isoToSqlDatetime(val) || null,
+  checkout_time:(val)=>isoToSqlDatetime(val) || null
 };
 
 const appointmentFieldsReverseMap = {
@@ -75,7 +75,7 @@ const appointmentFieldsReverseMap = {
   cancelled_by:(val)=>val || null,
   cancellation_reason:helper.safeJsonParse,
   is_virtual:(val) => Boolean(val),
-  reminder_sent:(val) => Boolean(val),
+  reminder_send:(val) => Boolean(val),
   meeting_link:(val)=>val || null,
   checkin_time:(val)=>val || null,
   checkout_time:(val)=>val || null,
@@ -103,6 +103,8 @@ const createAppointment = async (data) => {
     await invalidateCacheByPattern("appointmentsdetails:*");
     await invalidateCacheByPattern("patientvisitdetails:*");
     await invalidateCacheByPattern("appointmentsmonthlysummary:*");
+    await invalidateCacheByPattern("financeSummary:*");
+    await invalidateCacheByPattern("patient:*");
     if (appointmentId)
       await updatePatientCount(data.tenant_id, data.clinic_id, true);
       await updatePatientAppointmentCount(data.tenant_id, data.patient_id, true);
@@ -239,6 +241,7 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
     await invalidateCacheByPattern("appointmentsdetails:*");
     await invalidateCacheByPattern("patientvisitdetails:*");
     await invalidateCacheByPattern("appointmentsmonthlysummary:*");
+    await invalidateCacheByPattern("financeSummary:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -263,6 +266,8 @@ const updateAppoinmentStatusCancelled = async (appointment_id,tenant_id,
     await invalidateCacheByPattern("appointmentsdetails:*");
     await invalidateCacheByPattern("patientvisitdetails:*");
     await invalidateCacheByPattern("appointmentsmonthlysummary:*");
+    await invalidateCacheByPattern("financeSummary:*");
+    await invalidateCacheByPattern("patient:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -682,91 +687,79 @@ const getAppointmentSummaryByDentist = async (tenant_id, clinic_id,dentist_id) =
 };
 
 const getAppointmentSummaryChartByClinic = async (tenant_id, clinic_id) => {
-  const fetchDataForRange = async (from, to) => {
-    const [rows] = await pool.query(
-      `SELECT status, COUNT(*) as count
-       FROM appointment
-       WHERE tenant_id = ? AND clinic_id = ? AND created_time BETWEEN ? AND ?
-       GROUP BY status`,
-      [tenant_id, clinic_id, from, to]
-    );
+  const cacheData=`appointments:count:tenant:${tenant_id}:clinic:${clinic_id}`
+  const rows=await getOrSetCache(cacheData,async()=>{
+    const now = dayjs();
 
-    const result = { CP: 0, SC: 0, CL: 0 };
-    rows.forEach(row => {
-      result[row.status] = row.count;
-    });
+    // === Daily data for current week (Mon - Sun) - already newest to oldest (today first) ===
+    const weekStart = now.startOf("week");
+    const weekData = [];
+    for (let i = 0; i < 7; i++) {
+      const dayStart = weekStart.add(i, "day").startOf("day").toDate();
+      const dayEnd = weekStart.add(i, "day").endOf("day").toDate();
+      const total = await appointmentModel.fetchDataForRange(dayStart, dayEnd);
+      weekData.push(total);
+    }
+  
+    // === Weekly totals (4 weeks): newest -> oldest ===
+    const fourWeeks = [];
+    for (let i = 0; i < 4; i++) {
+      const from = now.subtract(i, "week").startOf("week").toDate();
+      const to = now.subtract(i, "week").endOf("week").toDate();
+      const total = await appointmentModel.fetchDataForRange(tenant_id,clinic_id,from, to);
+      fourWeeks.push(total); // [this week, last week, ...]
+    }
+  
+    // === Monthly totals (12 months): newest -> oldest ===
+    const monthTotals = [];
+    for (let i = 0; i < 12; i++) {
+      const from = now.subtract(i, "month").startOf("month").toDate();
+      const to = now.subtract(i, "month").endOf("month").toDate();
+      const total = await appointmentModel.fetchDataForRange(tenant_id,clinic_id,from, to);
+      monthTotals.push(total); // [current month, last month, ...]
+    }
+  
+    // === Yearly totals (4 years): newest -> oldest ===
+    const yearTotals = [];
+    for (let i = 0; i < 4; i++) {
+      const from = now.subtract(i, "year").startOf("year").toDate();
+      const to = now.subtract(i, "year").endOf("year").toDate();
+      const total = await appointmentModel.fetchDataForRange(tenant_id,clinic_id,from, to);
+      yearTotals.push(total); // [current year, last year, ...]
+    }
+  
+    return {
+      // Daily breakdown for current week (Mon - Sun)
+      "1w": weekData,
+  
+      // Weekly totals (newest to oldest)
+      "2w": fourWeeks.slice(0, 2),
+      "3w": fourWeeks.slice(0, 3),
+      "4w": fourWeeks.slice(0, 4),
+  
+      // Monthly totals (newest to oldest)
+      "1m": monthTotals.slice(0, 1),
+      "2m": monthTotals.slice(0, 2),
+      "3m": monthTotals.slice(0, 3),
+      "4m": monthTotals.slice(0, 4),
+      "5m": monthTotals.slice(0, 5),
+      "6m": monthTotals.slice(0, 6),
+      "7m": monthTotals.slice(0, 7),
+      "8m": monthTotals.slice(0, 8),
+      "9m": monthTotals.slice(0, 9),
+      "10m": monthTotals.slice(0, 10),
+      "11m": monthTotals.slice(0, 11),
+      "12m": monthTotals.slice(0, 12),
+  
+      // Yearly totals (newest to oldest)
+      "1y": yearTotals.slice(0, 1),
+      "2y": yearTotals.slice(0, 2),
+      "3y": yearTotals.slice(0, 3),
+      "4y": yearTotals.slice(0, 4),
+    };
+  })
 
-    return result.CP + result.SC + result.CL;
-  };
-
-  const now = dayjs();
-
-  // === Daily data for current week (Mon - Sun) - already newest to oldest (today first) ===
-  const weekStart = now.startOf("week");
-  const weekData = [];
-  for (let i = 0; i < 7; i++) {
-    const dayStart = weekStart.add(i, "day").startOf("day").toDate();
-    const dayEnd = weekStart.add(i, "day").endOf("day").toDate();
-    const total = await fetchDataForRange(dayStart, dayEnd);
-    weekData.push(total);
-  }
-
-  // === Weekly totals (4 weeks): newest -> oldest ===
-  const fourWeeks = [];
-  for (let i = 0; i < 4; i++) {
-    const from = now.subtract(i, "week").startOf("week").toDate();
-    const to = now.subtract(i, "week").endOf("week").toDate();
-    const total = await fetchDataForRange(from, to);
-    fourWeeks.push(total); // [this week, last week, ...]
-  }
-
-  // === Monthly totals (12 months): newest -> oldest ===
-  const monthTotals = [];
-  for (let i = 0; i < 12; i++) {
-    const from = now.subtract(i, "month").startOf("month").toDate();
-    const to = now.subtract(i, "month").endOf("month").toDate();
-    const total = await fetchDataForRange(from, to);
-    monthTotals.push(total); // [current month, last month, ...]
-  }
-
-  // === Yearly totals (4 years): newest -> oldest ===
-  const yearTotals = [];
-  for (let i = 0; i < 4; i++) {
-    const from = now.subtract(i, "year").startOf("year").toDate();
-    const to = now.subtract(i, "year").endOf("year").toDate();
-    const total = await fetchDataForRange(from, to);
-    yearTotals.push(total); // [current year, last year, ...]
-  }
-
-  return {
-    // Daily breakdown for current week (Mon - Sun)
-    "1w": weekData,
-
-    // Weekly totals (newest to oldest)
-    "2w": fourWeeks.slice(0, 2),
-    "3w": fourWeeks.slice(0, 3),
-    "4w": fourWeeks.slice(0, 4),
-
-    // Monthly totals (newest to oldest)
-    "1m": monthTotals.slice(0, 1),
-    "2m": monthTotals.slice(0, 2),
-    "3m": monthTotals.slice(0, 3),
-    "4m": monthTotals.slice(0, 4),
-    "5m": monthTotals.slice(0, 5),
-    "6m": monthTotals.slice(0, 6),
-    "7m": monthTotals.slice(0, 7),
-    "8m": monthTotals.slice(0, 8),
-    "9m": monthTotals.slice(0, 9),
-    "10m": monthTotals.slice(0, 10),
-    "11m": monthTotals.slice(0, 11),
-    "12m": monthTotals.slice(0, 12),
-
-    // Yearly totals (newest to oldest)
-    "1y": yearTotals.slice(0, 1),
-    "2y": yearTotals.slice(0, 2),
-    "3y": yearTotals.slice(0, 3),
-    "4y": yearTotals.slice(0, 4),
-  };
+  return rows
 };
 
 const getAppointmentSummaryChartByDentist = async (tenant_id, clinic_id,dentist_id) => {

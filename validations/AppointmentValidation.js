@@ -27,7 +27,7 @@ const appoinmentColumnConfig = [
   {
     columnname: "appointment_type",
     type: "enum",
-    enum_values: ['online','offline'],
+    enum_values: ['video','audio'],
     null: false,
   },
   { columnname: "consultation_fee", type: "decimal", size: "10,2", null: true },

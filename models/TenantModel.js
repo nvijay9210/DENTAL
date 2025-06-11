@@ -1,20 +1,17 @@
 const pool = require("../config/db");
-const { tenantQuery } = require("../query/TenantQuery");
+const { tenantQuery } = require("../query/TenantQuery")
 
-const createTenant = async (data) => {
-  const query = tenantQuery.addTenant;
-  const values=[data.tenant_name,data.tenant_domain,data.created_by]
+const record = require("../query/Records");
+;
+const TABLE = "tenant";
 
-  const conn = await pool.getConnection();
-  console.log(data)
+const createTenant = async (table,columns, values) => {
   try {
-   const tenant= await conn.query(query,values);
-   console.log(tenant[0].insertId)
-   return tenant[0].insertId;
+    const tenant = await record.createRecord(table, columns, values);
+    return tenant.insertId;
   } catch (error) {
-    throw new Error("Database error occurred while creating the Tenant");
-  } finally {
-    conn.release();
+    console.error("Error creating tenant:", error);
+    throw new CustomError("Database Operation Failed", 500);
   }
 };
 
@@ -86,18 +83,15 @@ const getTenantByTenantNameAndTenantDomain = async (tenantName,tenantDomain) => 
 };
 
 
-const updateTenant = async (tenant_id, data) => {
-  const query = tenantQuery.updateTenant;
-  const conn = await pool.getConnection();
+const updateTenant = async (tenant_id, columns,values) => {
   try {
-    const { tenant_name,tenant_domain,updated_by } = data;
-    const [result] = await conn.query(query, [tenant_name,tenant_domain,updated_by, tenant_id]);
-    return result.affectedRows; // Return the number of rows affected (should be 1 if successful)
+    const conditionColumn = ["tenant_id"];
+    const conditionValue = [tenant_id];
+
+    return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
-    console.error("Error updating Tenant:", error.message);
-    throw new CustomeError("Database error occurred while updating the Tenant.");
-  } finally {
-    conn.release();
+    console.error("Error updating tenant:", error);
+    throw new CustomError("Error updating tenant.", 500);
   }
 };
 
