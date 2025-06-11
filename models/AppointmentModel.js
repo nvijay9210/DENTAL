@@ -286,6 +286,40 @@ WHERE app.tenant_id = ?
     conn.release();
   }
 };
+const getAppointmentsWithDetailsByPatient = async (tenantId, patientId,limit,offset) => {
+  console.log(tenantId,patientId,limit,offset)
+  const query = `SELECT 
+  CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,
+  d.profile_picture,
+  d.gender,
+  d.date_of_birth,
+  app.status,
+  d.dentist_id,
+  d.working_hours,
+  d.duration,
+  app.visit_reason,
+  app.appointment_id,
+  app.appointment_date,
+  app.start_time,
+  app.end_time
+FROM appointment AS app
+JOIN dentist AS d ON d.dentist_id = app.dentist_id
+WHERE app.tenant_id = ? 
+  AND app.patient_id = ?
+  limit ? offset ?;
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, patientId,limit,offset]);
+    console.log('appoinments:',rows)
+    return rows;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
 
 const getAppointmentMonthlySummary = async (tenantId, clinic_id, dentist_id) => {
   const query = `SELECT 
@@ -482,5 +516,6 @@ module.exports = {
   getAllAppointmentsByTenantIdAndClinicIdByDentist,
   getAllAppointmentsByTenantIdAndClinicIdAndDentistId,
   fetchDataForRange,
-  updateAppoinmentStatusCancelledAndReschedule
+  updateAppoinmentStatusCancelledAndReschedule,
+  getAppointmentsWithDetailsByPatient
 };

@@ -40,6 +40,8 @@ module.exports = {
   DELETE_APPOINTMENT_TENANT: "/deleteappointment/:appointment_id/:tenant_id",
   GETALL_APPOINTMENT_TENANT_CLINIC_DENTIST:
     "/getallappointments/:tenant_id/:clinic_id/:dentist_id",
+  GETALL_APPOINTMENT_TENANT_PATIENT:
+    "/getallappointmentsbypatient/:tenant_id/:patient_id",
   GET_APPOINTMENT_MONTHLY_SUMMARY:
     "/getallappointments/monthlysummary/:tenant_id/:clinic_id/:dentist_id",
   GETALL_PATIENT_VISITEDETAILS:

@@ -242,6 +242,23 @@ exports.getAppointmentsWithDetails = async (req, res, next) => {
     next(err);
   }
 };
+exports.getAppointmentsWithDetailsByPatient = async (req, res, next) => {
+  const { tenant_id,patient_id } = req.params;
+  const { page, limit } = req.query;
+  try {
+    await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+    await checkIfExists("patient", "patient_id", patient_id);
+    const appointments = await appointmentService.getAppointmentsWithDetailsByPatient(
+      tenant_id,
+      patient_id,
+      page,
+      limit
+    );
+    res.status(200).json(appointments);
+  } catch (err) {
+    next(err);
+  }
+};
 
 exports.getAppointmentMonthlySummary = async (req, res, next) => {
   const { tenant_id, clinic_id, dentist_id } = req.params;

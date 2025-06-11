@@ -45,8 +45,8 @@ const appointmentFields = {
   is_virtual:helper.parseBoolean,
   reminder_send:helper.parseBoolean,
   meeting_link:(val)=>val || null,
-  checkin_time:(val)=>isoToSqlDatetime(val) || null,
-  checkout_time:(val)=>isoToSqlDatetime(val) || null
+  checkin_time:(val)=>val || null,
+  checkout_time:(val)=>val || null
 };
 
 const appointmentFieldsReverseMap = {
@@ -344,6 +344,35 @@ const getAppointmentsWithDetails = async (
         tenantId,
         clinic_id,
         dentist_id,
+        Number(limit),
+        offset
+      );
+
+      const formatted = await formatAppointments(result); // ✅ Use the returned value
+      return decodeJsonFields(formatted, fieldsToDecode); // ✅ Pass formatted data
+    });
+
+    return appointment;
+  } catch (error) {
+    console.error("Database error while fetching appointment:", error);
+    throw new CustomError("Failed to fetch appointment", 404);
+  }
+};
+const getAppointmentsWithDetailsByPatient = async (
+  tenantId,
+  patient_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `appointmentsdetails:${tenantId}${patient_id}:page:${page}:limit:${limit}`;
+  const fieldsToDecode = ["visit_reason","working_hours"];
+
+  try {
+    const appointment = await getOrSetCache(cacheKey, async () => {
+      const result = await appointmentModel.getAppointmentsWithDetailsByPatient(
+        tenantId,
+        patient_id,
         Number(limit),
         offset
       );
@@ -911,5 +940,6 @@ module.exports = {
   getAppointmentSummaryChartByClinic,
   getAppointmentSummaryChartByDentist,
   getAllAppointmentsByTenantIdAndClinicId,
-  getAllAppointmentsByTenantIdAndClinicIdByDentist
+  getAllAppointmentsByTenantIdAndClinicIdByDentist,
+  getAppointmentsWithDetailsByPatient
 };

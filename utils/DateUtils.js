@@ -1,3 +1,5 @@
+const { CustomError } = require("../middlewares/CustomeError");
+
 function formatDateOnly(isoString) {
   console.log(isoString)
   if (!isoString) return null;
@@ -60,5 +62,29 @@ function isoToSqlDatetime(isoStr) {
   return `${YYYY}-${MM}-${DD} ${HH}:${mm}:${ss}`;
 }
 
+const compareDateTime=async(d1, t1, d2, t2)=> {
+  const datetime1 = new Date(`${d1}T${t1}`);
+  const datetime2 = new Date(`${d2}T${t2}`);
 
-module.exports = { formatDateOnly, formatAppointments,isValidDate,isoToSqlDatetime };
+  console.log(datetime1,datetime2)
+
+  const millis1 = datetime1.getTime();
+  const millis2 = datetime2.getTime();
+
+  console.log(millis1,millis2)
+
+  if (millis1 > millis2) {
+    throw new CustomError(`${d1} ${t1} is later than ${d2} ${t2}`,400) 
+
+  // if (millis1 < millis2) {
+  //   return `${d1} ${t1} is earlier than ${d2} ${t2}`;
+  // } else if (millis1 > millis2) {
+  //   return `${d1} ${t1} is later than ${d2} ${t2}`;
+  // } else {
+  //   return `${d1} ${t1} is the same as ${d2} ${t2}`;
+  // }
+}
+}
+
+
+module.exports = { formatDateOnly, formatAppointments,isValidDate,isoToSqlDatetime,compareDateTime };
