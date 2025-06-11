@@ -97,13 +97,13 @@ const getAllAssetsByTenantId = async (tenantId, page = 1, limit = 10) => {
 // Get Asset by ID & Tenant
 const getAssetByTenantIdAndAssetId = async (tenantId, assetId) => {
   try {
-    const asset = await assetModel.getAssetByTenantIdAndAssetId(
+    const asset = await assetModel.getAssetByTenantAndAssetId(
       tenantId,
       assetId
     );
     const convertedRows = helper.convertDbToFrontend(asset, assetFieldsReverseMap);
     
-        return {data:convertedRows,total:assets.total};;
+        return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get asset: " + error.message, 404);
   }

@@ -6,10 +6,17 @@ const reminderPingColumnConfig = [
     { columnname: "tenant_id", type: "int", size: 6, null: false },
     { columnname: "clinic_id", type: "int", size: 11, null: false },
     { columnname: "dentist_id", type: "int", size: 11, null: false },
-    { columnname: "reminder_ping_description", type: "text", null: true },
-    { columnname: "reminder_ping_type", type: "varchar", size: 50, null: true },
-    { columnname: "reminder_ping_date", type: "date", null: true },
-    { columnname: "reminder_ping_time", type: "time", null: true },
+    { columnname: "original_appointment_id", type: "int", size: 11, null: false },
+    { columnname: "new_appointment_id", type: "int", size: 11, null: true },
+    { columnname: "reason", type: "text", null: false },
+    { columnname: "previous_date", type: "date", null: true },
+    { columnname: "new_date", type: "date", null: false },
+    { columnname: "previous_time", type: "time", null: true },
+    { columnname: "new_time", type: "time", null: false },
+    { columnname: "rescheduled_by", type: "varchar", size: 30, null: false },
+    { columnname: "rescheduled_at", type: "datetime", size: 30, null: true },
+    { columnname: "charges_applicable", type: "boolean", null: false },
+    { columnname: "charges_amount", type: "decimal", null: false },
   ];
 
 // AppointmentReschedules Column Configuration for Validation
@@ -33,18 +40,29 @@ const createAppointmentReschedulesValidation = async (details) => {
   await Promise.all([
     checkIfIdExists("tenant", "tenant_id", details.tenant_id),
   ]);
+
+  await checkIfExists(
+    "appointment",
+    "appointment_id",
+    details.original_appointment_id
+  );
+  await checkIfExists(
+    "appointment",
+    "appointment_id",
+    details.new_appointment_id
+  );
 };
 
 /**
  * Validate Update AppointmentReschedules Input with Tenant Scope
  */
-const updateAppointmentReschedulesValidation = async (reminderPingId, details) => {
+const updateAppointmentReschedulesValidation = async (rescheduled_id, details) => {
   await validateInput(details, updateColumnConfig);
 
   const exists = await checkIfExists(
-    "reminderPing",
-    "reminderPing_id",
-    reminderPingId,
+    "appointment_reschedules",
+    "rescheduled_id",
+    rescheduled_id,
     details.tenant_id
   );
   if (!exists) {

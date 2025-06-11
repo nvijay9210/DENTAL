@@ -177,7 +177,7 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
       clinicFieldReverseMap
     );
 
-    return {data:convertedRows,total:clinics.total};;
+    return convertedRows;
   } catch (error) {
     throw new CustomError(message.CLINIC_FETCH_FAIL, 404);
   }

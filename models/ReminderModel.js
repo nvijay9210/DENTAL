@@ -45,14 +45,14 @@ const getAllRemindersByTenantId = async (tenantId, limit, offset) => {
 // Get reminder by tenant ID and reminder ID
 const getReminderByTenantAndReminderId = async (tenant_id, reminder_id) => {
   try {
-    const [rows] = await record.getRecordByIdAndTenantId(
+    const rows = await record.getRecordByIdAndTenantId(
       TABLE,
       "tenant_id",
       tenant_id,
       "reminder_id",
       reminder_id
     );
-    return rows?.[0] ?? null;
+    return rows
   } catch (error) {
     console.error("Error fetching reminder:", error);
     throw new CustomError("Error fetching reminder.", 500);

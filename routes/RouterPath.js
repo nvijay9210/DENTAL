@@ -95,19 +95,19 @@ module.exports = {
   ADD_EXPENSE: "/addexpense",
   GETALL_EXPENSE_TENANT: "/getallexpenses/:tenant_id",
   GETALL_EXPENSE_REPORT_TENANT_CLINIC: "/getallexpenses/:tenant_id/:clinic_id",
-  GET_EXPENSE: "/getexpense/:expense_id",
+  GET_EXPENSE_TENANT: "/getexpense/:expense_id/:tenant_id",
   UPDATE_EXPENSE_TENANT: "/updateexpense/:expense_id/:tenant_id",
   DELETE_EXPENSE_TENANT: "/deleteexpense/:expense_id/:tenant_id",
 
   ADD_SUPPLIER: "/addsupplier",
   GETALL_SUPPLIER_TENANT: "/getallsuppliers/:tenant_id",
-  GET_SUPPLIER: "/getsupplier/:supplier_id",
+  GET_SUPPLIER_TENANT: "/getsupplier/:supplier_id/:tenant_id",
   UPDATE_SUPPLIER_TENANT: "/updatesupplier/:supplier_id/:tenant_id",
   DELETE_SUPPLIER_TENANT: "/deletesupplier/:supplier_id/:tenant_id",
 
   ADD_REMINDER: "/addreminder",
   GETALL_REMINDER_TENANT: "/getallreminders/:tenant_id",
-  GET_REMINDER: "/getreminder/:reminder_id",
+  GET_REMINDER_TENANT: "/getreminder/:reminder_id/:tenant_id",
   GET_REMINDER_SCHEDULE:
     "/getreminder/:tenant_id/:clinic_id/:dentist_id/:reminder_id",
   GET_REMINDER_DENTIST_TYPE:

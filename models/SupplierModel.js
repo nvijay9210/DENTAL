@@ -32,14 +32,14 @@ const getAllSuppliersByTenantId = async (tenantId, limit, offset) => {
 // Get supplier by tenant ID and supplier ID
 const getSupplierByTenantAndSupplierId = async (tenant_id, supplier_id) => {
   try {
-    const [rows] = await record.getRecordByIdAndTenantId(
+    const rows = await record.getRecordByIdAndTenantId(
       TABLE,
       "tenant_id",
       tenant_id,
       "supplier_id",
       supplier_id
     );
-    return rows?.[0] ?? null;
+    return rows;
   } catch (error) {
     console.error("Error fetching supplier:", error);
     throw new CustomError("Error fetching supplier.", 500);

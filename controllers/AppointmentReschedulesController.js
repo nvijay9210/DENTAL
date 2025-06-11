@@ -19,7 +19,10 @@ exports.createAppointmentReschedules = async (req, res, next) => {
 
     // Create the appointmentReschedules
     const id = await appointmentReschedulesService.createAppointmentReschedules(details);
-    res.status(201).json({ message: "AppointmentReschedules created", id });
+
+    console.log('Success6!')
+
+    res.status(201).json({ message: "AppointmentReschedules created", id:id.insertId });
   } catch (err) {
     next(err);
   }

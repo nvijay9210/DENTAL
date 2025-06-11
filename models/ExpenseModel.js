@@ -33,14 +33,14 @@ const getAllExpensesByTenantId = async (tenantId, limit, offset) => {
 // Get expense by tenant ID and expense ID
 const getExpenseByTenantAndExpenseId = async (tenant_id, expense_id) => {
   try {
-    const [rows] = await record.getRecordByIdAndTenantId(
+    const rows= await record.getRecordByIdAndTenantId(
       TABLE,
       "tenant_id",
       tenant_id,
       "expense_id",
       expense_id
     );
-    return rows?.[0] ?? null;
+    return rows;
   } catch (error) {
     console.error("Error fetching expense:", error);
     throw new CustomError("Error fetching expense.", 500);

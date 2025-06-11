@@ -130,7 +130,7 @@ const getExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
       expenseFieldsReverseMap
     );
 
-    return {data:convertedRows,total:expense.total};;
+    return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get expense: " + error.message, 404);
   }

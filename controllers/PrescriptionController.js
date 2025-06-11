@@ -120,11 +120,6 @@ exports.getPrescriptionByTenantIdAndPrescriptionId = async (req, res, next) => {
   if (!prescription) throw new CustomError("prescription not found", 404);
 
   try {
-    // Validate if prescription exists
-    await prescriptionValidation.checkPrescriptionExistsByIdValidation(
-      tenant_id,
-      prescription_id
-    );
 
     // Fetch prescription details
     const prescription =

@@ -165,6 +165,7 @@ exports.updateAppointment = async (req, res, next) => {
 };
 exports.updateAppoinmentStatusCancelled = async (req, res, next) => {
   const { appointment_id, tenant_id, clinic_id } = req.params;
+  const details=req.body
   try {
     // Validate if appointment exists before update
     const appointment1 = await checkIfExists(
@@ -180,7 +181,8 @@ exports.updateAppoinmentStatusCancelled = async (req, res, next) => {
     await appointmentService.updateAppoinmentStatusCancelled(
       appointment_id,
       tenant_id,
-      clinic_id
+      clinic_id,
+      details
     );
     res
       .status(200)

@@ -253,7 +253,8 @@ const deleteRecord = async (table, conditionColumns = [], conditionValues = []) 
   let conn;
   try {
     conn = await pool.getConnection();
-    const [result] = await conn.query(sql, conditionValues);
+    const result = await conn.query(sql, conditionValues);
+    console.log('res:',result[0])
     return result;
   } catch (error) {
     console.error("Error executing DELETE:", error);

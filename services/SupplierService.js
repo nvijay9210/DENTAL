@@ -100,7 +100,7 @@ const getSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
       supplierFieldsReverseMap
     );
 
-    return {data:convertedRows,total:supplier.total};;
+    return convertedRows
   } catch (error) {
     throw new CustomError("Failed to get supplier: " + error.message, 404);
   }

@@ -201,7 +201,7 @@ const getPrescriptionByTenantIdAndPrescriptionId = async (
     const convertedRows =
       helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
 
-    return {data:convertedRows,total:prescription.total};;
+    return convertedRows
     
   } catch (error) {
     throw new CustomError("Failed to get prescription: " + error.message, 404);

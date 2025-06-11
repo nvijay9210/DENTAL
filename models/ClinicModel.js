@@ -29,8 +29,9 @@ const getAllClinicsByTenantId = async (tenantId, limit, offset) => {
 // Get Clinic by Tenant ID and Clinic ID
 const getClinicByTenantIdAndClinicId = async (tenant_id, clinic_id) => {
   try {
-    const [rows] = await record.getRecordByIdAndTenantId('clinic', 'tenant_id', tenant_id, 'clinic_id', clinic_id);
-    return rows[0] || null;
+    const rows = await record.getRecordByIdAndTenantId('clinic', 'tenant_id', tenant_id, 'clinic_id', clinic_id);
+    console.log(rows)
+    return rows || null;
   } catch (error) {
     console.error("Error executing query:", error);
     throw new Error("Error fetching clinic.");

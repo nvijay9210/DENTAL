@@ -8,6 +8,11 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly } = require("../utils/DateUtils");
 const { duration } = require("moment");
+const { checkIfExists } = require("../models/checkIfExists");
+
+const {  updateAppoinmentStatusCancelledAndReschedule } = require("../models/AppointmentModel");
+const appointmentService=require('../services/AppointmentService');
+const { createAppointmentValidation } = require("../validations/AppointmentValidation");
 
 // Field mapping for appointmentReschedules (similar to treatment)
 
@@ -25,11 +30,11 @@ const appointmentRescheduleFields = {
   rescheduled_by: (val) => val,
   rescheduled_at: (val) => val,
   charge_applicable: helper.parseBoolean,
-  charge_amount: (val) => parseFloat(val)||0.00,
+  charge_amount: (val) => parseFloat(val) || 0.0,
 };
 
 const appointmentRescheduleFieldsReverseMap = {
-  reschedule_id:(val)=>val,
+  reschedule_id: (val) => val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   dentist_id: (val) => val,
@@ -42,8 +47,8 @@ const appointmentRescheduleFieldsReverseMap = {
   new_time: (val) => duration(val),
   rescheduled_by: (val) => val,
   rescheduled_at: (val) => val,
-  charge_applicable:(val)=> Boolean(val),
-  charge_amount: (val) => parseFloat(val)||0.00,
+  charge_applicable: (val) => Boolean(val),
+  charge_amount: (val) => parseFloat(val) || 0.0,
   created_by: (val) => val,
   created_time: (val) => (val ? new Date(val).toISOString() : null),
   updated_by: (val) => val,
@@ -51,18 +56,47 @@ const appointmentRescheduleFieldsReverseMap = {
 };
 
 // Create AppointmentReschedules
-const createAppointmentReschedules = async (data) => {
+const createAppointmentReschedules = async (details) => {
   const fieldMap = {
     ...appointmentRescheduleFields,
     created_by: (val) => val,
   };
   try {
-    const { columns, values } = mapFields(data, fieldMap);
-    const appointmentRescheduleId = await appointmentRescheduleModel.createAppointmentReschedules(
-      "appointmentReschedule",
-      columns,
-      values
-    );
+    console.log('Success1!')
+
+    const appointment=await appointmentService.getAppointmentByTenantIdAndAppointmentId(details.tenant_id,details.original_appointment_id)
+
+    console.log('Success2!')
+
+    await updateAppoinmentStatusCancelledAndReschedule(details.appointment_id,details.tenant_id,details.clinic_id,details.rescheduled_by,details.reason)
+
+    console.log('Success3!')
+    
+    appointment.appointment_date=details.new_date,
+    appointment.start_time=details.new_time,
+    appointment.rescheduled_from=appointment.appointment_id
+
+    await createAppointmentValidation(appointment)
+
+    console.log('Success4!')
+
+    const newAppointment=await appointmentService.createAppointment(appointment)
+
+    console.log('Success5!',newAppointment)
+
+    details.previous_date=appointment.appointment_date
+    details.previous_time=appointment.start_time
+    details.new_appointment_id=newAppointment
+
+    const { columns, values } = mapFields(details, fieldMap);
+
+    const appointmentRescheduleId =
+      await appointmentRescheduleModel.createAppointmentReschedules(
+        "appointment_reschedules",
+        columns,
+        values
+      );
+
     await invalidateCacheByPattern("appointmentReschedule:*");
     return appointmentRescheduleId;
   } catch (error) {
@@ -85,19 +119,24 @@ const getAllAppointmentReschedulessByTenantId = async (
 
   try {
     const appointmentReschedules = await getOrSetCache(cacheKey, async () => {
-      const result = await appointmentRescheduleModel.getAllAppointmentReschedulessByTenantId(
-        tenantId,
-        Number(limit),
-        offset
-      );
+      const result =
+        await appointmentRescheduleModel.getAllAppointmentReschedulessByTenantId(
+          tenantId,
+          Number(limit),
+          offset
+        );
       return result;
     });
 
-    const convertedRows = appointmentReschedules.data.map((appointmentReschedule) =>
-      helper.convertDbToFrontend(appointmentReschedule, appointmentRescheduleFieldsReverseMap)
+    const convertedRows = appointmentReschedules.data.map(
+      (appointmentReschedule) =>
+        helper.convertDbToFrontend(
+          appointmentReschedule,
+          appointmentRescheduleFieldsReverseMap
+        )
     );
 
-    return {data:convertedRows,total:appointmentReschedules.total};;
+    return { data: convertedRows, total: appointmentReschedules.total };
   } catch (err) {
     console.error("Database error while fetching appointmentReschedules:", err);
     throw new CustomError("Failed to fetch appointmentReschedules", 404);
@@ -114,20 +153,25 @@ const getAllAppointmentReschedulessByTenantIdAndClinicId = async (
 
   try {
     const appointmentReschedules = await getOrSetCache(cacheKey, async () => {
-      const result = await appointmentRescheduleModel.getAllAppointmentReschedulessByTenantIdAndClinicId(
-        tenantId,
-        clinic_id,
-        Number(limit),
-        offset
-      );
+      const result =
+        await appointmentRescheduleModel.getAllAppointmentReschedulessByTenantIdAndClinicId(
+          tenantId,
+          clinic_id,
+          Number(limit),
+          offset
+        );
       return result;
     });
 
-    const convertedRows = appointmentReschedules.data.map((appointmentReschedule) =>
-      helper.convertDbToFrontend(appointmentReschedule, appointmentRescheduleFieldsReverseMap)
+    const convertedRows = appointmentReschedules.data.map(
+      (appointmentReschedule) =>
+        helper.convertDbToFrontend(
+          appointmentReschedule,
+          appointmentRescheduleFieldsReverseMap
+        )
     );
 
-    return {data:convertedRows,total:appointmentReschedules.total};;
+    return { data: convertedRows, total: appointmentReschedules.total };
   } catch (err) {
     console.error("Database error while fetching appointmentReschedules:", err);
     throw new CustomError("Failed to fetch appointmentReschedules", 404);
@@ -146,21 +190,26 @@ const getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId = async (
 
   try {
     const appointmentReschedules = await getOrSetCache(cacheKey, async () => {
-      const result = await appointmentRescheduleModel.getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId(
-        tenantId,
-        clinic_id,
-        dentist_id,
-        Number(limit),
-        offset
-      );
+      const result =
+        await appointmentRescheduleModel.getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId(
+          tenantId,
+          clinic_id,
+          dentist_id,
+          Number(limit),
+          offset
+        );
       return result;
     });
 
-    const convertedRows = appointmentReschedules.data.map((appointmentReschedule) =>
-      helper.convertDbToFrontend(appointmentReschedule, appointmentRescheduleFieldsReverseMap)
+    const convertedRows = appointmentReschedules.data.map(
+      (appointmentReschedule) =>
+        helper.convertDbToFrontend(
+          appointmentReschedule,
+          appointmentRescheduleFieldsReverseMap
+        )
     );
 
-    return {data:convertedRows,total:appointmentReschedules.total};;
+    return { data: convertedRows, total: appointmentReschedules.total };
   } catch (err) {
     console.error("Database error while fetching appointmentReschedules:", err);
     throw new CustomError("Failed to fetch appointmentReschedules", 404);
@@ -183,29 +232,40 @@ const getAppointmentReschedulesByTenantIdAndAppointmentReschedulesId = async (
       appointmentRescheduleFieldsReverseMap
     );
 
-    return {data:convertedRows,total:appointmentReschedules.total};;
+    return { data: convertedRows, total: appointmentReschedules.total };
   } catch (error) {
-    throw new CustomError("Failed to get appointmentReschedule: " + error.message, 404);
+    throw new CustomError(
+      "Failed to get appointmentReschedule: " + error.message,
+      404
+    );
   }
 };
 
 // Update AppointmentReschedules
-const updateAppointmentReschedules = async (appointmentRescheduleId, data, tenant_id) => {
+const updateAppointmentReschedules = async (
+  appointmentRescheduleId,
+  data,
+  tenant_id
+) => {
   const fieldMap = {
     ...appointmentRescheduleFields,
     updated_by: (val) => val,
   };
   try {
     const { columns, values } = mapFields(data, fieldMap);
-    const affectedRows = await appointmentRescheduleModel.updateAppointmentReschedules(
-      appointmentRescheduleId,
-      columns,
-      values,
-      tenant_id
-    );
+    const affectedRows =
+      await appointmentRescheduleModel.updateAppointmentReschedules(
+        appointmentRescheduleId,
+        columns,
+        values,
+        tenant_id
+      );
 
     if (affectedRows === 0) {
-      throw new CustomError("AppointmentReschedules not found or no changes made.", 404);
+      throw new CustomError(
+        "AppointmentReschedules not found or no changes made.",
+        404
+      );
     }
 
     await invalidateCacheByPattern("appointmentReschedule:*");
@@ -217,29 +277,27 @@ const updateAppointmentReschedules = async (appointmentRescheduleId, data, tenan
 };
 
 // Delete AppointmentReschedules
-const deleteAppointmentReschedulesByTenantIdAndAppointmentReschedulesId = async (
-  tenantId,
-  appointmentRescheduleId
-) => {
-  try {
-    const affectedRows =
-      await appointmentRescheduleModel.deleteAppointmentReschedulesByTenantAndAppointmentReschedulesId(
-        tenantId,
-        appointmentRescheduleId
-      );
-    if (affectedRows === 0) {
-      throw new CustomError("AppointmentReschedules not found.", 404);
-    }
+const deleteAppointmentReschedulesByTenantIdAndAppointmentReschedulesId =
+  async (tenantId, appointmentRescheduleId) => {
+    try {
+      const affectedRows =
+        await appointmentRescheduleModel.deleteAppointmentReschedulesByTenantAndAppointmentReschedulesId(
+          tenantId,
+          appointmentRescheduleId
+        );
+      if (affectedRows === 0) {
+        throw new CustomError("AppointmentReschedules not found.", 404);
+      }
 
-    await invalidateCacheByPattern("appointmentReschedule:*");
-    return affectedRows;
-  } catch (error) {
-    throw new CustomError(
-      `Failed to delete appointmentReschedule: ${error.message}`,
-      404
-    );
-  }
-};
+      await invalidateCacheByPattern("appointmentReschedule:*");
+      return affectedRows;
+    } catch (error) {
+      throw new CustomError(
+        `Failed to delete appointmentReschedule: ${error.message}`,
+        404
+      );
+    }
+  };
 
 module.exports = {
   createAppointmentReschedules,
@@ -248,5 +306,5 @@ module.exports = {
   updateAppointmentReschedules,
   deleteAppointmentReschedulesByTenantIdAndAppointmentReschedulesId,
   getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId,
-  getAllAppointmentReschedulessByTenantIdAndClinicId
+  getAllAppointmentReschedulessByTenantIdAndClinicId,
 };

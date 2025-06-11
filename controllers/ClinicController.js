@@ -67,13 +67,14 @@ exports.getFinanceSummarybyDentist = async (req, res, next) => {
 exports.getClinicByTenantIdAndClinicId = async (req, res, next) => {
   const { clinic_id, tenant_id } = req.params;
   try {
-    const clinic = await checkIfExists(
-      "clinic",
-      "clinic_id",
-      clinic_id,
-      tenant_id
-    );
-    if (clinic) throw new CustomError("Clinic not exists", 404);
+    await checkIfExists('tenant','tenant_id',tenant_id)
+    // const clinic = await checkIfExists(
+    //   "clinic",
+    //   "clinic_id",
+    //   clinic_id,
+    //   tenant_id
+    // );
+    // if (clinic) throw new CustomError("Clinic not exists", 404);
     const clinics = await clinicService.getClinicByTenantIdAndClinicId(
       tenant_id,
       clinic_id

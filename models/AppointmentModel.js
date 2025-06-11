@@ -146,14 +146,14 @@ const getAppointmentByTenantIdAndAppointmentId = async (
   appointment_id
 ) => {
   try {
-    const [rows] = await record.getRecordByIdAndTenantId(
+    const rows = await record.getRecordByIdAndTenantId(
       "appointment",
       "tenant_id",
       tenant_id,
       "appointment_id",
       appointment_id
     );
-    return rows[0] || null;
+    return rows || null;
   } catch (error) {
     console.error("Error executing query:", error);
     throw new Error("Error fetching appointment.");
@@ -419,10 +419,10 @@ WHERE
   }
 };
 
-const updateAppoinmentStatusCancelled = async (appointment_id, tenantId, clinicId) => {
+const updateAppoinmentStatusCancelled = async (appointment_id, tenantId, clinicId,details) => {
   const query = `
     UPDATE appointment 
-    SET status = 'CL'
+    SET status = 'cancelled',cancelled_by=?,cancellation_reason=?
     WHERE 
       appointment_id = ? 
       AND tenant_id = ?  
@@ -431,7 +431,30 @@ const updateAppoinmentStatusCancelled = async (appointment_id, tenantId, clinicI
 
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [appointment_id, tenantId, clinicId]);
+    const [rows] = await conn.query(query, [details.cancelled_by, details.cancellation_reason,appointment_id, tenantId, clinicId]);
+    console.log('appointments:', rows);
+    return rows.affectedRows > 0;
+  } catch (error) {
+    console.error('Error updating appointment status:', error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+const updateAppoinmentStatusCancelledAndReschedule = async (appointment_id, tenantId, clinicId,cancelled_by,cancellation_reason) => {
+  const query = `
+    UPDATE appointment 
+    SET status = 'rescheduled',cancelled_by=?,cancellation_reason=?
+    WHERE 
+      appointment_id = ? 
+      AND tenant_id = ?  
+      AND clinic_id = ?
+  `;
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [cancelled_by,cancellation_reason,appointment_id, tenantId, clinicId]);
     console.log('appointments:', rows);
     return rows.affectedRows > 0;
   } catch (error) {
@@ -458,5 +481,6 @@ module.exports = {
   getAllAppointmentsByTenantIdAndClinicId,
   getAllAppointmentsByTenantIdAndClinicIdByDentist,
   getAllAppointmentsByTenantIdAndClinicIdAndDentistId,
-  fetchDataForRange
+  fetchDataForRange,
+  updateAppoinmentStatusCancelledAndReschedule
 };
