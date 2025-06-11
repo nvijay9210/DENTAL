@@ -12,7 +12,7 @@ const createAsset = async (table,columns, values) => {
     return asset.insertId;
   } catch (error) {
     console.error("Error creating asset:", error);
-    throw new CustomError("Database Query Error", 500);
+    throw new CustomError("Database Operation Failed", 500);
   }
 };
 
@@ -81,7 +81,7 @@ const getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (tenantId,
     return rows;
   } catch (error) {
     console.error(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }

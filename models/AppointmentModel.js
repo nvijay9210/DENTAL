@@ -16,7 +16,7 @@ const createAppointment = async (table, columns, values) => {
     return appointment.insertId;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   }
 };
 
@@ -66,7 +66,7 @@ WHERE
     return {data:rows,total:count[0].total};
   } catch (error) {
     console.log(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -101,7 +101,7 @@ WHERE
     return {data:rows,total:counts[0].total};
   } catch (error) {
     console.log(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -135,7 +135,7 @@ WHERE
     return {data:rows,total:counts[0].total};
   } catch (error) {
     console.log(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -248,7 +248,7 @@ const checkAppointmentExistsByStartTimeAndEndTimeAndDate = async (
     return rows[0]["exists"] === 1;
   } catch (error) {
     console.error("Error checking overlapping appointments:", error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -281,7 +281,7 @@ WHERE app.tenant_id = ?
     return rows;
   } catch (error) {
     console.log(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -310,7 +310,7 @@ WHERE
     return rows;
   } catch (error) {
     console.log(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -361,12 +361,31 @@ const getAppointmentSummary = async (tenantId, clinic_id, period = 'monthly') =>
     console.log(`Appointments (${period} summary):`, rows);
     return rows[0]; // Return the first row since it's an aggregate result
   } catch (error) {
-    console.error("Database Query Error:", error);
-    throw new Error("Database Query Error");
+    console.error("Database Operation Failed:", error);
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
 };
+
+ const fetchDataForRange = async (tenant_id,clinic_id,from, to) => {
+    const [rows] = await pool.query(
+      `SELECT status, COUNT(*) as count
+       FROM appointment
+       WHERE tenant_id = ? AND clinic_id = ? AND created_time BETWEEN ? AND ?
+       GROUP BY status`,
+      [tenant_id, clinic_id, from, to]
+    );
+
+    const result = { CP: 0, SC: 0, CL: 0 };
+    rows.forEach(row => {
+      result[row.status] = row.count;
+    });
+
+    return result.CP + result.SC + result.CL;
+  };
+
+
 
 const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (tenantId,clinicId, patientId,limit,offset) => {
   const query = `SELECT 
@@ -394,7 +413,7 @@ WHERE
     return rows;
   } catch (error) {
     console.log(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -417,7 +436,7 @@ const updateAppoinmentStatusCancelled = async (appointment_id, tenantId, clinicI
     return rows.affectedRows > 0;
   } catch (error) {
     console.error('Error updating appointment status:', error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -438,5 +457,6 @@ module.exports = {
   getAppointmentSummary,
   getAllAppointmentsByTenantIdAndClinicId,
   getAllAppointmentsByTenantIdAndClinicIdByDentist,
-  getAllAppointmentsByTenantIdAndClinicIdAndDentistId
+  getAllAppointmentsByTenantIdAndClinicIdAndDentistId,
+  fetchDataForRange
 };

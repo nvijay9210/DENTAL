@@ -12,7 +12,7 @@ const createStatusTypeSub = async (table, columns, values) => {
     return statusTypeSub.insertId;
   } catch (error) {
     console.error("Error creating statusTypeSub:", error);
-    throw new CustomError("Database Query Error", 500);
+    throw new CustomError("Database Operation Failed", 500);
   }
 };
 
@@ -146,7 +146,7 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
     return rows[0];
   } catch (error) {
     console.error("Error fetching status_type_id:", error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }

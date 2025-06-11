@@ -8,7 +8,7 @@ const createDentist = async (table, columns, values) => {
     return dentist.insertId;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   }
 };
 
@@ -92,7 +92,7 @@ const checkDentistExistsByTenantIdAndDentistId = async (
     return await record.recordExists("dentist", columns);
   } catch (error) {
     console.log(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   }
 };
 
@@ -106,7 +106,7 @@ const getAllDentistsByTenantIdAndClinicId = async (tenantId, clinicId,limit,offs
     return {data:rows,total:counts[0].total};
   } catch (error) {
     console.error(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -120,7 +120,7 @@ const getAllDentistsByClinicId=async(tenantId,clinicId)=>{
     return rows.length > 0;
   } catch (error) {
     console.error(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -135,7 +135,7 @@ const updateClinicIdAndNameAndAddress=async(tenantId,clinicId,clinic_name,clinic
     return rows.length > 0;
   } catch (error) {
     console.error(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -203,7 +203,7 @@ const updateDentistAppointmentCount = async (tenantId, clinicId,dentistId, assig
     return result.affectedRows > 0;
   } catch (error) {
     console.error(`Error ${assign ? 'incrementing' : 'decrementing'} dentist appointment count:`, error);
-    throw new Error(`Database Query Error while updating dentist appointment count`);
+    throw new Error(`Database Operation Failed while updating dentist appointment count`);
   } finally {
     conn.release();
   }

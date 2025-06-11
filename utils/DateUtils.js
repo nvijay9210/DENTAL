@@ -43,5 +43,22 @@ function isValidDate(dateStr) {
   return !isNaN(date.getTime());
 }
 
+function isoToSqlDatetime(isoStr) {
+  const date = new Date(isoStr);
+  if (isNaN(date.getTime())) {
+    throw new Error("Invalid date string");
+  }
 
-module.exports = { formatDateOnly, formatAppointments,isValidDate };
+  const YYYY = date.getFullYear();
+  const MM = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+  const DD = String(date.getDate()).padStart(2, "0");
+
+  const HH = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  const ss = String(date.getSeconds()).padStart(2, "0");
+
+  return `${YYYY}-${MM}-${DD} ${HH}:${mm}:${ss}`;
+}
+
+
+module.exports = { formatDateOnly, formatAppointments,isValidDate,isoToSqlDatetime };

@@ -10,7 +10,7 @@ const createClinic = async (table, columns, values) => {
     return clinic.insertId;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw new Error('Database Query Error');
+    throw new Error('Database Operation Failed');
   }
 };
 
@@ -74,7 +74,7 @@ const checkClinicExistsByTenantIdAndClinicId = async (tenantId, clinicId) => {
     return rows.length > 0;
   } catch (error) {
     console.error(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -88,7 +88,7 @@ const getClinicNameAndAddressByClinicId=async(tenantId,clinicId)=>{
     return rows[0][0];
   } catch (error) {
     console.error(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -107,7 +107,7 @@ const updateDoctorCount = async (tenantId, clinicId, assign = 'true') => {
     return result.affectedRows > 0;
   } catch (error) {
     console.error(error);
-    throw new Error(`Database Query Error while ${assign?'creat':'updat'}ing doctor count`);
+    throw new Error(`Database Operation Failed while ${assign?'creat':'updat'}ing doctor count`);
   } finally {
     conn.release();
   }
@@ -125,7 +125,7 @@ const updatePatientCount = async (tenantId, clinicId, assign = true) => {
     return result.affectedRows > 0;
   } catch (error) {
     console.error(error);
-    throw new Error(`Database Query Error while ${assign?'creat':'updat'}ing patient count`);
+    throw new Error(`Database Operation Failed while ${assign?'creat':'updat'}ing patient count`);
   } finally {
     conn.release();
   }

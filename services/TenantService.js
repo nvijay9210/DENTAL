@@ -1,5 +1,7 @@
 const tenantModel = require("../models/TenantModel");
+const { mapFields } = require("../query/Records");
 const { safeStringify, safeJsonParse } = require("../utils/Helpers");
+const helper = require("../utils/Helpers");
 
 const tenantFields = {
   tenant_name: (val) => val,
@@ -17,6 +19,10 @@ const tenantFieldsReverseMap = {
   tenant_app_logo: (val) => val,
   tenant_app_font: (val) => val,
   tenant_app_themes: safeJsonParse,
+  created_by: (val) => val,
+  created_time: (val) => val,
+  updated_by: (val) => val,
+  updated_time: (val) => val,
 };
 
 // Create tenant service (calls the model function)
@@ -25,9 +31,15 @@ const createTenant = async (data) => {
     ...tenantFields,
     created_by: (val) => val,
   };
+  
   try {
-    const tenantId = await tenantModel.createTenant(create); // Call model function to insert tenant
-    return tenantId;
+   const { columns, values } = mapFields(data, create);
+       const tenantId = await tenantModel.createTenant(
+         "tenant",
+         columns,
+         values
+       );
+       return tenantId
   } catch (error) {
     throw new Error("Failed to create tenant: " + error.message);
   }
@@ -37,7 +49,10 @@ const createTenant = async (data) => {
 const getTenants = async () => {
   try {
     const tenants = await tenantModel.getAllTenant(); // Call model function to get tenants
-    return tenants;
+    const convertedRows = tenants.map((tenant) =>
+          helper.convertDbToFrontend(tenant, tenantFieldsReverseMap)
+        );
+    return convertedRows;
   } catch (error) {
     throw new Error("Failed to get tenants: " + error.message);
   }
@@ -64,12 +79,14 @@ const getTenantByTenantNameAndTenantDomain = async (tenant_name,tenant_domain) =
 
 // Update tenant service
 const updateTenant = async (tenantId, data) => {
+
   try {
     const update = {
       ...tenantFields,
       updated_by: (val) => val,
     };
-    const affectedRows = await tenantModel.updateTenant(tenantId, update);
+    const { columns, values } = mapFields(data, update);
+    const affectedRows = await tenantModel.updateTenant(tenantId, columns,values);
     if (affectedRows === 0) {
       throw new Error("Tenant not found or no changes made.");
     }

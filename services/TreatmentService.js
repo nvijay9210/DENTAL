@@ -78,6 +78,7 @@ const createTreatment = async (data) => {
     );
     await invalidateCacheByPattern("treatment:*");
     await invalidateCacheByPattern("treatment_patient:*");
+    await invalidateCacheByPattern("financeSummary:*");
     return treatmentId;
   } catch (error) {
     console.error("Failed to create treatment:", error);
@@ -240,6 +241,7 @@ const updateTreatment = async (treatmentId, data, tenant_id) => {
 
     await invalidateCacheByPattern("treatment:*");
     await invalidateCacheByPattern("treatment_patient:*");
+    await invalidateCacheByPattern("financeSummary:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -264,6 +266,7 @@ const deleteTreatmentByTenantIdAndTreatmentId = async (
 
     await invalidateCacheByPattern("treatment:*");
     await invalidateCacheByPattern("treatment_patient:*");
+    await invalidateCacheByPattern("financeSummary:*");
     return affectedRows;
   } catch (error) {
     throw new CustomError(`Failed to delete treatment: ${error.message}`, 404);

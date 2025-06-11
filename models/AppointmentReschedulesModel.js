@@ -12,7 +12,7 @@ const createAppointmentReschedules = async (table,columns, values) => {
     return appointment_reschedules;
   } catch (error) {
     console.error("Error creating appointment_reschedules:", error);
-    throw new CustomError("Database Query Error", 500);
+    throw new CustomError("Database Operation Failed", 500);
   }
 };
 
@@ -33,7 +33,7 @@ const getAllAppointmentReschedulessByTenantIdAndClinicId = async (tenantId,clini
     return rows;
   } catch (error) {
     console.error(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
@@ -46,7 +46,7 @@ const getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId = async (te
     return rows;
   } catch (error) {
     console.error(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }

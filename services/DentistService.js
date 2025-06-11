@@ -215,7 +215,7 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
       throw new CustomError("Dentist not found", 404);
     }
 
-    const convertedRows= converthelper.convertDbToFrontend(dentist, dentistFieldReverseMap)
+    const convertedRows= helper.convertDbToFrontend(dentist, dentistFieldReverseMap)
     flattenAwards(dentist);
     return { ...convertedRows, flattenAwards };
   } catch (error) {

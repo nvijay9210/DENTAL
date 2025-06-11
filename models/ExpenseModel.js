@@ -12,7 +12,7 @@ const createExpense = async (table,columns, values) => {
     return expense.insertId;
   } catch (error) {
     console.error("Error creating expense:", error);
-    throw new CustomError("Database Query Error", 500);
+    throw new CustomError("Database Operation Failed", 500);
   }
 };
 
@@ -82,7 +82,7 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (tenantI
     return rows;
   } catch (error) {
     console.error(error);
-    throw new Error("Database Query Error");
+    throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
