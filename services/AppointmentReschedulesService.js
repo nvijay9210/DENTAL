@@ -7,7 +7,7 @@ const {
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly } = require("../utils/DateUtils");
-const { duration } = require("moment");
+const { duration } = require('../utils/Helpers');
 const { checkIfExists } = require("../models/checkIfExists");
 
 const {  updateAppoinmentStatusCancelledAndReschedule } = require("../models/AppointmentModel");
@@ -26,7 +26,7 @@ const appointmentRescheduleFields = {
   previous_date: (val) => (val ? formatDateOnly(val) : null),
   new_date: (val) => (val ? formatDateOnly(val) : null),
   previous_time: (val) => val,
-  new_time: (val) => val,
+  new_time: (val) => duration(val),
   rescheduled_by: (val) => val,
   rescheduled_at: (val) => val,
   charge_applicable: helper.parseBoolean,
@@ -62,27 +62,22 @@ const createAppointmentReschedules = async (details) => {
     created_by: (val) => val,
   };
   try {
-    console.log('Success1!')
 
     const appointment=await appointmentService.getAppointmentByTenantIdAndAppointmentId(details.tenant_id,details.original_appointment_id)
 
-    console.log('Success2!')
-
     await updateAppoinmentStatusCancelledAndReschedule(details.appointment_id,details.tenant_id,details.clinic_id,details.rescheduled_by,details.reason)
-
-    console.log('Success3!')
     
     appointment.appointment_date=details.new_date,
     appointment.start_time=details.new_time,
+    appointment.end_time=details.new_end_time || '00:00:00',//If new add
     appointment.rescheduled_from=appointment.appointment_id
+
+    console.log(appointment)
 
     await createAppointmentValidation(appointment)
 
-    console.log('Success4!')
 
     const newAppointment=await appointmentService.createAppointment(appointment)
-
-    console.log('Success5!',newAppointment)
 
     details.previous_date=appointment.appointment_date
     details.previous_time=appointment.start_time
