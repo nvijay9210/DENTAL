@@ -6,7 +6,7 @@ const {
 } = require("../config/redisConfig");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
-const { formatDateOnly } = require("../utils/DateUtils");
+const { formatDateOnly, compareDateTime } = require("../utils/DateUtils");
 const { duration } = require('../utils/Helpers');
 const { checkIfExists } = require("../models/checkIfExists");
 
@@ -26,7 +26,8 @@ const appointmentRescheduleFields = {
   previous_date: (val) => (val ? formatDateOnly(val) : null),
   new_date: (val) => (val ? formatDateOnly(val) : null),
   previous_time: (val) => val,
-  new_time: (val) => duration(val),
+  new_start_time: (val) => val,
+  new_end_time: (val) => val,
   rescheduled_by: (val) => val,
   rescheduled_at: (val) => val,
   charge_applicable: helper.parseBoolean,
@@ -43,8 +44,9 @@ const appointmentRescheduleFieldsReverseMap = {
   reason: helper.safeJsonParse,
   previous_date: (val) => formatDateOnly(val),
   new_date: (val) => (val ? formatDateOnly(val) : null),
-  previous_time: (val) => duration(val),
-  new_time: (val) => duration(val),
+  previous_time: (val) => val,
+  new_start_time: (val) => val,
+  new_end_time: (val) => val,
   rescheduled_by: (val) => val,
   rescheduled_at: (val) => val,
   charge_applicable: (val) => Boolean(val),
@@ -66,11 +68,16 @@ const createAppointmentReschedules = async (details) => {
     const appointment=await appointmentService.getAppointmentByTenantIdAndAppointmentId(details.tenant_id,details.original_appointment_id)
 
     await updateAppoinmentStatusCancelledAndReschedule(details.appointment_id,details.tenant_id,details.clinic_id,details.rescheduled_by,details.reason)
+
+    await compareDateTime(appointment.appointment_date,appointment.start_time,details.new_date,details.new_start_time)
+
+
     
     appointment.appointment_date=details.new_date,
-    appointment.start_time=details.new_time,
+    appointment.start_time=details.new_start_time,
     appointment.end_time=details.new_end_time || '00:00:00',//If new add
     appointment.rescheduled_from=appointment.appointment_id
+
 
     await createAppointmentValidation(appointment)
 
