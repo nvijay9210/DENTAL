@@ -81,9 +81,8 @@ WHERE
     app.tenant_id = ? 
     AND app.clinic_id = ? 
     AND app.dentist_id=?
-    limit=? offset=?
+    limit ? offset ?`;
 
-`;
   const query2= `SELECT 
     COUNT(*) AS total
 FROM 
