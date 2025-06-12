@@ -105,7 +105,7 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
       helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
     );
 
-    return {data:convertedRows,total:treatments.total};
+    return { data: convertedRows, total: treatments.total };
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
     throw new CustomError("Failed to fetch treatments", 404);
@@ -151,13 +151,13 @@ const getAllTreatmentsByTenantAndClinicId = async (
       return result;
     });
 
-    const convertedRows = treatments
-      .data.map((treatment) =>
+    const convertedRows = treatments.data
+      .map((treatment) =>
         helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
       )
       .map(flattenTreatmentImages);
 
-    return {data:convertedRows,total:treatments.total};;
+    return { data: convertedRows, total: treatments.total };
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
     throw new CustomError("Failed to fetch treatments", 404);
@@ -177,24 +177,90 @@ const getAllTreatmentsByTenantAndClinicIdAndDentist = async (
 
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
-      const result = await treatmentModel.getAllTreatmentsByTenantAndClinicIdAndDentist(
+      const result =
+        await treatmentModel.getAllTreatmentsByTenantAndClinicIdAndDentist(
+          tenantId,
+          clinic_id,
+          dentist_id,
+          appointment_id,
+          Number(limit),
+          offset
+        );
+      return result;
+    });
+
+    const convertedRows = treatments.data
+      .map((treatment) =>
+        helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
+      )
+      .map(flattenTreatmentImages);
+
+    return { data: convertedRows, total: treatments.total };
+  } catch (err) {
+    console.error("Database error while fetching treatments:", err);
+    throw new CustomError("Failed to fetch treatments", 404);
+  }
+};
+const getAllTreatmentsByTenantAndDentistId = async (
+  tenantId,
+  dentist_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `treatment:treatment_dentist:${tenantId}:page:${page}:limit:${limit}`;
+
+  try {
+    const treatments = await getOrSetCache(cacheKey, async () => {
+      const result = await treatmentModel.getAllTreatmentsByTenantAndDentistId(
         tenantId,
-        clinic_id,
         dentist_id,
-        appointment_id,
         Number(limit),
         offset
       );
       return result;
     });
 
-    const convertedRows = treatments
-      .data.map((treatment) =>
+    const convertedRows = treatments.data
+      .map((treatment) =>
         helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
       )
       .map(flattenTreatmentImages);
 
-    return {data:convertedRows,total:treatments.total};;
+    return { data: convertedRows, total: treatments.total };
+  } catch (err) {
+    console.error("Database error while fetching treatments:", err);
+    throw new CustomError("Failed to fetch treatments", 404);
+  }
+};
+
+const getAllTreatmentsByTenantAndPatientId = async (
+  tenantId,
+  patient_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `treatment:treatment_patient:${tenantId}:page:${page}:limit:${limit}`;
+
+  try {
+    const treatments = await getOrSetCache(cacheKey, async () => {
+      const result = await treatmentModel.getAllTreatmentsByTenantAndPatientId(
+        tenantId,
+        patient_id,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+
+    const convertedRows = treatments.data
+      .map((treatment) =>
+        helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
+      )
+      .map(flattenTreatmentImages);
+
+    return { data: convertedRows, total: treatments.total };
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
     throw new CustomError("Failed to fetch treatments", 404);
@@ -281,4 +347,6 @@ module.exports = {
   deleteTreatmentByTenantIdAndTreatmentId,
   getAllTreatmentsByTenantAndClinicId,
   getAllTreatmentsByTenantAndClinicIdAndDentist,
+  getAllTreatmentsByTenantAndDentistId,
+  getAllTreatmentsByTenantAndPatientId,
 };

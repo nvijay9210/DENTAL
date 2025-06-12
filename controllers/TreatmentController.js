@@ -105,6 +105,48 @@ exports.getAllTreatmentsByTenantAndClinicIdAndDentist = async (
   }
 };
 
+exports.getAllTreatmentsByTenantAndDentistId = async (req, res, next) => {
+  const { tenant_id, dentist_id } = req.params;
+  const { page, limit } = req.query;
+
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("dentist", "dentist_id", dentist_id);
+
+  try {
+    const treatments =
+      await treatmentService.getAllTreatmentsByTenantAndDentistId(
+        tenant_id,
+        dentist_id,
+        page,
+        limit
+      );
+    res.status(200).json(treatments);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllTreatmentsByTenantAndPatientId = async (req, res, next) => {
+  const { tenant_id, patient_id } = req.params;
+  const { page, limit } = req.query;
+
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("patient", "patient_id", patient_id);
+
+  try {
+    const treatments =
+      await treatmentService.getAllTreatmentsByTenantAndPatientId(
+        tenant_id,
+        patient_id,
+        page,
+        limit
+      );
+    res.status(200).json(treatments);
+  } catch (err) {
+    next(err);
+  }
+};
+
 /**
  * Get treatment by tenant and treatment ID
  */
@@ -119,7 +161,6 @@ exports.getTreatmentByTenantIdAndTreatmentId = async (req, res, next) => {
   if (!treatment) throw new CustomError("Treatment not found", 404);
 
   try {
-    
     // Fetch treatment details
     const treatment =
       await treatmentService.getTreatmentByTenantIdAndTreatmentId(

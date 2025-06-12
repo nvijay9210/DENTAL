@@ -115,10 +115,10 @@ WHERE
     app.tenant_id = ? 
     AND app.clinic_id = ? 
     AND app.dentist_id = ?
-    limit=? offset=?
+    limit ? offset ?
 `;
   const query2 = `SELECT 
-    app.appointment_date
+    COUNT(*) AS total
 FROM 
     appointment AS app
 WHERE 
@@ -130,6 +130,70 @@ WHERE
   try {
     const [rows] = await conn.query(query1, [tenantId, clinicId, dentistId,limit,offset]);
     const [counts] = await conn.query(query2, [tenantId, clinicId, dentistId,limit,offset]);
+    console.log('appoinments:',rows)
+    return {data:rows,total:counts[0].total};
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+const getAllAppointmentsByTenantIdAndDentistId = async (tenantId, dentistId,limit,offset) => {
+  const query1 = `SELECT 
+    *
+FROM 
+    appointment AS app
+WHERE 
+    app.tenant_id = ? 
+    AND app.dentist_id = ?
+    limit ? offset ?
+`;
+  const query2 = `SELECT 
+    COUNT(*) as total
+FROM 
+    appointment AS app
+WHERE 
+    app.tenant_id = ? 
+    AND app.dentist_id = ?
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [tenantId, dentistId,limit,offset]);
+    const [counts] = await conn.query(query2, [tenantId, dentistId]);
+    console.log('appoinments:',rows)
+    return {data:rows,total:counts[0].total};
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+const getAllAppointmentsByTenantIdAndPatientId = async (tenantId, patient_id,limit,offset) => {
+  const query1 = `SELECT 
+   *
+FROM 
+    appointment AS app
+WHERE 
+    app.tenant_id = ? 
+    AND app.patient_id = ?
+    limit ? offset ?
+`;
+  const query2 = `SELECT 
+    COUNT(*) as total
+FROM 
+    appointment AS app
+WHERE 
+    app.tenant_id = ? 
+    AND app.patient_id = ?
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [tenantId, patient_id,limit,offset]);
+    const [counts] = await conn.query(query2, [tenantId, patient_id]);
     console.log('appoinments:',rows)
     return {data:rows,total:counts[0].total};
   } catch (error) {
@@ -295,6 +359,7 @@ WHERE app.tenant_id = ?
     conn.release();
   }
 };
+
 const getAppointmentsWithDetailsByPatient = async (tenantId, patientId,limit,offset) => {
   console.log(tenantId,patientId,limit,offset)
   const query = `SELECT 
@@ -538,5 +603,7 @@ module.exports = {
   getAllAppointmentsByTenantIdAndClinicIdAndDentistId,
   fetchDataForRange,
   updateAppoinmentStatusCancelledAndReschedule,
-  getAppointmentsWithDetailsByPatient
+  getAppointmentsWithDetailsByPatient,
+  getAllAppointmentsByTenantIdAndDentistId,
+  getAllAppointmentsByTenantIdAndPatientId
 };

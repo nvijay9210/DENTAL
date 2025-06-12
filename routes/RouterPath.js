@@ -1,7 +1,6 @@
 module.exports = {
-  
-  TEST_URL:"/test",
-  
+  TEST_URL: "/test",
+
   ADD_TENANT: "/addtenant",
   GETALL_TENTANT: "/getalltenants",
   GET_TENANT: "/gettenant/:tenant_id",
@@ -40,6 +39,10 @@ module.exports = {
   DELETE_APPOINTMENT_TENANT: "/deleteappointment/:appointment_id/:tenant_id",
   GETALL_APPOINTMENT_TENANT_CLINIC_DENTIST:
     "/getallappointments/:tenant_id/:clinic_id/:dentist_id",
+  GETALL_APPOINTMENT_TENANT_DENTIST:
+    "/getallappointments_dentistid/:tenant_id/:dentist_id",
+  GETALL_APPOINTMENT_TENANT_PATIENTID:
+    "/getallappointments_patientid/:tenant_id/:patient_id",
   GETALL_APPOINTMENT_TENANT_PATIENT:
     "/getallappointmentsbypatient/:tenant_id/:patient_id",
   GET_APPOINTMENT_MONTHLY_SUMMARY:
@@ -53,6 +56,8 @@ module.exports = {
   GETALL_TREATMENT_TENANT: "/getalltreatments/:tenant_id",
   GETALL_TREATMENT_TENANT_CLIENT_APPOINTEMENT:
     "/getalltreatments/:tenant_id/:clinic_id/:appointment_id",
+  GETALL_TREATMENT_TENANT_DENTIST: "/getalltreatments_dentistid/:tenant_id/:dentist_id",
+  GETALL_TREATMENT_TENANT_PATIENT: "/getalltreatments_patientid/:tenant_id/:patient_id",
   GETALL_TREATMENT_TENANT_CLINIC_DENTIST_APPOINTEMENT:
     "/getalltreatments/:tenant_id/:clinic_id/:dentist_id/:appointment_id",
   GET_TREATMENT_TENANT: "/gettreatment/:treatment_id/:tenant_id",
@@ -66,6 +71,10 @@ module.exports = {
     "/getallprescriptions/:tenant_id/:clinic_id/:treatment_id",
   GETALL_PRESCRIPTION_TENANT_CLINIC_DENTIST_TREATMENT:
     "/getallprescriptions/:tenant_id/:clinic_id/:dentist_id/:treatment_id",
+  GETALL_PRESCRIPTION_TENANT_DENTIST:
+    "/getallprescriptions_dentistid/:tenant_id/:dentist_id",
+  GETALL_PRESCRIPTION_TENANT_PATIENT:
+    "/getallprescriptions_patientid/:tenant_id/:patient_id",
   UPDATE_PRESCRIPTION_TENANT: "/updateprescription/:prescription_id/:tenant_id",
   DELETE_PRESCRIPTION_TENANT: "/deleteprescription/:prescription_id/:tenant_id",
 
@@ -127,14 +136,18 @@ module.exports = {
   DELETE_PAYMENT_TENANT: "/deletepayment/:payment_id/:tenant_id",
 
   ADD_APPOINTMENT_RESCHEDULES: "/addappointment_reschedules",
-  GETALL_APPOINTMENT_RESCHEDULES_TENANT: "/getallappointment_reschedules/:tenant_id",
+  GETALL_APPOINTMENT_RESCHEDULES_TENANT:
+    "/getallappointment_reschedules/:tenant_id",
   GETALL_APPOINTMENT_RESCHEDULES_TENANT_CLINIC:
     "/getallappointment_rescheduless/:tenant_id/:clinic_id",
   GETALL_APPOINTMENT_RESCHEDULES_TENANT_CLINIC_DENTIST:
     "/getallappointment_reschedules/:tenant_id/:clinic_id/:dentist_id",
-  GET_APPOINTMENT_RESCHEDULES: "/getappointment_reschedules/:appointment_reschedules_id",
-  UPDATE_APPOINTMENT_RESCHEDULES_TENANT: "/updateappointment_reschedules/:appointment_reschedules_id/:tenant_id",
-  DELETE_APPOINTMENT_RESCHEDULES_TENANT: "/deleteappointment_reschedules/:appointment_reschedules_id/:tenant_id",
+  GET_APPOINTMENT_RESCHEDULES:
+    "/getappointment_reschedules/:appointment_reschedules_id",
+  UPDATE_APPOINTMENT_RESCHEDULES_TENANT:
+    "/updateappointment_reschedules/:appointment_reschedules_id/:tenant_id",
+  DELETE_APPOINTMENT_RESCHEDULES_TENANT:
+    "/deleteappointment_reschedules/:appointment_reschedules_id/:tenant_id",
 
   //dashboard Routes
 

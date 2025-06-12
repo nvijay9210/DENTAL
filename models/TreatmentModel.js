@@ -102,7 +102,65 @@ WHERE
   try {
     const [rows] = await conn.query(query1, [tenantId,clinic_id,dentist_id, appointment_id,limit,offset]);
     const [counts] = await conn.query(query2, [tenantId,clinic_id,dentist_id, appointment_id]);
-    return {data:rows,total:counts.total};
+    return {data:rows,total:counts[0].total};
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+const getAllTreatmentsByTenantAndDentistId = async (tenantId,dentist_id,limit,offset) => {
+  const query1 = `SELECT *
+FROM 
+    treatment 
+WHERE 
+    tenant_id = ? AND
+    dentist_id=?
+    limit ? offset ? 
+`;
+  const query2 = `SELECT COUNT (*) AS total
+FROM 
+    treatment 
+WHERE 
+    tenant_id = ? AND
+    dentist_id=? 
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [tenantId,dentist_id, limit,offset]);
+    const [counts] = await conn.query(query2, [tenantId,dentist_id]);
+    return {data:rows,total:counts[0].total};
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+const getAllTreatmentsByTenantAndPatientId = async (tenantId,patient_id,limit,offset) => {
+  const query1 = `SELECT *
+FROM 
+    treatment 
+WHERE 
+    tenant_id = ? AND 
+    patient_id=?
+    limit ? offset ? 
+`;
+  const query2 = `SELECT COUNT (*) AS total
+FROM 
+    treatment 
+WHERE 
+    tenant_id = ? AND 
+    patient_id=?
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [tenantId,patient_id, limit,offset]);
+    const [counts] = await conn.query(query2, [tenantId,patient_id]);
+    return {data:rows,total:counts[0].total};
   } catch (error) {
     console.log(error);
     throw new Error("Database Operation Failed");
@@ -149,4 +207,6 @@ module.exports = {
   deleteTreatmentByTenantAndTreatmentId,
   getAllTreatmentsByTenantAndClinicId,
   getAllTreatmentsByTenantAndClinicIdAndDentist,
+  getAllTreatmentsByTenantAndDentistId,
+  getAllTreatmentsByTenantAndPatientId
 };
