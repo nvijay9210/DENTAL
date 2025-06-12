@@ -247,7 +247,7 @@ exports.getAppointmentsWithDetailsByPatient = async (req, res, next) => {
   const { page, limit } = req.query;
   try {
     await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
-    await checkIfExists("patient", "patient_id", patient_id);
+    await checkIfIdExists("patient", "patient_id", patient_id);
     const appointments = await appointmentService.getAppointmentsWithDetailsByPatient(
       tenant_id,
       patient_id,

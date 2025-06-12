@@ -44,9 +44,9 @@ const appointmentFields = {
   cancellation_reason:helper.safeStringify,
   is_virtual:helper.parseBoolean,
   reminder_send:helper.parseBoolean,
-  meeting_link:(val)=>val || null,
-  checkin_time:(val)=>val || null,
-  checkout_time:(val)=>val || null
+  meeting_link:(val)=>(val) || null,
+  checkin_time:(val)=>val?isoToSqlDatetime(val):null,
+  checkout_time:(val)=>val?isoToSqlDatetime(val):null
 };
 
 const appointmentFieldsReverseMap = {
@@ -77,8 +77,8 @@ const appointmentFieldsReverseMap = {
   is_virtual:(val) => Boolean(val),
   reminder_send:(val) => Boolean(val),
   meeting_link:(val)=>val || null,
-  checkin_time:(val)=>val || null,
-  checkout_time:(val)=>val || null,
+  checkin_time: val => val ? new Date(val).toISOString() : null,
+  checkout_time: val => val ? new Date(val).toISOString() : null,
   created_by: (val) => val,
   created_time: (val) => (val ? new Date(val).toISOString() : null),
   updated_by: (val) => val,
@@ -206,6 +206,7 @@ const getAppointmentByTenantIdAndAppointmentId = async (
         tenantId,
         appointmentId
       );
+      console.log(appointment)
     
       const convertedRows = 
         helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
