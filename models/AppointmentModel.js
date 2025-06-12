@@ -46,7 +46,7 @@ FROM
 WHERE 
     app.tenant_id = ? 
     AND app.clinic_id = ? 
-    limit=? offset=?
+    limit ? offset ?
 
 `;
   const query2 = `SELECT 
@@ -153,6 +153,7 @@ const getAppointmentByTenantIdAndAppointmentId = async (
       "appointment_id",
       appointment_id
     );
+    console.log(tenant_id,appointment_id,rows)
     return rows || null;
   } catch (error) {
     console.error("Error executing query:", error);
@@ -290,6 +291,7 @@ const getAppointmentsWithDetailsByPatient = async (tenantId, patientId,limit,off
   console.log(tenantId,patientId,limit,offset)
   const query = `SELECT 
   CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,
+  d.specialisation,
   d.profile_picture,
   d.gender,
   d.date_of_birth,

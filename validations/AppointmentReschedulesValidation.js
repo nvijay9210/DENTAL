@@ -16,8 +16,8 @@ const reminderPingColumnConfig = [
     { columnname: "new_end_time", type: "time", null: false },
     { columnname: "rescheduled_by", type: "varchar", size: 30, null: false },
     { columnname: "rescheduled_at", type: "datetime", size: 30, null: true },
-    { columnname: "charges_applicable", type: "boolean", null: false },
-    { columnname: "charges_amount", type: "decimal", null: false },
+    { columnname: "charges_applicable", type: "boolean", null: true },
+    { columnname: "charges_amount", type: "decimal", null: true },
   ];
 
 // AppointmentReschedules Column Configuration for Validation

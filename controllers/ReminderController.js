@@ -38,7 +38,7 @@ exports.getAllRemindersByTenantId = async (req, res, next) => {
       page,
       limit
     );
-    res.status(200).json({reminders,total:reminders.length,page});
+    res.status(200).json({ reminders, total: reminders.length, page });
   } catch (err) {
     next(err);
   }
@@ -51,15 +51,19 @@ exports.getReminderByTenantIdAndReminderId = async (req, res, next) => {
   const { reminder_id, tenant_id } = req.params;
 
   try {
-    const reminder1 = await checkIfExists(
-      "reminder",
-      "reminder_id",
-      reminder_id,
-      tenant_id
-    );
+    // const reminder1 = await checkIfExists(
+    //   "reminder",
+    //   "reminder_id",
+    //   reminder_id,
+    //   tenant_id
+    // );
 
-    if (!reminder1) throw new CustomError("Reminder not found", 404);
+    // if (!reminder1) throw new CustomError("Reminder not found", 404);
 
+    const resp1=await checkIfIdExists("tenant", "tenant_id", tenant_id);
+    if(!resp1) throw new CustomError('Tenant not found',404)
+    const resp2=await checkIfIdExists("reminder", "reminder_id", reminder_id);
+    if(!resp2) throw new CustomError('Reminder not found',404)
     // Fetch reminder details
     const reminder = await reminderService.getReminderByTenantIdAndReminderId(
       tenant_id,
@@ -108,12 +112,12 @@ exports.getAllRemindersByTenantAndClinicAndDentistAndType = async (
   res,
   next
 ) => {
-  const {  tenant_id, clinic_id, dentist_id } = req.params;
-  const {type,page,limit}=req.query
-  if(type!=='reminder' && type!=='todo') throw new CustomError('Type must in reminder or todo only',400)
+  const { tenant_id, clinic_id, dentist_id } = req.params;
+  const { type, page, limit } = req.query;
+  if (type !== "reminder" && type !== "todo")
+    throw new CustomError("Type must in reminder or todo only", 400);
 
   try {
-
     await checkIfIdExists("clinic", "clinic_id", clinic_id);
     await checkIfIdExists("tenant", "tenant_id", tenant_id);
     await checkIfIdExists("dentist", "dentist_id", dentist_id);
@@ -178,7 +182,8 @@ exports.updateReminder = async (req, res, next) => {
     // Validate update input
     await reminderValidation.updateReminderValidation(reminder_id, details);
 
-    if(isNaN(details.repeat_interval) || details.repeat_interval==0) throw new CustomError('Repeat interval must greater than 0')
+    if (isNaN(details.repeat_interval) || details.repeat_interval == 0)
+      throw new CustomError("Repeat interval must greater than 0");
 
     // Update the reminder
     await reminderService.updateReminder(reminder_id, details, tenant_id);

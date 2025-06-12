@@ -57,7 +57,7 @@ const createColumnConfig = [
 
 const updateColumnConfig = [
   ...treatmentColumnConfig,
-  { columnname: "created_by", type: "varchar", size: 30, null: false },
+  { columnname: "updated_by", type: "varchar", size: 30, null: false },
 ];
 
 // Create Treatment Validation
