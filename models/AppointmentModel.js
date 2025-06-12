@@ -428,7 +428,7 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (tenantId,
     p.patient_id,
      CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
      app.appointment_date,
-     app.reason
+     app.visit_reason
 FROM 
     appointment AS app
 JOIN 
@@ -439,12 +439,12 @@ WHERE
     app.tenant_id = ? AND 
     app.clinic_id = ? AND 
     app.patient_id=? AND
-    app.status='CP'
+    app.status='completed'
     limit ? offset ? 
 `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId,clinicId, patientId,limit,offset]);
+    const [rows] = await conn.query(query, [tenantId,clinicId, patientId,Number(limit),offset]);
     console.log('appoinments:',rows)
     return rows;
   } catch (error) {
