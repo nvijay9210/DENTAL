@@ -359,6 +359,8 @@ const getAppointmentsWithDetails = async (
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
+
+
 const getAppointmentsWithDetailsByPatient = async (
   tenantId,
   patient_id,
