@@ -8,7 +8,7 @@ const { uploadFileMiddleware } = require("../utils/UploadFiles");
 const { multiTenantAuthMiddleware, permit } = require("../middlewares/AuthToken");
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.use(multiTenantAuthMiddleware);
+// router.use(multiTenantAuthMiddleware);
 
 // Common upload fields
 

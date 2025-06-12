@@ -13,7 +13,7 @@ function formatDateOnly(isoString) {
 // utils/dateFormatter.js
 
 function formatAppointments(rows) {
-  return rows.map((app) => {
+  return rows.data.map((app) => {
     const formatted = { ...app };
 
     if (app.appointment_date) {
