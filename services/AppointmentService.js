@@ -195,6 +195,56 @@ const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (tenantId,clinic_
   }
 };
 
+const getAllAppointmentsByTenantIdAndAndDentistId = async (tenantId,dentist_id, page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `appointment:${tenantId}:dentist:${dentist_id}:page:${page}:limit:${limit}`;
+
+  try {
+    const appointments = await getOrSetCache(cacheKey, async () => {
+      const result = await appointmentModel.getAllAppointmentsByTenantIdAndDentistId(
+        tenantId,
+        dentist_id,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+    const convertedRows = appointments.data.map((appointment) =>
+      helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
+    );
+
+    return {data:convertedRows,total:appointments.total};;
+  } catch (error) {
+    console.error("Database error while fetching appointment:", error);
+    throw new CustomError("Failed to fetch appointment", 404);
+  }
+};
+
+const getAllAppointmentsByTenantIdAndPatientId = async (tenantId,patient_id, page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `appointment:${tenantId}:patient:${patient_id}:page:${page}:limit:${limit}`;
+
+  try {
+    const appointments = await getOrSetCache(cacheKey, async () => {
+      const result = await appointmentModel.getAllAppointmentsByTenantIdAndPatientId(
+        tenantId,
+        patient_id,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+    const convertedRows = appointments.data.map((appointment) =>
+      helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
+    );
+
+    return {data:convertedRows,total:appointments.total};;
+  } catch (error) {
+    console.error("Database error while fetching appointment:", error);
+    throw new CustomError("Failed to fetch appointment", 404);
+  }
+};
+
 // Get Appointment by Tenant & ID
 const getAppointmentByTenantIdAndAppointmentId = async (
   tenantId,
@@ -954,5 +1004,7 @@ module.exports = {
   getAppointmentSummaryChartByDentist,
   getAllAppointmentsByTenantIdAndClinicId,
   getAllAppointmentsByTenantIdAndClinicIdByDentist,
-  getAppointmentsWithDetailsByPatient
+  getAppointmentsWithDetailsByPatient,
+  getAllAppointmentsByTenantIdAndAndDentistId,
+  getAllAppointmentsByTenantIdAndPatientId
 };

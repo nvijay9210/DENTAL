@@ -195,7 +195,84 @@ WHERE
       dentist_id,
       treatment_id,
     ]);
-    return { data: rows, total: counts.total };
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+const getAllPrescriptionsByTenantIdAndDentistId = async (
+  tenantId,
+  dentist_id,
+  limit,
+  offset
+) => {
+  const query1 = `SELECT *
+FROM 
+    prescription 
+WHERE 
+    tenant_id = ? AND 
+    dentist_id=?
+    limit ? offset ? 
+`;
+  const query2 = `SELECT COUNT(*) as total
+FROM 
+    prescription 
+WHERE 
+    tenant_id = ? AND 
+    dentist_id=?
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      dentist_id,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [tenantId, dentist_id]);
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+const getAllPrescriptionsByTenantIdAndPatientId = async (
+  tenantId,
+  patient_id,
+  limit,
+  offset
+) => {
+  const query1 = `SELECT *
+FROM 
+    prescription 
+WHERE 
+    tenant_id = ? AND 
+    patient_id = ?
+    limit ? offset ? 
+`;
+  const query2 = `SELECT COUNT(*) as total
+FROM 
+    prescription 
+WHERE 
+    tenant_id = ? AND 
+    patient_id = ?
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      patient_id,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [tenantId, patient_id]);
+    return { data: rows, total: counts[0].total };
   } catch (error) {
     console.log(error);
     throw new Error("Database Operation Failed");
@@ -212,4 +289,6 @@ module.exports = {
   deletePrescriptionByTenantAndPrescriptionId,
   getAllPrescriptionsByTenantAndClinicIdAndTreatmentId,
   getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId,
+  getAllPrescriptionsByTenantIdAndDentistId,
+  getAllPrescriptionsByTenantIdAndPatientId
 };

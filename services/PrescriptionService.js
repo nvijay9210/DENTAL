@@ -185,6 +185,68 @@ const getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (
     throw new CustomError("Failed to fetch prescriptions", 404);
   }
 };
+const getAllPrescriptionsByTenantIdAndDentistId = async (
+  tenantId,
+  dentist_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `prescription:prescriptionByDentist:${tenantId}:dentist:${dentist_id}:page:${page}:limit:${limit}`;
+
+  try {
+    const prescriptions = await getOrSetCache(cacheKey, async () => {
+      const result =
+        await prescriptionModel.getAllPrescriptionsByTenantIdAndDentistId(
+          tenantId,
+          dentist_id,
+          Number(limit),
+          offset
+        );
+      return result;
+    });
+
+    const convertedRows = prescriptions.data.map((prescription) =>
+          helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
+        );
+    
+        return {data:convertedRows,total:prescriptions.total};;
+  } catch (err) {
+    console.error("Database error while fetching prescriptions:", err);
+    throw new CustomError("Failed to fetch prescriptions", 404);
+  }
+};
+const getAllPrescriptionsByTenantIdAndPatientId = async (
+  tenantId,
+  patient_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `prescription:prescriptionByDentist:${tenantId}:patient:${patient_id}:page:${page}:limit:${limit}`;
+
+  try {
+    const prescriptions = await getOrSetCache(cacheKey, async () => {
+      const result =
+        await prescriptionModel.getAllPrescriptionsByTenantIdAndPatientId(
+          tenantId,
+          patient_id,
+          Number(limit),
+          offset
+        );
+      return result;
+    });
+
+    const convertedRows = prescriptions.data.map((prescription) =>
+          helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
+        );
+    
+        return {data:convertedRows,total:prescriptions.total};;
+  } catch (err) {
+    console.error("Database error while fetching prescriptions:", err);
+    throw new CustomError("Failed to fetch prescriptions", 404);
+  }
+};
 
 // Get Prescription by ID & Tenant
 const getPrescriptionByTenantIdAndPrescriptionId = async (
@@ -270,4 +332,6 @@ module.exports = {
   deletePrescriptionByTenantIdAndPrescriptionId,
   getAllPrescriptionsByTenantAndClinicIdAndTreatmentId,
   getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId,
+  getAllPrescriptionsByTenantIdAndDentistId,
+  getAllPrescriptionsByTenantIdAndPatientId
 };

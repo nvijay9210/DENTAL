@@ -103,6 +103,47 @@ exports.getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async
     next(err);
   }
 };
+exports.getAllPrescriptionsByTenantIdAndDentistId = async (req, res, next) => {
+  const { tenant_id, dentist_id } = req.params;
+  const { page, limit } = req.query;
+
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  
+  try {
+    const prescriptions =
+      await prescriptionService.getAllPrescriptionsByTenantIdAndDentistId(
+        tenant_id,
+        dentist_id,
+        page,
+        limit
+      );
+      res.status(200).json(prescriptions);
+  } catch (err) {
+    next(err);
+  }
+};
+  
+exports.getAllPrescriptionsByTenantIdAndPatientId = async (req, res, next) => {
+  const { tenant_id, patient_id } = req.params;
+  const { page, limit } = req.query;
+
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('patient','patient_id',patient_id)
+
+  try {
+    const prescriptions =
+      await prescriptionService.getAllPrescriptionsByTenantIdAndPatientId(
+        tenant_id,
+        patient_id,
+        page,
+        limit
+      );
+      res.status(200).json(prescriptions);
+  } catch (err) {
+    next(err);
+  }
+};
 
 /**
  * Get prescription by tenant and prescription ID
