@@ -494,6 +494,7 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
   try {
     const offset = (page - 1) * limit;
     const cacheKey = `patientvisitdetails:${tenantId}/${clinicId}/${patientId}`;
+
     const appointment = await getOrSetCache(cacheKey, async () => {
       const result =
         await appointmentModel.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId(
@@ -503,7 +504,17 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
           limit,
           offset
         );
-      return result; // 🔁 Important: return from cache function
+
+      // Format appointment_date to 'YYYY-MM-DD'
+      if (result && Array.isArray(result.data)) {
+        const formattedData = result.data.map(app => ({
+          ...app,
+          appointment_date: new Date(app.appointment_date).toISOString().split('T')[0]
+        }));
+        return { ...result, data: formattedData };
+      }
+
+      return result;
     });
 
     return appointment;
@@ -512,7 +523,6 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
-
 
 const isoWeek = require('dayjs/plugin/isoWeek');
 dayjs.extend(isoWeek);
