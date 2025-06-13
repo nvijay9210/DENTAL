@@ -81,6 +81,41 @@ exports.getAllAppointmentsByTenantIdAndClinicIdByDentist = async (req, res, next
   }
 };
 
+exports.getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (req, res, next) => {
+  const { tenant_id,clinic_id,dentist_id } = req.params;
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  try {
+    const appointments = await appointmentService.getAllRoomIdByTenantIdAndClinicIdAndDentistId(
+      tenant_id,
+      clinic_id,
+      dentist_id,
+      
+    );
+    res.status(200).json(appointments);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllRoomIdByTenantIdAndClinicIdAndPatientId = async (req, res, next) => {
+  const { tenant_id,clinic_id,patient_id } = req.params;
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  await checkIfIdExists('patient','patient_id',patient_id)
+  try {
+    const appointments = await appointmentService.getAllRoomIdByTenantIdAndClinicIdAndPatientId(
+      tenant_id,
+      clinic_id,
+      patient_id
+    );
+    res.status(200).json(appointments);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getAllAppointmentsByTenantIdAndDentistId = async (req, res, next) => {
   const { tenant_id,dentist_id } = req.params;
   const { page, limit } = req.query;

@@ -195,6 +195,33 @@ const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (tenantId,clinic_
   }
 };
 
+const getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (tenantId,clinic_id,dentist_id) => {
+  try{
+      const result = await appointmentModel.getAllRoomIdByTenantIdAndClinicIdAndDentistId(
+        tenantId,
+        clinic_id,
+        dentist_id
+      );
+      return result;
+  } catch (error) {
+    console.error("Database error while fetching appointment:", error);
+    throw new CustomError("Failed to fetch appointment", 404);
+  }
+};
+const getAllRoomIdByTenantIdAndClinicIdAndPatientId = async (tenantId,clinic_id,patient_id) => {
+  try{
+      const result = await appointmentModel.getAllRoomIdByTenantIdAndClinicIdAndPatientId(
+        tenantId,
+        clinic_id,
+        patient_id
+      );
+      return result;
+  } catch (error) {
+    console.error("Database error while fetching appointment:", error);
+    throw new CustomError("Failed to fetch appointment", 404);
+  }
+};
+
 const getAllAppointmentsByTenantIdAndAndDentistId = async (tenantId,dentist_id, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `appointment:${tenantId}:dentist:${dentist_id}:page:${page}:limit:${limit}`;
@@ -1016,5 +1043,7 @@ module.exports = {
   getAllAppointmentsByTenantIdAndClinicIdByDentist,
   getAppointmentsWithDetailsByPatient,
   getAllAppointmentsByTenantIdAndAndDentistId,
-  getAllAppointmentsByTenantIdAndPatientId
+  getAllAppointmentsByTenantIdAndPatientId,
+  getAllRoomIdByTenantIdAndClinicIdAndDentistId,
+  getAllRoomIdByTenantIdAndClinicIdAndPatientId
 };

@@ -17,7 +17,9 @@ const {
   GETALL_APPOINTMENTS_TENANT_CLINIC_DENTIST,
   GETALL_APPOINTMENT_TENANT_PATIENT,
   GETALL_APPOINTMENT_TENANT_DENTIST,
-  GETALL_APPOINTMENT_TENANT_PATIENTID
+  GETALL_APPOINTMENT_TENANT_PATIENTID,
+  GETALL_APPOINTMENT_ROOMID_PATIENT,
+  GETALL_APPOINTMENT_ROOMID_DENTIST,
 } = require("./RouterPath");
 
 // File upload middleware can be added here if needed (e.g. reports, prescriptions)
@@ -53,7 +55,10 @@ router.get(
 // Update Appointment
 router.put(UPDATE_APPOINTMENT_TENANT, appointmentController.updateAppointment);
 
-router.put(UPDATE_APPOINTMENT_SCHEDULE_CANCELED, appointmentController.updateAppoinmentStatusCancelled);
+router.put(
+  UPDATE_APPOINTMENT_SCHEDULE_CANCELED,
+  appointmentController.updateAppoinmentStatusCancelled
+);
 
 // Delete Appointment
 router.delete(
@@ -77,6 +82,14 @@ router.get(
 router.get(
   GETALL_APPOINTMENT_TENANT_PATIENT,
   appointmentController.getAppointmentsWithDetailsByPatient
+);
+router.get(
+  GETALL_APPOINTMENT_ROOMID_DENTIST,
+  appointmentController.getAllRoomIdByTenantIdAndClinicIdAndDentistId
+);
+router.get(
+  GETALL_APPOINTMENT_ROOMID_PATIENT,
+  appointmentController.getAllRoomIdByTenantIdAndClinicIdAndPatientId
 );
 
 router.get(
