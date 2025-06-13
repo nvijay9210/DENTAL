@@ -11,9 +11,15 @@ const { decodeJsonFields } = require("../utils/Helpers");
 const { formatDateOnly } = require("../utils/DateUtils");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
+const {
+  addUser,
+  getUserIdByUsername,
+  assignRealmRoleToUser,
+} = require("../middlewares/KeycloakAdmin");
 
 const patiendFields = {
   tenant_id: (val) => val,
+  keycloak_id: (val) => val,
   first_name: (val) => val,
   last_name: (val) => val,
   email: (val) => val || null,
@@ -42,6 +48,7 @@ const patiendFields = {
 const patientFieldsReverseMap = {
   patient_id: (val) => val,
   tenant_id: (val) => val,
+  keycloak_id: (val) => val,
   first_name: (val) => val,
   last_name: (val) => val,
   email: (val) => val,
@@ -75,13 +82,30 @@ const patientFieldsReverseMap = {
 };
 
 // Create patient
-const createPatient = async (data) => {
+const createPatient = async (data,token,realm) => {
   const create = {
     ...patiendFields,
     created_by: (val) => val,
   };
 
   try {
+    const userData = {
+      username: helper.generateUsername(data.first_name, data.phone_number),
+      email:
+        data.email ||
+        `${data.first_name}${helper.generateAlphanumericPassword()}@gmail.com`,
+      firstName: data.first_name,
+      lastName: data.last_name,
+      password: helper.generateAlphanumericPassword(),
+    };
+    const user = await addUser(token, realm, userData);
+    if (!user) throw new CustomError("User not created", 404);
+    console.log("User Created");
+    const userId = await getUserIdByUsername(token, realm, userData.username);
+    console.log("user:", userId);
+    const role = await assignRealmRoleToUser(token, realm, userId, "patient");
+    if (!role) throw new CustomError("Role not Assign", 404);
+    data.keycloak_id = userId;
     const { columns, values } = mapFields(data, create);
     const patientId = await patientModel.createPatient(
       "patient",
@@ -90,7 +114,7 @@ const createPatient = async (data) => {
     );
     await invalidateCacheByPattern("patients:*");
     await invalidateCacheByPattern("patient:*");
-    return patientId;
+    return {patientId,username:userData.username,password:userData.password};
   } catch (error) {
     console.trace(error);
     throw new CustomError(`Failed to create patient: ${error.message}`, 404);
@@ -757,7 +781,7 @@ const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
       tenantId,
       patientId
     );
-    console.log(patient)
+    console.log(patient);
     const convertedRows = helper.convertDbToFrontend(
       patient,
       patientFieldsReverseMap
@@ -855,17 +879,18 @@ async function groupToothProceduresByTimeRangeCumulative(
   clinic_id,
   referenceDateStr = null
 ) {
-  const cacheData=`patient:toothdetails:tenant:${tenant_id}:clinic:${clinic_id}`
-  const rows=await getOrSetCache(cacheData,async()=>{
-    const dbInput = await patientModel.groupToothProceduresByTimeRangeCumulative(
-      tenant_id,
-      clinic_id
-    );
-  
+  const cacheData = `patient:toothdetails:tenant:${tenant_id}:clinic:${clinic_id}`;
+  const rows = await getOrSetCache(cacheData, async () => {
+    const dbInput =
+      await patientModel.groupToothProceduresByTimeRangeCumulative(
+        tenant_id,
+        clinic_id
+      );
+
     const referenceDate = referenceDateStr
       ? new Date(referenceDateStr)
       : new Date();
-  
+
     const buckets = [
       "1w",
       "2w",
@@ -888,22 +913,22 @@ async function groupToothProceduresByTimeRangeCumulative(
       "3y",
       "4y",
     ];
-  
+
     function getTimeRange(diffDays) {
       if (diffDays <= 7) return "1w";
       if (diffDays <= 14) return "2w";
       if (diffDays <= 21) return "3w";
       if (diffDays <= 28) return "4w";
-  
+
       const months = Math.floor(diffDays / 30);
       if (months >= 1 && months <= 12) return `${months}m`;
-  
+
       const years = Math.floor(diffDays / 365);
       if (years >= 1 && years <= 4) return `${years}y`;
-  
+
       return null;
     }
-  
+
     // Step 1: Parse all records and flatten tooth details
     const allToothDetails = dbInput
       .map((record) => {
@@ -915,67 +940,67 @@ async function groupToothProceduresByTimeRangeCumulative(
       })
       .flat()
       .filter((item) => item != null); // filter out null or undefined entries
-  
+
     const rawCounts = {};
     const allTypesSet = new Set();
-  
+
     // Step 2: Count each procedure by its time range, only past dates
     allToothDetails.forEach((item) => {
       if (!item) return; // safety check
       const { date, type, selected } = item;
       if (!selected || !type || !date) return;
-  
+
       const procedureDate = new Date(date);
       const diffTime = referenceDate - procedureDate; // No Math.abs() to keep direction
       if (diffTime < 0) return; // Ignore future dates
-  
+
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
       const range = getTimeRange(diffDays);
-  
+
       if (!range) return;
-  
+
       allTypesSet.add(type);
-  
+
       if (!rawCounts[range]) rawCounts[range] = {};
       if (!rawCounts[range][type]) rawCounts[range][type] = 0;
-  
+
       rawCounts[range][type]++;
     });
-  
+
     // Step 3: Build cumulative results
     const result = {};
     buckets.forEach((b) => (result[b] = {}));
-  
+
     for (let i = 0; i < buckets.length; i++) {
       const bucket = buckets[i];
       const currentCounts = rawCounts[bucket] || {};
-  
+
       // Copy previous cumulative values
       if (i > 0) {
         for (const [type, count] of Object.entries(result[buckets[i - 1]])) {
           result[bucket][type] = (result[bucket][type] || 0) + count;
         }
       }
-  
+
       // Add current counts
       for (const [type, count] of Object.entries(currentCounts)) {
         result[bucket][type] = (result[bucket][type] || 0) + count;
       }
     }
-  
+
     // Optional: Remove empty buckets
     for (const bucket of Object.keys(result)) {
       if (Object.keys(result[bucket]).length === 0) {
         delete result[bucket];
       }
     }
-  
+
     return {
       types: Array.from(allTypesSet),
       cumulativeResult: result,
     };
-  })
- return rows
+  });
+  return rows;
 }
 
 async function groupToothProceduresByTimeRangeCumulativeByDentist(
@@ -984,129 +1009,129 @@ async function groupToothProceduresByTimeRangeCumulativeByDentist(
   dentist_id,
   referenceDateStr = null
 ) {
-  const cacheData=`patient:toothdetails:tenant:${tenant_id}:clinic:${clinic_id}:dentist:${dentist_id}`
-  const rows=await getOrSetCache(cacheData,async()=>{
+  const cacheData = `patient:toothdetails:tenant:${tenant_id}:clinic:${clinic_id}:dentist:${dentist_id}`;
+  const rows = await getOrSetCache(cacheData, async () => {
     const dbInput =
-    await patientModel.groupToothProceduresByTimeRangeCumulativeByDentist(
-      tenant_id,
-      clinic_id,
-      dentist_id
-    );
+      await patientModel.groupToothProceduresByTimeRangeCumulativeByDentist(
+        tenant_id,
+        clinic_id,
+        dentist_id
+      );
 
-  const referenceDate = referenceDateStr
-    ? new Date(referenceDateStr)
-    : new Date();
+    const referenceDate = referenceDateStr
+      ? new Date(referenceDateStr)
+      : new Date();
 
-  const buckets = [
-    "1w",
-    "2w",
-    "3w",
-    "4w",
-    "1m",
-    "2m",
-    "3m",
-    "4m",
-    "5m",
-    "6m",
-    "7m",
-    "8m",
-    "9m",
-    "10m",
-    "11m",
-    "12m",
-    "1y",
-    "2y",
-    "3y",
-    "4y",
-  ];
+    const buckets = [
+      "1w",
+      "2w",
+      "3w",
+      "4w",
+      "1m",
+      "2m",
+      "3m",
+      "4m",
+      "5m",
+      "6m",
+      "7m",
+      "8m",
+      "9m",
+      "10m",
+      "11m",
+      "12m",
+      "1y",
+      "2y",
+      "3y",
+      "4y",
+    ];
 
-  function getTimeRange(diffDays) {
-    if (diffDays <= 7) return "1w";
-    if (diffDays <= 14) return "2w";
-    if (diffDays <= 21) return "3w";
-    if (diffDays <= 28) return "4w";
+    function getTimeRange(diffDays) {
+      if (diffDays <= 7) return "1w";
+      if (diffDays <= 14) return "2w";
+      if (diffDays <= 21) return "3w";
+      if (diffDays <= 28) return "4w";
 
-    const months = Math.floor(diffDays / 30);
-    if (months >= 1 && months <= 12) return `${months}m`;
+      const months = Math.floor(diffDays / 30);
+      if (months >= 1 && months <= 12) return `${months}m`;
 
-    const years = Math.floor(diffDays / 365);
-    if (years >= 1 && years <= 4) return `${years}y`;
+      const years = Math.floor(diffDays / 365);
+      if (years >= 1 && years <= 4) return `${years}y`;
 
-    return null;
-  }
+      return null;
+    }
 
-  // Step 1: Parse all records and flatten tooth details
-  const allToothDetails = dbInput
-    .map((record) => {
-      try {
-        return JSON.parse(record.tooth_details);
-      } catch (e) {
-        return []; // fallback if JSON invalid
+    // Step 1: Parse all records and flatten tooth details
+    const allToothDetails = dbInput
+      .map((record) => {
+        try {
+          return JSON.parse(record.tooth_details);
+        } catch (e) {
+          return []; // fallback if JSON invalid
+        }
+      })
+      .flat()
+      .filter((item) => item != null); // filter out null or undefined entries
+
+    const rawCounts = {};
+    const allTypesSet = new Set();
+
+    // Step 2: Count each procedure by its time range, only past dates
+    allToothDetails.forEach((item) => {
+      if (!item) return; // safety check
+      const { date, type, selected } = item;
+      if (!selected || !type || !date) return;
+
+      const procedureDate = new Date(date);
+      const diffTime = referenceDate - procedureDate; // No Math.abs() to keep direction
+      if (diffTime < 0) return; // Ignore future dates
+
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      const range = getTimeRange(diffDays);
+
+      if (!range) return;
+
+      allTypesSet.add(type);
+
+      if (!rawCounts[range]) rawCounts[range] = {};
+      if (!rawCounts[range][type]) rawCounts[range][type] = 0;
+
+      rawCounts[range][type]++;
+    });
+
+    // Step 3: Build cumulative results
+    const result = {};
+    buckets.forEach((b) => (result[b] = {}));
+
+    for (let i = 0; i < buckets.length; i++) {
+      const bucket = buckets[i];
+      const currentCounts = rawCounts[bucket] || {};
+
+      // Copy previous cumulative values
+      if (i > 0) {
+        for (const [type, count] of Object.entries(result[buckets[i - 1]])) {
+          result[bucket][type] = (result[bucket][type] || 0) + count;
+        }
       }
-    })
-    .flat()
-    .filter((item) => item != null); // filter out null or undefined entries
 
-  const rawCounts = {};
-  const allTypesSet = new Set();
-
-  // Step 2: Count each procedure by its time range, only past dates
-  allToothDetails.forEach((item) => {
-    if (!item) return; // safety check
-    const { date, type, selected } = item;
-    if (!selected || !type || !date) return;
-
-    const procedureDate = new Date(date);
-    const diffTime = referenceDate - procedureDate; // No Math.abs() to keep direction
-    if (diffTime < 0) return; // Ignore future dates
-
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const range = getTimeRange(diffDays);
-
-    if (!range) return;
-
-    allTypesSet.add(type);
-
-    if (!rawCounts[range]) rawCounts[range] = {};
-    if (!rawCounts[range][type]) rawCounts[range][type] = 0;
-
-    rawCounts[range][type]++;
-  });
-
-  // Step 3: Build cumulative results
-  const result = {};
-  buckets.forEach((b) => (result[b] = {}));
-
-  for (let i = 0; i < buckets.length; i++) {
-    const bucket = buckets[i];
-    const currentCounts = rawCounts[bucket] || {};
-
-    // Copy previous cumulative values
-    if (i > 0) {
-      for (const [type, count] of Object.entries(result[buckets[i - 1]])) {
+      // Add current counts
+      for (const [type, count] of Object.entries(currentCounts)) {
         result[bucket][type] = (result[bucket][type] || 0) + count;
       }
     }
 
-    // Add current counts
-    for (const [type, count] of Object.entries(currentCounts)) {
-      result[bucket][type] = (result[bucket][type] || 0) + count;
+    // Optional: Remove empty buckets
+    for (const bucket of Object.keys(result)) {
+      if (Object.keys(result[bucket]).length === 0) {
+        delete result[bucket];
+      }
     }
-  }
 
-  // Optional: Remove empty buckets
-  for (const bucket of Object.keys(result)) {
-    if (Object.keys(result[bucket]).length === 0) {
-      delete result[bucket];
-    }
-  }
-
-  return {
-    types: Array.from(allTypesSet),
-    cumulativeResult: result,
-  };
-  })
-  return rows
+    return {
+      types: Array.from(allTypesSet),
+      cumulativeResult: result,
+    };
+  });
+  return rows;
 }
 
 // async function groupToothProceduresByTimeRangeCumulativeByDentist(

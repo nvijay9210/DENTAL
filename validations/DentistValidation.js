@@ -228,7 +228,7 @@ const validateUniqueFields = async (
 
 // Create Dentist Validation
 const createDentistValidation = async (details) => {
-  console.log('details:',details)
+
   validateInput(details, createColumnConfig);
   await checkIfIdExists("tenant", "tenant_id", details.tenant_id);
   await validateDentistPhones(details);

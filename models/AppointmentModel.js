@@ -152,10 +152,11 @@ WHERE
     app.tenant_id = ? 
     AND app.clinic_id = ? 
     AND app.dentist_id = ?
+    AND app.room_id!=?
 `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, clinicId, dentistId]);
+    const [rows] = await conn.query(query, [tenantId, clinicId, dentistId,'00000000-0000-0000-0000-000000000000']);
     return rows;
   } catch (error) {
     console.log(error);
@@ -175,10 +176,11 @@ WHERE
     app.tenant_id = ? 
     AND app.clinic_id = ? 
     AND app.patient_id = ?
+    AND app.room_id!=?
 `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, clinicId, patient_id]);
+    const [rows] = await conn.query(query, [tenantId, clinicId, patient_id,'00000000-0000-0000-0000-000000000000']);
     return rows;
   } catch (error) {
     console.log(error);

@@ -42,15 +42,10 @@ const createAppointmentReschedulesValidation = async (details) => {
     checkIfIdExists("tenant", "tenant_id", details.tenant_id),
   ]);
 
-  await checkIfExists(
+  await checkIfIdExists(
     "appointment",
     "appointment_id",
     details.original_appointment_id
-  );
-  await checkIfExists(
-    "appointment",
-    "appointment_id",
-    details.new_appointment_id
   );
 };
 

@@ -25,7 +25,6 @@ function getKeyClient(tenant_name) {
 
 async function verifyTokenForTenant(token, tenant_name) {
   const tenant = tenantsConfig[tenant_name];
-  console.log(token,tenant_name)
   if (!tenant) throw new Error("Unknown tenant");
 
   const client = getKeyClient(tenant_name);
@@ -78,7 +77,8 @@ function permit(...allowedRoles) {
 // Combined Auth + RBAC Middleware
 async function multiTenantAuthMiddleware(req, res, next) {
   try {
-    const token = req.cookies["access_token"];
+    const token = req.headers.authorization?.replace("Bearer ", "");
+
     // console.log(token)
     if (!token) return res.status(401).json({ error: "Unauthorized" });
 
@@ -90,7 +90,7 @@ async function multiTenantAuthMiddleware(req, res, next) {
 
     req.user = decodedToken;
     req.tenant_name = tenant_name;
-    req.token = decodedToken;
+    req.token = token;
     req.client = decodedToken.azp;
 
     next();
