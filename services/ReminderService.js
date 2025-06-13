@@ -159,6 +159,46 @@ const getAllRemindersByTenantAndClinicAndDentistAndType = async (
   }
 };
 
+const getAllNotifyByDentist = async (
+  tenant_id,
+  clinic_id,
+  dentist_id
+) => {
+
+  try {
+    const result =
+    await reminderModel.getAllNotifyByDentist(
+      tenant_id,
+      clinic_id,
+      dentist_id
+    );
+  return result;
+  } catch (err) {
+    console.error("Database error while fetching reminders:", err);
+    throw new CustomError("Failed to fetch reminders", 404);
+  }
+};
+
+const getAllNotifyByPatient = async (
+  tenant_id,
+  clinic_id,
+  patient_id
+) => {
+
+  try {
+    const result =
+    await reminderModel.getAllNotifyByPatient(
+      tenant_id,
+      clinic_id,
+      patient_id
+    );
+  return result;
+  } catch (err) {
+    console.error("Database error while fetching reminders:", err);
+    throw new CustomError("Failed to fetch reminders", 404);
+  }
+};
+
 // Get Reminder by ID & Tenant
 const getReminderByTenantIdAndReminderId = async (tenantId, reminderId) => {
   try {
@@ -506,5 +546,7 @@ module.exports = {
   deleteReminderByTenantIdAndReminderId,
   getReminderByTenantAndClinicIdAndDentistIdAndReminderId,
   getMonthlywiseRemindersByTenantAndClinicIdAndDentistId,
-  getAllRemindersByTenantAndClinicAndDentistAndType
+  getAllRemindersByTenantAndClinicAndDentistAndType,
+  getAllNotifyByPatient,
+  getAllNotifyByDentist
 };

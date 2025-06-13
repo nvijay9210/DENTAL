@@ -185,6 +185,90 @@ const getAllRemindersByTenantAndClinicAndDentistAndType = async (
   }
 };
 
+const getAllNotifyByPatient = async (
+  tenant_id,
+  clinic_id,
+  patient_id
+) => {
+  const query = `
+    SELECT 
+  app.appointment_id,
+  CONCAT(den.first_name, ' ', den.last_name) AS dentist_name,
+  app.start_time,
+  app.end_time,
+  app.visit_reason,
+  rem.title,
+  rem.description
+FROM appointment app
+JOIN reminder rem ON app.dentist_id = rem.dentist_id
+JOIN dentist den ON app.dentist_id=den.dentist_id
+WHERE app.appointment_date = CURDATE()
+  AND app.tenant_id = ?
+  AND app.clinic_id = ?
+  AND app.patient_id = ?
+  AND app.status = 'pending'
+ORDER BY app.start_time ASC;`;
+
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(query, [
+      tenant_id,
+      clinic_id,
+      patient_id
+    ]);
+
+    return rows
+  } catch (error) {
+    console.error("Database error in getAllRemindersBy...:", error);
+    throw new CustomError("Error fetching reminder.", 500);
+  } finally {
+    conn.release();
+  }
+};
+
+const getAllNotifyByDentist = async (
+  tenant_id,
+  clinic_id,
+  dentist_id
+) => {
+  const query = `
+    SELECT 
+  app.appointment_id,
+  CONCAT(pat.first_name, ' ', pat.last_name) AS patient_name,
+  app.start_time,
+  app.end_time,
+  app.visit_reason,
+  rem.title,
+  rem.description
+FROM appointment app
+JOIN reminder rem ON app.dentist_id = rem.dentist_id
+JOIN patient pat ON app.patient_id=pat.patient_id
+WHERE app.appointment_date = CURDATE()
+  AND app.tenant_id = ?
+  AND app.clinic_id = ?
+  AND app.dentist_id = ?
+  AND app.status = 'pending'
+ORDER BY app.start_time ASC;`;
+
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(query, [
+      tenant_id,
+      clinic_id,
+      dentist_id
+    ]);
+
+    return rows
+  } catch (error) {
+    console.error("Database error in getAllRemindersBy...:", error);
+    throw new CustomError("Error fetching reminder.", 500);
+  } finally {
+    conn.release();
+  }
+};
+
 
 const getMonthlywiseRemindersByTenantAndClinicIdAndDentistId = async (
   tenant_id,
@@ -233,10 +317,6 @@ const getMonthlywiseRemindersByTenantAndClinicIdAndDentistId = async (
 };
 
 module.exports = {
-  getMonthlywiseRemindersByTenantAndClinicIdAndDentistId,
-};
-
-module.exports = {
   createReminder,
   getAllRemindersByTenantId,
   getReminderByTenantAndReminderId,
@@ -244,5 +324,7 @@ module.exports = {
   deleteReminderByTenantAndReminderId,
   getReminderByTenantAndClinicIdAndDentistIdAndReminderId,
   getMonthlywiseRemindersByTenantAndClinicIdAndDentistId,
-  getAllRemindersByTenantAndClinicAndDentistAndType
+  getAllRemindersByTenantAndClinicAndDentistAndType,
+  getAllNotifyByPatient,
+  getAllNotifyByDentist
 };

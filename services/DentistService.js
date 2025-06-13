@@ -9,10 +9,12 @@ const { mapFields } = require("../query/Records");
 const { formatDateOnly } = require("../utils/DateUtils");
 
 const helper = require("../utils/Helpers");
+const { addUser, assignRoleToUser } = require("../middlewares/KeycloakAdmin");
 
 const dentistFieldMap = {
   tenant_id: (val) => val,
   clinic_id: (val) => val,
+  keycloak_id: val => val,
   first_name: (val) => val,
   last_name: (val) => val,
   gender: (val) => val,
@@ -59,10 +61,12 @@ const dentistFieldMap = {
   last_login: (val) => val,
   duration: helper.duration,
 };
+
 const dentistFieldReverseMap = {
   dentist_id:val=>val,
   tenant_id: val => val,
   clinic_id: val => val,
+  keycloak_id: val => val,
   first_name: val => val,
   last_name: val => val,
   gender: val => val,
@@ -111,12 +115,22 @@ const dentistFieldReverseMap = {
 
 
 // -------------------- CREATE --------------------
-const createDentist = async (data) => {
+const createDentist = async (data,token,realm,client) => {
   const create = {
     ...dentistFieldMap,
     created_by: (val) => val,
   };
   try {
+    const userData={
+      username: helper.generateUsername(data.first_name,data.phone_number),
+        email: data.email,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        password:helper.generateAlphanumericPassword()
+    }
+    const user=await addUser(token,realm,userData)
+    const role=await assignRoleToUser(token,realm,user.username,'dentist',client)
+    data.keycloak_id=user.userId
     const { columns, values } = mapFields(data, create);
     const dentistId = await dentistModel.createDentist(
       "dentist",
