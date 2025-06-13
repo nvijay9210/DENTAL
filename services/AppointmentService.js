@@ -430,8 +430,18 @@ const getAppointmentsWithDetailsByPatient = async (
         offset
       );
 
-      const formatted = await formatAppointments(result); // ✅ Use the returned value
-      return decodeJsonFields(formatted, fieldsToDecode); // ✅ Pass formatted data
+      if (result && Array.isArray(result.data)) {
+        const formattedData = result.data.map(app => ({
+          ...app,
+          appointment_date: new Date(app.appointment_date).toISOString().split('T')[0],
+          date_of_birth: new Date(app.date_of_birth).toISOString().split('T')[0],
+          date_of_birth: new Date(app.date_of_birth).toISOString().split('T')[0],
+          visit_reason:safeJsonParse(app.visit_reason),
+          date_of_birth: new Date(app.date_of_birth).toISOString().split('T')[0],
+          working_hours:safeJsonParse(app.working_hours),
+        }));
+        return { ...result, data: formattedData };
+      }
     });
 
     return appointment;

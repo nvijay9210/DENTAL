@@ -282,6 +282,7 @@ exports.getAppointmentsWithDetails = async (req, res, next) => {
     next(err);
   }
 };
+
 exports.getAppointmentsWithDetailsByPatient = async (req, res, next) => {
   const { tenant_id,patient_id } = req.params;
   const { page, limit } = req.query;

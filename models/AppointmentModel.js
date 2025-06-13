@@ -362,7 +362,7 @@ WHERE app.tenant_id = ?
 
 const getAppointmentsWithDetailsByPatient = async (tenantId, patientId,limit,offset) => {
   console.log(tenantId,patientId,limit,offset)
-  const query = `SELECT 
+  const query1 = `SELECT 
   CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,
   d.specialisation,
   d.profile_picture,
@@ -383,11 +383,19 @@ WHERE app.tenant_id = ?
   AND app.patient_id = ?
   limit ? offset ?;
 `;
+  const query2 = `SELECT 
+  COUNT(*) as total
+FROM appointment AS app
+JOIN dentist AS d ON d.dentist_id = app.dentist_id
+WHERE app.tenant_id = ? 
+  AND app.patient_id = ?
+`;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, patientId,limit,offset]);
+    const [rows] = await conn.query(query1, [tenantId, patientId,limit,offset]);
+    const [counts] = await conn.query(query2, [tenantId, patientId]);
     console.log('appoinments:',rows)
-    return rows;
+    return {data:rows,total:counts[0].total};
   } catch (error) {
     console.log(error);
     throw new Error("Database Operation Failed");
