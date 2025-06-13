@@ -2,6 +2,8 @@ const pool = require("../config/db");
 const helper = require("../utils/Helpers");
 const record = require("../query/Records");
 
+const { v4: uuidv4 } = require('uuid');
+
 // Assuming Helper method for column/value length match
 const validateColumnValueLengthMatch = (columns, values) => {
   if (columns.length !== values.length) {
@@ -140,6 +142,52 @@ WHERE
   }
 };
 
+const getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (tenantId, clinicId, dentistId) => {
+  const query = `SELECT 
+    app.appointment_id,
+    app.room_id
+FROM 
+    appointment AS app
+WHERE 
+    app.tenant_id = ? 
+    AND app.clinic_id = ? 
+    AND app.dentist_id = ?
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, clinicId, dentistId]);
+    return rows;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+const getAllRoomIdByTenantIdAndClinicIdAndPatientId = async (tenantId, clinicId, patient_id) => {
+  const query = `SELECT 
+    app.appointment_id,
+    app.room_id
+FROM 
+    appointment AS app
+WHERE 
+    app.tenant_id = ? 
+    AND app.clinic_id = ? 
+    AND app.patient_id = ?
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, clinicId, patient_id]);
+    return rows;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
 const getAllAppointmentsByTenantIdAndDentistId = async (tenantId, dentistId,limit,offset) => {
   const query1 = `SELECT 
     *
@@ -171,6 +219,7 @@ WHERE
     conn.release();
   }
 };
+
 
 const getAllAppointmentsByTenantIdAndPatientId = async (tenantId, patient_id,limit,offset) => {
   const query1 = `SELECT 
@@ -502,8 +551,6 @@ const getAppointmentSummary = async (tenantId, clinic_id, period = 'monthly') =>
     return result.CP + result.SC + result.CL;
   };
 
-
-
 const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (tenantId,clinicId, patientId,limit,offset) => {
   const query1 = `SELECT 
     p.patient_id,
@@ -593,6 +640,33 @@ const updateAppoinmentStatusCancelledAndReschedule = async (appointment_id, tena
   }
 };
 
+const updateRoomIdBeforeAppointment = async () => {
+  try {
+    const [appointments] = await pool.execute(`
+      SELECT appointment_id 
+      FROM appointment 
+      WHERE appointment_date = CURDATE()
+        AND start_time BETWEEN DATE_FORMAT(NOW() + INTERVAL 1 MINUTE, '%H:%i:00') AND DATE_FORMAT(NOW() + INTERVAL 1 MINUTE, '%H:%i:59')
+        AND is_virtual = 1
+        AND room_id = '00000000-0000-0000-0000-000000000000'
+    `);
+
+    const updatePromises = appointments.map(({ appointment_id }) => {
+      const roomId = uuidv4(); // or crypto.randomUUID() for Node 19+
+      return pool.execute(`
+        UPDATE appointment SET room_id = ? WHERE appointment_id = ?
+      `, [roomId, appointment_id]);
+    });
+
+    await Promise.all(updatePromises);
+
+    console.log(`Updated ${appointments.length} room_ids`);
+  } catch (err) {
+    console.error('Error updating room_id:', err);
+  }
+};
+
+
 
 module.exports = {
   createAppointment,
@@ -613,5 +687,8 @@ module.exports = {
   updateAppoinmentStatusCancelledAndReschedule,
   getAppointmentsWithDetailsByPatient,
   getAllAppointmentsByTenantIdAndDentistId,
-  getAllAppointmentsByTenantIdAndPatientId
+  getAllAppointmentsByTenantIdAndPatientId,
+  updateRoomIdBeforeAppointment,
+  getAllRoomIdByTenantIdAndClinicIdAndDentistId,
+  getAllRoomIdByTenantIdAndClinicIdAndPatientId
 };

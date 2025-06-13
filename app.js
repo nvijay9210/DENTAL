@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+require('./middlewares/Schedule')
 
 const errorHandler = require('./middlewares/errorHandler');
 const createTable = require('./models/CreateModel');

@@ -31,10 +31,10 @@ async function getAdminToken() {
   }
 }
 
-async function addUser(token, userData) {
+async function addUser(token,realm, userData) {
   try {
     const response = await axios.post(
-      `${KEYCLOAK_BASE_URL}/admin/realms/${REALM}/users`,
+      `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users`,
       {
         username: userData.username,
         email: userData.email,
@@ -65,10 +65,10 @@ async function addUser(token, userData) {
   }
 }
 
-async function assignRoleToUser(token, username, roleName, clientId) {
+async function assignRoleToUser(token,realm, username, roleName, clientId) {
   try {
     const usersResponse = await axios.get(
-      `${KEYCLOAK_BASE_URL}/admin/realms/${REALM}/users?username=${username}`,
+      `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users?username=${username}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -83,7 +83,7 @@ async function assignRoleToUser(token, username, roleName, clientId) {
     const userId = usersResponse.data[0].id;
 
     const rolesResponse = await axios.get(
-      `${KEYCLOAK_BASE_URL}/admin/realms/${REALM}/clients/${clientId}/roles`,
+      `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/clients/${clientId}/roles`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -97,7 +97,7 @@ async function assignRoleToUser(token, username, roleName, clientId) {
     }
 
     await axios.post(
-      `${KEYCLOAK_BASE_URL}/admin/realms/${REALM}/users/${userId}/role-mappings/clients/${clientId}`,
+      `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/role-mappings/clients/${clientId}`,
       [role],
       {
         headers: {
