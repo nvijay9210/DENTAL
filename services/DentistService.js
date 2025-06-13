@@ -7,9 +7,9 @@ const {
 const { decodeJsonFields, mapBooleanFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const { formatDateOnly } = require("../utils/DateUtils");
+const {addUser, getUserIdByUsername, assignRealmRoleToUser} =require('../middlewares/KeycloakAdmin')
 
 const helper = require("../utils/Helpers");
-const { addUser, assignRoleToUser } = require("../middlewares/KeycloakAdmin");
 
 const dentistFieldMap = {
   tenant_id: (val) => val,
@@ -115,7 +115,7 @@ const dentistFieldReverseMap = {
 
 
 // -------------------- CREATE --------------------
-const createDentist = async (data,token,realm,client) => {
+const createDentist = async (data,token,realm) => {
   const create = {
     ...dentistFieldMap,
     created_by: (val) => val,
@@ -123,14 +123,20 @@ const createDentist = async (data,token,realm,client) => {
   try {
     const userData={
       username: helper.generateUsername(data.first_name,data.phone_number),
-        email: data.email,
+        email: data.email||`${data.first_name}${helper.generateAlphanumericPassword()}@gmail.com`,
         firstName: data.first_name,
         lastName: data.last_name,
-        password:helper.generateAlphanumericPassword()
+        password:'1234'
+        // password:helper.generateAlphanumericPassword()
     }
     const user=await addUser(token,realm,userData)
-    const role=await assignRoleToUser(token,realm,user.username,'dentist',client)
-    data.keycloak_id=user.userId
+    if(!user) throw new CustomError('User not created',404)
+    console.log('User Created')
+    const userId=await getUserIdByUsername(token, realm, userData.username)
+    console.log('user:',userId)
+    const role=await assignRealmRoleToUser(token, realm, userId, "doctor")
+    if(!role) throw new CustomError("Role not Assign",404)
+    data.keycloak_id=userId
     const { columns, values } = mapFields(data, create);
     const dentistId = await dentistModel.createDentist(
       "dentist",
@@ -139,7 +145,7 @@ const createDentist = async (data,token,realm,client) => {
     );
     await invalidateCacheByPattern("dentists:*");
     await invalidateCacheByPattern("dentistsbyclinic:*");
-    return dentistId;
+    return {dentistId,username:userData.username,password:userData.password};
   } catch (error) {
     console.error("Failed to create dentist:", error.message);
     throw new CustomError(`Failed to create dentist: ${error.message}`, 404);

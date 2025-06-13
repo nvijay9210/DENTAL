@@ -6,6 +6,9 @@ const patientController = require("../controllers/PatientController");
 const { uploadFileMiddleware } = require("../utils/UploadFiles");
 const patientValidation = require("../validations/PatientValidation");
 const routerPath = require("./RouterPath");
+const { multiTenantAuthMiddleware } = require("../middlewares/AuthToken");
+
+router.use(multiTenantAuthMiddleware)
 
 // Setup multer memory storage
 const upload = multer({ storage: multer.memoryStorage() });

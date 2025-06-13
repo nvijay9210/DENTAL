@@ -1,145 +1,113 @@
-// keycloak-admin.js
-
 const axios = require("axios");
+const { CustomError } = require("./CustomeError");
 
-const KEYCLOAK_BASE_URL = "http://localhost:8080/auth";
-const REALM = "myrealm";
-const CLIENT_ID = "admin-cli";
-const ADMIN_USER = "admin";
-const ADMIN_PASSWORD = "admin";
+const KEYCLOAK_BASE_URL = "http://localhost:8080";
 
-async function getAdminToken() {
-  try {
-    const response = await axios.post(
-      `${KEYCLOAK_BASE_URL}/realms/${REALM}/protocol/openid-connect/token`,
-      new URLSearchParams({
-        username: ADMIN_USER,
-        password: ADMIN_PASSWORD,
-        grant_type: "password",
-        client_id: CLIENT_ID,
-      }),
+// ✅ 1. Create user
+const addUser = async (token, realm, userData) => {
+  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users`;
+
+  const payload = {
+    username: userData.username,
+    email: userData.email,
+    firstName: userData.firstName || "",
+    lastName: userData.lastName || "",
+    enabled: true,
+    emailVerified: true,
+    credentials: [
       {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-
-    return response.data.access_token;
-  } catch (error) {
-    throw new Error(`Failed to fetch admin token: ${error.message}`);
-  }
-}
-
-async function addUser(token, realm, userData) {
-  try {
-    // 1. Create the user
-    await axios.post(
-      `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users`,
-      {
-        username: userData.username,
-        email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        enabled: true,
-        credentials: [
-          {
-            type: "password",
-            value: userData.password,
-            temporary: false,
-          },
-        ],
+        type: "password",
+        value: userData.password,
+        temporary: false,
       },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    ],
+  };
 
-    // 2. Fetch user to get user ID
-    const response = await axios.get(
-      `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
-          username: userData.username,
-        },
-      }
-    );
+  try {
+    const existsUser = await getUserIdByUsername(token, realm, userData.username);
+    if (existsUser) throw new CustomError("Username Already Exists", 409);
+    const response = await axios.post(url, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
 
-    const user = response.data.find(
-      (u) => u.username.toLowerCase() === userData.username.toLowerCase()
-    );
-
-    if (!user) throw new Error("User created but not found");
-
-    console.log("✅ User created:", user.username, "| ID:", user.id);
-
-    return {
-      username: user.username,
-      userId: user.id,
-    };
+    console.log("✅ User created:", response.status);
+    return true;
   } catch (error) {
-    console.error("❌ Error creating user:", error.response?.data || error.message);
+    console.error(
+      "❌ Error creating user:",
+      error.response?.data || error.message
+    );
+    return false;
+  }
+};
+
+// ✅ 2. Get user ID by username
+const getUserIdByUsername = async (token, realm, username) => {
+  console.log("getUserIdByUsername:", token, realm, username);
+  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users?username=${username}`;
+
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.data.length === 0) {
+      console.error("❌ No user found with username:", username);
+      return null;
+    }
+
+    return response.data[0].id; // Return the user ID
+  } catch (error) {
+    console.error(
+      "❌ Failed to get user ID:",
+      error.response?.data || error.message
+    );
     return null;
   }
-}
+};
 
+// ✅ 3. Assign realm-level role to user
+const assignRealmRoleToUser = async (token, realm, userId, roleName) => {
+  const roleUrl = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/roles/${roleName}`;
+  const assignUrl = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/role-mappings/realm`;
 
-async function assignRoleToUser(token,realm, username, roleName, clientId) {
   try {
-    const usersResponse = await axios.get(
-      `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users?username=${username}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    // Step 1: Get role object
+    const roleRes = await axios.get(roleUrl, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    if (!usersResponse.data.length) {
-      throw new Error(`User "${username}" not found`);
-    }
+    const role = roleRes.data;
 
-    const userId = usersResponse.data[0].id;
+    // Step 2: Assign the role to the user
+    await axios.post(assignUrl, [role], {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
 
-    const rolesResponse = await axios.get(
-      `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/clients/${clientId}/roles`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    const role = rolesResponse.data.find(r => r.name === roleName);
-    if (!role) {
-      throw new Error(`Role "${roleName}" not found for client "${clientId}"`);
-    }
-
-    await axios.post(
-      `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/role-mappings/clients/${clientId}`,
-      [role],
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    console.log(`✅ Role "${roleName}" assigned to user "${username}"`);
+    console.log(`✅ Role '${roleName}' assigned to user ${userId}`);
+    return true;
   } catch (error) {
-    console.error("❌ Error assigning role:", error.response?.data || error.message);
+    console.error(
+      "❌ Failed to assign role:",
+      error.response?.data || error.message
+    );
+    return false;
   }
-}
+};
 
 module.exports = {
   addUser,
-  assignRoleToUser,
-  getAdminToken,
+  getUserIdByUsername,
+  assignRealmRoleToUser,
 };
