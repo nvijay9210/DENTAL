@@ -129,6 +129,10 @@ module.exports = {
     "/getreminder/:tenant_id/:clinic_id/:dentist_id",
   UPDATE_REMINDER_TENANT: "/updatereminder/:reminder_id/:tenant_id",
   DELETE_REMINDER_TENANT: "/deletereminder/:reminder_id/:tenant_id",
+  GETALL_NOTIFY_DENTIST:
+    "/getallnoticationdentist/:tenant_id/:clinic_id/:dentist_id",
+  GETALL_NOTIFY_PATIENT:
+    "/getallnoticationpatient/:tenant_id/:clinic_id/:patient_id",
 
   ADD_PAYMENT: "/addpayment",
   GETALL_PAYMENT_TENANT: "/getallpayments/:tenant_id",

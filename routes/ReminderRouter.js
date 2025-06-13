@@ -11,6 +11,8 @@ const {
   GET_REMINDER_SCHEDULE,
   GET_REMINDER_SCHEDULE_MONTHLY,
   GET_REMINDER_DENTIST_TYPE,
+  GETALL_NOTIFY_DENTIST,
+  GETALL_NOTIFY_PATIENT,
 } = require("./RouterPath");
 
 // Create Reminder
@@ -42,6 +44,15 @@ router.get(
 router.get(
   GET_REMINDER_DENTIST_TYPE,
   reminderController.getAllRemindersByTenantAndClinicAndDentistAndType
+);
+
+router.get(
+  GETALL_NOTIFY_DENTIST,
+  reminderController.getAllNotifyByDentist
+);
+router.get(
+  GETALL_NOTIFY_PATIENT,
+  reminderController.getAllNotifyByPatient
 );
 
 // Update Reminder

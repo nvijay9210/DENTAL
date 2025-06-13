@@ -176,6 +176,21 @@ function unflattenAwards(data) {
   return data;
 }
 
+function generateUsername(firstname, mobileno) {
+  const namePart = firstname.slice(0, 4).toLowerCase(); // first 4 letters
+  const mobilePart = mobileno.slice(-4);                // last 4 digits
+  return namePart + mobilePart;
+}
+
+function generateAlphanumericPassword(length = 6) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let pw = '';
+  for (let i = 0; i < length; i++) {
+    pw += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return pw;
+}
+
 
 // -------------------- EXPORTS --------------------
 
@@ -192,5 +207,7 @@ module.exports = {
   duration,
   convertDbToFrontend,
   getExistingAwardsIfNoneUploaded,
-  unflattenAwards
+  unflattenAwards,
+  generateUsername,
+  generateAlphanumericPassword
 };

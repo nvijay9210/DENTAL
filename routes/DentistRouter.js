@@ -5,9 +5,12 @@ const dentistController = require("../controllers/DentistController");
 const routerPath = require("./RouterPath");
 const { uploadFileMiddleware } = require("../utils/UploadFiles");
 const dentistValidation = require("../validations/DentistValidation");
+const { multiTenantAuthMiddleware } = require("../middlewares/AuthToken");
 
 // Setup multer memory storage
 const upload = multer({ storage: multer.memoryStorage() });
+
+router.use(multiTenantAuthMiddleware)
 
 // Common upload fields
 // const dentistUploadFields = upload.fields([

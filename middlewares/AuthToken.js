@@ -2,7 +2,7 @@ const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const jwksClient = require("jwks-rsa");
 
-// Tenant config: map tenantId to Keycloak realm info
+// Tenant config: map tenant_name to Keycloak realm info
 const tenantsConfig = {
   similecare: {
     jwksUri:
@@ -13,9 +13,9 @@ const tenantsConfig = {
   // Add more tenants as needed
 };
 
-function getKeyClient(tenantId) {
-  const tenant = tenantsConfig[tenantId];
-  // console.log(tenant)
+function getKeyClient(tenant_name) {
+  const tenant = tenantsConfig[tenant_name];
+  console.log(tenant)
   if (!tenant) throw new Error("Unknown tenant");
 
   return jwksClient({
@@ -23,12 +23,12 @@ function getKeyClient(tenantId) {
   });
 }
 
-async function verifyTokenForTenant(token, tenantId) {
-  const tenant = tenantsConfig[tenantId];
-  // console.log(token,tenantId)
+async function verifyTokenForTenant(token, tenant_name) {
+  const tenant = tenantsConfig[tenant_name];
+  console.log(token,tenant_name)
   if (!tenant) throw new Error("Unknown tenant");
 
-  const client = getKeyClient(tenantId);
+  const client = getKeyClient(tenant_name);
 
   function getKey(header, callback) {
     client.getSigningKey(header.kid, function (err, key) {
@@ -69,11 +69,9 @@ function permit(...allowedRoles) {
       return next();
     }
 
-    return res
-      .status(403)
-      .json({
-        error: "Forbidden: You do not have permission to access this resource",
-      });
+    return res.status(403).json({
+      error: "Forbidden: You do not have permission to access this resource",
+    });
   };
 }
 
@@ -84,16 +82,16 @@ async function multiTenantAuthMiddleware(req, res, next) {
     // console.log(token)
     if (!token) return res.status(401).json({ error: "Unauthorized" });
 
-    const tenantId = req.headers["x-tenant-id"];
-    if (!tenantId)
+    const tenant_name = req.headers["x-tenant-name"];
+    if (!tenant_name)
       return res.status(400).json({ error: "Tenant ID header required" });
 
-
-    const decodedToken = await verifyTokenForTenant(token, tenantId);
-
+    const decodedToken = await verifyTokenForTenant(token, tenant_name);
 
     req.user = decodedToken;
-    req.tenantId = tenantId;
+    req.tenant_name = tenant_name;
+    req.token = decodedToken;
+    req.client = decodedToken.azp;
 
     next();
   } catch (err) {

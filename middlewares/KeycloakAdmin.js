@@ -31,9 +31,10 @@ async function getAdminToken() {
   }
 }
 
-async function addUser(token,realm, userData) {
+async function addUser(token, realm, userData) {
   try {
-    const response = await axios.post(
+    // 1. Create the user
+    await axios.post(
       `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users`,
       {
         username: userData.username,
@@ -57,13 +58,37 @@ async function addUser(token,realm, userData) {
       }
     );
 
-    console.log("✅ User created:", userData.username);
-    return userData.username;
+    // 2. Fetch user to get user ID
+    const response = await axios.get(
+      `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          username: userData.username,
+        },
+      }
+    );
+
+    const user = response.data.find(
+      (u) => u.username.toLowerCase() === userData.username.toLowerCase()
+    );
+
+    if (!user) throw new Error("User created but not found");
+
+    console.log("✅ User created:", user.username, "| ID:", user.id);
+
+    return {
+      username: user.username,
+      userId: user.id,
+    };
   } catch (error) {
     console.error("❌ Error creating user:", error.response?.data || error.message);
     return null;
   }
 }
+
 
 async function assignRoleToUser(token,realm, username, roleName, clientId) {
   try {
