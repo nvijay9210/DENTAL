@@ -118,6 +118,12 @@ module.exports = {
   UPDATE_SUPPLIER_TENANT: "/updatesupplier/:supplier_id/:tenant_id",
   DELETE_SUPPLIER_TENANT: "/deletesupplier/:supplier_id/:tenant_id",
 
+  ADD_RECEPTION: "/addsupplier",
+  GETALL_RECEPTION_TENANT: "/getallsuppliers/:tenant_id",
+  GET_RECEPTION_TENANT: "/getsupplier/:supplier_id/:tenant_id",
+  UPDATE_RECEPTION_TENANT: "/updatesupplier/:supplier_id/:tenant_id",
+  DELETE_RECEPTION_TENANT: "/deletesupplier/:supplier_id/:tenant_id",
+
   ADD_REMINDER: "/addreminder",
   GETALL_REMINDER_TENANT: "/getallreminders/:tenant_id",
   GET_REMINDER_TENANT: "/getreminder/:reminder_id/:tenant_id",

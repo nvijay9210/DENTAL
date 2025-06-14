@@ -10,6 +10,7 @@ const { formatDateOnly } = require("../utils/DateUtils");
 const {addUser, getUserIdByUsername, assignRealmRoleToUser} =require('../middlewares/KeycloakAdmin')
 
 const helper = require("../utils/Helpers");
+const { encrypt } = require("../middlewares/PasswordHash");
 
 const dentistFieldMap = {
   tenant_id: (val) => val,
@@ -137,6 +138,8 @@ const createDentist = async (data,token,realm) => {
     const role=await assignRealmRoleToUser(token, realm, userId, "doctor")
     if(!role) throw new CustomError("Role not Assign",404)
     data.keycloak_id=userId
+    data.username=userData.username;
+    data.password=encrypt(userData.password);
     const { columns, values } = mapFields(data, create);
     const dentistId = await dentistModel.createDentist(
       "dentist",
