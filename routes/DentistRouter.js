@@ -10,7 +10,7 @@ const { multiTenantAuthMiddleware } = require("../middlewares/AuthToken");
 // Setup multer memory storage
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.use(multiTenantAuthMiddleware)
+// router.use(multiTenantAuthMiddleware)
 
 // Common upload fields
 // const dentistUploadFields = upload.fields([

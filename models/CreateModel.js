@@ -223,6 +223,21 @@ const createAppointmentReschedulesTable = async () => {
     conn.release();
   }
 };
+const createReceiption = async () => {
+  const query =  createTableQuery.addReceiption
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("Receiption table created successfully.");
+  } catch (error) {
+    console.error("Error creating Receiption table:", error);
+    throw new Error(
+      "Database error occurred while creating the Receiption table."
+    );
+  } finally {
+    conn.release();
+  }
+};
 
 const createPaymentTable = async () => {
   const query =  createTableQuery.addPayment
@@ -300,5 +315,6 @@ module.exports = {
   createSupplierTable,
   createReminderTable,
   createPaymentTable,
-  createAppointmentReschedulesTable
+  createAppointmentReschedulesTable,
+  createReceiption
 };

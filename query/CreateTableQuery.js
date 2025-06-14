@@ -116,6 +116,9 @@ const createTableQuery = {
   dentist_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
   clinic_id int(11) DEFAULT NULL,
+  keycloak_id int(11) NOT NULL,
+  username varchar(50) NOT NULL,
+  password varchar(255) NOT NULL,
   first_name varchar(50) NOT NULL,
   last_name varchar(50) NOT NULL,
   gender enum('M','F','TG') DEFAULT 'M',
@@ -123,6 +126,7 @@ const createTableQuery = {
   email varchar(255) DEFAULT NULL,
   phone_number varchar(15) NOT NULL,
   alternate_phone_number varchar(15) DEFAULT NULL,
+  status tinyint(1) Null DEFAULT 0,
   specialisation varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
   designation varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
   member_of longtext DEFAULT NULL,
@@ -155,6 +159,7 @@ const createTableQuery = {
   social_activities longtext DEFAULT NULL,
   last_login timestamp NULL DEFAULT NULL,
   duration int(3) DEFAULT NULL,
+  is_active tinyint(1) Null Default 0,
   created_by varchar(30) NOT NULL,
   created_time timestamp NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
@@ -171,6 +176,9 @@ const createTableQuery = {
   addPatient: `CREATE TABLE IF NOT EXISTS patient (
   patient_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
+  keycloak_id int(11) NOT NULL,
+  username varchar(50) NOT NULL,
+  password varchar(255) NOT NULL,
   first_name varchar(50) NOT NULL,
   last_name varchar(50) NOT NULL,
   email varchar(255) DEFAULT NULL,
@@ -487,6 +495,40 @@ CREATE TABLE IF NOT EXISTS payment (
   CONSTRAINT fk_payment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
+
+addReceiption: `CREATE TABLE IF NOT EXISTS receiption (
+  receiption_id int(11) NOT NULL AUTO_INCREMENT,
+  tenant_id int(6) NOT NULL,
+  clinic_id int(11) Not Null,
+  keycloak_id int(11) Not Null,
+  username varchar(50) NOT NULL,
+  password varchar(255) NOT NULL,
+  full_name varchar(100) NOT NULL,
+  email varchar(255) DEFAULT NULL,
+  phone_number varchar(15) NOT NULL,
+  alternate_phone_number varchar(15) DEFAULT NULL,
+  date_of_birth date NOT NULL,
+  gender enum('M','F','TG') NOT NULL DEFAULT 'M',
+  status tinyint(1) Null DEFAULT 0,
+  address text NOT NULL,
+  city varchar(100) NOT NULL,
+  state varchar(100) NOT NULL,
+  country varchar(50) NOT NULL,
+  pincode varchar(6) NOT NULL,
+  last_login DATETIME Null,
+  profile_picture varchar(255) DEFAULT NULL,
+  created_by varchar(30) NOT NULL,
+  created_time timestamp NOT NULL DEFAULT current_timestamp(),
+  updated_by varchar(30) DEFAULT NULL,
+  updated_time timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+  PRIMARY KEY (receiption_id),
+  KEY fk_receiption_tenant (tenant_id),
+  KEY fk_receiption_clinic (clinic_id),
+  CONSTRAINT fk_receiption_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_receiption_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+`,
 };
+
 
 module.exports = { createTableQuery };
