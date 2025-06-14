@@ -3,7 +3,7 @@ const { validateInput } = require("./InputValidation");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
 const { recordExists } = require("../query/Records");
 
-const receiptionColumnConfig = [
+const receptionColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 6, null: false },
   { columnname: "clinic_id", type: "int", size: 11, null: false },
   { columnname: "keycloak_id", type: "int", size: 11, null: false },
@@ -31,20 +31,20 @@ const receiptionColumnConfig = [
   { columnname: "pincode", type: "varchar", size:6, null: true },
   { columnname: "last_login", type: "datetime", null: true }
 ];
-// Receiption Column Configuration for Validation
+// Reception Column Configuration for Validation
 const createColumnConfig = [
-  ...receiptionColumnConfig,
+  ...receptionColumnConfig,
   { columnname: "created_by", type: "varchar", size: 30, null: false },
 ];
 
 const updateColumnConfig = [
-  ...receiptionColumnConfig,
+  ...receptionColumnConfig,
   { columnname: "updated_by", type: "varchar", size: 30, null: false },
 ];
 /**
- * Validate Create Receiption Input with Tenant Scope
+ * Validate Create Reception Input with Tenant Scope
  */
-const createReceiptionValidation = async (details) => {
+const createReceptionValidation = async (details) => {
   validateInput(details, createColumnConfig);
 
   // Check if referenced records exist within the same tenant
@@ -55,23 +55,23 @@ const createReceiptionValidation = async (details) => {
 };
 
 /**
- * Validate Update Receiption Input with Tenant Scope
+ * Validate Update Reception Input with Tenant Scope
  */
-const updateReceiptionValidation = async (receiptionId, details) => {
+const updateReceptionValidation = async (receptionId, details) => {
   validateInput(details, updateColumnConfig);
 
   const exists = await checkIfExists(
-    "receiption",
-    "receiption_id",
-    receiptionId,
+    "reception",
+    "reception_id",
+    receptionId,
     details.tenant_id
   );
   if (!exists) {
-    throw new CustomError("Receiption not found", 404);
+    throw new CustomError("Reception not found", 404);
   }
 };
 
 module.exports = {
-  createReceiptionValidation,
-  updateReceiptionValidation,
+  createReceptionValidation,
+  updateReceptionValidation,
 };
