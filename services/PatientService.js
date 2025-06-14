@@ -90,26 +90,28 @@ const createPatient = async (data,token,realm) => {
   };
 
   try {
-    const userData = {
-      username: helper.generateUsername(data.first_name, data.phone_number),
-      email:
-        data.email ||
-        `${data.first_name}${helper.generateAlphanumericPassword()}@gmail.com`,
-      firstName: data.first_name,
-      lastName: data.last_name,
-      password: helper.generateAlphanumericPassword(),
-    };
-    const user = await addUser(token, realm, userData);
-    if (!user) throw new CustomError("User not created", 404);
-    console.log("User Created");
-    const userId = await getUserIdByUsername(token, realm, userData.username);
-    console.log("user:", userId);
-    const role = await assignRealmRoleToUser(token, realm, userId, "patient");
-    if (!role) throw new CustomError("Role not Assign", 404);
-    data.keycloak_id = userId;
-    data.username=userData.username;
-    data.password=encrypt(userData.password);
-    const { columns, values } = mapFields(data, create);
+    // const userData = {
+    //   username: helper.generateUsername(data.first_name, data.phone_number),
+    //   email:
+    //     data.email ||
+    //     `${data.first_name}${helper.generateAlphanumericPassword()}@gmail.com`,
+    //   firstName: data.first_name,
+    //   lastName: data.last_name,
+    //   password: helper.generateAlphanumericPassword(),
+    // };
+    // const user = await addUser(token, realm, userData);
+    // if (!user) throw new CustomError("User not created", 404);
+    // console.log("User Created");
+    // const userId = await getUserIdByUsername(token, realm, userData.username);
+    // console.log("user:", userId);
+    // const role = await assignRealmRoleToUser(token, realm, userId, "patient");
+    // if (!role) throw new CustomError("Role not Assign", 404);
+    // data.keycloak_id = userId;
+    // data.username=userData.username;
+    // data.password=encrypt(userData.password);
+    
+    
+  const { columns, values } = mapFields(data, create);
     const patientId = await patientModel.createPatient(
       "patient",
       columns,

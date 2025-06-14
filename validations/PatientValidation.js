@@ -14,9 +14,9 @@ const uniqueFields = [
 
 const patientColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },
-  { columnname: "keycloak_id", type: "int", size: 11, null: false },
-  { columnname: "username", type: "varchar", size: 100, null: false },
-  { columnname: "password", type: "varchar", size: 255, null: false },
+  // { columnname: "keycloak_id", type: "int", size: 11, null: false },
+  // { columnname: "username", type: "varchar", size: 100, null: false },
+  // { columnname: "password", type: "varchar", size: 255, null: false },
   {
     columnname: "first_name",
     type: "varchar",
