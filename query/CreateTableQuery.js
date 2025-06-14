@@ -496,8 +496,8 @@ CREATE TABLE IF NOT EXISTS payment (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
 
-addReceiption: `CREATE TABLE IF NOT EXISTS receiption (
-  receiption_id int(11) NOT NULL AUTO_INCREMENT,
+addReception: `CREATE TABLE IF NOT EXISTS reception (
+  reception_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
   clinic_id int(11) Not Null,
   keycloak_id int(11) Not Null,
@@ -521,11 +521,11 @@ addReceiption: `CREATE TABLE IF NOT EXISTS receiption (
   created_time timestamp NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
   updated_time timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
-  PRIMARY KEY (receiption_id),
-  KEY fk_receiption_tenant (tenant_id),
-  KEY fk_receiption_clinic (clinic_id),
-  CONSTRAINT fk_receiption_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
-  CONSTRAINT fk_receiption_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
+  PRIMARY KEY (reception_id),
+  KEY fk_reception_tenant (tenant_id),
+  KEY fk_reception_clinic (clinic_id),
+  CONSTRAINT fk_reception_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_reception_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
 };

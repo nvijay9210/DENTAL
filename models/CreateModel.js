@@ -223,16 +223,16 @@ const createAppointmentReschedulesTable = async () => {
     conn.release();
   }
 };
-const createReceiption = async () => {
-  const query =  createTableQuery.addReceiption
+const createReception = async () => {
+  const query =  createTableQuery.addReception
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
-    console.log("Receiption table created successfully.");
+    console.log("Reception table created successfully.");
   } catch (error) {
-    console.error("Error creating Receiption table:", error);
+    console.error("Error creating Reception table:", error);
     throw new Error(
-      "Database error occurred while creating the Receiption table."
+      "Database error occurred while creating the Reception table."
     );
   } finally {
     conn.release();
@@ -316,5 +316,5 @@ module.exports = {
   createReminderTable,
   createPaymentTable,
   createAppointmentReschedulesTable,
-  createReceiption
+  createReception
 };

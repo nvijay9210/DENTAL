@@ -1,5 +1,5 @@
 const { CustomError } = require("../middlewares/CustomeError");
-const receiptionModel = require("../models/ReceiptionModel");
+const receptionModel = require("../models/ReceptionModel");
 const {
   getOrSetCache,
   invalidateCacheByPattern,
@@ -8,9 +8,9 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly } = require("../utils/DateUtils");
 
-// Field mapping for receiptions (similar to treatment)
+// Field mapping for receptions (similar to treatment)
 
-const receiptionFields = {
+const receptionFields = {
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   keycloak_id: (val) => val,
@@ -29,7 +29,7 @@ const receiptionFields = {
   pincode: (val) => val,
   last_login: (val) => val,
 };
-const receiptionFieldsReverseMap = {
+const receptionFieldsReverseMap = {
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   keycloak_id: (val) => val,
@@ -52,10 +52,10 @@ const receiptionFieldsReverseMap = {
   updated_by: (val) => val,
   updated_time: (val) => (val ? new Date(val).toISOString() : null),
 };
-// Create Receiption
-const createReceiption = async (data,token,realm) => {
+// Create Reception
+const createReception = async (data,token,realm) => {
   const fieldMap = {
-    ...receiptionFields,
+    ...receptionFields,
     created_by: (val) => val,
   };
   try {
@@ -80,27 +80,27 @@ const createReceiption = async (data,token,realm) => {
       data.password=encrypt(userData.password);
 
     const { columns, values } = mapFields(data, fieldMap);
-    const receiptionId = await receiptionModel.createReceiption(
-      "receiption",
+    const receptionId = await receptionModel.createReception(
+      "reception",
       columns,
       values
     );
-    await invalidateCacheByPattern("receiption:*");
-    return receiptionId;
+    await invalidateCacheByPattern("reception:*");
+    return receptionId;
   } catch (error) {
-    console.error("Failed to create receiption:", error);
-    throw new CustomError(`Failed to create receiption: ${error.message}`, 404);
+    console.error("Failed to create reception:", error);
+    throw new CustomError(`Failed to create reception: ${error.message}`, 404);
   }
 };
 
-// Get All Receiptions by Tenant ID with Caching
-const getAllReceiptionsByTenantId = async (tenantId, page = 1, limit = 10) => {
+// Get All Receptions by Tenant ID with Caching
+const getAllReceptionsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `receiption:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = `reception:${tenantId}:page:${page}:limit:${limit}`;
 
   try {
-    const receiptions = await getOrSetCache(cacheKey, async () => {
-      const result = await receiptionModel.getAllReceiptionsByTenantId(
+    const receptions = await getOrSetCache(cacheKey, async () => {
+      const result = await receptionModel.getAllReceptionsByTenantId(
         tenantId,
         Number(limit),
         offset
@@ -108,93 +108,93 @@ const getAllReceiptionsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = receiptions.data.map((receiption) =>
-      helper.convertDbToFrontend(receiption, receiptionFieldsReverseMap)
+    const convertedRows = receptions.data.map((reception) =>
+      helper.convertDbToFrontend(reception, receptionFieldsReverseMap)
     );
 
-    return { data: convertedRows, total: receiptions.total };
+    return { data: convertedRows, total: receptions.total };
   } catch (err) {
-    console.error("Database error while fetching receiptions:", err);
-    throw new CustomError("Failed to fetch receiptions", 404);
+    console.error("Database error while fetching receptions:", err);
+    throw new CustomError("Failed to fetch receptions", 404);
   }
 };
 
-// Get Receiption by ID & Tenant
-const getReceiptionByTenantIdAndReceiptionId = async (
+// Get Reception by ID & Tenant
+const getReceptionByTenantIdAndReceptionId = async (
   tenantId,
-  receiptionId
+  receptionId
 ) => {
   try {
-    const receiption =
-      await receiptionModel.getReceiptionByTenantAndReceiptionId(
+    const reception =
+      await receptionModel.getReceptionByTenantAndReceptionId(
         tenantId,
-        receiptionId
+        receptionId
       );
 
     const convertedRows = helper.convertDbToFrontend(
-      receiption,
-      receiptionFieldsReverseMap
+      reception,
+      receptionFieldsReverseMap
     );
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get receiption: " + error.message, 404);
+    throw new CustomError("Failed to get reception: " + error.message, 404);
   }
 };
 
-// Update Receiption
-const updateReceiption = async (receiptionId, data, tenant_id) => {
+// Update Reception
+const updateReception = async (receptionId, data, tenant_id) => {
   const fieldMap = {
-    ...receiptionFields,
+    ...receptionFields,
     updated_by: (val) => val,
   };
   try {
     const { columns, values } = mapFields(data, fieldMap);
-    const affectedRows = await receiptionModel.updateReceiption(
-      receiptionId,
+    const affectedRows = await receptionModel.updateReception(
+      receptionId,
       columns,
       values,
       tenant_id
     );
 
     if (affectedRows === 0) {
-      throw new CustomError("Receiption not found or no changes made.", 404);
+      throw new CustomError("Reception not found or no changes made.", 404);
     }
 
-    await invalidateCacheByPattern("receiption:*");
+    await invalidateCacheByPattern("reception:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update receiption", 404);
+    throw new CustomError("Failed to update reception", 404);
   }
 };
 
-// Delete Receiption
-const deleteReceiptionByTenantIdAndReceiptionId = async (
+// Delete Reception
+const deleteReceptionByTenantIdAndReceptionId = async (
   tenantId,
-  receiptionId
+  receptionId
 ) => {
   try {
     const affectedRows =
-      await receiptionModel.deleteReceiptionByTenantAndReceiptionId(
+      await receptionModel.deleteReceptionByTenantAndReceptionId(
         tenantId,
-        receiptionId
+        receptionId
       );
     if (affectedRows === 0) {
-      throw new CustomError("Receiption not found.", 404);
+      throw new CustomError("Reception not found.", 404);
     }
 
-    await invalidateCacheByPattern("receiption:*");
+    await invalidateCacheByPattern("reception:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete receiption: ${error.message}`, 404);
+    throw new CustomError(`Failed to delete reception: ${error.message}`, 404);
   }
 };
 
 module.exports = {
-  createReceiption,
-  getAllReceiptionsByTenantId,
-  getReceiptionByTenantIdAndReceiptionId,
-  updateReceiption,
-  deleteReceiptionByTenantIdAndReceiptionId,
+  createReception,
+  getAllReceptionsByTenantId,
+  getReceptionByTenantIdAndReceptionId,
+  updateReception,
+  deleteReceptionByTenantIdAndReceptionId,
 };
