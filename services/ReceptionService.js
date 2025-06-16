@@ -30,6 +30,7 @@ const receptionFields = {
   last_login: (val) => val,
 };
 const receptionFieldsReverseMap = {
+  reception_id:(val)=>val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   keycloak_id: (val) => val,
