@@ -82,6 +82,19 @@ const getTenantByTenantNameAndTenantDomain = async (tenantName,tenantDomain) => 
   }
 };
 
+const getUserIdUsingKeycloakId = async (table,user_id,tenant_id,clinic_id=null) => {
+  const query =`select ??_id userid from ?? where ??=? and ??=? and ??=?limit 1`;
+  const conn = await pool.getConnection();
+  try {
+    const rows = await conn.query(query, [table,table,"keycloak_id",user_id,"tenant_id",tenant_id,"clinic_id",clinic_id]);
+    return rows[0];
+  } catch (error) {
+    throw new CustomeError("Database error occurred while fetching the Tenant.");
+  } finally {
+    conn.release();
+  }
+};
+
 
 const updateTenant = async (tenant_id, columns,values) => {
   try {
@@ -118,5 +131,6 @@ module.exports = {
   checkTenantExistsByTenantnameAndTenantdomain,
   updateTenant,
   deleteTenant,
-  getTenantByTenantNameAndTenantDomain
+  getTenantByTenantNameAndTenantDomain,
+  getUserIdUsingKeycloakId
 };

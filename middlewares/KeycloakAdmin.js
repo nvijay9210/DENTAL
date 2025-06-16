@@ -137,6 +137,44 @@ async function addUserToGroup(token, realm, userId, groupName) {
   }
 }
 
+function extractUserInfo(token) {
+  const issuer = token.iss; // "http://localhost:8080/realms/similecare"
+  const realm = issuer.split("/").pop();
+
+  const realmToTenantMap = {
+    "similecare": "1",
+    "anotherrealm": "2"
+  };
+  const tenantId = realmToTenantMap[realm] || realm;
+
+  const groups = token.groups || [];
+  const clinicGroup = groups.find(g => g.startsWith("group-clinic-"));
+  let clinicId = null;
+
+  if (clinicGroup) {
+    const match = clinicGroup.match(/group-clinic-(\d+)-admin/);
+    if (match && match[1]) {
+      clinicId = match[1];
+    }
+  }
+
+  const globalRoles = token.realm_access?.roles || [];
+  const clientRoles = token.resource_access?.["react-client"]?.roles || [];
+
+  const role = clientRoles[0] || globalRoles.find(r =>
+    ['super-user', 'doctor', 'patient', 'admin'].includes(r)
+  ) || "user";
+
+  return {
+    username: token.email,
+    userId: token.sub,
+    displayName: token.name,
+    tenantId,
+    clinicId,
+    role
+  };
+}
+
 // ✅ Export all functions
 module.exports = {
   addUser,
