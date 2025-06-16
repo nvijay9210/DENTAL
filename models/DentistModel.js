@@ -97,7 +97,7 @@ const checkDentistExistsByTenantIdAndDentistId = async (
 };
 
 const getAllDentistsByTenantIdAndClinicId = async (tenantId, clinicId,limit,offset) => {
-  const query1 = `SELECT d.dentist_id, CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,d.specialisation,d.profile_picture FROM dentist d join clinic c on c.clinic_id = d.clinic_id WHERE d.tenant_id = ? AND d.clinic_id = ? limit ? offset ?`;
+  const query1 = `SELECT * FROM dentist d join clinic c on c.clinic_id = d.clinic_id WHERE d.tenant_id = ? AND d.clinic_id = ? limit ? offset ?`;
   const query2 = `SELECT count(*) as total FROM dentist d join clinic c on c.clinic_id = d.clinic_id WHERE d.tenant_id = ? AND d.clinic_id = ?`;
   const conn = await pool.getConnection();
   try {

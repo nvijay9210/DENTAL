@@ -18,9 +18,9 @@ const receptionFields = {
   password: (val) => val,
   full_name: (val) => val,
   email: (val) => val,
-  phoone_numebr: (val) => val,
+  phone_number: (val) => val,
   alternate_phone_number: (val) => val,
-  date_pf_birth: (val) => val,
+  date_of_birth: (val) => val,
   gender: (val) => val,
   address: (val) => helper.safeStringify(val),
   city: (val) => val,
@@ -37,9 +37,9 @@ const receptionFieldsReverseMap = {
   password: (val) => val,
   full_name: (val) => val,
   email: (val) => val,
-  phoone_numebr: (val) => val,
+  phone_number: (val) => val,
   alternate_phone_number: (val) => val,
-  date_pf_birth: (val) => formatDateOnly(val),
+  date_of_birth: (val) => formatDateOnly(val),
   gender: (val) => val,
   address: (val) => helper.safeJsonParse(val),
   city: (val) => val,
@@ -59,25 +59,25 @@ const createReception = async (data,token,realm) => {
     created_by: (val) => val,
   };
   try {
-    const userData = {
-        username: helper.generateUsername(data.first_name, data.phone_number),
-        email:
-          data.email ||
-          `${data.first_name}${helper.generateAlphanumericPassword()}@gmail.com`,
-        firstName: data.first_name,
-        lastName: data.last_name,
-        password: helper.generateAlphanumericPassword(),
-      };
-      const user = await addUser(token, realm, userData);
-      if (!user) throw new CustomError("User not created", 404);
-      console.log("User Created");
-      const userId = await getUserIdByUsername(token, realm, userData.username);
-      console.log("user:", userId);
-      const role = await assignRealmRoleToUser(token, realm, userId, "patient");
-      if (!role) throw new CustomError("Role not Assign", 404);
-      data.keycloak_id = userId;
-      data.username=userData.username;
-      data.password=encrypt(userData.password);
+    // const userData = {
+    //     username: helper.generateUsername(data.first_name, data.phone_number),
+    //     email:
+    //       data.email ||
+    //       `${data.first_name}${helper.generateAlphanumericPassword()}@gmail.com`,
+    //     firstName: data.first_name,
+    //     lastName: data.last_name,
+    //     password: helper.generateAlphanumericPassword(),
+    //   };
+    //   const user = await addUser(token, realm, userData);
+    //   if (!user) throw new CustomError("User not created", 404);
+    //   console.log("User Created");
+    //   const userId = await getUserIdByUsername(token, realm, userData.username);
+    //   console.log("user:", userId);
+    //   const role = await assignRealmRoleToUser(token, realm, userId, "patient");
+    //   if (!role) throw new CustomError("Role not Assign", 404);
+    //   data.keycloak_id = userId;
+    //   data.username=userData.username;
+    //   data.password=encrypt(userData.password);
 
     const { columns, values } = mapFields(data, fieldMap);
     const receptionId = await receptionModel.createReception(

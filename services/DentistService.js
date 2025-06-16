@@ -4,18 +4,23 @@ const {
   getOrSetCache,
   invalidateCacheByPattern,
 } = require("../config/redisConfig");
-const { decodeJsonFields, mapBooleanFields } = require("../utils/Helpers");
+const {
+  addUser,
+  getUserIdByUsername,
+  assignRealmRoleToUser,
+  addUserToGroup,
+} = require("../middlewares/KeycloakAdmin");
 const { mapFields } = require("../query/Records");
 const { formatDateOnly } = require("../utils/DateUtils");
-const {addUser, getUserIdByUsername, assignRealmRoleToUser} =require('../middlewares/KeycloakAdmin')
 
 const helper = require("../utils/Helpers");
+
 const { encrypt } = require("../middlewares/PasswordHash");
 
 const dentistFieldMap = {
   tenant_id: (val) => val,
   clinic_id: (val) => val,
-  keycloak_id: val => val,
+  keycloak_id: (val) => val,
   first_name: (val) => val,
   last_name: (val) => val,
   gender: (val) => val,
@@ -64,95 +69,142 @@ const dentistFieldMap = {
 };
 
 const dentistFieldReverseMap = {
-  dentist_id:val=>val,
-  tenant_id: val => val,
-  clinic_id: val => val,
-  keycloak_id: val => val,
-  first_name: val => val,
-  last_name: val => val,
-  gender: val => val,
-  date_of_birth: val => val ? new Date(val).toISOString().split('T')[0] : null,
-  email: val => val,
-  phone_number: val => val,
-  alternate_phone_number: val => val,
+  dentist_id: (val) => val,
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
+  keycloak_id: (val) => val,
+  first_name: (val) => val,
+  last_name: (val) => val,
+  gender: (val) => val,
+  date_of_birth: (val) =>
+    val ? new Date(val).toISOString().split("T")[0] : null,
+  email: (val) => val,
+  phone_number: (val) => val,
+  alternate_phone_number: (val) => val,
   specialisation: (val) => val,
 
   designation: (val) => val,
-  languages_spoken: val => helper.safeJsonParse(val),
-  working_hours: val => helper.safeJsonParse(val),
-  available_days: val => helper.safeJsonParse(val),
-  bio: val => helper.safeJsonParse(val),
-  social_links: val => helper.safeJsonParse(val),
-  social_activities: val => helper.safeJsonParse(val),
-  internship: val => helper.safeJsonParse(val),
-  position_held: val => helper.safeJsonParse(val),
-  research_projects: val => helper.safeJsonParse(val),
-  publication: val => helper.safeJsonParse(val),
-  awards_certifications: val => helper.safeJsonParse(val),
-  member_of: val => helper.safeJsonParse(val),
+  languages_spoken: (val) => helper.safeJsonParse(val),
+  working_hours: (val) => helper.safeJsonParse(val),
+  available_days: (val) => helper.safeJsonParse(val),
+  bio: (val) => helper.safeJsonParse(val),
+  social_links: (val) => helper.safeJsonParse(val),
+  social_activities: (val) => helper.safeJsonParse(val),
+  internship: (val) => helper.safeJsonParse(val),
+  position_held: (val) => helper.safeJsonParse(val),
+  research_projects: (val) => helper.safeJsonParse(val),
+  publication: (val) => helper.safeJsonParse(val),
+  awards_certifications: (val) => helper.safeJsonParse(val),
+  member_of: (val) => helper.safeJsonParse(val),
 
-  experience_years: val => parseInt(val) || 0,
-  license_number: val => val,
-  clinic_name: val => val,
-  clinic_address: val => val,
-  city: val => val,
-  state: val => val,
-  country: val => val,
-  pin_code: val => val,
+  experience_years: (val) => parseInt(val) || 0,
+  license_number: (val) => val,
+  clinic_name: (val) => val,
+  clinic_address: (val) => val,
+  city: (val) => val,
+  state: (val) => val,
+  country: (val) => val,
+  pin_code: (val) => val,
 
-  consultation_fee: val => parseFloat(val) || 0,
-  min_booking_fee: val => parseFloat(val) || 0,
-  ratings: val => parseFloat(val) || 0,
-  reviews_count: val => parseInt(val) || 0,
-  appointment_count: val => parseInt(val) || 0,
+  consultation_fee: (val) => parseFloat(val) || 0,
+  min_booking_fee: (val) => parseFloat(val) || 0,
+  ratings: (val) => parseFloat(val) || 0,
+  reviews_count: (val) => parseInt(val) || 0,
+  appointment_count: (val) => parseInt(val) || 0,
 
-  profile_picture: val => val,
-  teleconsultation_supported: val => Boolean(val),
-  insurance_supported: val => Boolean(val),
+  profile_picture: (val) => val,
+  teleconsultation_supported: (val) => Boolean(val),
+  insurance_supported: (val) => Boolean(val),
 
-  last_login: val => val,
-  duration: val => val,
+  last_login: (val) => val,
+  duration: (val) => val,
 };
 
-
 // -------------------- CREATE --------------------
-const createDentist = async (data,token,realm) => {
+
+const createDentist = async (data, token, realm) => {
   const create = {
     ...dentistFieldMap,
     created_by: (val) => val,
   };
+
   try {
-    // const userData={
-    //   username: helper.generateUsername(data.first_name,data.phone_number),
-    //     email: data.email||`${data.first_name}${helper.generateAlphanumericPassword()}@gmail.com`,
-    //     firstName: data.first_name,
-    //     lastName: data.last_name,
-    //     password:'1234'
-    //     // password:helper.generateAlphanumericPassword()
+    // 1. Generate username/email
+    // const username = helper.generateUsername(
+    //   data.first_name,
+    //   data.phone_number
+    // );
+    // const email =
+    //   data.email ||
+    //   `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
+
+    // const userData = {
+    //   username,
+    //   email,
+    //   firstName: data.first_name,
+    //   lastName: data.last_name,
+    //   password: "1234", // For demo; use generateAlphanumericPassword() in production
+    // };
+
+    // // 2. Create Keycloak User
+    // const isUserCreated = await addUser(token, realm, userData);
+    // if (!isUserCreated) throw new CustomError("Keycloak user not created", 400);
+
+    // console.log("✅ Keycloak user created:", userData.username);
+
+    // // 3. Get User ID from Keycloak
+    // const userId = await getUserIdByUsername(token, realm, userData.username);
+    // if (!userId) throw new CustomError("Could not fetch Keycloak user ID", 400);
+
+    // console.log("🆔 Keycloak user ID fetched:", userId);
+
+    // // 4. Assign Role: 'doctor'
+    // const roleAssigned = await assignRealmRoleToUser(
+    //   token,
+    //   realm,
+    //   userId,
+    //   "doctor"
+    // );
+    // if (!roleAssigned)
+    //   throw new CustomError("Failed to assign 'doctor' role", 400);
+
+    // console.log("🩺 Assigned 'doctor' role");
+
+    // // 5. Optional: Add to Group (e.g., based on clinicId)
+    // if (data.clinicId) {
+    //   const groupName = `group-clinic-${data.clinicId}-admin`;
+    //   const groupAdded = await addUserToGroup(token, realm, userId, groupName);
+
+    //   if (!groupAdded) {
+    //     console.warn(`⚠️ Failed to add user to group: ${groupName}`);
+    //   } else {
+    //     console.log(`👥 Added to group: ${groupName}`);
+    //   }
     // }
-    // const user=await addUser(token,realm,userData)
-    // if(!user) throw new CustomError('User not created',404)
-    // console.log('User Created')
-    // const userId=await getUserIdByUsername(token, realm, userData.username)
-    // console.log('user:',userId)
-    // const role=await assignRealmRoleToUser(token, realm, userId, "doctor")
-    // if(!role) throw new CustomError("Role not Assign",404)
-    // data.keycloak_id=userId
-    // data.username=userData.username;
-    // data.password=encrypt(userData.password);
-    
+
+    // 6. Map fields for DB
     const { columns, values } = mapFields(data, create);
+    values.push(userId); // Add keycloak_id to values array
+
+    // 7. Save to DB
     const dentistId = await dentistModel.createDentist(
       "dentist",
       columns,
       values
     );
+
+    // 8. Invalidate cache
     await invalidateCacheByPattern("dentists:*");
     await invalidateCacheByPattern("dentistsbyclinic:*");
-    return {dentistId,username:userData.username,password:userData.password};
+
+    return {
+      dentistId,
+      username: userData.username,
+      password: userData.password,
+    };
   } catch (error) {
-    console.error("Failed to create dentist:", error.message);
-    throw new CustomError(`Failed to create dentist: ${error.message}`, 404);
+    console.error("❌ Failed to create dentist:", error.message);
+    throw new CustomError(`Failed to create dentist: ${error.message}`, 400);
   }
 };
 
@@ -189,7 +241,6 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `dentists:${tenantId}:page:${page}:limit:${limit}`;
 
-  
   try {
     const dentists = await getOrSetCache(cacheKey, async () => {
       return await dentistModel.getAllDentistsByTenantId(
@@ -199,9 +250,13 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
       );
     });
 
-    const convertedRows = dentists.data.map(dentist => helper.convertDbToFrontend(dentist, dentistFieldReverseMap)).map(flattenAwards);
+    const convertedRows = dentists.data
+      .map((dentist) =>
+        helper.convertDbToFrontend(dentist, dentistFieldReverseMap)
+      )
+      .map(flattenAwards);
 
-    return {data:convertedRows,total:dentists.total};
+    return { data: convertedRows, total: dentists.total };
   } catch (err) {
     console.error("Database error while fetching dentists:", err.message);
     throw new CustomError("Database error while fetching dentists", 404);
@@ -239,7 +294,10 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
       throw new CustomError("Dentist not found", 404);
     }
 
-    const convertedRows= helper.convertDbToFrontend(dentist, dentistFieldReverseMap)
+    const convertedRows = helper.convertDbToFrontend(
+      dentist,
+      dentistFieldReverseMap
+    );
     flattenAwards(dentist);
     return { ...convertedRows, flattenAwards };
   } catch (error) {
@@ -299,9 +357,13 @@ const getAllDentistsByTenantIdAndClinicId = async (
       );
     });
 
-    const convertedRows = dentists.data.map(dentist => helper.convertDbToFrontend(dentist, dentistFieldReverseMap)).map(flattenAwards);
+    const convertedRows = dentists.data
+      .map((dentist) =>
+        helper.convertDbToFrontend(dentist, dentistFieldReverseMap)
+      )
+      .map(flattenAwards);
 
-    return {data:convertedRows,total:dentists.total};
+    return { data: convertedRows, total: dentists.total };
   } catch (error) {
     throw new CustomError(
       `Failed to check dentist existence: ${error.message}`,

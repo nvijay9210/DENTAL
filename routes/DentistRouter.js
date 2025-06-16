@@ -5,7 +5,8 @@ const dentistController = require("../controllers/DentistController");
 const routerPath = require("./RouterPath");
 const { uploadFileMiddleware } = require("../utils/UploadFiles");
 const dentistValidation = require("../validations/DentistValidation");
-const { multiTenantAuthMiddleware } = require("../middlewares/AuthToken");
+const { multiTenantAuthMiddleware, permitGroups, permit, requireTenantAndClinicAccess } = require("../middlewares/AuthToken");
+const { requireTenantAndRole } = require("../middlewares/AuthTenantAndRole");
 
 // Setup multer memory storage
 const upload = multer({ storage: multer.memoryStorage() });
@@ -44,7 +45,7 @@ const dentistFileMiddleware = uploadFileMiddleware({
 // Add Dentist
 router.post(
   routerPath.ADD_DENTIST,
-  // dentistUploadFields,
+  // requireTenantAndRole('dev'),
   upload.any(),
   dentistFileMiddleware,
   dentistController.createDentist
@@ -64,6 +65,8 @@ router.get(
 
 router.get(
   routerPath.GET_DENTIST_TENANT_CLINIC,
+  // requireTenantAndClinicAccess,
+  // permit('super-user'),
   dentistController.getAllDentistByTenantIdAndClientId
 );
 

@@ -6,7 +6,7 @@ const { recordExists } = require("../query/Records");
 const receptionColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 6, null: false },
   { columnname: "clinic_id", type: "int", size: 11, null: false },
-  { columnname: "keycloak_id", type: "int", size: 11, null: false },
+  { columnname: "keycloak_id", type: "char", size: 36, null: false },
   { columnname: "username", type: "varchar", size: 100, null: false },
   { columnname: "password", type: "varchar", size: 255, null: false },
   { columnname: "full_name", type: "varchar", size: 100, null: false },
