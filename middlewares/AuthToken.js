@@ -132,4 +132,4 @@ function permit(...allowedRoles) {
   };
 }
 
-module.exports = { requireTenantAndClinicAccess, permit };
+module.exports = { requireTenantAndClinicAccess, permit,verifyTokenForTenant };

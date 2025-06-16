@@ -70,6 +70,7 @@ const getTenantByTenantId = async (tenantId) => {
 
 const getTenantByTenantNameAndTenantDomain = async (tenant_name,tenant_domain) => {
   try {
+    
     const tenant = await tenantModel.getTenantByTenantNameAndTenantDomain(tenant_name,tenant_domain); // Call model function to get tenants
     return tenant;
   } catch (error) {
