@@ -2,6 +2,7 @@ const pool = require("../config/db");
 const { tenantQuery } = require("../query/TenantQuery")
 
 const record = require("../query/Records");
+const { CustomError } = require("../middlewares/CustomeError");
 ;
 const TABLE = "tenant";
 
@@ -37,7 +38,7 @@ const getTenantByTenantId = async (tenant_id) => {
     const [rows] = await conn.query(query, [tenant_id]);
     return rows[0];
   } catch (error) {
-    throw new CustomeError("Database error occurred while fetching the Tenant.",404);
+    throw new CustomError("Database error occurred while fetching the Tenant.",404);
   } finally {
     conn.release();
   }
@@ -50,7 +51,7 @@ const checkTenantExistsByTenantId = async (tenant_id) => {
     const [rows] = await conn.query(query, [tenant_id]);
     return rows.length > 0;
   } catch (error) {
-    throw new CustomeError("Database error occurred while fetching the Tenant.");
+    throw new CustomError("Database error occurred while fetching the Tenant.");
   } finally {
     conn.release();
   }
@@ -63,7 +64,7 @@ const checkTenantExistsByTenantnameAndTenantdomain = async (tenantName,tenantDom
     const [rows] = await conn.query(query, [tenantName,tenantDomain]);
     return rows.length > 0;
   } catch (error) {
-    throw new CustomeError("Database error occurred while fetching the Tenant.");
+    throw new CustomError("Database error occurred while fetching the Tenant.");
   } finally {
     conn.release();
   }
@@ -76,20 +77,39 @@ const getTenantByTenantNameAndTenantDomain = async (tenantName,tenantDomain) => 
     const rows = await conn.query(query, [tenantName,tenantDomain]);
     return rows[0];
   } catch (error) {
-    throw new CustomeError("Database error occurred while fetching the Tenant.");
+    throw new CustomError("Database error occurred while fetching the Tenant.");
   } finally {
     conn.release();
   }
 };
 
-const getUserIdUsingKeycloakId = async (table,user_id,tenant_id,clinic_id=null) => {
-  const query =`select ??_id userid from ?? where ??=? and ??=? and ??=?limit 1`;
+const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = null) => {
+  const idColumn = `${table}_id`;
+
+  let query = `
+    SELECT ?? AS userid,username
+    FROM ?? 
+    WHERE keycloak_id = ? AND tenant_id = ?
+  `;
+
+  const queryParams = [idColumn, table, keycloakId, tenantId];
+
+  if (clinicId !== null) {
+    query += ` AND clinic_id = ?`;
+    queryParams.push(clinicId);
+  }
+
+  query += ` LIMIT 1`;
+
   const conn = await pool.getConnection();
+
   try {
-    const rows = await conn.query(query, [table,table,"keycloak_id",user_id,"tenant_id",tenant_id,"clinic_id",clinic_id]);
-    return rows[0];
+    const rows = await conn.query(query, queryParams);
+    console.log(rows)
+    return rows[0]?.userid || null;
   } catch (error) {
-    throw new CustomeError("Database error occurred while fetching the Tenant.");
+    console.error("Database error:", error.message);
+    throw new CustomError("Database error occurred while fetching the UserId.");
   } finally {
     conn.release();
   }
@@ -117,7 +137,7 @@ const deleteTenant = async (tenant_id) => {
     return result.affectedRows; // Return the number of rows affected (should be 1 if successful)
   } catch (error) {
     console.error("Error deleting Tenant:", error.message);
-    throw new CustomeError("Database error occurred while deleting the Tenant.");
+    throw new CustomError("Database error occurred while deleting the Tenant.");
   } finally {
     conn.release();
   }
