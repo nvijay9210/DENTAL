@@ -326,11 +326,11 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
     throw new CustomError("Failed to update appointment", 404);
   }
 };
-const updateAppoinmentStatusCancelled = async (appointment_id,tenant_id,
+const updateAppoinmentStatus = async (appointment_id,tenant_id,
   clinic_id,details) => {
 
   try {
-    const affectedRows = await appointmentModel.updateAppoinmentStatusCancelled(
+    const affectedRows = await appointmentModel.updateAppoinmentStatus(
       appointment_id,
       tenant_id,
       clinic_id,
@@ -1034,7 +1034,7 @@ module.exports = {
   getAppointmentsWithDetails,
   getAppointmentMonthlySummary,
   getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId,
-  updateAppoinmentStatusCancelled,
+  updateAppoinmentStatus,
   getAppointmentSummary,
   getAppointmentSummaryByDentist,
   getAppointmentSummaryChartByClinic,

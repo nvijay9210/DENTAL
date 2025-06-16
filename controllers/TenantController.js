@@ -1,4 +1,5 @@
 const { CustomError } = require("../middlewares/CustomeError");
+const { extractUserInfo } = require("../middlewares/KeycloakAdmin");
 const { getUserIdUsingKeycloakId } = require("../models/TenantModel");
 const tenantService = require("../services/TenantService");
 const tenantValidation = require("../validations/TenantValidation");
@@ -40,6 +41,8 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   if (access_token && access_token.startsWith("Bearer ")) {
     access_token = access_token.split(" ")[1];
   }
+  let user=extractUserInfo(req.user)
+  user.userId=await getUserIdUsingKeycloakId('dentist',user.userId,user.tenantId,user.clinicId)
 
   try {
     if (!tenant_name || !tenant_domain)
@@ -48,14 +51,13 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
       tenant_name,
       tenant_domain
     );
-    const user=await getUserIdUsingKeycloakId()
     res.cookie("access_token", access_token, {
       httpOnly: true, // Prevents JS access on client side (recommended for security)
       secure: true, // Set to true if using HTTPS
       sameSite: "strict", // Helps prevent CSRF
       maxAge: 60 * 60 * 1000, // 1 hour in milliseconds
     });
-    res.status(200).json(tenants);
+    res.status(200).json({...tenants[0],...user});
   } catch (err) {
     next(err);
   }

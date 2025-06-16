@@ -238,7 +238,7 @@ exports.updateAppointment = async (req, res, next) => {
     next(err);
   }
 };
-exports.updateAppoinmentStatusCancelled = async (req, res, next) => {
+exports.updateAppoinmentStatus = async (req, res, next) => {
   const { appointment_id, tenant_id, clinic_id } = req.params;
   const details=req.body
   try {
@@ -253,7 +253,7 @@ exports.updateAppoinmentStatusCancelled = async (req, res, next) => {
     if (!appointment1) throw new CustomError("Appointment not found", 404);
 
     // Update the appointment
-    await appointmentService.updateAppoinmentStatusCancelled(
+    await appointmentService.updateAppoinmentStatus(
       appointment_id,
       tenant_id,
       clinic_id,

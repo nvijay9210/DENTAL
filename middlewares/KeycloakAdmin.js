@@ -159,10 +159,10 @@ function extractUserInfo(token) {
   }
 
   const globalRoles = token.realm_access?.roles || [];
-  const clientRoles = token.resource_access?.["react-client"]?.roles || [];
+  // const clientRoles = token.resource_access?.["react-client"]?.roles || [];
 
-  const role = clientRoles[0] || globalRoles.find(r =>
-    ['super-user', 'doctor', 'patient', 'admin'].includes(r)
+  const role = globalRoles.find(r =>
+    ['super-user', 'dentist', 'patient', 'receptionlist','supplier','dev'].includes(r)
   ) || "user";
 
   return {
@@ -181,4 +181,5 @@ module.exports = {
   getUserIdByUsername,
   assignRealmRoleToUser,
   addUserToGroup,
+  extractUserInfo
 };

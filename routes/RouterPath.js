@@ -49,8 +49,10 @@ module.exports = {
     "/getallappointments/monthlysummary/:tenant_id/:clinic_id/:dentist_id",
   GETALL_PATIENT_VISITEDETAILS:
     "/getallvisitdetails/:tenant_id/:clinic_id/:patient_id",
-  UPDATE_APPOINTMENT_SCHEDULE_CANCELED:
-    "/updateappointment_cancelstatus/:appointment_id/:tenant_id/:clinic_id/",
+  UPDATE_APPOINTMENT_STATUS:
+    "/updateappointment_status/:appointment_id/:tenant_id/:clinic_id/",
+  // UPDATE_APPOINTMENT_SCHEDULE_CANCELED:
+  //   "/updateappointment_cancelstatus/:appointment_id/:tenant_id/:clinic_id/",
   GETALL_APPOINTMENT_ROOMID_PATIENT:"/getallroomidpatient/:tenant_id/:clinic_id/:patient_id",
   GETALL_APPOINTMENT_ROOMID_DENTIST:"/getallroomiddentist/:tenant_id/:clinic_id/:dentist_id",
 
