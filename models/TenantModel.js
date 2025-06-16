@@ -106,7 +106,7 @@ const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = 
   try {
     const rows = await conn.query(query, queryParams);
     console.log(rows)
-    return rows[0]?.userid || null;
+    return rows[0];
   } catch (error) {
     console.error("Database error:", error.message);
     throw new CustomError("Database error occurred while fetching the UserId.");

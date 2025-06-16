@@ -41,8 +41,16 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   if (access_token && access_token.startsWith("Bearer ")) {
     access_token = access_token.split(" ")[1];
   }
-  let user=extractUserInfo(req.user)
-  user.userId=await getUserIdUsingKeycloakId('dentist',user.userId,user.tenantId,user.clinicId)
+  let user = extractUserInfo(req.user);
+  const userdetails = await getUserIdUsingKeycloakId(
+    "dentist",
+    user.userId,
+    user.tenantId,
+    user.clinicId
+  );
+
+  user.userId=userdetails[0].userid
+  user.username=userdetails[0].username
 
   try {
     if (!tenant_name || !tenant_domain)
@@ -57,7 +65,12 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
       sameSite: "strict", // Helps prevent CSRF
       maxAge: 60 * 60 * 1000, // 1 hour in milliseconds
     });
-    res.status(200).json({...tenants[0],...user});
+    res
+      .status(200)
+      .json({
+        ...tenants[0],
+        ...user
+      });
   } catch (err) {
     next(err);
   }
