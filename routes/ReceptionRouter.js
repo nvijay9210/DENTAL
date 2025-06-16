@@ -27,8 +27,8 @@ const receptionFileMiddleware = uploadFileMiddleware({
         multiple: false,
       }
     ],
-    createValidationFn: receptionValidation.createPatientValidation,
-    updateValidationFn: receptionValidation.updatePatientValidation,
+    createValidationFn: receptionValidation.createReceptionValidation,
+    updateValidationFn: receptionValidation.updateReceptionValidation,
   });
 
 // Create Reception
