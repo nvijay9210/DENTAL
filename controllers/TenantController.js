@@ -1,4 +1,5 @@
 const { CustomError } = require("../middlewares/CustomeError");
+const { getUserIdUsingKeycloakId } = require("../models/TenantModel");
 const tenantService = require("../services/TenantService");
 const tenantValidation = require("../validations/TenantValidation");
 
@@ -47,6 +48,7 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
       tenant_name,
       tenant_domain
     );
+    const user=await getUserIdUsingKeycloakId()
     res.cookie("access_token", access_token, {
       httpOnly: true, // Prevents JS access on client side (recommended for security)
       secure: true, // Set to true if using HTTPS
