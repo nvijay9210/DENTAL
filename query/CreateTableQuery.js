@@ -19,6 +19,8 @@ const createTableQuery = {
   rescheduled_from int(11) DEFAULT NULL,
   cancelled_by varchar(30) DEFAULT NULL,
   cancellation_reason text DEFAULT NULL,
+  doctor_rating decimal(3,2) DEFAULT NULL,
+  feedback text DEFAULT NULL,
   is_virtual tinyint(1) DEFAULT 0,
   reminder_send tinyint(1) DEFAULT 0,
   meeting_link varchar(255) DEFAULT NULL,

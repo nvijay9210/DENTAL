@@ -74,7 +74,7 @@ WHERE
       offset,
     ]);
     const [count] = await conn.query(query2, [tenantId, clinicId]);
-    console.log("appoinments:", rows);
+    
     return { data: rows, total: count[0].total };
   } catch (error) {
     console.log(error);
@@ -120,7 +120,7 @@ WHERE
       offset,
     ]);
     const [counts] = await conn.query(query2, [tenantId, clinicId, dentist_id]);
-    console.log("appoinments:", rows);
+
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.log(error);
@@ -172,7 +172,7 @@ WHERE
       limit,
       offset,
     ]);
-    console.log("appoinments:", rows);
+    
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.log(error);
@@ -280,7 +280,7 @@ WHERE
       offset,
     ]);
     const [counts] = await conn.query(query2, [tenantId, dentistId]);
-    console.log("appoinments:", rows);
+  
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.log(error);
@@ -322,7 +322,7 @@ WHERE
       offset,
     ]);
     const [counts] = await conn.query(query2, [tenantId, patient_id]);
-    console.log("appoinments:", rows);
+   
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.log(error);
@@ -494,7 +494,7 @@ WHERE app.tenant_id = ?
       clinic_id,
       dentist_id,
     ]);
-    console.log("appoinments:", rows);
+    
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.log(error);
@@ -548,7 +548,7 @@ WHERE app.tenant_id = ?
       offset,
     ]);
     const [counts] = await conn.query(query2, [tenantId, patientId]);
-    console.log("appoinments:", rows);
+    
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.log(error);
@@ -581,7 +581,7 @@ WHERE
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query, [tenantId, clinic_id, dentist_id]);
-    console.log("appoinments:", rows);
+
     return rows;
   } catch (error) {
     console.log(error);
@@ -721,6 +721,60 @@ WHERE
   }
 };
 
+const getDentistIdByTenantIdAndAppointmentId = async (
+  tenantId,
+  appointment_id,
+  status
+) => {
+  const query = `
+    SELECT 
+      app.dentist_id as dentistId
+    FROM 
+      appointment AS app
+    WHERE 
+      app.tenant_id = ? AND 
+      app.appointment_id = ? AND
+      app.status = ?
+  `;
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId, appointment_id, status]);
+    // Check if a row was found, and return the dentistId or null/undefined
+    return rows.length > 0 ? rows[0].dentistId : null;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+
+const updateAppoinmentFeedback = async (appointment_id,tenant_id,details,status) => {
+  const { doctor_rating,feedback } = details;
+
+  let query = `
+    UPDATE appointment 
+    SET doctor_rating = ?,feedback=?  WHERE appointment_id = ? 
+      AND tenant_id = ? 
+      AND status = ?
+  `;
+
+  let queryParams = [doctor_rating,feedback,appointment_id,tenant_id,status];
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, queryParams);
+    return rows.affectedRows > 0;
+  } catch (error) {
+    console.error("Error updating appointment status:", error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
 const updateAppoinmentStatus = async (appointment_id, tenantId, clinicId, details) => {
   const { status, cancelled_by, cancellation_reason } = details;
 
@@ -756,6 +810,7 @@ const updateAppoinmentStatus = async (appointment_id, tenantId, clinicId, detail
     conn.release();
   }
 };
+
 const updateAppoinmentStatusCancelledAndReschedule = async (
   appointment_id,
   tenantId,
@@ -781,7 +836,6 @@ const updateAppoinmentStatusCancelledAndReschedule = async (
       tenantId,
       clinicId,
     ]);
-    console.log("appointments:", rows);
     return rows.affectedRows > 0;
   } catch (error) {
     console.error("Error updating appointment status:", error);
@@ -843,4 +897,6 @@ module.exports = {
   updateRoomIdBeforeAppointment,
   getAllRoomIdByTenantIdAndClinicIdAndDentistId,
   getAllRoomIdByTenantIdAndClinicIdAndPatientId,
+  updateAppoinmentFeedback,
+  getDentistIdByTenantIdAndAppointmentId
 };

@@ -16,7 +16,7 @@ const { formatDateOnly, formatAppointments, isoToSqlDatetime } = require("../uti
 const { mapFields } = require("../query/Records");
 const { updatePatientCount } = require("../models/ClinicModel");
 const { updatePatientAppointmentCount } = require("../models/PatientModel");
-const { updateDentistAppointmentCount } = require("../models/DentistModel");
+const { updateDentistAppointmentCount, getDentistByTenantIdAndDentistId, updateDentistRatingAndReviewCount } = require("../models/DentistModel");
 
 const appointmentFields = {
   tenant_id: (val) => val,
@@ -28,6 +28,8 @@ const appointmentFields = {
   start_time: (val) => val,
   end_time: (val) => val,
   status: (val) => val,
+  doctor_rating: (val) => parseFloat(val),
+  feedback: (val) => helper.safeStringify(val),
   appointment_type: (val) => val,
   consultation_fee: (val) => val || null,
   discount_applied: (val) => val || 0.0,
@@ -60,6 +62,8 @@ const appointmentFieldsReverseMap = {
   start_time: (val) => val,
   end_time: (val) => val,
   status: (val) => val,
+  doctor_rating: (val) => val,
+  feedback: (val) => safeJsonParse(val),
   appointment_type: (val) => val,
   consultation_fee: (val) => val,
   discount_applied: (val) => val || 0.0,
@@ -283,7 +287,7 @@ const getAppointmentByTenantIdAndAppointmentId = async (
         tenantId,
         appointmentId
       );
-      console.log(appointment)
+      // console.log(appointment)
     
       const convertedRows = 
         helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
@@ -326,6 +330,65 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
     throw new CustomError("Failed to update appointment", 404);
   }
 };
+
+const updateAppoinmentFeedback = async (appointment_id, tenant_id, details, status = 'completed') => {
+  try {
+    // 1. Update appointment feedback
+    const affectedRows = await appointmentModel.updateAppoinmentFeedback(
+      appointment_id, tenant_id, details, status
+    );
+
+    if (affectedRows === 0) {
+      throw new CustomError("Appointment not found or no changes made.", 404);
+    }
+
+    // 2. Invalidate relevant cache patterns
+    await invalidateCacheByPattern("appointment:*");
+    await invalidateCacheByPattern("appointmentsdetails:*");
+    await invalidateCacheByPattern("patientvisitdetails:*");
+    await invalidateCacheByPattern("appointmentsmonthlysummary:*");
+    await invalidateCacheByPattern("financeSummary:*");
+    await invalidateCacheByPattern("patient:*");
+
+    // 3. Get dentistId for this appointment
+    const dentistId = await appointmentModel.getDentistIdByTenantIdAndAppointmentId(
+      tenant_id, appointment_id, status
+    );
+    if (!dentistId) {
+      throw new CustomError("Dentist not found for this appointment.", 404);
+    }
+
+    // 4. Get dentist details
+    const dentist = await getDentistByTenantIdAndDentistId(tenant_id, dentistId);
+    if (!dentist) {
+      throw new CustomError("Dentist details not found.", 404);
+    }
+
+    // 5. Calculate new average rating
+    const prevRating = Number(dentist.ratings) || 0;
+    const prevCount = Number(dentist.reviews_count) || 0;
+    const newRating = Number(details.doctor_rating) || 0;
+
+    const totalRating = ((prevRating * prevCount) + newRating) / (prevCount + 1);
+
+    // 6. Update dentist's rating and review count
+    const dentistRating = await updateDentistRatingAndReviewCount(
+      tenant_id, dentistId, totalRating, prevCount + 1
+    );
+
+    if (dentistRating === 0) {
+      throw new CustomError("Dentist rating update failed or no changes made.", 404);
+    }
+
+    return dentistRating;
+
+  } catch (error) {
+    console.error("Update Error:", error);
+    throw new CustomError(error.message || "Failed to update appointment", error.statusCode || 500);
+  }
+};
+
+
 const updateAppoinmentStatus = async (appointment_id,tenant_id,
   clinic_id,details) => {
 
@@ -1045,5 +1108,6 @@ module.exports = {
   getAllAppointmentsByTenantIdAndAndDentistId,
   getAllAppointmentsByTenantIdAndPatientId,
   getAllRoomIdByTenantIdAndClinicIdAndDentistId,
-  getAllRoomIdByTenantIdAndClinicIdAndPatientId
+  getAllRoomIdByTenantIdAndClinicIdAndPatientId,
+  updateAppoinmentFeedback
 };
