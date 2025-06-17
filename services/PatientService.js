@@ -21,6 +21,8 @@ const { encrypt } = require("../middlewares/PasswordHash");
 const patiendFields = {
   tenant_id: (val) => val,
   keycloak_id: (val) => val,
+  username: (val) => val,
+  password: (val) => val,
   first_name: (val) => val,
   last_name: (val) => val,
   email: (val) => val || null,
@@ -50,6 +52,8 @@ const patientFieldsReverseMap = {
   patient_id: (val) => val,
   tenant_id: (val) => val,
   keycloak_id: (val) => val,
+  username: (val) => val,
+  password: (val) => val,
   first_name: (val) => val,
   last_name: (val) => val,
   email: (val) => val,
@@ -90,25 +94,62 @@ const createPatient = async (data,token,realm) => {
   };
 
   try {
-    // const userData = {
-    //   username: helper.generateUsername(data.first_name, data.phone_number),
-    //   email:
-    //     data.email ||
-    //     `${data.first_name}${helper.generateAlphanumericPassword()}@gmail.com`,
-    //   firstName: data.first_name,
-    //   lastName: data.last_name,
-    //   password: helper.generateAlphanumericPassword(),
-    // };
-    // const user = await addUser(token, realm, userData);
-    // if (!user) throw new CustomError("User not created", 404);
-    // console.log("User Created");
-    // const userId = await getUserIdByUsername(token, realm, userData.username);
-    // console.log("user:", userId);
-    // const role = await assignRealmRoleToUser(token, realm, userId, "patient");
-    // if (!role) throw new CustomError("Role not Assign", 404);
-    // data.keycloak_id = userId;
-    // data.username=userData.username;
-    // data.password=encrypt(userData.password);
+    // 1. Generate username/email
+    const username = helper.generateUsername(
+      data.first_name,
+      data.phone_number
+    );
+    const email =
+      data.email ||
+      `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
+
+    const userData = {
+      username,
+      email,
+      firstName: data.first_name,
+      lastName: data.last_name,
+      password: "1234", // For demo; use generateAlphanumericPassword() in production
+    };
+
+    // 2. Create Keycloak User
+    const isUserCreated = await addUser(token, realm, userData);
+    if (!isUserCreated) throw new CustomError("Keycloak user not created", 400);
+
+    console.log("✅ Keycloak user created:", userData.username);
+
+    // 3. Get User ID from Keycloak
+    const userId = await getUserIdByUsername(token, realm, userData.username);
+    if (!userId) throw new CustomError("Could not fetch Keycloak user ID", 400);
+
+    console.log("🆔 Keycloak user ID fetched:", userId);
+
+    // 4. Assign Role: 'patient'
+    const roleAssigned = await assignRealmRoleToUser(
+      token,
+      realm,
+      userId,
+      "dentist"
+    );
+    if (!roleAssigned)
+      throw new CustomError("Failed to assign 'patient' role", 400);
+
+    console.log("🩺 Assigned 'patient' role");
+
+    // 5. Optional: Add to Group (e.g., based on clinicId)
+    if (data.clinicId) {
+      const groupName = `dental-${data.tenantId}-${data.clinicId}`;
+      const groupAdded = await addUserToGroup(token, realm, userId, groupName);
+
+      if (!groupAdded) {
+        console.warn(`⚠️ Failed to add user to group: ${groupName}`);
+      } else {
+        console.log(`👥 Added to group: ${groupName}`);
+      }
+    }
+
+    data.keycloak_id=userId,
+    data.username=username,
+    data.password=encrypt(userData.password).content
     
     
   const { columns, values } = mapFields(data, create);
@@ -786,7 +827,7 @@ const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
       tenantId,
       patientId
     );
-    console.log(patient);
+    // console.log(patient);
     const convertedRows = helper.convertDbToFrontend(
       patient,
       patientFieldsReverseMap

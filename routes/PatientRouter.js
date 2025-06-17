@@ -7,6 +7,7 @@ const { uploadFileMiddleware } = require("../utils/UploadFiles");
 const patientValidation = require("../validations/PatientValidation");
 const routerPath = require("./RouterPath");
 const { multiTenantAuthMiddleware } = require("../middlewares/AuthToken");
+const { authenticateTenantClinicGroup } = require("../Keycloak/AuthenticateTenantAndClient");
 
 // router.use(multiTenantAuthMiddleware)
 
@@ -14,12 +15,12 @@ const { multiTenantAuthMiddleware } = require("../middlewares/AuthToken");
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Common upload fields
-const patientUploadFields = upload.fields([
-  { name: "profile_picture", maxCount: 1 },
-  // { name: "aadhaar_front", maxCount: 1 },
-  // { name: "aadhaar_back", maxCount: 1 },
-  // { name: "medical_reports", maxCount: 10 },
-]);
+// const patientUploadFields = upload.fields([
+//   { name: "profile_picture", maxCount: 1 },
+//   // { name: "aadhaar_front", maxCount: 1 },
+//   // { name: "aadhaar_back", maxCount: 1 },
+//   // { name: "medical_reports", maxCount: 10 },
+// ]);
 
 // File middleware options
 const patientFileMiddleware = uploadFileMiddleware({
@@ -42,7 +43,7 @@ const patientFileMiddleware = uploadFileMiddleware({
 // Create Patient
 router.post(
   routerPath.ADD_PATIENT,
-  // patientUploadFields,
+  authenticateTenantClinicGroup(['super-user']),
   upload.any(),
   patientFileMiddleware,
   patientController.createPatient

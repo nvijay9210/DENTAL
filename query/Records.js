@@ -186,7 +186,6 @@ const getAllRecords = async (table, tenantColumn, tenantId, limit = 100, offset 
     // 2. Get paginated data
     const [data] = await conn.query(dataSql, [tenantId, limit, offset]);
 
-    console.log(total,data)
 
     return { total, data };
   } catch (error) {
@@ -254,7 +253,7 @@ const deleteRecord = async (table, conditionColumns = [], conditionValues = []) 
   try {
     conn = await pool.getConnection();
     const result = await conn.query(sql, conditionValues);
-    console.log('res:',result[0])
+    // console.log('res:',result[0])
     return result;
   } catch (error) {
     console.error("Error executing DELETE:", error);

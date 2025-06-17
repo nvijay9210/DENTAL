@@ -1,33 +1,36 @@
-const jwksClient = require("jwks-rsa");
 const jwt = require("jsonwebtoken");
+const jwksClient = require("jwks-rsa");
+const axios=require('axios')
 
-// Define tenants config
 const tenantsConfig = {
   similecare: {
     jwksUri: "http://localhost:8080/realms/similecare/protocol/openid-connect/certs",
-    audience: "react-client",
     issuer: "http://localhost:8080/realms/similecare",
+    audience: "react-client",
   },
-  // Add more tenants as needed
+  // Add other realms as needed
 };
 
-function getKeyClient(tenantName) {
-  const tenant = tenantsConfig[tenantName];
-  if (!tenant) throw new Error(`Unknown tenant: ${tenantName}`);
+function getKeyClient(realm) {
+  const tenant = tenantsConfig[realm];
+  if (!tenant) throw new Error(`Unknown realm: ${realm}`);
   return jwksClient({ jwksUri: tenant.jwksUri });
 }
 
-function verifyTokenForTenant(token, tenantName) {
-  const tenant = tenantsConfig[tenantName];
-  const client = getKeyClient(tenantName);
-
+function verifyTokenForRealm(token, realm) {
   return new Promise((resolve, reject) => {
+    const tenant = tenantsConfig[realm];
+    if (!tenant) return reject(new Error(`Unknown realm: ${realm}`));
+
+    const client = getKeyClient(realm);
+
     jwt.verify(
       token,
       (header, callback) => {
         client.getSigningKey(header.kid, (err, key) => {
           if (err) return callback(err);
-          callback(null, key.getPublicKey());
+          const publicKey = key.getPublicKey();
+          callback(null, publicKey);
         });
       },
       {
@@ -43,43 +46,98 @@ function verifyTokenForTenant(token, tenantName) {
   });
 }
 
-// 🔐 Role + Tenant Validation Middleware
-function requireTenantAndRole(requiredRole) {
-  return async (req, res, next) => {
+
+async function authMiddleware(req, res, next) {
+  try {
+    const realm = req.cookies.realm || req.headers["x-realm"];
+    if (!realm) {
+      return res.status(401).json({ message: "Realm not provided" });
+    }
+
+    const accessToken = await checkAndRefreshToken(req, res);
+
+    const user = await verifyTokenForRealm(accessToken, realm);
+    req.user = user;
+    req.realm = realm;
+
+    next();
+  } catch (err) {
+    console.error("❌ Auth failed:", err.message);
+    res.status(401).json({ error: "Unauthorized", detail: err.message });
+  }
+}
+
+function decodeToken(token) {
+  try {
+    return jwt.decode(token);
+  } catch {
+    return null;
+  }
+}
+
+async function checkAndRefreshToken(req, res) {
+  let accessToken =
+    req.cookies.access_token ||
+    (req.headers.authorization?.startsWith("Bearer ") && req.headers.authorization.slice(7)) ||
+    null;
+
+  const refreshToken = req.cookies.refresh_token || req.headers["x-refresh-token"];
+  const realm = req.cookies.realm || req.headers["x-realm"];
+
+  if (!accessToken || !realm) throw new Error("Access token or realm not provided");
+
+  const decoded = decodeToken(accessToken);
+  if (!decoded || !decoded.exp) throw new Error("Invalid access token");
+
+  const now = Math.floor(Date.now() / 1000);
+  const expiresIn = decoded.exp - now;
+
+  if (expiresIn < 120) {
+    if (!refreshToken) throw new Error("Refresh token required to renew access token");
+
+    const tenant = tenantsConfig[realm];
+    if (!tenant) throw new Error("Unknown realm config");
+
     try {
-      // 1. Get token from header
-      const token = req.headers.authorization?.replace("Bearer ", "");
-      if (!token) return res.status(401).json({ error: "Unauthorized" });
+      const response = await axios.post(
+        tenant.tokenEndpoint,
+        new URLSearchParams({
+          grant_type: "refresh_token",
+          refresh_token: refreshToken,
+          client_id: tenant.audience,
+        }),
+        {
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        }
+      );
 
-      // 2. Get tenant name from header
-      const tenantName = req.headers["x-tenant-name"];
-      if (!tenantName)
-        return res.status(400).json({ error: "Tenant name header required" });
+      const { access_token, refresh_token } = response.data;
 
-      // 3. Verify token for that tenant
-      const decodedToken = await verifyTokenForTenant(token, tenantName);
+      // 🍪 Set new cookies
+      res.cookie("access_token", access_token, {
+        httpOnly: true,
+        sameSite: "Strict",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 1000 * 60 * 15,
+      });
 
-      // 4. Attach user info
-      req.user = decodedToken;
-      req.tenantName = tenantName;
-
-      // 5. Check if user has required role
-      const userRoles = decodedToken.realm_access?.roles || [];
-      const hasPermission = userRoles.includes(requiredRole);
-
-      if (!hasPermission) {
-        return res.status(403).json({
-          error: `Forbidden: You must have the "${requiredRole}" role to perform this action`,
+      if (refresh_token) {
+        res.cookie("refresh_token", refresh_token, {
+          httpOnly: true,
+          sameSite: "Strict",
+          secure: process.env.NODE_ENV === "production",
+          maxAge: 1000 * 60 * 60 * 24 * 7,
         });
       }
 
-      // ✅ All checks passed
-      next();
+      return access_token;
     } catch (err) {
-      console.error("Auth validation failed:", err.message);
-      return res.status(401).json({ error: "Invalid token or access denied" });
+      console.error("🔁 Token refresh failed:", err.message);
+      throw new Error("Failed to refresh token");
     }
-  };
+  }
+
+  return accessToken;
 }
 
-module.exports = { requireTenantAndRole };
+module.exports={authMiddleware}

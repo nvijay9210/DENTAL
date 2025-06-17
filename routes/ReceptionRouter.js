@@ -13,6 +13,7 @@ const {
 } = require("./RouterPath");
 const receptionValidation = require("../validations/ReceptionValidation");
 const { multiTenantAuthMiddleware } = require("../middlewares/AuthToken");
+const { authenticateTenantClinicGroup } = require("../Keycloak/AuthenticateTenantAndClient");
 const upload = multer({ storage: multer.memoryStorage() });
 
 // router.use(multiTenantAuthMiddleware)
@@ -34,6 +35,7 @@ const receptionFileMiddleware = uploadFileMiddleware({
 // Create Reception
 router.post(
   ADD_RECEPTION,
+  authenticateTenantClinicGroup(['super-user']),
   upload.any(),
   receptionFileMiddleware,
   receptionController.createReception

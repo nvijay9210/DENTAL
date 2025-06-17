@@ -9,7 +9,7 @@ const patientValidation = require("../validations/PatientValidation");
 exports.createPatient = async (req, res, next) => {
   const details = req.body;
   const token=req.token;
-  const realm=req.tenant_name;
+  const realm=req.realm;
 
   try {
     // Validate patient data
@@ -218,7 +218,7 @@ exports.updatePatient = async (req, res, next) => {
 exports.updateToothDetails = async (req, res, next) => {
   const { patient_id, tenant_id } = req.params;
   const details = req.body;
-  console.log("details:", details);
+  // console.log("details:", details);
   try {
     const patient = await checkIfExists(
       "patient",

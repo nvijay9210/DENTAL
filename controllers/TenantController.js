@@ -38,6 +38,7 @@ exports.getTenantByTenantId = async (req, res, next) => {
 exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   const { tenant_name, tenant_domain } = req.params;
   let access_token = req.headers["authorization"];
+  let realm = req.headers["x-realm"];
   if (access_token && access_token.startsWith("Bearer ")) {
     access_token = access_token.split(" ")[1];
   }
@@ -49,8 +50,8 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
     user.clinicId
   );
 
-  user.userId=userdetails[0].userid
-  user.username=userdetails[0].username
+  user.userId = userdetails[0]?.userid || null;
+  user.username = userdetails[0]?.username || null;
 
   try {
     if (!tenant_name || !tenant_domain)
@@ -60,17 +61,22 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
       tenant_domain
     );
     res.cookie("access_token", access_token, {
-      httpOnly: true, // Prevents JS access on client side (recommended for security)
-      secure: true, // Set to true if using HTTPS
-      sameSite: "strict", // Helps prevent CSRF
-      maxAge: 60 * 60 * 1000, // 1 hour in milliseconds
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 1000 * 60 * 15,
     });
-    res
-      .status(200)
-      .json({
-        ...tenants[0],
-        ...user
-      });
+
+    res.cookie("realm", realm, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    res.status(200).json({
+      ...tenants[0],
+      ...user,
+    });
   } catch (err) {
     next(err);
   }
