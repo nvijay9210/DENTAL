@@ -5,7 +5,6 @@ const dentistController = require("../controllers/DentistController");
 const routerPath = require("./RouterPath");
 const { uploadFileMiddleware } = require("../utils/UploadFiles");
 const dentistValidation = require("../validations/DentistValidation");
-const { strictDentalGroupAccess } = require("../Keycloak/StrictGroupAccess");
 const { authenticateTenantClinicGroup } = require("../Keycloak/AuthenticateTenantAndClient");
 
 // Setup multer memory storage
@@ -54,7 +53,7 @@ router.post(
 // Get All Dentists by Tenant ID
 router.get(
   routerPath.GETALL_DENTIST_TENANT,
-  strictDentalGroupAccess(['super-user']),
+  authenticateTenantClinicGroup(['super-user']),
   dentistController.getAllDentistsByTenantId
 );
 

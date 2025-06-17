@@ -5,7 +5,6 @@ const routerPath = require("./RouterPath");
 const tenantValidation = require("../validations/TenantValidation");
 const multer = require("multer");
 const { uploadFileMiddleware } = require("../utils/UploadFiles");
-const { strictDentalGroupAccess } = require("../Keycloak/StrictGroupAccess");
 const { authenticateTenantClinicGroup } = require("../Keycloak/AuthenticateTenantAndClient");
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -37,7 +36,7 @@ router.post(
 router.get(routerPath.GETALL_TENTANT, tenantController.getAllTenant);
 router.get(routerPath.GET_TENANT, tenantController.getTenantByTenantId);
 router.get(
-  routerPath.GET_TENANT_NAME_DOMAIN,authenticateTenantClinicGroup(['dentist','super-user']),
+  routerPath.GET_TENANT_NAME_DOMAIN,authenticateTenantClinicGroup(['tenant','super-user']),
   tenantController.getTenantByTenantNameAndTenantDomain
 );
 router.put(

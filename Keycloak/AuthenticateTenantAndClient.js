@@ -3,7 +3,7 @@ const jwksClient = require("jwks-rsa");
 
 function getKeycloakClient(realm) {
   return jwksClient({
-    jwksUri: `http://localhost:8080/realms/${realm}/protocol/openid-connect/certs`,
+    jwksUri: `${process.env.KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/certs`,
   });
 }
 
