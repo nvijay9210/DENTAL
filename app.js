@@ -35,6 +35,8 @@ const receptionRouter = require('./routes/ReceptionRouter');
 // const compressionMiddleware = require('./middlewares/CompressionMiddleware');
 const { redisconnect } = require('./config/redisConfig');
 
+const { keycloakAuthMiddleware } = require('./middlewares/RefreshTokenController');
+
 // Initialize Express
 const app = express();
 

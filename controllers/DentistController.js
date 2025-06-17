@@ -8,7 +8,7 @@ const dentistValidation = require("../validations/DentistValidation");
 exports.createDentist = async (req, res, next) => {
   const details = req.body;
   const token=req.token;
-  const realm=req.tenant_name;
+  const realm=req.realm;
 
   try {
     await dentistValidation.createDentistValidation(details);

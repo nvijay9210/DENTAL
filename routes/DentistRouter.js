@@ -5,8 +5,8 @@ const dentistController = require("../controllers/DentistController");
 const routerPath = require("./RouterPath");
 const { uploadFileMiddleware } = require("../utils/UploadFiles");
 const dentistValidation = require("../validations/DentistValidation");
-const { multiTenantAuthMiddleware, permitGroups, permit, requireTenantAndClinicAccess } = require("../middlewares/AuthToken");
-const { requireTenantAndRole } = require("../middlewares/AuthTenantAndRole");
+const { strictDentalGroupAccess } = require("../Keycloak/StrictGroupAccess");
+const { authenticateTenantClinicGroup } = require("../Keycloak/AuthenticateTenantAndClient");
 
 // Setup multer memory storage
 const upload = multer({ storage: multer.memoryStorage() });
@@ -45,7 +45,7 @@ const dentistFileMiddleware = uploadFileMiddleware({
 // Add Dentist
 router.post(
   routerPath.ADD_DENTIST,
-  // requireTenantAndRole('dev'),
+  authenticateTenantClinicGroup(['super-user']),
   upload.any(),
   dentistFileMiddleware,
   dentistController.createDentist
@@ -54,6 +54,7 @@ router.post(
 // Get All Dentists by Tenant ID
 router.get(
   routerPath.GETALL_DENTIST_TENANT,
+  strictDentalGroupAccess(['super-user']),
   dentistController.getAllDentistsByTenantId
 );
 
@@ -65,8 +66,7 @@ router.get(
 
 router.get(
   routerPath.GET_DENTIST_TENANT_CLINIC,
-  // requireTenantAndClinicAccess,
-  // permit('super-user'),
+  authenticateTenantClinicGroup(['super-user']),
   dentistController.getAllDentistByTenantIdAndClientId
 );
 
