@@ -21,6 +21,7 @@ const {
   GETALL_APPOINTMENT_ROOMID_PATIENT,
   GETALL_APPOINTMENT_ROOMID_DENTIST,
   UPDATE_APPOINTMENT_STATUS,
+  UPDATE_APPOINTMENT_RATING_FEEDBACK,
 } = require("./RouterPath");
 
 // File upload middleware can be added here if needed (e.g. reports, prescriptions)
@@ -64,6 +65,11 @@ router.put(UPDATE_APPOINTMENT_TENANT, appointmentController.updateAppointment);
 router.put(
   UPDATE_APPOINTMENT_STATUS,
   appointmentController.updateAppoinmentStatus
+);
+
+router.put(
+  UPDATE_APPOINTMENT_RATING_FEEDBACK,
+  appointmentController.updateAppoinmentFeedback
 );
 
 // Delete Appointment

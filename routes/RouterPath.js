@@ -49,6 +49,8 @@ module.exports = {
     "/getallappointments/monthlysummary/:tenant_id/:clinic_id/:dentist_id",
   GETALL_PATIENT_VISITEDETAILS:
     "/getallvisitdetails/:tenant_id/:clinic_id/:patient_id",
+    UPDATE_APPOINTMENT_RATING_FEEDBACK:
+    "/submitfeedback/:tenant_id/:appointment_id",
   UPDATE_APPOINTMENT_STATUS:
     "/updateappointment_status/:appointment_id/:tenant_id/:clinic_id/",
   // UPDATE_APPOINTMENT_SCHEDULE_CANCELED:

@@ -63,6 +63,14 @@ const appoinmentColumnConfig = [
     null: false,
   },
   { columnname: "visit_reason", type: "text", null: true },
+  { columnname: "feedback", type: "text", null: true },
+  {
+    columnname: "doctor_rating",
+    type: "decimal",
+    size: "3,2",
+    null: true,
+    default: 0.0,
+  },
   {
     columnname: "follow_up_needed",
     type: "boolean",

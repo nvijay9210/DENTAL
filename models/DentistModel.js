@@ -31,19 +31,17 @@ const getAllDentistsByTenantId = async (tenantId, limit, offset) => {
 };
 
 const getDentistByTenantIdAndDentistId = async (tenant_id, dentist_id) => {
+  const query = `select * from dentist where tenant_id=? and dentist_id=?`;
+  const conn = await pool.getConnection();
   try {
-    const rows = await record.getRecordByIdAndTenantId(
-      "dentist",
-      "tenant_id",
-      tenant_id,
-      "dentist_id",
-      dentist_id
-    );
+    const [rows] = await conn.query(query, [tenant_id, dentist_id]);
 
-    return rows || null;
+    return rows;
   } catch (error) {
-    console.error("Error executing query:", error);
-    throw new Error("Error fetching dentist.");
+    console.error(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
   }
 };
 
@@ -141,6 +139,21 @@ const updateClinicIdAndNameAndAddress=async(tenantId,clinicId,clinic_name,clinic
   }
 }
 
+const updateDentistRatingAndReviewCount=async(tenantId,dentist_id,newRating,newReviewCount)=>{
+
+  const query = `update dentist set ratings=?, reviews_count=?  where tenant_id=? and dentist_id=?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [newRating,newReviewCount,tenantId,dentist_id]);
+    return rows.length > 0;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+}
+
 const updateNullClinicInfoWithJoin = async (tenantId, clinicId,dentistId) => {
 
   const query = `
@@ -223,5 +236,6 @@ module.exports = {
   getAllDentistsByClinicId,
   updateNullClinicInfoWithJoin,
   checkDentistExistsUsingTenantIdAndClinicIdAnddentistId,
-  updateDentistAppointmentCount
+  updateDentistAppointmentCount,
+  updateDentistRatingAndReviewCount
 };

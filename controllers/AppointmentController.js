@@ -238,6 +238,7 @@ exports.updateAppointment = async (req, res, next) => {
     next(err);
   }
 };
+
 exports.updateAppoinmentStatus = async (req, res, next) => {
   const { appointment_id, tenant_id, clinic_id } = req.params;
   const details=req.body
@@ -262,6 +263,32 @@ exports.updateAppoinmentStatus = async (req, res, next) => {
     res
       .status(200)
       .json({ message: "Appointment status updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateAppoinmentFeedback = async (req, res, next) => {
+  const { appointment_id, tenant_id } = req.params;
+  const details=req.body
+  try {
+    // Validate if appointment exists before update
+    const appointment1 = await checkIfExists(
+      "appointment",
+      "appointment_id",
+      appointment_id,
+      tenant_id
+    );
+
+    if (!appointment1) throw new CustomError("Appointment not found", 404);
+
+    // Update the appointment
+    await appointmentService.updateAppoinmentFeedback( 
+      appointment_id,tenant_id,details
+    );
+    res
+      .status(200)
+      .json({ message: "Appointment and Dentist Feedback updated successfully" });
   } catch (err) {
     next(err);
   }
