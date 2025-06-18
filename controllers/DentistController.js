@@ -7,16 +7,15 @@ const dentistValidation = require("../validations/DentistValidation");
 
 exports.createDentist = async (req, res, next) => {
   const details = req.body;
-  // const token=req.token;
-  // const realm=req.realm;
+  const token=req.token;
+  const realm=req.realm;
 
   try {
     await dentistValidation.createDentistValidation(details);
     
 
     // Create a new dentist
-    // const id = await dentistService.createDentist(details,token,realm);
-    const id = await dentistService.createDentist(details);
+    const id = await dentistService.createDentist(details,token,realm);
     res.status(200).json({ message: "Dentist created", id });
   } catch (err) {
     next(err);

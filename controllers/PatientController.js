@@ -8,16 +8,15 @@ const patientValidation = require("../validations/PatientValidation");
 
 exports.createPatient = async (req, res, next) => {
   const details = req.body;
-  // const token=req.token;
-  // const realm=req.realm;
+  const token=req.token;
+  const realm=req.realm;
 
   try {
     // Validate patient data
     await patientValidation.createPatientValidation(details);
 
     // Create a new patient
-    // const id = await patientService.createPatient(details,token,realm);
-    const id = await patientService.createPatient(details);
+    const id = await patientService.createPatient(details,token,realm);
     res.status(200).json({ message: "Patient created", id });
   } catch (err) {
     next(err);

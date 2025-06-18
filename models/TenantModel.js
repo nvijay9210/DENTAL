@@ -86,8 +86,6 @@ const getTenantByTenantNameAndTenantDomain = async (tenantName,tenantDomain) => 
 const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = null) => {
   const idColumn = `${table}_id`;
 
-  if(table==='receptionist') table='reception'
-
   let query = `
     SELECT ?? AS userid,username
     FROM ?? 
