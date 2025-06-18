@@ -35,7 +35,7 @@ const receptionFileMiddleware = uploadFileMiddleware({
 // Create Reception
 router.post(
   ADD_RECEPTION,
-  authenticateTenantClinicGroup(['super-user']),
+  // authenticateTenantClinicGroup(['super-user']),
   upload.any(),
   receptionFileMiddleware,
   receptionController.createReception
