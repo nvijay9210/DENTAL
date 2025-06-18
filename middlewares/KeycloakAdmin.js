@@ -175,11 +175,44 @@ function extractUserInfo(token) {
   };
 }
 
+// ✅ 5. Reset User Password
+async function resetUserPassword(token, realm, userId, newPassword, temporary = false) {
+  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/reset-password`;
+
+  try {
+    const response = await axios.put(
+      url,
+      {
+        type: "password",
+        value: newPassword,
+        temporary: temporary
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    console.log(`✅ Password reset for user ${userId}`);
+    return true;
+  } catch (error) {
+    console.error(
+      "❌ Failed to reset password:",
+      error.response?.data || error.message
+    );
+    return false;
+  }
+}
+
+
 // ✅ Export all functions
 module.exports = {
   addUser,
   getUserIdByUsername,
   assignRealmRoleToUser,
   addUserToGroup,
-  extractUserInfo
+  extractUserInfo,
+  resetUserPassword
 };

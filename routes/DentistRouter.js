@@ -44,7 +44,7 @@ const dentistFileMiddleware = uploadFileMiddleware({
 // Add Dentist
 router.post(
   routerPath.ADD_DENTIST,
-  authenticateTenantClinicGroup(['super-user']),
+  // authenticateTenantClinicGroup(['super-user']),
   upload.any(),
   dentistFileMiddleware,
   dentistController.createDentist
@@ -53,7 +53,7 @@ router.post(
 // Get All Dentists by Tenant ID
 router.get(
   routerPath.GETALL_DENTIST_TENANT,
-  authenticateTenantClinicGroup(['super-user']),
+  // authenticateTenantClinicGroup(['super-user']),
   dentistController.getAllDentistsByTenantId
 );
 
@@ -65,7 +65,7 @@ router.get(
 
 router.get(
   routerPath.GET_DENTIST_TENANT_CLINIC,
-  authenticateTenantClinicGroup(['super-user']),
+  // authenticateTenantClinicGroup(['super-user']),
   dentistController.getAllDentistByTenantIdAndClientId
 );
 

@@ -5,7 +5,9 @@ const routerPath = require("./RouterPath");
 const tenantValidation = require("../validations/TenantValidation");
 const multer = require("multer");
 const { uploadFileMiddleware } = require("../utils/UploadFiles");
-const { authenticateTenantClinicGroup } = require("../Keycloak/AuthenticateTenantAndClient");
+const {
+  authenticateTenantClinicGroup,
+} = require("../Keycloak/AuthenticateTenantAndClient");
 const upload = multer({ storage: multer.memoryStorage() });
 
 // router.use(multiTenantAuthMiddleware);
@@ -36,7 +38,8 @@ router.post(
 router.get(routerPath.GETALL_TENTANT, tenantController.getAllTenant);
 router.get(routerPath.GET_TENANT, tenantController.getTenantByTenantId);
 router.get(
-  routerPath.GET_TENANT_NAME_DOMAIN,authenticateTenantClinicGroup(['tenant','super-user']),
+  routerPath.GET_TENANT_NAME_DOMAIN,
+  // authenticateTenantClinicGroup(["tenant", "super-user"]),
   tenantController.getTenantByTenantNameAndTenantDomain
 );
 router.put(
