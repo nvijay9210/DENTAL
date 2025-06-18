@@ -9,15 +9,16 @@ const receptionValidation = require("../validations/ReceptionValidation");
  */
 exports.createReception = async (req, res, next) => {
   const details = req.body;
-  const token=req.token;
-  const realm=req.realm;
+  // const token=req.token;
+  // const realm=req.realm;
 
   try {
     // Validate reception data
     await receptionValidation.createReceptionValidation(details);
 
     // Create the reception
-    const id = await receptionService.createReception(details,token,realm);
+    // const id = await receptionService.createReception(details,token,realm);
+    const id = await receptionService.createReception(details);
     res.status(201).json({ message: "Reception created", id });
   } catch (err) {
     next(err);

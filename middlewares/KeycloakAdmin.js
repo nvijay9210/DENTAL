@@ -138,31 +138,30 @@ async function addUserToGroup(token, realm, userId, groupName) {
 }
 
 function extractUserInfo(token) {
-  const issuer = token.iss; // "http://localhost:8080/realms/similecare"
+  const issuer = token.iss; // e.g., "http://localhost:8080/realms/smilecare"
   const realm = issuer.split("/").pop();
 
   const realmToTenantMap = {
-    "similecare": "1",
+    "smilecare": "1",     // Fixed typo
     "anotherrealm": "2"
   };
   const tenantId = realmToTenantMap[realm] || realm;
 
   const groups = token.groups || [];
-  const clinicGroup = groups.find(g => g.startsWith("group-clinic-"));
+  const clinicGroup = groups.find(g => g.startsWith("dental-"));
   let clinicId = null;
 
   if (clinicGroup) {
-    const match = clinicGroup.match(/group-clinic-(\d+)-admin/);
+    const match = clinicGroup.match(/dental-(\d+)/);
     if (match && match[1]) {
       clinicId = match[1];
     }
   }
 
   const globalRoles = token.realm_access?.roles || [];
-  // const clientRoles = token.resource_access?.["react-client"]?.roles || [];
 
   const role = globalRoles.find(r =>
-    ['super-user', 'dentist', 'patient', 'receptionlist','supplier','dev'].includes(r)
+    ['super-user', 'dentist', 'patient', 'receptionist', 'supplier', 'tenant'].includes(r)
   ) || "user";
 
   return {
