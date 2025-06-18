@@ -39,7 +39,7 @@ router.get(routerPath.GETALL_TENTANT, tenantController.getAllTenant);
 router.get(routerPath.GET_TENANT, tenantController.getTenantByTenantId);
 router.get(
   routerPath.GET_TENANT_NAME_DOMAIN,
-  // authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "super-user"]),
   tenantController.getTenantByTenantNameAndTenantDomain
 );
 router.put(

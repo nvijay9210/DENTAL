@@ -161,7 +161,7 @@ function extractUserInfo(token) {
   const globalRoles = token.realm_access?.roles || [];
 
   const role = globalRoles.find(r =>
-    ['super-user', 'dentist', 'patient', 'receptionist', 'supplier', 'tenant'].includes(r)
+    ['super-user', 'dentist', 'patient', 'receptionlist', 'supplier', 'dev', 'tenant'].includes(r)
   ) || "user";
 
   return {
