@@ -10,6 +10,7 @@ exports.createLoginHistory = async (req, res, next) => {
   const details = req.body;
 
   try {
+    await loginhistoryValidation.updateLoginHistoryValidation(details)
     // Create the loginhistory
     const id = await loginhistoryService.createLoginHistory(details);
     res.status(201).json({ message: "LoginHistory created", id });

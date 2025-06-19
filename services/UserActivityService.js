@@ -32,13 +32,51 @@ const useractivityFieldsReverseMap = {
   created_time: (val) => (val ? new Date(val).toISOString() : null),
 };
 // Create UserActivity
-const createUserActivity = async (data) => {
-  const fieldMap = {
-    ...useractivityFields,
-    created_by: (val) => val,
-  };
+const sessionActivityLogin = async (data) => {
   try {
-    const { columns, values } = mapFields(data, fieldMap);
+    const { columns, values } = mapFields(data, useractivityFields);
+    const useractivityId = await useractivityModel.sessionActivityLogin(
+      "useractivity",
+      columns,
+      values
+    );
+    await invalidateCacheByPattern("useractivity:*");
+    return useractivityId;
+  } catch (error) {
+    console.error("Failed to create useractivity:", error);
+    throw new CustomError(
+      `Failed to create useractivity: ${error.message}`,
+      404
+    );
+  }
+};
+
+const sessionActivityLogout = async (data) => {
+  try {
+    const { columns, values } = mapFields(data, useractivityFields);
+    const affectedRows = await useractivityModel.sessionActivityLogout(
+      "useractivity",
+      columns,
+      values
+    );
+    if (affectedRows === 0) {
+      throw new CustomError("UserActivity not found or no changes made.", 404);
+    }
+
+    await invalidateCacheByPattern("useractivity:*");
+    return affectedRows;
+  } catch (error) {
+    console.error("Failed to updated useractivity:", error);
+    throw new CustomError(
+      `Failed to updated useractivity: ${error.message}`,
+      404
+    );
+  }
+};
+
+const createUserActivity = async (data) => {
+  try {
+    const { columns, values } = mapFields(data, useractivityFields);
     const useractivityId = await useractivityModel.createUserActivity(
       "useractivity",
       columns,
@@ -166,4 +204,6 @@ module.exports = {
   getUserActivityByTenantIdAndUserActivityId,
   updateUserActivity,
   deleteUserActivityByTenantIdAndUserActivityId,
+  sessionActivityLogin,
+  sessionActivityLogout,
 };

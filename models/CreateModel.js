@@ -270,7 +270,7 @@ const createUserActivityTable = async () => {
   }
 };
 const creatLoginHistoryTable = async () => {
-  const query =  createTableQuery.addPayment
+  const query =  createTableQuery.addLoginHistory
   const conn = await pool.getConnection();
   try {
     await conn.query(query);

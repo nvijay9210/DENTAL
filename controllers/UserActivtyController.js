@@ -2,6 +2,7 @@ const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
 const useractivityService = require("../services/UserActivityService");
 const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
+const { createUserActivityValidation, updateUserActivityValidation } = require("../validations/UserActivityValidation");
 
 /**
  * Create a new useractivity
@@ -13,6 +14,33 @@ exports.createUserActivity = async (req, res, next) => {
     // Create the useractivity
     const id = await useractivityService.createUserActivity(details);
     res.status(201).json({ message: "UserActivity created", id });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.sessionActivityLogin = async (req, res, next) => {
+  const details = req.body;
+
+  try {
+    await createUserActivityValidation(details)
+    // Create the useractivity
+    const id = await useractivityService.sessionActivityLogin(details);
+    res.status(200).json({ message: "Login Successfullly", id });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.sessionActivityLogout = async (req, res, next) => {
+  const details = req.body;
+  const {useractivityid}=req.params
+
+  try {
+    // Create the useractivity
+    await updateUserActivityValidation(useractivityid,details)
+    const id = await useractivityService.sessionActivityLogout(details);
+    res.status(200).json({ message: "Logout Successfully", id });
   } catch (err) {
     next(err);
   }
