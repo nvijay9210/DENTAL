@@ -86,5 +86,9 @@ const compareDateTime=async(d1, t1, d2, t2)=> {
 }
 }
 
+function isEarlier(dt1, dt2) {
+  return new Date(dt1) < new Date(dt2);
+}
 
-module.exports = { formatDateOnly, formatAppointments,isValidDate,isoToSqlDatetime,compareDateTime };
+
+module.exports = { formatDateOnly, formatAppointments,isValidDate,isoToSqlDatetime,compareDateTime,isEarlier };

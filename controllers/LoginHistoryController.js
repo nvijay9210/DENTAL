@@ -2,15 +2,17 @@ const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
 const loginhistoryService = require("../services/LoginHistoryService");
 const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
+const { createLoginHistoryValidation, updateLoginHistoryValidation } = require("../validations/LoginHistoryValidation");
+const { v4: uuidv4 } = require('uuid');
 
 /**
  * Create a new loginhistory
  */
 exports.createLoginHistory = async (req, res, next) => {
   const details = req.body;
-
+  details.session_id=uuidv4()
   try {
-    await loginhistoryValidation.updateLoginHistoryValidation(details)
+    await createLoginHistoryValidation(details)
     // Create the loginhistory
     const id = await loginhistoryService.createLoginHistory(details);
     res.status(201).json({ message: "LoginHistory created", id });
@@ -69,12 +71,12 @@ exports.getLoginHistoryByTenantIdAndLoginHistoryId = async (req, res, next) => {
  * Update an existing loginhistory
  */
 exports.updateLoginHistory = async (req, res, next) => {
-  const { loginhistory_id, tenant_id } = req.params;
+  const { loginhistory_id,tenant_id } = req.params;
   const details = req.body;
 
   try {
     // Validate update input
-    await loginhistoryValidation.updateLoginHistoryValidation(loginhistory_id, details);
+    await updateLoginHistoryValidation(loginhistory_id, details);
 
     // Update the loginhistory
     await loginhistoryService.updateLoginHistory(loginhistory_id, details, tenant_id);

@@ -36,12 +36,9 @@ const loginhistoryFieldsReverseMap = {
 };
 // Create LoginHistory
 const createLoginHistory = async (data) => {
-  const fieldMap = {
-    ...loginhistoryFields,
-    created_by: (val) => val,
-  };
+  
   try {
-    const { columns, values } = mapFields(data, fieldMap);
+    const { columns, values } = mapFields(data, loginhistoryFields);
     const loginhistoryId = await loginhistoryModel.createLoginHistory(
       "loginhistory",
       columns,
@@ -113,12 +110,8 @@ const getLoginHistoryByTenantIdAndLoginHistoryId = async (
 
 // Update LoginHistory
 const updateLoginHistory = async (loginhistoryId, data, tenant_id) => {
-  const fieldMap = {
-    ...loginhistoryFields,
-    updated_by: (val) => val,
-  };
   try {
-    const { columns, values } = mapFields(data, fieldMap);
+    const { columns, values } = mapFields(data, loginhistoryFields);
     const affectedRows = await loginhistoryModel.updateLoginHistory(
       loginhistoryId,
       columns,

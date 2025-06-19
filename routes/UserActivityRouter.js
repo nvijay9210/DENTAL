@@ -10,11 +10,11 @@ const {
 // Create UserActivity
 router.post(
   ADD_USER_ACTIVITY_LOGIN,
-  useractivityController.sessionActivityLogin
+  useractivityController.createUserActivity
 );
-router.post(
+router.put(
   ADD_USER_ACTIVITY_LOGOUT,
-  useractivityController.sessionActivityLogout
+  useractivityController.updateUserActivity
 );
 
 module.exports = router;

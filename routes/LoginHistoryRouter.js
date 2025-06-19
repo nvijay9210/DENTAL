@@ -13,7 +13,7 @@ router.post(
   ADD_LOGIN_HISTORY_LOGIN,
   loginhistoryController.createLoginHistory
 );
-router.post(
+router.put(
   ADD_LOGIN_HISTORY_LOGOUT,
   loginhistoryController.updateLoginHistory
 );
