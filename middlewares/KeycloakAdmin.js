@@ -27,6 +27,8 @@ async function addUser(token, realm, userData) {
     const existingUser = await getUserIdByUsername(token, realm, payload.username);
     if (existingUser) throw new CustomError("Username already exists", 409);
 
+    console.log("user start to add",token,payload)
+
     const response = await axios.post(url, payload, {
       headers: {
         Authorization: `Bearer ${token}`,

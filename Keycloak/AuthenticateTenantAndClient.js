@@ -58,7 +58,7 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
           const groupName = `dental-${tenant_id}-${clinic_id}`;
           const userGroups = decoded.groups || [];
           if (!userGroups.includes(groupName)) {
-            return res.status(403).json({ message: `Access denied: user not in group '${groupName}'` });
+            return res.status(403).json({ message: `Access denied: user not in group`});
           }
         }
         // If tenant_id or clinic_id is missing, skip the group check and continue

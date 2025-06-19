@@ -31,23 +31,37 @@ const TenantFileMiddleware = uploadFileMiddleware({
 
 router.post(
   routerPath.ADD_TENANT,
+  authenticateTenantClinicGroup(["tenant", "super-user"]),
   upload.any(),
   TenantFileMiddleware,
   tenantController.addTenant
 );
-router.get(routerPath.GETALL_TENTANT, tenantController.getAllTenant);
-router.get(routerPath.GET_TENANT, tenantController.getTenantByTenantId);
+router.get(
+  routerPath.GETALL_TENTANT,
+  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  tenantController.getAllTenant
+);
+router.get(
+  routerPath.GET_TENANT,
+  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  tenantController.getTenantByTenantId
+);
 router.get(
   routerPath.GET_TENANT_NAME_DOMAIN,
-  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist","patient","receptionist","supplier"]),
   tenantController.getTenantByTenantNameAndTenantDomain
 );
 router.put(
   routerPath.UPDATE_TENANT,
+  authenticateTenantClinicGroup(["tenant", "super-user"]),
   upload.any(),
   TenantFileMiddleware,
   tenantController.updateTenant
 );
-router.delete(routerPath.DELETE_TENANT, tenantController.deleteTenant);
+router.delete(
+  routerPath.DELETE_TENANT,
+  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  tenantController.deleteTenant
+);
 
 module.exports = router;

@@ -11,6 +11,9 @@ const {
   DELETE_ASSET_TENANT,
   GETALL_ASSET_REPORT_TENANT_CLINIC,
 } = require("./RouterPath");
+const {
+  authenticateTenantClinicGroup,
+} = require("../Keycloak/AuthenticateTenantAndClient");
 const assetvalidation = require("../validations/AssetValidation");
 const { uploadFileMiddleware } = require("../utils/UploadFiles");
 // Setup multer memory storage once
@@ -33,22 +36,36 @@ const assetFileMiddleware = uploadFileMiddleware({
 // Create Asset
 router.post(
   ADD_ASSET,
+  authenticateTenantClinicGroup(["tenant", "dentist", "super-user"]),
   upload.any(),
   assetFileMiddleware,
   assetController.createAsset
 );
 
 // Get All Assets by Tenant ID with Pagination
-router.get(GETALL_ASSET_TENANT, assetController.getAllAssetsByTenantId);
+router.get(
+  GETALL_ASSET_TENANT,
+  authenticateTenantClinicGroup(["tenant", "dentist", "super-user"]),
+  assetController.getAllAssetsByTenantId
+);
 
-router.get(GETALL_ASSET_REPORT_TENANT_CLINIC, assetController.getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate);
+router.get(
+  GETALL_ASSET_REPORT_TENANT_CLINIC,
+  authenticateTenantClinicGroup(["tenant", "dentist", "super-user"]),
+  assetController.getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate
+);
 
 // Get Single Asset by Tenant ID & Asset ID
-router.get(GET_ASSET_TENANT, assetController.getAssetByTenantIdAndAssetId);
+router.get(
+  GET_ASSET_TENANT,
+  authenticateTenantClinicGroup(["tenant", "dentist", "super-user"]),
+  assetController.getAssetByTenantIdAndAssetId
+);
 
 // Update Asset
 router.put(
   UPDATE_ASSET_TENANT,
+  authenticateTenantClinicGroup(["tenant", "dentist", "super-user"]),
   upload.any(),
   assetFileMiddleware,
   assetController.updateAsset
@@ -57,6 +74,7 @@ router.put(
 // Delete Asset
 router.delete(
   DELETE_ASSET_TENANT,
+  authenticateTenantClinicGroup(["tenant", "dentist", "super-user"]),
   assetController.deleteAssetByTenantIdAndAssetId
 );
 

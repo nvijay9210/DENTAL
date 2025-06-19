@@ -8,6 +8,7 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly } = require("../utils/DateUtils");
 const { encrypt } = require("../middlewares/PasswordHash");
+const { addUser, getUserIdByUsername, assignRealmRoleToUser, addUserToGroup } = require("../middlewares/KeycloakAdmin");
 
 // Field mapping for receptions (similar to treatment)
 
@@ -67,7 +68,7 @@ const createReception = async (data,token,realm) => {
   try {
   // 1. Generate username/email
   const username = helper.generateUsername(
-    data.first_name,
+    data.full_name,
     data.phone_number
   );
   const email =
@@ -77,7 +78,7 @@ const createReception = async (data,token,realm) => {
   const userData = {
     username,
     email,
-    firstName: data.first_name,
+    firstName: data.full_name,
     lastName: data.last_name,
     password: "1234", // For demo; use generateAlphanumericPassword() in production
   };

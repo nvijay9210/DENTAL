@@ -304,9 +304,11 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
     const convertedRows = helper.convertDbToFrontend(
       dentist,
       dentistFieldReverseMap
-    );
-    flattenAwards(dentist);
-    return { ...convertedRows, flattenAwards };
+    )
+    
+    const result=flattenAwards(convertedRows);
+ 
+    return result;
   } catch (error) {
     throw new CustomError(`Failed to get dentist: ${error.message}`, 404);
   }

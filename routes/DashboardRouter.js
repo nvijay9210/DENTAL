@@ -18,6 +18,9 @@ const {
   GET_TOOTH_DETAILS_DENTIST,
 } = require("./RouterPath");
 const {
+  authenticateTenantClinicGroup,
+} = require("../Keycloak/AuthenticateTenantAndClient");
+const {
   getMostVisitedPatientsByDentistPeriods,
   getMostVisitedPatientsByClinicPeriods,
   getNewPatientsByClinicPeriods,
@@ -34,42 +37,79 @@ const {
 
 router.get(
   GET_APPOINTMENT_SUMMARY_PERIOD,
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
   appointmentController.getAppointmentSummary
 );
 
-router.get(GET_PATIENT_SUMMARY_DENTIST, getMostVisitedPatientsByDentistPeriods);
+router.get(
+  GET_PATIENT_SUMMARY_DENTIST,
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
+  getMostVisitedPatientsByDentistPeriods
+);
 
-router.get(GET_PATIENT_SUMMARY_CLINIC, getMostVisitedPatientsByClinicPeriods);
+router.get(
+  GET_PATIENT_SUMMARY_CLINIC,
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
+  getMostVisitedPatientsByClinicPeriods
+);
 
-router.get(GET_NEW_PATIENT_SUMMARY_CLINIC, getNewPatientsByClinicPeriods);
+router.get(
+  GET_NEW_PATIENT_SUMMARY_CLINIC,
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
+  getNewPatientsByClinicPeriods
+);
 
 router.get(
   GET_NEW_PATIENT_SUMMARY_DENTIST,
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
   getNewPatientsTrendsByDentistAndClinic
 );
 
-router.get(GET_AGE_GENDER_SUMMARY_DENTIST, getAgeGenderByDentist);
+router.get(
+  GET_AGE_GENDER_SUMMARY_DENTIST,
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
+  getAgeGenderByDentist
+);
 
-router.get(GET_AGE_GENDER_SUMMARY_CLINIC, getAgeGenderByClinic);
+router.get(
+  GET_AGE_GENDER_SUMMARY_CLINIC,
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
+  getAgeGenderByClinic
+);
 
-router.get(GET_CLINIC_FINANACE_SUMMARY_CLINIC, getFinanceSummary);
+router.get(
+  GET_CLINIC_FINANACE_SUMMARY_CLINIC,
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
+  getFinanceSummary
+);
 
-router.get(GET_CLINIC_FINANACE_SUMMARY_DENTIST, getFinanceSummarybyDentist);
+router.get(
+  GET_CLINIC_FINANACE_SUMMARY_DENTIST,
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
+  getFinanceSummarybyDentist
+);
 
 router.get(
   GET_APPOINTMENT_SUMMARY_CHART_CLINIC,
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
   appointmentController.getAppointmentSummaryChartByClinic
 );
 
 router.get(
   GET_APPOINTMENT_SUMMARY_CHART_DENTIST,
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
   appointmentController.getAppointmentSummaryChartByDentist
 );
 
-router.get(GET_TOOTH_DETAILS_CLINIC, groupToothProceduresByTimeRangeCumulative);
+router.get(
+  GET_TOOTH_DETAILS_CLINIC,
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
+  groupToothProceduresByTimeRangeCumulative
+);
 
 router.get(
   GET_TOOTH_DETAILS_DENTIST,
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
   groupToothProceduresByTimeRangeCumulativeByDentist
 );
 

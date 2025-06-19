@@ -11,33 +11,55 @@ const {
   GETALL_APPOINTMENT_RESCHEDULES_TENANT_CLINIC,
   GETALL_APPOINTMENT_RESCHEDULES_TENANT_CLINIC_DENTIST,
 } = require("./RouterPath");
-const appointmentReschedulevalidation = require("../validations/AppointmentReschedulesValidation");
+
+const {
+  authenticateTenantClinicGroup,
+} = require("../Keycloak/AuthenticateTenantAndClient");
 
 // Create AppointmentReschedules
 router.post(
   ADD_APPOINTMENT_RESCHEDULES,
+  authenticateTenantClinicGroup(['tenant','receptionist','patient','dentist']),
   appointmentRescheduleController.createAppointmentReschedules
 );
 
 // Get All AppointmentRescheduless by Tenant ID with Pagination
-router.get(GETALL_APPOINTMENT_RESCHEDULES_TENANT, appointmentRescheduleController.getAllAppointmentReschedulessByTenantId);
+router.get(
+  GETALL_APPOINTMENT_RESCHEDULES_TENANT,
+  authenticateTenantClinicGroup(['tenant','receptionist','patient','dentist']),
+  appointmentRescheduleController.getAllAppointmentReschedulessByTenantId
+);
 
-router.get(GETALL_APPOINTMENT_RESCHEDULES_TENANT_CLINIC, appointmentRescheduleController.getAllAppointmentReschedulessByTenantIdAndClinicId);
+router.get(
+  GETALL_APPOINTMENT_RESCHEDULES_TENANT_CLINIC,
+  authenticateTenantClinicGroup(['tenant','receptionist','patient','dentist']),
+  appointmentRescheduleController.getAllAppointmentReschedulessByTenantIdAndClinicId
+);
 
-router.get(GETALL_APPOINTMENT_RESCHEDULES_TENANT_CLINIC_DENTIST, appointmentRescheduleController.getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId);
+router.get(
+  GETALL_APPOINTMENT_RESCHEDULES_TENANT_CLINIC_DENTIST,
+  authenticateTenantClinicGroup(['tenant','receptionist','patient','dentist']),
+  appointmentRescheduleController.getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId
+);
 
 // Get Single AppointmentReschedules by Tenant ID & AppointmentReschedules ID
-router.get(GET_APPOINTMENT_RESCHEDULES_TENANT, appointmentRescheduleController.getAppointmentReschedulesByTenantIdAndAppointmentReschedulesId);
+router.get(
+  GET_APPOINTMENT_RESCHEDULES_TENANT,
+  authenticateTenantClinicGroup(['tenant','receptionist','patient','dentist']),
+  appointmentRescheduleController.getAppointmentReschedulesByTenantIdAndAppointmentReschedulesId
+);
 
 // Update AppointmentReschedules
 router.put(
   UPDATE_APPOINTMENT_RESCHEDULES_TENANT,
+  authenticateTenantClinicGroup(['tenant','receptionist','patient','dentist']),
   appointmentRescheduleController.updateAppointmentReschedules
 );
 
 // Delete AppointmentReschedules
 router.delete(
   DELETE_APPOINTMENT_RESCHEDULES_TENANT,
+  authenticateTenantClinicGroup(['tenant','receptionist','patient','dentist']),
   appointmentRescheduleController.deleteAppointmentReschedulesByTenantIdAndAppointmentReschedulesId
 );
 
