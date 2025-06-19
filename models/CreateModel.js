@@ -254,6 +254,36 @@ const createPaymentTable = async () => {
     conn.release();
   }
 };
+const createUserActivityTable = async () => {
+  const query =  createTableQuery.addUserActivity
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("UserActivity table created successfully.");
+  } catch (error) {
+    console.error("Error creating UserActivity table:", error);
+    throw new Error(
+      "Database error occurred while creating the UserActivity table."
+    );
+  } finally {
+    conn.release();
+  }
+};
+const creatLoginHistoryTable = async () => {
+  const query =  createTableQuery.addPayment
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("LoginHistory table created successfully.");
+  } catch (error) {
+    console.error("Error creating LoginHistory table:", error);
+    throw new Error(
+      "Database error occurred while creating the LoginHistory table."
+    );
+  } finally {
+    conn.release();
+  }
+};
 
 const createUserTable = async () => {
   const query = userQuery.createUserTable;
@@ -316,5 +346,7 @@ module.exports = {
   createReminderTable,
   createPaymentTable,
   createAppointmentReschedulesTable,
-  createReception
+  createReception,
+  createUserActivityTable,
+  creatLoginHistoryTable
 };
