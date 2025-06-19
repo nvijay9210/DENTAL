@@ -205,6 +205,9 @@ module.exports = {
 
   GET_TOOTH_DETAILS_CLINIC: "/toothdetails/:tenant_id/:clinic_id",
   GET_TOOTH_DETAILS_DENTIST: "/toothdetails/:tenant_id/:clinic_id/:dentist_id",
+
+  ADD_USER_ACTIVITY: "/adduseractivity",
+  ADD_LOGIN_HISTORY: "/addloginhistory",
 };
 
 // GET /api/tenant?page=2&limit=10

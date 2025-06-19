@@ -375,6 +375,9 @@ CREATE TABLE IF NOT EXISTS supplier (
   supplier_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
   clinic_id int(11) NOT NULL,
+  keycloak_id char(36)  NULL,
+  username varchar(50) NULL,
+  password varchar(255) NULL,
   supplier_name varchar(100) DEFAULT NULL,
   supplier_category varchar(100) DEFAULT NULL,
   supplier_status varchar(100) DEFAULT NULL,
@@ -502,7 +505,7 @@ CREATE TABLE IF NOT EXISTS payment (
   reception_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
   clinic_id int(11) Not Null,
- keycloak_id char(36)  NULL,
+  keycloak_id char(36)  NULL,
   username varchar(50) NULL,
   password varchar(255) NULL,
   full_name varchar(100) NOT NULL,
@@ -535,7 +538,7 @@ CREATE TABLE IF NOT EXISTS payment (
   tenant_id int(11) NOT NULL,
   clinic_id int(11) NOT NULL,
   keycloak_user_id char(36) NOT NULL,
-  user_activity_id int(11) NOT NULL,
+  useractivity int(11) NOT NULL,
   login_time datetime NOT NULL,
   logout_time datetime DEFAULT NULL,
   ip_address varchar(45) DEFAULT NULL,
@@ -543,11 +546,11 @@ CREATE TABLE IF NOT EXISTS payment (
   browser_info text DEFAULT NULL,
   created_at timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (log_id),
-  UNIQUE KEY user_activity_id (user_activity_id)
+  UNIQUE KEY useractivity (useractivity)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
-  addUserActivity: `CREATE TABLE IF NOT EXISTS user_activity (
-  user_activity_id int(11)  NOT NULL AUTO_INCREMENT,
+  addUserActivity: `CREATE TABLE IF NOT EXISTS useractivity (
+  useractivity int(11)  NOT NULL AUTO_INCREMENT,
   keycloak_user_id char(36) NOT NULL DEFAULT 0,
   ip_address varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   browser varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -556,7 +559,7 @@ CREATE TABLE IF NOT EXISTS payment (
   logout_time timestamp NULL DEFAULT NULL,
   duration time DEFAULT NULL,
   created_at timestamp NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (session_id)
+  PRIMARY KEY (useractivity)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
 };

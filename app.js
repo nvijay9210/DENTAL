@@ -31,6 +31,8 @@ const paymentRouter = require('./routes/PaymentRouter');
 const dashboardRouter = require('./routes/DashboardRouter');
 const appointment_reschedules = require('./routes/AppointmentReschedulesRouter');
 const receptionRouter = require('./routes/ReceptionRouter');
+const userActivityRouter = require('./routes/UserActivityRouter');
+const loginHistoryRouter = require('./routes/LoginHistoryRouter');
 
 // const compressionMiddleware = require('./middlewares/CompressionMiddleware');
 const { redisconnect } = require('./config/redisConfig');
@@ -144,6 +146,8 @@ async function initializeTables() {
     await createTable.createPaymentTable();
     await createTable.createAppointmentReschedulesTable();
     await createTable.createReception();
+    await createTable.creatLoginHistoryTable();
+    await createTable.createUserActivityTable();
 
     console.log('All tables created in order.');
   } catch (err) {
@@ -176,6 +180,8 @@ app.use('/v1/payment', paymentRouter);
 app.use('/v1/dashboard', dashboardRouter);
 app.use('/v1/appointment_reschedules', appointment_reschedules);
 app.use('/v1/reception', receptionRouter);
+app.use('/v1/useractivity', userActivityRouter);
+app.use('/v1/loginhistory', loginHistoryRouter);
 
 // Error handler must be last
 app.use(errorHandler);
