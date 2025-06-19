@@ -534,8 +534,8 @@ CREATE TABLE IF NOT EXISTS payment (
   log_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(11) NOT NULL,
   clinic_id int(11) NOT NULL,
-  user_id char(36) NOT NULL,
-  session_id char(36) NOT NULL,
+  keycloak_user_id char(36) NOT NULL,
+  user_activity_id int(11) NOT NULL,
   login_time datetime NOT NULL,
   logout_time datetime DEFAULT NULL,
   ip_address varchar(45) DEFAULT NULL,
@@ -543,12 +543,12 @@ CREATE TABLE IF NOT EXISTS payment (
   browser_info text DEFAULT NULL,
   created_at timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (log_id),
-  UNIQUE KEY session_id (session_id)
+  UNIQUE KEY user_activity_id (user_activity_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
   addUserActivity: `CREATE TABLE IF NOT EXISTS user_activity (
-  session_id char(36)  NOT NULL AUTO_INCREMENT,
-  user_id char(36) NOT NULL DEFAULT 0,
+  user_activity_id int(11)  NOT NULL AUTO_INCREMENT,
+  keycloak_user_id char(36) NOT NULL DEFAULT 0,
   ip_address varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   browser varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   device varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
