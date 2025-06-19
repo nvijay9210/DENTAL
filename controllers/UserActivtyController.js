@@ -1,6 +1,7 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
 const useractivityService = require("../services/UserActivityService");
+const { isEarlier } = require("../utils/DateUtils");
 const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 const { createUserActivityValidation, updateUserActivityValidation } = require("../validations/UserActivityValidation");
 
@@ -12,35 +13,9 @@ exports.createUserActivity = async (req, res, next) => {
 
   try {
     // Create the useractivity
+    await createUserActivityValidation(details)
     const id = await useractivityService.createUserActivity(details);
     res.status(201).json({ message: "UserActivity created", id });
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.sessionActivityLogin = async (req, res, next) => {
-  const details = req.body;
-
-  try {
-    await createUserActivityValidation(details)
-    // Create the useractivity
-    const id = await useractivityService.sessionActivityLogin(details);
-    res.status(200).json({ message: "Login Successfullly", id });
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.sessionActivityLogout = async (req, res, next) => {
-  const details = req.body;
-  const {useractivityid}=req.params
-
-  try {
-    // Create the useractivity
-    await updateUserActivityValidation(useractivityid,details)
-    const id = await useractivityService.sessionActivityLogout(details);
-    res.status(200).json({ message: "Logout Successfully", id });
   } catch (err) {
     next(err);
   }
@@ -101,38 +76,11 @@ exports.updateUserActivity = async (req, res, next) => {
 
   try {
     // Validate update input
-    await useractivityValidation.updateUserActivityValidation(useractivity_id, details);
-
+    await updateUserActivityValidation(useractivity_id, details);
+    isEarlier()
     // Update the useractivity
     await useractivityService.updateUserActivity(useractivity_id, details, tenant_id);
     res.status(200).json({ message: "UserActivity updated successfully" });
-  } catch (err) {
-    next(err);
-  }
-};
-
-/**
- * Delete a useractivity by ID and tenant ID
- */
-exports.deleteUserActivityByTenantIdAndUserActivityId = async (req, res, next) => {
-  const { useractivity_id, tenant_id } = req.params;
-
-  try {
-    // Validate if useractivity exists
-    const treatment = await checkIfExists(
-      "useractivity",
-      "useractivity_id",
-      useractivity_id,
-      tenant_id
-    );
-    if (!treatment) throw new CustomError("useractivityId not Exists", 404);
-
-    // Delete the useractivity
-    await useractivityService.deleteUserActivityByTenantIdAndUserActivityId(
-      tenant_id,
-      useractivity_id
-    );
-    res.status(200).json({ message: "UserActivity deleted successfully" });
   } catch (err) {
     next(err);
   }

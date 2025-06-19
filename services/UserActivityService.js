@@ -32,47 +32,6 @@ const useractivityFieldsReverseMap = {
   created_time: (val) => (val ? new Date(val).toISOString() : null),
 };
 // Create UserActivity
-const sessionActivityLogin = async (data) => {
-  try {
-    const { columns, values } = mapFields(data, useractivityFields);
-    const useractivityId = await useractivityModel.sessionActivityLogin(
-      "useractivity",
-      columns,
-      values
-    );
-    await invalidateCacheByPattern("useractivity:*");
-    return useractivityId;
-  } catch (error) {
-    console.error("Failed to create useractivity:", error);
-    throw new CustomError(
-      `Failed to create useractivity: ${error.message}`,
-      404
-    );
-  }
-};
-
-const sessionActivityLogout = async (data) => {
-  try {
-    const { columns, values } = mapFields(data, useractivityFields);
-    const affectedRows = await useractivityModel.sessionActivityLogout(
-      "useractivity",
-      columns,
-      values
-    );
-    if (affectedRows === 0) {
-      throw new CustomError("UserActivity not found or no changes made.", 404);
-    }
-
-    await invalidateCacheByPattern("useractivity:*");
-    return affectedRows;
-  } catch (error) {
-    console.error("Failed to updated useractivity:", error);
-    throw new CustomError(
-      `Failed to updated useractivity: ${error.message}`,
-      404
-    );
-  }
-};
 
 const createUserActivity = async (data) => {
   try {
@@ -147,18 +106,13 @@ const getUserActivityByTenantIdAndUserActivityId = async (
 };
 
 // Update UserActivity
-const updateUserActivity = async (useractivityId, data, tenant_id) => {
-  const fieldMap = {
-    ...useractivityFields,
-    updated_by: (val) => val,
-  };
+const updateUserActivity = async (useractivityId, data) => {
   try {
-    const { columns, values } = mapFields(data, fieldMap);
+    const { columns, values } = mapFields(data, useractivityFields);
     const affectedRows = await useractivityModel.updateUserActivity(
       useractivityId,
       columns,
-      values,
-      tenant_id
+      values
     );
 
     if (affectedRows === 0) {
@@ -173,37 +127,9 @@ const updateUserActivity = async (useractivityId, data, tenant_id) => {
   }
 };
 
-// Delete UserActivity
-const deleteUserActivityByTenantIdAndUserActivityId = async (
-  tenantId,
-  useractivityId
-) => {
-  try {
-    const affectedRows =
-      await useractivityModel.deleteUserActivityByTenantAndUserActivityId(
-        tenantId,
-        useractivityId
-      );
-    if (affectedRows === 0) {
-      throw new CustomError("UserActivity not found.", 404);
-    }
-
-    await invalidateCacheByPattern("useractivity:*");
-    return affectedRows;
-  } catch (error) {
-    throw new CustomError(
-      `Failed to delete useractivity: ${error.message}`,
-      404
-    );
-  }
-};
-
 module.exports = {
   createUserActivity,
   getAllUserActivitysByTenantId,
   getUserActivityByTenantIdAndUserActivityId,
-  updateUserActivity,
-  deleteUserActivityByTenantIdAndUserActivityId,
-  sessionActivityLogin,
-  sessionActivityLogout,
+  updateUserActivity
 };
