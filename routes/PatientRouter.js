@@ -7,7 +7,9 @@ const { uploadFileMiddleware } = require("../utils/UploadFiles");
 const patientValidation = require("../validations/PatientValidation");
 const routerPath = require("./RouterPath");
 const { multiTenantAuthMiddleware } = require("../middlewares/AuthToken");
-const { authenticateTenantClinicGroup } = require("../Keycloak/AuthenticateTenantAndClient");
+const {
+  authenticateTenantClinicGroup,
+} = require("../Keycloak/AuthenticateTenantAndClient");
 
 // router.use(multiTenantAuthMiddleware)
 
@@ -24,7 +26,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // File middleware options
 const patientFileMiddleware = uploadFileMiddleware({
-  folderName: "Patient",
+  folderName: "receptionist",
   fileFields: [
     {
       fieldName: "profile_picture",
@@ -43,7 +45,7 @@ const patientFileMiddleware = uploadFileMiddleware({
 // Create Patient
 router.post(
   routerPath.ADD_PATIENT,
-  authenticateTenantClinicGroup(['tenant']),
+  authenticateTenantClinicGroup(["tenant","super-user","dentist"]),
   upload.any(),
   patientFileMiddleware,
   patientController.createPatient
@@ -52,18 +54,31 @@ router.post(
 // Get All Patients
 router.get(
   routerPath.GETALL_PATIENT_TENANT,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "receptionist"
+  ]),
   patientController.getAllPatientsByTenantId
 );
 
 // Get Single Patient
 router.get(
   routerPath.GET_PATIENT_TENANT,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "receptionist",
+  ]),
   patientController.getPatientByTenantIdAndPatientId
 );
 
 // Update Patient
 router.put(
   routerPath.UPDATE_PATIENT_TENANT,
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
   // patientUploadFields,
   upload.any(),
   patientFileMiddleware,
@@ -72,12 +87,19 @@ router.put(
 
 router.put(
   routerPath.UPDATE_PATIENT_TOOTH_DETAILS,
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist"]),
   patientController.updateToothDetails
 );
 
 // Delete Patient
 router.delete(
   routerPath.DELETE_PATIENT_TENANT,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "receptionist",
+  ]),
   patientController.deletePatientByTenantIdAndPatientId
 );
 

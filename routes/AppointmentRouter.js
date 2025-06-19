@@ -23,39 +23,87 @@ const {
   UPDATE_APPOINTMENT_STATUS,
   UPDATE_APPOINTMENT_RATING_FEEDBACK,
 } = require("./RouterPath");
+const {
+  authenticateTenantClinicGroup,
+} = require("../Keycloak/AuthenticateTenantAndClient");
 
 // File upload middleware can be added here if needed (e.g. reports, prescriptions)
 
 // Create Appointment
-router.post(ADD_APPOINTMENT, appointmentController.createAppointment);
+router.post(
+  ADD_APPOINTMENT,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "patient",
+    "dentist",
+  ]),
+  appointmentController.createAppointment
+);
 
 // Get All Appointments by Tenant ID with Pagination
 router.get(
   GETALL_APPOINTMENT_TENANT,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "dentist",
+  ]),
   appointmentController.getAllAppointmentsByTenantId
 );
 router.get(
   GETALL_APPOINTMENT_TENANT_CLINIC,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "dentist",
+  ]),
   appointmentController.getAllAppointmentsByTenantIdAndClinicId
 );
 router.get(
   GETALL_APPOINTMENTS_TENANT_CLINIC_DENTIST,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "patient",
+    "dentist",
+  ]),
   appointmentController.getAllAppointmentsByTenantIdAndClinicIdByDentist
 );
 
 // Get Single Appointment by Tenant & Appointment ID
 router.get(
   GET_APPOINTMENT_TENANT,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "patient",
+    "dentist",
+  ]),
   appointmentController.getAppointmentByTenantIdAndAppointmentId
 );
 
 router.get(
   GETALL_PATIENT_VISITEDETAILS,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "dentist",
+  ]),
   appointmentController.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId
 );
 
 // Update Appointment
-router.put(UPDATE_APPOINTMENT_TENANT, appointmentController.updateAppointment);
+router.put(
+  UPDATE_APPOINTMENT_TENANT,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "patient",
+    "dentist",
+  ]),
+  appointmentController.updateAppointment
+);
 
 // router.put(
 //   UPDATE_APPOINTMENT_SCHEDULE_CANCELED,
@@ -64,53 +112,114 @@ router.put(UPDATE_APPOINTMENT_TENANT, appointmentController.updateAppointment);
 
 router.put(
   UPDATE_APPOINTMENT_STATUS,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "patient",
+    "dentist",
+  ]),
   appointmentController.updateAppoinmentStatus
 );
 
 router.put(
   UPDATE_APPOINTMENT_RATING_FEEDBACK,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "patient",
+    "dentist",
+  ]),
   appointmentController.updateAppoinmentFeedback
 );
 
 // Delete Appointment
 router.delete(
   DELETE_APPOINTMENT_TENANT,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "patient",
+    "dentist",
+  ]),
   appointmentController.deleteAppointmentByTenantIdAndAppointmentId
 );
 
 router.get(
   GETALL_APPOINTMENT_TENANT_CLINIC_DENTIST,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "dentist",
+  ]),
   appointmentController.getAppointmentsWithDetails
 );
 router.get(
   GETALL_APPOINTMENT_TENANT_DENTIST,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "dentist",
+  ]),
   appointmentController.getAllAppointmentsByTenantIdAndDentistId
 );
 router.get(
   GETALL_APPOINTMENT_TENANT_PATIENTID,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "dentist",
+  ]),
   appointmentController.getAllAppointmentsByTenantIdAndPatientId
 );
 
 router.get(
   GETALL_APPOINTMENT_TENANT_PATIENT,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "dentist",
+  ]),
   appointmentController.getAppointmentsWithDetailsByPatient
 );
 router.get(
   GETALL_APPOINTMENT_ROOMID_DENTIST,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "patient",
+    "dentist",
+  ]),
   appointmentController.getAllRoomIdByTenantIdAndClinicIdAndDentistId
 );
 router.get(
   GETALL_APPOINTMENT_ROOMID_PATIENT,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "patient",
+    "dentist",
+  ]),
   appointmentController.getAllRoomIdByTenantIdAndClinicIdAndPatientId
 );
 
 router.get(
   GET_APPOINTMENT_MONTHLY_SUMMARY,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "receptionist",
+    "patient",
+    "dentist",
+  ]),
   appointmentController.getAppointmentMonthlySummary
 );
 
 router.get(
   GET_APPOINTMENT_MONTHLY_SUMMARY,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "receptionist",
+    "dentist",
+  ]),
   appointmentController.getAppointmentMonthlySummary
 );
 

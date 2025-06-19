@@ -5,7 +5,9 @@ const dentistController = require("../controllers/DentistController");
 const routerPath = require("./RouterPath");
 const { uploadFileMiddleware } = require("../utils/UploadFiles");
 const dentistValidation = require("../validations/DentistValidation");
-const { authenticateTenantClinicGroup } = require("../Keycloak/AuthenticateTenantAndClient");
+const {
+  authenticateTenantClinicGroup,
+} = require("../Keycloak/AuthenticateTenantAndClient");
 
 // Setup multer memory storage
 const upload = multer({ storage: multer.memoryStorage() });
@@ -44,7 +46,7 @@ const dentistFileMiddleware = uploadFileMiddleware({
 // Add Dentist
 router.post(
   routerPath.ADD_DENTIST,
-  authenticateTenantClinicGroup(['tenant']),
+  authenticateTenantClinicGroup(["tenant", "super-user"]),
   upload.any(),
   dentistFileMiddleware,
   dentistController.createDentist
@@ -53,25 +55,43 @@ router.post(
 // Get All Dentists by Tenant ID
 router.get(
   routerPath.GETALL_DENTIST_TENANT,
-  authenticateTenantClinicGroup(['tenant']),
+  authenticateTenantClinicGroup(["tenant","super-user"]),
   dentistController.getAllDentistsByTenantId
 );
 
 // Get Dentist by Clinic ID and Dentist ID
 router.get(
   routerPath.GET_DENTIST_TENANT,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "receptionist",
+    "patient",
+    "dentist"
+  ]),
   dentistController.getDentistByTenantIdAndDentistId
 );
 
 router.get(
   routerPath.GET_DENTIST_TENANT_CLINIC,
-  authenticateTenantClinicGroup(['tenant']),
+  authenticateTenantClinicGroup([
+    "super-user",
+    "dentist",
+    "tenant",
+    "receptionist",
+    "patient"
+  ]),
   dentistController.getAllDentistByTenantIdAndClientId
 );
 
 // Update Dentist
 router.put(
   routerPath.UPDATE_DENTIST_TENANT,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist"
+  ]),
   // dentistUploadFields,
   upload.any(),
   dentistFileMiddleware,
@@ -81,6 +101,10 @@ router.put(
 // Delete Dentist
 router.delete(
   routerPath.DELETE_DENTIST_TENANT,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user"
+  ]),
   dentistController.deleteDentistByTenantIdAndDentistId
 );
 

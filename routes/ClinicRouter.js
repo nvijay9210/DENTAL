@@ -5,7 +5,9 @@ const clinicController = require("../controllers/ClinicController");
 const { uploadFileMiddleware } = require("../utils/UploadFiles");
 const clinicValidation = require("../validations/ClinicValidation");
 const routerPath = require("./RouterPath");
-const { multiTenantAuthMiddleware } = require("../middlewares/AuthToken");
+const {
+  authenticateTenantClinicGroup,
+} = require("../Keycloak/AuthenticateTenantAndClient");
 
 // Setup multer memory storage once
 const upload = multer({ storage: multer.memoryStorage() });
@@ -33,7 +35,7 @@ const clinicFileMiddleware = uploadFileMiddleware({
 // Add Clinic
 router.post(
   routerPath.ADD_CLINIC,
-  // clinicUploadFields,
+  authenticateTenantClinicGroup(["tenant", "super-user"]),
   upload.any(),
   clinicFileMiddleware,
   clinicController.createClinic
@@ -42,6 +44,7 @@ router.post(
 // Get All Clinics by Tenant
 router.get(
   routerPath.GETALL_CLINIC_TENANT,
+  authenticateTenantClinicGroup(["tenant", "super-user"]),
   //  multiTenantAuthMiddleware,
   clinicController.getAllClinicByTenantId
 );
@@ -49,12 +52,14 @@ router.get(
 // Get Clinic by Tenant & Clinic ID
 router.get(
   routerPath.GET_CLINIC_TENANT,
+  authenticateTenantClinicGroup(["tenant", "super-user"]),
   clinicController.getClinicByTenantIdAndClinicId
 );
 
 // Update Clinic
 router.put(
   routerPath.UPDATE_CLINIC_TENANT,
+  authenticateTenantClinicGroup(["tenant", "super-user"]),
   // clinicUploadFields,
   upload.any(),
   clinicFileMiddleware,
@@ -63,12 +68,14 @@ router.put(
 
 router.put(
   routerPath.HANDLE_CLINIC_ASSIGNMENT,
+  authenticateTenantClinicGroup(["tenant", "super-user"]),
   clinicController.handleClinicAssignment
 );
 
 // Delete Clinic
 router.delete(
   routerPath.DELETE_CLINIC_TENANT,
+  authenticateTenantClinicGroup(["tenant", "super-user"]),
   clinicController.deleteClinicByTenantIdAndClinicId
 );
 

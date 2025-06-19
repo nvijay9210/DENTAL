@@ -34,9 +34,8 @@ const getDentistByTenantIdAndDentistId = async (tenant_id, dentist_id) => {
   const query = `select * from dentist where tenant_id=? and dentist_id=?`;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenant_id, dentist_id]);
-
-    return rows;
+    const rows = await conn.query(query, [tenant_id, dentist_id]);
+    return rows[0][0];
   } catch (error) {
     console.error(error);
     throw new Error("Database Operation Failed");

@@ -19,6 +19,9 @@ const {
   GETALL_TREATMENT_TENANT_DENTIST,
   GETALL_TREATMENT_TENANT_PATIENT,
 } = require("./RouterPath");
+const {
+  authenticateTenantClinicGroup,
+} = require("../Keycloak/AuthenticateTenantAndClient");
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -40,7 +43,8 @@ const treatmentFileMiddleware = uploadFileMiddleware({
 // Create Treatment
 router.post(
   ADD_TREATMENT,
- upload.any(),
+  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
+  upload.any(),
   treatmentFileMiddleware,
   treatmentController.createTreatment
 );
@@ -48,36 +52,43 @@ router.post(
 // Get All Treatments by Tenant ID with Pagination
 router.get(
   GETALL_TREATMENT_TENANT,
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
   treatmentController.getAllTreatmentsByTenantId
 );
 
 router.get(
   GETALL_TREATMENT_TENANT_CLIENT_APPOINTEMENT,
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
   treatmentController.getAllTreatmentsByTenantAndClinicId
 );
 
 router.get(
   GETALL_TREATMENT_TENANT_CLINIC_DENTIST_APPOINTEMENT,
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
   treatmentController.getAllTreatmentsByTenantAndClinicIdAndDentist
 );
 router.get(
   GETALL_TREATMENT_TENANT_DENTIST,
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
   treatmentController.getAllTreatmentsByTenantAndDentistId
 );
 router.get(
   GETALL_TREATMENT_TENANT_PATIENT,
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
   treatmentController.getAllTreatmentsByTenantAndPatientId
 );
 
 // Get Single Treatment by Tenant ID & Treatment ID
 router.get(
   GET_TREATMENT_TENANT,
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
   treatmentController.getTreatmentByTenantIdAndTreatmentId
 );
 
 // Update Treatment
 router.put(
   UPDATE_TREATMENT_TENANT,
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
   upload.any(),
   treatmentFileMiddleware,
   treatmentController.updateTreatment
@@ -86,6 +97,7 @@ router.put(
 // Delete Treatment
 router.delete(
   DELETE_TREATMENT_TENANT,
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
   treatmentController.deleteTreatmentByTenantIdAndTreatmentId
 );
 

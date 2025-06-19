@@ -121,14 +121,14 @@ const createPatient = async (data,token,realm) => {
     const userId = await getUserIdByUsername(token, realm, userData.username);
     if (!userId) throw new CustomError("Could not fetch Keycloak user ID", 400);
 
-    console.log("🆔 Keycloak user ID fetched:", userId);
+    console.log("🆔 Keycloak user ID fetched:",token,realm, userId);
 
     // 4. Assign Role: 'patient'
     const roleAssigned = await assignRealmRoleToUser(
       token,
       realm,
       userId,
-      "dentist"
+      "patient"
     );
     if (!roleAssigned)
       throw new CustomError("Failed to assign 'patient' role", 400);

@@ -14,53 +14,72 @@ const {
   GETALL_NOTIFY_DENTIST,
   GETALL_NOTIFY_PATIENT,
 } = require("./RouterPath");
+const {
+  authenticateTenantClinicGroup,
+} = require("../Keycloak/AuthenticateTenantAndClient");
 
 // Create Reminder
-router.post(ADD_REMINDER, reminderController.createReminder);
+router.post(
+  ADD_REMINDER,
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient"]),
+  reminderController.createReminder
+);
 
 // Get All Reminders by Tenant ID with Pagination
 router.get(
   GETALL_REMINDER_TENANT,
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient"]),
   reminderController.getAllRemindersByTenantId
 );
 
 // Get Single Reminder by Tenant ID & Reminder ID
 router.get(
   GET_REMINDER_TENANT,
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient"]),
   reminderController.getReminderByTenantIdAndReminderId
 );
 
 // Get Single Reminder by Tenant ID & Reminder ID
 router.get(
   GET_REMINDER_SCHEDULE,
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient"]),
   reminderController.getReminderByTenantAndClinicIdAndDentistIdAndReminderId
 );
 
 router.get(
   GET_REMINDER_SCHEDULE_MONTHLY,
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient"]),
   reminderController.getMonthlywiseRemindersByTenantAndClinicIdAndDentistId
 );
 
 router.get(
   GET_REMINDER_DENTIST_TYPE,
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient"]),
   reminderController.getAllRemindersByTenantAndClinicAndDentistAndType
 );
 
 router.get(
   GETALL_NOTIFY_DENTIST,
+  authenticateTenantClinicGroup(["tenant","super-user", "dentist", "patient"]),
   reminderController.getAllNotifyByDentist
 );
 router.get(
   GETALL_NOTIFY_PATIENT,
+  authenticateTenantClinicGroup(["tenant","super-user", "dentist", "patient"]),
   reminderController.getAllNotifyByPatient
 );
 
 // Update Reminder
-router.put(UPDATE_REMINDER_TENANT, reminderController.updateReminder);
+router.put(
+  UPDATE_REMINDER_TENANT,
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient"]),
+  reminderController.updateReminder
+);
 
 // Delete Reminder
 router.delete(
   DELETE_REMINDER_TENANT,
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient"]),
   reminderController.deleteReminderByTenantIdAndReminderId
 );
 
