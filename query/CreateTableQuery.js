@@ -533,24 +533,23 @@ CREATE TABLE IF NOT EXISTS payment (
   CONSTRAINT fk_reception_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
-  addLoginHistory: `CREATE TABLE IF NOT EXISTS login_history (
+  addLoginHistory: `CREATE TABLE IF NOT EXISTS loginhistory (
   log_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(11) NOT NULL,
   clinic_id int(11) NOT NULL,
   keycloak_user_id char(36) NOT NULL,
-  useractivity int(11) NOT NULL,
+  session_id char(36) NOT NULL,
   login_time datetime NOT NULL,
   logout_time datetime DEFAULT NULL,
   ip_address varchar(45) DEFAULT NULL,
   device_info text DEFAULT NULL,
   browser_info text DEFAULT NULL,
-  created_at timestamp NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (log_id),
-  UNIQUE KEY useractivity (useractivity)
+  created_time timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (log_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
   addUserActivity: `CREATE TABLE IF NOT EXISTS useractivity (
-  useractivity int(11)  NOT NULL AUTO_INCREMENT,
+  useractivity_id int(11)  NOT NULL AUTO_INCREMENT,
   keycloak_user_id char(36) NOT NULL DEFAULT 0,
   ip_address varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   browser varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -558,8 +557,8 @@ CREATE TABLE IF NOT EXISTS payment (
   login_time timestamp NOT NULL DEFAULT current_timestamp(),
   logout_time timestamp NULL DEFAULT NULL,
   duration time DEFAULT NULL,
-  created_at timestamp NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (useractivity)
+  created_time timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (useractivity_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
 };
