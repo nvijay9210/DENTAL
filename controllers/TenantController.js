@@ -37,6 +37,7 @@ exports.getTenantByTenantId = async (req, res, next) => {
 
 exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   const {tenant_name,tenant_domain}=req.params
+
   let user = extractUserInfo(req.user);
   if (user.role !== "tenant" && user.role !== "super-user") {
     const userdetails = await getUserIdUsingKeycloakId(

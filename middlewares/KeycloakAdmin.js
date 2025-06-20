@@ -139,15 +139,26 @@ async function addUserToGroup(token, realm, userId, groupName) {
   }
 }
 
+require('dotenv').config();
+
+function getTenantIdByRealm(realm) {
+  const mapString = process.env.REALM_TENANT_MAP || "";
+  const map = Object.fromEntries(
+    mapString.split(',').map(pair => {
+      const [k, v] = pair.split(':');
+      return [k.trim(), v.trim()];
+    })
+  );
+  return map[realm] || realm;
+}
+
+
+
 function extractUserInfo(token) {
-  const issuer = token.iss; // e.g., "http://localhost:8080/realms/smilecare"
+  const issuer = token.iss;
   const realm = issuer.split("/").pop();
 
-  const realmToTenantMap = {
-    "smilecare": "1",     // Fixed typo
-    "anotherrealm": "2"
-  };
-  const tenantId = realmToTenantMap[realm] || realm;
+  const tenantId = getTenantIdByRealm(realm);
 
   const groups = token.groups || [];
   const clinicGroup = groups.find(g => g.startsWith("dental-"));
@@ -175,6 +186,7 @@ function extractUserInfo(token) {
     role
   };
 }
+
 
 // ✅ 5. Reset User Password
 async function resetUserPassword(token, realm, userId, newPassword, temporary = false) {
