@@ -6,7 +6,7 @@ const {
 } = require("../config/redisConfig");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
-const { formatDateOnly } = require("../utils/DateUtils");
+const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 
 // Field mapping for payments (similar to treatment)
 
@@ -50,10 +50,10 @@ const paymentFields = {
       val ? formatDateOnly(val)  : null,
     created_by: (val) => val,
     created_time: (val) =>
-      val ? new Date(val).toISOString() : null,
+      val ? convertUTCToLocal(val) : null,
     updated_by: (val) => val,
     updated_time: (val) =>
-      val ? new Date(val).toISOString() : null,
+      val ? convertUTCToLocal(val) : null,
   };
   
 

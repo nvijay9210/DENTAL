@@ -9,7 +9,7 @@ const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
-const { formatDateOnly } = require("../utils/DateUtils");
+const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 
 // Field mapping for expenses (similar to treatment)
 
@@ -28,16 +28,16 @@ const expenseFieldsReverseMap = {
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   expense_date: (val) =>
-    val ? new Date(val).toISOString().split("T")[0] : null,
+    val ? convertUTCToLocal(val).split("T")[0] : null,
   expense_category: (val) => val,
   expense_reason: (val) => val,
   expense_amount: (val) => val,
   mode_of_payment: (val) => val,
   receipt_number: (val) => val,
   created_by: (val) => val,
-  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
-  updated_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 
 // Create Expense

@@ -15,6 +15,7 @@ const {
 } = require("../services/DentistService");
 
 const message = require("../middlewares/ErrorMessages");
+const { convertUTCToLocal } = require("../utils/DateUtils");
 
 const clinicFieldMap = {
   tenant_id: (val) => val,
@@ -84,9 +85,9 @@ const clinicFieldReverseMap = {
   pharmacy: (val) => Boolean(val),
   wifi: (val) => Boolean(val),
   created_by: (val) => val,
-  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
-  updated_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 
 // -------------------- CREATE --------------------

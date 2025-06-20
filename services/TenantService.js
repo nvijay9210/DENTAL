@@ -1,5 +1,6 @@
 const tenantModel = require("../models/TenantModel");
 const { mapFields } = require("../query/Records");
+const { convertUTCToLocal } = require("../utils/DateUtils");
 const { safeStringify, safeJsonParse } = require("../utils/Helpers");
 const helper = require("../utils/Helpers");
 
@@ -9,7 +10,7 @@ const tenantFields = {
   tenant_app_name: (val) => val,
   tenant_app_logo: (val) => val,
   tenant_app_font: (val) => val,
-  tenant_app_themes: safeStringify,
+  tenant_app_themes: (val) => val
 };
 const tenantFieldsReverseMap = {
   tenant_id:val=>val,
@@ -18,18 +19,18 @@ const tenantFieldsReverseMap = {
   tenant_app_name: (val) => val,
   tenant_app_logo: (val) => val,
   tenant_app_font: (val) => val,
-  tenant_app_themes: safeJsonParse,
+  tenant_app_themes: (val) => val,
   created_by: (val) => val,
   created_time: (val) => val,
   updated_by: (val) => val,
-  updated_time: (val) => val,
+  updated_time: (val) => convertUTCToLocal(val)
 };
 
 // Create tenant service (calls the model function)
 const createTenant = async (data) => {
   const create = {
     ...tenantFields,
-    created_by: (val) => val,
+    created_by: (val) => val
   };
   
   try {
@@ -83,7 +84,7 @@ const updateTenant = async (tenantId, data) => {
   try {
     const update = {
       ...tenantFields,
-      updated_by: (val) => val,
+      updated_by: (val) => val
     };
     const { columns, values } = mapFields(data, update);
     const affectedRows = await tenantModel.updateTenant(tenantId, columns,values);

@@ -7,6 +7,7 @@ const {
 
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
+const { convertUTCToLocal } = require("../utils/DateUtils");
 
 // Field mapping for loginhistorys (similar to treatment)
 
@@ -32,7 +33,7 @@ const loginhistoryFieldsReverseMap = {
   login_time: (val) => val,
   logout_time: (val) => val,
   created_by: (val) => val,
-  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  created_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 // Create LoginHistory
 const createLoginHistory = async (data) => {

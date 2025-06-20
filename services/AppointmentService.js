@@ -12,7 +12,7 @@ const {
   duration,
   safeJsonParse,
 } = require("../utils/Helpers");
-const { formatDateOnly, formatAppointments, isoToSqlDatetime } = require("../utils/DateUtils");
+const { formatDateOnly, formatAppointments, isoToSqlDatetime, convertUTCToLocal } = require("../utils/DateUtils");
 const { mapFields } = require("../query/Records");
 const { updatePatientCount } = require("../models/ClinicModel");
 const { updatePatientAppointmentCount } = require("../models/PatientModel");
@@ -81,12 +81,12 @@ const appointmentFieldsReverseMap = {
   is_virtual:(val) => Boolean(val),
   reminder_send:(val) => Boolean(val),
   meeting_link:(val)=>val || null,
-  checkin_time: val => val ? new Date(val).toISOString() : null,
-  checkout_time: val => val ? new Date(val).toISOString() : null,
+  checkin_time: val => val ? convertUTCToLocal(val) : null,
+  checkout_time: val => val ? convertUTCToLocal(val) : null,
   created_by: (val) => val,
-  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
-  updated_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 
 // Create Appointment

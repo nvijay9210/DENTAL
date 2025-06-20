@@ -8,7 +8,7 @@ const {
   getOrSetCache,
 } = require("../config/redisConfig");
 const { decodeJsonFields } = require("../utils/Helpers");
-const { formatDateOnly } = require("../utils/DateUtils");
+const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const {
@@ -81,9 +81,9 @@ const patientFieldsReverseMap = {
   insurance_policy_number: (val) => val,
   profile_picture: (val) => val,
   created_by: (val) => val,
-  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
-  updated_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 
 // Create patient
@@ -578,122 +578,6 @@ const getNewPatientsTrendsByDentistAndClinic = async (
   });
   return rows;
 };
-
-// const getNewPatientsTrendsByDentistAndClinic = async (tenantId, clinicId, dentistId) => {
-//   // Fetch all patients who have their FIRST appointment with this dentist in this clinic
-//   const query = `
-//     SELECT
-//       p.patient_id,
-//       MIN(a.appointment_date) AS first_appt_date
-//     FROM
-//       appointment a
-//     JOIN
-//       patient p ON a.patient_id = p.patient_id
-//     WHERE
-//       a.tenant_id = ?
-//       AND a.clinic_id = ?
-//       AND a.dentist_id = ?
-//     GROUP BY
-//       p.patient_id
-//   `;
-//   const conn = await pool.getConnection();
-//   let rows;
-//   try {
-//     [rows] = await conn.query(query, [tenantId, clinicId, dentistId]);
-//   } finally {
-//     conn.release();
-//   }
-
-//   const now = moment().utc();
-//   const result = {};
-
-//   // --- 1w: Current week, daily counts (Mon-Sun) ---
-//   {
-//     const weekStart = now.clone().startOf('isoWeek');
-//     const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-//     const data = [];
-//     for (let d = 0; d < 7; d++) {
-//       const dayStart = weekStart.clone().add(d, 'days').startOf('day');
-//       const dayEnd = dayStart.clone().endOf('day');
-//       const count = rows.filter(row => {
-//         const created = moment(row.first_appt_date).utc();
-//         return created.isBetween(dayStart, dayEnd, null, '[]');
-//       }).length;
-//       data.push(count);
-//     }
-//     result['1w'] = { labels, datasets: [{ data }] };
-//   }
-
-//   // --- 4w: Last 4 weeks (labels: "1w", "2w", "3w", "4w") ---
-//   {
-//     const labels = [];
-//     const data = [];
-//     for (let w = 4; w >= 1; w--) {
-//       const weekStart = now.clone().startOf('isoWeek').subtract(w - 1, 'weeks');
-//       const weekEnd = weekStart.clone().endOf('isoWeek');
-//       const count = rows.filter(row => {
-//         const created = moment(row.first_appt_date).utc();
-//         return created.isBetween(weekStart, weekEnd, null, '[]');
-//       }).length;
-//       labels.push(`${5 - w}w`);
-//       data.push(count);
-//     }
-//     result['4w'] = { labels, datasets: [{ data }] };
-//   }
-
-//   // --- 4m: Last 4 months (labels: month names) ---
-//   {
-//     const labels = [];
-//     const data = [];
-//     for (let m = 4; m >= 1; m--) {
-//       const monthStart = now.clone().startOf('month').subtract(m - 1, 'months');
-//       const monthEnd = monthStart.clone().endOf('month');
-//       const count = rows.filter(row => {
-//         const created = moment(row.first_appt_date).utc();
-//         return created.isBetween(monthStart, monthEnd, null, '[]');
-//       }).length;
-//       labels.push(monthStart.format('MMM'));
-//       data.push(count);
-//     }
-//     result['4m'] = { labels, datasets: [{ data }] };
-//   }
-
-//   // --- 12m: Last 12 months (labels: month names) ---
-//   {
-//     const labels = [];
-//     const data = [];
-//     for (let m = 12; m >= 1; m--) {
-//       const monthStart = now.clone().startOf('month').subtract(m - 1, 'months');
-//       const monthEnd = monthStart.clone().endOf('month');
-//       const count = rows.filter(row => {
-//         const created = moment(row.first_appt_date).utc();
-//         return created.isBetween(monthStart, monthEnd, null, '[]');
-//       }).length;
-//       labels.push(monthStart.format('MMM'));
-//       data.push(count);
-//     }
-//     result['12m'] = { labels, datasets: [{ data }] };
-//   }
-
-//   // --- 4y: Last 4 years (labels: years) ---
-//   {
-//     const labels = [];
-//     const data = [];
-//     for (let y = 4; y >= 1; y--) {
-//       const yearStart = now.clone().startOf('year').subtract(y - 1, 'years');
-//       const yearEnd = yearStart.clone().endOf('year');
-//       const count = rows.filter(row => {
-//         const created = moment(row.first_appt_date).utc();
-//         return created.isBetween(yearStart, yearEnd, null, '[]');
-//       }).length;
-//       labels.push(yearStart.format('YYYY'));
-//       data.push(count);
-//     }
-//     result['4y'] = { labels, datasets: [{ data }] };
-//   }
-
-//   return result;
-// };
 
 const getAgeGenderByDentist = async (tenantId, clinicId, dentistId) => {
   const cacheData = `patient:agegender:tenant:${tenantId}:clinic:${clinicId}:dentist:${dentistId}`;

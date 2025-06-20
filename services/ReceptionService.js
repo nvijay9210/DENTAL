@@ -6,7 +6,7 @@ const {
 } = require("../config/redisConfig");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
-const { formatDateOnly } = require("../utils/DateUtils");
+const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { encrypt } = require("../middlewares/PasswordHash");
 const { addUser, getUserIdByUsername, assignRealmRoleToUser, addUserToGroup } = require("../middlewares/KeycloakAdmin");
 
@@ -55,9 +55,9 @@ const receptionFieldsReverseMap = {
   pincode: (val) => val,
   last_login: (val) => val,
   created_by: (val) => val,
-  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
-  updated_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 // Create Reception
 const createReception = async (data,token,realm) => {

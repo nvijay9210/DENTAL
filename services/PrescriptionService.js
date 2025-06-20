@@ -9,7 +9,7 @@ const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
-const { formatDateOnly } = require("../utils/DateUtils");
+const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 
 // Field mapping for prescriptions (similar to treatment)
 
@@ -56,9 +56,9 @@ const prescriptionFieldsReversMap = {
   notes: helper.safeJsonParse,
   is_active: val => Boolean(val),
   created_by: (val) => val,
-  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
-  updated_time: (val) => (val ? new Date(val).toISOString() : null)
+  updated_time: (val) => (val ? convertUTCToLocal(val) : null)
 };
 
 // Create Prescription
