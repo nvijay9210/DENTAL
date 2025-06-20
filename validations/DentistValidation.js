@@ -74,7 +74,7 @@ const dentistColumnConfig = [
   },
   {
     columnname: "designation",
-    type: "varchar",
+    type: "text",
     null: true
   },
   {

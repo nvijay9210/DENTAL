@@ -19,16 +19,16 @@ function getKey(realm, header, callback) {
 // Middleware: skips group validation if user has 'tenant' role
 function authenticateTenantClinicGroup(requiredRoles = []) {
   return (req, res, next) => {
-    // if (process.env.NODE_ENV === "development") {
-    //   req.user = {
-    //     username: "dev-user",
-    //     realm_access: { roles: requiredRoles },
-    //     groups: ["dev-group"],
-    //   };
-    //   req.realm = req.headers["x-realm"] || "dev-realm";
-    //   req.token = "dev-token";
-    //   return next();
-    // }
+    if (process.env.NODE_ENV === "development") {
+      req.user = {
+        username: "dev-user",
+        realm_access: { roles: requiredRoles },
+        groups: ["dev-group"],
+      };
+      req.realm = req.headers["x-realm"] || "dev-realm";
+      req.token = "dev-token";
+      return next();
+    }
 
     const token = req.headers.authorization?.split(" ")[1];
     const realm = req.headers["x-realm"];

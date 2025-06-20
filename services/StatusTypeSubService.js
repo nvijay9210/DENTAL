@@ -9,6 +9,7 @@ const {
   getStatusTypeIdByTenantAndStatusType,
 } = require("../models/StatusTypeModel");
 const helper = require("../utils/Helpers");
+const { convertUTCToLocal } = require("../utils/DateUtils");
 const statusTypeSubFields = {
   tenant_id: (val) => val,
   status_type_id: (val) => val,
@@ -22,9 +23,9 @@ const statusTypeSubFieldsReverseMap = {
   status_type_sub: (val) => val,
   status_type_sub_ref: (val) => val,
   created_by: (val) => val,
-  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
-  updated_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 // Create StatusTypeSub
 const createStatusTypeSub = async (details, statusType) => {

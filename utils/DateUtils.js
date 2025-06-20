@@ -1,7 +1,8 @@
 const { CustomError } = require("../middlewares/CustomeError");
+const { DateTime } = require("luxon");
 
 function formatDateOnly(isoString) {
-  console.log(isoString)
+  console.log(isoString);
   if (!isoString) return null;
 
   const date = new Date(isoString);
@@ -62,33 +63,60 @@ function isoToSqlDatetime(isoStr) {
   return `${YYYY}-${MM}-${DD} ${HH}:${mm}:${ss}`;
 }
 
-const compareDateTime=async(d1, t1, d2, t2)=> {
+const compareDateTime = async (d1, t1, d2, t2) => {
   const datetime1 = new Date(`${d1}T${t1}`);
   const datetime2 = new Date(`${d2}T${t2}`);
 
-  console.log(datetime1,datetime2)
+  console.log(datetime1, datetime2);
 
   const millis1 = datetime1.getTime();
   const millis2 = datetime2.getTime();
 
-  console.log(millis1,millis2)
+  console.log(millis1, millis2);
 
   if (millis1 > millis2) {
-    throw new CustomError(`${d1} ${t1} is later than ${d2} ${t2}`,400) 
+    throw new CustomError(`${d1} ${t1} is later than ${d2} ${t2}`, 400);
 
-  // if (millis1 < millis2) {
-  //   return `${d1} ${t1} is earlier than ${d2} ${t2}`;
-  // } else if (millis1 > millis2) {
-  //   return `${d1} ${t1} is later than ${d2} ${t2}`;
-  // } else {
-  //   return `${d1} ${t1} is the same as ${d2} ${t2}`;
-  // }
-}
-}
+    // if (millis1 < millis2) {
+    //   return `${d1} ${t1} is earlier than ${d2} ${t2}`;
+    // } else if (millis1 > millis2) {
+    //   return `${d1} ${t1} is later than ${d2} ${t2}`;
+    // } else {
+    //   return `${d1} ${t1} is the same as ${d2} ${t2}`;
+    // }
+  }
+};
 
 function isEarlier(dt1, dt2) {
   return new Date(dt1) < new Date(dt2);
 }
 
+/**
+ * Converts an ISO UTC string to system local time (region-based)
+ * @param {string} utcISOString - ISO string like "2025-06-20T07:27:11.000Z"
+ * @returns {string} - Local time in "YYYY-MM-DD HH:mm:ss" format
+ */
+function convertUTCToLocal(utcISOString) {
+  const date = new Date(utcISOString); // auto converts UTC to local
 
-module.exports = { formatDateOnly, formatAppointments,isValidDate,isoToSqlDatetime,compareDateTime,isEarlier };
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mi = String(date.getMinutes()).padStart(2, '0');
+  const ss = String(date.getSeconds()).padStart(2, '0');
+
+  return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+}
+
+
+
+module.exports = {
+  formatDateOnly,
+  formatAppointments,
+  isValidDate,
+  isoToSqlDatetime,
+  compareDateTime,
+  isEarlier,
+  convertUTCToLocal,
+};

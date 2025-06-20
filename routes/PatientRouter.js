@@ -26,17 +26,14 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // File middleware options
 const patientFileMiddleware = uploadFileMiddleware({
-  folderName: "receptionist",
+  folderName: "Patient",
   fileFields: [
     {
       fieldName: "profile_picture",
       subFolder: "Photos",
       maxSizeMB: 2,
       multiple: false,
-    },
-    // { fieldName: "aadhaar_front", subFolder: "Documents", maxSizeMB: 5, multiple: false },
-    // { fieldName: "aadhaar_back", subFolder: "Documents", maxSizeMB: 5, multiple: false },
-    // { fieldName: "medical_reports", subFolder: "Documents", maxSizeMB: 5, multiple: true },
+    }
   ],
   createValidationFn: patientValidation.createPatientValidation,
   updateValidationFn: patientValidation.updatePatientValidation,

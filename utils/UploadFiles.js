@@ -57,6 +57,8 @@ const uploadFileMiddleware = (options) => {
           break;
       }
 
+      console.log("id:",id)
+
       if (id) {
         await updateValidationFn(id, req.body, tenant_id);
       } else {

@@ -11,7 +11,7 @@ const {
   addUserToGroup,
 } = require("../middlewares/KeycloakAdmin");
 const { mapFields } = require("../query/Records");
-const { formatDateOnly } = require("../utils/DateUtils");
+const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 
 const helper = require("../utils/Helpers");
 
@@ -32,7 +32,7 @@ const dentistFieldMap = {
   alternate_phone_number: (val) => val,
 
   specialisation: (val) => val,
-  designation: (val) => val,
+  designation: (val) => helper.safeStringify(val),
   languages_spoken: helper.safeStringify,
   working_hours: helper.safeStringify,
   available_days: helper.safeStringify,
@@ -81,13 +81,13 @@ const dentistFieldReverseMap = {
   last_name: (val) => val,
   gender: (val) => val,
   date_of_birth: (val) =>
-    val ? new Date(val).toISOString().split("T")[0] : null,
+    val ? convertUTCToLocal(val).split("T")[0] : null,
   email: (val) => val,
   phone_number: (val) => val,
   alternate_phone_number: (val) => val,
   specialisation: (val) => val,
 
-  designation: (val) => val,
+  designation: (val) => helper.safeJsonParse(val),
   languages_spoken: (val) => helper.safeJsonParse(val),
   working_hours: (val) => helper.safeJsonParse(val),
   available_days: (val) => helper.safeJsonParse(val),
@@ -122,6 +122,10 @@ const dentistFieldReverseMap = {
 
   last_login: (val) => val,
   duration: (val) => val,
+  created_by: (val) => val,
+  created_time: (val) => (val ? convertUTCToLocal(val) : null),
+  updated_by: (val) => val,
+  updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 
 // -------------------- CREATE --------------------

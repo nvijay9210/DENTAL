@@ -7,6 +7,7 @@ const {
 
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
+const { convertUTCToLocal } = require("../utils/DateUtils");
 
 // Field mapping for useractivitys (similar to treatment)
 
@@ -29,7 +30,7 @@ const useractivityFieldsReverseMap = {
   logout_time: (val) => val,
   duration: (val) => val,
   created_by: (val) => val,
-  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  created_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 // Create UserActivity
 

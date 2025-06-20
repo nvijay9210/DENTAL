@@ -5,6 +5,7 @@ const {
   invalidateCacheByPattern,
 } = require("../config/redisConfig");
 const helper = require("../utils/Helpers");
+const { convertUTCToLocal } = require("../utils/DateUtils");
 
 const statusTypeField = {
   tenant_id: (val) => val,
@@ -15,9 +16,9 @@ const statusTypeFieldReverseMap = {
   tenant_id: (val) => val,
   status_type: (val) => val,
   created_by: (val) => val,
-  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
-  updated_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 // Create StatusType
 const createStatusType = async (data) => {

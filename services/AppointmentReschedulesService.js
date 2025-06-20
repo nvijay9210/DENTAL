@@ -6,7 +6,7 @@ const {
 } = require("../config/redisConfig");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
-const { formatDateOnly, compareDateTime } = require("../utils/DateUtils");
+const { formatDateOnly, compareDateTime,convertUTCToLocal } = require("../utils/DateUtils");
 const { duration } = require('../utils/Helpers');
 const { checkIfExists } = require("../models/checkIfExists");
 
@@ -52,9 +52,9 @@ const appointmentRescheduleFieldsReverseMap = {
   charge_applicable: (val) => Boolean(val),
   charge_amount: (val) => parseFloat(val) || 0.0,
   created_by: (val) => val,
-  created_time: (val) => (val ? new Date(val).toISOString() : null),
+  created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
-  updated_time: (val) => (val ? new Date(val).toISOString() : null),
+  updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 
 // Create AppointmentReschedules

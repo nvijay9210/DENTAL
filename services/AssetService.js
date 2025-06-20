@@ -9,7 +9,7 @@ const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
-const { formatDateOnly } = require("../utils/DateUtils");
+const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 
 const assetFields = {
   tenant_id: (val) => val,
@@ -39,15 +39,15 @@ const assetFieldsReverseMap = {
   allocated_to: (val) => val,
   quantity: (val) => val,
   price: (val) => val,
-  purchased_date: val => val ? new Date(val).toISOString().split('T')[0] : null,
+  purchased_date: val => val ? convertUTCToLocal(val).split('T')[0] : null,
   purchased_by: (val) => val,
-  expired_date: val => val ? new Date(val).toISOString().split('T')[0] : null,
+  expired_date: val => val ? convertUTCToLocal(val).split('T')[0] : null,
   invoice_number: (val) => val,
   description:val=> helper.safeJsonParse(val),
   created_by: val => val,
-  created_time: val => val ? new Date(val).toISOString() : null,
+  created_time: val => val ? convertUTCToLocal(val) : null,
   updated_by: val => val,
-  updated_time: val => val ? new Date(val).toISOString() : null
+  updated_time: val => val ? convertUTCToLocal(val) : null
 };
 
 // Field mapping for assets (similar to treatment)
