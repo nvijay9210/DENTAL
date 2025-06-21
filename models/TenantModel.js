@@ -3,6 +3,7 @@ const { tenantQuery } = require("../query/TenantQuery")
 
 const record = require("../query/Records");
 const { CustomError } = require("../middlewares/CustomeError");
+const { tablesToCheck } = require("../utils/GolbalValidationPhone");
 ;
 const TABLE = "tenant";
 
@@ -75,8 +76,10 @@ const getTenantByTenantNameAndTenantDomain = async (tenantName,tenantDomain) => 
   const conn = await pool.getConnection();
   try {
     const rows = await conn.query(query, [tenantName,tenantDomain]);
+    console.log(rows)
     return rows[0];
   } catch (error) {
+    console.log(error.message)
     throw new CustomError("Database error occurred while fetching the Tenant.");
   } finally {
     conn.release();
@@ -84,6 +87,7 @@ const getTenantByTenantNameAndTenantDomain = async (tenantName,tenantDomain) => 
 };
 
 const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = null) => {
+  if(table==='receptionist') table='reception'
   const idColumn = `${table}_id`;
 
   let query = `
@@ -94,7 +98,7 @@ const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = 
 
   const queryParams = [idColumn, table, keycloakId, tenantId];
 
-  if (clinicId !== null) {
+  if (clinicId !== null && table!=='patient') {
     query += ` AND clinic_id = ?`;
     queryParams.push(clinicId);
   }
@@ -105,7 +109,7 @@ const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = 
 
   try {
     const rows = await conn.query(query, queryParams);
-    console.log(rows)
+ 
     return rows[0];
   } catch (error) {
     console.error("Database error:", error.message);
