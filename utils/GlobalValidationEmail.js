@@ -6,7 +6,9 @@ const checkGlobalEmailUniqueness = async (conn, tenantId, email,currentTable, id
   const tableIdMap = {
     clinic: "clinic_id",
     dentist: "dentist_id",
-    patient: "patient_id"
+    patient: "patient_id",
+    supplier: "supplier_id",
+    reception: "reception_id"
   };
 
   for (const [table, idColumn] of Object.entries(tableIdMap)) {

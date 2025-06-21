@@ -848,12 +848,17 @@ const updateAppoinmentStatusCancelledAndReschedule = async (
 const updateRoomIdBeforeAppointment = async () => {
   try {
     const [appointments] = await pool.execute(`
-      SELECT appointment_id 
-      FROM appointment 
-      WHERE appointment_date = CURDATE()
-        AND start_time BETWEEN DATE_FORMAT(NOW() + INTERVAL 1 MINUTE, '%H:%i:00') AND DATE_FORMAT(NOW() + INTERVAL 1 MINUTE, '%H:%i:59')
-        AND is_virtual = 1
-        AND room_id = '00000000-0000-0000-0000-000000000000'
+      SELECT appointment_id
+FROM appointment
+WHERE 
+  appointment_date = CURDATE()
+  AND start_time BETWEEN 
+    DATE_FORMAT(CONVERT_TZ(NOW() + INTERVAL 1 MINUTE, '+05:30', '+00:00'), '%H:%i:00')
+    AND
+    DATE_FORMAT(CONVERT_TZ(NOW() + INTERVAL 1 MINUTE, '+05:30', '+00:00'), '%H:%i:59')
+  AND is_virtual = 1
+  AND room_id = '00000000-0000-0000-0000-000000000000';
+
     `);
 
     const updatePromises = appointments.map(({ appointment_id }) => {

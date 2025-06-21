@@ -212,7 +212,7 @@ const updatePatientValidation = async (patientId, details, tenantId) => {
   }
 
   await validatePatientPhones(details, patientId);
-  if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email,patientId);
+  // if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email,patientId);
   await validateUniqueFields(details, true, patientId);
 };
 
