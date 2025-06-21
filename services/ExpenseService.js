@@ -16,7 +16,7 @@ const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const expenseFields = {
   tenant_id: (val) => val,
   clinic_id: (val) => val,
-  expense_date: (val) => formatDateOnly(val),
+  expense_date: (val) => val,
   expense_category: (val) => val,
   expense_reason: (val) => val,
   expense_amount: (val) => parseFloat(val),
@@ -28,7 +28,7 @@ const expenseFieldsReverseMap = {
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   expense_date: (val) =>
-    val ? convertUTCToLocal(val).split("T")[0] : null,
+    val ? formatDateOnly(val) : null,
   expense_category: (val) => val,
   expense_reason: (val) => val,
   expense_amount: (val) => val,
