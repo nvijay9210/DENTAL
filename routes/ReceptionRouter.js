@@ -47,7 +47,7 @@ router.post(
 // Get All Receptions by Tenant ID with Pagination
 router.get(
   GETALL_RECEPTION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","receptionist"]),
   receptionController.getAllReceptionsByTenantId
 );
 

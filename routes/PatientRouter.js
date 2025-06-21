@@ -68,6 +68,7 @@ router.get(
     "super-user",
     "dentist",
     "receptionist",
+    "patient"
   ]),
   patientController.getPatientByTenantIdAndPatientId
 );

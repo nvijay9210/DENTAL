@@ -24,7 +24,8 @@ router.get(
     "tenant",
     "super-user",
     "dentist",
-    "patient"
+    "patient",
+    "receptionist"
   ]),
   prescriptionController.getAllPrescriptionsByTenantId
 );
@@ -44,7 +45,8 @@ router.get(
     "tenant",
     "super-user",
     "dentist",
-    "patient"
+    "patient",
+    "receptionist"
   ]),
   prescriptionController.getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId
 );

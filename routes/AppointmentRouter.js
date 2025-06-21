@@ -67,6 +67,7 @@ router.get(
     "receptionist",
     "patient",
     "dentist",
+    "receptionist"
   ]),
   appointmentController.getAllAppointmentsByTenantIdAndClinicIdByDentist
 );
@@ -150,7 +151,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "receptionist",
-    "dentist",
+    "dentist"
   ]),
   appointmentController.getAppointmentsWithDetails
 );
@@ -179,6 +180,7 @@ router.get(
     "tenant",
     "receptionist",
     "dentist",
+    "patient"
   ]),
   appointmentController.getAppointmentsWithDetailsByPatient
 );

@@ -38,7 +38,9 @@ exports.getTenantByTenantId = async (req, res, next) => {
 exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   const {tenant_name,tenant_domain}=req.params
 
+
   let user = extractUserInfo(req.user);
+
   if (user.role !== "tenant" && user.role !== "super-user") {
     const userdetails = await getUserIdUsingKeycloakId(
       user.role,
@@ -57,18 +59,6 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
       tenant_name,
       tenant_domain
     );
-    res.cookie("access_token", req.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 1000 * 60 * 15,
-    });
-
-    res.cookie("realm", req.realm, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    });
 
     res.status(200).json({
       ...tenants[0],
