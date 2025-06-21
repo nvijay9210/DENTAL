@@ -81,7 +81,7 @@ const dentistFieldReverseMap = {
   last_name: (val) => val,
   gender: (val) => val,
   date_of_birth: (val) =>
-    val ? convertUTCToLocal(val).split("T")[0] : null,
+    val ? formatDateOnly(val) : null,
   email: (val) => val,
   phone_number: (val) => val,
   alternate_phone_number: (val) => val,

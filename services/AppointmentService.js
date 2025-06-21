@@ -729,8 +729,8 @@ const getAppointmentSummary = async (tenant_id, clinic_id) => {
 
     rows.forEach(row => {
       result.total_appointments += row.count;
-      if (row.status === "CP") result.completed_appointments = row.count;
-      else if (row.status === "SC") result.pending_appointments = row.count;
+      if (row.status === "completed") result.completed_appointments = row.count;
+      else if (row.status === "scheduled") result.pending_appointments = row.count;
       else if (row.status === "cancelled") result.cancelled_appointments = row.count;
     });
 
@@ -829,8 +829,8 @@ const getAppointmentSummaryByDentist = async (tenant_id, clinic_id,dentist_id) =
 
     rows.forEach(row => {
       result.total_appointments += row.count;
-      if (row.status === "CP") result.completed_appointments = row.count;
-      else if (row.status === "SC") result.pending_appointments = row.count;
+      if (row.status === "completed") result.completed_appointments = row.count;
+      else if (row.status === "scheduled") result.pending_appointments = row.count;
       else if (row.status === "cancelled") result.cancelled_appointments = row.count;
     });
 
