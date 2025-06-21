@@ -123,6 +123,7 @@ const getAllRemindersByTenantId = async (tenantId, page = 1, limit = 10) => {
     throw new CustomError("Failed to fetch reminders", 404);
   }
 };
+
 const getAllRemindersByTenantAndClinicAndDentistAndType = async (
   tenant_id,
   clinic_id,
@@ -172,7 +173,11 @@ const getAllNotifyByDentist = async (
       clinic_id,
       dentist_id
     );
-  return result;
+    const result1 = result.map((r) =>
+      ({ ...r, description: helper.safeJsonParse(r.description) })
+    );
+    
+  return result1;
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
     throw new CustomError("Failed to fetch reminders", 404);
