@@ -87,6 +87,7 @@ router.get(
   GETALL_PATIENT_VISITEDETAILS,
   authenticateTenantClinicGroup([
     "tenant",
+    "super-user",
     "receptionist",
     "dentist",
   ]),
