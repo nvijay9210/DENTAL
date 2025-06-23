@@ -52,7 +52,7 @@ router.get(
 // Get Clinic by Tenant & Clinic ID
 router.get(
   routerPath.GET_CLINIC_TENANT,
-  authenticateTenantClinicGroup(["tenant"]),
+  authenticateTenantClinicGroup(["tenant","super-user"]),
   clinicController.getClinicByTenantIdAndClinicId
 );
 
