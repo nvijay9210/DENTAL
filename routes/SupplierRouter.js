@@ -17,35 +17,60 @@ const {
 // Create Supplier
 router.post(
   ADD_SUPPLIER,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier"]),
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "supplier",
+  ]),
   supplierController.createSupplier
 );
 
 // Get All Suppliers by Tenant ID with Pagination
 router.get(
   GETALL_SUPPLIER_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier"]),
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "supplier",
+  ]),
   supplierController.getAllSuppliersByTenantId
 );
 
 // Get Single Supplier by Tenant ID & Supplier ID
 router.get(
   GET_SUPPLIER_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier"]),
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "supplier",
+  ]),
   supplierController.getSupplierByTenantIdAndSupplierId
 );
 
 // Update Supplier
 router.put(
   UPDATE_SUPPLIER_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier"]),
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "supplier",
+  ]),
   supplierController.updateSupplier
 );
 
 // Delete Supplier
 router.delete(
   DELETE_SUPPLIER_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier"]),
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "supplier",
+  ]),
   supplierController.deleteSupplierByTenantIdAndSupplierId
 );
 

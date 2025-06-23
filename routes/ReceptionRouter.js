@@ -38,7 +38,7 @@ const receptionFileMiddleware = uploadFileMiddleware({
 // Create Reception
 router.post(
   ADD_RECEPTION,
-  authenticateTenantClinicGroup(["tenant","super-user"]),
+  authenticateTenantClinicGroup(["tenant", "super-user"]),
   upload.any(),
   receptionFileMiddleware,
   receptionController.createReception
@@ -47,7 +47,13 @@ router.post(
 // Get All Receptions by Tenant ID with Pagination
 router.get(
   GETALL_RECEPTION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","receptionist"]),
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "patient",
+    "receptionist",
+  ]),
   receptionController.getAllReceptionsByTenantId
 );
 

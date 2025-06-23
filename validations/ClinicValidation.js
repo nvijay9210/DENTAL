@@ -182,6 +182,8 @@ const clinicColumnConfig = [
   },
   { columnname: "pharmacy", type: "tinyint", null: true, is_boolean: true },
   { columnname: "wifi", type: "tinyint", null: false, is_boolean: true },
+  { columnname: "clinic_app_font", type: "varchar", size: 100, null: true },
+  { columnname: "clinic_app_themes", type: "varchar", size: 50, null: true },
 ];
 
 const createClinicColumnConfig = [

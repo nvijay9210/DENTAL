@@ -245,7 +245,7 @@ const updateDentistValidation = async (dentistId, details, tenant_id) => {
   await validateTenant(tenant_id);
   // await checkIfIdExists('clinic','clinic_id',details.clinic_id||0)
 
-  if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email,'dentist',dentistId);
+  // if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email,'dentist',dentistId);
   await validateUniqueFields(details, true, dentistId);
 
   if (

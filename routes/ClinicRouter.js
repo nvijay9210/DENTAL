@@ -66,6 +66,16 @@ router.put(
   clinicController.updateClinic
 );
 
+// Update Clinic
+router.put(
+  routerPath.UPDATE_CLINIC_SETTINGS,
+  authenticateTenantClinicGroup(["tenant","super-user"]),
+  // clinicUploadFields,
+  upload.any(),
+  clinicFileMiddleware,
+  clinicController.updateClinicSettings
+);
+
 router.put(
   routerPath.HANDLE_CLINIC_ASSIGNMENT,
   authenticateTenantClinicGroup(["tenant", "super-user"]),

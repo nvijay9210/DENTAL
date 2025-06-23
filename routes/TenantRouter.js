@@ -48,7 +48,14 @@ router.get(
 );
 router.get(
   routerPath.GET_TENANT_NAME_DOMAIN,
-  authenticateTenantClinicGroup(["tenant", "super-user","dentist","patient","receptionist","supplier"]),
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "patient",
+    "receptionist",
+    "supplier",
+  ]),
   tenantController.getTenantByTenantNameAndTenantDomain
 );
 router.put(

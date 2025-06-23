@@ -50,6 +50,8 @@ const clinicFieldMap = {
   parking_availability: helper.parseBoolean,
   pharmacy: helper.parseBoolean,
   wifi: helper.parseBoolean,
+  clinic_app_font:(val)=>val,
+  clinic_app_themes:(val)=>val
 };
 
 const clinicFieldReverseMap = {
@@ -85,6 +87,8 @@ const clinicFieldReverseMap = {
   parking_availability: (val) => Boolean(val),
   pharmacy: (val) => Boolean(val),
   wifi: (val) => Boolean(val),
+  clinic_app_font:(val)=>val,
+  clinic_app_themes:(val)=>val,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
@@ -780,6 +784,38 @@ const getFinanceSummarybyDentist = async (tenant_id, clinic_id, dentist_id) => {
   }
 };
 
+const getClinicSettingsByTenantIdAndClinicId = async (
+  tenantId,
+  clinicId
+) => {
+  try {
+    const clinic = await clinicModel.getClinicSettingsByTenantIdAndClinicId(
+      tenantId,
+      clinicId
+    );
+    return clinic;
+  } catch (error) {
+    throw new CustomError(message.CLINIC_DELETE_FAIL, 404);
+  }
+};
+
+const updateClinicSettings = async (
+  tenantId,
+  clinicId,
+  details
+) => {
+  try {
+    const clinic = await clinicModel.updateClinicSettings(
+      tenantId,
+      clinicId,
+      details
+    );
+    return clinic;
+  } catch (error) {
+    throw new CustomError(error.message, 404);
+  }
+};
+
 module.exports = {
   createClinic,
   updateClinic,
@@ -790,4 +826,6 @@ module.exports = {
   handleClinicAssignment,
   getFinanceSummary,
   getFinanceSummarybyDentist,
+  getClinicSettingsByTenantIdAndClinicId,
+  updateClinicSettings
 };
