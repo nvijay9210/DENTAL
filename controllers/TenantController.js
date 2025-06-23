@@ -50,7 +50,7 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
     );
     user.userId = userdetails[0]?.userid || null;
     user.username = userdetails[0]?.username || null;
-    user["clinic_id"]=user.clinicId
+    if(user.role==='super-user') user["clinic_id"]=user.clinicId
   }
 
   try {
