@@ -3,6 +3,9 @@ const { extractUserInfo } = require("../middlewares/KeycloakAdmin");
 const { getUserIdUsingKeycloakId } = require("../models/TenantModel");
 const tenantService = require("../services/TenantService");
 const tenantValidation = require("../validations/TenantValidation");
+const {
+  getClinicSettingsByTenantIdAndClinicId,
+} = require("../services/ClinicService");
 
 exports.addTenant = async (req, res, next) => {
   try {
@@ -36,8 +39,7 @@ exports.getTenantByTenantId = async (req, res, next) => {
 };
 
 exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
-  const {tenant_name,tenant_domain}=req.params
-
+  const { tenant_name, tenant_domain } = req.params;
 
   let user = extractUserInfo(req.user);
 
@@ -46,23 +48,30 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
       user.role,
       user.userId,
       user.tenantId,
-      user.clinicId
+      user.clinicId  
     );
     user.userId = userdetails[0]?.userid || null;
     user.username = userdetails[0]?.username || null;
-    if(user.role==='super-user') user["clinic_id"]=user.clinicId
   }
 
   try {
-    if (!tenant_name || !tenant_domain)
-      throw new CustomError("Tenantname and domain is requried", 400);
-    const tenants = await tenantService.getTenantByTenantNameAndTenantDomain(
-      tenant_name,
-      tenant_domain
-    );
-
+    let settings;
+    if (user.role === "super-user") {
+      settings = await getClinicSettingsByTenantIdAndClinicId(
+        user.tenantId,
+        user.clinicId
+      );
+      console.log(settings)
+    } else {
+      if (!tenant_name || !tenant_domain)
+        throw new CustomError("Tenantname and domain is requried", 400);
+      settings = await tenantService.getTenantByTenantNameAndTenantDomain(
+        tenant_name,
+        tenant_domain
+      );
+    }
     res.status(200).json({
-      ...tenants[0],
+      ...settings,
       ...user,
     });
   } catch (err) {

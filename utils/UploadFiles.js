@@ -57,12 +57,14 @@ const uploadFileMiddleware = (options) => {
           break;
       }
 
-      console.log("id:",id)
+      console.log("id:",id,"settings",typeof req.query.settings)
 
-      if (id) {
-        await updateValidationFn(id, req.body, tenant_id);
-      } else {
-        await createValidationFn(req.body);
+      if(req.query.settings!=1){
+        if (id) {
+          await updateValidationFn(id, req.body, tenant_id);
+        } else {
+          await createValidationFn(req.body);
+        }
       }
 
       const baseTenantPath = path.join(

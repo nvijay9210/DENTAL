@@ -50,6 +50,34 @@ exports.getFinanceSummary = async (req, res, next) => {
     next(err);
   }
 };
+exports.getClinicSettingsByTenantIdAndClinicId = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  try {
+    const clinics = await clinicService.getClinicSettingsByTenantIdAndClinicId(
+      tenant_id, clinic_id
+    );
+    res.status(200).json(clinics);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateClinicSettings = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  const details=req.body
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  try {
+    await clinicService.updateClinicSettings(
+      tenant_id, clinic_id,details
+    );
+    res.status(200).json({ message: "Clinic settings updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
 
 exports.getFinanceSummarybyDentist = async (req, res, next) => {
   const { tenant_id,clinic_id,dentist_id } = req.params;

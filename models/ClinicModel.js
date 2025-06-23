@@ -226,6 +226,39 @@ const getFinanceSummarybyDentist=async(tenant_id,clinic_id,dentist_id)=>{
   return {appointments,treatments,expenses}
 }
 
+const getClinicSettingsByTenantIdAndClinicId=async(tenantId,clinicId)=>{
+  const query = `select clinic_name,clinic_logo,clinic_app_themes,clinic_app_font from clinic  where tenant_id=? and clinic_id=?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tenantId,clinicId]);
+    return rows[0];
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+}
+
+const updateClinicSettings = async (tenantId, clinicId,details) => {
+
+  const query = `
+    UPDATE clinic
+    SET clinic_name=?,clinic_logo=?,clinic_app_font=?,clinic_app_themes=?
+    WHERE tenant_id = ? AND clinic_id=?;
+  `;
+
+  const conn = await pool.getConnection();
+  try {
+    const [result] = await conn.query(query, [details.clinic_name,details.clinic_logo,details.clinic_app_font,details.clinic_app_themes, tenantId, clinicId]);
+    return result.affectedRows > 0;
+  } catch (error) {
+    throw new Error(`Database Operation Failed while updating clinic settings`);
+  } finally {
+    conn.release();
+  }
+};
+
 
 module.exports = {
   createClinic,
@@ -238,6 +271,7 @@ module.exports = {
   updateDoctorCount,
   updatePatientCount,
   getFinanceSummary,
-  getFinanceSummarybyDentist
-  // getTotalDentistCountByClinicId
+  getFinanceSummarybyDentist,
+  getClinicSettingsByTenantIdAndClinicId,
+  updateClinicSettings
 };

@@ -43,7 +43,7 @@ const treatmentFileMiddleware = uploadFileMiddleware({
 // Create Treatment
 router.post(
   ADD_TREATMENT,
-  authenticateTenantClinicGroup(["tenant", "super-user","dentist"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist"]),
   upload.any(),
   treatmentFileMiddleware,
   treatmentController.createTreatment

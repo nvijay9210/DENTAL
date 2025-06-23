@@ -6,8 +6,8 @@ const tenantColumnConfig = [
   { columnname: "tenant_name", type: "varchar", size: 50, null: false },
   { columnname: "tenant_domain", type: "varchar", size: 255, null: false },
   { columnname: "tenant_app_name", type: "varchar", size: 100, null: true },
-  { columnname: "tenant_app_logo", type: "varchar", size: 50, null: true },
-  { columnname: "tenant_app_themes", type: "longtext", null: true },
+  { columnname: "tenant_app_logo", type: "varchar", size: 255, null: true },
+  { columnname: "tenant_app_themes", type: "varchar",size: 50, null: true },
   { columnname: "tenant_app_font", type: "varchar", size: 255, null: true },
 ];
 const createColumnConfig = [
