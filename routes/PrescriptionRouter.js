@@ -42,11 +42,11 @@ router.get(
 
 router.get(
   GETALL_PRESCRIPTION_TENANT_CLINIC_DENTIST_TREATMENT,authenticateTenantClinicGroup([
+    "receptionist",
     "tenant",
     "super-user",
     "dentist",
-    "patient",
-    "receptionist"
+    "patient"
   ]),
   prescriptionController.getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId
 );

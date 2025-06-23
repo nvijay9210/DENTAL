@@ -115,8 +115,6 @@ const dentistColumnConfig = [
     type: "time",
     null: true,
   },
-  { columnname: "clinic_name", type: "varchar", size: 150, null: true },
-  { columnname: "clinic_address", type: "varchar", size: 300, null: true },
   { columnname: "city", type: "varchar", size: 100, null: false },
   { columnname: "state", type: "varchar", size: 100, null: false },
   { columnname: "country", type: "varchar", size: 50, null: false },

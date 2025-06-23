@@ -221,6 +221,41 @@ async function resetUserPassword(token, realm, userId, newPassword, temporary = 
   }
 }
 
+// ✅ 6. Create Group in Realm
+async function createGroup(token, realm, groupName, attributes = {}) {
+  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups`;
+
+  const payload = {
+    name: groupName,
+    attributes
+  };
+
+  try {
+
+    const response = await axios.post(url, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    console.log(`✅ Group "${groupName}" created`);
+    return true;
+  } catch (error) {
+    if (error.response?.status === 409) {
+      console.warn(`⚠️ Group "${groupName}" already exists`);
+      return false;
+    }
+
+    console.error(
+      `❌ Failed to create group "${groupName}":`,
+      error.response?.data || error.message
+    );
+    return false;
+  }
+}
+
+
 
 // ✅ Export all functions
 module.exports = {
@@ -229,5 +264,6 @@ module.exports = {
   assignRealmRoleToUser,
   addUserToGroup,
   extractUserInfo,
-  resetUserPassword
+  resetUserPassword,
+  createGroup
 };

@@ -48,8 +48,6 @@ const dentistFieldMap = {
 
   experience_years: (val) => parseInt(val) || 0,
   license_number: (val) => val,
-  clinic_name: (val) => val,
-  clinic_address: (val) => val,
   city: (val) => val,
   state: (val) => val,
   country: (val) => val,
@@ -103,8 +101,6 @@ const dentistFieldReverseMap = {
 
   experience_years: (val) => parseInt(val) || 0,
   license_number: (val) => val,
-  clinic_name: (val) => val,
-  clinic_address: (val) => val,
   city: (val) => val,
   state: (val) => val,
   country: (val) => val,

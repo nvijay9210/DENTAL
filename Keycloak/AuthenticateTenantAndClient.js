@@ -63,6 +63,7 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
 
         // If user has 'tenant' role, skip group validation
         if (realmRoles.includes("tenant")) {
+          req.token = token;
           req.user = decoded;
           req.realm = realm;
           return next();

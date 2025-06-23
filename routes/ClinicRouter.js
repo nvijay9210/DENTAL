@@ -35,7 +35,7 @@ const clinicFileMiddleware = uploadFileMiddleware({
 // Add Clinic
 router.post(
   routerPath.ADD_CLINIC,
-  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant"]),
   upload.any(),
   clinicFileMiddleware,
   clinicController.createClinic
@@ -52,7 +52,7 @@ router.get(
 // Get Clinic by Tenant & Clinic ID
 router.get(
   routerPath.GET_CLINIC_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant"]),
   clinicController.getClinicByTenantIdAndClinicId
 );
 

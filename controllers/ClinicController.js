@@ -8,11 +8,13 @@ const {
 
 exports.createClinic = async (req, res, next) => {
   const details = req.body;
+  const token=req.token;
+  const realm=req.realm;
 
   try {
     await clinicValidation.createClinicValidation(details);
     // Create a new clinic
-    const id = await clinicService.createClinic(details);
+    const id = await clinicService.createClinic(details,token,realm);
     res.status(200).json({ message: "Clinic created", id });
   } catch (err) {
     next(err);
