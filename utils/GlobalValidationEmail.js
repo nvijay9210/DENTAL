@@ -7,7 +7,6 @@ const checkGlobalEmailUniqueness = async (conn, tenantId, email,currentTable, id
     clinic: "clinic_id",
     dentist: "dentist_id",
     patient: "patient_id",
-    supplier: "supplier_id",
     reception: "reception_id"
   };
 
@@ -21,7 +20,7 @@ const checkGlobalEmailUniqueness = async (conn, tenantId, email,currentTable, id
       const params = [currentTable, email, tenantId,`${currentTable}_id`,id];
       try {
         const rows = await conn.query(query, params);
-        console.log(rows[0])
+
         if (rows[0].length > 0) {
           throw new CustomError(`Email already exists in ${table}`, 409);
         }
@@ -35,7 +34,7 @@ const checkGlobalEmailUniqueness = async (conn, tenantId, email,currentTable, id
 
     try {
       const rows = await conn.query(query, params);
-      console.log(rows[0])
+  
       if (rows[0].length > 0) {
         throw new CustomError(`Email already exists in ${table}`, 409);
       }
@@ -49,8 +48,6 @@ const checkGlobalEmailUniqueness = async (conn, tenantId, email,currentTable, id
 // Main validator function
 const globalValidationEmail = async (tenantId, email,currentTable, id = null) => {
   const conn = await pool.getConnection();
-
-  console.log('tenant_id:',tenantId,'email:',email,'id:',id)
 
   try {
     // Only run email check if email is provided
