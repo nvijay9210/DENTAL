@@ -185,7 +185,8 @@ function extractUserInfo(token) {
     displayName: token.name,
     tenantId,
     clinicId,
-    role
+    role,
+    preferred_username:token.preferred_username
   };
 }
 

@@ -55,7 +55,10 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   }
 
   else{
-    user.username=user.preferred_username
+    console.log(user)
+    const fullName = user.preferred_username;
+    const firstName = (fullName?.split(' ') || [])[0] || 'user';
+    user['user_name']=firstName
   }
 
   if(user.userId===null) throw new CustomError('User in inactive state',404)
