@@ -43,8 +43,6 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
 
   let user = extractUserInfo(req.user);
 
-  console.log('user:',user)
-
   if (user.role !== "tenant" && user.role !== "super-user") {
     const userdetails = await getUserIdUsingKeycloakId(
       user.role,
@@ -59,6 +57,8 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   else{
     user.username=user.preferred_username
   }
+
+  if(user.userId===null) throw new CustomError('User in inactive state',404)
 
   try {
     let settings;

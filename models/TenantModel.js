@@ -98,6 +98,11 @@ const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = 
 
   const queryParams = [idColumn, table, keycloakId, tenantId];
 
+  if (table==='dentist' || table==='reception') {
+    query += ` AND status = ?`;
+    queryParams.push('1');
+  }
+
   if (clinicId !== null && table!=='patient') {
     query += ` AND clinic_id = ?`;
     queryParams.push(clinicId);
