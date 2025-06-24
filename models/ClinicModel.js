@@ -227,11 +227,11 @@ const getFinanceSummarybyDentist=async(tenant_id,clinic_id,dentist_id)=>{
 }
 
 const getClinicSettingsByTenantIdAndClinicId=async(tenantId,clinicId)=>{
-  const query = `select clinic_name,clinic_logo,clinic_app_themes,clinic_app_font from clinic  where tenant_id=? and clinic_id=?`;
+  const query = `select t.tenant_name,t.tenant_domain, c.clinic_name,c.clinic_logo,c.clinic_app_themes,c.clinic_app_font from clinic c inner join tenant t on t.tenant_id=c.tenant_id  where c.tenant_id=? and c.clinic_id=?`;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId,clinicId]);
-    return rows[0];
+    const rows = await conn.query(query, [tenantId,clinicId]);
+    return rows[0][0];
   } catch (error) {
     console.error(error);
     throw new Error("Database Operation Failed");

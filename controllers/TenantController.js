@@ -43,6 +43,8 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
 
   let user = extractUserInfo(req.user);
 
+  console.log('user:',user)
+
   if (user.role !== "tenant" && user.role !== "super-user") {
     const userdetails = await getUserIdUsingKeycloakId(
       user.role,
@@ -54,6 +56,10 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
     user.username = userdetails[0]?.username || null;
   }
 
+  else{
+    user.username=user.preferred_username
+  }
+
   try {
     let settings;
     if (user.role === "super-user") {
@@ -61,7 +67,7 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
         user.tenantId,
         user.clinicId
       );
-      console.log(settings)
+      // console.log("settings:",settings)
     } else {
       if (!tenant_name || !tenant_domain)
         throw new CustomError("Tenantname and domain is requried", 400);

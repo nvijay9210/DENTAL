@@ -330,6 +330,7 @@ exports.getAppointmentsWithDetails = async (req, res, next) => {
   const { page, limit } = req.query;
   try {
     await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+    await checkIfIdExists("tenant", "tenant_id", tenant_id);
     await checkIfIdExists("clinic", "clinic_id", clinic_id);
     await checkIfIdExists("dentist", "dentist_id", dentist_id);
     const appointments = await appointmentService.getAppointmentsWithDetails(
