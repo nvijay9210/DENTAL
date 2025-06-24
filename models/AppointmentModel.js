@@ -565,22 +565,23 @@ const getAppointmentMonthlySummary = async (
 ) => {
   const query = `SELECT 
     COUNT(*) AS total_appointments,
-    SUM(CASE WHEN app.status = 'CP' THEN 1 ELSE 0 END) AS completed_appointments,
-    SUM(CASE WHEN app.status = 'SCH' THEN 1 ELSE 0 END) AS pending_appointments,
-    SUM(CASE WHEN app.status = 'CL' THEN 1 ELSE 0 END) AS cancelled_appointments
+    SUM(CASE WHEN app.status = 'completed' THEN 1 ELSE 0 END) AS completed_appointments,
+    SUM(CASE WHEN app.status = 'scheduled' THEN 1 ELSE 0 END) AS pending_appointments,
+    SUM(CASE WHEN app.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_appointments
 FROM 
     appointment AS app
 WHERE 
     app.tenant_id = ? 
     AND app.clinic_id = ? 
     AND app.dentist_id = ?
+    AND app.rescheduled_from=?
     AND app.appointment_date >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
     AND app.appointment_date < DATE_FORMAT(CURDATE() + INTERVAL 1 MONTH, '%Y-%m-01');
 
 `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, clinic_id, dentist_id]);
+    const [rows] = await conn.query(query, [tenantId, clinic_id, dentist_id,null]);
 
     return rows;
   } catch (error) {
