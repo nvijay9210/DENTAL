@@ -69,6 +69,7 @@ exports.updateClinicSettings = async (req, res, next) => {
   const details=req.body
   await checkIfIdExists('tenant','tenant_id',tenant_id)
   await checkIfIdExists('clinic','clinic_id',clinic_id)
+  if(!details.updated_by) throw new CustomError("Updated_by is required")
   try {
     await clinicService.updateClinicSettings(
       tenant_id, clinic_id,details
