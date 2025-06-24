@@ -244,13 +244,13 @@ const updateClinicSettings = async (tenantId, clinicId,details) => {
 
   const query = `
     UPDATE clinic
-    SET clinic_name=?,clinic_logo=?,clinic_app_font=?,clinic_app_themes=?
+    SET clinic_name=?,clinic_logo=?,clinic_app_font=?,clinic_app_themes=?,updated_by=?
     WHERE tenant_id = ? AND clinic_id=?;
   `;
 
   const conn = await pool.getConnection();
   try {
-    const [result] = await conn.query(query, [details.clinic_name,details.clinic_logo,details.clinic_app_font,details.clinic_app_themes, tenantId, clinicId]);
+    const [result] = await conn.query(query, [details.clinic_name,details.clinic_logo,details.clinic_app_font,details.clinic_app_themes, tenantId, clinicId,details.updated_by]);
     return result.affectedRows > 0;
   } catch (error) {
     throw new Error(`Database Operation Failed while updating clinic settings`);

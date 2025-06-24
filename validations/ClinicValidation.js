@@ -218,7 +218,7 @@ const updateClinicValidation = async (clinicId, details, tenantId) => {
 
   validatePhonesNotSame(details);
   await validateClinicPhones(details, clinicId);
-  if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email,clinicId);
+  // if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email,clinicId);
   await validateUniqueFields(details, true, clinicId);
 };
 
