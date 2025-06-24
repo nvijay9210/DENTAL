@@ -150,7 +150,7 @@ const updateClinic = async (clinicId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.log("Service Error:", error);
-    throw new CustomError(message.CLINICS_FETCH_FAIL, 404);
+    throw new CustomError(message.CLINIC_UPDATE_FAIL, 404);
   }
 };
 
@@ -795,7 +795,7 @@ const getClinicSettingsByTenantIdAndClinicId = async (
     );
     return clinic;
   } catch (error) {
-    throw new CustomError(message.CLINIC_DELETE_FAIL, 404);
+    throw new CustomError(message.CLINIC_FETCH_FAIL, 404);
   }
 };
 

@@ -5,22 +5,22 @@ const createTableQuery = {
   patient_id int(11) NOT NULL,
   dentist_id int(11) NOT NULL,
   clinic_id int(11) NOT NULL,
-  room_id char(36) NULL DEFAULT '00000000-0000-0000-0000-000000000000' COMMENT 'UUID of assigned room',
+  room_id char(36) DEFAULT '00000000-0000-0000-0000-000000000000' COMMENT 'UUID of assigned room',
   appointment_date date NOT NULL,
   start_time time NOT NULL,
   end_time time NOT NULL,
   status enum('pending','confirmed','checkedin','inprogress','completed','cancelled','clinic_cancelled','noshow','rescheduled','followup','rejected','expired','payment_pending','paid') NOT NULL DEFAULT 'pending',
-  appointment_type enum('video','audio') NULL,
-  consultation_fee decimal(10,2) DEFAULT NULL,
+  appointment_type enum('video','audio') DEFAULT NULL,
+  doctor_rating decimal(3,2) DEFAULT NULL,
+  feedback text DEFAULT NULL,
+  consultation_fee decimal(10,2) DEFAULT 0.00,
   discount_applied decimal(6,2) NOT NULL DEFAULT 0.00,
   payment_status varchar(100) NOT NULL,
-  min_booking_fee int(11) DEFAULT NULL,
-  paid_amount int(11) DEFAULT NULL,
+  min_booking_fee int(11) DEFAULT 0,
+  paid_amount int(11) DEFAULT 0,
   rescheduled_from int(11) DEFAULT NULL,
   cancelled_by varchar(30) DEFAULT NULL,
   cancellation_reason text DEFAULT NULL,
-  doctor_rating decimal(3,2) DEFAULT NULL,
-  feedback text DEFAULT NULL,
   is_virtual tinyint(1) DEFAULT 0,
   reminder_send tinyint(1) DEFAULT 0,
   meeting_link varchar(255) DEFAULT NULL,
@@ -103,6 +103,8 @@ const createTableQuery = {
   parking_availability tinyint(1) NOT NULL DEFAULT 0,
   pharmacy tinyint(1) NOT NULL DEFAULT 0,
   wifi tinyint(1) NOT NULL DEFAULT 0,
+  clinic_app_font varchar(50) DEFAULT NULL,
+  clinic_app_themes varchar(50) DEFAULT NULL,
   created_by varchar(30) NOT NULL DEFAULT 'ADMIN',
   created_time timestamp NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
@@ -118,9 +120,9 @@ const createTableQuery = {
   dentist_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
   clinic_id int(11) DEFAULT NULL,
- keycloak_id char(36)  NULL,
-  username varchar(50) NULL,
-  password varchar(255) NULL,
+  keycloak_id char(36) DEFAULT NULL,
+  username varchar(50) DEFAULT NULL,
+  password varchar(255) DEFAULT NULL,
   first_name varchar(50) NOT NULL,
   last_name varchar(50) NOT NULL,
   gender enum('M','F','TG') DEFAULT 'M',
@@ -128,14 +130,11 @@ const createTableQuery = {
   email varchar(255) DEFAULT NULL,
   phone_number varchar(15) NOT NULL,
   alternate_phone_number varchar(15) DEFAULT NULL,
-  status tinyint(1) Null DEFAULT 0,
   specialisation varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
   designation varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
   member_of longtext DEFAULT NULL,
   experience_years int(2) NOT NULL,
   license_number varchar(20) NOT NULL,
-  clinic_name varchar(150) DEFAULT NULL,
-  clinic_address varchar(300) DEFAULT NULL,
   city varchar(100) NOT NULL,
   state varchar(100) NOT NULL,
   country varchar(50) NOT NULL,
@@ -161,7 +160,7 @@ const createTableQuery = {
   social_activities longtext DEFAULT NULL,
   last_login timestamp NULL DEFAULT NULL,
   duration int(3) DEFAULT NULL,
-  is_active tinyint(1) Null Default 0,
+  status tinyint(1) DEFAULT 0,
   created_by varchar(30) NOT NULL,
   created_time timestamp NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
@@ -178,9 +177,9 @@ const createTableQuery = {
   addPatient: `CREATE TABLE IF NOT EXISTS patient (
   patient_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
- keycloak_id char(36)  NULL,
-  username varchar(50) NULL,
-  password varchar(255) NULL,
+  keycloak_id char(36) DEFAULT NULL,
+  username varchar(50) DEFAULT NULL,
+  password varchar(255) DEFAULT NULL,
   first_name varchar(50) NOT NULL,
   last_name varchar(50) NOT NULL,
   email varchar(255) DEFAULT NULL,
@@ -302,11 +301,9 @@ CREATE TABLE IF NOT EXISTS tenant (
   tenant_app_name varchar(100) DEFAULT NULL,
   tenant_app_logo varchar(255) DEFAULT NULL,
   tenant_app_font varchar(50) DEFAULT NULL,
-  tenant_app_themes longtext DEFAULT NULL,
+  tenant_app_themes varchar(50) DEFAULT NULL,
   PRIMARY KEY (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
-
-
 `,
   addTreatment: `CREATE TABLE IF NOT EXISTS treatment (
   treatment_id int(11) NOT NULL AUTO_INCREMENT,
@@ -367,7 +364,8 @@ CREATE TABLE IF NOT EXISTS expense (
   PRIMARY KEY (expense_id),
   KEY fk_expense_clinic (clinic_id),
   CONSTRAINT fk_expense_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
 
 `,
   addSupplier: `
@@ -375,9 +373,9 @@ CREATE TABLE IF NOT EXISTS supplier (
   supplier_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
   clinic_id int(11) NOT NULL,
-  keycloak_id char(36)  NULL,
-  username varchar(50) NULL,
-  password varchar(255) NULL,
+  keycloak_id char(36) DEFAULT NULL,
+  username varchar(50) DEFAULT NULL,
+  password varchar(255) DEFAULT NULL,
   supplier_name varchar(100) DEFAULT NULL,
   supplier_category varchar(100) DEFAULT NULL,
   supplier_status varchar(100) DEFAULT NULL,
@@ -394,7 +392,8 @@ CREATE TABLE IF NOT EXISTS supplier (
   KEY fk_supplier_tenant (tenant_id),
   CONSTRAINT fk_supplier_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
   CONSTRAINT fk_supplier_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
 
 `,
   addReminder: `
@@ -432,7 +431,8 @@ CREATE TABLE IF NOT EXISTS reminder (
   CONSTRAINT fk_reminder_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
   CONSTRAINT fk_reminder_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
   CONSTRAINT fk_reminder_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
 `,
   addAppointmentReschedules: `
 CREATE TABLE IF NOT EXISTS appointment_reschedules (
@@ -441,20 +441,21 @@ CREATE TABLE IF NOT EXISTS appointment_reschedules (
   clinic_id int(11) NOT NULL,
   dentist_id int(11) NOT NULL,
   original_appointment_id int(11) NOT NULL,
-  new_appointment_id  int(11) NOT NULL,
-  previous_date  DATE NOT NULL,
-  previous_time  TIME NOT NULL,
-  new_date  DATE NOT NULL,
-  new_time  TIME NOT NULL,
-  reason TEXT NOT NULL,
-  charge_applicable TINYINT(1) NOT NULL,
-  charge_amount DECIMAL(10,2) NOT NULL,
-  rescheduled_by VARCHAR(30) NOT NULL,
-  rescheduled_at DATETIME NOT NULL DEFAULT current_timestamp(),
+  new_appointment_id int(11) NOT NULL,
+  previous_date date NOT NULL,
+  previous_time time NOT NULL,
+  new_date date NOT NULL,
+  new_start_time time NOT NULL,
+  new_end_time time NOT NULL,
+  reason text NOT NULL,
+  charge_applicable tinyint(1) NOT NULL DEFAULT 0,
+  charge_amount decimal(10,2) NOT NULL DEFAULT 0.00,
+  rescheduled_by varchar(30) NOT NULL,
+  rescheduled_at timestamp NULL DEFAULT NULL,
   created_by varchar(30) NOT NULL,
-  created_time datetime NOT NULL DEFAULT current_timestamp(),
+  created_time timestamp NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
-  updated_time datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  updated_time timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
   PRIMARY KEY (resheduled_id),
   KEY fk_appointment_reschedules_clinic (clinic_id),
   KEY fk_appointment_reschedules_tenant (tenant_id),
@@ -462,7 +463,8 @@ CREATE TABLE IF NOT EXISTS appointment_reschedules (
   CONSTRAINT fk_appointment_reschedules_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
   CONSTRAINT fk_appointment_reschedules_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
   CONSTRAINT fk_appointment_reschedules_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
 `,
   addPayment: `
 CREATE TABLE IF NOT EXISTS payment (
@@ -499,28 +501,29 @@ CREATE TABLE IF NOT EXISTS payment (
   CONSTRAINT fk_payment_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id) ON UPDATE CASCADE,
   CONSTRAINT fk_payment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
 `,
 
   addReception: `CREATE TABLE IF NOT EXISTS reception (
   reception_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
-  clinic_id int(11) Not Null,
-  keycloak_id char(36)  NULL,
-  username varchar(50) NULL,
-  password varchar(255) NULL,
+  clinic_id int(11) NOT NULL,
+  keycloak_id char(36) DEFAULT NULL,
+  username varchar(50) DEFAULT NULL,
+  password varchar(255) DEFAULT NULL,
   full_name varchar(100) NOT NULL,
   email varchar(255) DEFAULT NULL,
   phone_number varchar(15) NOT NULL,
   alternate_phone_number varchar(15) DEFAULT NULL,
   date_of_birth date NOT NULL,
   gender enum('M','F','TG') NOT NULL DEFAULT 'M',
-  status tinyint(1) Null DEFAULT 0,
+  status tinyint(1) DEFAULT 0,
   address text NOT NULL,
   city varchar(100) NOT NULL,
   state varchar(100) NOT NULL,
   country varchar(50) NOT NULL,
   pincode varchar(6) NOT NULL,
-  last_login DATETIME Null,
+  last_login datetime DEFAULT NULL,
   profile_picture varchar(255) DEFAULT NULL,
   created_by varchar(30) NOT NULL,
   created_time timestamp NOT NULL DEFAULT current_timestamp(),
@@ -531,35 +534,37 @@ CREATE TABLE IF NOT EXISTS payment (
   KEY fk_reception_clinic (clinic_id),
   CONSTRAINT fk_reception_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
   CONSTRAINT fk_reception_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
   addLoginHistory: `CREATE TABLE IF NOT EXISTS loginhistory (
-  log_id int(11) NOT NULL AUTO_INCREMENT,
-  tenant_id int(11) NOT NULL,
-  clinic_id int(11) NOT NULL,
-  keycloak_user_id char(36) NOT NULL,
-  session_id char(36) NOT NULL,
-  login_time datetime NOT NULL,
+  loginhistory_id int(11) NOT NULL AUTO_INCREMENT,
+  tenant_id int(11) DEFAULT NULL,
+  clinic_id int(11) DEFAULT NULL,
+  keycloak_user_id char(36) DEFAULT NULL,
+  session_id varchar(36) DEFAULT NULL,
+  login_time datetime DEFAULT NULL,
   logout_time datetime DEFAULT NULL,
   ip_address varchar(45) DEFAULT NULL,
   device_info text DEFAULT NULL,
   browser_info text DEFAULT NULL,
   created_time timestamp NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (log_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+  PRIMARY KEY (loginhistory_id) USING BTREE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
 `,
   addUserActivity: `CREATE TABLE IF NOT EXISTS useractivity (
-  useractivity_id int(11)  NOT NULL AUTO_INCREMENT,
-  keycloak_user_id char(36) NOT NULL DEFAULT 0,
-  ip_address varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  browser varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  device varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  login_time timestamp NOT NULL DEFAULT current_timestamp(),
+  useractivity_id int(11) NOT NULL AUTO_INCREMENT,
+  keycloak_user_id char(36) DEFAULT NULL,
+  ip_address varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  browser varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  device varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  login_time timestamp NULL DEFAULT current_timestamp(),
   logout_time timestamp NULL DEFAULT NULL,
   duration time DEFAULT NULL,
   created_time timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (useractivity_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
 `,
 };
 
