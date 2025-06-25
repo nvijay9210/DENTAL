@@ -85,14 +85,14 @@ const clinicColumnConfig = [
   {
     columnname: "phone_number",
     type: "varchar",
-    size: 15,
+    size: 20,
     null: false,
     pattern: /^\+?[0-9]{7,15}$/,
   },
   {
     columnname: "alternate_phone_number",
     type: "varchar",
-    size: 15,
+    size: 20,
     null: true,
     pattern: /^\+?[0-9]{7,15}$/,
   },
@@ -121,6 +121,12 @@ const clinicColumnConfig = [
     size: 10,
     null: false,
     // pattern: /^[A-Z]{2}[0-9]{4}[A-Z]{2}[0-9]{2}$/ // For Standard Pattern not found
+  },
+  {
+    columnname: "currency_code",
+    type: "varchar",
+    size: 10,
+    null: true
   },
   {
     columnname: "gst_number",

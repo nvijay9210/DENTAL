@@ -48,14 +48,14 @@ const dentistColumnConfig = [
   {
     columnname: "phone_number",
     type: "varchar",
-    size: 15,
+    size: 20,
     null: false,
     pattern: /^\+?[0-9]{7,15}$/,
   },
   {
     columnname: "alternate_phone_number",
     type: "varchar",
-    size: 15,
+    size: 20,
     null: true,
     pattern: /^\+?[0-9]{7,15}$/,
   },
