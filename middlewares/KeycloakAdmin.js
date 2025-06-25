@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { CustomError } = require("./CustomeError");
 
-const KEYCLOAK_BASE_URL = "http://localhost:8080";
+const KEYCLOAK_BASE_URL = process.env.KEYCLOAK_BASE_URL;
 
 // ✅ 1. Add User
 async function addUser(token, realm, userData) {
@@ -27,7 +27,7 @@ async function addUser(token, realm, userData) {
     const existingUser = await getUserIdByUsername(token, realm, payload.username);
     if (existingUser) throw new CustomError("Username already exists", 409);
 
-    console.log("user start to add",token,payload)
+    // console.log("user start to add",token,payload)
 
     const response = await axios.post(url, payload, {
       headers: {
