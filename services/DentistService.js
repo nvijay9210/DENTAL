@@ -54,6 +54,7 @@ const dentistFieldMap = {
   pin_code: (val) => val,
 
   consultation_fee: (val) => parseFloat(val) || 0,
+  currency_code: (val) => val,
   min_booking_fee: (val) => parseFloat(val) || 0,
   ratings: (val) => parseFloat(val) || 0,
   reviews_count: (val) => parseInt(val) || 0,
@@ -107,6 +108,7 @@ const dentistFieldReverseMap = {
   pin_code: (val) => val,
 
   consultation_fee: (val) => parseFloat(val) || 0,
+  currency_code: (val) => val,
   min_booking_fee: (val) => parseFloat(val) || 0,
   ratings: (val) => parseFloat(val) || 0,
   reviews_count: (val) => parseInt(val) || 0,

@@ -14,13 +14,13 @@ const receptionColumnConfig = [
   {
     columnname: "phone_number",
     type: "varchar",
-    size: 15,
+    size: 20,
     null: false,
   },
   {
     columnname: "alternate_phone_number",
     type: "varchar",
-    size: 15,
+    size: 20,
     null: true,
   },
   { columnname: "date_of_birth", type: "date", null: true },
