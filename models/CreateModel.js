@@ -8,6 +8,7 @@ const createTenantTable = async () => {
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
+    await seedTenantsFromEnv()
     console.log("Tenant table created successfully.");
   } catch (error) {
     console.error("Error creating Tenant table:", error);
@@ -326,6 +327,70 @@ async function addStatusTypeTableData() {
     console.error("Error inserting data:", err.message);
   } finally {
     if (conn) conn.release();
+  }
+}
+
+require('dotenv').config();
+
+async function seedTenantsFromEnv() {
+  const REALM_TENANT_MAP = process.env.REALM_TENANT_MAP;
+  const REALM_TENANT_DOMAIN_MAP = process.env.REALM_TENANT_DOMAIN_MAP;
+  const DEFAULT_CREATED_BY = process.env.DEFAULT_CREATED_BY || 'ADMIN';
+
+  if (!REALM_TENANT_MAP || !REALM_TENANT_DOMAIN_MAP) {
+    console.warn("Missing REALM_TENANT_MAP or REALM_TENANT_DOMAIN_MAP");
+    return;
+  }
+
+  const realmTenantMap = {};
+  const domainTenantMap = {};
+
+  // Parse REALM_TENANT_MAP into object: {1: "smilecare", 2: "anotherrealm"}
+  for (const entry of REALM_TENANT_MAP.split(',')) {
+    const [realm, tenantId] = entry.trim().split(':');
+    realmTenantMap[tenantId] = realm;
+  }
+
+  // Parse REALM_TENANT_DOMAIN_MAP into object: {1: ".in", 2: ".com"}
+  for (const entry of REALM_TENANT_DOMAIN_MAP.split(',')) {
+    const [domain, tenantId] = entry.trim().split(':');
+    domainTenantMap[tenantId] = domain;
+  }
+
+  // Combine and prepare inserts
+  const tenantIds = [...new Set([...Object.keys(realmTenantMap), ...Object.keys(domainTenantMap)])];
+
+  for (const tenantId of tenantIds) {
+    const tenantName = realmTenantMap[tenantId] || null;
+    const tenantDomain = domainTenantMap[tenantId] || null;
+
+    if (!tenantName || !tenantDomain) {
+      console.warn(`Skipping tenant_id=${tenantId}: missing name or domain`);
+      continue;
+    }
+
+    const sql = `
+      INSERT IGNORE INTO tenant (
+        tenant_id,
+        tenant_name,
+        tenant_domain,
+        created_by
+      ) VALUES (?, ?, ?, ?)
+    `;
+
+    try {
+      const conn = await pool.getConnection();
+      await conn.query(sql, [
+        parseInt(tenantId, 10),
+        tenantName,
+        tenantDomain,
+        DEFAULT_CREATED_BY
+      ]);
+      console.log(`✅ Inserted/Updated tenant: ${tenantName} (${tenantDomain})`);
+      conn.release();
+    } catch (err) {
+      console.error(`❌ Error inserting tenant_id=${tenantId}:`, err.message);
+    }
   }
 }
 
