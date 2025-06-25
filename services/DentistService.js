@@ -75,12 +75,11 @@ const dentistFieldReverseMap = {
   clinic_id: (val) => val,
   keycloak_id: (val) => val,
   username: (val) => val,
-  password: (val) =>val,
+  password: (val) => val,
   first_name: (val) => val,
   last_name: (val) => val,
   gender: (val) => val,
-  date_of_birth: (val) =>
-    val ? formatDateOnly(val) : null,
+  date_of_birth: (val) => (val ? formatDateOnly(val) : null),
   email: (val) => val,
   phone_number: (val) => val,
   alternate_phone_number: (val) => val,
@@ -135,62 +134,71 @@ const createDentist = async (data, token, realm) => {
   };
 
   try {
-    // 1. Generate username/email
-    const username = helper.generateUsername(
-      data.first_name,
-      data.phone_number
-    );
-    const email =
-      data.email ||
-      `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
+    if (process.env.KEYCLOAK_POWER === "on") {
+      // 1. Generate username/email
+      const username = helper.generateUsername(
+        data.first_name,
+        data.phone_number
+      );
+      const email =
+        data.email ||
+        `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
 
-    const userData = {
-      username,
-      email,
-      firstName: data.first_name,
-      lastName: data.last_name,
-      password: "1234", // For demo; use generateAlphanumericPassword() in production
-    };
+      const userData = {
+        username,
+        email,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        password: "1234", // For demo; use generateAlphanumericPassword() in production
+      };
 
-    // 2. Create Keycloak User
-    const isUserCreated = await addUser(token, realm, userData);
-    if (!isUserCreated) throw new CustomError("Keycloak user not created", 400);
+      // 2. Create Keycloak User
+      const isUserCreated = await addUser(token, realm, userData);
+      if (!isUserCreated)
+        throw new CustomError("Keycloak user not created", 400);
 
-    console.log("✅ Keycloak user created:", userData.username);
+      console.log("✅ Keycloak user created:", userData.username);
 
-    // 3. Get User ID from Keycloak
-    const userId = await getUserIdByUsername(token, realm, userData.username);
-    if (!userId) throw new CustomError("Could not fetch Keycloak user ID", 400);
+      // 3. Get User ID from Keycloak
+      const userId = await getUserIdByUsername(token, realm, userData.username);
+      if (!userId)
+        throw new CustomError("Could not fetch Keycloak user ID", 400);
 
-    console.log("🆔 Keycloak user ID fetched:", userId);
+      console.log("🆔 Keycloak user ID fetched:", userId);
 
-    // 4. Assign Role: 'doctor'
-    const roleAssigned = await assignRealmRoleToUser(
-      token,
-      realm,
-      userId,
-      "dentist"
-    );
-    if (!roleAssigned)
-      throw new CustomError("Failed to assign 'doctor' role", 400);
+      // 4. Assign Role: 'doctor'
+      const roleAssigned = await assignRealmRoleToUser(
+        token,
+        realm,
+        userId,
+        "dentist"
+      );
+      if (!roleAssigned)
+        throw new CustomError("Failed to assign 'doctor' role", 400);
 
-    console.log("🩺 Assigned 'doctor' role");
+      console.log("🩺 Assigned 'doctor' role");
 
-    // 5. Optional: Add to Group (e.g., based on clinicId)
-    if (data.clinicId) {
-      const groupName = `dental-${data.tenantId}-${data.clinicId}`;
-      const groupAdded = await addUserToGroup(token, realm, userId, groupName);
+      // 5. Optional: Add to Group (e.g., based on clinicId)
+      if (data.clinicId) {
+        const groupName = `dental-${data.tenantId}-${data.clinicId}`;
+        const groupAdded = await addUserToGroup(
+          token,
+          realm,
+          userId,
+          groupName
+        );
 
-      if (!groupAdded) {
-        console.warn(`⚠️ Failed to add user to group: ${groupName}`);
-      } else {
-        console.log(`👥 Added to group: ${groupName}`);
+        if (!groupAdded) {
+          console.warn(`⚠️ Failed to add user to group: ${groupName}`);
+        } else {
+          console.log(`👥 Added to group: ${groupName}`);
+        }
       }
-    }
 
-    data.keycloak_id=userId,
-    data.username=username,
-    data.password=encrypt(userData.password).content
+      (data.keycloak_id = userId),
+        (data.username = username),
+        (data.password = encrypt(userData.password).content);
+    }
 
     // 6. Map fields for DB
     const { columns, values } = mapFields(data, create);
@@ -206,11 +214,13 @@ const createDentist = async (data, token, realm) => {
     await invalidateCacheByPattern("dentists:*");
     await invalidateCacheByPattern("dentistsbyclinic:*");
 
-    return {
-      dentistId,
-      username: userData.username,
-      password: userData.password,
-    };
+    return dentistId;
+
+    // return {
+    //   dentistId,
+    //   username: userData.username,
+    //   password: userData.password,
+    // };
   } catch (error) {
     console.error("❌ Failed to create dentist:", error.message);
     throw new CustomError(`Failed to create dentist: ${error.message}`, 400);
@@ -306,10 +316,10 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
     const convertedRows = helper.convertDbToFrontend(
       dentist,
       dentistFieldReverseMap
-    )
-    
-    const result=flattenAwards(convertedRows);
- 
+    );
+
+    const result = flattenAwards(convertedRows);
+
     return result;
   } catch (error) {
     throw new CustomError(`Failed to get dentist: ${error.message}`, 404);

@@ -106,7 +106,7 @@ const createClinic = async (data, token, realm) => {
     const { columns, values } = mapFields(data, createClinicFieldMap);
     const clinicId = await clinicModel.createClinic("clinic", columns, values);
     await invalidateCacheByPattern("clinics:*");
-    if (clinicId) {
+    if (clinicId && process.env.KEYCLOAK_POWER==='on') {
       const groupName = `dental-${data.tenant_id}-${clinicId}`;
 
       const attributes = {

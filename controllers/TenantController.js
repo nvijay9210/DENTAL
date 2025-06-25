@@ -41,31 +41,32 @@ exports.getTenantByTenantId = async (req, res, next) => {
 exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   const { tenant_name, tenant_domain } = req.params;
 
-  let user = extractUserInfo(req.user);
+  if (process.env.KEYCLOAK_POWER === "on") {
+    let user = extractUserInfo(req.user);
 
-  if (user.role !== "tenant" && user.role !== "super-user") {
-    const userdetails = await getUserIdUsingKeycloakId(
-      user.role,
-      user.userId,
-      user.tenantId,
-      user.clinicId  
-    );
-    user.userId = userdetails[0]?.userid || null;
-    user.username = userdetails[0]?.username || null;
+    if (user.role !== "tenant" && user.role !== "super-user") {
+      const userdetails = await getUserIdUsingKeycloakId(
+        user.role,
+        user.userId,
+        user.tenantId,
+        user.clinicId
+      );
+      user.userId = userdetails[0]?.userid || null;
+      user.username = userdetails[0]?.username || null;
+    } else {
+      console.log(user);
+      const fullName = user.preferred_username;
+      const firstName = (fullName?.split(" ") || [])[0] || "user";
+      user["user_name"] = firstName;
+    }
+
+    if (user.userId === null)
+      throw new CustomError("User in inactive state", 404);
   }
-
-  else{
-    console.log(user)
-    const fullName = user.preferred_username;
-    const firstName = (fullName?.split(' ') || [])[0] || 'user';
-    user['user_name']=firstName
-  }
-
-  if(user.userId===null) throw new CustomError('User in inactive state',404)
 
   try {
     let settings;
-    if (user.role === "super-user") {
+    if (process.env.KEYCLOAK_POWER === "on" && user.role === "super-user") {
       settings = await getClinicSettingsByTenantIdAndClinicId(
         user.tenantId,
         user.clinicId
@@ -79,10 +80,11 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
         tenant_domain
       );
     }
-    res.status(200).json({
-      ...settings,
-      ...user,
-    });
+    // res.status(200).json({
+    //   ...settings,
+    //   ...user,
+    // });
+    res.status(200).json(settings);
   } catch (err) {
     next(err);
   }
