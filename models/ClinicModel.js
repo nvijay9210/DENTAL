@@ -250,7 +250,7 @@ const updateClinicSettings = async (tenantId, clinicId,details) => {
 
   const conn = await pool.getConnection();
   try {
-    const [result] = await conn.query(query, [details.clinic_name,details.clinic_logo,details.clinic_app_font,details.clinic_app_themes, tenantId, clinicId,details.updated_by]);
+    const [result] = await conn.query(query, [details.clinic_name,details.clinic_logo,details.clinic_app_font,details.clinic_app_themes,details.updated_by, tenantId, clinicId]);
     return result.affectedRows > 0;
   } catch (error) {
     throw new Error(`Database Operation Failed while updating clinic settings`);
