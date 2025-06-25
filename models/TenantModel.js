@@ -76,7 +76,6 @@ const getTenantByTenantNameAndTenantDomain = async (tenantName,tenantDomain) => 
   const conn = await pool.getConnection();
   try {
     const rows = await conn.query(query, [tenantName,tenantDomain]);
-    console.log(rows)
     return rows[0];
   } catch (error) {
     console.log(error.message)

@@ -8,7 +8,12 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { encrypt } = require("../middlewares/PasswordHash");
-const { addUser, getUserIdByUsername, assignRealmRoleToUser, addUserToGroup } = require("../middlewares/KeycloakAdmin");
+const {
+  addUser,
+  getUserIdByUsername,
+  assignRealmRoleToUser,
+  addUserToGroup,
+} = require("../middlewares/KeycloakAdmin");
 
 // Field mapping for receptions (similar to treatment)
 
@@ -21,7 +26,7 @@ const receptionFields = {
   full_name: (val) => val,
   email: (val) => val,
   status: (val) => helper.parseBoolean(val),
-  profile_picture:(val)=>val,
+  profile_picture: (val) => val,
   phone_number: (val) => val,
   alternate_phone_number: (val) => val,
   date_of_birth: (val) => val,
@@ -34,7 +39,7 @@ const receptionFields = {
   last_login: (val) => val,
 };
 const receptionFieldsReverseMap = {
-  reception_id:(val)=>val,
+  reception_id: (val) => val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   keycloak_id: (val) => val,
@@ -43,7 +48,7 @@ const receptionFieldsReverseMap = {
   full_name: (val) => val,
   email: (val) => val,
   status: (val) => Boolean(val),
-  profile_picture:(val)=>val,
+  profile_picture: (val) => val,
   phone_number: (val) => val,
   alternate_phone_number: (val) => val,
   date_of_birth: (val) => formatDateOnly(val),
@@ -60,68 +65,77 @@ const receptionFieldsReverseMap = {
   updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 // Create Reception
-const createReception = async (data,token,realm) => {
+const createReception = async (data, token, realm) => {
   const fieldMap = {
     ...receptionFields,
     created_by: (val) => val,
   };
   try {
-  // 1. Generate username/email
-  const username = helper.generateUsername(
-    data.full_name,
-    data.phone_number
-  );
-  const email =
-    data.email ||
-    `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
+    if (process.env.KEYCLOAK_POWER === "on") {
+      // 1. Generate username/email
+      const username = helper.generateUsername(
+        data.full_name,
+        data.phone_number
+      );
+      const email =
+        data.email ||
+        `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
 
-  const userData = {
-    username,
-    email,
-    firstName: data.full_name,
-    lastName: data.last_name,
-    password: "1234", // For demo; use generateAlphanumericPassword() in production
-  };
+      const userData = {
+        username,
+        email,
+        firstName: data.full_name,
+        lastName: data.last_name,
+        password: "1234", // For demo; use generateAlphanumericPassword() in production
+      };
 
-  // 2. Create Keycloak User
-  const isUserCreated = await addUser(token, realm, userData);
-  if (!isUserCreated) throw new CustomError("Keycloak user not created", 400);
+      // 2. Create Keycloak User
+      const isUserCreated = await addUser(token, realm, userData);
+      if (!isUserCreated)
+        throw new CustomError("Keycloak user not created", 400);
 
-  console.log("✅ Keycloak user created:", userData.username);
+      console.log("✅ Keycloak user created:", userData.username);
 
-  // 3. Get User ID from Keycloak
-  const userId = await getUserIdByUsername(token, realm, userData.username);
-  if (!userId) throw new CustomError("Could not fetch Keycloak user ID", 400);
+      // 3. Get User ID from Keycloak
+      const userId = await getUserIdByUsername(token, realm, userData.username);
+      if (!userId)
+        throw new CustomError("Could not fetch Keycloak user ID", 400);
 
-  console.log("🆔 Keycloak user ID fetched:", userId);
+      console.log("🆔 Keycloak user ID fetched:", userId);
 
-  // 4. Assign Role: 'receptionist'
-  const roleAssigned = await assignRealmRoleToUser(
-    token,
-    realm,
-    userId,
-    "receptionist"
-  );
-  if (!roleAssigned)
-    throw new CustomError("Failed to assign 'receptionist' role", 400);
+      // 4. Assign Role: 'receptionist'
+      const roleAssigned = await assignRealmRoleToUser(
+        token,
+        realm,
+        userId,
+        "receptionist"
+      );
+      if (!roleAssigned)
+        throw new CustomError("Failed to assign 'receptionist' role", 400);
 
-  console.log("🩺 Assigned 'receptionist' role");
+      console.log("🩺 Assigned 'receptionist' role");
 
-  // 5. Optional: Add to Group (e.g., based on clinicId)
-  if (data.clinicId) {
-    const groupName = `dental-${data.tenantId}-${data.clinicId}`;
-    const groupAdded = await addUserToGroup(token, realm, userId, groupName);
+      // 5. Optional: Add to Group (e.g., based on clinicId)
+      if (data.clinicId) {
+        const groupName = `dental-${data.tenantId}-${data.clinicId}`;
+        const groupAdded = await addUserToGroup(
+          token,
+          realm,
+          userId,
+          groupName
+        );
 
-    if (!groupAdded) {
-      console.warn(`⚠️ Failed to add user to group: ${groupName}`);
-    } else {
-      console.log(`👥 Added to group: ${groupName}`);
+        if (!groupAdded) {
+          console.warn(`⚠️ Failed to add user to group: ${groupName}`);
+        } else {
+          console.log(`👥 Added to group: ${groupName}`);
+        }
+      }
+
+      (data.keycloak_id = userId),
+        (data.username = username),
+        (data.password = encrypt(userData.password).content);
     }
-  }
-
-  data.keycloak_id=userId,
-  data.username=username,
-  data.password=encrypt(userData.password).content
 
     const { columns, values } = mapFields(data, fieldMap);
     const receptionId = await receptionModel.createReception(
@@ -164,16 +178,12 @@ const getAllReceptionsByTenantId = async (tenantId, page = 1, limit = 10) => {
 };
 
 // Get Reception by ID & Tenant
-const getReceptionByTenantIdAndReceptionId = async (
-  tenantId,
-  receptionId
-) => {
+const getReceptionByTenantIdAndReceptionId = async (tenantId, receptionId) => {
   try {
-    const reception =
-      await receptionModel.getReceptionByTenantAndReceptionId(
-        tenantId,
-        receptionId
-      );
+    const reception = await receptionModel.getReceptionByTenantAndReceptionId(
+      tenantId,
+      receptionId
+    );
 
     const convertedRows = helper.convertDbToFrontend(
       reception,
