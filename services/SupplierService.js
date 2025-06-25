@@ -53,62 +53,71 @@ const createSupplier = async (data) => {
     created_by: (val) => val,
   };
   try {
-    // 1. Generate username/email
-    const username = helper.generateUsername(
-      data.first_name,
-      data.phone_number
-    );
-    const email =
-      data.email ||
-      `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
+    if (process.env.KEYCLOAK_POWER === "on") {
+      // 1. Generate username/email
+      const username = helper.generateUsername(
+        data.first_name,
+        data.phone_number
+      );
+      const email =
+        data.email ||
+        `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
 
-    const userData = {
-      username,
-      email,
-      firstName: data.first_name,
-      lastName: data.last_name,
-      password: "1234", // For demo; use generateAlphanumericPassword() in production
-    };
+      const userData = {
+        username,
+        email,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        password: "1234", // For demo; use generateAlphanumericPassword() in production
+      };
 
-    // 2. Create Keycloak User
-    const isUserCreated = await addUser(token, realm, userData);
-    if (!isUserCreated) throw new CustomError("Keycloak user not created", 400);
+      // 2. Create Keycloak User
+      const isUserCreated = await addUser(token, realm, userData);
+      if (!isUserCreated)
+        throw new CustomError("Keycloak user not created", 400);
 
-    console.log("✅ Keycloak user created:", userData.username);
+      console.log("✅ Keycloak user created:", userData.username);
 
-    // 3. Get User ID from Keycloak
-    const userId = await getUserIdByUsername(token, realm, userData.username);
-    if (!userId) throw new CustomError("Could not fetch Keycloak user ID", 400);
+      // 3. Get User ID from Keycloak
+      const userId = await getUserIdByUsername(token, realm, userData.username);
+      if (!userId)
+        throw new CustomError("Could not fetch Keycloak user ID", 400);
 
-    console.log("🆔 Keycloak user ID fetched:", userId);
+      console.log("🆔 Keycloak user ID fetched:", userId);
 
-    // 4. Assign Role: 'supplier'
-    const roleAssigned = await assignRealmRoleToUser(
-      token,
-      realm,
-      userId,
-      "supplier"
-    );
-    if (!roleAssigned)
-      throw new CustomError("Failed to assign 'supplier' role", 400);
+      // 4. Assign Role: 'supplier'
+      const roleAssigned = await assignRealmRoleToUser(
+        token,
+        realm,
+        userId,
+        "supplier"
+      );
+      if (!roleAssigned)
+        throw new CustomError("Failed to assign 'supplier' role", 400);
 
-    console.log("🩺 Assigned 'doctor' role");
+      console.log("🩺 Assigned 'doctor' role");
 
-    // 5. Optional: Add to Group (e.g., based on clinicId)
-    if (data.clinicId) {
-      const groupName = `dental-${data.tenantId}-${data.clinicId}`;
-      const groupAdded = await addUserToGroup(token, realm, userId, groupName);
+      // 5. Optional: Add to Group (e.g., based on clinicId)
+      if (data.clinicId) {
+        const groupName = `dental-${data.tenantId}-${data.clinicId}`;
+        const groupAdded = await addUserToGroup(
+          token,
+          realm,
+          userId,
+          groupName
+        );
 
-      if (!groupAdded) {
-        console.warn(`⚠️ Failed to add user to group: ${groupName}`);
-      } else {
-        console.log(`👥 Added to group: ${groupName}`);
+        if (!groupAdded) {
+          console.warn(`⚠️ Failed to add user to group: ${groupName}`);
+        } else {
+          console.log(`👥 Added to group: ${groupName}`);
+        }
       }
-    }
 
-    data.keycloak_id=userId,
-    data.username=username,
-    data.password=encrypt(userData.password).content
+      (data.keycloak_id = userId),
+        (data.username = username),
+        (data.password = encrypt(userData.password).content);
+    }
 
     const { columns, values } = mapFields(data, fieldMap);
     const supplierId = await supplierModel.createSupplier(
@@ -143,7 +152,7 @@ const getAllSuppliersByTenantId = async (tenantId, page = 1, limit = 10) => {
       helper.convertDbToFrontend(supplier, supplierFieldsReverseMap)
     );
 
-    return {data:convertedRows,total:suppliers.total};;
+    return { data: convertedRows, total: suppliers.total };
   } catch (err) {
     console.error("Database error while fetching suppliers:", err);
     throw new CustomError("Failed to fetch suppliers", 404);
@@ -163,7 +172,7 @@ const getSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
       supplierFieldsReverseMap
     );
 
-    return convertedRows
+    return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get supplier: " + error.message, 404);
   }
