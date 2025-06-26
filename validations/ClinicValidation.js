@@ -3,6 +3,7 @@ const clinicService = require("../services/ClinicService");
 const {
   checkIfExists,
   checkIfExistsWithoutId,
+  checkIfIdExists,
 } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
@@ -126,7 +127,7 @@ const clinicColumnConfig = [
     columnname: "currency_code",
     type: "varchar",
     size: 10,
-    null: true
+    null: true,
   },
   {
     columnname: "gst_number",
@@ -207,11 +208,14 @@ const createClinicValidation = async (details) => {
   validateInput(details, createClinicColumnConfig);
   await validateTenant(details.tenant_id);
   await validateClinicPhones(details);
-  if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email);
+  if (details.email !== null)
+    await globalValidationEmail(details.tenant_id, details.email);
   await validateUniqueFields(details);
 };
 
 const updateClinicValidation = async (clinicId, details, tenantId) => {
+  await checkIfExists("tenant", "tenant_id", tenantId);
+  await checkIfExists("clinic", "clinic_id", clinicId);
   if (!clinicId) throw new CustomError("Clinic ID is required", 400);
   validateInput(details, updateClinicColumnConfig);
   await validateTenant(tenantId);
@@ -286,9 +290,26 @@ const checkClinicExistsByClinicIdValidation = async (tenantId, clinicId) => {
   if (!clinic) throw new CustomError("Clinic not found", 409);
 };
 
+const updateClinicSettingsValidation = async (tenantId, clinicId,details) => {
+  await checkIfIdExists("tenant", "tenant_id", tenantId);
+  await checkIfIdExists("clinic", "clinic_id", clinicId);
+  if (!details.updated_by) throw new CustomError("Updated_by is required");
+  if (
+    details.clinic_name===undefined ||
+    details.clinic_logo===undefined ||
+    details.clinic_app_themes===undefined ||
+    details.clinic_app_font===undefined
+  )
+    throw new CustomError(
+      "Clinicname,cliniclogo,clinicthemes,clinicfont is required",
+      400
+    );
+};
+
 module.exports = {
   createClinicValidation,
   updateClinicValidation,
   checkClinicExistsByClinicIdValidation,
   handleClinicAssignmentValidation,
+  updateClinicSettingsValidation,
 };
