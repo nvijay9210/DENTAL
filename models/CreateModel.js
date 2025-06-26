@@ -193,6 +193,66 @@ const createSupplierTable = async () => {
     conn.release();
   }
 };
+const createSupplierProdutsTable = async () => {
+  const query =  createTableQuery.addSupplierProducts
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("SupplierProducts table created successfully.");
+  } catch (error) {
+    console.error("Error creating SupplierProducts table:", error);
+    throw new Error(
+      "Database error occurred while creating the SupplierProducts table."
+    );
+  } finally {
+    conn.release();
+  }
+};
+const createPurchaseOrder = async () => {
+  const query =  createTableQuery.addPurchaseOrder
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("PurchaseOrder table created successfully.");
+  } catch (error) {
+    console.error("Error creating PurchaseOrder table:", error);
+    throw new Error(
+      "Database error occurred while creating the PurchaseOrder table."
+    );
+  } finally {
+    conn.release();
+  }
+};
+const createSupplierPaymentsTable = async () => {
+  const query =  createTableQuery.addSupplierPayments
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("SupplierPayments table created successfully.");
+  } catch (error) {
+    console.error("Error creating SupplierPayments table:", error);
+    throw new Error(
+      "Database error occurred while creating the SupplierPayments table."
+    );
+  } finally {
+    conn.release();
+  }
+};
+const createSupplierReviewTable = async () => {
+  const query =  createTableQuery.addSupplierReview
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("SupplierReview table created successfully.");
+  } catch (error) {
+    console.error("Error creating SupplierReview table:", error);
+    throw new Error(
+      "Database error occurred while creating the SupplierReview table."
+    );
+  } finally {
+    conn.release();
+  }
+};
 
 const createReminderTable = async () => {
   const query =  createTableQuery.addReminder
@@ -408,6 +468,10 @@ module.exports = {
   createAssetTable,
   createExpenseTable,
   createSupplierTable,
+  createSupplierProdutsTable,
+  createSupplierPaymentsTable,
+  createSupplierReviewTable,
+  createPurchaseOrder,
   createReminderTable,
   createPaymentTable,
   createAppointmentReschedulesTable,

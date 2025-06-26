@@ -145,9 +145,13 @@ const checkIfExists = async (table, field, value, tenantId) => {
       "asset",
       "expense",
       "supplier",
+      "purchase_orders",
+      "supplier_products",
+      "supplier_payments",
+      "supplier_reviews",
       "reminder",
       "payment",
-      "reception"
+      "reception",
     ]; // Add your actual table names here
     if (!allowedTables.includes(table)) {
       throw new Error(`Invalid table name: ${table}`);

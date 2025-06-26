@@ -371,31 +371,172 @@ CREATE TABLE IF NOT EXISTS expense (
 `,
   addSupplier: `
 CREATE TABLE IF NOT EXISTS supplier (
-  supplier_id int(11) NOT NULL AUTO_INCREMENT,
-  tenant_id int(6) NOT NULL,
-  clinic_id int(11) NOT NULL,
-  keycloak_id char(36) DEFAULT NULL,
-  username varchar(50) DEFAULT NULL,
-  password varchar(255) DEFAULT NULL,
-  supplier_name varchar(100) DEFAULT NULL,
-  supplier_category varchar(100) DEFAULT NULL,
-  supplier_status varchar(100) DEFAULT NULL,
-  payment_status varchar(100) DEFAULT NULL,
-  supplier_contact_number varchar(15) DEFAULT NULL,
-  supplier_country varchar(50) DEFAULT NULL,
-  supplier_performance_rating decimal(3,2) DEFAULT NULL,
-  created_by varchar(30) NOT NULL,
-  created_time timestamp NOT NULL DEFAULT current_timestamp(),
-  updated_by varchar(30) DEFAULT NULL,
-  updated_time timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+  supplier_id INT(11) NOT NULL AUTO_INCREMENT,
+  supplier_code VARCHAR(50) DEFAULT NULL,
+  tenant_id INT(6) NOT NULL,
+  clinic_id INT(11) NOT NULL,
+  keycloak_id CHAR(36) DEFAULT NULL,
+  username VARCHAR(50) DEFAULT NULL,
+  password VARCHAR(255) DEFAULT NULL,
+  name VARCHAR(100) DEFAULT NULL,
+  category VARCHAR(100) DEFAULT NULL,
+  status TINYINT(1) DEFAULT 0,
+  email VARCHAR(150) DEFAULT NULL,
+  phone_number VARCHAR(20) NOT NULL,
+  alternate_phone_number VARCHAR(20) NOT NULL,
+  fax VARCHAR(50) DEFAULT NULL,
+  website VARCHAR(255) DEFAULT NULL,
+  gst_number VARCHAR(50) DEFAULT NULL,
+  tax_id VARCHAR(50) DEFAULT NULL,
+  pan_number VARCHAR(50) DEFAULT NULL,
+  logo_url TEXT DEFAULT NULL,
+  mode_of_payment VARCHAR(100) DEFAULT NULL,
+  preferred_currency VARCHAR(10) DEFAULT NULL,
+  credit_limit DECIMAL(15, 2) DEFAULT NULL,
+  opening_balance DECIMAL(15, 2) DEFAULT NULL,
+  notes TEXT DEFAULT NULL,
+  address_type ENUM('billing','shipping','office') DEFAULT 'billing',
+  address_line1 Varchar(100) DEFAULT NULL,
+  address_line2 Varchar(100) DEFAULT NULL,
+  city Varchar(100) DEFAULT NULL,
+  state Varchar(100) DEFAULT NULL,
+  postal_code Varchar(20) DEFAULT NULL,
+  country Varchar(100) DEFAULT NULL,
+  created_by VARCHAR(30) NOT NULL,
+  created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  updated_by VARCHAR(30) DEFAULT NULL,
+  updated_time TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(),
+  
   PRIMARY KEY (supplier_id),
+  UNIQUE KEY uq_supplier_code (supplier_code),
   KEY fk_supplier_clinic (clinic_id),
   KEY fk_supplier_tenant (tenant_id),
   CONSTRAINT fk_supplier_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
   CONSTRAINT fk_supplier_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
+`,
+  addSupplierProducts: `
+CREATE TABLE IF NOT EXISTS supplier_products (
+  supplier_product_id INT(11) NOT NULL AUTO_INCREMENT,
+  tenant_id INT(6) NOT NULL,
+  clinic_id INT(11) NOT NULL,
+  supplier_id INT(11) NOT NULL,
+  product_name VARCHAR(255) DEFAULT NULL,
+  description TEXT DEFAULT NULL,
+  unit_price DECIMAL(15, 2) DEFAULT NULL,
+  unit VARCHAR(50) DEFAULT NULL,
+  moq INT DEFAULT NULL,
+  lead_time_days INT DEFAULT NULL,
+  currency VARCHAR(10) DEFAULT NULL,
+  active TINYINT(1) DEFAULT 1,
+  created_by VARCHAR(30) NOT NULL,
+  created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  updated_by VARCHAR(30) DEFAULT NULL,
+  updated_time TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(),
 
+  PRIMARY KEY (supplier_product_id),
+  KEY fk_supplier_product_supplier (supplier_id),
+  KEY fk_supplier_product_tenant (tenant_id),
+  KEY fk_supplier_product_clinic (clinic_id),
+
+  CONSTRAINT fk_supplier_product_supplier FOREIGN KEY (supplier_id)
+    REFERENCES supplier (supplier_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_supplier_product_tenant FOREIGN KEY (tenant_id)
+    REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_supplier_product_clinic FOREIGN KEY (clinic_id)
+    REFERENCES clinic (clinic_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
+`,
+  addPurchaseOrder: `CREATE TABLE IF NOT EXISTS purchase_orders (
+  purchase_order_id INT(11) NOT NULL AUTO_INCREMENT,
+  tenant_id INT(6) NOT NULL,
+  clinic_id INT(11) NOT NULL,
+  supplier_id INT(11) NOT NULL,
+  order_number VARCHAR(100) DEFAULT NULL,
+  order_date DATE DEFAULT NULL,
+  product_name VARCHAR(100) DEFAULT NULL,
+  quantity INT DEFAULT NULL,
+  total_amount DECIMAL(12,2) DEFAULT NULL,
+  status ENUM('pending', 'confirmed', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+  delivery_date DATE DEFAULT NULL,
+  created_by VARCHAR(30) NOT NULL,
+  created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  updated_by VARCHAR(30) DEFAULT NULL,
+  updated_time TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(),
+
+  PRIMARY KEY (purchase_order_id),
+  KEY fk_purchase_order_supplier (supplier_id),
+  KEY fk_purchase_order_tenant (tenant_id),
+  KEY fk_purchase_order_clinic (clinic_id),
+
+  CONSTRAINT fk_purchase_order_supplier FOREIGN KEY (supplier_id)
+    REFERENCES supplier (supplier_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_purchase_order_tenant FOREIGN KEY (tenant_id)
+    REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_purchase_order_clinic FOREIGN KEY (clinic_id)
+    REFERENCES clinic (clinic_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+`,
+  addSupplierPayments: `CREATE TABLE IF NOT EXISTS supplier_payments (
+  supplier_payment_id INT(11) NOT NULL AUTO_INCREMENT,
+  tenant_id INT(6) NOT NULL,
+  clinic_id INT(11) NOT NULL,
+  supplier_id INT(11) NOT NULL,
+  amount DECIMAL(12, 2) NOT NULL,
+  mode_of_payment VARCHAR(50) DEFAULT NULL,
+  receipt_number VARCHAR(100) DEFAULT NULL,
+  bank_name VARCHAR(100) DEFAULT NULL,
+  bank_account_number VARCHAR(100) DEFAULT NULL,
+  bank_ifsc VARCHAR(20) DEFAULT NULL,
+  transaction_id VARCHAR(100) DEFAULT NULL,
+  payment_date DATE DEFAULT NULL,
+  created_by VARCHAR(30) NOT NULL,
+  created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  updated_by VARCHAR(30) DEFAULT NULL,
+  updated_time TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(),
+
+  PRIMARY KEY (supplier_payment_id),
+  KEY fk_supplier_payment_supplier (supplier_id),
+  KEY fk_supplier_payment_tenant (tenant_id),
+  KEY fk_supplier_payment_clinic (clinic_id),
+
+  CONSTRAINT fk_supplier_payment_supplier FOREIGN KEY (supplier_id)
+    REFERENCES supplier (supplier_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_supplier_payment_tenant FOREIGN KEY (tenant_id)
+    REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_supplier_payment_clinic FOREIGN KEY (clinic_id)
+    REFERENCES clinic (clinic_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+`,
+  addSupplierReview: `CREATE TABLE IF NOT EXISTS supplier_reviews (
+  supplier_review_id INT(11) NOT NULL AUTO_INCREMENT,
+  tenant_id INT(6) NOT NULL,
+  clinic_id INT(11) NOT NULL,
+  supplier_id INT(11) NOT NULL,
+  rating_quality INT(1) CHECK (rating_quality BETWEEN 1 AND 5),
+  rating_delivery INT(1) CHECK (rating_delivery BETWEEN 1 AND 5),
+  rating_communication INT(1) CHECK (rating_communication BETWEEN 1 AND 5),
+  comment TEXT DEFAULT NULL,
+  reviewed_by VARCHAR(30) NOT NULL,
+  created_by VARCHAR(30) NOT NULL,
+  created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  updated_by VARCHAR(30) DEFAULT NULL,
+  updated_time TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(),
+
+  PRIMARY KEY (supplier_review_id),
+  KEY fk_supplier_review_supplier (supplier_id),
+  KEY fk_supplier_review_tenant (tenant_id),
+  KEY fk_supplier_review_clinic (clinic_id),
+
+  CONSTRAINT fk_supplier_review_supplier FOREIGN KEY (supplier_id)
+    REFERENCES supplier (supplier_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_supplier_review_tenant FOREIGN KEY (tenant_id)
+    REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_supplier_review_clinic FOREIGN KEY (clinic_id)
+    REFERENCES clinic (clinic_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
   addReminder: `
 CREATE TABLE IF NOT EXISTS reminder (
