@@ -1,0 +1,548 @@
+[LOG] 26/6/2025, 12:43:37 pm - Environment: development
+[LOG] 26/6/2025, 12:43:37 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 12:43:37 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 12:43:37 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 12:43:37 pm - ❌ Failed to connect to Redis: Socket already opened
+26/6/2025, 12:49:06 pm GET /https://example.com/logo.png 404
+26/6/2025, 12:49:08 pm GET /v1/reminder/getallnoticationdentist/1/1/1?page=1&limit=10 304
+[LOG] 26/6/2025, 1:01:09 pm - due_date: 2025-06-26 string
+[LOG] 26/6/2025, 1:01:10 pm - 2025-06-26
+[ERROR] 26/6/2025, 1:01:10 pm - Error executing INSERT: Error: Unknown column 'NaN' in 'VALUES'
+[ERROR] 26/6/2025, 1:01:10 pm - Error executing query: Error: Unknown column 'NaN' in 'VALUES'
+[ERROR] 26/6/2025, 1:01:10 pm - Failed to create appointment: Error: Database Operation Failed
+26/6/2025, 1:01:11 pm POST /v1/appointment/addappointment 404
+[LOG] 26/6/2025, 1:07:17 pm - due_date: 2025-06-25 string
+26/6/2025, 1:07:17 pm POST /v1/appointment/addappointment 400
+[LOG] 26/6/2025, 1:08:04 pm - due_date: 2025-06-25 string
+[LOG] 26/6/2025, 1:08:04 pm - 2025-06-25
+26/6/2025, 1:08:07 pm POST /v1/appointment/addappointment 201
+26/6/2025, 1:18:15 pm GET /https://example.com/logo.png 404
+[LOG] 26/6/2025, 1:19:12 pm - Environment: development
+[LOG] 26/6/2025, 1:19:13 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 1:19:13 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 1:19:13 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 1:19:13 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 1:20:53 pm - Environment: development
+[LOG] 26/6/2025, 1:20:53 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 1:20:53 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 1:20:53 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 1:20:53 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 1:21:23 pm - Environment: development
+[LOG] 26/6/2025, 1:21:23 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 1:21:23 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 1:21:23 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 1:21:23 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 1:22:00 pm - Environment: development
+[LOG] 26/6/2025, 1:22:00 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 1:22:00 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 1:22:00 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 1:22:00 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 1:22:17 pm - Environment: development
+[LOG] 26/6/2025, 1:22:17 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 1:22:17 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 1:22:17 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 1:22:17 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 1:22:48 pm - Environment: development
+[LOG] 26/6/2025, 1:22:49 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 1:22:49 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 1:22:49 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 1:22:49 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 1:22:59 pm - Environment: development
+[LOG] 26/6/2025, 1:22:59 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 1:22:59 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 1:22:59 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 1:22:59 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 2:05:35 pm - Environment: development
+[LOG] 26/6/2025, 2:05:35 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 2:05:35 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 2:05:35 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 2:05:35 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 2:05:35 pm - ✅ Inserted/Updated tenant: smilecare (.in)
+[LOG] 26/6/2025, 2:05:35 pm - Tenant table created successfully.
+[LOG] 26/6/2025, 2:05:35 pm - Hospial table created successfully.
+[LOG] 26/6/2025, 2:05:35 pm - Dentist table created successfully.
+[LOG] 26/6/2025, 2:05:35 pm - Patient table created successfully.
+[LOG] 26/6/2025, 2:05:35 pm - Appointment table created successfully.
+[LOG] 26/6/2025, 2:05:35 pm - Treatment table created successfully.
+[LOG] 26/6/2025, 2:05:35 pm - Prescription table created successfully.
+[LOG] 26/6/2025, 2:05:35 pm - statusType table created successfully.
+[LOG] 26/6/2025, 2:05:35 pm - StatusType data added successfully
+[LOG] 26/6/2025, 2:05:35 pm - StatusTypeSub table created successfully.
+[LOG] 26/6/2025, 2:05:35 pm - Asset table created successfully.
+[LOG] 26/6/2025, 2:05:35 pm - Expense table created successfully.
+[ERROR] 26/6/2025, 2:05:35 pm - Error creating Supplier table: Error: Can't create table `dental`.`suppliers` (errno: 121 "Duplicate key on write or update")
+[ERROR] 26/6/2025, 2:05:35 pm - Error creating tables: Error: Database error occurred while creating the Supplier table.
+[LOG] 26/6/2025, 2:06:18 pm - Environment: development
+[LOG] 26/6/2025, 2:06:18 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 2:06:18 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 2:06:18 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 2:06:18 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 2:06:19 pm - ✅ Inserted/Updated tenant: smilecare (.in)
+[LOG] 26/6/2025, 2:06:19 pm - Tenant table created successfully.
+[LOG] 26/6/2025, 2:06:19 pm - Hospial table created successfully.
+[LOG] 26/6/2025, 2:06:19 pm - Dentist table created successfully.
+[LOG] 26/6/2025, 2:06:19 pm - Patient table created successfully.
+[LOG] 26/6/2025, 2:06:19 pm - Appointment table created successfully.
+[LOG] 26/6/2025, 2:06:19 pm - Treatment table created successfully.
+[LOG] 26/6/2025, 2:06:19 pm - Prescription table created successfully.
+[LOG] 26/6/2025, 2:06:19 pm - statusType table created successfully.
+[LOG] 26/6/2025, 2:06:19 pm - StatusType data added successfully
+[LOG] 26/6/2025, 2:06:19 pm - StatusTypeSub table created successfully.
+[LOG] 26/6/2025, 2:06:19 pm - Asset table created successfully.
+[LOG] 26/6/2025, 2:06:19 pm - Expense table created successfully.
+[LOG] 26/6/2025, 2:06:19 pm - Supplier table created successfully.
+[ERROR] 26/6/2025, 2:06:19 pm - Error creating SupplierProducts table: Error: Can't create table `dental`.`supplier_products` (errno: 150 "Foreign key constraint is incorrectly formed")
+[ERROR] 26/6/2025, 2:06:19 pm - Error creating tables: Error: Database error occurred while creating the SupplierProducts table.
+[LOG] 26/6/2025, 2:07:24 pm - Environment: development
+[LOG] 26/6/2025, 2:07:24 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 2:07:24 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 2:07:24 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 2:07:24 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 2:07:24 pm - ✅ Inserted/Updated tenant: smilecare (.in)
+[LOG] 26/6/2025, 2:07:24 pm - Tenant table created successfully.
+[LOG] 26/6/2025, 2:07:24 pm - Hospial table created successfully.
+[LOG] 26/6/2025, 2:07:24 pm - Dentist table created successfully.
+[LOG] 26/6/2025, 2:07:24 pm - Patient table created successfully.
+[LOG] 26/6/2025, 2:07:24 pm - Appointment table created successfully.
+[LOG] 26/6/2025, 2:07:24 pm - Treatment table created successfully.
+[LOG] 26/6/2025, 2:07:24 pm - Prescription table created successfully.
+[LOG] 26/6/2025, 2:07:24 pm - statusType table created successfully.
+[LOG] 26/6/2025, 2:07:24 pm - StatusType data added successfully
+[LOG] 26/6/2025, 2:07:24 pm - StatusTypeSub table created successfully.
+[LOG] 26/6/2025, 2:07:24 pm - Asset table created successfully.
+[LOG] 26/6/2025, 2:07:24 pm - Expense table created successfully.
+[ERROR] 26/6/2025, 2:07:24 pm - Error creating Supplier table: Error: Can't create table `dental`.`supplier` (errno: 121 "Duplicate key on write or update")
+[ERROR] 26/6/2025, 2:07:24 pm - Error creating tables: Error: Database error occurred while creating the Supplier table.
+[LOG] 26/6/2025, 2:07:35 pm - Environment: development
+[LOG] 26/6/2025, 2:07:35 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 2:07:35 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 2:07:35 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 2:07:35 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 2:07:35 pm - ✅ Inserted/Updated tenant: smilecare (.in)
+[LOG] 26/6/2025, 2:07:35 pm - Tenant table created successfully.
+[LOG] 26/6/2025, 2:07:35 pm - Hospial table created successfully.
+[LOG] 26/6/2025, 2:07:35 pm - Dentist table created successfully.
+[LOG] 26/6/2025, 2:07:35 pm - Patient table created successfully.
+[LOG] 26/6/2025, 2:07:35 pm - Appointment table created successfully.
+[LOG] 26/6/2025, 2:07:35 pm - Treatment table created successfully.
+[LOG] 26/6/2025, 2:07:35 pm - Prescription table created successfully.
+[LOG] 26/6/2025, 2:07:35 pm - statusType table created successfully.
+[LOG] 26/6/2025, 2:07:35 pm - StatusType data added successfully
+[LOG] 26/6/2025, 2:07:35 pm - StatusTypeSub table created successfully.
+[LOG] 26/6/2025, 2:07:35 pm - Asset table created successfully.
+[LOG] 26/6/2025, 2:07:35 pm - Expense table created successfully.
+[LOG] 26/6/2025, 2:07:36 pm - Supplier table created successfully.
+[LOG] 26/6/2025, 2:07:36 pm - SupplierProducts table created successfully.
+[LOG] 26/6/2025, 2:07:36 pm - PurchaseOrder table created successfully.
+[LOG] 26/6/2025, 2:07:36 pm - SupplierPayments table created successfully.
+[LOG] 26/6/2025, 2:07:36 pm - SupplierReview table created successfully.
+[LOG] 26/6/2025, 2:07:36 pm - Reminder table created successfully.
+[LOG] 26/6/2025, 2:07:36 pm - Payment table created successfully.
+[LOG] 26/6/2025, 2:07:36 pm - AppointmentReschedules table created successfully.
+[LOG] 26/6/2025, 2:07:36 pm - Reception table created successfully.
+[LOG] 26/6/2025, 2:07:36 pm - LoginHistory table created successfully.
+[LOG] 26/6/2025, 2:07:36 pm - UserActivity table created successfully.
+[LOG] 26/6/2025, 2:07:36 pm - All tables created in order.
+[LOG] 26/6/2025, 2:11:55 pm - Environment: development
+[LOG] 26/6/2025, 2:11:55 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 2:11:55 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 2:11:55 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 2:11:55 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 2:11:55 pm - ✅ Inserted/Updated tenant: smilecare (.in)
+[LOG] 26/6/2025, 2:11:55 pm - Tenant table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - Hospial table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - Dentist table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - Patient table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - Appointment table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - Treatment table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - Prescription table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - statusType table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - StatusType data added successfully
+[LOG] 26/6/2025, 2:11:55 pm - StatusTypeSub table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - Asset table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - Expense table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - Supplier table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - SupplierProducts table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - PurchaseOrder table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - SupplierPayments table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - SupplierReview table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - Reminder table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - Payment table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - AppointmentReschedules table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - Reception table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - LoginHistory table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - UserActivity table created successfully.
+[LOG] 26/6/2025, 2:11:55 pm - All tables created in order.
+[LOG] 26/6/2025, 2:13:35 pm - Environment: development
+[LOG] 26/6/2025, 2:13:35 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 2:13:35 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 2:13:35 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 2:13:35 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 4:07:17 pm - Environment: development
+[LOG] 26/6/2025, 4:07:17 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 4:07:17 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 4:07:17 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 4:07:17 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 4:07:54 pm - tenantId: 4
+[ERROR] 26/6/2025, 4:07:54 pm - Error: tenant_id does not exist
+26/6/2025, 4:07:55 pm GET /v1/supplier/getallsuppliers/4?page=1&limit=10 404
+[LOG] 26/6/2025, 4:08:02 pm - tenantId: 1
+26/6/2025, 4:08:02 pm GET /v1/supplier/getallsuppliers/1?page=1&limit=10 200
+26/6/2025, 4:42:40 pm POST /v1/supplier/addsupplier 400
+26/6/2025, 4:43:35 pm POST /v1/supplier/addsupplier 400
+[LOG] 26/6/2025, 4:44:03 pm - [object Object]
+26/6/2025, 4:44:03 pm POST /v1/supplier/addsupplier 201
+26/6/2025, 4:45:01 pm GET /v1/supplier/getsupplier/1/1 200
+26/6/2025, 4:46:09 pm PUT /v1/supplier/updatesupplier/1/1 200
+[LOG] 26/6/2025, 4:46:18 pm - tenantId: 1
+26/6/2025, 4:46:18 pm GET /v1/supplier/getallsuppliers/1?page=1&limit=10 200
+26/6/2025, 4:53:24 pm POST /v1/supplierproducts/addsupplierproduct 404
+[ERROR] 26/6/2025, 4:53:30 pm - Error executing INSERT: Error: Unknown column 'supplier_products_id' in 'INSERT INTO'
+[ERROR] 26/6/2025, 4:53:30 pm - Error creating supplier_product: Error: Unknown column 'supplier_products_id' in 'INSERT INTO'
+[ERROR] 26/6/2025, 4:53:30 pm - Failed to create supplier_products: Error: Database Operation Failed
+26/6/2025, 4:53:30 pm POST /v1/supplierproduct/addsupplierproduct 404
+[LOG] 26/6/2025, 4:54:17 pm - Environment: development
+[LOG] 26/6/2025, 4:54:17 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 4:54:17 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 4:54:17 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 4:54:17 pm - ❌ Failed to connect to Redis: Socket already opened
+[ERROR] 26/6/2025, 4:54:21 pm - Error executing INSERT: Error: Unknown column 'mode_of_payment' in 'INSERT INTO'
+[ERROR] 26/6/2025, 4:54:21 pm - Error creating supplier_product: Error: Unknown column 'mode_of_payment' in 'INSERT INTO'
+[ERROR] 26/6/2025, 4:54:21 pm - Failed to create supplier_products: Error: Database Operation Failed
+26/6/2025, 4:54:21 pm POST /v1/supplierproduct/addsupplierproduct 404
+[LOG] 26/6/2025, 4:56:25 pm - Environment: development
+[LOG] 26/6/2025, 4:56:25 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 4:56:25 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 4:56:25 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 4:56:25 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 4:56:30 pm - [object Object]
+26/6/2025, 4:56:30 pm POST /v1/supplierproduct/addsupplierproduct 201
+[LOG] 26/6/2025, 4:57:19 pm - tenantId: 1
+26/6/2025, 4:57:19 pm GET /v1/supplierproduct/getallsupplierproducts/1 400
+[LOG] 26/6/2025, 4:57:34 pm - tenantId: 1
+[ERROR] 26/6/2025, 4:57:34 pm - Error executing SELECT ALL with count: Error: Table 'dental.supplier_product' doesn't exist
+[ERROR] 26/6/2025, 4:57:34 pm - Error fetching supplier_products: Error: Table 'dental.supplier_product' doesn't exist
+[ERROR] 26/6/2025, 4:57:34 pm - Database error while fetching supplier_productss: Error: Error fetching supplier_products.
+26/6/2025, 4:57:34 pm GET /v1/supplierproduct/getallsupplierproducts/1?page=1&limit=10 404
+[LOG] 26/6/2025, 4:59:17 pm - Environment: development
+[LOG] 26/6/2025, 4:59:17 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 4:59:17 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 4:59:17 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 4:59:17 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 4:59:26 pm - Environment: development
+[LOG] 26/6/2025, 4:59:26 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 4:59:26 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 4:59:26 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 4:59:26 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 4:59:32 pm - tenantId: 1
+[ERROR] 26/6/2025, 4:59:32 pm - Error executing SELECT ALL with count: Error: Table 'dental.supplierproduct' doesn't exist
+[ERROR] 26/6/2025, 4:59:32 pm - Error fetching supplier_products: Error: Table 'dental.supplierproduct' doesn't exist
+[ERROR] 26/6/2025, 4:59:32 pm - Database error while fetching supplier_productss: Error: Error fetching supplier_products.
+26/6/2025, 4:59:32 pm GET /v1/supplierproduct/getallsupplierproducts/1?page=1&limit=10 404
+[LOG] 26/6/2025, 5:00:06 pm - Environment: development
+[LOG] 26/6/2025, 5:00:06 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:00:06 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:00:06 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:00:06 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:00:09 pm - tenantId: 1
+[ERROR] 26/6/2025, 5:00:09 pm - Error executing SELECT ALL with count: Error: Table 'dental.supplierproducts' doesn't exist
+[ERROR] 26/6/2025, 5:00:09 pm - Error fetching supplier_products: Error: Table 'dental.supplierproducts' doesn't exist
+[ERROR] 26/6/2025, 5:00:10 pm - Database error while fetching supplier_productss: Error: Error fetching supplier_products.
+26/6/2025, 5:00:10 pm GET /v1/supplierproduct/getallsupplierproducts/1?page=1&limit=10 404
+[LOG] 26/6/2025, 5:00:47 pm - Environment: development
+[LOG] 26/6/2025, 5:00:47 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:00:47 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:00:47 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:00:47 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:00:51 pm - tenantId: 1
+26/6/2025, 5:00:52 pm GET /v1/supplierproduct/getallsupplierproducts/1?page=1&limit=10 200
+[ERROR] 26/6/2025, 5:01:42 pm - Error: Invalid table name: supplierproducts
+26/6/2025, 5:01:42 pm GET /v1/supplierproduct/getsupplierproduct/1/1 500
+[ERROR] 26/6/2025, 5:03:39 pm - Error: Invalid table name: supplierproducts
+26/6/2025, 5:03:40 pm GET /v1/supplierproduct/getsupplierproduct/1/1 500
+[LOG] 26/6/2025, 5:04:22 pm - Environment: development
+[LOG] 26/6/2025, 5:04:22 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:04:22 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:04:22 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:04:22 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:04:35 pm - Environment: development
+[LOG] 26/6/2025, 5:04:35 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:04:35 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:04:35 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:04:35 pm - ❌ Failed to connect to Redis: Socket already opened
+[ERROR] 26/6/2025, 5:04:39 pm - Error: Invalid table name: supplier_products
+26/6/2025, 5:04:39 pm GET /v1/supplierproduct/getsupplierproduct/1/1 500
+[LOG] 26/6/2025, 5:08:02 pm - Environment: development
+[LOG] 26/6/2025, 5:08:02 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:08:02 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:08:02 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:08:02 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:09:22 pm - Environment: development
+[LOG] 26/6/2025, 5:09:22 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:09:22 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:09:22 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:09:22 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:09:37 pm - Environment: development
+[LOG] 26/6/2025, 5:09:37 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:09:37 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:09:37 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:09:37 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:09:56 pm - Environment: development
+[LOG] 26/6/2025, 5:09:56 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:09:56 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:09:56 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:09:56 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:10:12 pm - Environment: development
+[LOG] 26/6/2025, 5:10:12 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:10:12 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:10:12 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:10:12 pm - ❌ Failed to connect to Redis: Socket already opened
+26/6/2025, 5:10:16 pm GET /v1/supplierproduct/getsupplierproduct/1/1 200
+26/6/2025, 5:11:48 pm PUT /v1/supplierproduct/updatesupplierproducts/1/1 404
+26/6/2025, 5:11:59 pm PUT /v1/supplierproduct/updatesupplierproduct/1/1 200
+[LOG] 26/6/2025, 5:12:09 pm - tenantId: 1
+26/6/2025, 5:12:09 pm GET /v1/supplierproduct/getallsupplierproducts/1?page=1&limit=10 200
+[LOG] 26/6/2025, 5:13:32 pm - [object Object]
+26/6/2025, 5:13:32 pm POST /v1/supplierproduct/addsupplierproduct 201
+26/6/2025, 5:13:50 pm DELETE /v1/supplierproduct/deletesupplierproduct/2/1 200
+[LOG] 26/6/2025, 5:14:08 pm - tenantId: 1
+26/6/2025, 5:14:08 pm GET /v1/supplierproduct/getallsupplierproducts/1?page=1&limit=10 200
+[LOG] 26/6/2025, 5:17:30 pm - Environment: development
+[LOG] 26/6/2025, 5:17:30 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:17:30 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:17:30 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:17:30 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:17:50 pm - Environment: development
+[LOG] 26/6/2025, 5:17:50 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:17:50 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:17:50 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:17:50 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:18:09 pm - Environment: development
+[LOG] 26/6/2025, 5:18:09 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:18:09 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:18:09 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:18:09 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:18:25 pm - Environment: development
+[LOG] 26/6/2025, 5:18:25 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:18:25 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:18:25 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:18:25 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:18:34 pm - due_date: 2025-06-24 string
+[LOG] 26/6/2025, 5:18:34 pm - due_date: 2025-07-01 string
+[LOG] 26/6/2025, 5:18:34 pm - 2025-06-24
+[LOG] 26/6/2025, 5:18:34 pm - 2025-07-01
+[ERROR] 26/6/2025, 5:18:34 pm - Failed to create purchase_order: TypeError: purchase_orderModel.createPurchaseOrder is not a function
+26/6/2025, 5:18:35 pm POST /v1/purchaseorder/addpurchaseorder 404
+[LOG] 26/6/2025, 5:19:51 pm - Environment: development
+[LOG] 26/6/2025, 5:19:51 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:19:51 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:19:51 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:19:51 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:20:11 pm - Environment: development
+[LOG] 26/6/2025, 5:20:11 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:20:11 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:20:11 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:20:11 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:20:18 pm - Environment: development
+[LOG] 26/6/2025, 5:20:18 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:20:18 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:20:18 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:20:18 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:20:34 pm - Environment: development
+[LOG] 26/6/2025, 5:20:34 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:20:34 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:20:34 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:20:34 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:20:52 pm - Environment: development
+[LOG] 26/6/2025, 5:20:52 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:20:52 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:20:52 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:20:52 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:21:01 pm - Environment: development
+[LOG] 26/6/2025, 5:21:01 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:21:01 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:21:01 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:21:01 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:21:27 pm - due_date: 2025-06-24 string
+[LOG] 26/6/2025, 5:21:27 pm - due_date: 2025-07-01 string
+[LOG] 26/6/2025, 5:21:28 pm - 2025-06-24
+[LOG] 26/6/2025, 5:21:28 pm - 2025-07-01
+[ERROR] 26/6/2025, 5:21:28 pm - Error executing INSERT: Error: Table 'dental.purchase_order' doesn't exist
+[ERROR] 26/6/2025, 5:21:28 pm - Error creating purchase_orders: Error: Table 'dental.purchase_order' doesn't exist
+[ERROR] 26/6/2025, 5:21:28 pm - Failed to create purchase_order: Error: Database Operation Failed
+26/6/2025, 5:21:28 pm POST /v1/purchaseorder/addpurchaseorder 404
+[LOG] 26/6/2025, 5:22:32 pm - Environment: development
+[LOG] 26/6/2025, 5:22:32 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:22:32 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:22:32 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:22:32 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:22:52 pm - Environment: development
+[LOG] 26/6/2025, 5:22:52 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:22:52 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:22:52 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:22:52 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:23:23 pm - Environment: development
+[LOG] 26/6/2025, 5:23:23 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:23:23 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:23:23 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:23:23 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:24:42 pm - Environment: development
+[LOG] 26/6/2025, 5:24:42 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:24:42 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:24:42 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:24:42 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:24:57 pm - due_date: 2025-06-24 string
+[LOG] 26/6/2025, 5:24:57 pm - due_date: 2025-07-01 string
+[LOG] 26/6/2025, 5:24:57 pm - 2025-06-24
+[LOG] 26/6/2025, 5:24:57 pm - 2025-07-01
+[ERROR] 26/6/2025, 5:24:57 pm - Error executing INSERT: Error: Data truncated for column 'status' at row 1
+[ERROR] 26/6/2025, 5:24:57 pm - Error creating purchase_orders: Error: Data truncated for column 'status' at row 1
+[ERROR] 26/6/2025, 5:24:57 pm - Failed to create purchase_order: Error: Database Operation Failed
+26/6/2025, 5:24:57 pm POST /v1/purchaseorder/addpurchaseorder 404
+[LOG] 26/6/2025, 5:25:32 pm - Environment: development
+[LOG] 26/6/2025, 5:25:32 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:25:32 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:25:32 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:25:32 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:25:38 pm - due_date: 2025-06-24 string
+[LOG] 26/6/2025, 5:25:38 pm - due_date: 2025-07-01 string
+[LOG] 26/6/2025, 5:25:38 pm - 2025-06-24
+[LOG] 26/6/2025, 5:25:38 pm - 2025-07-01
+[ERROR] 26/6/2025, 5:25:38 pm - Error executing INSERT: Error: Data truncated for column 'status' at row 1
+[ERROR] 26/6/2025, 5:25:38 pm - Error creating purchase_orders: Error: Data truncated for column 'status' at row 1
+[ERROR] 26/6/2025, 5:25:38 pm - Failed to create purchase_order: Error: Database Operation Failed
+26/6/2025, 5:25:38 pm POST /v1/purchaseorder/addpurchaseorder 404
+[LOG] 26/6/2025, 5:26:50 pm - Environment: development
+[LOG] 26/6/2025, 5:26:50 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:26:50 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:26:50 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:26:50 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:26:55 pm - due_date: 2025-06-24 string
+[LOG] 26/6/2025, 5:26:55 pm - due_date: 2025-07-01 string
+[LOG] 26/6/2025, 5:26:55 pm - 2025-06-24
+[LOG] 26/6/2025, 5:26:55 pm - 2025-07-01
+[LOG] 26/6/2025, 5:26:55 pm - [object Object]
+26/6/2025, 5:26:55 pm POST /v1/purchaseorder/addpurchaseorder 201
+[LOG] 26/6/2025, 5:28:31 pm - tenantId: 1
+[LOG] 26/6/2025, 5:28:31 pm - Tue Jun 24 2025 05:30:00 GMT+0530 (India Standard Time)
+[LOG] 26/6/2025, 5:28:31 pm - Tue Jul 01 2025 05:30:00 GMT+0530 (India Standard Time)
+26/6/2025, 5:28:31 pm GET /v1/purchaseorder/getallpurchaseorders/1?page=1&limit=10 200
+[ERROR] 26/6/2025, 5:29:23 pm - Error: Invalid table name: purchaseorders
+26/6/2025, 5:29:23 pm GET /v1/purchaseorder/getpurchaseorder/1/1 500
+[LOG] 26/6/2025, 5:31:36 pm - Environment: development
+[LOG] 26/6/2025, 5:31:36 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:31:36 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:31:36 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:31:36 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:31:45 pm - Environment: development
+[LOG] 26/6/2025, 5:31:45 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:31:45 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:31:45 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:31:45 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:31:49 pm - Tue Jun 24 2025 05:30:00 GMT+0530 (India Standard Time)
+[LOG] 26/6/2025, 5:31:49 pm - Tue Jul 01 2025 05:30:00 GMT+0530 (India Standard Time)
+26/6/2025, 5:31:49 pm GET /v1/purchaseorder/getpurchaseorder/1/1 200
+[LOG] 26/6/2025, 5:35:00 pm - due_date: 2025-06-24 string
+[LOG] 26/6/2025, 5:35:00 pm - due_date: 2025-07-01 string
+[LOG] 26/6/2025, 5:35:00 pm - 2025-06-24
+[LOG] 26/6/2025, 5:35:00 pm - 2025-07-01
+26/6/2025, 5:35:01 pm PUT /v1/purchaseorder/updatepurchaseorder/1/1 200
+[LOG] 26/6/2025, 5:36:30 pm - due_date: 2025-06-24 string
+[LOG] 26/6/2025, 5:36:30 pm - due_date: 2025-07-01 string
+[LOG] 26/6/2025, 5:36:30 pm - 2025-06-24
+[LOG] 26/6/2025, 5:36:30 pm - 2025-07-01
+[LOG] 26/6/2025, 5:36:30 pm - [object Object]
+26/6/2025, 5:36:30 pm POST /v1/purchaseorder/addpurchaseorder 201
+26/6/2025, 5:36:35 pm DELETE /v1/purchaseorder/deletepurchaseorder/2/1 200
+26/6/2025, 5:38:49 pm POST /v1/%20supplierpayment/addsupplierpayment 404
+26/6/2025, 5:39:02 pm POST /v1/%20supplierpayments/addsupplierpayment 404
+26/6/2025, 5:39:28 pm POST /v1/%20supplierpayments/addsupplierpayment 404
+26/6/2025, 5:39:37 pm POST /v1/supplierpayments/addsupplierpayment 404
+[LOG] 26/6/2025, 5:39:41 pm - due_date: 2025-06-25 string
+[ERROR] 26/6/2025, 5:39:41 pm - Error: supplier_id does not exist
+26/6/2025, 5:39:41 pm POST /v1/supplierpayment/addsupplierpayment 404
+[LOG] 26/6/2025, 5:39:51 pm - due_date: 2025-06-25 string
+[LOG] 26/6/2025, 5:39:52 pm - 2025-06-25
+[LOG] 26/6/2025, 5:39:53 pm - [object Object]
+26/6/2025, 5:39:53 pm POST /v1/supplierpayment/addsupplierpayment 201
+[LOG] 26/6/2025, 5:41:08 pm - tenantId: 1
+[LOG] 26/6/2025, 5:41:08 pm - Wed Jun 25 2025 05:30:00 GMT+0530 (India Standard Time)
+26/6/2025, 5:41:08 pm GET /v1/supplierpayment/getallsupplierpayments/1?page=1&limit=10 200
+[ERROR] 26/6/2025, 5:42:01 pm - Error: Invalid table name: supplierpayments
+26/6/2025, 5:42:01 pm GET /v1/supplierpayment/getsupplierpayment/1/1 500
+[LOG] 26/6/2025, 5:43:09 pm - Environment: development
+[LOG] 26/6/2025, 5:43:09 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:43:09 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:43:09 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:43:09 pm - ❌ Failed to connect to Redis: Socket already opened
+[ERROR] 26/6/2025, 5:43:33 pm - Error executing SELECT BY ID: Error: Unknown column 'supplier_payments_id' in 'WHERE'
+[ERROR] 26/6/2025, 5:43:33 pm - Error fetching supplier_payments: Error: Unknown column 'supplier_payments_id' in 'WHERE'
+26/6/2025, 5:43:33 pm GET /v1/supplierpayment/getsupplierpayment/1/1 404
+[LOG] 26/6/2025, 5:48:00 pm - Environment: development
+[LOG] 26/6/2025, 5:48:00 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:48:00 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:48:00 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:48:00 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:48:20 pm - Environment: development
+[LOG] 26/6/2025, 5:48:21 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 5:48:21 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 5:48:21 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 5:48:21 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 5:48:26 pm - Wed Jun 25 2025 05:30:00 GMT+0530 (India Standard Time)
+26/6/2025, 5:48:26 pm GET /v1/supplierpayment/getsupplierpayment/1/1 200
+[LOG] 26/6/2025, 5:49:34 pm - due_date: 2025-06-25 string
+[LOG] 26/6/2025, 5:49:35 pm - 2025-06-25
+[LOG] 26/6/2025, 5:49:35 pm - [object Object]
+26/6/2025, 5:49:35 pm POST /v1/supplierpayment/addsupplierpayment 201
+[LOG] 26/6/2025, 5:50:00 pm - due_date: 2025-06-25 string
+[LOG] 26/6/2025, 5:50:01 pm - 2025-06-25
+26/6/2025, 5:50:01 pm PUT /v1/supplierpayment/updatesupplierpayment/1/1 200
+26/6/2025, 5:50:48 pm DELETE /v1/supplierpayment/deletesupplierpayment/1/1 200
+[ERROR] 26/6/2025, 6:18:06 pm - Error executing INSERT: Error: Unknown column 'comments' in 'INSERT INTO'
+[ERROR] 26/6/2025, 6:18:06 pm - Error creating supplier_reviews: Error: Unknown column 'comments' in 'INSERT INTO'
+[ERROR] 26/6/2025, 6:18:06 pm - Failed to create supplier_reviews: Error: Database Operation Failed
+26/6/2025, 6:18:06 pm POST /v1/supplierreview/addsupplierreview 404
+[ERROR] 26/6/2025, 6:18:21 pm - Error executing INSERT: Error: Unknown column 'comments' in 'INSERT INTO'
+[ERROR] 26/6/2025, 6:18:21 pm - Error creating supplier_reviews: Error: Unknown column 'comments' in 'INSERT INTO'
+[ERROR] 26/6/2025, 6:18:21 pm - Failed to create supplier_reviews: Error: Database Operation Failed
+26/6/2025, 6:18:21 pm POST /v1/supplierreview/addsupplierreview 404
+[LOG] 26/6/2025, 6:19:25 pm - Environment: development
+[LOG] 26/6/2025, 6:19:26 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 6:19:26 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 6:19:26 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 6:19:26 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 6:19:40 pm - [object Object]
+26/6/2025, 6:19:40 pm POST /v1/supplierreview/addsupplierreview 201
+[LOG] 26/6/2025, 6:21:53 pm - tenantId: 1
+26/6/2025, 6:21:54 pm GET /v1/supplierreview/getallsupplierreviews/1?page=1&limit=10 200
+26/6/2025, 6:23:00 pm GET /v1/supplierreview/getsupplierreviews/1/1 404
+[ERROR] 26/6/2025, 6:23:08 pm - Error: Invalid table name: supplierreviews
+26/6/2025, 6:23:08 pm GET /v1/supplierreview/getsupplierreview/1/1 500
+[LOG] 26/6/2025, 6:25:11 pm - Environment: development
+[LOG] 26/6/2025, 6:25:11 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 6:25:11 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 6:25:11 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 6:25:11 pm - ❌ Failed to connect to Redis: Socket already opened
+[ERROR] 26/6/2025, 6:25:17 pm - Error executing SELECT BY ID: Error: Unknown column 'supplier_reviews_id' in 'WHERE'
+[ERROR] 26/6/2025, 6:25:17 pm - Error fetching supplier_reviews: Error: Unknown column 'supplier_reviews_id' in 'WHERE'
+26/6/2025, 6:25:17 pm GET /v1/supplierreview/getsupplierreview/1/1 404
+[LOG] 26/6/2025, 6:25:56 pm - Environment: development
+[LOG] 26/6/2025, 6:25:56 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 6:25:56 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 6:25:56 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 6:25:56 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 6:26:26 pm - Environment: development
+[LOG] 26/6/2025, 6:26:26 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 6:26:26 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 6:26:26 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 6:26:26 pm - ❌ Failed to connect to Redis: Socket already opened
+[LOG] 26/6/2025, 6:26:44 pm - Environment: development
+[LOG] 26/6/2025, 6:26:44 pm - Using DB Host: localhost
+[LOG] 26/6/2025, 6:26:44 pm - Server listening on port: 8004
+[LOG] 26/6/2025, 6:26:44 pm - ✅ Server running on localhost port 8004
+[ERROR] 26/6/2025, 6:26:44 pm - ❌ Failed to connect to Redis: Socket already opened
+26/6/2025, 6:26:49 pm GET /v1/supplierreview/getsupplierreview/1/1 200
+[LOG] 26/6/2025, 6:27:55 pm - [object Object]
+26/6/2025, 6:27:55 pm POST /v1/supplierreview/addsupplierreview 201
+26/6/2025, 6:28:21 pm PUT /v1/supplierreview/updatesupplierreview/1/1 200
+26/6/2025, 6:30:12 pm DELETE /v1/supplierreview/deletesupplierreview/2/1 200

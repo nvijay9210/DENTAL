@@ -6,8 +6,8 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
-// require('./middlewares/Schedule')
-const { logFilePath, logStream } = require('./logs/logger');
+// require('./middlewares/Schedule') //appointment schedule
+// const { logFilePath, logStream } = require('./logs/logger'); //log file
 
 const errorHandler = require('./middlewares/errorHandler');
 const createTable = require('./models/CreateModel');
@@ -28,6 +28,10 @@ const statusTypeSubRouter = require('./routes/StatusTypeSubRouter');
 const assetRouter = require('./routes/AssetRouter');
 const expenseRouter = require('./routes/ExpenseRouter');
 const supplierRouter = require('./routes/SupplierRouter');
+const supplierProductsRouter = require('./routes/SupplierProductsRouter');
+const supplierPaymentsRouter = require('./routes/SupplierPaymentsRouter');
+const purchaseOrdersRouter = require('./routes/PurchaseOrdersRouter');
+const supplierReviewsRouter = require('./routes/SupplierReviewsRouter');
 const reminderRouter = require('./routes/ReminderRouter');
 const paymentRouter = require('./routes/PaymentRouter');
 const dashboardRouter = require('./routes/DashboardRouter');
@@ -126,11 +130,8 @@ app.use("/files", express.static("uploads/"));
 
 
 // ✅ Morgan logging (system time)
-morgan.token('local-date', () => new Date().toLocaleString());
-// morgan.token('custom-status', (req, res) =>
-//   res.statusCode >= 200 && res.statusCode < 300 ? 'VALUE' : 'ERROR'
-// );
-app.use(morgan(':local-date :method :url :status', { stream: logStream }));
+// morgan.token('local-date', () => new Date().toLocaleString());
+// app.use(morgan(':local-date :method :url :status', { stream: logStream }));
 
 
 // Redis connection
@@ -151,6 +152,10 @@ async function initializeTables() {
     await createTable.createAssetTable();
     await createTable.createExpenseTable();
     await createTable.createSupplierTable();
+    await createTable.createSupplierProdutsTable();
+    await createTable.createPurchaseOrder();
+    await createTable.createSupplierPaymentsTable();
+    await createTable.createSupplierReviewTable();
     await createTable.createReminderTable();
     await createTable.createPaymentTable();
     await createTable.createAppointmentReschedulesTable();
@@ -170,19 +175,19 @@ async function initializeTables() {
 
 
 // ✅ Log viewer route
-app.get('/logs', (req, res) => {
-  if (!fs.existsSync(logFilePath)) {
-    return res.status(404).send('Log file not found');
-  }
+// app.get('/logs', (req, res) => {
+//   if (!fs.existsSync(logFilePath)) {
+//     return res.status(404).send('Log file not found');
+//   }
 
-  fs.readFile(logFilePath, 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error reading log file:', err.message);
-      return res.status(500).send('Error reading log file');
-    }
-    res.type('text/plain').send(data);
-  });
-});
+//   fs.readFile(logFilePath, 'utf8', (err, data) => {
+//     if (err) {
+//       console.error('Error reading log file:', err.message);
+//       return res.status(500).send('Error reading log file');
+//     }
+//     res.type('text/plain').send(data);
+//   });
+// });
 
 
 // Test route
@@ -203,6 +208,10 @@ app.use('/v1/statustypesub', statusTypeSubRouter);
 app.use('/v1/asset', assetRouter);
 app.use('/v1/expense', expenseRouter);
 app.use('/v1/supplier', supplierRouter);
+app.use('/v1/supplierproduct', supplierProductsRouter);
+app.use('/v1/supplierpayment', supplierPaymentsRouter);
+app.use('/v1/purchaseorder', purchaseOrdersRouter);
+app.use('/v1/supplierreview', supplierReviewsRouter);
 app.use('/v1/reminder', reminderRouter);
 app.use('/v1/payment', paymentRouter);
 app.use('/v1/dashboard', dashboardRouter);

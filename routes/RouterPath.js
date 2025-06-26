@@ -123,6 +123,34 @@ module.exports = {
   UPDATE_SUPPLIER_TENANT: "/updatesupplier/:supplier_id/:tenant_id",
   DELETE_SUPPLIER_TENANT: "/deletesupplier/:supplier_id/:tenant_id",
 
+  ADD_SUPPLIER_PRODUCTS: "/addsupplierproduct",
+  GETALL_SUPPLIER_PRODUCTS_TENANT: "/getallsupplierproducts/:tenant_id",
+  GET_SUPPLIER_PRODUCTS_TENANT: "/getsupplierproduct/:supplier_product_id/:tenant_id",
+  UPDATE_SUPPLIER_PRODUCTS_TENANT: "/updatesupplierproduct/:supplier_product_id/:tenant_id",
+  DELETE_SUPPLIER_PRODUCTS_TENANT: "/deletesupplierproduct/:supplier_product_id/:tenant_id",
+
+
+  ADD_SUPPLIER_PAYMENTS: "/addsupplierpayment",
+  GETALL_SUPPLIER_PAYMENTS_TENANT: "/getallsupplierpayments/:tenant_id",
+  GET_SUPPLIER_PAYMENTS_TENANT: "/getsupplierpayment/:supplier_payment_id/:tenant_id",
+  UPDATE_SUPPLIER_PAYMENTS_TENANT: "/updatesupplierpayment/:supplier_payment_id/:tenant_id",
+  DELETE_SUPPLIER_PAYMENTS_TENANT: "/deletesupplierpayment/:supplier_payment_id/:tenant_id",
+
+
+  ADD_SUPPLIER_REVIEWS: "/addsupplierreview",
+  GETALL_SUPPLIER_REVIEWS_TENANT: "/getallsupplierreviews/:tenant_id",
+  GET_SUPPLIER_REVIEWS_TENANT: "/getsupplierreview/:supplier_review_id/:tenant_id",
+  UPDATE_SUPPLIER_REVIEWS_TENANT: "/updatesupplierreview/:supplier_review_id/:tenant_id",
+  DELETE_SUPPLIER_REVIEWS_TENANT: "/deletesupplierreview/:supplier_review_id/:tenant_id",
+
+
+  ADD_PURCHASE_ORDER: "/addpurchaseorder",
+  GETALL_PURCHASE_ORDER_TENANT: "/getallpurchaseorders/:tenant_id",
+  GET_PURCHASE_ORDER_TENANT: "/getpurchaseorder/:purchase_order_id/:tenant_id",
+  UPDATE_PURCHASE_ORDER_TENANT: "/updatepurchaseorder/:purchase_order_id/:tenant_id",
+  DELETE_PURCHASE_ORDER_TENANT: "/deletepurchaseorder/:purchase_order_id/:tenant_id",
+
+
   ADD_RECEPTION: "/addreceptionist",
   GETALL_RECEPTION_TENANT: "/getallreceptionists/:tenant_id",
   GET_RECEPTION_TENANT: "/getreceptionist/:reception_id/:tenant_id",
