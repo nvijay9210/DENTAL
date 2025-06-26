@@ -8,13 +8,13 @@ const {
 
 exports.createClinic = async (req, res, next) => {
   const details = req.body;
-  const token=req.token;
-  const realm=req.realm;
+  const token = req.token;
+  const realm = req.realm;
 
   try {
     await clinicValidation.createClinicValidation(details);
     // Create a new clinic
-    const id = await clinicService.createClinic(details,token,realm);
+    const id = await clinicService.createClinic(details, token, realm);
     res.status(200).json({ message: "Clinic created", id });
   } catch (err) {
     next(err);
@@ -33,30 +33,29 @@ exports.getAllClinicByTenantId = async (req, res, next) => {
     );
     res.status(200).json(clinics);
   } catch (err) {
-    next(err); 
+    next(err);
   }
 };
 
 exports.getFinanceSummary = async (req, res, next) => {
-  const { tenant_id,clinic_id } = req.params;
-  await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  const { tenant_id, clinic_id } = req.params;
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
   try {
-    const clinics = await clinicService.getFinanceSummary(
-      tenant_id, clinic_id
-    );
+    const clinics = await clinicService.getFinanceSummary(tenant_id, clinic_id);
     res.status(200).json(clinics);
   } catch (err) {
     next(err);
   }
 };
 exports.getClinicSettingsByTenantIdAndClinicId = async (req, res, next) => {
-  const { tenant_id,clinic_id } = req.params;
-  await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  const { tenant_id, clinic_id } = req.params;
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
   try {
     const clinics = await clinicService.getClinicSettingsByTenantIdAndClinicId(
-      tenant_id, clinic_id
+      tenant_id,
+      clinic_id
     );
     res.status(200).json(clinics);
   } catch (err) {
@@ -65,15 +64,11 @@ exports.getClinicSettingsByTenantIdAndClinicId = async (req, res, next) => {
 };
 
 exports.updateClinicSettings = async (req, res, next) => {
-  const { tenant_id,clinic_id } = req.params;
-  const details=req.body
-  await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('clinic','clinic_id',clinic_id)
-  if(!details.updated_by) throw new CustomError("Updated_by is required")
+  const { tenant_id, clinic_id } = req.params;
+  const details = req.body;
+  await clinicValidation.updateClinicSettingsValidation(tenant_id, clinic_id,details);
   try {
-    await clinicService.updateClinicSettings(
-      tenant_id, clinic_id,details
-    );
+    await clinicService.updateClinicSettings(tenant_id, clinic_id, details);
     res.status(200).json({ message: "Clinic settings updated successfully" });
   } catch (err) {
     next(err);
@@ -81,13 +76,15 @@ exports.updateClinicSettings = async (req, res, next) => {
 };
 
 exports.getFinanceSummarybyDentist = async (req, res, next) => {
-  const { tenant_id,clinic_id,dentist_id } = req.params;
-  await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('clinic','clinic_id',clinic_id)
-  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  const { tenant_id, clinic_id, dentist_id } = req.params;
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
+  await checkIfIdExists("dentist", "dentist_id", dentist_id);
   try {
     const clinics = await clinicService.getFinanceSummarybyDentist(
-      tenant_id, clinic_id,dentist_id
+      tenant_id,
+      clinic_id,
+      dentist_id
     );
     res.status(200).json(clinics);
   } catch (err) {
@@ -98,14 +95,8 @@ exports.getFinanceSummarybyDentist = async (req, res, next) => {
 exports.getClinicByTenantIdAndClinicId = async (req, res, next) => {
   const { clinic_id, tenant_id } = req.params;
   try {
-    await checkIfExists('tenant','tenant_id',tenant_id)
-    // const clinic = await checkIfExists(
-    //   "clinic",
-    //   "clinic_id",
-    //   clinic_id,
-    //   tenant_id
-    // );
-    // if (clinic) throw new CustomError("Clinic not exists", 404);
+    await checkIfExists("tenant", "tenant_id", tenant_id);
+    await checkIfExists("clinic", "clinic_id", clinic_id);
     const clinics = await clinicService.getClinicByTenantIdAndClinicId(
       tenant_id,
       clinic_id
