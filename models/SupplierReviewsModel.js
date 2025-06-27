@@ -8,7 +8,7 @@ const TABLE = "supplier_reviews";
 const createSupplierReviews = async (table,columns, values) => {
   try {
     const supplier_reviews = await record.createRecord(table, columns, values);
-    console.log(supplier_reviews)
+    
     return supplier_reviews.insertId;
   } catch (error) {
     console.error("Error creating supplier_reviews:", error);

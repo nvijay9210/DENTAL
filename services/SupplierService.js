@@ -30,11 +30,11 @@ const supplierFields = {
   gst_number: (val) => val,
   pan_number: (val) => val,
   tax_id: (val) => val,
-  logo_url: helper.safeStringify,
+  logo_url: (val) => val,
   mode_of_payment: (val) => val,
   preferred_currency: (val) => val,
-  credit_limit: (val) => parseFloat(val),
-  opening_balance: (val) => parseFloat(val),
+  credit_limit: (val) =>val? parseFloat(val):0,
+  opening_balance: (val) =>val? parseFloat(val):0,
   notes:helper.safeStringify,
   address_type:(val)=>val,
   address:(val)=>val,
@@ -60,11 +60,11 @@ const supplierFieldsReverseMap = {
   gst_number: (val) => val,
   pan_number: (val) => val,
   tax_id: (val) => val,
-  logo_url: helper.safeJsonParse,
+  logo_url: (val) => val,
   mode_of_payment: (val) => val,
   preferred_currency: (val) => val,
-  credit_limit: (val) => parseFloat(val),
-  opening_balance: (val) => parseFloat(val),
+  credit_limit: (val) =>val? parseFloat(val):0,
+  opening_balance: (val) =>val? parseFloat(val):0,
   notes:helper.safeJsonParse,
   address_type:(val)=>val,
   address:(val)=>val,
@@ -151,6 +151,7 @@ const createSupplier = async (data) => {
     }
 
     const { columns, values } = mapFields(data, fieldMap);
+
     const supplierId = await supplierModel.createSupplier(
       "supplier",
       columns,

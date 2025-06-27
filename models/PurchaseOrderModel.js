@@ -8,7 +8,7 @@ const TABLE = "purchase_orders";
 const createPurchaseOrders = async (table,columns, values) => {
   try {
     const purchase_orders = await record.createRecord(table, columns, values);
-    console.log(purchase_orders)
+  
     return purchase_orders.insertId;
   } catch (error) {
     console.error("Error creating purchase_orders:", error);

@@ -8,7 +8,6 @@ const TABLE = "supplier_payments";
 const createSupplierPayments = async (table,columns, values) => {
   try {
     const supplier_payments = await record.createRecord(table, columns, values);
-    console.log(supplier_payments)
     return supplier_payments.insertId;
   } catch (error) {
     console.error("Error creating supplier_payments:", error);
