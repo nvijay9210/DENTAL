@@ -108,7 +108,7 @@ const checkPatientExistsByTenantIdAndPatientId = async (
 };
 
 const updateToothDetails = async (data, patientId, tenantId) => {
-  //console.log(data,patientId,tenantId)
+  console.log(data,patientId,tenantId)
   const query =
     "update patient set tooth_details=? where patient_id=? and tenant_id";
   const conn = await pool.getConnection();

@@ -800,7 +800,7 @@ const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
 
 const updateToothDetails = async (data, patientId, tenant_id) => {
   //console.log(data);
-  data = data.length > 0 ? JSON.stringify(data) : null;
+  data = Object.keys(data).length > 0 ? JSON.stringify(data) : null;
   try {
     const affectedRows = await patientModel.updateToothDetails(
       data,

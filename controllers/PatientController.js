@@ -218,7 +218,7 @@ exports.updatePatient = async (req, res, next) => {
 exports.updateToothDetails = async (req, res, next) => {
   const { patient_id, tenant_id } = req.params;
   const details = req.body;
-  // console.log("details:", details);
+  console.log("details:", details);
   try {
     const patient = await checkIfExists(
       "patient",

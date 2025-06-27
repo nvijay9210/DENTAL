@@ -362,8 +362,8 @@ const checkDentistExistsByTenantIdAndDentistId = async (
 const getAllDentistsByTenantIdAndClinicId = async (
   tenantId,
   clinicId,
-  page,
-  limit
+  page=1,
+  limit=10
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = `dentistsbyclinic:${tenantId}:${clinicId}:page:${page}:limit:${limit}`;
