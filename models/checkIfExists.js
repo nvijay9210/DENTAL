@@ -204,6 +204,8 @@ const checkIfExistsWithoutId = async (
       [table, field, value, excludeField, excludeValue, tenantId]
     );
 
+    console.log(result,value)
+
     return result.length > 0 ? true : false;
   } catch (err) {
     console.error(err);

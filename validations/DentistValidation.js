@@ -206,7 +206,7 @@ const validateUniqueFields = async (
   dentistId = 0
 ) => {
   for (const field of uniqueFields) {
-    if (!details[field] || details[field] === "null") continue;
+    if (!details[field] || details[field] === null) continue;
 
     const exists = isUpdate
       ? await checkIfExistsWithoutId(
@@ -240,7 +240,6 @@ const createDentistValidation = async (details) => {
 
 // Update Dentist Validation
 const updateDentistValidation = async (dentistId, details, tenant_id) => {
-  console.log('details:',details)
   validateInput(details, updateColumnConfig);
   await validateTenant(tenant_id);
   // await checkIfIdExists('clinic','clinic_id',details.clinic_id||0)

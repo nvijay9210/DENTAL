@@ -19,7 +19,8 @@ module.exports = {
   ADD_DENTIST: "/adddentist",
   GETALL_DENTIST_TENANT: "/getalldentists/:tenant_id",
   GET_DENTIST_TENANT: "/getdentist_tenant/:dentist_id/:tenant_id",
-  GET_DENTIST_TENANT_CLINIC: "/getalldentist_tenant_clinic/:tenant_id/:clinic_id",
+  GET_DENTIST_TENANT_CLINIC:
+    "/getalldentist_tenant_clinic/:tenant_id/:clinic_id",
   UPDATE_DENTIST_TENANT: "/updatedentist/:dentist_id/:tenant_id",
   DELETE_DENTIST_TENANT: "/deletedentist/:dentist_id/:tenant_id",
 
@@ -50,21 +51,25 @@ module.exports = {
     "/getallappointments/monthlysummary/:tenant_id/:clinic_id/:dentist_id",
   GETALL_PATIENT_VISITEDETAILS:
     "/getallvisitdetails/:tenant_id/:clinic_id/:patient_id",
-    UPDATE_APPOINTMENT_RATING_FEEDBACK:
+  UPDATE_APPOINTMENT_RATING_FEEDBACK:
     "/submitfeedback/:tenant_id/:appointment_id",
   UPDATE_APPOINTMENT_STATUS:
     "/updateappointment_status/:appointment_id/:tenant_id/:clinic_id/",
   // UPDATE_APPOINTMENT_SCHEDULE_CANCELED:
   //   "/updateappointment_cancelstatus/:appointment_id/:tenant_id/:clinic_id/",
-  GETALL_APPOINTMENT_ROOMID_PATIENT:"/getallroomidpatient/:tenant_id/:clinic_id/:patient_id",
-  GETALL_APPOINTMENT_ROOMID_DENTIST:"/getallroomiddentist/:tenant_id/:clinic_id/:dentist_id",
+  GETALL_APPOINTMENT_ROOMID_PATIENT:
+    "/getallroomidpatient/:tenant_id/:clinic_id/:patient_id",
+  GETALL_APPOINTMENT_ROOMID_DENTIST:
+    "/getallroomiddentist/:tenant_id/:clinic_id/:dentist_id",
 
   ADD_TREATMENT: "/addtreatment",
   GETALL_TREATMENT_TENANT: "/getalltreatments/:tenant_id",
   GETALL_TREATMENT_TENANT_CLIENT_APPOINTEMENT:
     "/getalltreatments/:tenant_id/:clinic_id/:appointment_id",
-  GETALL_TREATMENT_TENANT_DENTIST: "/getalltreatments_dentistid/:tenant_id/:dentist_id",
-  GETALL_TREATMENT_TENANT_PATIENT: "/getalltreatments_patientid/:tenant_id/:patient_id",
+  GETALL_TREATMENT_TENANT_DENTIST:
+    "/getalltreatments_dentistid/:tenant_id/:dentist_id",
+  GETALL_TREATMENT_TENANT_PATIENT:
+    "/getalltreatments_patientid/:tenant_id/:patient_id",
   GETALL_TREATMENT_TENANT_CLINIC_DENTIST_APPOINTEMENT:
     "/getalltreatments/:tenant_id/:clinic_id/:dentist_id/:appointment_id",
   GET_TREATMENT_TENANT: "/gettreatment/:treatment_id/:tenant_id",
@@ -125,31 +130,38 @@ module.exports = {
 
   ADD_SUPPLIER_PRODUCTS: "/addsupplierproduct",
   GETALL_SUPPLIER_PRODUCTS_TENANT: "/getallsupplierproducts/:tenant_id",
-  GET_SUPPLIER_PRODUCTS_TENANT: "/getsupplierproduct/:supplier_product_id/:tenant_id",
-  UPDATE_SUPPLIER_PRODUCTS_TENANT: "/updatesupplierproduct/:supplier_product_id/:tenant_id",
-  DELETE_SUPPLIER_PRODUCTS_TENANT: "/deletesupplierproduct/:supplier_product_id/:tenant_id",
-
+  GET_SUPPLIER_PRODUCTS_TENANT:
+    "/getsupplierproduct/:supplier_product_id/:tenant_id",
+  UPDATE_SUPPLIER_PRODUCTS_TENANT:
+    "/updatesupplierproduct/:supplier_product_id/:tenant_id",
+  DELETE_SUPPLIER_PRODUCTS_TENANT:
+    "/deletesupplierproduct/:supplier_product_id/:tenant_id",
 
   ADD_SUPPLIER_PAYMENTS: "/addsupplierpayment",
   GETALL_SUPPLIER_PAYMENTS_TENANT: "/getallsupplierpayments/:tenant_id",
-  GET_SUPPLIER_PAYMENTS_TENANT: "/getsupplierpayment/:supplier_payment_id/:tenant_id",
-  UPDATE_SUPPLIER_PAYMENTS_TENANT: "/updatesupplierpayment/:supplier_payment_id/:tenant_id",
-  DELETE_SUPPLIER_PAYMENTS_TENANT: "/deletesupplierpayment/:supplier_payment_id/:tenant_id",
-
+  GET_SUPPLIER_PAYMENTS_TENANT:
+    "/getsupplierpayment/:supplier_payment_id/:tenant_id",
+  UPDATE_SUPPLIER_PAYMENTS_TENANT:
+    "/updatesupplierpayment/:supplier_payment_id/:tenant_id",
+  DELETE_SUPPLIER_PAYMENTS_TENANT:
+    "/deletesupplierpayment/:supplier_payment_id/:tenant_id",
 
   ADD_SUPPLIER_REVIEWS: "/addsupplierreview",
   GETALL_SUPPLIER_REVIEWS_TENANT: "/getallsupplierreviews/:tenant_id",
-  GET_SUPPLIER_REVIEWS_TENANT: "/getsupplierreview/:supplier_review_id/:tenant_id",
-  UPDATE_SUPPLIER_REVIEWS_TENANT: "/updatesupplierreview/:supplier_review_id/:tenant_id",
-  DELETE_SUPPLIER_REVIEWS_TENANT: "/deletesupplierreview/:supplier_review_id/:tenant_id",
-
+  GET_SUPPLIER_REVIEWS_TENANT:
+    "/getsupplierreview/:supplier_review_id/:tenant_id",
+  UPDATE_SUPPLIER_REVIEWS_TENANT:
+    "/updatesupplierreview/:supplier_review_id/:tenant_id",
+  DELETE_SUPPLIER_REVIEWS_TENANT:
+    "/deletesupplierreview/:supplier_review_id/:tenant_id",
 
   ADD_PURCHASE_ORDER: "/addpurchaseorder",
   GETALL_PURCHASE_ORDER_TENANT: "/getallpurchaseorders/:tenant_id",
   GET_PURCHASE_ORDER_TENANT: "/getpurchaseorder/:purchase_order_id/:tenant_id",
-  UPDATE_PURCHASE_ORDER_TENANT: "/updatepurchaseorder/:purchase_order_id/:tenant_id",
-  DELETE_PURCHASE_ORDER_TENANT: "/deletepurchaseorder/:purchase_order_id/:tenant_id",
-
+  UPDATE_PURCHASE_ORDER_TENANT:
+    "/updatepurchaseorder/:purchase_order_id/:tenant_id",
+  DELETE_PURCHASE_ORDER_TENANT:
+    "/deletepurchaseorder/:purchase_order_id/:tenant_id",
 
   ADD_RECEPTION: "/addreceptionist",
   GETALL_RECEPTION_TENANT: "/getallreceptionists/:tenant_id",
