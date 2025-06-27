@@ -50,6 +50,7 @@ const createSupplierValidation = async (details) => {
     checkIfIdExists("tenant", "tenant_id", details.tenant_id),
     checkIfIdExists("clinic", "clinic_id", details.clinic_id),
   ]);
+  console.log('createsuplliervalidation done')
 };
 
 /**

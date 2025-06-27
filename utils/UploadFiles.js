@@ -32,6 +32,12 @@ const uploadFileMiddleware = (options) => {
       const tenant_id = req.body.tenant_id || req.params.tenant_id;
       let id = 0;
       switch (folderName) {
+        case "Supplier_products":
+          id = req.params.supplier_product_id;
+          break;
+        case "Supplier":
+          id = req.params.supplier_id;
+          break;
         case "Reception":
           id = req.params.reception_id;
           break;
@@ -56,10 +62,11 @@ const uploadFileMiddleware = (options) => {
         default:
           break;
       }
+      const settings=req.query.settings || 0
+    
+     
 
-      console.log("id:",id,"settings",typeof req.query.settings)
-
-      if(req.query.settings!=1){
+      if(settings!=1){
         if (id) {
           await updateValidationFn(id, req.body, tenant_id);
         } else {
@@ -132,7 +139,7 @@ const uploadFileMiddleware = (options) => {
           uploadedFiles.awards_certifications = awards;
         }
         else if (fileField.fieldName==="treatment_images") {
-          console.log('treatment_images place')
+         
           // --- Handle dynamic treatment_image fields (no description) ---
           const treatments = [];
           let idx = 0;
@@ -164,7 +171,7 @@ const uploadFileMiddleware = (options) => {
                 Math.random() * 10000
               )}${extension}`;
               const savedPath = await saveFile(resizedImage, fieldTenantPath, fileName);
-              console.log('treatmentimage:',savedPath)
+             
         
               treatments.push(savedPath);
             } else if (existingImagePath) {
@@ -179,11 +186,12 @@ const uploadFileMiddleware = (options) => {
         }
          else {
           // --- Handle other file fields as before ---
-          console.log('else place')
+          
           const files =
             req.files?.filter(
               (file) => file.fieldname === fileField.fieldName
             ) || [];
+            
           if (files.length > 0) {
             const savedPaths = [];
             for (let i = 0; i < files.length; i++) {
@@ -222,6 +230,7 @@ const uploadFileMiddleware = (options) => {
                 savedPaths[0]?.[fileField.fieldName];
             }
             uploadedFiles[fileField.fieldName] = savedPaths;
+          
           }
         }
       }

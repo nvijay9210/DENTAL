@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
 
 const supplierController = require("../controllers/SupplierController");
 const {
@@ -13,6 +14,23 @@ const suppliervalidation = require("../validations/SupplierValidation");
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
+const { uploadFileMiddleware } = require("../utils/UploadFiles");
+// Setup multer memory storage once
+const upload = multer({ storage: multer.memoryStorage() });
+
+const supplierFileMiddleware = uploadFileMiddleware({
+  folderName: "Supplier",
+  fileFields: [
+    {
+      fieldName: "logo_url",
+      subFolder: "Photos",
+      maxSizeMB: 2,
+      multiple: false,
+    },
+  ],
+  createValidationFn: suppliervalidation.createSupplierValidation,
+  updateValidationFn: suppliervalidation.updateSupplierValidation,
+});
 
 // Create Supplier
 router.post(
@@ -23,6 +41,8 @@ router.post(
     "dentist",
     "supplier",
   ]),
+  upload.any(),
+  supplierFileMiddleware,
   supplierController.createSupplier
 );
 
@@ -59,6 +79,8 @@ router.put(
     "dentist",
     "supplier",
   ]),
+  upload.any(),
+  supplierFileMiddleware,
   supplierController.updateSupplier
 );
 
