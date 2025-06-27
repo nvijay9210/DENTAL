@@ -31,7 +31,7 @@ const appointmentRescheduleFields = {
   rescheduled_by: (val) => val,
   rescheduled_at: (val) => val,
   charge_applicable: helper.parseBoolean,
-  charge_amount: (val) => parseFloat(val) || 0.0,
+  charge_amount: (val) => val? parseFloat(val) : 0,
 };
 
 const appointmentRescheduleFieldsReverseMap = {
@@ -50,7 +50,7 @@ const appointmentRescheduleFieldsReverseMap = {
   rescheduled_by: (val) => val,
   rescheduled_at: (val) => val,
   charge_applicable: (val) => Boolean(val),
-  charge_amount: (val) => parseFloat(val) || 0.0,
+  charge_amount: (val) => val? parseFloat(val) : 0,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
