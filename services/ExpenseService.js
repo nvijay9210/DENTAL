@@ -19,7 +19,7 @@ const expenseFields = {
   expense_date: (val) => val,
   expense_category: (val) => val,
   expense_reason: (val) => val,
-  expense_amount: (val) => parseFloat(val),
+  expense_amount: (val) => val? parseFloat(val) : 0,
   mode_of_payment: (val) => val,
   receipt_number: (val) => val,
 };
@@ -31,7 +31,7 @@ const expenseFieldsReverseMap = {
     val ? formatDateOnly(val) : null,
   expense_category: (val) => val,
   expense_reason: (val) => val,
-  expense_amount: (val) => val,
+  expense_amount: (val) => val? parseFloat(val) : 0,
   mode_of_payment: (val) => val,
   receipt_number: (val) => val,
   created_by: (val) => val,
