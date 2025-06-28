@@ -141,6 +141,8 @@ module.exports = {
 
   ADD_SUPPLIER_PAYMENTS: "/addsupplierpayment",
   GETALL_SUPPLIER_PAYMENTS_TENANT: "/getallsupplierpayments/:tenant_id",
+  GET_SUPPLIER_PAYMENTS_TENANT_PURCHASEORDER:
+    "/getsupplierpaymentbypurhaseorder/:purchase_order_id/:tenant_id",
   GET_SUPPLIER_PAYMENTS_TENANT:
     "/getsupplierpayment/:supplier_payment_id/:tenant_id",
   UPDATE_SUPPLIER_PAYMENTS_TENANT:

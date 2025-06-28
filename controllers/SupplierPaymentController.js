@@ -67,6 +67,29 @@ exports.getSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (req, res, ne
     next(err);
   }
 };
+exports.getSupplierPaymentsByTenantAndPurchaseOrderId = async (req, res, next) => {
+  const { purchase_order_id, tenant_id } = req.params;
+
+  try {
+    const supplierPayments1 = await checkIfExists(
+      "purchase_orders",
+      "purchase_order_id",
+      purchase_order_id,
+      tenant_id
+    );
+
+    if (!supplierPayments1) throw new CustomError("SupplierPayments not found", 404);
+
+    // Fetch supplierPayments details
+    const supplierPayments = await supplierPaymentsService.getSupplierPaymentsByTenantIdAndSupplierPaymentsId(
+      tenant_id,
+      purchase_order_id
+    );
+    res.status(200).json(supplierPayments);
+  } catch (err) {
+    next(err);
+  }
+};
 
 /**
  * Update an existing supplierPayments

@@ -130,6 +130,30 @@ const getSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (
     );
   }
 };
+const getSupplierPaymentsByTenantAndPurchaseOrderId = async (
+  tenantId,
+  purchase_order_id
+) => {
+  try {
+    const supplier_payments =
+      await supplier_paymentsModel.getSupplierPaymentsByTenantAndPurchaseOrderId(
+        tenantId,
+        purchase_order_id
+      );
+
+    const convertedRows = helper.convertDbToFrontend(
+      supplier_payments,
+      supplier_paymentsFieldsReverseMap
+    );
+
+    return convertedRows;
+  } catch (error) {
+    throw new CustomError(
+      "Failed to get supplier_payments: " + error.message,
+      404
+    );
+  }
+};
 
 // Update SupplierPayments
 const updateSupplierPayments = async (supplier_paymentsId, data, tenant_id) => {
@@ -192,4 +216,5 @@ module.exports = {
   getSupplierPaymentsByTenantIdAndSupplierPaymentsId,
   updateSupplierPayments,
   deleteSupplierPaymentsByTenantIdAndSupplierPaymentsId,
+  getSupplierPaymentsByTenantAndPurchaseOrderId
 };
