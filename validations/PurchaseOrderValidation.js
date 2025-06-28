@@ -41,6 +41,7 @@ const createPurchaseOrderValidation = async (details) => {
   await Promise.all([
     checkIfIdExists("tenant", "tenant_id", details.tenant_id),
     checkIfIdExists("clinic", "clinic_id", details.clinic_id),
+    details.dentist_id && checkIfIdExists("dentist", "dentist_id", details.dentist_id),
     checkIfIdExists("supplier", "supplier_id", details.supplier_id),
   ]);
 };
@@ -50,6 +51,10 @@ const createPurchaseOrderValidation = async (details) => {
  */
 const updatePurchaseOrderValidation = async (purchase_order_id, details) => {
   validateInput(details, updateColumnConfig);
+
+  await Promise.all([
+    details.dentist_id && checkIfIdExists("dentist", "dentist_id", details.dentist_id)
+  ]);
 
   const exists = await checkIfExists(
     "purchase_orders",
