@@ -25,6 +25,7 @@ const supplier_reviewsFields = {
   reviewed_by: (val) => val,
 };
 const supplier_reviewsFieldsReverseMap = {
+  supplier_review_id: (val) => val,
   supplier_payment_id: (val) => val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,

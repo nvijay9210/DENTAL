@@ -27,10 +27,10 @@ const supplier_productsFields = {
   active: (val) => helper.parseBoolean(val),
 };
 const supplier_productsFieldsReverseMap = {
+  supplier_product_id: (val) => val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   supplier_id: (val) => val,
-  supplier_product_id: (val) => val,
   product_name: (val) => val,
   description: helper.safeJsonParse,
   unit: (val) => val,
