@@ -123,6 +123,7 @@ module.exports = {
   DELETE_EXPENSE_TENANT: "/deleteexpense/:expense_id/:tenant_id",
 
   ADD_SUPPLIER: "/addsupplier",
+  GETALL_SUPPLIER_TENANT_CLINIC: "/getallsuppliers/:tenant_id/:clinic_id",
   GETALL_SUPPLIER_TENANT: "/getallsuppliers/:tenant_id",
   GET_SUPPLIER_TENANT: "/getsupplier/:supplier_id/:tenant_id",
   UPDATE_SUPPLIER_TENANT: "/updatesupplier/:supplier_id/:tenant_id",

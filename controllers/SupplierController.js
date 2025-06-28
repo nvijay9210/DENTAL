@@ -25,6 +25,22 @@ exports.createSupplier = async (req, res, next) => {
 /**
  * Get all suppliers by tenant ID with pagination
  */
+exports.getAllSuppliersByTenantIdAndClinicId = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  try {
+    const suppliers = await supplierService.getAllSuppliersByTenantIdAndClinicId(
+      tenant_id,
+      clinic_id,
+      page,
+      limit
+    );
+    res.status(200).json(suppliers);
+  } catch (err) {
+    next(err);
+  }
+};
 exports.getAllSuppliersByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
   const { page, limit } = req.query;
