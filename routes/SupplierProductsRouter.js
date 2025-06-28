@@ -9,6 +9,7 @@ const {
   GET_SUPPLIER_PRODUCTS_TENANT,
   UPDATE_SUPPLIER_PRODUCTS_TENANT,
   DELETE_SUPPLIER_PRODUCTS_TENANT,
+  GETALL_SUPPLIER_PRODUCTS_TENANT_CLINIC,
 } = require("./RouterPath");
 const suppliervalidation = require("../validations/SupplierProductsValidation");
 const {
@@ -58,6 +59,16 @@ router.get(
     "supplier",
   ]),
   supplierController.getAllSupplierProductssByTenantId
+);
+router.get(
+  GETALL_SUPPLIER_PRODUCTS_TENANT_CLINIC,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "supplier",
+  ]),
+  supplierController.getAllSupplierProductssByTenantIdAndSupplierId
 );
 
 // Get Single SupplierProducts by Tenant ID & SupplierProducts ID

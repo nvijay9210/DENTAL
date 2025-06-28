@@ -1,5 +1,7 @@
+const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
 const assetService = require("../services/AssetService");
+const { isValidDate } = require("../utils/DateUtils");
 const assetValidation = require("../validations/AssetValidation");
 const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 
@@ -102,16 +104,18 @@ exports.getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   next
 ) => {
   const { tenant_id, clinic_id } = req.params;
-  const {start_date, end_date } = req.query;
+  const {start_date, end_date,limit,page } = req.query;
   try {
-    if (!(isValidDate(start_date) && isValidDate(end_date)))
-      throw new CustomError("Startdate or enddate format invalid", 400);
+    // if (!(isValidDate(start_date) && isValidDate(end_date)))
+    //   throw new CustomError("Startdate or enddate format invalid", 400);
     const assets =
       await assetService.getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate(
         tenant_id,
         clinic_id,
         start_date,
-        end_date
+        end_date,
+        page,
+        limit
       );
       res.status(200).json(assets);
   } catch (err) {

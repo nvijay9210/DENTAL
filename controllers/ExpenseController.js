@@ -50,7 +50,7 @@ exports.getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   next
 ) => {
   const { tenant_id, clinic_id } = req.params;
-  const { start_date, end_date } = req.query;
+  const { start_date, end_date, limit, page } = req.query;
   try {
     if (!(isValidDate(start_date) && isValidDate(end_date)))
       throw new CustomError("Startdate or enddate format invalid", 400);
@@ -59,7 +59,9 @@ exports.getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
         tenant_id,
         clinic_id,
         start_date,
-        end_date
+        end_date,
+        page,
+        limit
       );
     res.status(200).json(expenses);
   } catch (err) {
@@ -74,7 +76,6 @@ exports.getExpenseByTenantIdAndExpenseId = async (req, res, next) => {
   const { expense_id, tenant_id } = req.params;
 
   try {
-
     // Fetch expense details
     const expense = await expenseService.getExpenseByTenantIdAndExpenseId(
       tenant_id,

@@ -44,6 +44,7 @@ const supplierFields = {
   country:(val)=>val
 };
 const supplierFieldsReverseMap = {
+  supplier_id:(val)=>val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   keycloak_id: (val) => val,

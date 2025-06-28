@@ -453,6 +453,7 @@ CREATE TABLE IF NOT EXISTS supplier_products (
   tenant_id INT(6) NOT NULL,
   clinic_id INT(11) NOT NULL,
   supplier_id INT(11) NOT NULL,
+  supplier_purchase_id INT(11) NOT NULL,
   order_number VARCHAR(100) DEFAULT NULL,
   order_date DATE DEFAULT NULL,
   product_name VARCHAR(100) DEFAULT NULL,
@@ -467,6 +468,7 @@ CREATE TABLE IF NOT EXISTS supplier_products (
 
   PRIMARY KEY (purchase_order_id),
   KEY fk_purchase_order_supplier (supplier_id),
+  KEY fk_purchase_order_supplier_product (supplier_product_id),
   KEY fk_purchase_order_tenant (tenant_id),
   KEY fk_purchase_order_clinic (clinic_id),
 
@@ -476,6 +478,8 @@ CREATE TABLE IF NOT EXISTS supplier_products (
     REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_purchase_order_clinic FOREIGN KEY (clinic_id)
     REFERENCES clinic (clinic_id) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT fk_purchase_order_supplier_product FOREIGN KEY (supplier_product_id)
+    REFERENCES supplier_products (supplier_product_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
   addSupplierPayments: `CREATE TABLE IF NOT EXISTS supplier_payments (
@@ -483,6 +487,7 @@ CREATE TABLE IF NOT EXISTS supplier_products (
   tenant_id INT(6) NOT NULL,
   clinic_id INT(11) NOT NULL,
   supplier_id INT(11) NOT NULL,
+  purchase_order_id INT(11) NOT NULL,
   amount DECIMAL(12, 2) NOT NULL,
   mode_of_payment VARCHAR(50) DEFAULT NULL,
   receipt_number VARCHAR(100) DEFAULT NULL,
@@ -498,10 +503,13 @@ CREATE TABLE IF NOT EXISTS supplier_products (
 
   PRIMARY KEY (supplier_payment_id),
   KEY fk_supplier_payment_supplier (supplier_id),
+  KEY fk_supplier_payment_purchase_order (purchase_order_id),
   KEY fk_supplier_payment_tenant (tenant_id),
   KEY fk_supplier_payment_clinic (clinic_id),
 
-  CONSTRAINT fk_supplier_payment_supplier FOREIGN KEY (supplier_id)
+  CONSTRAINT fk_supplier_payment_supplier FOREIGN KEY (purchase_order_id)
+    REFERENCES purchase_orders (purchase_order_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_supplier_payment_purchase_order FOREIGN KEY (supplier_id)
     REFERENCES supplier (supplier_id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_supplier_payment_tenant FOREIGN KEY (tenant_id)
     REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -577,7 +585,7 @@ CREATE TABLE IF NOT EXISTS reminder (
 `,
   addAppointmentReschedules: `
 CREATE TABLE IF NOT EXISTS appointment_reschedules (
-  resheduled_id int(11) NOT NULL AUTO_INCREMENT,
+  rescheduled_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
   clinic_id int(11) NOT NULL,
   dentist_id int(11) NOT NULL,

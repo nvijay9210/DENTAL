@@ -1,7 +1,9 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
 const supplierProductsService = require("../services/SupplierProductsService");
-const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
+const {
+  validateTenantIdAndPageAndLimit,
+} = require("../validations/CommonValidations");
 const supplierProductsValidation = require("../validations/SupplierProductsValidation");
 
 /**
@@ -30,11 +32,35 @@ exports.getAllSupplierProductssByTenantId = async (req, res, next) => {
   const { page, limit } = req.query;
   await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
-    const supplierProductss = await supplierProductsService.getAllSupplierProductssByTenantId(
-      tenant_id,
-      page,
-      limit
-    );
+    const supplierProductss =
+      await supplierProductsService.getAllSupplierProductssByTenantId(
+        tenant_id,
+        page,
+        limit
+      );
+    res.status(200).json(supplierProductss);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllSupplierProductssByTenantIdAndSupplierId = async (
+  req,
+  res,
+  next
+) => {
+  const { tenant_id, supplier_id } = req.params;
+  const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  try {
+    await checkIfExists("supplier", "supplier_id", supplier_id);
+    const supplierProductss =
+      await supplierProductsService.getAllSupplierProductssByTenantIdAndSupplierId(
+        tenant_id,
+        supplier_id,
+        page,
+        limit
+      );
     res.status(200).json(supplierProductss);
   } catch (err) {
     next(err);
@@ -44,7 +70,11 @@ exports.getAllSupplierProductssByTenantId = async (req, res, next) => {
 /**
  * Get supplierProducts by tenant and supplierProducts ID
  */
-exports.getSupplierProductsByTenantIdAndSupplierProductsId = async (req, res, next) => {
+exports.getSupplierProductsByTenantIdAndSupplierProductsId = async (
+  req,
+  res,
+  next
+) => {
   const { supplier_product_id, tenant_id } = req.params;
 
   try {
@@ -55,13 +85,15 @@ exports.getSupplierProductsByTenantIdAndSupplierProductsId = async (req, res, ne
       tenant_id
     );
 
-    if (!supplierProducts1) throw new CustomError("SupplierProducts not found", 404);
+    if (!supplierProducts1)
+      throw new CustomError("SupplierProducts not found", 404);
 
     // Fetch supplierProducts details
-    const supplierProducts = await supplierProductsService.getSupplierProductsByTenantIdAndSupplierProductsId(
-      tenant_id,
-      supplier_product_id
-    );
+    const supplierProducts =
+      await supplierProductsService.getSupplierProductsByTenantIdAndSupplierProductsId(
+        tenant_id,
+        supplier_product_id
+      );
     res.status(200).json(supplierProducts);
   } catch (err) {
     next(err);
@@ -77,10 +109,17 @@ exports.updateSupplierProducts = async (req, res, next) => {
 
   try {
     // Validate update input
-    await supplierProductsValidation.updateSupplierProductsValidation(supplier_product_id, details);
+    await supplierProductsValidation.updateSupplierProductsValidation(
+      supplier_product_id,
+      details
+    );
 
     // Update the supplierProducts
-    await supplierProductsService.updateSupplierProducts(supplier_product_id, details, tenant_id);
+    await supplierProductsService.updateSupplierProducts(
+      supplier_product_id,
+      details,
+      tenant_id
+    );
     res.status(200).json({ message: "SupplierProducts updated successfully" });
   } catch (err) {
     next(err);
@@ -90,7 +129,11 @@ exports.updateSupplierProducts = async (req, res, next) => {
 /**
  * Delete a supplierProducts by ID and tenant ID
  */
-exports.deleteSupplierProductsByTenantIdAndSupplierProductsId = async (req, res, next) => {
+exports.deleteSupplierProductsByTenantIdAndSupplierProductsId = async (
+  req,
+  res,
+  next
+) => {
   const { supplier_product_id, tenant_id } = req.params;
 
   try {

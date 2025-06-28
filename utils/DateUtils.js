@@ -2,7 +2,7 @@ const { CustomError } = require("../middlewares/CustomeError");
 const { DateTime } = require("luxon");
 
 function formatDateOnly(isoString) {
-  console.log(isoString);
+
   if (!isoString) return null;
 
   const date = new Date(isoString);
@@ -109,6 +109,24 @@ function convertUTCToLocal(utcISOString) {
   return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
 }
 
+const dayjs = require('dayjs');
+
+//Check UserInputDatetime < now()
+
+// const appointmentDate = "2025-04-06";
+// const startTime = "09:00";
+
+function checkPreviousDatetimeOrNot(date, time) {
+  const inputDateTime = dayjs(`${date} ${time}`);
+  const now = dayjs();
+
+  if (!inputDateTime.isValid()) {
+    throw new Error("Invalid date or time format");
+  }
+
+  return inputDateTime.isSameOrAfter(now, 'minute');
+}
+
 
 
 module.exports = {
@@ -119,4 +137,5 @@ module.exports = {
   compareDateTime,
   isEarlier,
   convertUTCToLocal,
+  checkPreviousDatetimeOrNot
 };

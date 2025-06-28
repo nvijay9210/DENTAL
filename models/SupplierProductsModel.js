@@ -29,6 +29,27 @@ const getAllSupplierProductssByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
+const getAllSupplierProductssByTenantIdAndSupplierId = async (tenantId,supplierId, limit, offset) => {
+  const query1 = `SELECT * FROM supplier_products  WHERE tenant_id = ? AND supplier_id = ? limit ? offset ?`;
+  const query2 = `SELECT count(*) as total FROM supplier_products  WHERE tenant_id = ? AND supplier_id = ?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      supplierId,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [tenantId, supplierId]);
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
 // Get supplier_product by tenant ID and supplier_product ID
 const getSupplierProductsByTenantAndSupplierProductsId = async (tenant_id, supplier_product_id) => {
   try {
@@ -81,4 +102,5 @@ module.exports = {
   getSupplierProductsByTenantAndSupplierProductsId,
   updateSupplierProducts,
   deleteSupplierProductsByTenantAndSupplierProductsId,
+  getAllSupplierProductssByTenantIdAndSupplierId
 };

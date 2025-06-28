@@ -92,6 +92,32 @@ const getAllSupplierProductssByTenantId = async (tenantId, page = 1, limit = 10)
   }
 };
 
+const getAllSupplierProductssByTenantIdAndSupplierId = async (tenantId,supplierId, page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `supplier_products:${tenantId}:page:${page}:limit:${limit}`;
+
+  try {
+    const supplier_productss = await getOrSetCache(cacheKey, async () => {
+      const result = await supplier_productsModel.getAllSupplierProductssByTenantIdAndSupplierId(
+        tenantId,
+        supplierId,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+
+    const convertedRows = supplier_productss.data.map((supplier_products) =>
+      helper.convertDbToFrontend(supplier_products, supplier_productsFieldsReverseMap)
+    );
+
+    return { data: convertedRows, total: supplier_productss.total };
+  } catch (err) {
+    console.error("Database error while fetching supplier_productss:", err);
+    throw new CustomError("Failed to fetch supplier_productss", 404);
+  }
+};
+
 // Get SupplierProducts by ID & Tenant
 const getSupplierProductsByTenantIdAndSupplierProductsId = async (tenantId, supplier_productsId) => {
   try {
@@ -163,4 +189,5 @@ module.exports = {
   getSupplierProductsByTenantIdAndSupplierProductsId,
   updateSupplierProducts,
   deleteSupplierProductsByTenantIdAndSupplierProductsId,
+  getAllSupplierProductssByTenantIdAndSupplierId
 };

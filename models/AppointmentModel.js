@@ -2,7 +2,7 @@ const pool = require("../config/db");
 const helper = require("../utils/Helpers");
 const record = require("../query/Records");
 
-const { v4: uuidv4 } = require("uuid");
+const { v4: uuidv4, stringify } = require("uuid");
 
 // Assuming Helper method for column/value length match
 const validateColumnValueLengthMatch = (columns, values) => {
@@ -74,7 +74,7 @@ WHERE
       offset,
     ]);
     const [count] = await conn.query(query2, [tenantId, clinicId]);
-    
+
     return { data: rows, total: count[0].total };
   } catch (error) {
     console.log(error);
@@ -172,7 +172,7 @@ WHERE
       limit,
       offset,
     ]);
-    
+
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.log(error);
@@ -280,7 +280,7 @@ WHERE
       offset,
     ]);
     const [counts] = await conn.query(query2, [tenantId, dentistId]);
-  
+
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.log(error);
@@ -322,7 +322,7 @@ WHERE
       offset,
     ]);
     const [counts] = await conn.query(query2, [tenantId, patient_id]);
-   
+
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.log(error);
@@ -494,7 +494,7 @@ WHERE app.tenant_id = ?
       clinic_id,
       dentist_id,
     ]);
-    
+
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.log(error);
@@ -548,7 +548,7 @@ WHERE app.tenant_id = ?
       offset,
     ]);
     const [counts] = await conn.query(query2, [tenantId, patientId]);
-    
+
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.log(error);
@@ -581,7 +581,12 @@ WHERE
 `;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, clinic_id, dentist_id,null]);
+    const [rows] = await conn.query(query, [
+      tenantId,
+      clinic_id,
+      dentist_id,
+      null,
+    ]);
 
     return rows;
   } catch (error) {
@@ -751,9 +756,13 @@ const getDentistIdByTenantIdAndAppointmentId = async (
   }
 };
 
-
-const updateAppoinmentFeedback = async (appointment_id,tenant_id,details,status) => {
-  const { doctor_rating,feedback } = details;
+const updateAppoinmentFeedback = async (
+  appointment_id,
+  tenant_id,
+  details,
+  status
+) => {
+  const { doctor_rating, feedback } = details;
 
   let query = `
     UPDATE appointment 
@@ -762,7 +771,13 @@ const updateAppoinmentFeedback = async (appointment_id,tenant_id,details,status)
       AND status = ?
   `;
 
-  let queryParams = [doctor_rating,feedback,appointment_id,tenant_id,status];
+  let queryParams = [
+    doctor_rating,
+    feedback,
+    appointment_id,
+    tenant_id,
+    status,
+  ];
 
   const conn = await pool.getConnection();
   try {
@@ -776,7 +791,12 @@ const updateAppoinmentFeedback = async (appointment_id,tenant_id,details,status)
   }
 };
 
-const updateAppoinmentStatus = async (appointment_id, tenantId, clinicId, details) => {
+const updateAppoinmentStatus = async (
+  appointment_id,
+  tenantId,
+  clinicId,
+  details
+) => {
   const { status, cancelled_by, cancellation_reason } = details;
 
   let query = `
@@ -847,38 +867,53 @@ const updateAppoinmentStatusCancelledAndReschedule = async (
 };
 
 const updateRoomIdBeforeAppointment = async () => {
+  const conn = await pool.getConnection();
   try {
-    const [appointments] = await pool.execute(`
-      SELECT appointment_id
-FROM appointment
-WHERE 
-  appointment_date = CURDATE()
-  AND start_time BETWEEN 
-    DATE_FORMAT(CONVERT_TZ(NOW() + INTERVAL 1 MINUTE, '+05:30', '+00:00'), '%H:%i:00')
-    AND
-    DATE_FORMAT(CONVERT_TZ(NOW() + INTERVAL 1 MINUTE, '+05:30', '+00:00'), '%H:%i:59')
-  AND is_virtual = 1
-  AND room_id = '00000000-0000-0000-0000-000000000000';
-
+    const [appointments] = await conn.execute(`
+      SELECT appointment_id, appointment_date, start_time
+      FROM appointment
+      WHERE 
+        appointment_date = CURDATE()
+        AND is_virtual = 1
+        AND room_id = '00000000-0000-0000-0000-000000000000';
     `);
 
-    const updatePromises = appointments.map(({ appointment_id }) => {
-      const roomId = uuidv4(); // or crypto.randomUUID() for Node 19+
-      return pool.execute(
-        `
-        UPDATE appointment SET room_id = ? WHERE appointment_id = ?
-      `,
-        [roomId, appointment_id]
+    const now = Date.now();
+    const fiveMinutesLater = now + 5 * 60 * 1000;
+
+    const toUpdate = appointments.filter(({ appointment_date, start_time }) => {
+      const dateStr = appointment_date.toISOString().split("T")[0]; // "YYYY-MM-DD"
+      const [year, month, day] = dateStr.split("-").map(Number);
+      const [hour, minute, second] = start_time.split(":").map(Number);
+
+      const dateTime = new Date(year, month - 1, day, hour, minute, second);
+      const timestamp = dateTime.getTime();
+
+      return timestamp >= now && timestamp <= fiveMinutesLater;
+    });
+
+    if (toUpdate.length === 0) {
+      console.log("⏳ No appointments to update.");
+      return;
+    }
+
+    const updatePromises = toUpdate.map(({ appointment_id }) => {
+      const newRoomId = uuidv4();
+      return conn.execute(
+        `UPDATE appointment SET room_id = ? WHERE appointment_id = ?`,
+        [newRoomId, appointment_id]
       );
     });
 
     await Promise.all(updatePromises);
-
-    console.log(`Updated ${appointments.length} room_ids`);
+    console.log(`✅ Updated ${toUpdate.length} room_id(s)`);
   } catch (err) {
-    console.error("Error updating room_id:", err);
+    console.error("❌ Error:", err);
+  } finally {
+    conn.release();
   }
 };
+
 
 module.exports = {
   createAppointment,
@@ -904,5 +939,5 @@ module.exports = {
   getAllRoomIdByTenantIdAndClinicIdAndDentistId,
   getAllRoomIdByTenantIdAndClinicIdAndPatientId,
   updateAppoinmentFeedback,
-  getDentistIdByTenantIdAndAppointmentId
+  getDentistIdByTenantIdAndAppointmentId,
 };
