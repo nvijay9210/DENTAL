@@ -28,11 +28,11 @@ const purchase_orderFields = {
   delivery_date: (val) => formatDateOnly(val),
 };
 const purchase_orderFieldsReverseMap = {
+  purchase_order_id: (val) => val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   dentist_id: (val) => val,
   supplier_id: (val) => val,
-  purchase_order_id: (val) => val,
   product_name: (val) => val,
   order_number: (val) => val,
   order_date: (val) => formatDateOnly(val),
