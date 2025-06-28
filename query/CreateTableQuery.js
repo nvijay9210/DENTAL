@@ -43,7 +43,7 @@ const createTableQuery = {
   CONSTRAINT fk_appointment_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
   CONSTRAINT fk_appointment_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
   CONSTRAINT fk_appointment_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id) ON UPDATE CASCADE,
-  CONSTRAINT fk_appointment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT fk_appointment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id)  ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;`,
 
   addAsset: `CREATE TABLE IF NOT EXISTS asset (
@@ -112,7 +112,7 @@ const createTableQuery = {
   PRIMARY KEY (clinic_id),
   KEY fk_tenant (tenant_id),
   KEY idx_phone_number (phone_number),
-  CONSTRAINT fk_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT fk_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id)  ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 `,
 
@@ -170,8 +170,8 @@ const createTableQuery = {
   KEY idx_tenant_id (tenant_id),
   KEY idx_phone_number (phone_number),
   KEY clinic_id (clinic_id),
-  CONSTRAINT fk_dentist_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT fk_dentist_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT fk_dentist_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id)  ON UPDATE CASCADE,
+  CONSTRAINT fk_dentist_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id)  ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 `,
 
@@ -219,7 +219,7 @@ const createTableQuery = {
   KEY fk_patient_tenant (tenant_id),
   KEY fk_patient_dentist (dentist_preference),
   CONSTRAINT fk_patient_dentist FOREIGN KEY (dentist_preference) REFERENCES dentist (dentist_id) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT fk_patient_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT fk_patient_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id)  ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
 
@@ -257,7 +257,7 @@ const createTableQuery = {
   CONSTRAINT fk_prescription_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
   CONSTRAINT fk_prescription_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
   CONSTRAINT fk_prescription_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id) ON UPDATE CASCADE,
-  CONSTRAINT fk_prescription_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_prescription_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id)  ON UPDATE CASCADE,
   CONSTRAINT fk_prescription_treatment FOREIGN KEY (treatment_id) REFERENCES treatment (treatment_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
@@ -287,7 +287,7 @@ CREATE TABLE IF NOT EXISTS statustypesub (
   updated_time timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
   PRIMARY KEY (status_type_sub_id),
   KEY status_type_id (status_type_id),
-  CONSTRAINT statustypesub_ibfk_1 FOREIGN KEY (status_type_id) REFERENCES statustype (status_type_id) ON DELETE CASCADE
+  CONSTRAINT statustypesub_ibfk_1 FOREIGN KEY (status_type_id) REFERENCES statustype (status_type_id) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
   addTenant: `
@@ -344,7 +344,7 @@ CREATE TABLE IF NOT EXISTS tenant (
   CONSTRAINT fk_treatment_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
   CONSTRAINT fk_treatment_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
   CONSTRAINT fk_treatment_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id) ON UPDATE CASCADE,
-  CONSTRAINT fk_treatment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT fk_treatment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id)  ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
   addExpense: `
@@ -422,6 +422,7 @@ CREATE TABLE IF NOT EXISTS supplier_products (
   clinic_id INT(11) NOT NULL,
   supplier_id INT(11) NOT NULL,
   product_name VARCHAR(255) DEFAULT NULL,
+  image_url VARCHAR(255) DEFAULT NULL,
   description TEXT DEFAULT NULL,
   unit_price DECIMAL(15, 2) DEFAULT NULL,
   unit VARCHAR(50) DEFAULT NULL,
@@ -440,11 +441,11 @@ CREATE TABLE IF NOT EXISTS supplier_products (
   KEY fk_supplier_product_clinic (clinic_id),
 
   CONSTRAINT fk_supplier_product_supplier FOREIGN KEY (supplier_id)
-    REFERENCES supplier (supplier_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    REFERENCES supplier (supplier_id)  ON UPDATE CASCADE,
   CONSTRAINT fk_supplier_product_tenant FOREIGN KEY (tenant_id)
-    REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    REFERENCES tenant (tenant_id)  ON UPDATE CASCADE,
   CONSTRAINT fk_supplier_product_clinic FOREIGN KEY (clinic_id)
-    REFERENCES clinic (clinic_id) ON DELETE CASCADE ON UPDATE CASCADE
+    REFERENCES clinic (clinic_id)  ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 `,
@@ -452,8 +453,9 @@ CREATE TABLE IF NOT EXISTS supplier_products (
   purchase_order_id INT(11) NOT NULL AUTO_INCREMENT,
   tenant_id INT(6) NOT NULL,
   clinic_id INT(11) NOT NULL,
+  dentist_id INT(11) NULL,
   supplier_id INT(11) NOT NULL,
-  supplier_purchase_id INT(11) NOT NULL,
+  supplier_product_id INT(11) NOT NULL,
   order_number VARCHAR(100) DEFAULT NULL,
   order_date DATE DEFAULT NULL,
   product_name VARCHAR(100) DEFAULT NULL,
@@ -471,15 +473,18 @@ CREATE TABLE IF NOT EXISTS supplier_products (
   KEY fk_purchase_order_supplier_product (supplier_product_id),
   KEY fk_purchase_order_tenant (tenant_id),
   KEY fk_purchase_order_clinic (clinic_id),
+  KEY fk_purchase_order_dentist (dentist_id),
 
   CONSTRAINT fk_purchase_order_supplier FOREIGN KEY (supplier_id)
-    REFERENCES supplier (supplier_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    REFERENCES supplier (supplier_id)  ON UPDATE CASCADE,
   CONSTRAINT fk_purchase_order_tenant FOREIGN KEY (tenant_id)
-    REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    REFERENCES tenant (tenant_id)  ON UPDATE CASCADE,
   CONSTRAINT fk_purchase_order_clinic FOREIGN KEY (clinic_id)
-    REFERENCES clinic (clinic_id) ON DELETE CASCADE ON UPDATE CASCADE
+    REFERENCES clinic (clinic_id)  ON UPDATE CASCADE,
+  CONSTRAINT fk_purchase_order_dentist FOREIGN KEY (dentist_id)
+    REFERENCES dentist (dentist_id)  ON UPDATE CASCADE,
   CONSTRAINT fk_purchase_order_supplier_product FOREIGN KEY (supplier_product_id)
-    REFERENCES supplier_products (supplier_product_id) ON DELETE CASCADE ON UPDATE CASCADE
+    REFERENCES supplier_products (supplier_product_id)  ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
   addSupplierPayments: `CREATE TABLE IF NOT EXISTS supplier_payments (
@@ -508,13 +513,13 @@ CREATE TABLE IF NOT EXISTS supplier_products (
   KEY fk_supplier_payment_clinic (clinic_id),
 
   CONSTRAINT fk_supplier_payment_supplier FOREIGN KEY (purchase_order_id)
-    REFERENCES purchase_orders (purchase_order_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    REFERENCES purchase_orders (purchase_order_id)  ON UPDATE CASCADE,
   CONSTRAINT fk_supplier_payment_purchase_order FOREIGN KEY (supplier_id)
-    REFERENCES supplier (supplier_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    REFERENCES supplier (supplier_id)  ON UPDATE CASCADE,
   CONSTRAINT fk_supplier_payment_tenant FOREIGN KEY (tenant_id)
-    REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    REFERENCES tenant (tenant_id)  ON UPDATE CASCADE,
   CONSTRAINT fk_supplier_payment_clinic FOREIGN KEY (clinic_id)
-    REFERENCES clinic (clinic_id) ON DELETE CASCADE ON UPDATE CASCADE
+    REFERENCES clinic (clinic_id)  ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
   addSupplierReview: `CREATE TABLE IF NOT EXISTS supplier_reviews (
@@ -522,6 +527,7 @@ CREATE TABLE IF NOT EXISTS supplier_products (
   tenant_id INT(6) NOT NULL,
   clinic_id INT(11) NOT NULL,
   supplier_id INT(11) NOT NULL,
+  purchase_order_id INT(11) NOT NULL,
   rating_quality INT(1) CHECK (rating_quality BETWEEN 1 AND 5),
   rating_delivery INT(1) CHECK (rating_delivery BETWEEN 1 AND 5),
   rating_communication INT(1) CHECK (rating_communication BETWEEN 1 AND 5),
@@ -536,13 +542,16 @@ CREATE TABLE IF NOT EXISTS supplier_products (
   KEY fk_supplier_review_supplier (supplier_id),
   KEY fk_supplier_review_tenant (tenant_id),
   KEY fk_supplier_review_clinic (clinic_id),
+  KEY fk_supplier_review_purchase_order (purchase_order_id),
 
   CONSTRAINT fk_supplier_review_supplier FOREIGN KEY (supplier_id)
-    REFERENCES supplier (supplier_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    REFERENCES supplier (supplier_id)  ON UPDATE CASCADE,
   CONSTRAINT fk_supplier_review_tenant FOREIGN KEY (tenant_id)
-    REFERENCES tenant (tenant_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    REFERENCES tenant (tenant_id)  ON UPDATE CASCADE,
   CONSTRAINT fk_supplier_review_clinic FOREIGN KEY (clinic_id)
-    REFERENCES clinic (clinic_id) ON DELETE CASCADE ON UPDATE CASCADE
+    REFERENCES clinic (clinic_id)  ON UPDATE CASCADE,
+  CONSTRAINT fk_supplier_review_purchase_order FOREIGN KEY (purchase_order_id)
+    REFERENCES purchase_orders (purchase_order_id)  ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
   addReminder: `
