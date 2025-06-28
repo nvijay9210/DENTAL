@@ -130,6 +130,7 @@ module.exports = {
 
   ADD_SUPPLIER_PRODUCTS: "/addsupplierproduct",
   GETALL_SUPPLIER_PRODUCTS_TENANT: "/getallsupplierproducts/:tenant_id",
+  GETALL_SUPPLIER_PRODUCTS_TENANT_CLINIC: "/getallsupplierproducts/:tenant_id/:clinic_id",
   GET_SUPPLIER_PRODUCTS_TENANT:
     "/getsupplierproduct/:supplier_product_id/:tenant_id",
   UPDATE_SUPPLIER_PRODUCTS_TENANT:

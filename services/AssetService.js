@@ -159,10 +159,12 @@ const getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   tenantId,
   clinicId,
   startDate,
-  endDate
+  endDate,
+  page=1,
+  limit=10
 ) => {
   const cacheKey = `asset:datewise:${tenantId}`;
-
+  const offset = (page - 1) * limit;
   try {
     const assets = await getOrSetCache(cacheKey, async () => {
       const result =
@@ -170,7 +172,9 @@ const getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (
           tenantId,
           clinicId,
           startDate,
-          endDate
+          endDate,
+          parseInt(offset),
+          parseInt(limit)
         );
       return result;
     });

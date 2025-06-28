@@ -1,6 +1,7 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { validateInput } = require("./InputValidation");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
+const { checkPreviousDatetimeOrNot } = require("../utils/DateUtils");
 
 const reminderPingColumnConfig = [
     { columnname: "tenant_id", type: "int", size: 6, null: false },
@@ -41,6 +42,9 @@ const createAppointmentReschedulesValidation = async (details) => {
   await Promise.all([
     checkIfIdExists("tenant", "tenant_id", details.tenant_id),
   ]);
+  if(!checkPreviousDatetimeOrNot(details.new_date,details.new_start_time)){
+    throw new CustomError("AppointmentReschedule DateTime Expired",400);
+  }
 
   await checkIfIdExists(
     "appointment",

@@ -74,12 +74,14 @@ const deleteExpenseByTenantAndExpenseId = async (tenant_id, expense_id) => {
   }
 };
 
-const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (tenantId, clinicId,startDate,endDate) => {
-  const query = `SELECT * FROM expense WHERE tenant_id = ? AND clinic_id = ? AND expense_date between ? AND ?`;
+const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (tenantId, clinicId,startDate,endDate,limit,offset) => {
+  const query1 = `SELECT * FROM expense WHERE tenant_id = ? AND clinic_id = ? AND expense_date between ? AND ? limit ? offset ?`;
+  const query2 = `SELECT count(*) as total FROM expense d WHERE tenant_id = ? AND clinic_id = ? AND expense_date between ? AND ?`;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tenantId, clinicId,startDate,endDate]);
-    return rows;
+    const [rows] = await conn.query(query1, [tenantId, clinicId,startDate,endDate,limit,offset]);
+    const [counts] = await conn.query(query2, [tenantId, clinicId,startDate,endDate]);
+    return { data: rows, total: counts[0].total };
   } catch (error) {
     console.error(error);
     throw new Error("Database Operation Failed");

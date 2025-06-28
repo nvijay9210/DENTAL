@@ -9,6 +9,7 @@ const {
 } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
+const { checkPreviousDatetimeOrNot } = require("../utils/DateUtils");
 
 const appoinmentColumnConfig = [
   { columnname: "patient_id", type: "int", size: 11, null: false },
@@ -103,6 +104,9 @@ const createAppointmentValidation = async (details) => {
   await checkIfIdExists("clinic", "clinic_id", details.clinic_id);
   await checkIfIdExists("dentist", "dentist_id", details.dentist_id);
   await checkIfIdExists("patient", "patient_id", details.patient_id);
+  if(!checkPreviousDatetimeOrNot(details.appointment_date,details.start_time)){
+    throw new CustomError("Appointment DateTime Expired",400);
+  }
   const appointment =
     await appointmentModel.checkAppointmentExistsByStartTimeAndEndTimeAndDate(
       details

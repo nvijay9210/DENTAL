@@ -35,7 +35,7 @@ const appointmentRescheduleFields = {
 };
 
 const appointmentRescheduleFieldsReverseMap = {
-  reschedule_id: (val) => val,
+  rescheduled_id: (val) => val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   dentist_id: (val) => val,
@@ -67,16 +67,15 @@ const createAppointmentReschedules = async (details) => {
 
     const appointment=await appointmentService.getAppointmentByTenantIdAndAppointmentId(details.tenant_id,details.original_appointment_id)
 
-    await updateAppoinmentStatusCancelledAndReschedule(details.appointment_id,details.tenant_id,details.clinic_id,details.rescheduled_by,details.reason)
+    await updateAppoinmentStatusCancelledAndReschedule(details.original_appointment_id,details.tenant_id,details.clinic_id,details.rescheduled_by,details.reason)
 
     await compareDateTime(appointment.appointment_date,appointment.start_time,details.new_date,details.new_start_time)
 
-
-    
     appointment.appointment_date=details.new_date,
     appointment.start_time=details.new_start_time,
     appointment.end_time=details.new_end_time || '00:00:00',//If new add
     appointment.rescheduled_from=appointment.appointment_id
+    appointment.status='pending'
 
 
     await createAppointmentValidation(appointment)
@@ -129,9 +128,9 @@ const getAllAppointmentReschedulessByTenantId = async (
     });
 
     const convertedRows = appointmentReschedules.data.map(
-      (appointmentReschedule) =>
+      (appointmentReschedules) =>
         helper.convertDbToFrontend(
-          appointmentReschedule,
+          appointmentReschedules,
           appointmentRescheduleFieldsReverseMap
         )
     );

@@ -92,10 +92,12 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   tenantId,
   clinicId,
   startDate,
-  endDate
+  endDate,
+  page=1,
+  limit=10,
 ) => {
   const cacheKey = `expense:datewise:${tenantId}`;
-
+  const offset = (page - 1) * limit;
   try {
     const expenses = await getOrSetCache(cacheKey, async () => {
       const result =
@@ -103,7 +105,9 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
           tenantId,
           clinicId,
           startDate,
-          endDate
+          endDate,
+          parseInt(limit),
+          parseInt(offset)
         );
       return result;
     });
