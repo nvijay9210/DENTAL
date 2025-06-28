@@ -167,6 +167,32 @@ const createSupplier = async (data) => {
 };
 
 // Get All Suppliers by Tenant ID with Caching
+const getAllSuppliersByTenantIdAndClinicId = async (tenantId,clinicId, page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `supplier:${tenantId}::${clinicId}:page:${page}:limit:${limit}`;
+
+  try {
+    const suppliers = await getOrSetCache(cacheKey, async () => {
+      const result = await supplierModel.getAllSuppliersByTenantIdAndClinicId(
+        tenantId,
+        clinicId,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+
+    const convertedRows = suppliers.data.map((supplier) =>
+      helper.convertDbToFrontend(supplier, supplierFieldsReverseMap)
+    );
+
+    return { data: convertedRows, total: suppliers.total };
+  } catch (err) {
+    console.error("Database error while fetching suppliers:", err);
+    throw new CustomError("Failed to fetch suppliers", 404);
+  }
+};
+
 const getAllSuppliersByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = `supplier:${tenantId}:page:${page}:limit:${limit}`;
@@ -263,4 +289,5 @@ module.exports = {
   getSupplierByTenantIdAndSupplierId,
   updateSupplier,
   deleteSupplierByTenantIdAndSupplierId,
+  getAllSuppliersByTenantIdAndClinicId
 };

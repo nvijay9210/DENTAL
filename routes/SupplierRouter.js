@@ -9,6 +9,7 @@ const {
   GET_SUPPLIER_TENANT,
   UPDATE_SUPPLIER_TENANT,
   DELETE_SUPPLIER_TENANT,
+  GETALL_SUPPLIER_TENANT_CLINIC,
 } = require("./RouterPath");
 const suppliervalidation = require("../validations/SupplierValidation");
 const {
@@ -47,6 +48,16 @@ router.post(
 );
 
 // Get All Suppliers by Tenant ID with Pagination
+router.get(
+  GETALL_SUPPLIER_TENANT_CLINIC,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "supplier",
+  ]),
+  supplierController.getAllSuppliersByTenantIdAndClinicId
+);
 router.get(
   GETALL_SUPPLIER_TENANT,
   authenticateTenantClinicGroup([
