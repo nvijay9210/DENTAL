@@ -44,6 +44,21 @@ const getSupplierPaymentsByTenantAndSupplierPaymentsId = async (tenant_id, suppl
     throw new CustomError("Error fetching supplier_payments.", 500);
   }
 };
+const getSupplierPaymentsByTenantAndPurchaseOrderId = async (tenant_id, purchase_order_id) => {
+  try {
+    const rows = await record.getRecordByIdAndTenantId(
+      TABLE,
+      "tenant_id",
+      tenant_id,
+      "purchase_order_id",
+      purchase_order_id
+    );
+    return rows;
+  } catch (error) {
+    console.error("Error fetching supplier_payments by purchase_order_id:", error);
+    throw new CustomError("Error fetching supplier_payments by purchase_order_id.", 500);
+  }
+};
 
 // Update supplier_payments
 const updateSupplierPayments = async (supplier_payments_id, columns, values, tenant_id) => {
@@ -80,4 +95,5 @@ module.exports = {
   getSupplierPaymentsByTenantAndSupplierPaymentsId,
   updateSupplierPayments,
   deleteSupplierPaymentsByTenantAndSupplierPaymentsId,
+  getSupplierPaymentsByTenantAndPurchaseOrderId
 };
