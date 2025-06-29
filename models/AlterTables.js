@@ -1,68 +1,143 @@
 const pool = require("../config/db");
 
-async function updateDentistTableStructure() {
-    const query = `
-      ALTER TABLE dentist
-      ADD COLUMN IF NOT EXISTS currency_code CHAR(10) DEFAULT 'INR',
-      MODIFY COLUMN phone_number VARCHAR(20),
-      MODIFY COLUMN alternate_phone_number VARCHAR(20);
-    `;
-    const conn = await pool.getConnection();
-  try {
-    await conn.query(query);
-    console.log("Dentist table altered successfully.");
-  } catch (error) {
-    console.error("Error alter Dentist table:", error);
-    throw new Error("Database error occurred while alter the Dentist table.");
-  } finally {
-    conn.release();
-  }
-  }
-async function updatePatientTableStructure() {
-    const query = `
-      ALTER TABLE patient
-      MODIFY COLUMN phone_number VARCHAR(20),
-      MODIFY COLUMN alternate_phone_number VARCHAR(20);
-    `;
-    const conn = await pool.getConnection();
-  try {
-    await conn.query(query);
-    console.log("Patient table altered successfully.");
-  } catch (error) {
-    console.error("Error alter Patient table:", error);
-    throw new Error("Database error occurred while alter the Patient table.");
-  } finally {
-    conn.release();
-  }
-  }
+// Utility: Check if a constraint exists
+async function constraintExists(conn, tableName, constraintName) {
+  const [rows] = await conn.query(`
+    SELECT CONSTRAINT_NAME FROM information_schema.REFERENTIAL_CONSTRAINTS
+    WHERE CONSTRAINT_SCHEMA = DATABASE()
+      AND TABLE_NAME = ?
+      AND CONSTRAINT_NAME = ?;
+  `, [tableName, constraintName]);
 
-async function updateReceptionTableStructure() {
-    const query = `
-      ALTER TABLE reception
+  return rows.length > 0;
+}
+
+// Step 1: Update clinic table structure
+async function updateClinicTableStructure(conn) {
+  const query = `
+    ALTER TABLE clinic
       MODIFY COLUMN phone_number VARCHAR(20),
       MODIFY COLUMN alternate_phone_number VARCHAR(20);
-    `;
-    const conn = await pool.getConnection();
+  `;
   try {
     await conn.query(query);
-    console.log("Reception table altered successfully.");
+    console.log("✅ Clinic table altered successfully.");
   } catch (error) {
-    console.error("Error alter Dentist table:", error);
-    throw new Error("Database error occurred while alter the Reception table.");
-  } finally {
-    conn.release();
+    console.error("❌ Error altering Clinic table:", error.message);
+    throw new Error("Database error occurred while altering the Clinic table.");
   }
-  }
-  
+}
 
+// Step 2: Apply schema fixes (FKs + Indexes)
+async function applySchemaFixes(conn) {
+  try {
+    console.log("🔄 Applying schema fixes...");
+
+    // Add FKs to asset table
+    if (!(await constraintExists(conn, 'asset', 'fk_asset_tenant'))) {
+      await conn.query(`ALTER TABLE asset ADD CONSTRAINT fk_asset_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE;`);
+    }
+    if (!(await constraintExists(conn, 'asset', 'fk_asset_clinic'))) {
+      await conn.query(`ALTER TABLE asset ADD CONSTRAINT fk_asset_clinic FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON UPDATE CASCADE;`);
+    }
+
+    // Add FK to expense table
+    if (!(await constraintExists(conn, 'expense', 'fk_expense_tenant'))) {
+      await conn.query(`ALTER TABLE expense ADD CONSTRAINT fk_expense_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE;`);
+    }
+
+    // Add FKs to loginhistory table
+    if (!(await constraintExists(conn, 'loginhistory', 'fk_loginhistory_tenant'))) {
+      await conn.query(`ALTER TABLE loginhistory ADD CONSTRAINT fk_loginhistory_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE;`);
+    }
+    if (!(await constraintExists(conn, 'loginhistory', 'fk_loginhistory_clinic'))) {
+      await conn.query(`ALTER TABLE loginhistory ADD CONSTRAINT fk_loginhistory_clinic FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON UPDATE CASCADE;`);
+    }
+
+    // Add missing indexes
+    await conn.query(`CREATE INDEX IF NOT EXISTS idx_loginhistory_keycloak_user_id ON loginhistory(keycloak_user_id);`);
+    await conn.query(`CREATE INDEX IF NOT EXISTS idx_dentist_keycloak_id ON dentist(keycloak_id);`);
+    await conn.query(`CREATE INDEX IF NOT EXISTS idx_patient_keycloak_id ON patient(keycloak_id);`);
+    await conn.query(`CREATE INDEX IF NOT EXISTS idx_supplier_keycloak_id ON supplier(keycloak_id);`);
+    await conn.query(`CREATE INDEX IF NOT EXISTS idx_reception_keycloak_id ON reception(keycloak_id);`);
+    await conn.query(`CREATE INDEX IF NOT EXISTS idx_useractivity_keycloak_user_id ON useractivity(keycloak_user_id);`);
+
+    // Optional: Add indexes for common filters
+    await conn.query(`CREATE INDEX IF NOT EXISTS idx_appointment_status ON appointment(status);`);
+    await conn.query(`CREATE INDEX IF NOT EXISTS idx_appointment_date ON appointment(appointment_date);`);
+    await conn.query(`CREATE INDEX IF NOT EXISTS idx_payment_created_time ON payment(created_time);`);
+    await conn.query(`CREATE INDEX IF NOT EXISTS idx_expense_created_time ON expense(created_time);`);
+
+    console.log("✅ Schema fixes applied successfully.");
+  } catch (error) {
+    console.error("❌ Error applying schema fixes:", error.message);
+    throw error;
+  }
+}
+
+// Step 3: Fix appointment_reschedules table primary key
+async function fixAppointmentReschedulePK(conn) {
+  try {
+    console.log("🔄 Fixing appointment_reschedules primary key...");
+
+    // Step 1: Check if column name is incorrect
+    const [columns] = await conn.query(`
+      SHOW COLUMNS FROM appointment_reschedules LIKE 'resheduled_id';
+    `);
+
+    if (columns.length > 0) {
+      // Rename column from 'resheduled_id' to 'rescheduled_id'
+      await conn.query(`
+        ALTER TABLE appointment_reschedules
+        CHANGE COLUMN resheduled_id rescheduled_id INT(11) NOT NULL AUTO_INCREMENT;
+      `);
+      console.log("✅ Column renamed from 'resheduled_id' to 'rescheduled_id'");
+    }
+
+    // Step 2: Ensure rescheduled_id is PRIMARY KEY
+    const [pkCheck] = await conn.query(`
+      SHOW INDEX FROM appointment_reschedules WHERE Key_name = 'PRIMARY';
+    `);
+
+    if (pkCheck.length === 0) {
+      // Add PRIMARY KEY on rescheduled_id if missing
+      await conn.query(`
+        ALTER TABLE appointment_reschedules
+        ADD PRIMARY KEY (rescheduled_id);
+      `);
+      console.log("✅ Primary key added on 'rescheduled_id'");
+    } else {
+      console.log("✅ Primary key already exists on 'rescheduled_id'");
+    }
+  } catch (error) {
+    console.error("❌ Error fixing appointment_reschedules PK:", error.message);
+    throw error;
+  }
+}
+
+// Main migration runner
 (async () => {
+  const conn = await pool.getConnection();
   try {
-    await updateDentistTableStructure();
-    await updatePatientTableStructure();
-    await updateReceptionTableStructure();
+    console.log("🔌 Connected to database. Starting migration...");
+
+    await conn.beginTransaction();
+
+    // Step 1: Update clinic table
+    await updateClinicTableStructure(conn);
+
+    // Step 2: Apply schema fixes
+    await applySchemaFixes(conn);
+
+     // Step 3: Fix appointment_reschedules primary key
+     await fixAppointmentReschedulePK(conn);
+
+    await conn.commit();
+    console.log("🎉 Migration completed successfully.");
   } catch (err) {
-    console.error("Table update failed:", err.message);
+    await conn.rollback();
+    console.error("💥 Migration failed:", err.message);
+  } finally {
+    conn.release();
   }
 })();
-
-
