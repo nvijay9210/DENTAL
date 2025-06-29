@@ -66,8 +66,13 @@ const createTableQuery = {
   created_time timestamp NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
   updated_time timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
-  PRIMARY KEY (asset_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+  PRIMARY KEY (asset_id),
+  KEY fk_asset_clinic (clinic_id),
+  KEY fk_asset_tenant (tenant_id),
+  CONSTRAINT fk_asset_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_asset_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
 `,
 
   addClinic: `CREATE TABLE IF NOT EXISTS clinic (
@@ -119,7 +124,7 @@ const createTableQuery = {
   addDentist: `CREATE TABLE IF NOT EXISTS dentist (
   dentist_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
-  clinic_id int(11) DEFAULT NULL,
+  clinic_id int(11) NOT NULL,
   keycloak_id char(36) DEFAULT NULL,
   username varchar(50) DEFAULT NULL,
   password varchar(255) DEFAULT NULL,
@@ -167,6 +172,7 @@ const createTableQuery = {
   updated_by varchar(30) DEFAULT NULL,
   updated_time timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
   PRIMARY KEY (dentist_id),
+  KEY idx_dentist_keycloak_id (keycloak_id),
   KEY idx_tenant_id (tenant_id),
   KEY idx_phone_number (phone_number),
   KEY clinic_id (clinic_id),
@@ -216,6 +222,7 @@ const createTableQuery = {
   profession varchar(100) DEFAULT NULL,
   tooth_details text DEFAULT NULL,
   PRIMARY KEY (patient_id),
+  KEY idx_patient_keycloak_id (keycloak_id),
   KEY fk_patient_tenant (tenant_id),
   KEY fk_patient_dentist (dentist_preference),
   CONSTRAINT fk_patient_dentist FOREIGN KEY (dentist_preference) REFERENCES dentist (dentist_id) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -364,10 +371,10 @@ CREATE TABLE IF NOT EXISTS expense (
   updated_time timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
   PRIMARY KEY (expense_id),
   KEY fk_expense_clinic (clinic_id),
+  KEY fk_expense_tenant (tenant_id),
+  CONSTRAINT fk_expense_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE,
   CONSTRAINT fk_expense_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
-
-
 `,
   addSupplier: `
 CREATE TABLE IF NOT EXISTS supplier (
@@ -407,6 +414,7 @@ CREATE TABLE IF NOT EXISTS supplier (
   updated_time TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(),
   
   PRIMARY KEY (supplier_id),
+  KEY idx_supplier_keycloak_id (keycloak_id),
   UNIQUE KEY uq_supplier_code (supplier_code),
   KEY fk_supplier_clinic (clinic_id),
   KEY fk_supplier_tenant (tenant_id),
@@ -614,7 +622,7 @@ CREATE TABLE IF NOT EXISTS appointment_reschedules (
   created_time timestamp NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
   updated_time timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
-  PRIMARY KEY (resheduled_id),
+  PRIMARY KEY (rescheduled_id),
   KEY fk_appointment_reschedules_clinic (clinic_id),
   KEY fk_appointment_reschedules_tenant (tenant_id),
   KEY fk_appointment_reschedules_dentist (dentist_id),
@@ -688,6 +696,7 @@ CREATE TABLE IF NOT EXISTS payment (
   updated_by varchar(30) DEFAULT NULL,
   updated_time timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
   PRIMARY KEY (reception_id),
+  KEY idx_reception_keycloak_id (keycloak_id),
   KEY fk_reception_tenant (tenant_id),
   KEY fk_reception_clinic (clinic_id),
   CONSTRAINT fk_reception_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
@@ -706,7 +715,12 @@ CREATE TABLE IF NOT EXISTS payment (
   device_info text DEFAULT NULL,
   browser_info text DEFAULT NULL,
   created_time timestamp NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (loginhistory_id) USING BTREE
+  PRIMARY KEY (loginhistory_id),
+  KEY idx_loginhistory_keycloak_user_id (keycloak_id),
+  KEY fk_login_history_clinic (clinic_id),
+  KEY fk_login_history_tenant (tenant_id),
+  CONSTRAINT fk_login_history_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_login_history_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 `,
@@ -720,7 +734,9 @@ CREATE TABLE IF NOT EXISTS payment (
   logout_time timestamp NULL DEFAULT NULL,
   duration time DEFAULT NULL,
   created_time timestamp NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (useractivity_id)
+  PRIMARY KEY (useractivity_id),
+  KEY idx_useractivity_keycloak_user_id (keycloak_id),
+  KEY idx_keycloak_user_id (keycloak_user_id)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 `,
