@@ -299,6 +299,38 @@ const getAppointmentByTenantIdAndAppointmentId = async (
   }
 };
 
+const getRoomIdByTenantIdAndAppointmentId = async (
+  tenantId,
+  appointmentId
+) => {
+  try {
+    const appointment =
+      await appointmentModel.getRoomIdByTenantIdAndAppointmentId(
+        tenantId,
+        appointmentId
+      );
+
+
+      if(appointment===null) throw new CustomError('Appoinment not found',404)
+
+        // console.log(appointment)
+    
+      const convertedRows = {...appointment,
+        appointment_date:formatDateOnly(appointment.appointment_date),
+        feedback:safeJsonParse(appointment.feedback),
+        visit_reason:safeJsonParse(appointment.visit_reason),
+        notes:safeJsonParse(appointment.notes),
+        cancelled_reason:safeJsonParse(appointment.cancelled_reason),
+        checkin_time:convertUTCToLocal(appointment.checkin_time),
+        checkout_time:convertUTCToLocal(appointment.checkout_time),
+      }
+      
+      return convertedRows;
+  } catch (error) {
+    throw new CustomError("Failed to get appointment: " + error.message, 404);
+  }
+};
+
 // Update Appointment
 const updateAppointment = async (appointmentId, data, tenant_id) => {
   const fieldMap = {
@@ -1109,5 +1141,6 @@ module.exports = {
   getAllAppointmentsByTenantIdAndPatientId,
   getAllRoomIdByTenantIdAndClinicIdAndDentistId,
   getAllRoomIdByTenantIdAndClinicIdAndPatientId,
-  updateAppoinmentFeedback
+  updateAppoinmentFeedback,
+  getRoomIdByTenantIdAndAppointmentId
 };
