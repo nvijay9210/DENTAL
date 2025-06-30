@@ -17,7 +17,6 @@ function getSystemDateTime() {
 }
 
 cron.schedule('* * * * *', async () => {
-  console.log('helloworld!')
   const systemTime = getSystemDateTime();
   console.log(`[${systemTime}] Checking for upcoming virtual appointments...`);
   await updateRoomIdBeforeAppointment();
