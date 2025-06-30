@@ -33,25 +33,54 @@ async function applySchemaFixes(conn) {
   try {
     console.log("🔄 Applying schema fixes...");
 
-    // Add FKs to asset table
+    // Asset → tenant
     if (!(await constraintExists(conn, 'asset', 'fk_asset_tenant'))) {
-      await conn.query(`ALTER TABLE asset ADD CONSTRAINT fk_asset_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE;`);
+      await cleanupOrphanedRows(conn, 'asset', 'tenant_id', 'tenant', 'tenant_id');
+      await conn.query(`
+        ALTER TABLE asset 
+        ADD CONSTRAINT fk_asset_tenant 
+        FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE;
+      `);
     }
+
+    // Asset → clinic
     if (!(await constraintExists(conn, 'asset', 'fk_asset_clinic'))) {
-      await conn.query(`ALTER TABLE asset ADD CONSTRAINT fk_asset_clinic FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON UPDATE CASCADE;`);
+      await cleanupOrphanedRows(conn, 'asset', 'clinic_id', 'clinic', 'clinic_id');
+      await conn.query(`
+        ALTER TABLE asset 
+        ADD CONSTRAINT fk_asset_clinic 
+        FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON UPDATE CASCADE;
+      `);
     }
 
-    // Add FK to expense table
+    // Expense → tenant
     if (!(await constraintExists(conn, 'expense', 'fk_expense_tenant'))) {
-      await conn.query(`ALTER TABLE expense ADD CONSTRAINT fk_expense_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE;`);
+      await cleanupOrphanedRows(conn, 'expense', 'tenant_id', 'tenant', 'tenant_id');
+      await conn.query(`
+        ALTER TABLE expense 
+        ADD CONSTRAINT fk_expense_tenant 
+        FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE;
+      `);
     }
 
-    // Add FKs to loginhistory table
+    // Loginhistory → tenant
     if (!(await constraintExists(conn, 'loginhistory', 'fk_loginhistory_tenant'))) {
-      await conn.query(`ALTER TABLE loginhistory ADD CONSTRAINT fk_loginhistory_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE;`);
+      await cleanupOrphanedRows(conn, 'loginhistory', 'tenant_id', 'tenant', 'tenant_id');
+      await conn.query(`
+        ALTER TABLE loginhistory 
+        ADD CONSTRAINT fk_loginhistory_tenant 
+        FOREIGN KEY (tenant_id) REFERENCES tenant(tenant_id) ON UPDATE CASCADE;
+      `);
     }
+
+    // Loginhistory → clinic
     if (!(await constraintExists(conn, 'loginhistory', 'fk_loginhistory_clinic'))) {
-      await conn.query(`ALTER TABLE loginhistory ADD CONSTRAINT fk_loginhistory_clinic FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON UPDATE CASCADE;`);
+      await cleanupOrphanedRows(conn, 'loginhistory', 'clinic_id', 'clinic', 'clinic_id');
+      await conn.query(`
+        ALTER TABLE loginhistory 
+        ADD CONSTRAINT fk_loginhistory_clinic 
+        FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON UPDATE CASCADE;
+      `);
     }
 
     // Add missing indexes
@@ -62,7 +91,7 @@ async function applySchemaFixes(conn) {
     await conn.query(`CREATE INDEX IF NOT EXISTS idx_reception_keycloak_id ON reception(keycloak_id);`);
     await conn.query(`CREATE INDEX IF NOT EXISTS idx_useractivity_keycloak_user_id ON useractivity(keycloak_user_id);`);
 
-    // Optional: Add indexes for common filters
+    // Optional indexes
     await conn.query(`CREATE INDEX IF NOT EXISTS idx_appointment_status ON appointment(status);`);
     await conn.query(`CREATE INDEX IF NOT EXISTS idx_appointment_date ON appointment(appointment_date);`);
     await conn.query(`CREATE INDEX IF NOT EXISTS idx_payment_created_time ON payment(created_time);`);
