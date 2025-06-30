@@ -12,6 +12,31 @@ async function constraintExists(conn, tableName, constraintName) {
   return rows.length > 0;
 }
 
+/**
+ * Removes orphaned rows from a table where the foreign key has no matching reference.
+ * @param {Object} conn - Database connection
+ * @param {string} table - Table name with orphaned data
+ * @param {string} column - Column referencing the foreign key
+ * @param {string} refTable - Referenced table
+ * @param {string} refColumn - Referenced column
+ */
+async function cleanupOrphanedRows(conn, table, column, refTable, refColumn) {
+  const query = `
+    DELETE FROM ?? 
+    WHERE NOT EXISTS (
+      SELECT 1 FROM ?? 
+      WHERE ?? = ??.?? 
+    );
+  `;
+  try {
+    await conn.query(query, [table, refTable, refColumn, table, column]);
+    console.log(`✅ Cleaned up orphaned rows in \`${table}\` for \`${column}\``);
+  } catch (error) {
+    console.error(`❌ Error cleaning up orphaned rows in \`${table}\`:`, error.message);
+    throw error;
+  }
+}
+
 // Step 1: Update clinic table structure
 async function updateClinicTableStructure(conn) {
   const query = `
