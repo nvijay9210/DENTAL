@@ -187,16 +187,20 @@ const getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (
   clinicId,
   dentistId
 ) => {
-  const query = `SELECT 
-    app.appointment_id,
-    app.room_id
-FROM 
-    appointment AS app
+  const query = `SELECT
+  CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
+      CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,
+      app.*
+    FROM 
+      appointment AS app
+      JOIN patient p on p.patient_id=app.patient_id
+      JOIN dentist d on d.dentist_id=app.dentist_id
 WHERE 
     app.tenant_id = ? 
     AND app.clinic_id = ? 
     AND app.dentist_id = ?
     AND app.room_id!=?
+    AND app.status=?
 `;
   const conn = await pool.getConnection();
   try {
@@ -205,6 +209,7 @@ WHERE
       clinicId,
       dentistId,
       "00000000-0000-0000-0000-000000000000",
+      "confirmed",
     ]);
     return rows;
   } catch (error) {
@@ -220,11 +225,14 @@ const getAllRoomIdByTenantIdAndClinicIdAndPatientId = async (
   clinicId,
   patient_id
 ) => {
-  const query = `SELECT 
-    app.appointment_id,
-    app.room_id
-FROM 
-    appointment AS app
+  const query = `SELECT
+  CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
+      CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,
+      app.*
+    FROM 
+      appointment AS app
+      JOIN patient p on p.patient_id=app.patient_id
+      JOIN dentist d on d.dentist_id=app.dentist_id
 WHERE 
     app.tenant_id = ? 
     AND app.clinic_id = ? 
@@ -238,6 +246,7 @@ WHERE
       clinicId,
       patient_id,
       "00000000-0000-0000-0000-000000000000",
+      "confirmed"
     ]);
     return rows;
   } catch (error) {
@@ -759,7 +768,7 @@ const getDentistIdByTenantIdAndAppointmentId = async (
 const getRoomIdByTenantIdAndAppointmentId = async (
   tenantId,
   appointment_id,
-  status='confirmed'
+  status = "confirmed"
 ) => {
   const query = `
     SELECT 
@@ -946,7 +955,6 @@ const updateRoomIdBeforeAppointment = async () => {
   }
 };
 
-
 module.exports = {
   createAppointment,
   getAllAppointmentsByTenantId,
@@ -972,5 +980,5 @@ module.exports = {
   getAllRoomIdByTenantIdAndClinicIdAndPatientId,
   updateAppoinmentFeedback,
   getDentistIdByTenantIdAndAppointmentId,
-  getRoomIdByTenantIdAndAppointmentId
+  getRoomIdByTenantIdAndAppointmentId,
 };
