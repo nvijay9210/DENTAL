@@ -220,9 +220,8 @@ WHERE
   }
 };
 
-const getAllRoomIdByTenantIdAndClinicIdAndPatientId = async (
+const getAllRoomIdByTenantIdAndPatientId = async (
   tenantId,
-  clinicId,
   patient_id
 ) => {
   const query = `SELECT
@@ -235,18 +234,17 @@ const getAllRoomIdByTenantIdAndClinicIdAndPatientId = async (
       JOIN dentist d on d.dentist_id=app.dentist_id
 WHERE 
     app.tenant_id = ? 
-    AND app.clinic_id = ? 
     AND app.patient_id = ?
     AND app.room_id!=?
+    AND app.status=?
 `;
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query, [
       tenantId,
-      clinicId,
       patient_id,
       "00000000-0000-0000-0000-000000000000",
-      "confirmed"
+      "confirmed",
     ]);
     return rows;
   } catch (error) {
@@ -977,7 +975,7 @@ module.exports = {
   getAllAppointmentsByTenantIdAndPatientId,
   updateRoomIdBeforeAppointment,
   getAllRoomIdByTenantIdAndClinicIdAndDentistId,
-  getAllRoomIdByTenantIdAndClinicIdAndPatientId,
+  getAllRoomIdByTenantIdAndPatientId,
   updateAppoinmentFeedback,
   getDentistIdByTenantIdAndAppointmentId,
   getRoomIdByTenantIdAndAppointmentId,

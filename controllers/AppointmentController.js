@@ -113,15 +113,13 @@ exports.getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (req, res, next) =
   }
 };
 
-exports.getAllRoomIdByTenantIdAndClinicIdAndPatientId = async (req, res, next) => {
-  const { tenant_id,clinic_id,patient_id } = req.params;
+exports.getAllRoomIdByTenantIdAndPatientId = async (req, res, next) => {
+  const { tenant_id,patient_id } = req.params;
   await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('clinic','clinic_id',clinic_id)
   await checkIfIdExists('patient','patient_id',patient_id)
   try {
-    const appointments = await appointmentService.getAllRoomIdByTenantIdAndClinicIdAndPatientId(
+    const appointments = await appointmentService.getAllRoomIdByTenantIdAndPatientId(
       tenant_id,
-      clinic_id,
       patient_id
     );
     res.status(200).json(appointments);

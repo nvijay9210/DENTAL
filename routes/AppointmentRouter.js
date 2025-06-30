@@ -201,7 +201,7 @@ router.get(
     "patient",
     "dentist",
   ]),
-  appointmentController.getAllRoomIdByTenantIdAndClinicIdAndPatientId
+  appointmentController.getAllRoomIdByTenantIdAndPatientId
 );
 router.get(
   GET_ROOMID_APPOINTMENTID,
