@@ -16,7 +16,7 @@ function getSystemDateTime() {
   return formatter.format(now).replace(',', '');
 }
 
-cron.schedule('*/5 * * * *', async () => {
+cron.schedule('* * * * *', async () => {
   console.log('helloworld!')
   const systemTime = getSystemDateTime();
   console.log(`[${systemTime}] Checking for upcoming virtual appointments...`);

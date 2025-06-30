@@ -914,7 +914,9 @@ const updateRoomIdBeforeAppointment = async () => {
       WHERE 
         appointment_date = CURDATE()
         AND is_virtual = 1
-        AND room_id = '00000000-0000-0000-0000-000000000000';
+        AND room_id =  '00000000-0000-0000-0000-000000000000'
+        AND status="confirmed"
+        AND appointment_type="video"
     `);
 
     const now = Date.now();
