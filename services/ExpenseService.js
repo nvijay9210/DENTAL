@@ -22,6 +22,10 @@ const expenseFields = {
   expense_amount: (val) => val? parseFloat(val) : 0,
   mode_of_payment: (val) => val,
   receipt_number: (val) => val,
+  paid_by: (val) => val,
+  paid_by_user: (val) => val,
+  paid_to: (val) => val,
+  expense_documents: helper.safeStringify,
 };
 const expenseFieldsReverseMap = {
   expense_id:val=>val,
@@ -34,6 +38,10 @@ const expenseFieldsReverseMap = {
   expense_amount: (val) => val? parseFloat(val) : 0,
   mode_of_payment: (val) => val,
   receipt_number: (val) => val,
+  paid_by: (val) => val,
+  paid_by_user: (val) => val,
+  paid_to: (val) => val,
+  expense_documents: helper.safeJsonParse,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,

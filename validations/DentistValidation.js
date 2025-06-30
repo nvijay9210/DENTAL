@@ -151,12 +151,6 @@ const dentistColumnConfig = [
     is_boolean: true,
   },
   {
-    columnname: "insurance_supported",
-    type: "tinyint",
-    null: false,
-    is_boolean: true,
-  },
-  {
     columnname: "languages_spoken",
     type: "longtext",
     null: true,

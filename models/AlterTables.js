@@ -234,6 +234,46 @@ async function addInsurancePolicyDateColumnsToPatient(conn) {
   }
 }
 
+// Step 6: Add new fields to expense table
+async function addNewFieldsToExpenseTable(conn) {
+  try {
+    console.log("🔄 Adding new fields to expense table...");
+
+    const columnsToAdd = [
+      {
+        name: 'paid_by',
+        definition: 'VARCHAR(255) NULL DEFAULT NULL COMMENT \'Name or role of person who made the payment\''
+      },
+      {
+        name: 'paid_by_user',
+        definition: 'VARCHAR(255) NULL DEFAULT NULL COMMENT \'Keycloak user ID or username of the payer\''
+      },
+      {
+        name: 'paid_to',
+        definition: 'VARCHAR(255) NULL DEFAULT NULL COMMENT \'Name or entity that received the payment\''
+      },
+      {
+        name: 'expense_documents',
+        definition: 'JSON NULL DEFAULT NULL COMMENT \'List of document paths or URLs (stored as JSON)\''
+      }
+    ];
+
+    for (const { name, definition } of columnsToAdd) {
+      const [existing] = await conn.query(`SHOW COLUMNS FROM expense LIKE ?`, [name]);
+      if (existing.length === 0) {
+        await conn.query(`ALTER TABLE expense ADD COLUMN ${name} ${definition};`);
+        console.log(`✅ Column \`${name}\` added successfully.`);
+      } else {
+        console.log(`ℹ️ Column \`${name}\` already exists.`);
+      }
+    }
+
+  } catch (error) {
+    console.error("❌ Error adding new fields to expense table:", error.message);
+    throw error;
+  }
+}
+
 // Main migration runner
 (async () => {
   const conn = await pool.getConnection();
@@ -256,6 +296,9 @@ async function addInsurancePolicyDateColumnsToPatient(conn) {
 
     // Step 5: Add insurance_policy_start_date to patient table
     await addInsurancePolicyDateColumnsToPatient(conn);
+
+    // Step 6: Add new fields to expense table
+    await addNewFieldsToExpenseTable(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");
