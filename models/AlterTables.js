@@ -298,7 +298,7 @@ async function addNewFieldsToExpenseTable(conn) {
     await addInsurancePolicyDateColumnsToPatient(conn);
 
     // Step 6: Add new fields to expense table
-    await addNewFieldsToExpenseTable(conn);
+    // await addNewFieldsToExpenseTable(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");
