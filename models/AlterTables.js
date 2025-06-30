@@ -115,6 +115,71 @@ async function fixAppointmentReschedulePK(conn) {
   }
 }
 
+// Step 4: Remove insurance_supported column from dentist table
+async function removeInsuranceSupportedFromDentist(conn) {
+  try {
+    console.log("🔄 Removing 'insurance_supported' column from dentist table...");
+
+    // Check if the column exists before attempting to drop it
+    const [columns] = await conn.query(`
+      SHOW COLUMNS FROM dentist LIKE 'insurance_supported';
+    `);
+
+    if (columns.length > 0) {
+      await conn.query(`
+        ALTER TABLE dentist
+        DROP COLUMN insurance_supported;
+      `);
+      console.log("✅ Column 'insurance_supported' removed successfully.");
+    } else {
+      console.log("ℹ️ Column 'insurance_supported' does not exist. Skipping removal.");
+    }
+  } catch (error) {
+    console.error("❌ Error removing 'insurance_supported' column:", error.message);
+    throw error;
+  }
+}
+
+// Step 5: Add 'insurance_policy_start_date' column to patient table
+async function addInsurancePolicyDateColumnsToPatient(conn) {
+  try {
+    console.log("🔄 Adding insurance policy date columns to patient table...");
+
+    // Check for insurance_policy_start_date
+    const [startCol] = await conn.query(`
+      SHOW COLUMNS FROM patient LIKE 'insurance_policy_start_date';
+    `);
+
+    // Check for insurance_policy_end_date
+    const [endCol] = await conn.query(`
+      SHOW COLUMNS FROM patient LIKE 'insurance_policy_end_date';
+    `);
+
+    if (endCol.length === 0) {
+      await conn.query(`
+        ALTER TABLE patient
+        ADD COLUMN insurance_policy_end_date DATE NULL;
+      `);
+      console.log("✅ Column 'insurance_policy_end_date' added.");
+    } else {
+      console.log("ℹ️ Column 'insurance_policy_end_date' already exists.");
+    }
+
+    if (startCol.length === 0) {
+      await conn.query(`
+        ALTER TABLE patient
+        ADD COLUMN insurance_policy_start_date DATE NULL AFTER insurance_policy_end_date;
+      `);
+      console.log("✅ Column 'insurance_policy_start_date' added.");
+    } else {
+      console.log("ℹ️ Column 'insurance_policy_start_date' already exists.");
+    }
+  } catch (error) {
+    console.error("❌ Error adding insurance policy date columns:", error.message);
+    throw error;
+  }
+}
+
 // Main migration runner
 (async () => {
   const conn = await pool.getConnection();
@@ -131,6 +196,12 @@ async function fixAppointmentReschedulePK(conn) {
 
      // Step 3: Fix appointment_reschedules primary key
      await fixAppointmentReschedulePK(conn);
+
+      // Step 4: Remove insurance_supported from dentist table
+    await removeInsuranceSupportedFromDentist(conn);
+
+    // Step 5: Add insurance_policy_start_date to patient table
+    await addInsurancePolicyDateColumnsToPatient(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");

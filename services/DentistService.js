@@ -63,7 +63,6 @@ const dentistFieldMap = {
   profile_picture: (val) => val || null,
 
   teleconsultation_supported: helper.parseBoolean,
-  insurance_supported: helper.parseBoolean,
 
   last_login: (val) => val,
   duration: helper.duration,
@@ -115,7 +114,6 @@ const dentistFieldReverseMap = {
 
   profile_picture: (val) => val,
   teleconsultation_supported: (val) => Boolean(val),
-  insurance_supported: (val) => Boolean(val),
 
   last_login: (val) => val,
   duration: (val) => val,

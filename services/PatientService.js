@@ -45,6 +45,8 @@ const patiendFields = {
   emergency_contact_number: (val) => val || null,
   insurance_provider: (val) => val || null,
   insurance_policy_number: (val) => val || null,
+  insurance_policy_start_date:(val)=>(val ? formatDateOnly(val) : null),
+  insurance_policy_end_date:(val)=>(val ? formatDateOnly(val) : null),
   profile_picture: (val) => val || null,
 };
 
@@ -79,6 +81,8 @@ const patientFieldsReverseMap = {
   emergency_contact_number: (val) => val,
   insurance_provider: (val) => val,
   insurance_policy_number: (val) => val,
+  insurance_policy_start_date:(val)=>(val ? formatDateOnly(val) : null),
+  insurance_policy_end_date:(val)=>(val ? formatDateOnly(val) : null),
   profile_picture: (val) => val,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),

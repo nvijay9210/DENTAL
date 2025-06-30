@@ -43,6 +43,20 @@ exports.getAllAppointmentsByTenantId = async (req, res, next) => {
   }
 };
 
+exports.getRoomIdByTenantIdAndAppointmentId = async (req, res, next) => {
+  const { tenant_id,appointment_id } = req.params;
+  checkIfExists('appointment','appointment_id',appointment_id,tenant_id)
+  try {
+    const appointments = await appointmentService.getRoomIdByTenantIdAndAppointmentId(
+      tenant_id,
+      appointment_id
+    );
+    res.status(200).json(appointments);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getAllAppointmentsByTenantIdAndClinicId = async (req, res, next) => {
   const { tenant_id,clinic_id } = req.params;
   const { page, limit } = req.query;
