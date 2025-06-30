@@ -212,11 +212,10 @@ const getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (tenantId,clinic_id,
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
-const getAllRoomIdByTenantIdAndClinicIdAndPatientId = async (tenantId,clinic_id,patient_id) => {
+const getAllRoomIdByTenantIdAndPatientId = async (tenantId,patient_id) => {
   try{
-      const result = await appointmentModel.getAllRoomIdByTenantIdAndClinicIdAndPatientId(
+      const result = await appointmentModel.getAllRoomIdByTenantIdAndPatientId(
         tenantId,
-        clinic_id,
         patient_id
       );
       return result;
@@ -1140,7 +1139,7 @@ module.exports = {
   getAllAppointmentsByTenantIdAndAndDentistId,
   getAllAppointmentsByTenantIdAndPatientId,
   getAllRoomIdByTenantIdAndClinicIdAndDentistId,
-  getAllRoomIdByTenantIdAndClinicIdAndPatientId,
+  getAllRoomIdByTenantIdAndPatientId,
   updateAppoinmentFeedback,
   getRoomIdByTenantIdAndAppointmentId
 };
