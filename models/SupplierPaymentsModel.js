@@ -28,6 +28,27 @@ const getAllSupplierPaymentssByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
+const getAllSupplierPaymentssByTenantIdAndSupplierId = async (tenantId,supplierId, limit, offset) => {
+  const query1 = `SELECT * FROM supplier_payments  WHERE tenant_id = ? AND supplier_id = ? limit ? offset ?`;
+  const query2 = `SELECT count(*) as total FROM supplier_payments  WHERE tenant_id = ? AND supplier_id = ?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      supplierId,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [tenantId, supplierId]);
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
 // Get supplier_payments by tenant ID and supplier_payments ID
 const getSupplierPaymentsByTenantAndSupplierPaymentsId = async (tenant_id, supplier_payments_id) => {
   try {
@@ -95,5 +116,6 @@ module.exports = {
   getSupplierPaymentsByTenantAndSupplierPaymentsId,
   updateSupplierPayments,
   deleteSupplierPaymentsByTenantAndSupplierPaymentsId,
-  getSupplierPaymentsByTenantAndPurchaseOrderId
+  getSupplierPaymentsByTenantAndPurchaseOrderId,
+  getAllSupplierPaymentssByTenantIdAndSupplierId
 };

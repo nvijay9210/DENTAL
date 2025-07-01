@@ -29,6 +29,27 @@ const getAllSupplierReviewssByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
+const getAllSupplierReviewsByTenantIdAndSupplierId = async (tenantId,supplierId, limit, offset) => {
+  const query1 = `SELECT * FROM supplier_reviews  WHERE tenant_id = ? AND supplier_id = ? limit ? offset ?`;
+  const query2 = `SELECT count(*) as total FROM supplier_reviews  WHERE tenant_id = ? AND supplier_id = ?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      supplierId,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [tenantId, supplierId]);
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
 // Get supplier_reviews by tenant ID and supplier_reviews ID
 const getSupplierReviewsByTenantAndSupplierReviewsId = async (tenant_id, supplier_review_id) => {
   try {
@@ -81,4 +102,5 @@ module.exports = {
   getSupplierReviewsByTenantAndSupplierReviewsId,
   updateSupplierReviews,
   deleteSupplierReviewsByTenantAndSupplierReviewsId,
+  getAllSupplierReviewsByTenantIdAndSupplierId
 };

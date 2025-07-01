@@ -8,6 +8,7 @@ const {
   GET_SUPPLIER_REVIEWS_TENANT,
   UPDATE_SUPPLIER_REVIEWS_TENANT,
   DELETE_SUPPLIER_REVIEWS_TENANT,
+  GETALL_SUPPLIER_REVIEWS_TENANT_SUPPLIER,
 } = require("./RouterPath");
 const suppliervalidation = require("../validations/SupplierReviewsValidation");
 const {
@@ -36,6 +37,16 @@ router.get(
     "supplier",
   ]),
   supplierController.getAllSupplierReviewssByTenantId
+);
+router.get(
+  GETALL_SUPPLIER_REVIEWS_TENANT_SUPPLIER,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "supplier",
+  ]),
+  supplierController.getAllSupplierReviewsByTenantIdAndSupplierId
 );
 
 // Get Single SupplierReviews by Tenant ID & SupplierReviews ID

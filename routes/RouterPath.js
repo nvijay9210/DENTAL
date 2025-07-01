@@ -133,7 +133,7 @@ module.exports = {
 
   ADD_SUPPLIER_PRODUCTS: "/addsupplierproduct",
   GETALL_SUPPLIER_PRODUCTS_TENANT: "/getallsupplierproducts/:tenant_id",
-  GETALL_SUPPLIER_PRODUCTS_TENANT_CLINIC: "/getallsupplierproducts/:tenant_id/:clinic_id",
+  GETALL_SUPPLIER_PRODUCTS_TENANT_SUPPLIER: "/getallsupplierproducts/:tenant_id/:clinic_id",
   GET_SUPPLIER_PRODUCTS_TENANT:
     "/getsupplierproduct/:supplier_product_id/:tenant_id",
   UPDATE_SUPPLIER_PRODUCTS_TENANT:
@@ -143,6 +143,7 @@ module.exports = {
 
   ADD_SUPPLIER_PAYMENTS: "/addsupplierpayment",
   GETALL_SUPPLIER_PAYMENTS_TENANT: "/getallsupplierpayments/:tenant_id",
+  GETALL_SUPPLIER_PAYMENTS_TENANT_SUPPLIER: "/getallsupplierpayments/:tenant_id/:supplier_id",
   GET_SUPPLIER_PAYMENTS_TENANT_PURCHASEORDER:
     "/getsupplierpaymentbypurhaseorder/:purchase_order_id/:tenant_id",
   GET_SUPPLIER_PAYMENTS_TENANT:
@@ -154,6 +155,7 @@ module.exports = {
 
   ADD_SUPPLIER_REVIEWS: "/addsupplierreview",
   GETALL_SUPPLIER_REVIEWS_TENANT: "/getallsupplierreviews/:tenant_id",
+  GETALL_SUPPLIER_REVIEWS_TENANT_SUPPLIER: "/getallsupplierreviews/:tenant_id/:supplier_id",
   GET_SUPPLIER_REVIEWS_TENANT:
     "/getsupplierreview/:supplier_review_id/:tenant_id",
   UPDATE_SUPPLIER_REVIEWS_TENANT:
@@ -163,6 +165,7 @@ module.exports = {
 
   ADD_PURCHASE_ORDER: "/addpurchaseorder",
   GETALL_PURCHASE_ORDER_TENANT: "/getallpurchaseorders/:tenant_id",
+  GETALL_PURCHASE_ORDER_TENANT_SUPPLIER: "/getallpurchaseorders/:tenant_id/:supplier_id",
   GET_PURCHASE_ORDER_TENANT: "/getpurchaseorder/:purchase_order_id/:tenant_id",
   UPDATE_PURCHASE_ORDER_TENANT:
     "/updatepurchaseorder/:purchase_order_id/:tenant_id",
