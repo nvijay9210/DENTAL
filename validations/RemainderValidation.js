@@ -18,6 +18,8 @@ const reminderColumnConfig = [
   { columnname: "repeat_count", type: "int", null: true },
   { columnname: "notify_before_hours", type: "int", null: true },
   { columnname: "repeat_weekends", type: "varchar", size: 20, null: true },
+  { columnname: "monthly_week", type: "text", null: true },
+  { columnname: "monthly_weekends", type: "text", null: true },
   { columnname: "monthly_option", type: "varchar", size: 20, null: true },
   { columnname: "repeat_end_date", type: "date", null: true },
   { columnname: "notify", type: "boolean", null: true },

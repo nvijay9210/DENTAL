@@ -61,8 +61,7 @@ module.exports = {
     "/getallroomidpatient/:tenant_id/:patient_id",
   GETALL_APPOINTMENT_ROOMID_DENTIST:
     "/getallroomiddentist/:tenant_id/:clinic_id/:dentist_id",
-  GET_ROOMID_APPOINTMENTID:
-    "/getroomidappointment/:tenant_id/:appointment_id",
+  GET_ROOMID_APPOINTMENTID: "/getroomidappointment/:tenant_id/:appointment_id",
 
   ADD_TREATMENT: "/addtreatment",
   GETALL_TREATMENT_TENANT: "/getalltreatments/:tenant_id",
@@ -133,7 +132,8 @@ module.exports = {
 
   ADD_SUPPLIER_PRODUCTS: "/addsupplierproduct",
   GETALL_SUPPLIER_PRODUCTS_TENANT: "/getallsupplierproducts/:tenant_id",
-  GETALL_SUPPLIER_PRODUCTS_TENANT_SUPPLIER: "/getallsupplierproducts/:tenant_id/:clinic_id",
+  GETALL_SUPPLIER_PRODUCTS_TENANT_SUPPLIER:
+    "/getallsupplierproducts/:tenant_id/:clinic_id",
   GET_SUPPLIER_PRODUCTS_TENANT:
     "/getsupplierproduct/:supplier_product_id/:tenant_id",
   UPDATE_SUPPLIER_PRODUCTS_TENANT:
@@ -143,7 +143,8 @@ module.exports = {
 
   ADD_SUPPLIER_PAYMENTS: "/addsupplierpayment",
   GETALL_SUPPLIER_PAYMENTS_TENANT: "/getallsupplierpayments/:tenant_id",
-  GETALL_SUPPLIER_PAYMENTS_TENANT_SUPPLIER: "/getallsupplierpayments/:tenant_id/:supplier_id",
+  GETALL_SUPPLIER_PAYMENTS_TENANT_SUPPLIER:
+    "/getallsupplierpayments/:tenant_id/:supplier_id",
   GET_SUPPLIER_PAYMENTS_TENANT_PURCHASEORDER:
     "/getsupplierpaymentbypurhaseorder/:purchase_order_id/:tenant_id",
   GET_SUPPLIER_PAYMENTS_TENANT:
@@ -155,7 +156,8 @@ module.exports = {
 
   ADD_SUPPLIER_REVIEWS: "/addsupplierreview",
   GETALL_SUPPLIER_REVIEWS_TENANT: "/getallsupplierreviews/:tenant_id",
-  GETALL_SUPPLIER_REVIEWS_TENANT_SUPPLIER: "/getallsupplierreviews/:tenant_id/:supplier_id",
+  GETALL_SUPPLIER_REVIEWS_TENANT_SUPPLIER:
+    "/getallsupplierreviews/:tenant_id/:supplier_id",
   GET_SUPPLIER_REVIEWS_TENANT:
     "/getsupplierreview/:supplier_review_id/:tenant_id",
   UPDATE_SUPPLIER_REVIEWS_TENANT:
@@ -165,7 +167,8 @@ module.exports = {
 
   ADD_PURCHASE_ORDER: "/addpurchaseorder",
   GETALL_PURCHASE_ORDER_TENANT: "/getallpurchaseorders/:tenant_id",
-  GETALL_PURCHASE_ORDER_TENANT_SUPPLIER: "/getallpurchaseorders/:tenant_id/:supplier_id",
+  GETALL_PURCHASE_ORDER_TENANT_SUPPLIER:
+    "/getallpurchaseorders/:tenant_id/:supplier_id",
   GET_PURCHASE_ORDER_TENANT: "/getpurchaseorder/:purchase_order_id/:tenant_id",
   UPDATE_PURCHASE_ORDER_TENANT:
     "/updatepurchaseorder/:purchase_order_id/:tenant_id",
@@ -214,6 +217,14 @@ module.exports = {
     "/updateappointment_reschedules/:appointment_reschedules_id/:tenant_id",
   DELETE_APPOINTMENT_RESCHEDULES_TENANT:
     "/deleteappointment_reschedules/:appointment_reschedules_id/:tenant_id",
+
+  ADD_NOTIFICATION: "/addnotification",
+  GETALL_NOTIFICATION_TENANT: "/getallnotifications/:tenant_id",
+  GET_NOTIFICATION_TENANT: "/getnotification/:notification_id/:tenant_id",
+  UPDATE_NOTIFICATION_TENANT: "/updatenotification/:notification_id/:tenant_id",
+  UPDATE_NOTIFICATION_RECIPIENTS_STATUS_TENANT: "/updatenotificationrecipients/:notification_recipient_id",
+  DELETE_NOTIFICATION_TENANT: "/deletenotification/:notification_id/:tenant_id",
+
 
   //dashboard Routes
 

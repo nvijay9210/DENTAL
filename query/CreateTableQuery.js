@@ -743,6 +743,61 @@ CREATE TABLE IF NOT EXISTS payment (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 `,
+  addNotificationSend: `CREATE TABLE IF NOT EXISTS notifications (
+  notification_id INT(11) NOT NULL AUTO_INCREMENT,
+
+  tenant_id INT NOT NULL,
+  sender_role VARCHAR(20) NOT NULL,
+  sender_id INT NOT NULL, -- e.g., doctor_id, patient_id
+
+  type VARCHAR(50) NOT NULL,
+  -- Example values: 'treatment', 'document', 'message', 'appointment', 'reminder', 'invoice'
+
+  title VARCHAR(255) NOT NULL,
+  message TEXT,
+
+  reference_id INT NULL DEFAULT NULL,
+  -- Optional: link to treatment_id, appointment_id, etc.
+
+  file_url TEXT,
+  -- Optional: attached PDF, image, doc path or URL
+
+  created_by VARCHAR(50),
+  created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_by VARCHAR(50),
+  updated_time TIMESTAMP DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+
+  -- Primary Key required for AUTO_INCREMENT
+  PRIMARY KEY (notification_id),
+
+  -- Foreign Key Constraints
+  CONSTRAINT fk_notification_tenant FOREIGN KEY (tenant_id)
+    REFERENCES tenant(tenant_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
+`,
+  addNotificationRecipients: `CREATE TABLE IF NOT EXISTS notificationrecipients (
+  notification_recipient_id INT(11) NOT NULL AUTO_INCREMENT,
+
+  notification_id INT NOT NULL,
+  receiver_role VARCHAR(20) NOT NULL,
+  receiver_id INT NOT NULL, -- e.g., doctor_id, patient_id
+
+  status VARCHAR(50) NOT NULL DEFAULT 'unread',
+
+  created_by VARCHAR(50),
+  delivered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  read_at TIMESTAMP DEFAULT NULL,
+
+  -- Set primary key for auto_increment
+  PRIMARY KEY (notification_recipient_id),
+
+  -- Correct foreign key reference
+  CONSTRAINT fk_notification_recipients_notification FOREIGN KEY (notification_id)
+    REFERENCES notifications(notification_id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
+`,
 };
 
 module.exports = { createTableQuery };

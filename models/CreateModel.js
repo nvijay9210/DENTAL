@@ -345,6 +345,36 @@ const creatLoginHistoryTable = async () => {
     conn.release();
   }
 };
+const creatNotificationTable = async () => {
+  const query =  createTableQuery.addNotificationSend
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("Notification table created successfully.");
+  } catch (error) {
+    console.error("Error creating Notification table:", error);
+    throw new Error(
+      "Database error occurred while creating the Notification table."
+    );
+  } finally {
+    conn.release();
+  }
+};
+const creatNotificationRecipientsTable = async () => {
+  const query =  createTableQuery.addNotificationRecipients
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("NotificationRecipients table created successfully.");
+  } catch (error) {
+    console.error("Error creating NotificationRecipients table:", error);
+    throw new Error(
+      "Database error occurred while creating the NotificationRecipients table."
+    );
+  } finally {
+    conn.release();
+  }
+};
 
 const createUserTable = async () => {
   const query = userQuery.createUserTable;
@@ -477,5 +507,7 @@ module.exports = {
   createAppointmentReschedulesTable,
   createReception,
   createUserActivityTable,
-  creatLoginHistoryTable
+  creatLoginHistoryTable,
+  creatNotificationTable,
+  creatNotificationRecipientsTable
 };

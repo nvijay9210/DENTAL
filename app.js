@@ -39,6 +39,7 @@ const appointment_reschedules = require('./routes/AppointmentReschedulesRouter')
 const receptionRouter = require('./routes/ReceptionRouter');
 const userActivityRouter = require('./routes/UserActivityRouter');
 const loginHistoryRouter = require('./routes/LoginHistoryRouter');
+const notificationRouter = require('./routes/NotificationRouter');
 
 // const compressionMiddleware = require('./middlewares/CompressionMiddleware');
 const { redisconnect } = require('./config/redisConfig');
@@ -162,6 +163,8 @@ async function initializeTables() {
     await createTable.createReception();
     await createTable.creatLoginHistoryTable();
     await createTable.createUserActivityTable();
+    await createTable.creatNotificationTable();
+    await createTable.creatNotificationRecipientsTable();
 
     console.log('All tables created in order.');
   } catch (err) {
@@ -219,6 +222,7 @@ app.use('/v1/appointment_reschedules', appointment_reschedules);
 app.use('/v1/reception', receptionRouter);
 app.use('/v1/useractivity', userActivityRouter);
 app.use('/v1/loginhistory', loginHistoryRouter);
+app.use('/v1/notification', notificationRouter);
 
 // Error handler must be last
 app.use(errorHandler);

@@ -24,10 +24,9 @@ const expenseFileMiddleware = uploadFileMiddleware({
   fileFields: [
     {
       fieldName: "expense_documents",
-      subFolder: "Documents",
       maxSizeMB: 5,
       multiple: true,
-      isDocument:true
+      isDocument:false
     },
   ],
   createValidationFn: expensevalidation.createExpenseValidation,
