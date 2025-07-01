@@ -9,6 +9,7 @@ const {
   UPDATE_SUPPLIER_PAYMENTS_TENANT,
   DELETE_SUPPLIER_PAYMENTS_TENANT,
   GET_SUPPLIER_PAYMENTS_TENANT_PURCHASEORDER,
+  GETALL_SUPPLIER_PAYMENTS_TENANT_SUPPLIER,
 } = require("./RouterPath");
 const suppliervalidation = require("../validations/SupplierPaymentsValidation");
 const {
@@ -37,6 +38,17 @@ router.get(
     "supplier",
   ]),
   supplierPaymentController.getAllSupplierPaymentssByTenantId
+);
+
+router.get(
+  GETALL_SUPPLIER_PAYMENTS_TENANT_SUPPLIER,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "supplier",
+  ]),
+  supplierPaymentController.getAllSupplierPaymentssByTenantIdAndSupplierId
 );
 
 // Get Single SupplierPayments by Tenant ID & SupplierPayments ID

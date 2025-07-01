@@ -8,6 +8,7 @@ const {
   GET_PURCHASE_ORDER_TENANT,
   UPDATE_PURCHASE_ORDER_TENANT,
   DELETE_PURCHASE_ORDER_TENANT,
+  GETALL_PURCHASE_ORDER_TENANT_SUPPLIER,
 } = require("./RouterPath");
 const suppliervalidation = require("../validations/PurchaseOrderValidation");
 const {
@@ -36,6 +37,16 @@ router.get(
     "supplier",
   ]),
   supplierController.getAllPurchaseOrdersByTenantId
+);
+router.get(
+  GETALL_PURCHASE_ORDER_TENANT_SUPPLIER,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "supplier",
+  ]),
+  supplierController.getAllPurchaseOrdersByTenantIdAndSupplierId
 );
 
 // Get Single PurchaseOrder by Tenant ID & PurchaseOrder ID

@@ -41,6 +41,22 @@ exports.getAllSupplierPaymentssByTenantId = async (req, res, next) => {
   }
 };
 
+exports.getAllSupplierPaymentssByTenantIdAndSupplierId = async (req, res, next) => {
+  const { tenant_id,supplier_id } = req.params;
+  const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  try {
+    const supplierPaymentss = await supplierPaymentsService.getAllSupplierPaymentssByTenantIdAndSupplierId(
+      tenant_id,supplier_id,
+      page,
+      limit
+    );
+    res.status(200).json(supplierPaymentss);
+  } catch (err) {
+    next(err);
+  }
+};
+
 /**
  * Get supplierPayments by tenant and supplierPayments ID
  */

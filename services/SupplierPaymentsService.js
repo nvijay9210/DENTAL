@@ -104,6 +104,40 @@ const getAllSupplierPaymentssByTenantId = async (
     throw new CustomError("Failed to fetch supplier_paymentss", 404);
   }
 };
+const getAllSupplierPaymentssByTenantIdAndSupplierId = async (
+  tenantId,
+  supplier_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `supplier_payments:${tenantId}:${supplier_id}:page:${page}:limit:${limit}`;
+
+  try {
+    const supplier_paymentss = await getOrSetCache(cacheKey, async () => {
+      const result =
+        await supplier_paymentsModel.getAllSupplierPaymentssByTenantIdAndSupplierId(
+          tenantId,
+          supplier_id,
+          Number(limit),
+          offset
+        );
+      return result;
+    });
+
+    const convertedRows = supplier_paymentss.data.map((supplier_payments) =>
+      helper.convertDbToFrontend(
+        supplier_payments,
+        supplier_paymentsFieldsReverseMap
+      )
+    );
+
+    return { data: convertedRows, total: supplier_paymentss.total };
+  } catch (err) {
+    console.error("Database error while fetching supplier_paymentss:", err);
+    throw new CustomError("Failed to fetch supplier_paymentss", 404);
+  }
+};
 
 // Get SupplierPayments by ID & Tenant
 const getSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (
@@ -216,5 +250,6 @@ module.exports = {
   getSupplierPaymentsByTenantIdAndSupplierPaymentsId,
   updateSupplierPayments,
   deleteSupplierPaymentsByTenantIdAndSupplierPaymentsId,
-  getSupplierPaymentsByTenantAndPurchaseOrderId
+  getSupplierPaymentsByTenantAndPurchaseOrderId,
+  getAllSupplierPaymentssByTenantIdAndSupplierId
 };

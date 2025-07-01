@@ -46,6 +46,27 @@ const getPurchaseOrdersByTenantAndPurchaseOrdersId = async (tenant_id, purchase_
   }
 };
 
+const getAllPurchaseOrdersByTenantIdAndSupplierId = async (tenantId,supplierId, limit, offset) => {
+  const query1 = `SELECT * FROM purchase_orders  WHERE tenant_id = ? AND supplier_id = ? limit ? offset ?`;
+  const query2 = `SELECT count(*) as total FROM purchase_orders  WHERE tenant_id = ? AND supplier_id = ?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      supplierId,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [tenantId, supplierId]);
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
 // Update purchase_orders
 const updatePurchaseOrders = async (purchase_order_id, columns, values, tenant_id) => {
   try {
@@ -81,4 +102,5 @@ module.exports = {
   getPurchaseOrdersByTenantAndPurchaseOrdersId,
   updatePurchaseOrders,
   deletePurchaseOrdersByTenantAndPurchaseOrdersId,
+  getAllPurchaseOrdersByTenantIdAndSupplierId
 };

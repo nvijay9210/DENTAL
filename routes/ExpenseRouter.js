@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
 
 const expenseController = require("../controllers/ExpenseController");
 const {
@@ -14,6 +15,24 @@ const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
 const expensevalidation = require("../validations/ExpenseValidation");
+const { uploadFileMiddleware } = require("../utils/UploadFiles");
+// Setup multer memory storage once
+const upload = multer({ storage: multer.memoryStorage() });
+
+const expenseFileMiddleware = uploadFileMiddleware({
+  folderName: "Expense",
+  fileFields: [
+    {
+      fieldName: "expense_documents",
+      subFolder: "Documents",
+      maxSizeMB: 5,
+      multiple: true,
+      isDocument:true
+    },
+  ],
+  createValidationFn: expensevalidation.createExpenseValidation,
+  updateValidationFn: expensevalidation.updateExpenseValidation,
+});
 
 // Create Expense
 router.post(
@@ -23,6 +42,8 @@ router.post(
     "super-user",
     "dentist"
   ]),
+  upload.any(),
+  expenseFileMiddleware,
   expenseController.createExpense
 );
 
@@ -66,6 +87,8 @@ router.put(
     "super-user",
     "dentist"
   ]),
+  upload.any(),
+  expenseFileMiddleware,
   expenseController.updateExpense
 );
 

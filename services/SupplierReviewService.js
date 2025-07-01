@@ -99,6 +99,40 @@ const getAllSupplierReviewssByTenantId = async (
     throw new CustomError("Failed to fetch supplier_reviewss", 404);
   }
 };
+const getAllSupplierReviewsByTenantIdAndSupplierId = async (
+  tenantId,
+  supplier_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `supplier_reviews:${tenantId}:page:${page}:limit:${limit}`;
+
+  try {
+    const supplier_reviewss = await getOrSetCache(cacheKey, async () => {
+      const result =
+        await supplier_reviewsModel.getAllSupplierReviewsByTenantIdAndSupplierId(
+          tenantId,
+          supplier_id,
+          Number(limit),
+          offset
+        );
+      return result;
+    });
+
+    const convertedRows = supplier_reviewss.data.map((supplier_reviews) =>
+      helper.convertDbToFrontend(
+        supplier_reviews,
+        supplier_reviewsFieldsReverseMap
+      )
+    );
+
+    return { data: convertedRows, total: supplier_reviewss.total };
+  } catch (err) {
+    console.error("Database error while fetching supplier_reviewss:", err);
+    throw new CustomError("Failed to fetch supplier_reviewss", 404);
+  }
+};
 
 // Get SupplierReviews by ID & Tenant
 const getSupplierReviewsByTenantIdAndSupplierReviewsId = async (
@@ -187,4 +221,5 @@ module.exports = {
   getSupplierReviewsByTenantIdAndSupplierReviewsId,
   updateSupplierReviews,
   deleteSupplierReviewsByTenantIdAndSupplierReviewsId,
+  getAllSupplierReviewsByTenantIdAndSupplierId
 };

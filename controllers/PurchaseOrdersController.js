@@ -1,7 +1,9 @@
 const { CustomError } = require("../middlewares/CustomeError");
-const { checkIfExists } = require("../models/checkIfExists");
+const { checkIfExists, checkIfIdExists } = require("../models/checkIfExists");
 const purchaseOrdersService = require("../services/PurchaseOrderService");
-const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
+const {
+  validateTenantIdAndPageAndLimit,
+} = require("../validations/CommonValidations");
 const purchaseOrdersValidation = require("../validations/PurchaseOrderValidation");
 
 /**
@@ -30,11 +32,34 @@ exports.getAllPurchaseOrdersByTenantId = async (req, res, next) => {
   const { page, limit } = req.query;
   await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
-    const purchaseOrderss = await purchaseOrdersService.getAllPurchaseOrdersByTenantId(
-      tenant_id,
-      page,
-      limit
-    );
+    const purchaseOrderss =
+      await purchaseOrdersService.getAllPurchaseOrdersByTenantId(
+        tenant_id,
+        page,
+        limit
+      );
+    res.status(200).json(purchaseOrderss);
+  } catch (err) {
+    next(err);
+  }
+};
+exports.getAllPurchaseOrdersByTenantIdAndSupplierId = async (
+  req,
+  res,
+  next
+) => {
+  const { tenant_id, supplier_id } = req.params;
+  const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  await checkIfIdExists("supplier", "supplier_id", supplier_id);
+  try {
+    const purchaseOrderss =
+      await purchaseOrdersService.getAllPurchaseOrdersByTenantIdAndSupplierId(
+        tenant_id,
+        supplier_id,
+        page,
+        limit
+      );
     res.status(200).json(purchaseOrderss);
   } catch (err) {
     next(err);
@@ -44,7 +69,11 @@ exports.getAllPurchaseOrdersByTenantId = async (req, res, next) => {
 /**
  * Get purchaseOrders by tenant and purchaseOrders ID
  */
-exports.getPurchaseOrderByTenantIdAndPurchaseOrderId = async (req, res, next) => {
+exports.getPurchaseOrderByTenantIdAndPurchaseOrderId = async (
+  req,
+  res,
+  next
+) => {
   const { purchase_order_id, tenant_id } = req.params;
 
   try {
@@ -58,10 +87,11 @@ exports.getPurchaseOrderByTenantIdAndPurchaseOrderId = async (req, res, next) =>
     if (!purchaseOrders1) throw new CustomError("PurchaseOrder not found", 404);
 
     // Fetch purchaseOrders details
-    const purchaseOrders = await purchaseOrdersService.getPurchaseOrderByTenantIdAndPurchaseOrderId(
-      tenant_id,
-      purchase_order_id
-    );
+    const purchaseOrders =
+      await purchaseOrdersService.getPurchaseOrderByTenantIdAndPurchaseOrderId(
+        tenant_id,
+        purchase_order_id
+      );
     res.status(200).json(purchaseOrders);
   } catch (err) {
     next(err);
@@ -77,10 +107,17 @@ exports.updatePurchaseOrder = async (req, res, next) => {
 
   try {
     // Validate update input
-    await purchaseOrdersValidation.updatePurchaseOrderValidation(purchase_order_id, details);
+    await purchaseOrdersValidation.updatePurchaseOrderValidation(
+      purchase_order_id,
+      details
+    );
 
     // Update the purchaseOrders
-    await purchaseOrdersService.updatePurchaseOrder(purchase_order_id, details, tenant_id);
+    await purchaseOrdersService.updatePurchaseOrder(
+      purchase_order_id,
+      details,
+      tenant_id
+    );
     res.status(200).json({ message: "PurchaseOrder updated successfully" });
   } catch (err) {
     next(err);
@@ -90,7 +127,11 @@ exports.updatePurchaseOrder = async (req, res, next) => {
 /**
  * Delete a purchaseOrders by ID and tenant ID
  */
-exports.deletePurchaseOrderByTenantIdAndPurchaseOrderId = async (req, res, next) => {
+exports.deletePurchaseOrderByTenantIdAndPurchaseOrderId = async (
+  req,
+  res,
+  next
+) => {
   const { purchase_order_id, tenant_id } = req.params;
 
   try {

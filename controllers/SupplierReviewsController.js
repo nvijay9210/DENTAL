@@ -1,5 +1,5 @@
 const { CustomError } = require("../middlewares/CustomeError");
-const { checkIfExists } = require("../models/checkIfExists");
+const { checkIfExists, checkIfIdExists } = require("../models/checkIfExists");
 const supplierReviewsService = require("../services/SupplierReviewService");
 const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 const supplierReviewsValidation = require("../validations/SupplierReviewsValidation");
@@ -32,6 +32,23 @@ exports.getAllSupplierReviewssByTenantId = async (req, res, next) => {
   try {
     const supplierReviewss = await supplierReviewsService.getAllSupplierReviewssByTenantId(
       tenant_id,
+      page,
+      limit
+    );
+    res.status(200).json(supplierReviewss);
+  } catch (err) {
+    next(err);
+  }
+};
+exports.getAllSupplierReviewsByTenantIdAndSupplierId = async (req, res, next) => {
+  const { tenant_id,supplier_id } = req.params;
+  const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  await checkIfIdExists('supplier','supplier_id',supplier_id)
+  try {
+    const supplierReviewss = await supplierReviewsService.getAllSupplierReviewsByTenantIdAndSupplierId(
+      tenant_id,
+      supplier_id,
       page,
       limit
     );

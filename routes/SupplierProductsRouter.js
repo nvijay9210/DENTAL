@@ -10,6 +10,7 @@ const {
   UPDATE_SUPPLIER_PRODUCTS_TENANT,
   DELETE_SUPPLIER_PRODUCTS_TENANT,
   GETALL_SUPPLIER_PRODUCTS_TENANT_CLINIC,
+  GETALL_SUPPLIER_PRODUCTS_TENANT_SUPPLIER,
 } = require("./RouterPath");
 const suppliervalidation = require("../validations/SupplierProductsValidation");
 const {
@@ -61,7 +62,7 @@ router.get(
   supplierController.getAllSupplierProductssByTenantId
 );
 router.get(
-  GETALL_SUPPLIER_PRODUCTS_TENANT_CLINIC,
+  GETALL_SUPPLIER_PRODUCTS_TENANT_SUPPLIER,
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
