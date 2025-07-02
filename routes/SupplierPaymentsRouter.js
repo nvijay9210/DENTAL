@@ -11,10 +11,30 @@ const {
   GET_SUPPLIER_PAYMENTS_TENANT_PURCHASEORDER,
   GETALL_SUPPLIER_PAYMENTS_TENANT_SUPPLIER,
 } = require("./RouterPath");
-const suppliervalidation = require("../validations/SupplierPaymentsValidation");
+const supplierPaymentvalidation = require("../validations/SupplierPaymentsValidation");
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
+
+const multer = require("multer");
+
+const { uploadFileMiddleware } = require("../utils/UploadFiles");
+// Setup multer memory storage once
+const upload = multer({ storage: multer.memoryStorage() });
+
+const supplierPaymentFileMiddleware = uploadFileMiddleware({
+  folderName: "SupplierPayment",
+  fileFields: [
+    {
+      fieldName: "supplier_payment_documents",
+      maxSizeMB: process.env.DOCUMENT_MAX_SIZE,
+      multiple: true,
+      isDocument: false,
+    },
+  ],
+  createValidationFn: supplierPaymentvalidation.createSupplierPaymentsValidation,
+  updateValidationFn: supplierPaymentvalidation.updateSupplierPaymentsValidation,
+});
 
 // Create SupplierPayments
 router.post(
@@ -25,6 +45,8 @@ router.post(
     "dentist",
     "supplier",
   ]),
+  upload.any(),
+  supplierPaymentFileMiddleware,
   supplierPaymentController.createSupplierPayments
 );
 

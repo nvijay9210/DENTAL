@@ -79,12 +79,11 @@ const createNotification = async (data) => {
 
     const recipientIds = [];
 
+    console.log(receiverIds)
+
     // Step 3: Save one recipient at a time
-    for (const receiver_id of receiverIds) {
-      if (!Number.isInteger(receiver_id)) {
-        console.warn(`Skipping invalid receiver_id: ${receiver_id}`);
-        continue;
-      }
+    for (let receiver_id of receiverIds) {
+      receiver_id=parseInt(receiver_id)
 
       const recipientData = {
         notification_id,
