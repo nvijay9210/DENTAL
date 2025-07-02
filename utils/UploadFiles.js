@@ -524,8 +524,10 @@ const uploadFileMiddleware = (options) => {
       let id = 0;
       switch (folderName) {
         case "Notification": id = req.params.notification_id; break;
+        case "Payment": id = req.params.payment_id; break;
         case "Expense": id = req.params.expense_id; break;
         case "Supplier_products": id = req.params.supplier_product_id; break;
+        case "SupplierPayment": id = req.params.supplier_payment_id; break;
         case "Supplier": id = req.params.supplier_id; break;
         case "Reception": id = req.params.reception_id; break;
         case "Asset": id = req.params.asset_id; break;
@@ -537,6 +539,7 @@ const uploadFileMiddleware = (options) => {
         default: break;
       }
 
+      //its only for clinic image update
       const settings = req.query.settings || 0;
       if (settings != 1) {
         if (id) {
@@ -571,6 +574,8 @@ const uploadFileMiddleware = (options) => {
         fs.writeFileSync(filePath, buffer);
         return relativePath(filePath);
       };
+
+      console.log(id,fileFields)
 
       // Process each field
       for (const fileField of fileFields) {
