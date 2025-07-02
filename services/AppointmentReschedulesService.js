@@ -71,11 +71,15 @@ const createAppointmentReschedules = async (details) => {
 
     await compareDateTime(appointment.appointment_date,appointment.start_time,details.new_date,details.new_start_time)
 
+    details.previous_date=appointment.appointment_date
+    details.previous_time=appointment.start_time
+
     appointment.appointment_date=details.new_date,
     appointment.start_time=details.new_start_time,
     appointment.end_time=details.new_end_time || '00:00:00',//If new add
     appointment.rescheduled_from=appointment.appointment_id
     appointment.status='pending'
+    appointment.room_id='00000000-0000-0000-0000-000000000000'
 
 
     await createAppointmentValidation(appointment)
@@ -83,8 +87,6 @@ const createAppointmentReschedules = async (details) => {
 
     const newAppointment=await appointmentService.createAppointment(appointment)
 
-    details.previous_date=appointment.appointment_date
-    details.previous_time=appointment.start_time
     details.new_appointment_id=newAppointment
 
     const { columns, values } = mapFields(details, fieldMap);

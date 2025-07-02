@@ -44,19 +44,17 @@ exports.getAllNotificationsByTenantId = async (req, res, next) => {
     next(err);
   }
 };
-exports.getAllNotificationByTenantIdAndSupplierId = async (req, res, next) => {
-  const { tenant_id, supplier_id } = req.params;
-  const { page, limit } = req.query;
-  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
-  await checkIfIdExists("supplier", "supplier_id", supplier_id);
+exports.getNotificationsForReceiver = async (req, res, next) => {
+  const { tenant_id } = req.params;
+  const { receiver_role, receiver_id } = req.query;
+
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
   try {
-    const notifications =
-      await notificationService.getAllNotificationByTenantIdAndSupplierId(
-        tenant_id,
-        supplier_id,
-        page,
-        limit
-      );
+    const notifications = await notificationService.getNotificationsForReceiver(
+      tenant_id,
+      receiver_id,
+      receiver_role
+    );
     res.status(200).json(notifications);
   } catch (err) {
     next(err);
@@ -122,8 +120,12 @@ exports.markNotificationAsRead = async (req, res, next) => {
 
   try {
     // Validate update input
-    await checkIfIdExists('notificationrecipients','notification_recipient_id',notification_recipient_id)
-    
+    await checkIfIdExists(
+      "notificationrecipients",
+      "notification_recipient_id",
+      notification_recipient_id
+    );
+
     // Update the notification
     await notificationRecipientService.markNotificationAsRead(
       notification_recipient_id

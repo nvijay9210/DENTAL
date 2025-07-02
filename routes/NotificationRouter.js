@@ -10,6 +10,7 @@ const {
   UPDATE_NOTIFICATION_TENANT,
   DELETE_NOTIFICATION_TENANT,
   UPDATE_NOTIFICATION_RECIPIENTS_STATUS_TENANT,
+  GET_NOTIFICATION_TENANT_RECEIVER,
 } = require("./RouterPath");
 const {
   authenticateTenantClinicGroup,
@@ -47,6 +48,11 @@ router.get(
   GETALL_NOTIFICATION_TENANT,
   authenticateTenantClinicGroup(["tenant", "super-user", "dentist"]),
   notificationController.getAllNotificationsByTenantId
+);
+router.get(
+  GET_NOTIFICATION_TENANT_RECEIVER,
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist"]),
+  notificationController.getNotificationsForReceiver
 );
 
 // Get Single Notification by Tenant ID & Notification ID

@@ -10,21 +10,22 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
-const { createNotificationRecipient } = require("./NotificationRecipientsService");
-
+const {
+  createNotificationRecipient,
+} = require("./NotificationRecipientsService");
 
 // Field mapping for notifications (similar to treatment)
 
 const notificationFields = {
-    tenant_id: (val) => val,
-    sender_role: (val) => val,
-    sender_id: (val) => val,
-    type: (val) => val,
-    title: (val) => val,
-    message: (val) => helper.safeStringify(val),
-    reference_id: (val) => (val ? parseInt(val) : null),
-    file_url: (val) => helper.safeStringify(val)
-  };
+  tenant_id: (val) => val,
+  sender_role: (val) => val,
+  sender_id: (val) => val,
+  type: (val) => val,
+  title: (val) => val,
+  message: (val) => helper.safeStringify(val),
+  reference_id: (val) => (val ? parseInt(val) : null),
+  file_url: (val) => helper.safeStringify(val),
+};
 const notificationFieldsReverseMap = {
   notification_id: (val) => val,
   tenant_id: (val) => val,
@@ -70,7 +71,9 @@ const createNotification = async (data) => {
         receiverIds = JSON.parse(receiverIds); // "[1,2,3]" → [1, 2, 3]
       } catch (err) {
         // fallback: try comma-separated format
-        receiverIds = receiverIds.split(",").map((id) => parseInt(id.trim(), 10));
+        receiverIds = receiverIds
+          .split(",")
+          .map((id) => parseInt(id.trim(), 10));
       }
     }
 
@@ -79,11 +82,11 @@ const createNotification = async (data) => {
 
     const recipientIds = [];
 
-    console.log(receiverIds)
+    console.log(receiverIds);
 
     // Step 3: Save one recipient at a time
     for (let receiver_id of receiverIds) {
-      receiver_id=parseInt(receiver_id)
+      receiver_id = parseInt(receiver_id);
 
       const recipientData = {
         notification_id,
@@ -96,7 +99,9 @@ const createNotification = async (data) => {
 
       console.log("Saving recipient for receiver_id:", receiver_id);
 
-      const notification_recipients_id = await createNotificationRecipient(recipientData);
+      const notification_recipients_id = await createNotificationRecipient(
+        recipientData
+      );
       recipientIds.push(notification_recipients_id);
     }
 
@@ -112,7 +117,6 @@ const createNotification = async (data) => {
   }
 };
 
-
 // Get All Notifications by Tenant ID with Caching
 const getAllNotificationsByTenantId = async (
   tenantId,
@@ -124,20 +128,16 @@ const getAllNotificationsByTenantId = async (
 
   try {
     const notifications = await getOrSetCache(cacheKey, async () => {
-      const result =
-        await notificationModel.getAllNotificationsByTenantId(
-          tenantId,
-          Number(limit),
-          offset
-        );
+      const result = await notificationModel.getAllNotificationsByTenantId(
+        tenantId,
+        Number(limit),
+        offset
+      );
       return result;
     });
 
     const convertedRows = notifications.data.map((notification) =>
-      helper.convertDbToFrontend(
-        notification,
-        notificationFieldsReverseMap
-      )
+      helper.convertDbToFrontend(notification, notificationFieldsReverseMap)
     );
 
     return { data: convertedRows, total: notifications.total };
@@ -146,35 +146,31 @@ const getAllNotificationsByTenantId = async (
     throw new CustomError("Failed to fetch notifications", 404);
   }
 };
-const getAllNotificationByTenantIdAndSupplierId = async (
+
+const getNotificationsForReceiver = async (
   tenantId,
-  supplier_id,
-  page = 1,
-  limit = 10
+  receiverId,
+  receiverRole
 ) => {
-  const offset = (page - 1) * limit;
-  const cacheKey = `notification:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = `notification:${tenantId}`;
 
   try {
-    const notifications = await getOrSetCache(cacheKey, async () => {
-      const result =
-        await notificationModel.getAllNotificationByTenantIdAndSupplierId(
-          tenantId,
-          supplier_id,
-          Number(limit),
-          offset
-        );
+    let notifications = await getOrSetCache(cacheKey, async () => {
+      const result = await notificationModel.getNotificationsForReceiver(
+        tenantId,
+        receiverId,
+        receiverRole
+      );
       return result;
     });
 
-    const convertedRows = notifications.data.map((notification) =>
-      helper.convertDbToFrontend(
-        notification,
-        notificationFieldsReverseMap
-      )
-    );
+    // ✅ Parse message field for each item safely
+    notifications = notifications.map((n) => ({
+      ...n,
+      message: helper.safeJsonParse(n.message),
+    }));
 
-    return { data: convertedRows, total: notifications.total };
+    return notifications;
   } catch (err) {
     console.error("Database error while fetching notifications:", err);
     throw new CustomError("Failed to fetch notifications", 404);
@@ -200,10 +196,7 @@ const getNotificationByTenantIdAndNotificationId = async (
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError(
-      "Failed to get notification: " + error.message,
-      404
-    );
+    throw new CustomError("Failed to get notification: " + error.message, 404);
   }
 };
 
@@ -223,10 +216,7 @@ const updateNotification = async (notification_id, data, tenant_id) => {
     );
 
     if (affectedRows === 0) {
-      throw new CustomError(
-        "Notification not found or no changes made.",
-        404
-      );
+      throw new CustomError("Notification not found or no changes made.", 404);
     }
 
     await invalidateCacheByPattern("notification:*");
@@ -268,5 +258,5 @@ module.exports = {
   getNotificationByTenantIdAndNotificationId,
   updateNotification,
   deleteNotificationByTenantIdAndNotificationId,
-  getAllNotificationByTenantIdAndSupplierId
+  getNotificationsForReceiver,
 };
