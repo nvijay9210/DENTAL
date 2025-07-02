@@ -206,7 +206,7 @@ WHERE app.appointment_date = CURDATE()
   AND app.tenant_id = ?
   AND app.clinic_id = ?
   AND app.patient_id = ?
-  AND app.status = 'pending'
+  AND app.status = 'confirmed'
 ORDER BY app.start_time ASC;`;
 
   const conn = await pool.getConnection();
@@ -240,15 +240,20 @@ const getAllNotifyByDentist = async (
   app.end_time,
   app.visit_reason,
   rem.title,
-  rem.description
+  rem.description,
+  not.title as notification_title,
+  not.message,
+  not.type,
+  not.file_url
 FROM appointment app
 JOIN reminder rem ON app.dentist_id = rem.dentist_id
 JOIN patient pat ON app.patient_id=pat.patient_id
+JOIN notifications not on app.tenant_id=not.tenant_id
 WHERE app.appointment_date = CURDATE()
   AND app.tenant_id = ?
   AND app.clinic_id = ?
   AND app.dentist_id = ?
-  AND app.status = 'pending'
+  AND app.status = 'confirmed'
 ORDER BY app.start_time ASC;`;
 
   const conn = await pool.getConnection();

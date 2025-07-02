@@ -29,26 +29,94 @@ const getAllNotificationsByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
-const getAllNotificationByTenantIdAndSupplierId = async (tenantId,supplierId, limit, offset) => {
-  const query1 = `SELECT * FROM notification  WHERE tenant_id = ? AND supplier_id = ? limit ? offset ?`;
-  const query2 = `SELECT count(*) as total FROM notification  WHERE tenant_id = ? AND supplier_id = ?`;
+const getNotificationsForReceiver = async (tenantId, receiverId, receiverRole) => {
+  console.log(tenantId, receiverRole, receiverId);
+
+  // Receiver join
+  let receiverJoinTable = '';
+  let receiverAlias = '';
+  let receiverNameExpr = '';
+
+  if (receiverRole === 'dentist') {
+    receiverJoinTable = 'dentist';
+    receiverAlias = 'ruser';
+    receiverNameExpr = `CONCAT(ruser.first_name, ' ', ruser.last_name)`;
+  } else if (receiverRole === 'patient') {
+    receiverJoinTable = 'patient';
+    receiverAlias = 'ruser';
+    receiverNameExpr = `CONCAT(ruser.first_name, ' ', ruser.last_name)`;
+  } else {
+    throw new Error("Invalid receiver role");
+  }
+
+  // Dynamic LEFT JOINs for sender and clinic
+  const senderJoin = `
+    LEFT JOIN dentist sd ON sd.dentist_id = n.sender_id AND n.sender_role = 'dentist'
+    LEFT JOIN patient sp ON sp.patient_id = n.sender_id AND n.sender_role = 'patient'
+    LEFT JOIN clinic cd ON cd.clinic_id = sd.clinic_id
+    LEFT JOIN clinic cp ON cp.tenant_id = sp.tenant_id
+  `;
+
+  // Dynamic expressions
+  const senderNameExpr = `
+    CASE 
+      WHEN n.sender_role = 'dentist' THEN CONCAT(sd.first_name, ' ', sd.last_name)
+      WHEN n.sender_role = 'patient' THEN CONCAT(sp.first_name, ' ', sp.last_name)
+      ELSE NULL
+    END
+  `;
+
+  const senderClinicExpr = `
+    CASE
+      WHEN n.sender_role = 'dentist' THEN cd.clinic_name
+      WHEN n.sender_role = 'patient' THEN cp.clinic_name
+      ELSE NULL
+    END
+  `;
+
+  const query = `
+    SELECT 
+      n.notification_id,
+      n.tenant_id,
+      n.sender_role,
+      n.sender_id,
+      n.type,
+      n.title,
+      n.message,
+      n.reference_id,
+      n.file_url,
+      n.created_by,
+      n.created_time,
+      n.updated_by,
+      n.updated_time,
+      r.receiver_role,
+      r.receiver_id,
+      r.status,
+      r.delivered_at,
+      r.read_at,
+      ${receiverNameExpr} AS receiver_name,
+      ${senderNameExpr} AS sender_name,
+      ${senderClinicExpr} AS clinic_name
+    FROM notificationrecipients r
+    JOIN notifications n ON n.notification_id = r.notification_id
+    JOIN ${receiverJoinTable} ${receiverAlias} ON ${receiverAlias}.${receiverRole}_id = r.receiver_id
+    ${senderJoin}
+    WHERE r.status != ? AND r.receiver_role = ? AND r.receiver_id = ? AND n.tenant_id = ?
+    ORDER BY n.created_time DESC
+  `;
+
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query1, [
-      tenantId,
-      supplierId,
-      limit,
-      offset,
-    ]);
-    const [counts] = await conn.query(query2, [tenantId, supplierId]);
-    return { data: rows, total: counts[0].total };
-  } catch (error) {
-    console.error(error);
-    throw new Error("Database Operation Failed");
+    const [rows] = await conn.query(query, ['archived', receiverRole, receiverId, tenantId]);
+    return rows;
+  } catch (err) {
+    console.error("SQL error:", err);
+    throw new Error("Failed to fetch notifications");
   } finally {
     conn.release();
   }
 };
+
 
 // Get notification by tenant ID and notification ID
 const getNotificationByTenantAndNotificationId = async (tenant_id, notification_id) => {
@@ -122,6 +190,6 @@ module.exports = {
   getNotificationByTenantAndNotificationId,
   updateNotification,
   deleteNotificationByTenantAndNotificationId,
-  getAllNotificationByTenantIdAndSupplierId,
+  getNotificationsForReceiver,
   archiveOldReadNotifications
 };

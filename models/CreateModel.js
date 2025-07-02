@@ -407,7 +407,9 @@ async function addStatusTypeTableData() {
 (9, 'tenant_app_font'),
 (10, 'treatment_type'),
 (11, 'treatment_status'),
-(12, 'smoking_status');
+(12, 'smoking_status'),
+(13, 'disease_type'),
+(14, 'currency_code');
   `;
 
   try {

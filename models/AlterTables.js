@@ -410,6 +410,85 @@ async function updateReminderTableStructure(conn) {
   }
 }
 
+// Step 8: Modify discount_amount column in appointment table to allow NULL
+async function modifyDiscountAmountColumn(conn) {
+  try {
+    console.log("🔄 Modifying discount_amount column in appointment table...");
+    const [columns] = await conn.query(`
+      SHOW COLUMNS FROM appointment LIKE 'discount_amount';
+    `);
+
+    if (columns.length > 0 && columns[0].Null === "NO") {
+      await conn.query(`
+        ALTER TABLE appointment
+        MODIFY COLUMN discount_amount DECIMAL(10,2) NULL;
+      `);
+      console.log("✅ Column 'discount_amount' modified to allow NULL.");
+    } else if (columns.length > 0 && columns[0].Null === "YES") {
+      console.log("ℹ️ Column 'discount_amount' already allows NULL.");
+    } else {
+      console.log("❌ Column 'discount_amount' does not exist.");
+    }
+  } catch (error) {
+    console.error("❌ Error modifying 'discount_amount' column:", error.message);
+    throw error;
+  }
+}
+
+// Step 9: Modify payment_status column in appointment table to allow NULL
+async function modifyPaymentStatusColumn(conn) {
+  try {
+    console.log("🔄 Modifying payment_status column in appointment table...");
+    const [columns] = await conn.query(`
+      SHOW COLUMNS FROM appointment LIKE 'payment_status';
+    `);
+
+    if (columns.length > 0 && columns[0].Null === "NO") {
+      await conn.query(`
+        ALTER TABLE appointment
+        MODIFY COLUMN payment_status VARCHAR(100) NULL;
+      `);
+      console.log("✅ Column 'payment_status' modified to allow NULL.");
+    } else if (columns.length > 0 && columns[0].Null === "YES") {
+      console.log("ℹ️ Column 'payment_status' already allows NULL.");
+    } else {
+      console.log("❌ Column 'payment_status' does not exist.");
+    }
+  } catch (error) {
+    console.error("❌ Error modifying 'payment_status' column:", error.message);
+    throw error;
+  }
+}
+
+// Step 10: Insert default status types if not exists
+async function insertDefaultStatusTypes(conn) {
+  const statusTypes = ['disease_type', 'currency_code'];
+  
+  try {
+    console.log("🔄 Inserting default status types...");
+    
+    for (const type of statusTypes) {
+      const [existing] = await conn.query(
+        "SELECT * FROM statustype WHERE status_type = ?",
+        [type]
+      );
+
+      if (existing.length === 0) {
+        await conn.query(
+          "INSERT INTO statustype (status_type, created_by) VALUES (?, ?)",
+          [type, "ADMIN"]
+        );
+        console.log(`✅ Status type '${type}' inserted.`);
+      } else {
+        console.log(`ℹ️ Status type '${type}' already exists.`);
+      }
+    }
+  } catch (error) {
+    console.error("❌ Error inserting status types:", error.message);
+    throw error;
+  }
+}
+
 // Main migration runner
 (async () => {
   const conn = await pool.getConnection();
@@ -438,6 +517,15 @@ async function updateReminderTableStructure(conn) {
 
     // Step 7: Update reminder table
     await updateReminderTableStructure(conn);
+
+    // Step 8: Update appointment table
+    await modifyDiscountAmountColumn(conn);
+
+    // Step 9: Update appointment table
+    await modifyPaymentStatusColumn(conn);
+
+     // Step 10: Insert default status types
+     await insertDefaultStatusTypes(conn); // <-- New step added here
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");
