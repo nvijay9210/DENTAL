@@ -13,6 +13,7 @@ const {
   GET_REMINDER_DENTIST_TYPE,
   GETALL_NOTIFY_DENTIST,
   GETALL_NOTIFY_PATIENT,
+  GETALL_REMINDER_NOTIFY_DENTIST,
 } = require("./RouterPath");
 const {
   authenticateTenantClinicGroup,
@@ -67,6 +68,11 @@ router.get(
   GETALL_NOTIFY_PATIENT,
   authenticateTenantClinicGroup(["tenant","super-user", "dentist", "patient"]),
   reminderController.getAllNotifyByPatient
+);
+router.get(
+  GETALL_REMINDER_NOTIFY_DENTIST,
+  authenticateTenantClinicGroup(["tenant","super-user", "dentist", "patient"]),
+  reminderController.getAllReminderNotifyByDentist
 );
 
 // Update Reminder
