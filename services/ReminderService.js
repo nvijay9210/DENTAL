@@ -37,15 +37,15 @@ const reminderFields = {
   time: (val) => val,
   is_recurring: (val) => val,
   reminder_repeat: (val) => val,
-  repeat_interval: (val) => val? parseInt(val) : 0,
-  repeat_count: (val) => val? parseInt(val) : 0,
+  repeat_interval: (val) => (val ? parseInt(val) : 0),
+  repeat_count: (val) => (val ? parseInt(val) : 0),
   repeat_weekdays: (val) => helper.safeStringify(val),
   monthly_week: (val) => helper.safeStringify(val),
   monthly_weekdays: (val) => helper.safeStringify(val),
   monthly_option: (val) => val,
   repeat_end_date: (val) => (val ? formatDateOnly(val) : null),
   notify: helper.parseBoolean,
-  notify_before_hours: (val) => val? parseInt(val) : 0,
+  notify_before_hours: (val) => (val ? parseInt(val) : 0),
   reminder_reason: (val) => val,
   status: (val) => val,
 };
@@ -64,17 +64,17 @@ const reminderFieldsReverseMap = {
   start_date: (val) => formatDateOnly(val),
   time: (val) => val,
   reminder_repeat: (val) => val,
-  repeat_interval: (val) => val? parseInt(val) : 0,
+  repeat_interval: (val) => (val ? parseInt(val) : 0),
   repeat_weekdays: (val) => helper.safeJsonParse(val),
   monthly_week: (val) => helper.safeJsonParse(val),
   monthly_weekdays: (val) => helper.safeJsonParse(val),
   repeat_end_date: (val) => formatDateOnly(val),
   notify: (val) => Boolean(val),
   is_recurring: (val) => val,
-  repeat_count: (val) => val? parseInt(val) : 0,
+  repeat_count: (val) => (val ? parseInt(val) : 0),
   monthly_option: (val) => val,
   reminder_reason: (val) => val,
-  notify_before_hours: (val) => val? parseInt(val) : 0,
+  notify_before_hours: (val) => (val ? parseInt(val) : 0),
   status: (val) => val,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
@@ -132,7 +132,7 @@ const getAllRemindersByTenantAndClinicAndDentistAndType = async (
   tenant_id,
   clinic_id,
   dentist_id,
-  page=1,
+  page = 1,
   limit = 10,
   type
 ) => {
@@ -164,44 +164,58 @@ const getAllRemindersByTenantAndClinicAndDentistAndType = async (
   }
 };
 
-const getAllNotifyByDentist = async (
-  tenant_id,
-  clinic_id,
-  dentist_id
-) => {
-
+const getAllNotifyByDentist = async (tenant_id, clinic_id, dentist_id) => {
   try {
-    const result =
-    await reminderModel.getAllNotifyByDentist(
+    const result = await reminderModel.getAllNotifyByDentist(
       tenant_id,
       clinic_id,
       dentist_id
     );
-    const result1 = result.map((r) =>
-      ({ ...r, description: helper.safeJsonParse(r.description) })
-    );
-    
-  return result1;
+    const result1 = result.map((r) => ({
+      ...r,
+      description: helper.safeJsonParse(r.description),
+      appointment_date: formatDateOnly(r.appointment_date),
+    }));
+
+    return result1;
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
     throw new CustomError("Failed to fetch reminders", 404);
   }
 };
 
-const getAllNotifyByPatient = async (
-  tenant_id,
-  clinic_id,
-  patient_id
-) => {
-
+const getAllNotifyByPatient = async (tenant_id, clinic_id, patient_id) => {
   try {
-    const result =
-    await reminderModel.getAllNotifyByPatient(
+    const result = await reminderModel.getAllNotifyByPatient(
       tenant_id,
       clinic_id,
       patient_id
     );
-  return result;
+    const result1 = result.map((r) => ({
+      ...r,
+      description: helper.safeJsonParse(r.description),
+      appointment_date: formatDateOnly(r.appointment_date),
+    }));
+    return result1;
+  } catch (err) {
+    console.error("Database error while fetching reminders:", err);
+    throw new CustomError("Failed to fetch reminders", 404);
+  }
+};
+
+const getAllReminderNotifyByDentist = async (tenant_id, clinic_id, dentist_id) => {
+  try {
+    const result = await reminderModel.getAllReminderNotifyByDentist(
+      tenant_id,
+      clinic_id,
+      dentist_id
+    );
+    const result1 = result.map((r) => ({
+      ...r,
+      description: helper.safeJsonParse(r.description),
+      start_date: formatDateOnly(r.start_date),
+    }));
+    return result1;
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
     throw new CustomError("Failed to fetch reminders", 404);
@@ -221,7 +235,7 @@ const getReminderByTenantIdAndReminderId = async (tenantId, reminderId) => {
       reminderFieldsReverseMap
     );
 
-    return convertedRows
+    return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get reminder: " + error.message, 404);
   }
@@ -557,5 +571,6 @@ module.exports = {
   getMonthlywiseRemindersByTenantAndClinicIdAndDentistId,
   getAllRemindersByTenantAndClinicAndDentistAndType,
   getAllNotifyByPatient,
-  getAllNotifyByDentist
+  getAllNotifyByDentist,
+  getAllReminderNotifyByDentist
 };
