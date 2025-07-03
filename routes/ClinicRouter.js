@@ -23,7 +23,6 @@ const clinicFileMiddleware = uploadFileMiddleware({
   fileFields: [
     {
       fieldName: "clinic_logo",
-      subFolder: "Photos",
       maxSizeMB: 2,
       multiple: false,
     },

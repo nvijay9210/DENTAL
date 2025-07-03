@@ -30,7 +30,6 @@ const patientFileMiddleware = uploadFileMiddleware({
   fileFields: [
     {
       fieldName: "profile_picture",
-      subFolder: "Photos",
       maxSizeMB: 2,
       multiple: false,
     }

@@ -24,7 +24,6 @@ const assetFileMiddleware = uploadFileMiddleware({
   fileFields: [
     {
       fieldName: "asset_photo",
-      subFolder: "Photos",
       maxSizeMB: 2,
       multiple: false,
     },

@@ -28,8 +28,7 @@ const supplierPaymentFileMiddleware = uploadFileMiddleware({
     {
       fieldName: "supplier_payment_documents",
       maxSizeMB: process.env.DOCUMENT_MAX_SIZE,
-      multiple: true,
-      isDocument: false,
+      multiple: true
     },
   ],
   createValidationFn: supplierPaymentvalidation.createSupplierPaymentsValidation,

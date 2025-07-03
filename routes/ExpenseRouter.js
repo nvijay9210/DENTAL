@@ -3,6 +3,8 @@ const router = express.Router();
 const multer = require("multer");
 
 const expenseController = require("../controllers/ExpenseController");
+const { getFileFieldsFromDB } = require("../utils/GetFileFieldsFromDB");
+
 const {
   ADD_EXPENSE,
   GETALL_EXPENSE_TENANT,
@@ -25,8 +27,7 @@ const expenseFileMiddleware = uploadFileMiddleware({
     {
       fieldName: "expense_documents",
       maxSizeMB: 5,
-      multiple: true,
-      isDocument:false
+      multiple: true
     },
   ],
   createValidationFn: expensevalidation.createExpenseValidation,
