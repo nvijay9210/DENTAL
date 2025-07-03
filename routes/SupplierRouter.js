@@ -24,7 +24,6 @@ const supplierFileMiddleware = uploadFileMiddleware({
   fileFields: [
     {
       fieldName: "logo_url",
-      subFolder: "Photos",
       maxSizeMB: 2,
       multiple: false,
     },

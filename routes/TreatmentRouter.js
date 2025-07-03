@@ -31,7 +31,6 @@ const treatmentFileMiddleware = uploadFileMiddleware({
   fileFields: [
     {
       fieldName: "treatment_images",
-      subFolder: "Photos",
       maxSizeMB: 10,
       multiple: true,
     },

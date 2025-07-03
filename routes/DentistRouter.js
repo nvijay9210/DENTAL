@@ -26,14 +26,11 @@ const dentistFileMiddleware = uploadFileMiddleware({
   fileFields: [
     {
       fieldName: "profile_picture",
-      // subFolder: "Photos",
       maxSizeMB: 2,
-      multiple: false,
-      isDocument:false
+      multiple: false
     },
     {
       fieldName: "awards_certifications",
-      // subFolder: "Documents",
       maxSizeMB: 10,
       multiple: true,
     },

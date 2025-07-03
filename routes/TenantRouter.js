@@ -20,7 +20,6 @@ const TenantFileMiddleware = uploadFileMiddleware({
   fileFields: [
     {
       fieldName: "tenant_app_logo",
-      subFolder: "Photos",
       maxSizeMB: 2,
       multiple: false,
     },
