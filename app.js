@@ -40,6 +40,7 @@ const receptionRouter = require('./routes/ReceptionRouter');
 const userActivityRouter = require('./routes/UserActivityRouter');
 const loginHistoryRouter = require('./routes/LoginHistoryRouter');
 const notificationRouter = require('./routes/NotificationRouter');
+const toothdetailsRouter = require('./routes/ToothDetailsRouter');
 
 // const compressionMiddleware = require('./middlewares/CompressionMiddleware');
 const { redisconnect } = require('./config/redisConfig');
@@ -225,6 +226,7 @@ app.use('/v1/reception', receptionRouter);
 app.use('/v1/useractivity', userActivityRouter);
 app.use('/v1/loginhistory', loginHistoryRouter);
 app.use('/v1/notification', notificationRouter);
+app.use('/v1/toothdetails', toothdetailsRouter);
 
 // Error handler must be last
 app.use(errorHandler);

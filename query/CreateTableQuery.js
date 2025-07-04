@@ -722,11 +722,14 @@ CREATE TABLE IF NOT EXISTS payment (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
   addToothDetails: `CREATE TABLE IF NOT EXISTS toothdetails (
-  tooth_details_id int(11) NOT NULL AUTO_INCREMENT,
+  toothdetails_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
   clinic_id int(11) NOT NULL,
   dentist_id int(11) NOT NULL,
   patient_id int(11) NOT NULL,
+  tooth_id TINYINT UNSIGNED NOT NULL,
+  tooth_name varchar(100) NOT NULL,
+  tooth_position varchar(100) NOT NULL,
   disease_type varchar(100) NOT NULL,
   disease_name varchar(100) NOT NULL,
   treatment_date Date NOT NULL,
@@ -735,13 +738,15 @@ CREATE TABLE IF NOT EXISTS payment (
   created_time timestamp NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
   updated_time timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
-  PRIMARY KEY (tooth_details_id),
+  PRIMARY KEY (toothdetails_id),
   KEY idx_toothdetails_dentist (dentist_id),
+  KEY idx_toothdetails_patient (patient_id),
   KEY fk_toothdetails_tenant (tenant_id),
   KEY fk_toothdetails_clinic (clinic_id),
   CONSTRAINT fk_toothdetails_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
   CONSTRAINT fk_toothdetails_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE,
-  CONSTRAINT fk_toothdetails_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE
+  CONSTRAINT fk_toothdetails_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
+  CONSTRAINT fk_toothdetails_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `,
   addLoginHistory: `CREATE TABLE IF NOT EXISTS loginhistory (

@@ -135,7 +135,7 @@ module.exports = {
   ADD_SUPPLIER_PRODUCTS: "/addsupplierproduct",
   GETALL_SUPPLIER_PRODUCTS_TENANT: "/getallsupplierproducts/:tenant_id",
   GETALL_SUPPLIER_PRODUCTS_TENANT_SUPPLIER:
-    "/getallsupplierproducts/:tenant_id/:clinic_id",
+    "/getallsupplierproducts/:tenant_id/:supplier_id",
   GET_SUPPLIER_PRODUCTS_TENANT:
     "/getsupplierproduct/:supplier_product_id/:tenant_id",
   UPDATE_SUPPLIER_PRODUCTS_TENANT:
@@ -229,6 +229,14 @@ module.exports = {
   UPDATE_NOTIFICATION_TENANT: "/updatenotification/:notification_id/:tenant_id",
   UPDATE_NOTIFICATION_RECIPIENTS_STATUS_TENANT: "/updatenotificationrecipients/:notification_recipient_id",
   DELETE_NOTIFICATION_TENANT: "/deletenotification/:notification_id/:tenant_id",
+
+  
+  ADD_TOOTHDETAILS: "/addtoothdetails",
+  GETALL_TOOTHDETAILS_TENANT: "/getalltoothdetails/:tenant_id",
+  GET_TOOTHDETAILS_TENANT: "/gettoothdetails/:toothdetails_id/:tenant_id",
+  UPDATE_TOOTHDETAILS_TENANT: "/updatetoothdetails/:toothdetails_id/:tenant_id",
+  DELETE_TOOTHDETAILS_TENANT: "/deletetoothdetails/:toothdetails_id/:tenant_id",
+  
 
 
   //dashboard Routes
