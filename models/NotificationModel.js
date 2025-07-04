@@ -30,7 +30,6 @@ const getAllNotificationsByTenantId = async (tenantId, limit, offset) => {
 };
 
 const getNotificationsForReceiver = async (tenantId, receiverId, receiverRole) => {
-  console.log(tenantId, receiverRole, receiverId);
 
   // Receiver join
   let receiverJoinTable = '';
@@ -77,6 +76,7 @@ const getNotificationsForReceiver = async (tenantId, receiverId, receiverRole) =
   const query = `
     SELECT 
       n.notification_id,
+      r.notification_recipient_id,
       n.tenant_id,
       n.sender_role,
       n.sender_id,
