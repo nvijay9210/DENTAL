@@ -12,11 +12,20 @@ const {
   duration,
   safeJsonParse,
 } = require("../utils/Helpers");
-const { formatDateOnly, formatAppointments, isoToSqlDatetime, convertUTCToLocal } = require("../utils/DateUtils");
+const {
+  formatDateOnly,
+  formatAppointments,
+  isoToSqlDatetime,
+  convertUTCToLocal,
+} = require("../utils/DateUtils");
 const { mapFields } = require("../query/Records");
 const { updatePatientCount } = require("../models/ClinicModel");
 const { updatePatientAppointmentCount } = require("../models/PatientModel");
-const { updateDentistAppointmentCount, getDentistByTenantIdAndDentistId, updateDentistRatingAndReviewCount } = require("../models/DentistModel");
+const {
+  updateDentistAppointmentCount,
+  getDentistByTenantIdAndDentistId,
+  updateDentistRatingAndReviewCount,
+} = require("../models/DentistModel");
 
 const appointmentFields = {
   tenant_id: (val) => val,
@@ -28,32 +37,32 @@ const appointmentFields = {
   start_time: (val) => val,
   end_time: (val) => val,
   status: (val) => val,
-  doctor_rating: (val) => val? parseFloat(val) : 0,
+  doctor_rating: (val) => (val ? parseFloat(val) : 0),
   feedback: (val) => helper.safeStringify(val),
   appointment_type: (val) => val,
   consultation_fee: (val) => val || null,
   discount_applied: (val) => val || 0.0,
-  payment_status: (val) => val ,
-  min_booking_fee: (val) => val? parseFloat(val) : 0 ,
-  paid_amount: (val) => val? parseFloat(val) : 0 ,
-  mode_of_payment: (val) => val ,
+  payment_status: (val) => val,
+  min_booking_fee: (val) => (val ? parseFloat(val) : 0),
+  paid_amount: (val) => (val ? parseFloat(val) : 0),
+  mode_of_payment: (val) => val,
   visit_reason: helper.safeStringify,
   follow_up_needed: (val) => Boolean(val),
   reminder_method: (val) => val || null,
   notes: helper.safeStringify,
-  rescheduled_from:(val)=>val || null,
-  cancelled_by:(val)=>val || null,
-  cancellation_reason:helper.safeStringify,
-  is_virtual:helper.parseBoolean,
-  reminder_send:helper.parseBoolean,
-  meeting_link:(val)=>(val) || null,
-  checkin_time:(val)=>val?isoToSqlDatetime(val):null,
-  checkout_time:(val)=>val?isoToSqlDatetime(val):null
+  rescheduled_from: (val) => val || null,
+  cancelled_by: (val) => val || null,
+  cancellation_reason: helper.safeStringify,
+  is_virtual: helper.parseBoolean,
+  reminder_send: helper.parseBoolean,
+  meeting_link: (val) => val || null,
+  checkin_time: (val) => (val ? isoToSqlDatetime(val) : null),
+  checkout_time: (val) => (val ? isoToSqlDatetime(val) : null),
 };
 
 const appointmentFieldsReverseMap = {
-  appointment_id:(val)=>val,
-  room_id:(val)=>val,
+  appointment_id: (val) => val,
+  room_id: (val) => val,
   tenant_id: (val) => val,
   patient_id: (val) => val,
   dentist_id: (val) => val,
@@ -68,21 +77,21 @@ const appointmentFieldsReverseMap = {
   consultation_fee: (val) => val,
   discount_applied: (val) => val || 0.0,
   payment_status: (val) => val,
-  min_booking_fee: (val) => parseInt(val) ,
-  paid_amount: (val) => parseInt(val) ,
+  min_booking_fee: (val) => parseInt(val),
+  paid_amount: (val) => parseInt(val),
   mode_of_payment: (val) => val,
   visit_reason: (val) => (val ? safeJsonParse(val) : null),
   follow_up_needed: (val) => Boolean(val),
   reminder_method: (val) => val,
   notes: (val) => (val ? safeJsonParse(val) : null),
-  rescheduled_from:(val)=>val || null,
-  cancelled_by:(val)=>val || null,
-  cancellation_reason:helper.safeJsonParse,
-  is_virtual:(val) => Boolean(val),
-  reminder_send:(val) => Boolean(val),
-  meeting_link:(val)=>val || null,
-  checkin_time: val => val ? convertUTCToLocal(val) : null,
-  checkout_time: val => val ? convertUTCToLocal(val) : null,
+  rescheduled_from: (val) => val || null,
+  cancelled_by: (val) => val || null,
+  cancellation_reason: helper.safeJsonParse,
+  is_virtual: (val) => Boolean(val),
+  reminder_send: (val) => Boolean(val),
+  meeting_link: (val) => val || null,
+  checkin_time: (val) => (val ? convertUTCToLocal(val) : null),
+  checkout_time: (val) => (val ? convertUTCToLocal(val) : null),
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
@@ -109,10 +118,22 @@ const createAppointment = async (data) => {
     await invalidateCacheByPattern("appointmentsmonthlysummary:*");
     await invalidateCacheByPattern("financeSummary:*");
     await invalidateCacheByPattern("patient:*");
+    console.log("appointment_id:", appointmentId);
     if (appointmentId)
       await updatePatientCount(data.tenant_id, data.clinic_id, true);
-      await updatePatientAppointmentCount(data.tenant_id, data.patient_id, true);
-      await updateDentistAppointmentCount(data.tenant_id,data.clinic_id, data.dentist_id, true);
+    await updatePatientAppointmentCount(data.tenant_id, data.patient_id, true);
+    await updateDentistAppointmentCount(
+      data.tenant_id,
+      data.clinic_id,
+      data.dentist_id,
+      true
+    );
+    await appointmentModel.updateAppointmentStats(
+      data.tenant_id,
+      data.clinic_id,
+      data.dentist_id,
+      data.appointment_date
+    );
     return appointmentId;
   } catch (error) {
     console.error("Failed to create appointment:", error);
@@ -141,134 +162,164 @@ const getAllAppointmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
       helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
     );
 
-    return {data:convertedRows,total:appointments.total};;
+    return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
 
-const getAllAppointmentsByTenantIdAndClinicId = async (tenantId,clinic_id, page = 1, limit = 10) => {
+const getAllAppointmentsByTenantIdAndClinicId = async (
+  tenantId,
+  clinic_id,
+  page = 1,
+  limit = 10
+) => {
   const offset = (page - 1) * limit;
   const cacheKey = `appointment:${tenantId}:clinicid:${clinic_id}:page:${page}:limit:${limit}`;
 
   try {
     const appointments = await getOrSetCache(cacheKey, async () => {
-      const result = await appointmentModel.getAllAppointmentsByTenantIdAndClinicId(
-        tenantId,
-        clinic_id,
-        Number(limit),
-        offset
-      );
+      const result =
+        await appointmentModel.getAllAppointmentsByTenantIdAndClinicId(
+          tenantId,
+          clinic_id,
+          Number(limit),
+          offset
+        );
       return result;
     });
     const convertedRows = appointments.data.map((appointment) =>
       helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
     );
 
-    return {data:convertedRows,total:appointments.total};;
+    return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
 
-const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (tenantId,clinic_id,dentist_id, page = 1, limit = 10) => {
+const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (
+  tenantId,
+  clinic_id,
+  dentist_id,
+  page = 1,
+  limit = 10
+) => {
   const offset = (page - 1) * limit;
   const cacheKey = `appointment:${tenantId}:clinicid:${clinic_id}:dentist:${dentist_id}:page:${page}:limit:${limit}`;
 
   try {
     const appointments = await getOrSetCache(cacheKey, async () => {
-      const result = await appointmentModel.getAllAppointmentsByTenantIdAndClinicIdByDentist(
-        tenantId,
-        clinic_id,
-        dentist_id,
-        Number(limit),
-        offset
-      );
+      const result =
+        await appointmentModel.getAllAppointmentsByTenantIdAndClinicIdByDentist(
+          tenantId,
+          clinic_id,
+          dentist_id,
+          Number(limit),
+          offset
+        );
       return result;
     });
     const convertedRows = appointments.data.map((appointment) =>
       helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
     );
 
-    return {data:convertedRows,total:appointments.total};;
+    return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
 
-const getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (tenantId,clinic_id,dentist_id) => {
-  try{
-      const result = await appointmentModel.getAllRoomIdByTenantIdAndClinicIdAndDentistId(
+const getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (
+  tenantId,
+  clinic_id,
+  dentist_id
+) => {
+  try {
+    const result =
+      await appointmentModel.getAllRoomIdByTenantIdAndClinicIdAndDentistId(
         tenantId,
         clinic_id,
         dentist_id
       );
-      return result;
+    return result;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
-const getAllRoomIdByTenantIdAndPatientId = async (tenantId,patient_id) => {
-  try{
-      const result = await appointmentModel.getAllRoomIdByTenantIdAndPatientId(
-        tenantId,
-        patient_id
-      );
-      return result;
+const getAllRoomIdByTenantIdAndPatientId = async (tenantId, patient_id) => {
+  try {
+    const result = await appointmentModel.getAllRoomIdByTenantIdAndPatientId(
+      tenantId,
+      patient_id
+    );
+    return result;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
 
-const getAllAppointmentsByTenantIdAndAndDentistId = async (tenantId,dentist_id, page = 1, limit = 10) => {
+const getAllAppointmentsByTenantIdAndAndDentistId = async (
+  tenantId,
+  dentist_id,
+  page = 1,
+  limit = 10
+) => {
   const offset = (page - 1) * limit;
   const cacheKey = `appointment:${tenantId}:dentist:${dentist_id}:page:${page}:limit:${limit}`;
 
   try {
     const appointments = await getOrSetCache(cacheKey, async () => {
-      const result = await appointmentModel.getAllAppointmentsByTenantIdAndDentistId(
-        tenantId,
-        dentist_id,
-        Number(limit),
-        offset
-      );
+      const result =
+        await appointmentModel.getAllAppointmentsByTenantIdAndDentistId(
+          tenantId,
+          dentist_id,
+          Number(limit),
+          offset
+        );
       return result;
     });
     const convertedRows = appointments.data.map((appointment) =>
       helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
     );
 
-    return {data:convertedRows,total:appointments.total};;
+    return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
 
-const getAllAppointmentsByTenantIdAndPatientId = async (tenantId,patient_id, page = 1, limit = 10) => {
+const getAllAppointmentsByTenantIdAndPatientId = async (
+  tenantId,
+  patient_id,
+  page = 1,
+  limit = 10
+) => {
   const offset = (page - 1) * limit;
   const cacheKey = `appointment:${tenantId}:patient:${patient_id}:page:${page}:limit:${limit}`;
 
   try {
     const appointments = await getOrSetCache(cacheKey, async () => {
-      const result = await appointmentModel.getAllAppointmentsByTenantIdAndPatientId(
-        tenantId,
-        patient_id,
-        Number(limit),
-        offset
-      );
+      const result =
+        await appointmentModel.getAllAppointmentsByTenantIdAndPatientId(
+          tenantId,
+          patient_id,
+          Number(limit),
+          offset
+        );
       return result;
     });
     const convertedRows = appointments.data.map((appointment) =>
       helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
     );
 
-    return {data:convertedRows,total:appointments.total};;
+    return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
     throw new CustomError("Failed to fetch appointment", 404);
@@ -286,22 +337,20 @@ const getAppointmentByTenantIdAndAppointmentId = async (
         tenantId,
         appointmentId
       );
-      // console.log(appointment)
-    
-      const convertedRows = 
-        helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
-      
-  
-      return convertedRows;
+    // console.log(appointment)
+
+    const convertedRows = helper.convertDbToFrontend(
+      appointment,
+      appointmentFieldsReverseMap
+    );
+
+    return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get appointment: " + error.message, 404);
   }
 };
 
-const getRoomIdByTenantIdAndAppointmentId = async (
-  tenantId,
-  appointmentId
-) => {
+const getRoomIdByTenantIdAndAppointmentId = async (tenantId, appointmentId) => {
   try {
     const appointment =
       await appointmentModel.getRoomIdByTenantIdAndAppointmentId(
@@ -309,22 +358,23 @@ const getRoomIdByTenantIdAndAppointmentId = async (
         appointmentId
       );
 
+    if (appointment === null)
+      throw new CustomError("Appoinment not found", 404);
 
-      if(appointment===null) throw new CustomError('Appoinment not found',404)
+    // console.log(appointment)
 
-        // console.log(appointment)
-    
-      const convertedRows = {...appointment,
-        appointment_date:formatDateOnly(appointment.appointment_date),
-        feedback:safeJsonParse(appointment.feedback),
-        visit_reason:safeJsonParse(appointment.visit_reason),
-        notes:safeJsonParse(appointment.notes),
-        cancelled_reason:safeJsonParse(appointment.cancelled_reason),
-        checkin_time:convertUTCToLocal(appointment.checkin_time),
-        checkout_time:convertUTCToLocal(appointment.checkout_time),
-      }
-      
-      return convertedRows;
+    const convertedRows = {
+      ...appointment,
+      appointment_date: formatDateOnly(appointment.appointment_date),
+      feedback: safeJsonParse(appointment.feedback),
+      visit_reason: safeJsonParse(appointment.visit_reason),
+      notes: safeJsonParse(appointment.notes),
+      cancelled_reason: safeJsonParse(appointment.cancelled_reason),
+      checkin_time: convertUTCToLocal(appointment.checkin_time),
+      checkout_time: convertUTCToLocal(appointment.checkout_time),
+    };
+
+    return convertedRows;
   } catch (error) {
     throw new CustomError("Failed to get appointment: " + error.message, 404);
   }
@@ -350,6 +400,12 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
       throw new CustomError("Appointment not found or no changes made.", 404);
     }
 
+    await appointmentModel.updateAppointmentStats(
+      data.tenant_id,
+      data.clinic_id,
+      data.appointment_date
+    );
+
     await invalidateCacheByPattern("appointment:*");
     await invalidateCacheByPattern("appointmentsdetails:*");
     await invalidateCacheByPattern("patientvisitdetails:*");
@@ -362,11 +418,19 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
   }
 };
 
-const updateAppoinmentFeedback = async (appointment_id, tenant_id, details, status = 'completed') => {
+const updateAppoinmentFeedback = async (
+  appointment_id,
+  tenant_id,
+  details,
+  status = "completed"
+) => {
   try {
     // 1. Update appointment feedback
     const affectedRows = await appointmentModel.updateAppoinmentFeedback(
-      appointment_id, tenant_id, details, status
+      appointment_id,
+      tenant_id,
+      details,
+      status
     );
 
     if (affectedRows === 0) {
@@ -382,15 +446,21 @@ const updateAppoinmentFeedback = async (appointment_id, tenant_id, details, stat
     await invalidateCacheByPattern("patient:*");
 
     // 3. Get dentistId for this appointment
-    const dentistId = await appointmentModel.getDentistIdByTenantIdAndAppointmentId(
-      tenant_id, appointment_id, status
-    );
+    const dentistId =
+      await appointmentModel.getDentistIdByTenantIdAndAppointmentId(
+        tenant_id,
+        appointment_id,
+        status
+      );
     if (!dentistId) {
       throw new CustomError("Dentist not found for this appointment.", 404);
     }
 
     // 4. Get dentist details
-    const dentist = await getDentistByTenantIdAndDentistId(tenant_id, dentistId);
+    const dentist = await getDentistByTenantIdAndDentistId(
+      tenant_id,
+      dentistId
+    );
     if (!dentist) {
       throw new CustomError("Dentist details not found.", 404);
     }
@@ -400,29 +470,39 @@ const updateAppoinmentFeedback = async (appointment_id, tenant_id, details, stat
     const prevCount = Number(dentist.reviews_count) || 0;
     const newRating = Number(details.doctor_rating) || 0;
 
-    const totalRating = ((prevRating * prevCount) + newRating) / (prevCount + 1);
+    const totalRating = (prevRating * prevCount + newRating) / (prevCount + 1);
 
     // 6. Update dentist's rating and review count
     const dentistRating = await updateDentistRatingAndReviewCount(
-      tenant_id, dentistId, totalRating, prevCount + 1
+      tenant_id,
+      dentistId,
+      totalRating,
+      prevCount + 1
     );
 
     if (dentistRating === 0) {
-      throw new CustomError("Dentist rating update failed or no changes made.", 404);
+      throw new CustomError(
+        "Dentist rating update failed or no changes made.",
+        404
+      );
     }
 
     return dentistRating;
-
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError(error.message || "Failed to update appointment", error.statusCode || 500);
+    throw new CustomError(
+      error.message || "Failed to update appointment",
+      error.statusCode || 500
+    );
   }
 };
 
-
-const updateAppoinmentStatus = async (appointment_id,tenant_id,
-  clinic_id,details) => {
-
+const updateAppoinmentStatus = async (
+  appointment_id,
+  tenant_id,
+  clinic_id,
+  details
+) => {
   try {
     const affectedRows = await appointmentModel.updateAppoinmentStatus(
       appointment_id,
@@ -431,9 +511,14 @@ const updateAppoinmentStatus = async (appointment_id,tenant_id,
       details
     );
 
+
     if (affectedRows === 0) {
       throw new CustomError("Appointment not found or no changes made.", 404);
     }
+
+    const appointment= await getAppointmentByTenantIdAndAppointmentId(tenant_id,appointment_id)
+
+    await appointmentModel.updateAppointmentStats(tenant_id,clinic_id,appointment.dentist_id,appointment.appointment_date)
 
     await invalidateCacheByPattern("appointment:*");
     await invalidateCacheByPattern("appointmentsdetails:*");
@@ -462,6 +547,12 @@ const deleteAppointmentByTenantIdAndAppointmentId = async (
     if (affectedRows === 0) {
       throw new CustomError("Appointment not found.", 404);
     }
+
+    await appointmentModel.updateAppointmentStats(
+      data.tenant_id,
+      data.clinic_id,
+      data.appointment_date
+    );
 
     await invalidateCacheByPattern("appointment:*");
     await invalidateCacheByPattern("appointmentsdetails:*");
@@ -531,7 +622,6 @@ const getAppointmentsWithDetails = async (
   }
 };
 
-
 const getAppointmentsWithDetailsByPatient = async (
   tenantId,
   patient_id,
@@ -540,7 +630,7 @@ const getAppointmentsWithDetailsByPatient = async (
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = `appointmentsdetails:${tenantId}${patient_id}:page:${page}:limit:${limit}`;
-  const fieldsToDecode = ["visit_reason","working_hours"];
+  const fieldsToDecode = ["visit_reason", "working_hours"];
 
   try {
     const appointment = await getOrSetCache(cacheKey, async () => {
@@ -552,14 +642,22 @@ const getAppointmentsWithDetailsByPatient = async (
       );
 
       if (result && Array.isArray(result.data)) {
-        const formattedData = result.data.map(app => ({
+        const formattedData = result.data.map((app) => ({
           ...app,
-          appointment_date: new Date(app.appointment_date).toISOString().split('T')[0],
-          date_of_birth: new Date(app.date_of_birth).toISOString().split('T')[0],
-          date_of_birth: new Date(app.date_of_birth).toISOString().split('T')[0],
-          visit_reason:safeJsonParse(app.visit_reason),
-          date_of_birth: new Date(app.date_of_birth).toISOString().split('T')[0],
-          working_hours:safeJsonParse(app.working_hours),
+          appointment_date: new Date(app.appointment_date)
+            .toISOString()
+            .split("T")[0],
+          date_of_birth: new Date(app.date_of_birth)
+            .toISOString()
+            .split("T")[0],
+          date_of_birth: new Date(app.date_of_birth)
+            .toISOString()
+            .split("T")[0],
+          visit_reason: safeJsonParse(app.visit_reason),
+          date_of_birth: new Date(app.date_of_birth)
+            .toISOString()
+            .split("T")[0],
+          working_hours: safeJsonParse(app.working_hours),
         }));
         return { ...result, data: formattedData };
       }
@@ -690,9 +788,11 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
 
       // Format appointment_date to 'YYYY-MM-DD'
       if (result && Array.isArray(result.data)) {
-        const formattedData = result.data.map(app => ({
+        const formattedData = result.data.map((app) => ({
           ...app,
-          appointment_date: new Date(app.appointment_date).toISOString().split('T')[0]
+          appointment_date: new Date(app.appointment_date)
+            .toISOString()
+            .split("T")[0],
         }));
         return { ...result, data: formattedData };
       }
@@ -707,7 +807,7 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
   }
 };
 
-const isoWeek = require('dayjs/plugin/isoWeek');
+const isoWeek = require("dayjs/plugin/isoWeek");
 dayjs.extend(isoWeek);
 
 const getAppointmentSummary = async (tenant_id, clinic_id) => {
@@ -715,29 +815,29 @@ const getAppointmentSummary = async (tenant_id, clinic_id) => {
 
   const ranges = {
     weeks: Array.from({ length: 4 }, (_, i) => {
-      const targetWeek = dayjs().subtract(i, 'week');
+      const targetWeek = dayjs().subtract(i, "week");
       return {
         label: `${i + 1}w`,
-        from: targetWeek.startOf('week').toDate(),
-        to: targetWeek.endOf('week').toDate()
+        from: targetWeek.startOf("week").toDate(),
+        to: targetWeek.endOf("week").toDate(),
       };
     }),
 
     months: Array.from({ length: 12 }, (_, i) => {
-      const targetMonth = dayjs().subtract(i, 'month');
+      const targetMonth = dayjs().subtract(i, "month");
       return {
         label: `${i + 1}m`,
-        from: targetMonth.startOf('month').toDate(),
-        to: targetMonth.endOf('month').toDate()
+        from: targetMonth.startOf("month").toDate(),
+        to: targetMonth.endOf("month").toDate(),
       };
     }),
 
     years: Array.from({ length: 4 }, (_, i) => {
-      const targetYear = dayjs().subtract(i, 'year');
+      const targetYear = dayjs().subtract(i, "year");
       return {
         label: `${i + 1}y`,
-        from: targetYear.startOf('year').toDate(),
-        to: targetYear.endOf('year').toDate()
+        from: targetYear.startOf("year").toDate(),
+        to: targetYear.endOf("year").toDate(),
       };
     }),
   };
@@ -758,11 +858,13 @@ const getAppointmentSummary = async (tenant_id, clinic_id) => {
       cancelled_appointments: 0,
     };
 
-    rows.forEach(row => {
+    rows.forEach((row) => {
       result.total_appointments += row.count;
       if (row.status === "completed") result.completed_appointments = row.count;
-      else if (row.status === "scheduled") result.pending_appointments = row.count;
-      else if (row.status === "cancelled") result.cancelled_appointments = row.count;
+      else if (row.status === "scheduled")
+        result.pending_appointments = row.count;
+      else if (row.status === "cancelled")
+        result.cancelled_appointments = row.count;
     });
 
     return {
@@ -775,9 +877,13 @@ const getAppointmentSummary = async (tenant_id, clinic_id) => {
 
   const mergeStats = (acc, newStats) => {
     acc.total_appointments += parseInt(newStats.total_appointments || 0);
-    acc.completed_appointments += parseInt(newStats.completed_appointments || 0);
+    acc.completed_appointments += parseInt(
+      newStats.completed_appointments || 0
+    );
     acc.pending_appointments += parseInt(newStats.pending_appointments || 0);
-    acc.cancelled_appointments += parseInt(newStats.cancelled_appointments || 0);
+    acc.cancelled_appointments += parseInt(
+      newStats.cancelled_appointments || 0
+    );
     return acc;
   };
 
@@ -795,14 +901,16 @@ const getAppointmentSummary = async (tenant_id, clinic_id) => {
       const currentStats = await fetchDataForRange(item.from, item.to);
 
       // Merge into cumulative stats
-      cumulativeStats = mergeStats({...cumulativeStats}, currentStats);
+      cumulativeStats = mergeStats({ ...cumulativeStats }, currentStats);
 
       // Save cumulative value directly under the label (e.g., "2w", "3m", "1y")
       summary[item.label] = {
         total_appointments: cumulativeStats.total_appointments,
-        completed_appointments: cumulativeStats.completed_appointments.toString(),
+        completed_appointments:
+          cumulativeStats.completed_appointments.toString(),
         pending_appointments: cumulativeStats.pending_appointments.toString(),
-        cancelled_appointments: cumulativeStats.cancelled_appointments.toString(),
+        cancelled_appointments:
+          cumulativeStats.cancelled_appointments.toString(),
       };
     }
   }
@@ -810,34 +918,38 @@ const getAppointmentSummary = async (tenant_id, clinic_id) => {
   return summary;
 };
 
-const getAppointmentSummaryByDentist = async (tenant_id, clinic_id,dentist_id) => {
+const getAppointmentSummaryByDentist = async (
+  tenant_id,
+  clinic_id,
+  dentist_id
+) => {
   const summary = {};
 
   const ranges = {
     weeks: Array.from({ length: 4 }, (_, i) => {
-      const targetWeek = dayjs().subtract(i, 'week');
+      const targetWeek = dayjs().subtract(i, "week");
       return {
         label: `${i + 1}w`,
-        from: targetWeek.startOf('week').toDate(),
-        to: targetWeek.endOf('week').toDate()
+        from: targetWeek.startOf("week").toDate(),
+        to: targetWeek.endOf("week").toDate(),
       };
     }),
 
     months: Array.from({ length: 12 }, (_, i) => {
-      const targetMonth = dayjs().subtract(i, 'month');
+      const targetMonth = dayjs().subtract(i, "month");
       return {
         label: `${i + 1}m`,
-        from: targetMonth.startOf('month').toDate(),
-        to: targetMonth.endOf('month').toDate()
+        from: targetMonth.startOf("month").toDate(),
+        to: targetMonth.endOf("month").toDate(),
       };
     }),
 
     years: Array.from({ length: 4 }, (_, i) => {
-      const targetYear = dayjs().subtract(i, 'year');
+      const targetYear = dayjs().subtract(i, "year");
       return {
         label: `${i + 1}y`,
-        from: targetYear.startOf('year').toDate(),
-        to: targetYear.endOf('year').toDate()
+        from: targetYear.startOf("year").toDate(),
+        to: targetYear.endOf("year").toDate(),
       };
     }),
   };
@@ -848,7 +960,7 @@ const getAppointmentSummaryByDentist = async (tenant_id, clinic_id,dentist_id) =
        FROM appointment
        WHERE tenant_id = ? AND clinic_id = ? AND dentist_id=? AND created_time BETWEEN ? AND ?
        GROUP BY status`,
-      [tenant_id, clinic_id,dentist_id, from, to]
+      [tenant_id, clinic_id, dentist_id, from, to]
     );
 
     const result = {
@@ -858,11 +970,13 @@ const getAppointmentSummaryByDentist = async (tenant_id, clinic_id,dentist_id) =
       cancelled_appointments: 0,
     };
 
-    rows.forEach(row => {
+    rows.forEach((row) => {
       result.total_appointments += row.count;
       if (row.status === "completed") result.completed_appointments = row.count;
-      else if (row.status === "scheduled") result.pending_appointments = row.count;
-      else if (row.status === "cancelled") result.cancelled_appointments = row.count;
+      else if (row.status === "scheduled")
+        result.pending_appointments = row.count;
+      else if (row.status === "cancelled")
+        result.cancelled_appointments = row.count;
     });
 
     return {
@@ -875,9 +989,13 @@ const getAppointmentSummaryByDentist = async (tenant_id, clinic_id,dentist_id) =
 
   const mergeStats = (acc, newStats) => {
     acc.total_appointments += parseInt(newStats.total_appointments || 0);
-    acc.completed_appointments += parseInt(newStats.completed_appointments || 0);
+    acc.completed_appointments += parseInt(
+      newStats.completed_appointments || 0
+    );
     acc.pending_appointments += parseInt(newStats.pending_appointments || 0);
-    acc.cancelled_appointments += parseInt(newStats.cancelled_appointments || 0);
+    acc.cancelled_appointments += parseInt(
+      newStats.cancelled_appointments || 0
+    );
     return acc;
   };
 
@@ -895,14 +1013,16 @@ const getAppointmentSummaryByDentist = async (tenant_id, clinic_id,dentist_id) =
       const currentStats = await fetchDataForRange(item.from, item.to);
 
       // Merge into cumulative stats
-      cumulativeStats = mergeStats({...cumulativeStats}, currentStats);
+      cumulativeStats = mergeStats({ ...cumulativeStats }, currentStats);
 
       // Save cumulative value directly under the label (e.g., "2w", "3m", "1y")
       summary[item.label] = {
         total_appointments: cumulativeStats.total_appointments,
-        completed_appointments: cumulativeStats.completed_appointments.toString(),
+        completed_appointments:
+          cumulativeStats.completed_appointments.toString(),
         pending_appointments: cumulativeStats.pending_appointments.toString(),
-        cancelled_appointments: cumulativeStats.cancelled_appointments.toString(),
+        cancelled_appointments:
+          cumulativeStats.cancelled_appointments.toString(),
       };
     }
   }
@@ -911,8 +1031,8 @@ const getAppointmentSummaryByDentist = async (tenant_id, clinic_id,dentist_id) =
 };
 
 const getAppointmentSummaryChartByClinic = async (tenant_id, clinic_id) => {
-  const cacheData=`appointments:count:tenant:${tenant_id}:clinic:${clinic_id}`
-  const rows=await getOrSetCache(cacheData,async()=>{
+  const cacheData = `appointments:count:tenant:${tenant_id}:clinic:${clinic_id}`;
+  const rows = await getOrSetCache(cacheData, async () => {
     const now = dayjs();
 
     // === Daily data for current week (Mon - Sun) - already newest to oldest (today first) ===
@@ -924,43 +1044,58 @@ const getAppointmentSummaryChartByClinic = async (tenant_id, clinic_id) => {
       const total = await appointmentModel.fetchDataForRange(dayStart, dayEnd);
       weekData.push(total);
     }
-  
+
     // === Weekly totals (4 weeks): newest -> oldest ===
     const fourWeeks = [];
     for (let i = 0; i < 4; i++) {
       const from = now.subtract(i, "week").startOf("week").toDate();
       const to = now.subtract(i, "week").endOf("week").toDate();
-      const total = await appointmentModel.fetchDataForRange(tenant_id,clinic_id,from, to);
+      const total = await appointmentModel.fetchDataForRange(
+        tenant_id,
+        clinic_id,
+        from,
+        to
+      );
       fourWeeks.push(total); // [this week, last week, ...]
     }
-  
+
     // === Monthly totals (12 months): newest -> oldest ===
     const monthTotals = [];
     for (let i = 0; i < 12; i++) {
       const from = now.subtract(i, "month").startOf("month").toDate();
       const to = now.subtract(i, "month").endOf("month").toDate();
-      const total = await appointmentModel.fetchDataForRange(tenant_id,clinic_id,from, to);
+      const total = await appointmentModel.fetchDataForRange(
+        tenant_id,
+        clinic_id,
+        from,
+        to
+      );
       monthTotals.push(total); // [current month, last month, ...]
     }
-  
+
     // === Yearly totals (4 years): newest -> oldest ===
     const yearTotals = [];
     for (let i = 0; i < 4; i++) {
       const from = now.subtract(i, "year").startOf("year").toDate();
       const to = now.subtract(i, "year").endOf("year").toDate();
-      const total = await appointmentModel.fetchDataForRange(tenant_id,clinic_id,from, to);
+      const total = await appointmentModel.fetchDataForRange(
+        tenant_id,
+        clinic_id,
+        from,
+        to
+      );
       yearTotals.push(total); // [current year, last year, ...]
     }
-  
+
     return {
       // Daily breakdown for current week (Mon - Sun)
       "1w": weekData,
-  
+
       // Weekly totals (newest to oldest)
       "2w": fourWeeks.slice(0, 2),
       "3w": fourWeeks.slice(0, 3),
       "4w": fourWeeks.slice(0, 4),
-  
+
       // Monthly totals (newest to oldest)
       "1m": monthTotals.slice(0, 1),
       "2m": monthTotals.slice(0, 2),
@@ -974,19 +1109,23 @@ const getAppointmentSummaryChartByClinic = async (tenant_id, clinic_id) => {
       "10m": monthTotals.slice(0, 10),
       "11m": monthTotals.slice(0, 11),
       "12m": monthTotals.slice(0, 12),
-  
+
       // Yearly totals (newest to oldest)
       "1y": yearTotals.slice(0, 1),
       "2y": yearTotals.slice(0, 2),
       "3y": yearTotals.slice(0, 3),
       "4y": yearTotals.slice(0, 4),
     };
-  })
+  });
 
-  return rows
+  return rows;
 };
 
-const getAppointmentSummaryChartByDentist = async (tenant_id, clinic_id,dentist_id) => {
+const getAppointmentSummaryChartByDentist = async (
+  tenant_id,
+  clinic_id,
+  dentist_id
+) => {
   const fetchDataForRange = async (from, to) => {
     const [rows] = await pool.query(
       `SELECT status, COUNT(*) as count
@@ -996,7 +1135,7 @@ const getAppointmentSummaryChartByDentist = async (tenant_id, clinic_id,dentist_
       [tenant_id, clinic_id, dentist_id, from, to]
     );
     const result = { CP: 0, SC: 0, CL: 0 };
-    rows.forEach(row => {
+    rows.forEach((row) => {
       result[row.status] = row.count;
     });
     return result;
@@ -1018,23 +1157,22 @@ const getAppointmentSummaryChartByDentist = async (tenant_id, clinic_id,dentist_
   }
 
   const maxWeeks = 4;
-const fourWeeks = [];
-const fourWeekLabels = [];
+  const fourWeeks = [];
+  const fourWeekLabels = [];
 
-// Build labels from oldest (4w) to latest (1w)
-for (let i = maxWeeks; i >= 1; i--) {
-  fourWeekLabels.push(`${i}w`);
-}
+  // Build labels from oldest (4w) to latest (1w)
+  for (let i = maxWeeks; i >= 1; i--) {
+    fourWeekLabels.push(`${i}w`);
+  }
 
-// Fetch counts for each week (oldest to latest)
-for (let i = maxWeeks - 1; i >= 0; i--) {
-  const from = now.subtract(i, "week").startOf("week").toDate();
-  const to = now.subtract(i, "week").endOf("week").toDate();
-  const counts = await fetchDataForRange(from, to);
-  const total = (counts.CP || 0) + (counts.SC || 0) + (counts.CL || 0);
-  fourWeeks.push(total);
-}
-
+  // Fetch counts for each week (oldest to latest)
+  for (let i = maxWeeks - 1; i >= 0; i--) {
+    const from = now.subtract(i, "week").startOf("week").toDate();
+    const to = now.subtract(i, "week").endOf("week").toDate();
+    const counts = await fetchDataForRange(from, to);
+    const total = (counts.CP || 0) + (counts.SC || 0) + (counts.CL || 0);
+    fourWeeks.push(total);
+  }
 
   // === Months 1m to 12m: month names and total counts ===
   const maxMonths = 12;
@@ -1115,6 +1253,113 @@ for (let i = maxWeeks - 1; i >= 0; i--) {
   };
 };
 
+// async function getAppointmentSummaryByStartDateAndEndDate(
+//   tenant_id,
+//   startDate,
+//   endDate,
+//   clinic_id,
+//   dentist_id = null
+// ) {
+//   let query = `
+//     SELECT 
+//       appointment_date AS date,
+//       SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) AS confirmed,
+//       SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed,
+//       SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled
+//     FROM appointment
+//     WHERE tenant_id = ?
+//       AND clinic_id = ?
+//       AND appointment_date BETWEEN ? AND ?
+//   `;
+
+//   const queryParams = [tenant_id, clinic_id, startDate, endDate];
+
+//   // Only filter by dentist if it's passed (not null or 0)
+//   if (dentist_id) {
+//     query += ` AND dentist_id = ?`;
+//     queryParams.push(dentist_id);
+//   }
+
+//   query += `
+//     GROUP BY appointment_date
+//     ORDER BY appointment_date
+//   `;
+
+//   try {
+//     const [rows] = await pool.query(query, queryParams);
+
+//     return rows.map((row) => ({
+//       date: formatDateOnly(row.date),
+//       confirmed: Number(row.confirmed),
+//       completed: Number(row.completed),
+//       cancelled: Number(row.cancelled),
+//     }));
+//   } catch (error) {
+//     console.error("❌ Error fetching appointment summary:", error);
+//     throw new CustomError("Error fetching appointment summary", 500);
+//   }
+// }
+
+async function getAppointmentSummaryByStartDateAndEndDate(
+  tenant_id,
+  startDate,
+  endDate,
+  clinic_id,     // optional
+  dentist_id     // optional
+) {
+  const queryParams = [tenant_id, startDate, endDate];
+
+  let query = `
+    SELECT 
+      a.stat_date AS date,
+      SUM(a.confirmed) AS confirmed,
+      SUM(a.completed) AS completed,
+      SUM(a.cancelled) AS cancelled
+    FROM appointment_stats a
+    WHERE a.tenant_id = ?
+      AND a.stat_date BETWEEN ? AND ?
+  `;
+
+  // Optional: Filter by clinic if valid
+  if (clinic_id && !isNaN(clinic_id)) {
+    query += ` AND a.clinic_id = ?`;
+    queryParams.push(clinic_id);
+  }
+
+  // Optional: Filter only if dentist_id is provided and valid
+  if (dentist_id && !isNaN(dentist_id)) {
+    query += `
+      AND EXISTS (
+        SELECT 1 FROM appointment app
+        WHERE app.tenant_id = a.tenant_id
+          AND app.appointment_date = a.stat_date
+          ${clinic_id && !isNaN(clinic_id) ? `AND app.clinic_id = a.clinic_id` : ""}
+          AND app.dentist_id = ?
+      )
+    `;
+    queryParams.push(dentist_id);
+  }
+
+  query += ` GROUP BY a.stat_date ORDER BY a.stat_date`;
+
+  try {
+    const [rows] = await pool.query(query, queryParams);
+
+    return rows.map((row) => ({
+      date: formatDateOnly(row.date),
+      confirmed: Number(row.confirmed),
+      completed: Number(row.completed),
+      cancelled: Number(row.cancelled),
+    }));
+  } catch (error) {
+    console.error("❌ Error fetching appointment summary:", error);
+    throw new CustomError("Error fetching appointment summary", 500);
+  }
+}
+
+
+
+
 
 
 
@@ -1141,5 +1386,6 @@ module.exports = {
   getAllRoomIdByTenantIdAndClinicIdAndDentistId,
   getAllRoomIdByTenantIdAndPatientId,
   updateAppoinmentFeedback,
-  getRoomIdByTenantIdAndAppointmentId
+  getRoomIdByTenantIdAndAppointmentId,
+  getAppointmentSummaryByStartDateAndEndDate,
 };

@@ -46,6 +46,22 @@ const createTableQuery = {
   CONSTRAINT fk_appointment_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id)  ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;`,
 
+  addAppointmentStats: `CREATE TABLE IF NOT EXISTS appointment_stats (
+    appointment_stats_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    clinic_id INT NOT NULL,
+    dentist_id INT NULL,
+    stat_date DATE NOT NULL,
+    confirmed INT DEFAULT 0,
+    completed INT DEFAULT 0,
+    cancelled INT DEFAULT 0,
+    created_by varchar(30) NOT NULL DEFAULT 'ADMIN',
+  created_time timestamp NOT NULL DEFAULT current_timestamp(),
+  updated_by varchar(30) DEFAULT NULL,
+  updated_time timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+    UNIQUE KEY uk_tenant_date (tenant_id,clinic_id,dentist_id, stat_date)
+);`,
+
   addAsset: `CREATE TABLE IF NOT EXISTS asset (
   asset_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,

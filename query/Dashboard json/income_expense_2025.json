@@ -1,0 +1,627 @@
+[
+  {
+    "date": "2025-03-01",
+    "income": 7919,
+    "expense": 2100
+  },
+  {
+    "date": "2025-03-02",
+    "income": 6041,
+    "expense": 4457
+  },
+  {
+    "date": "2025-03-03",
+    "income": 8649,
+    "expense": 1837
+  },
+  {
+    "date": "2025-03-04",
+    "income": 6849,
+    "expense": 2438
+  },
+  {
+    "date": "2025-03-05",
+    "income": 9867,
+    "expense": 4739
+  },
+  {
+    "date": "2025-03-06",
+    "income": 9470,
+    "expense": 3905
+  },
+  {
+    "date": "2025-03-07",
+    "income": 2743,
+    "expense": 4714
+  },
+  {
+    "date": "2025-03-08",
+    "income": 7829,
+    "expense": 3447
+  },
+  {
+    "date": "2025-03-09",
+    "income": 1812,
+    "expense": 1490
+  },
+  {
+    "date": "2025-03-10",
+    "income": 2819,
+    "expense": 5656
+  },
+  {
+    "date": "2025-03-11",
+    "income": 9885,
+    "expense": 3224
+  },
+  {
+    "date": "2025-03-12",
+    "income": 1756,
+    "expense": 6050
+  },
+  {
+    "date": "2025-03-13",
+    "income": 3950,
+    "expense": 8554
+  },
+  {
+    "date": "2025-03-14",
+    "income": 2518,
+    "expense": 2977
+  },
+  {
+    "date": "2025-03-15",
+    "income": 2472,
+    "expense": 6153
+  },
+  {
+    "date": "2025-03-16",
+    "income": 6323,
+    "expense": 3482
+  },
+  {
+    "date": "2025-03-17",
+    "income": 4729,
+    "expense": 1327
+  },
+  {
+    "date": "2025-03-18",
+    "income": 9369,
+    "expense": 2179
+  },
+  {
+    "date": "2025-03-19",
+    "income": 1336,
+    "expense": 8231
+  },
+  {
+    "date": "2025-03-20",
+    "income": 8892,
+    "expense": 5384
+  },
+  {
+    "date": "2025-03-21",
+    "income": 1284,
+    "expense": 6381
+  },
+  {
+    "date": "2025-03-22",
+    "income": 7003,
+    "expense": 5944
+  },
+  {
+    "date": "2025-03-23",
+    "income": 1238,
+    "expense": 3950
+  },
+  {
+    "date": "2025-03-24",
+    "income": 8858,
+    "expense": 6863
+  },
+  {
+    "date": "2025-03-25",
+    "income": 7153,
+    "expense": 4661
+  },
+  {
+    "date": "2025-03-26",
+    "income": 4164,
+    "expense": 5614
+  },
+  {
+    "date": "2025-03-27",
+    "income": 6315,
+    "expense": 6786
+  },
+  {
+    "date": "2025-03-28",
+    "income": 2581,
+    "expense": 4443
+  },
+  {
+    "date": "2025-03-29",
+    "income": 9809,
+    "expense": 5210
+  },
+  {
+    "date": "2025-03-30",
+    "income": 7357,
+    "expense": 4513
+  },
+  {
+    "date": "2025-03-31",
+    "income": 7609,
+    "expense": 6050
+  },
+  {
+    "date": "2025-04-01",
+    "income": 2817,
+    "expense": 8023
+  },
+  {
+    "date": "2025-04-02",
+    "income": 7218,
+    "expense": 2119
+  },
+  {
+    "date": "2025-04-03",
+    "income": 7971,
+    "expense": 5531
+  },
+  {
+    "date": "2025-04-04",
+    "income": 1045,
+    "expense": 2209
+  },
+  {
+    "date": "2025-04-05",
+    "income": 3101,
+    "expense": 4498
+  },
+  {
+    "date": "2025-04-06",
+    "income": 1189,
+    "expense": 4263
+  },
+  {
+    "date": "2025-04-07",
+    "income": 3220,
+    "expense": 3543
+  },
+  {
+    "date": "2025-04-08",
+    "income": 2451,
+    "expense": 5520
+  },
+  {
+    "date": "2025-04-09",
+    "income": 7944,
+    "expense": 7930
+  },
+  {
+    "date": "2025-04-10",
+    "income": 3826,
+    "expense": 8265
+  },
+  {
+    "date": "2025-04-11",
+    "income": 6925,
+    "expense": 8039
+  },
+  {
+    "date": "2025-04-12",
+    "income": 8591,
+    "expense": 2366
+  },
+  {
+    "date": "2025-04-13",
+    "income": 8921,
+    "expense": 3796
+  },
+  {
+    "date": "2025-04-14",
+    "income": 9451,
+    "expense": 8151
+  },
+  {
+    "date": "2025-04-15",
+    "income": 4579,
+    "expense": 5714
+  },
+  {
+    "date": "2025-04-16",
+    "income": 1316,
+    "expense": 3538
+  },
+  {
+    "date": "2025-04-17",
+    "income": 8290,
+    "expense": 963
+  },
+  {
+    "date": "2025-04-18",
+    "income": 4222,
+    "expense": 7314
+  },
+  {
+    "date": "2025-04-19",
+    "income": 7232,
+    "expense": 1850
+  },
+  {
+    "date": "2025-04-20",
+    "income": 7794,
+    "expense": 3610
+  },
+  {
+    "date": "2025-04-21",
+    "income": 2006,
+    "expense": 2767
+  },
+  {
+    "date": "2025-04-22",
+    "income": 7129,
+    "expense": 7374
+  },
+  {
+    "date": "2025-04-23",
+    "income": 2768,
+    "expense": 8329
+  },
+  {
+    "date": "2025-04-24",
+    "income": 9804,
+    "expense": 681
+  },
+  {
+    "date": "2025-04-25",
+    "income": 9049,
+    "expense": 1701
+  },
+  {
+    "date": "2025-04-26",
+    "income": 4845,
+    "expense": 8239
+  },
+  {
+    "date": "2025-04-27",
+    "income": 4843,
+    "expense": 6210
+  },
+  {
+    "date": "2025-04-28",
+    "income": 1826,
+    "expense": 3171
+  },
+  {
+    "date": "2025-04-29",
+    "income": 4899,
+    "expense": 2696
+  },
+  {
+    "date": "2025-04-30",
+    "income": 2690,
+    "expense": 3767
+  },
+  {
+    "date": "2025-05-01",
+    "income": 6032,
+    "expense": 8701
+  },
+  {
+    "date": "2025-05-02",
+    "income": 2018,
+    "expense": 2968
+  },
+  {
+    "date": "2025-05-03",
+    "income": 1116,
+    "expense": 5763
+  },
+  {
+    "date": "2025-05-04",
+    "income": 3357,
+    "expense": 880
+  },
+  {
+    "date": "2025-05-05",
+    "income": 6254,
+    "expense": 6798
+  },
+  {
+    "date": "2025-05-06",
+    "income": 8951,
+    "expense": 8560
+  },
+  {
+    "date": "2025-05-07",
+    "income": 1006,
+    "expense": 3217
+  },
+  {
+    "date": "2025-05-08",
+    "income": 9274,
+    "expense": 2725
+  },
+  {
+    "date": "2025-05-09",
+    "income": 1344,
+    "expense": 7807
+  },
+  {
+    "date": "2025-05-10",
+    "income": 7235,
+    "expense": 8680
+  },
+  {
+    "date": "2025-05-11",
+    "income": 8254,
+    "expense": 3552
+  },
+  {
+    "date": "2025-05-12",
+    "income": 9823,
+    "expense": 1226
+  },
+  {
+    "date": "2025-05-13",
+    "income": 1923,
+    "expense": 7240
+  },
+  {
+    "date": "2025-05-14",
+    "income": 3445,
+    "expense": 1510
+  },
+  {
+    "date": "2025-05-15",
+    "income": 9578,
+    "expense": 6392
+  },
+  {
+    "date": "2025-05-16",
+    "income": 6817,
+    "expense": 8091
+  },
+  {
+    "date": "2025-05-17",
+    "income": 4232,
+    "expense": 7762
+  },
+  {
+    "date": "2025-05-18",
+    "income": 8008,
+    "expense": 978
+  },
+  {
+    "date": "2025-05-19",
+    "income": 7158,
+    "expense": 5239
+  },
+  {
+    "date": "2025-05-20",
+    "income": 8538,
+    "expense": 3451
+  },
+  {
+    "date": "2025-05-21",
+    "income": 7618,
+    "expense": 2206
+  },
+  {
+    "date": "2025-05-22",
+    "income": 1908,
+    "expense": 2444
+  },
+  {
+    "date": "2025-05-23",
+    "income": 3017,
+    "expense": 2440
+  },
+  {
+    "date": "2025-05-24",
+    "income": 8946,
+    "expense": 2662
+  },
+  {
+    "date": "2025-05-25",
+    "income": 3889,
+    "expense": 5501
+  },
+  {
+    "date": "2025-05-26",
+    "income": 1418,
+    "expense": 2951
+  },
+  {
+    "date": "2025-05-27",
+    "income": 5822,
+    "expense": 8687
+  },
+  {
+    "date": "2025-05-28",
+    "income": 9695,
+    "expense": 8880
+  },
+  {
+    "date": "2025-05-29",
+    "income": 2313,
+    "expense": 2340
+  },
+  {
+    "date": "2025-05-30",
+    "income": 1016,
+    "expense": 2430
+  },
+  {
+    "date": "2025-05-31",
+    "income": 8509,
+    "expense": 4036
+  },
+  {
+    "date": "2025-06-01",
+    "income": 3036,
+    "expense": 1040
+  },
+  {
+    "date": "2025-06-02",
+    "income": 3298,
+    "expense": 3177
+  },
+  {
+    "date": "2025-06-03",
+    "income": 4882,
+    "expense": 4952
+  },
+  {
+    "date": "2025-06-04",
+    "income": 6084,
+    "expense": 928
+  },
+  {
+    "date": "2025-06-05",
+    "income": 2249,
+    "expense": 3424
+  },
+  {
+    "date": "2025-06-06",
+    "income": 6003,
+    "expense": 5394
+  },
+  {
+    "date": "2025-06-07",
+    "income": 4839,
+    "expense": 5407
+  },
+  {
+    "date": "2025-06-08",
+    "income": 5012,
+    "expense": 1545
+  },
+  {
+    "date": "2025-06-09",
+    "income": 1803,
+    "expense": 4717
+  },
+  {
+    "date": "2025-06-10",
+    "income": 8977,
+    "expense": 3061
+  },
+  {
+    "date": "2025-06-11",
+    "income": 4697,
+    "expense": 6232
+  },
+  {
+    "date": "2025-06-12",
+    "income": 5310,
+    "expense": 955
+  },
+  {
+    "date": "2025-06-13",
+    "income": 5414,
+    "expense": 4552
+  },
+  {
+    "date": "2025-06-14",
+    "income": 7287,
+    "expense": 6064
+  },
+  {
+    "date": "2025-06-15",
+    "income": 6260,
+    "expense": 3011
+  },
+  {
+    "date": "2025-06-16",
+    "income": 6361,
+    "expense": 4275
+  },
+  {
+    "date": "2025-06-17",
+    "income": 2165,
+    "expense": 2418
+  },
+  {
+    "date": "2025-06-18",
+    "income": 1534,
+    "expense": 4290
+  },
+  {
+    "date": "2025-06-19",
+    "income": 9250,
+    "expense": 1180
+  },
+  {
+    "date": "2025-06-20",
+    "income": 7616,
+    "expense": 6889
+  },
+  {
+    "date": "2025-06-21",
+    "income": 5611,
+    "expense": 3786
+  },
+  {
+    "date": "2025-06-22",
+    "income": 4575,
+    "expense": 6875
+  },
+  {
+    "date": "2025-06-23",
+    "income": 9432,
+    "expense": 5736
+  },
+  {
+    "date": "2025-06-24",
+    "income": 4758,
+    "expense": 5342
+  },
+  {
+    "date": "2025-06-25",
+    "income": 3299,
+    "expense": 7664
+  },
+  {
+    "date": "2025-06-26",
+    "income": 1684,
+    "expense": 8106
+  },
+  {
+    "date": "2025-06-27",
+    "income": 6906,
+    "expense": 6656
+  },
+  {
+    "date": "2025-06-28",
+    "income": 4086,
+    "expense": 3700
+  },
+  {
+    "date": "2025-06-29",
+    "income": 3121,
+    "expense": 7834
+  },
+  {
+    "date": "2025-06-30",
+    "income": 4379,
+    "expense": 2902
+  },
+  {
+    "date": "2025-07-01",
+    "income": 7513,
+    "expense": 2873
+  },
+  {
+    "date": "2025-07-02",
+    "income": 5159,
+    "expense": 6845
+  },
+  {
+    "date": "2025-07-03",
+    "income": 5415,
+    "expense": 2165
+  }
+]

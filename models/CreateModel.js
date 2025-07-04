@@ -376,6 +376,22 @@ const creatNotificationRecipientsTable = async () => {
   }
 };
 
+const createAppointmentStatsTable = async () => {
+  const query =  createTableQuery.addAppointmentStats
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("AppointmentStats table created successfully.");
+  } catch (error) {
+    console.error("Error creating AppointmentStats table:", error);
+    throw new Error(
+      "Database error occurred while creating the AppointmentStats table."
+    );
+  } finally {
+    conn.release();
+  }
+};
+
 const createUserTable = async () => {
   const query = userQuery.createUserTable;
   const conn = await pool.getConnection();
@@ -511,5 +527,6 @@ module.exports = {
   createUserActivityTable,
   creatLoginHistoryTable,
   creatNotificationTable,
-  creatNotificationRecipientsTable
+  creatNotificationRecipientsTable,
+  createAppointmentStatsTable
 };
