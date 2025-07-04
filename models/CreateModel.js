@@ -391,6 +391,21 @@ const createAppointmentStatsTable = async () => {
     conn.release();
   }
 };
+const createToothDetailsTable = async () => {
+  const query =  createTableQuery.addToothDetails
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("ToothDetails table created successfully.");
+  } catch (error) {
+    console.error("Error creating ToothDetails table:", error);
+    throw new Error(
+      "Database error occurred while creating the ToothDetails table."
+    );
+  } finally {
+    conn.release();
+  }
+};
 
 const createUserTable = async () => {
   const query = userQuery.createUserTable;
@@ -528,5 +543,6 @@ module.exports = {
   creatLoginHistoryTable,
   creatNotificationTable,
   creatNotificationRecipientsTable,
-  createAppointmentStatsTable
+  createAppointmentStatsTable,
+  createToothDetailsTable
 };
