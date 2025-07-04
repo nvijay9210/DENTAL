@@ -1,5 +1,6 @@
 const pool = require("../config/db");
 const record = require("../query/Records");
+const { formatDateOnly } = require("../utils/DateUtils");
 
 // Assuming Helper method for column/value length match
 const validateColumnValueLengthMatch = (columns, values) => {
@@ -250,62 +251,45 @@ const groupToothProceduresByTimeRangeCumulative = async (
   endDate,
   dentistId = null
 ) => {
-  let query = `
-    SELECT p.tooth_details
-    FROM patient p
-    WHERE p.tenant_id = ?
-      AND EXISTS (
-        SELECT 1
-        FROM appointment a
-        WHERE a.patient_id = p.patient_id
-          AND a.clinic_id = ?
-          ${dentistId ? 'AND a.dentist_id = ?' : ''}
-          AND a.appointment_date BETWEEN ? AND ?
-      )
-      AND p.tooth_details IS NOT NULL
-      AND p.tooth_details != ''
+  const query = `
+    SELECT
+      treatment_date AS date,
+      disease_type,
+      COUNT(*) AS count
+    FROM
+      toothdetails
+    WHERE
+      tenant_id = ?
+      AND clinic_id = ?
+      AND treatment_date BETWEEN ? AND ?
+      ${dentistId ? 'AND dentist_id = ?' : ''}
+    GROUP BY
+      treatment_date,
+      disease_type
+    ORDER BY
+      treatment_date;
   `;
 
   const params = dentistId
-    ? [tenantId, clinicId, dentistId, startDate, endDate]
+    ? [tenantId, clinicId, startDate, endDate, dentistId]
     : [tenantId, clinicId, startDate, endDate];
 
   const [rows] = await pool.query(query, params);
 
-  const dailySummary = {};
+  // Transforming result to grouped format
+  const resultMap = {};
 
   for (const row of rows) {
-    let details;
-    try {
-      details = JSON.parse(row.tooth_details);
-      if (!Array.isArray(details)) continue;
-    } catch (e) {
-      console.warn('Invalid JSON in tooth_details:', e);
-      continue;
-    }
-
-    for (const item of details) {
-      const { date, type } = item;
-      if (!date || !type) continue;
-
-      const itemDate = new Date(date);
-      const from = new Date(startDate);
-      const to = new Date(endDate);
-      if (itemDate < from || itemDate > to) continue;
-
-      if (!dailySummary[date]) dailySummary[date] = {};
-      if (!dailySummary[date][type]) dailySummary[date][type] = 0;
-      dailySummary[date][type]++;
-    }
+    const { date, disease_type, count } = row;
+    if (!resultMap[date]) resultMap[date] = {};
+    resultMap[date][disease_type] = count;
   }
 
-  return Object.entries(dailySummary).map(([date, procedures]) => ({
-    date,
+  return Object.entries(resultMap).map(([date, procedures]) => ({
+    date:formatDateOnly(date),
     procedures,
   }));
 };
-
-
 
 const groupToothProceduresByTimeRangeCumulativeByDentist = async (
   tenantId,
