@@ -65,7 +65,7 @@ const dentistFieldMap = {
   teleconsultation_supported: helper.parseBoolean,
 
   last_login: (val) => val,
-  duration: helper.duration,
+  duration:  (val) => val,
 };
 
 const dentistFieldReverseMap = {
