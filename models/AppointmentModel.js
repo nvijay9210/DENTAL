@@ -220,10 +220,7 @@ WHERE
   }
 };
 
-const getAllRoomIdByTenantIdAndPatientId = async (
-  tenantId,
-  patient_id
-) => {
+const getAllRoomIdByTenantIdAndPatientId = async (tenantId, patient_id) => {
   const query = `SELECT
   CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
       CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,
@@ -955,6 +952,40 @@ const updateRoomIdBeforeAppointment = async () => {
   }
 };
 
+async function updateAppointmentStats(tenant_id, clinic_id, dentist_id,appointment_date) {
+  const [results] = await pool.query(
+    `SELECT
+       SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) AS confirmed,
+       SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed,
+       SUM(CASE WHEN status IN ('cancelled', 'clinic_cancelled', 'noshow') THEN 1 ELSE 0 END) AS cancelled
+     FROM appointment
+     WHERE tenant_id = ? AND clinic_id=? AND dentist_id=? AND appointment_date = ?`,
+    [tenant_id, clinic_id,dentist_id, appointment_date]
+  );
+
+  const row = results[0];
+
+
+  // Update stats table
+  await pool.query(
+    `INSERT INTO appointment_stats (tenant_id,clinic_id,dentist_id, stat_date, confirmed, completed, cancelled)
+     VALUES (?, ?, ?, ?, ?, ?,?)
+     ON DUPLICATE KEY UPDATE
+       confirmed = VALUES(confirmed),
+       completed = VALUES(completed),
+       cancelled = VALUES(cancelled)`,
+    [
+      tenant_id,
+      clinic_id,
+      dentist_id,
+      appointment_date,
+      row.confirmed,
+      row.completed,
+      row.cancelled,
+    ]
+  );
+}
+
 module.exports = {
   createAppointment,
   getAllAppointmentsByTenantId,
@@ -981,4 +1012,5 @@ module.exports = {
   updateAppoinmentFeedback,
   getDentistIdByTenantIdAndAppointmentId,
   getRoomIdByTenantIdAndAppointmentId,
+  updateAppointmentStats,
 };

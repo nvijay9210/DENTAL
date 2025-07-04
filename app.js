@@ -165,6 +165,7 @@ async function initializeTables() {
     await createTable.createUserActivityTable();
     await createTable.creatNotificationTable();
     await createTable.creatNotificationRecipientsTable();
+    await createTable.createAppointmentStatsTable();
 
     console.log('All tables created in order.');
   } catch (err) {
@@ -172,7 +173,7 @@ async function initializeTables() {
   }
 }
 
-// initializeTables(); // Uncomment if you want to auto-create tables on startup
+initializeTables(); // Uncomment if you want to auto-create tables on startup
 
 // require('./models/AlterTables')
 

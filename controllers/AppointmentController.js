@@ -395,14 +395,20 @@ exports.getAppointmentMonthlySummary = async (req, res, next) => {
 
 exports.getAppointmentSummary = async (req, res, next) => {
   const { tenant_id, clinic_id } = req.params;
-  // const{period}=req.query
+  const{dentist_id,startDate,endDate}=req.query
   await checkIfIdExists("tenant", "tenant_id", tenant_id);
   await checkIfIdExists("clinic", "clinic_id", clinic_id);
   // if(period!=='monthly' && period!=='yearly' && period!=='weekly') throw new CustomError('Period mustbe a weekly,monthly or yearly',400)
   try {
-    const appointments = await appointmentService.getAppointmentSummary(
-      tenant_id,
-      clinic_id
+    if (!startDate || !endDate) {
+      return res.status(400).json({ message: "Start and end dates are required." });
+    }
+    const appointments = await appointmentService.getAppointmentSummaryByStartDateAndEndDate(
+      parseInt(tenant_id),
+      startDate,
+      endDate,
+      parseInt(clinic_id),
+      parseInt(dentist_id)
       // period
     );
     res.status(200).json(appointments);

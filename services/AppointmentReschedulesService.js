@@ -10,7 +10,7 @@ const { formatDateOnly, compareDateTime,convertUTCToLocal } = require("../utils/
 const { duration } = require('../utils/Helpers');
 const { checkIfExists } = require("../models/checkIfExists");
 
-const {  updateAppoinmentStatusCancelledAndReschedule } = require("../models/AppointmentModel");
+const {  updateAppoinmentStatusCancelledAndReschedule, updateAppointmentStats } = require("../models/AppointmentModel");
 const appointmentService=require('../services/AppointmentService');
 const { createAppointmentValidation } = require("../validations/AppointmentValidation");
 
@@ -97,7 +97,11 @@ const createAppointmentReschedules = async (details) => {
         columns,
         values
       );
-
+    await updateAppointmentStats(
+      appointment.tenant_id,
+      appointment.clinic_id,
+      appointment.appointment_date
+    );
     await invalidateCacheByPattern("appointmentReschedule:*");
     return appointmentRescheduleId;
   } catch (error) {
