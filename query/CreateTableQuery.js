@@ -735,7 +735,7 @@ CREATE TABLE IF NOT EXISTS payment (
   browser_info text DEFAULT NULL,
   created_time timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (loginhistory_id),
-  KEY idx_loginhistory_keycloak_user_id (keycloak_id),
+  KEY idx_loginhistory_keycloak_user_id (keycloak_user_id),
   KEY fk_login_history_clinic (clinic_id),
   KEY fk_login_history_tenant (tenant_id),
   CONSTRAINT fk_login_history_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
@@ -754,8 +754,7 @@ CREATE TABLE IF NOT EXISTS payment (
   duration time DEFAULT NULL,
   created_time timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (useractivity_id),
-  KEY idx_useractivity_keycloak_user_id (keycloak_id),
-  KEY idx_keycloak_user_id (keycloak_user_id)
+  KEY idx_useractivity_keycloak_user_id (keycloak_user_id)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 `,
