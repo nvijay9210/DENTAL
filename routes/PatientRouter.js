@@ -58,6 +58,27 @@ router.get(
   ]),
   patientController.getAllPatientsByTenantId
 );
+//getallpatient by tenant and clinic id without pagination
+router.get(
+  routerPath.GETALL_PATIENT_TENANT_CLINIC,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "receptionist"
+  ]),
+  patientController.getAllPatientsByTenantIdAndClinicIdUsingAppointment
+);
+router.get(
+  routerPath.GETALL_PATIENT_TENANT_CLINIC_DENTIST,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "receptionist"
+  ]),
+  patientController.getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus
+);
 
 // Get Single Patient
 router.get(

@@ -38,6 +38,31 @@ exports.getAllPatientsByTenantId = async (req, res, next) => {
     next(err);
   }
 };
+exports.getAllPatientsByTenantIdAndClinicIdUsingAppointment = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  try {
+    const patients = await patientService.getAllPatientsByTenantIdAndClinicIdUsingAppointment(
+      tenant_id,
+      clinic_id
+    );
+    res.status(200).json(patients);
+  } catch (err) {
+    next(err);
+  }
+};
+exports.getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (req, res, next) => {
+  const { tenant_id,clinic_id,dentist_id } = req.params;
+  try {
+    const patients = await patientService.getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus(
+      tenant_id,
+      clinic_id,
+      dentist_id
+    );
+    res.status(200).json(patients);
+  } catch (err) {
+    next(err);
+  }
+};
 
 // getTopPatientsByAppointmentPeriod
 // exports.getPeriodSummaryByPatient = async (req, res, next) => {
