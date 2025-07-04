@@ -70,6 +70,42 @@ async function renameMonthlyWeekdayColumn(conn) {
   }
 }
 
+// Step 11: Change file_url column in notification table from TEXT to VARCHAR(100)
+async function updateNotificationFileUrlColumn(conn) {
+  try {
+    console.log("🔄 Updating 'file_url' column in notification table...");
+
+    // Check current column definition
+    const [columns] = await conn.query(`
+      SHOW COLUMNS FROM notifications LIKE 'file_url';
+    `);
+
+    if (columns.length === 0) {
+      console.log("❌ Column 'file_url' does not exist in notification table.");
+      return;
+    }
+
+    const currentType = columns[0].Type; // e.g., 'text', 'varchar(255)', etc.
+
+    if (currentType === 'varchar(100)') {
+      console.log("ℹ️ Column 'file_url' is already of type VARCHAR(100). Skipping.");
+      return;
+    }
+
+    // Alter the column type to VARCHAR(255)
+    await conn.query(`
+      ALTER TABLE notifications
+      MODIFY COLUMN file_url VARCHAR(255) NULL COMMENT 'URL or path of associated file';
+    `);
+
+    console.log("✅ Column 'file_url' changed from TEXT to VARCHAR(255).");
+
+  } catch (error) {
+    console.error("❌ Error updating 'file_url' column:", error.message);
+    throw error;
+  }
+}
+
 // Main migration runner
 (async () => {
   const conn = await pool.getConnection();
@@ -80,6 +116,9 @@ async function renameMonthlyWeekdayColumn(conn) {
 
     // Step 1: Update clinic table
     await renameMonthlyWeekdayColumn(conn);
+
+    // Step 2: Update notification table
+    await updateNotificationFileUrlColumn(conn);
     
     await conn.commit();
     console.log("🎉 Migration completed successfully.");
