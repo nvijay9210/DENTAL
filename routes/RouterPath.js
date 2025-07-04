@@ -26,6 +26,8 @@ module.exports = {
 
   ADD_PATIENT: "/addpatient",
   GETALL_PATIENT_TENANT: "/getallpatients/:tenant_id",
+  GETALL_PATIENT_TENANT_CLINIC: "/getallpatients/:tenant_id/:clinic_id",
+  GETALL_PATIENT_TENANT_CLINIC_DENTIST: "/getallpatients/:tenant_id/:clinic_id/:dentist_id",
   GET_PATIENT_TENANT: "/getpatient/:patient_id/:tenant_id",
   UPDATE_PATIENT_TENANT: "/updatepatient/:patient_id/:tenant_id",
   UPDATE_PATIENT_TOOTH_DETAILS: "/updatepatients_tooth/:patient_id/:tenant_id",

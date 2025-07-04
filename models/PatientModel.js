@@ -452,6 +452,73 @@ const getAgeGenderByClinic = async (tenantId, clinicId) => {
   }
 };
 
+const getAllPatientsByTenantIdAndClinicIdUsingAppointment = async (tenantId, clinicId) => {
+  const query = `
+    SELECT
+      p.tenant_id,
+      a.clinic_id,
+      p.patient_id,
+      CONCAT(p.first_name, ' ', p.last_name) AS full_name
+    FROM
+      patient p
+    JOIN
+      appointment a ON a.patient_id = p.patient_id
+    WHERE
+      a.tenant_id = ?
+      AND a.clinic_id = ?
+    GROUP BY
+      p.patient_id, a.clinic_id, p.tenant_id
+    ORDER BY
+      p.last_name ASC
+  `;
+
+  const conn = await pool.getConnection();
+  try {
+    const [patients] = await conn.query(query, [tenantId, clinicId]);
+    return patients; // Returns array of patients with full_name
+  } catch (error) {
+    console.error("Error fetching patients:", error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (tenantId, clinicId, dentist_id) => {
+  const query = `
+    SELECT
+      p.tenant_id,
+      a.clinic_id,
+      p.patient_id,
+      CONCAT(p.first_name, ' ', p.last_name) AS full_name
+    FROM
+      patient p
+    INNER JOIN
+      appointment a ON a.patient_id = p.patient_id
+    WHERE
+      a.tenant_id = ?
+      AND a.clinic_id = ?
+      AND a.dentist_id = ?
+      AND a.status IN ('completed', 'confirmed', 'pending')
+    GROUP BY
+      p.patient_id, a.clinic_id, p.tenant_id
+    ORDER BY
+      p.last_name ASC
+  `;
+
+  const conn = await pool.getConnection();
+  try {
+    const [patients] = await conn.query(query, [tenantId, clinicId, dentist_id]);
+
+    return patients
+  } catch (error) {
+    console.error("Error fetching patients:", error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
 module.exports = {
   createPatient,
   getAllPatientsByTenantId,
@@ -471,4 +538,6 @@ module.exports = {
   getNewPatientsTrendsByDentistAndClinic,
   getAgeGenderByDentist,
   getAgeGenderByClinic,
+  getAllPatientsByTenantIdAndClinicIdUsingAppointment,
+  getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus
 };
