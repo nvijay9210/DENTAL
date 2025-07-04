@@ -41,14 +41,14 @@ const patientColumnConfig = [
   {
     columnname: "phone_number",
     type: "varchar",
-    size: 10,
+    size: 20,
     null: false,
     pattern: /^\+?[0-9]{7,15}$/,
   },
   {
     columnname: "alternate_phone_number",
     type: "varchar",
-    size: 10,
+    size: 20,
     null: true,
     pattern: /^\+?[0-9]{7,15}$/,
   },
@@ -100,7 +100,7 @@ const patientColumnConfig = [
   {
     columnname: "emergency_contact_number",
     type: "varchar",
-    size: 15,
+    size: 20,
     null: false,
   },
   { columnname: "insurance_provider", type: "varchar", size: 255, null: true },

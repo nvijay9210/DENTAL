@@ -6,7 +6,13 @@ const { recordExists } = require("../query/Records");
 const supplierColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 6, null: false },
   { columnname: "clinic_id", type: "int", size: 11, null: false },
-  { columnname: "supplier_code", type: "varchar", size: 50, null: true, unique: true },
+  {
+    columnname: "supplier_code",
+    type: "varchar",
+    size: 50,
+    null: true,
+    unique: true,
+  },
   { columnname: "keycloak_id", type: "char", size: 36, null: true },
   { columnname: "username", type: "varchar", size: 50, null: true },
   { columnname: "password", type: "varchar", size: 255, null: true },
@@ -15,7 +21,12 @@ const supplierColumnConfig = [
   { columnname: "status", type: "tinyint", size: 1, null: true, default: 0 },
   { columnname: "email", type: "varchar", size: 150, null: true },
   { columnname: "phone_number", type: "varchar", size: 20, null: false },
-  { columnname: "alternate_phone_number", type: "varchar", size: 20, null: false },
+  {
+    columnname: "alternate_phone_number",
+    type: "varchar",
+    size: 20,
+    null: false,
+  },
   { columnname: "fax", type: "varchar", size: 50, null: true },
   { columnname: "website", type: "varchar", size: 255, null: true },
   { columnname: "gst_number", type: "varchar", size: 50, null: true },
@@ -26,7 +37,7 @@ const supplierColumnConfig = [
   { columnname: "preferred_currency", type: "varchar", size: 10, null: true },
   { columnname: "credit_limit", type: "decimal", size: "15,2", null: true },
   { columnname: "opening_balance", type: "decimal", size: "15,2", null: true },
-  { columnname: "notes", type: "text", null: true }
+  { columnname: "notes", type: "text", null: true },
 ];
 
 // Supplier Column Configuration for Validation
@@ -50,7 +61,7 @@ const createSupplierValidation = async (details) => {
     checkIfIdExists("tenant", "tenant_id", details.tenant_id),
     checkIfIdExists("clinic", "clinic_id", details.clinic_id),
   ]);
-  console.log('createsuplliervalidation done')
+  console.log("createsuplliervalidation done");
 };
 
 /**

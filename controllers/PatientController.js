@@ -170,11 +170,13 @@ exports.getAgeGenderByClinic = async (req, res, next) => {
 };
 exports.groupToothProceduresByTimeRangeCumulative = async (req, res, next) => {
   const { tenant_id,clinic_id } = req.params;
+  const { dentist_id,startDate,endDate } = req.query;
   await checkIfIdExists('tenant','tenant_id',tenant_id)
   await checkIfIdExists('clinic','clinic_id',clinic_id)
   try {
+    if(!startDate || !endDate) throw new CustomError('Requeired startDate,endDate',400)
     const patients = await patientService.groupToothProceduresByTimeRangeCumulative(
-      tenant_id,clinic_id
+      tenant_id,clinic_id,dentist_id,startDate,endDate
     );
     res.status(200).json(patients);
   } catch (err) {

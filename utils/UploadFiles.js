@@ -741,6 +741,9 @@ const uploadFileMiddleware = (options) => {
       let id = 0;
 
       switch (folderName) {
+        case "Notification":
+          id = req.params.notification_id;
+          break;
         case "Expense":
           id = req.params.expense_id;
           break;
@@ -944,16 +947,11 @@ const uploadFileMiddleware = (options) => {
                 fileName
               );
 
-              savedPaths.push({ [fileField.fieldName]: savedPath });
+              savedPaths.push(savedPath); // Only push the string path
             }
 
-            if (fileField.multiple) {
-              req.body[fileField.fieldName] = savedPaths;
-            } else {
-              req.body[fileField.fieldName] =
-                savedPaths[0]?.[fileField.fieldName];
-            }
-
+            // Always store as array of strings
+            req.body[fileField.fieldName] = savedPaths;
             uploadedFiles[fileField.fieldName] = savedPaths;
           }
         }
