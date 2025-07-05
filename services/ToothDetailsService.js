@@ -26,6 +26,7 @@ const toothdetailsFields = {
 };
 
 const toothdetailsFieldsReverseMap = {
+  toothdetails_id:(val)=>val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   dentist_id: (val) => val,
