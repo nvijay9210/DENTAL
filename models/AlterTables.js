@@ -1,149 +1,126 @@
 const pool = require("../config/db");
+/**
+ * Safely renames a column only if old column exists and new column doesn't.
+ */
+async function renameColumnIfSafe(pool, table, oldName, newName, columnDefinition) {
+  try {
+    const [oldCol] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [table, oldName]);
+    const [newCol] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [table, newName]);
 
-// Utility: Check if a constraint exists
-async function constraintExists(conn, tableName, constraintName) {
-  const [rows] = await conn.query(
-    `
-    SELECT CONSTRAINT_NAME FROM information_schema.REFERENTIAL_CONSTRAINTS
-    WHERE CONSTRAINT_SCHEMA = DATABASE()
-      AND TABLE_NAME = ?
-      AND CONSTRAINT_NAME = ?;
-  `,
-    [tableName, constraintName]
-  );
+    if (newCol.length > 0) {
+      console.log(`ℹ️ Column \`${newName}\` already exists in \`${table}\`. Skipping rename.`);
+      return;
+    }
 
-  return rows.length > 0;
+    if (oldCol.length === 0) {
+      console.log(`ℹ️ Column \`${oldName}\` does not exist in \`${table}\`. Skipping rename.`);
+      return;
+    }
+
+    await pool.query(`ALTER TABLE ?? CHANGE COLUMN ?? ?? ${columnDefinition};`, [table, oldName, newName]);
+    console.log(`✅ Renamed column from \`${oldName}\` to \`${newName}\` in \`${table}\``);
+  } catch (error) {
+    console.error(`❌ Error renaming column \`${oldName}\` in \`${table}\`:`, error.message);
+    throw error;
+  }
 }
 
 /**
- * Removes orphaned rows from a table where the foreign key has no matching reference.
- * @param {Object} conn - Database connection
- * @param {string} table - Table name with orphaned data
- * @param {string} column - Column referencing the foreign key
- * @param {string} refTable - Referenced table
- * @param {string} refColumn - Referenced column
+ * Safely adds a column only if it doesn't exist.
  */
-async function cleanupOrphanedRows(conn, table, column, refTable, refColumn) {
-  const query = `
-    DELETE FROM ?? 
-    WHERE NOT EXISTS (
-      SELECT 1 FROM ?? 
-      WHERE ?? = ??.?? 
-    );
-  `;
+async function addColumnIfNotExists(pool, table, column, definition, comment = '') {
   try {
-    await conn.query(query, [table, refTable, refColumn, table, column]);
-    console.log(
-      `✅ Cleaned up orphaned rows in \`${table}\` for \`${column}\``
-    );
-  } catch (error) {
-    console.error(
-      `❌ Error cleaning up orphaned rows in \`${table}\`:`,
-      error.message
-    );
-    throw error;
-  }
-}
-
-// Step 11: Rename 'monthly_weekday' to 'monthly_weekdays'
-async function renameMonthlyWeekdayColumn(conn) {
-  try {
-    console.log("🔄 Renaming column 'monthly_weekday' to 'monthly_weekdays' in reminder table...");
-    
-    // Check if old column exists
-    const [existing] = await conn.query(`
-      SHOW COLUMNS FROM reminder LIKE 'monthly_weekday';
-    `);
+    const [existing] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [table, column]);
 
     if (existing.length > 0) {
-      await conn.query(`
-        ALTER TABLE reminder
-        CHANGE COLUMN monthly_weekday monthly_weekdays TEXT NULL;
-      `);
-      console.log("✅ Column renamed from 'monthly_weekday' to 'monthly_weekdays'");
-    } else {
-      console.log("ℹ️ Column 'monthly_weekday' does not exist. Skipping rename.");
+      console.log(`ℹ️ Column \`${column}\` already exists in \`${table}\`. Skipping.`);
+      return;
     }
+
+    let query = `ALTER TABLE ?? ADD COLUMN ?? ${definition}`;
+    if (comment) {
+      query += ` COMMENT '${comment}'`;
+    }
+
+    await pool.query(query, [table, column]);
+    console.log(`✅ Added column \`${column}\` to \`${table}\``);
   } catch (error) {
-    console.error("❌ Error renaming column:", error.message);
+    console.error(`❌ Error adding column \`${column}\` to \`${table}\`:`, error.message);
     throw error;
   }
 }
 
-// Step 11: Change file_url column in notification table from TEXT to VARCHAR(100)
+/**
+ * Safely modifies a column type only if current type is different.
+ */
+async function modifyColumnTypeIfNotMatch(pool, table, column, targetType, comment = '') {
+  try {
+    const [colInfo] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [table, column]);
+
+    if (colInfo.length === 0) {
+      console.log(`❌ Column \`${column}\` does not exist in \`${table}\`.`);
+      return;
+    }
+
+    const currentType = colInfo[0].Type.toUpperCase();
+    const targetUpper = targetType.toUpperCase();
+
+    if (currentType === targetUpper) {
+      console.log(`ℹ️ Column \`${column}\` in \`${table}\` already matches type: ${targetUpper}. Skipping.`);
+      return;
+    }
+
+    let query = `ALTER TABLE ?? MODIFY COLUMN ?? ${targetType}`;
+    if (comment) {
+      query += ` COMMENT '${comment}'`;
+    }
+
+    await pool.query(query, [table, column]);
+    console.log(`✅ Modified column \`${column}\` in \`${table}\` from \`${currentType}\` to \`${targetType}\``);
+  } catch (error) {
+    console.error(`❌ Error modifying column \`${column}\` in \`${table}\`:`, error.message);
+    throw error;
+  }
+}
+
+
+
+async function renameMonthlyWeekdayColumn(conn) {
+  await renameColumnIfSafe(
+    conn,
+    "reminder",
+    "monthly_weekday",
+    "monthly_weekdays",
+    "TEXT NULL COMMENT 'Monthly weekdays for reminder'"
+  );
+}
+
 async function updateNotificationFileUrlColumn(conn) {
-  try {
-    console.log("🔄 Updating 'file_url' column in notification table...");
-
-    // Check current column definition
-    const [columns] = await conn.query(`
-      SHOW COLUMNS FROM notifications LIKE 'file_url';
-    `);
-
-    if (columns.length === 0) {
-      console.log("❌ Column 'file_url' does not exist in notification table.");
-      return;
-    }
-
-    const currentType = columns[0].Type; // e.g., 'text', 'varchar(255)', etc.
-
-    if (currentType === 'varchar(100)') {
-      console.log("ℹ️ Column 'file_url' is already of type VARCHAR(100). Skipping.");
-      return;
-    }
-
-    // Alter the column type to VARCHAR(255)
-    await conn.query(`
-      ALTER TABLE notifications
-      MODIFY COLUMN file_url VARCHAR(255) NULL COMMENT 'URL or path of associated file';
-    `);
-
-    console.log("✅ Column 'file_url' changed from TEXT to VARCHAR(255).");
-
-  } catch (error) {
-    console.error("❌ Error updating 'file_url' column:", error.message);
-    throw error;
-  }
+  await modifyColumnTypeIfNotMatch(
+    conn,
+    "notifications",
+    "file_url",
+    "VARCHAR(255) NULL",
+    "URL or path of associated file"
+  );
 }
 
-// Step NEW: Add paid_amount and balance_amount columns to supplier_payments
 async function addColumnsToSupplierPayment(conn) {
-  try {
-    console.log("🔄 Adding columns to 'supplier_payments' table...");
+  await addColumnIfNotExists(
+    conn,
+    "supplier_payments",
+    "paid_amount",
+    "DECIMAL(10,2) NULL",
+    "Amount paid to supplier"
+  );
 
-    // Check if 'paid_amount' column exists
-    const [paidAmountColumn] = await conn.query(`
-      SHOW COLUMNS FROM supplier_payments LIKE 'paid_amount';
-    `);
-
-    if (paidAmountColumn.length === 0) {
-      await conn.query(`
-        ALTER TABLE supplier_payments
-        ADD COLUMN paid_amount DECIMAL(10,2) NULL COMMENT 'Amount paid to supplier';
-      `);
-      console.log("✅ Added 'paid_amount' column to supplier_payments");
-    } else {
-      console.log("ℹ️ Column 'paid_amount' already exists. Skipping.");
-    }
-
-    // Check if 'balance_amount' column exists
-    const [balanceAmountColumn] = await conn.query(`
-      SHOW COLUMNS FROM supplier_payments LIKE 'balance_amount';
-    `);
-
-    if (balanceAmountColumn.length === 0) {
-      await conn.query(`
-        ALTER TABLE supplier_payments
-        ADD COLUMN balance_amount DECIMAL(10,2) NULL COMMENT 'Remaining balance amount';
-      `);
-      console.log("✅ Added 'balance_amount' column to supplier_payments");
-    } else {
-      console.log("ℹ️ Column 'balance_amount' already exists. Skipping.");
-    }
-  } catch (error) {
-    console.error("❌ Error adding columns to 'supplier_payments':", error.message);
-    throw error;
-  }
+  await addColumnIfNotExists(
+    conn,
+    "supplier_payments",
+    "balance_amount",
+    "DECIMAL(10,2) NULL",
+    "Remaining balance amount"
+  );
 }
 
 // Main migration runner
@@ -154,15 +131,11 @@ async function addColumnsToSupplierPayment(conn) {
 
     await conn.beginTransaction();
 
-    // Step 1: Update clinic table
+    // Run migrations
     await renameMonthlyWeekdayColumn(conn);
+    await updateNotificationFileUrlColumn(conn);
+    await addColumnsToSupplierPayment(conn);
 
-     // Step 2: Update file_url column in notification table
-     await updateNotificationFileUrlColumn(conn);
-
-     // Step 3: Add paid_amount and balance_amount to supplier_payments
-     await addColumnsToSupplierPayment(conn);
-    
     await conn.commit();
     console.log("🎉 Migration completed successfully.");
   } catch (err) {
