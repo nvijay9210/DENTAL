@@ -99,11 +99,12 @@ exports.getMostVisitedPatientsByDentistPeriods = async (req, res, next) => {
 
 exports.getMostVisitedPatientsByClinicPeriods = async (req, res, next) => {
   const { tenant_id,clinic_id } = req.params;
+  const { startDate, endDate, dentist_id } = req.query;
   await checkIfIdExists('tenant','tenant_id',tenant_id)
   await checkIfIdExists('clinic','clinic_id',clinic_id)
   try {
     const patients = await patientService.getMostVisitedPatientsByClinicPeriods(
-      tenant_id,clinic_id
+      tenant_id, clinic_id, startDate, endDate, dentist_id
     );
     res.status(200).json(patients);
   } catch (err) {
