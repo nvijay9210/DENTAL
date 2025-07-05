@@ -237,7 +237,7 @@ async function getFinanceSummary({
 
     // 4. Expenses
     const expenseQuery = `
-      SELECT expense_date AS date, SUM(amount) AS expense
+      SELECT expense_date AS date, SUM(expense_amount) AS expense
       FROM expense
       WHERE expense_date BETWEEN ? AND ?
         AND tenant_id = ?
