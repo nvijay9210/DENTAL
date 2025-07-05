@@ -123,11 +123,6 @@ const patientColumnConfig = [
     size: 100,
     null: true,
   },
-  {
-    columnname: "tooth_details",
-    type: "text",
-    null: true,
-  },
   { columnname: "treatment_history", type: "json", null: true },
   { columnname: "appointment_count", type: "int", null: true },
   { columnname: "last_appointment_date", type: "timestamp", null: true },
