@@ -8,7 +8,7 @@ const supplierPaymentsColumnConfig = [
     { columnname: "clinic_id", type: "int", size: 11, null: false },
     { columnname: "supplier_id", type: "int", size: 11, null: false },
     { columnname: "amount", type: "decimal", size: "12,2", null: false },
-    { columnname: "payment_mode", type: "varchar", size: 50, null: true },
+    { columnname: "mode_of_payment", type: "varchar", size: 50, null: true },
     { columnname: "receipt_number", type: "varchar", size: 100, null: true },
     { columnname: "bank_name", type: "varchar", size: 100, null: true },
     { columnname: "bank_account_number", type: "varchar", size: 100, null: true },
