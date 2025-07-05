@@ -106,6 +106,46 @@ async function updateNotificationFileUrlColumn(conn) {
   }
 }
 
+// Step NEW: Add paid_amount and balance_amount columns to supplier_payments
+async function addColumnsToSupplierPayment(conn) {
+  try {
+    console.log("🔄 Adding columns to 'supplier_payments' table...");
+
+    // Check if 'paid_amount' column exists
+    const [paidAmountColumn] = await conn.query(`
+      SHOW COLUMNS FROM supplier_payments LIKE 'paid_amount';
+    `);
+
+    if (paidAmountColumn.length === 0) {
+      await conn.query(`
+        ALTER TABLE supplier_payments
+        ADD COLUMN paid_amount DECIMAL(10,2) NULL COMMENT 'Amount paid to supplier';
+      `);
+      console.log("✅ Added 'paid_amount' column to supplier_payments");
+    } else {
+      console.log("ℹ️ Column 'paid_amount' already exists. Skipping.");
+    }
+
+    // Check if 'balance_amount' column exists
+    const [balanceAmountColumn] = await conn.query(`
+      SHOW COLUMNS FROM supplier_payments LIKE 'balance_amount';
+    `);
+
+    if (balanceAmountColumn.length === 0) {
+      await conn.query(`
+        ALTER TABLE supplier_payments
+        ADD COLUMN balance_amount DECIMAL(10,2) NULL COMMENT 'Remaining balance amount';
+      `);
+      console.log("✅ Added 'balance_amount' column to supplier_payments");
+    } else {
+      console.log("ℹ️ Column 'balance_amount' already exists. Skipping.");
+    }
+  } catch (error) {
+    console.error("❌ Error adding columns to 'supplier_payments':", error.message);
+    throw error;
+  }
+}
+
 // Main migration runner
 (async () => {
   const conn = await pool.getConnection();
@@ -117,8 +157,11 @@ async function updateNotificationFileUrlColumn(conn) {
     // Step 1: Update clinic table
     await renameMonthlyWeekdayColumn(conn);
 
-    // Step 2: Update notification table
-    await updateNotificationFileUrlColumn(conn);
+     // Step 2: Update file_url column in notification table
+     await updateNotificationFileUrlColumn(conn);
+
+     // Step 3: Add paid_amount and balance_amount to supplier_payments
+     await addColumnsToSupplierPayment(conn);
     
     await conn.commit();
     console.log("🎉 Migration completed successfully.");
