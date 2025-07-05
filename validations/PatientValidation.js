@@ -5,6 +5,8 @@ const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
 const { validatePhonesGlobally } = require("../utils/PhoneValidationHelper");
 const { globalValidationEmail } = require("../utils/GlobalValidationEmail");
+const { checkPhoneConflicts } = require("../utils/PhonenumbersValidation");
+const { checkEmailConflicts } = require("../utils/EmailValidation");
 
 const uniqueFields = [
   "email",
@@ -183,8 +185,11 @@ const validateUniqueFields = async (
 const createPatientValidation = async (details) => {
   validateInput(details, CreateColumnConfig);
   await checkTenantExistsByTenantIdValidation(details.tenant_id);
-  await validatePatientPhones(details);
-  if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email);
+  await checkPhoneConflicts(
+    details.phone_number,
+    details.alternate_phone_number || null
+  );
+  await checkEmailConflicts(details.email);
   await validateUniqueFields(details);
 };
 
@@ -196,18 +201,15 @@ const updatePatientValidation = async (patientId, details, tenantId) => {
   if(!patient) throw new CustomError('PatientId not found',400)
   await checkTenantExistsByTenantIdValidation(tenantId);
 
-  if (
-    details.alternate_phone_number !== null &&
-    Number(details.phone_number) === Number(details.alternate_phone_number)
-  ) {
-    throw new CustomError(
-      "Phone number and alternate phone number cannot be the same",
-      409
-    );
-  }
 
-  await validatePatientPhones(details, patientId);
-  // if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email,patientId);
+  await checkPhoneConflicts(
+    details.phone_number,
+    details.alternate_phone_number || null,
+    "patient",
+    patientId
+  );
+
+  await checkEmailConflicts(details.email, 'patient', patientId);
   await validateUniqueFields(details, true, patientId);
 };
 

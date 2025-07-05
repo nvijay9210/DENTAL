@@ -6,7 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
-require('./middlewares/Schedule') //appointment schedule
+// require('./middlewares/Schedule') //appointment schedule
 // const { logFilePath, logStream } = require('./logs/logger'); //log file
 
 const errorHandler = require('./middlewares/errorHandler');
@@ -175,9 +175,9 @@ async function initializeTables() {
   }
 }
 
-initializeTables(); // Uncomment if you want to auto-create tables on startup
+// initializeTables(); // Uncomment if you want to auto-create tables on startup
 
-require('./models/AlterTables')
+// require('./models/AlterTables')
 
 
 // ✅ Log viewer route

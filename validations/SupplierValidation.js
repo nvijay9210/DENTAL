@@ -2,6 +2,8 @@ const { CustomError } = require("../middlewares/CustomeError");
 const { validateInput } = require("./InputValidation");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
 const { recordExists } = require("../query/Records");
+const { checkPhoneConflicts } = require("../utils/PhonenumbersValidation");
+const { checkEmailConflicts } = require("../utils/EmailValidation");
 
 const supplierColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 6, null: false },
@@ -56,6 +58,12 @@ const updateColumnConfig = [
 const createSupplierValidation = async (details) => {
   validateInput(details, createColumnConfig);
 
+  await checkPhoneConflicts(
+    details.phone_number,
+    details.alternate_phone_number || null
+  );
+  await checkEmailConflicts(details.email);
+
   // Check if referenced records exist within the same tenant
   await Promise.all([
     checkIfIdExists("tenant", "tenant_id", details.tenant_id),
@@ -69,6 +77,16 @@ const createSupplierValidation = async (details) => {
  */
 const updateSupplierValidation = async (supplierId, details) => {
   validateInput(details, updateColumnConfig);
+
+  await checkPhoneConflicts(
+    details.phone_number,
+    details.alternate_phone_number || null,
+    "supplier",
+    supplierId
+  );
+  await checkEmailConflicts(details.email,"supplier",supplierId);
+
+
 
   const exists = await checkIfExists(
     "supplier",
