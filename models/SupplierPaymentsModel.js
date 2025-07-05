@@ -65,19 +65,46 @@ const getSupplierPaymentsByTenantAndSupplierPaymentsId = async (tenant_id, suppl
     throw new CustomError("Error fetching supplier_payments.", 500);
   }
 };
-const getSupplierPaymentsByTenantAndPurchaseOrderId = async (tenant_id, purchase_order_id) => {
+
+// const getSupplierPaymentsByTenantAndPurchaseOrderId = async (tenant_id, purchase_order_id) => {
+//   try {
+//     const rows = await record.getRecordByIdAndTenantId(
+//       TABLE,
+//       "tenant_id",
+//       tenant_id,
+//       "purchase_order_id",
+//       purchase_order_id
+//     );
+//     return rows;
+//   } catch (error) {
+//     console.error("Error fetching supplier_payments by purchase_order_id:", error);
+//     throw new CustomError("Error fetching supplier_payments by purchase_order_id.", 500);
+//   }
+// };
+
+const getSupplierPaymentsByTenantAndPurchaseOrderId = async (tenantId,  purchase_order_id) => {
+  const query = `
+    SELECT
+    po.*,
+     sp.paid_amount,
+     sp.balance_amount,
+    FROM
+      supplier_payments sp
+    JOIN
+    purchase_orders po ON po.purchase_order_id = sp.purchase_order_id
+    WHERE
+      sp.tenant_id = ?
+      AND sp.purchase_order_id = ?
+  `;
+  const conn = await pool.getConnection();
   try {
-    const rows = await record.getRecordByIdAndTenantId(
-      TABLE,
-      "tenant_id",
-      tenant_id,
-      "purchase_order_id",
-      purchase_order_id
-    );
+    const [rows] = await conn.query(query, [tenantId, purchase_order_id]);
     return rows;
   } catch (error) {
-    console.error("Error fetching supplier_payments by purchase_order_id:", error);
-    throw new CustomError("Error fetching supplier_payments by purchase_order_id.", 500);
+    console.error("Error fetching appointment analytics:", error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
   }
 };
 
