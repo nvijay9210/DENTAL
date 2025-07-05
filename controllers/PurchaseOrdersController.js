@@ -43,6 +43,7 @@ exports.getAllPurchaseOrdersByTenantId = async (req, res, next) => {
     next(err);
   }
 };
+
 exports.getAllPurchaseOrdersByTenantIdAndSupplierId = async (
   req,
   res,

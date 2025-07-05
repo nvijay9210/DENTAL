@@ -233,6 +233,8 @@ module.exports = {
   
   ADD_TOOTHDETAILS: "/addtoothdetails",
   GETALL_TOOTHDETAILS_TENANT: "/getalltoothdetails/:tenant_id",
+  GETALL_TOOTHDETAILS_TENANT_CLINIC_DENTIST_PATIENT: "/getalltoothdetails/:tenant_id/:clinic_id/:dentist_id/:patient_id",
+  GETALL_TOOTHDETAILS_TENANT_CLINIC_PATIENT: "/getalltoothdetails/:tenant_id/:clinic_id/:patient_id",
   GET_TOOTHDETAILS_TENANT: "/gettoothdetails/:toothdetails_id/:tenant_id",
   UPDATE_TOOTHDETAILS_TENANT: "/updatetoothdetails/:toothdetails_id/:tenant_id",
   DELETE_TOOTHDETAILS_TENANT: "/deletetoothdetails/:toothdetails_id/:tenant_id",

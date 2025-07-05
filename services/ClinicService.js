@@ -520,7 +520,7 @@ const handleClinicAssignment = async (
 
 const getFinanceSummary = async (tenantId,clinicId,dentistId,startDate,endDate) => {
   const cacheKey = `clinics:incomes:${tenantId}:appointmentswise`;
-
+  console.log(typeof startDate,typeof endDate)
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
       const result = await clinicModel.getFinanceSummary(

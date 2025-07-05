@@ -99,6 +99,78 @@ const getAllToothDetailssByTenantId = async (
     throw new CustomError("Failed to fetch toothdetailss", 404);
   }
 };
+const getAllToothDetailsByTenantAndClinicAndDentistAndPatientId = async (
+  tenantId,
+  clinicId,
+  dentistId,
+  patientId,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `toothdetails:${tenantId}:dentist:${dentistId}:page:${page}:limit:${limit}`;
+
+  try {
+    const toothdetailss = await getOrSetCache(cacheKey, async () => {
+      const result =
+        await toothdetailsModel.getAllToothDetailsByTenantAndClinicAndDentistAndPatientId(
+          tenantId,
+          clinicId,
+          dentistId,
+          patientId,
+          Number(limit),
+          offset
+        );
+      return result;
+    });
+
+    const convertedRows = toothdetailss.data.map((toothdetails) =>
+      helper.convertDbToFrontend(toothdetails, toothdetailsFieldsReverseMap)
+    );
+
+    return { data: convertedRows, total: toothdetailss.total };
+  } catch (err) {
+    console.error("Database error while fetching toothdetailss:", err);
+    throw new CustomError("Failed to fetch toothdetailss", 404);
+  }
+};
+
+const getAllToothDetailsByTenantAndClinicAndPatientId = async (
+  tenantId,
+  clinicId,
+  patientId,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = `toothdetails:${tenantId}:patient:${patientId}:page:${page}:limit:${limit}`;
+
+  try {
+    const toothdetailss = await getOrSetCache(cacheKey, async () => {
+      const result =
+        await toothdetailsModel.getAllToothDetailsByTenantAndClinicAndPatientId(
+          tenantId,
+          clinicId,
+          patientId,
+          Number(limit),
+          offset
+        );
+      return result;
+    });
+
+    console.log(toothdetailss)
+
+    const convertedRows = toothdetailss.data.map((r) => ({
+      ...r,
+      description: helper.safeJsonParse(r.description),
+    }));
+
+    return { data: convertedRows, total: toothdetailss.total };
+  } catch (err) {
+    console.error("Database error while fetching toothdetailss:", err);
+    throw new CustomError("Failed to fetch toothdetailss", 404);
+  }
+};
 
 // Get ToothDetails by ID & Tenant
 const getToothDetailsByTenantIdAndToothDetailsId = async (
@@ -180,5 +252,7 @@ module.exports = {
   getAllToothDetailssByTenantId,
   getToothDetailsByTenantIdAndToothDetailsId,
   updateToothDetails,
-  deleteToothDetailsByTenantIdAndToothDetailsId
+  deleteToothDetailsByTenantIdAndToothDetailsId,
+  getAllToothDetailsByTenantAndClinicAndDentistAndPatientId,
+  getAllToothDetailsByTenantAndClinicAndPatientId,
 };
