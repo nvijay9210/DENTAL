@@ -158,6 +158,7 @@ async function dropToothDetailsColumn(conn) {
 
 
 
+
 // Main migration runner
 (async () => {
   const conn = await pool.getConnection();

@@ -17,14 +17,28 @@ function getSystemDateTime() {
   return formatter.format(now).replace(',', '');
 }
 
-cron.schedule('* * * * *', async () => {
-  const systemTime = getSystemDateTime();
-  console.log(`[${systemTime}] Checking for upcoming virtual appointments...`);
-  await updateRoomIdBeforeAppointment();
+cron.schedule('* * * * *', () => {
+  setImmediate(async () => {
+    const systemTime = getSystemDateTime();
+    console.log(`[${systemTime}] ⏳ Checking virtual appointments...`);
+    try {
+      const start = Date.now();
+      await updateRoomIdBeforeAppointment();
+      console.log(`✅ Completed in ${Date.now() - start}ms`);
+    } catch (err) {
+      console.error("❌ Appointment cron failed:", err.message);
+    }
+  });
 });
 
-cron.schedule('0 0 * * *', async () => {
-  console.log("🕒 Running daily maintenance tasks at 00:00...");
-
-  await archiveOldReadNotifications();
+cron.schedule('0 0 * * *', () => {
+  setImmediate(async () => {
+    console.log("🕒 Running daily maintenance tasks at 00:00...");
+    try {
+      await archiveOldReadNotifications();
+      console.log("✅ Old read notifications archived");
+    } catch (err) {
+      console.error("❌ Maintenance task failed:", err.message);
+    }
+  });
 });
