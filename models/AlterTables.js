@@ -121,6 +121,14 @@ async function addColumnsToSupplierPayment(conn) {
     "DECIMAL(10,2) NULL",
     "Remaining balance amount"
   );
+
+  await addColumnIfNotExists(
+    conn,
+    "supplier_payments",
+    "supplier_payment_documents",
+    "text NULL",
+    "Supplier Payment documents"
+  );
 }
 
 // Main migration runner
