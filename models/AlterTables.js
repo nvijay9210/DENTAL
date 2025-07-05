@@ -83,6 +83,27 @@ async function modifyColumnTypeIfNotMatch(pool, table, column, targetType, comme
   }
 }
 
+/**
+ * Safely drops a column only if it exists.
+ */
+async function dropColumnIfExists(pool, table, column) {
+  try {
+    const [existing] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [table, column]);
+
+    if (existing.length === 0) {
+      console.log(`ℹ️ Column \`${column}\` does not exist in \`${table}\`. Skipping.`);
+      return;
+    }
+
+    await pool.query("ALTER TABLE ?? DROP COLUMN ??", [table, column]);
+    console.log(`✅ Dropped column \`${column}\` from \`${table}\``);
+  } catch (error) {
+    console.error(`❌ Error dropping column \`${column}\` from \`${table}\`:`, error.message);
+    throw error;
+  }
+}
+
+
 
 
 async function renameMonthlyWeekdayColumn(conn) {
@@ -131,6 +152,12 @@ async function addColumnsToSupplierPayment(conn) {
   );
 }
 
+async function dropToothDetailsColumn(conn) {
+  await dropColumnIfExists(conn, "patient", "tooth_details");
+}
+
+
+
 // Main migration runner
 (async () => {
   const conn = await pool.getConnection();
@@ -143,6 +170,7 @@ async function addColumnsToSupplierPayment(conn) {
     await renameMonthlyWeekdayColumn(conn);
     await updateNotificationFileUrlColumn(conn);
     await addColumnsToSupplierPayment(conn);
+    await dropToothDetailsColumn(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");
