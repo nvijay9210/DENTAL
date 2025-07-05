@@ -103,6 +103,8 @@ router.put(
     "dentist",
     "supplier",
   ]),
+  upload.any(),
+  supplierPaymentFileMiddleware,
   supplierPaymentController.updateSupplierPayments
 );
 

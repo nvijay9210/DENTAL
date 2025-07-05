@@ -187,7 +187,7 @@ async function getFinanceSummary({
   dentist_id = null
 }) {
   try {
-    // Query for income from payment table
+    // 1. Income from payment
     let paymentQuery = `
       SELECT DATE(payment_date) AS date, SUM(final_amount) AS income
       FROM payment
@@ -203,10 +203,10 @@ async function getFinanceSummary({
     }
     paymentQuery += ' GROUP BY DATE(payment_date)';
 
-    // Query for income from appointment table
+    // 2. Consultation income from appointment
     let appointmentQuery = `
       SELECT appointment_date AS date, 
-             SUM(consultation_fee - discount_applied) AS income
+             SUM(consultation_fee - IFNULL(discount_applied, 0)) AS income
       FROM appointment
       WHERE status = 'completed'
         AND appointment_date BETWEEN ? AND ?
@@ -220,10 +220,9 @@ async function getFinanceSummary({
     }
     appointmentQuery += ' GROUP BY appointment_date';
 
-    // Query for income from treatment table
+    // 3. Treatment income
     let treatmentQuery = `
-      SELECT treatment_date AS date, 
-             SUM(cost) AS income
+      SELECT treatment_date AS date, SUM(cost) AS income
       FROM treatment
       WHERE treatment_date BETWEEN ? AND ?
         AND tenant_id = ?
@@ -236,9 +235,9 @@ async function getFinanceSummary({
     }
     treatmentQuery += ' GROUP BY treatment_date';
 
-    // Query for expenses
+    // 4. Expenses
     const expenseQuery = `
-      SELECT expense_date AS date, SUM(expense_amount) AS expense
+      SELECT expense_date AS date, SUM(amount) AS expense
       FROM expense
       WHERE expense_date BETWEEN ? AND ?
         AND tenant_id = ?
@@ -246,15 +245,20 @@ async function getFinanceSummary({
       GROUP BY expense_date
     `;
 
-    // Run all queries in parallel
-    const [[paymentRows], [appointmentRows], [treatmentRows], [expenseRows]] = await Promise.all([
+    // Run all queries
+    const [
+      [paymentRows],
+      [appointmentRows],
+      [treatmentRows],
+      [expenseRows]
+    ] = await Promise.all([
       pool.query(paymentQuery, paymentParams),
       pool.query(appointmentQuery, appointmentParams),
       pool.query(treatmentQuery, treatmentParams),
       pool.query(expenseQuery, [startDate, endDate, tenant_id, clinic_id])
     ]);
 
-    // Create maps
+    // Combine incomes
     const incomeMap = {};
     [...paymentRows, ...appointmentRows, ...treatmentRows].forEach(row => {
       const date = row.date;
@@ -262,19 +266,15 @@ async function getFinanceSummary({
       incomeMap[date] = (incomeMap[date] || 0) + amount;
     });
 
+    // Combine expenses
     const expenseMap = {};
     expenseRows.forEach(row => {
-      expenseMap[row.date] = parseFloat(row.expense || 0);
+      const date = row.date;
+      expenseMap[date] = parseFloat(row.expense || 0);
     });
 
-    console.log(incomeMap,expenseMap)
-
     // Merge all dates
-    const allDates = new Set([
-      ...Object.keys(incomeMap),
-      ...Object.keys(expenseMap)
-    ]); 
-
+    const allDates = new Set([...Object.keys(incomeMap), ...Object.keys(expenseMap)]);
     const result = [];
 
     for (const date of allDates) {
@@ -285,15 +285,16 @@ async function getFinanceSummary({
       });
     }
 
-    // Sort by date
+    // Sort
     result.sort((a, b) => new Date(a.date) - new Date(b.date));
-
     return result;
+
   } catch (error) {
     console.error("Error fetching finance summary:", error);
     throw error;
   }
 }
+
 
 const getFinanceSummarybyDentist=async(tenant_id,clinic_id,dentist_id)=>{
   const conn = await pool.getConnection();
