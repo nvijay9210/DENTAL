@@ -9,6 +9,8 @@ const {
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
 const { globalValidationEmail } = require("../utils/GlobalValidationEmail");
+const { checkPhoneConflicts } = require("../utils/PhonenumbersValidation");
+const { checkEmailConflicts } = require("../utils/EmailValidation");
 
 const uniqueFields = ["email", "license_number"];
 
@@ -75,7 +77,7 @@ const dentistColumnConfig = [
   {
     columnname: "designation",
     type: "text",
-    null: true
+    null: true,
   },
   {
     columnname: "member_of",
@@ -138,7 +140,7 @@ const dentistColumnConfig = [
     data_type: "json",
   },
   { columnname: "consultation_fee", type: "decimal", size: "10,2", null: true },
-  { columnname: "min_booking_fee", type: "int", size: 6 , null: true },
+  { columnname: "min_booking_fee", type: "int", size: 6, null: true },
   { columnname: "ratings", type: "decimal", size: "3,2", null: true },
   { columnname: "reviews_count", type: "int", null: true },
   { columnname: "appointment_count", type: "int", null: true },
@@ -223,12 +225,14 @@ const validateUniqueFields = async (
 
 // Create Dentist Validation
 const createDentistValidation = async (details) => {
-
   validateInput(details, createColumnConfig);
   await checkIfIdExists("tenant", "tenant_id", details.tenant_id);
-  await validateDentistPhones(details);
-  
-  if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email);
+  await checkPhoneConflicts(
+    details.phone_number,
+    details.alternate_phone_number || null
+  );
+
+  await checkEmailConflicts(details.email);
   await validateUniqueFields(details);
 };
 
@@ -237,8 +241,13 @@ const updateDentistValidation = async (dentistId, details, tenant_id) => {
   validateInput(details, updateColumnConfig);
   await validateTenant(tenant_id);
   // await checkIfIdExists('clinic','clinic_id',details.clinic_id||0)
-
-  // if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email,'dentist',dentistId);
+  await checkPhoneConflicts(
+    details.phone_number,
+    details.alternate_phone_number || null,
+    "dentist",
+    dentistId
+  );
+  await checkEmailConflicts(details.email, "dentist", details.dentist_id);
   await validateUniqueFields(details, true, dentistId);
 
   if (

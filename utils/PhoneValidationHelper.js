@@ -20,7 +20,7 @@ const validatePhonesGlobally = async (data, entityId = 0, entityType, tenantId) 
   }
 
   // Validate entityType
-  const validEntityTypes = ["clinic", "dentist", "patient"];
+  const validEntityTypes = ["clinic", "dentist", "patient","supplier","reception"];
   if (!validEntityTypes.includes(entityType)) {
     throw new CustomError("Invalid entity type", 400);
   }

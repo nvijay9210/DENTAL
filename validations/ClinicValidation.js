@@ -13,6 +13,8 @@ const {
 } = require("../models/DentistModel");
 const { validatePhonesGlobally } = require("../utils/PhoneValidationHelper");
 const { globalValidationEmail } = require("../utils/GlobalValidationEmail");
+const { checkPhoneConflicts } = require("../utils/PhonenumbersValidation");
+const { checkEmailConflicts } = require("../utils/EmailValidation");
 
 const uniqueFields = ["email", "gst_number", "license_number", "pan_number"];
 
@@ -207,7 +209,12 @@ const updateClinicColumnConfig = [
 const createClinicValidation = async (details) => {
   validateInput(details, createClinicColumnConfig);
   await validateTenant(details.tenant_id);
-  await validateClinicPhones(details);
+  await checkPhoneConflicts(
+    details.phone_number,
+    details.alternate_phone_number || null
+  );
+  await checkEmailConflicts(details.email);
+
   if (details.email !== null)
     await globalValidationEmail(details.tenant_id, details.email);
   await validateUniqueFields(details);
@@ -219,6 +226,16 @@ const updateClinicValidation = async (clinicId, details, tenantId) => {
   if (!clinicId) throw new CustomError("Clinic ID is required", 400);
   validateInput(details, updateClinicColumnConfig);
   await validateTenant(tenantId);
+
+  await checkPhoneConflicts(
+    details.phone_number,
+    details.alternate_phone_number || null,
+    "clinic",
+    clinicId
+  );
+
+  await checkEmailConflicts(details.email, 'clinic', clinicId);
+
 
   const clinic = await recordExists("clinic", {
     tenant_id: tenantId,
@@ -290,15 +307,15 @@ const checkClinicExistsByClinicIdValidation = async (tenantId, clinicId) => {
   if (!clinic) throw new CustomError("Clinic not found", 409);
 };
 
-const updateClinicSettingsValidation = async (tenantId, clinicId,details) => {
+const updateClinicSettingsValidation = async (tenantId, clinicId, details) => {
   await checkIfIdExists("tenant", "tenant_id", tenantId);
   await checkIfIdExists("clinic", "clinic_id", clinicId);
   if (!details.updated_by) throw new CustomError("Updated_by is required");
   if (
-    details.clinic_name===undefined ||
-    details.clinic_logo===undefined ||
-    details.clinic_app_themes===undefined ||
-    details.clinic_app_font===undefined
+    details.clinic_name === undefined ||
+    details.clinic_logo === undefined ||
+    details.clinic_app_themes === undefined ||
+    details.clinic_app_font === undefined
   )
     throw new CustomError(
       "Clinicname,cliniclogo,clinicthemes,clinicfont is required",
