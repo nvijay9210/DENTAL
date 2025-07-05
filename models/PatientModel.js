@@ -360,32 +360,136 @@ const getMostVisitedPatientsByDentistPeriods = async (
     conn.release();
   }
 };
-const getMostVisitedPatientsByClinicPeriods = async (tenantId, clinicId) => {
-  const query = `
-      SELECT
-        a.patient_id,
-        CONCAT(p.first_name, ' ', p.last_name) AS name,
-        a.appointment_date
-      FROM
-        appointment a
-      JOIN
-        patient p ON a.patient_id = p.patient_id
-      WHERE
-        a.tenant_id = ?
-        AND a.clinic_id = ?
-    `;
+
+// const getMostVisitedPatientsByClinicPeriods = async (tenantId, clinicId) => {
+//   const query = `
+//       SELECT
+//         a.patient_id,
+//         CONCAT(p.first_name, ' ', p.last_name) AS name,
+//         a.appointment_date
+//       FROM
+//         appointment a
+//       JOIN
+//         patient p ON a.patient_id = p.patient_id
+//       WHERE
+//         a.tenant_id = ?
+//         AND a.clinic_id = ?
+//     `;
+//   const conn = await pool.getConnection();
+//   let rows;
+//   try {
+//     [rows] = await conn.query(query, [tenantId, clinicId]);
+//     return rows;
+//   } catch (error) {
+//     console.error("Error fetching tooth details:", error);
+//     throw new Error("Database Operation Failed");
+//   } finally {
+//     conn.release();
+//   }
+// }
+
+/**
+ * Fetches daily patient data grouped by date with new vs repeated patients
+ *
+ * @param {number} tenant_id
+ * @param {number} clinic_id
+ * @param {string} startDate - 'YYYY-MM-DD'
+ * @param {string} endDate - 'YYYY-MM-DD'
+ * @param {number|null} dentist_id
+ * @returns {Promise<{daily_patient_data: Array}>}
+ */
+async function getMostVisitedPatientsByClinicPeriods(tenant_id, clinic_id, startDate, endDate, dentist_id = null) {
   const conn = await pool.getConnection();
-  let rows;
   try {
-    [rows] = await conn.query(query, [tenantId, clinicId]);
-    return rows;
-  } catch (error) {
-    console.error("Error fetching tooth details:", error);
-    throw new Error("Database Operation Failed");
+    // Query appointments joined with patient table
+    let query = `
+      SELECT 
+        a.appointment_date,
+        p.patient_id,
+        p.first_name AS name,
+        TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) AS age,
+        CASE WHEN p.gender = 'M' THEN 'Male' ELSE 'Female' END AS gender
+      FROM appointment a
+      JOIN patient p ON a.patient_id = p.patient_id
+      WHERE a.tenant_id = ?
+        AND a.clinic_id = ?
+        AND a.appointment_date BETWEEN ? AND ?
+    `;
+
+    const queryParams = [tenant_id, clinic_id, startDate, endDate];
+
+    if (dentist_id) {
+      query += ` AND a.dentist_id = ?`;
+      queryParams.push(dentist_id);
+    }
+
+    query += ` ORDER BY a.appointment_date ASC`;
+
+    const [rows] = await conn.query(query, queryParams);
+
+    // Build result structure
+    return formatDailyPatientData(rows);
   } finally {
     conn.release();
   }
-};
+}
+
+/**
+ * Formats raw DB rows into daily_patient_data structure
+ * @param {Array} rows
+ * @returns {{daily_patient_data: Array}}
+ */
+function formatDailyPatientData(rows) {
+  const firstVisitMap = {}; // key: name-age-gender => earliest date
+  const dailyMap = {};
+
+  // First pass: identify first visit for each patient
+  rows.forEach(row => {
+    const key = `${row.name}-${row.age}-${row.gender}`;
+    if (!firstVisitMap[key] || row.appointment_date < firstVisitMap[key]) {
+      firstVisitMap[key] = row.appointment_date;
+    }
+  });
+
+  // Second pass: group by date and classify as new or repeat
+  rows.forEach(row => {
+    const key = `${row.name}-${row.age}-${row.gender}`;
+    const dateStr = row.appointment_date.toISOString().split('T')[0];
+
+    if (!dailyMap[dateStr]) {
+      dailyMap[dateStr] = {
+        date: dateStr,
+        new_patients: [],
+        repeated_patients: []
+      };
+    }
+
+    const isRepeat = firstVisitMap[key] < row.appointment_date;
+
+    const patientEntry = {
+      name: row.name,
+      age: row.age,
+      gender: row.gender
+    };
+
+    if (isRepeat) {
+      dailyMap[dateStr].repeated_patients.push(patientEntry);
+    } else {
+      dailyMap[dateStr].new_patients.push(patientEntry);
+    }
+  });
+
+  // Convert map to array and sort by date
+  const dailyData = Object.values(dailyMap).sort((a, b) =>
+    a.date.localeCompare(b.date)
+  );
+
+  return {
+    daily_patient_data: dailyData
+  };
+}
+
+
 const getNewPatientsTrends = async (tenantId, clinicId) => {
   const query = `
       SELECT
