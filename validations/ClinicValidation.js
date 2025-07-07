@@ -11,8 +11,6 @@ const { recordExists } = require("../query/Records");
 const {
   checkDentistExistsUsingTenantIdAndClinicIdAnddentistId,
 } = require("../models/DentistModel");
-const { validatePhonesGlobally } = require("../utils/PhoneValidationHelper");
-const { globalValidationEmail } = require("../utils/GlobalValidationEmail");
 const { checkPhoneConflicts } = require("../utils/PhonenumbersValidation");
 const { checkEmailConflicts } = require("../utils/EmailValidation");
 
@@ -25,8 +23,6 @@ const validateTenant = async (tenantId) => {
 
 const validateClinicPhones = async (data, clinicId = 0) => {
   const tenantId = data.tenant_id;
-
-  await validatePhonesGlobally(data, clinicId, "clinic", tenantId);
 
   if (
     data.alternate_phone_number &&
@@ -214,10 +210,6 @@ const createClinicValidation = async (details) => {
     details.alternate_phone_number || null
   );
   await checkEmailConflicts(details.email);
-
-  if (details.email !== null)
-    await globalValidationEmail(details.tenant_id, details.email);
-  await validateUniqueFields(details);
 };
 
 const updateClinicValidation = async (clinicId, details, tenantId) => {
@@ -245,7 +237,7 @@ const updateClinicValidation = async (clinicId, details, tenantId) => {
 
   validatePhonesNotSame(details);
   await validateClinicPhones(details, clinicId);
-  // if(details.email!==null) await globalValidationEmail(details.tenant_id,details.email,clinicId);
+
   await validateUniqueFields(details, true, clinicId);
 };
 
