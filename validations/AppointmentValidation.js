@@ -23,7 +23,7 @@ const appoinmentColumnConfig = [
     columnname: "status",
     type: "enum",
     enum_values: ['pending', 'confirmed', 'checkedin', 'inprogress', 'completed', 'cancelled', 'clinic_cancelled', 'noshow', 'rescheduled', 'followup', 'rejected', 'expired', 'payment_pending', 'paid'],
-    null: false,
+    null: true,
   },
   {
     columnname: "appointment_type",

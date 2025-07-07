@@ -425,77 +425,63 @@ const updateAppoinmentFeedback = async (
   status = "completed"
 ) => {
   try {
-    // 1. Update appointment feedback
-    const affectedRows = await appointmentModel.updateAppoinmentFeedback(
+    const newRating = Number(details.doctor_rating ?? 0);
+
+    // Step 1: Update appointment feedback
+    const updated = await appointmentModel.updateAppoinmentFeedback(
       appointment_id,
       tenant_id,
       details,
+      status,
+      Number(details.feedback_display ?? 1) // still store it in DB
+    );
+    if (updated === 0) throw new CustomError("Appointment not found or no changes made.", 404);
+
+    // Step 2: Invalidate cache
+    const patterns = [
+      "appointment:*", "appointmentsdetails:*", "patientvisitdetails:*",
+      "appointmentsmonthlysummary:*", "financeSummary:*", "patient:*"
+    ];
+    await Promise.all(patterns.map(invalidateCacheByPattern));
+
+    // Step 3: Get dentist details
+    const dentistId = await appointmentModel.getDentistIdByTenantIdAndAppointmentId(
+      tenant_id,
+      appointment_id,
       status
     );
+    if (!dentistId) throw new CustomError("Dentist not found for this appointment.", 404);
 
-    if (affectedRows === 0) {
-      throw new CustomError("Appointment not found or no changes made.", 404);
-    }
+    const dentist = await getDentistByTenantIdAndDentistId(tenant_id, dentistId);
+    if (!dentist) throw new CustomError("Dentist details not found.", 404);
 
-    // 2. Invalidate relevant cache patterns
-    await invalidateCacheByPattern("appointment:*");
-    await invalidateCacheByPattern("appointmentsdetails:*");
-    await invalidateCacheByPattern("patientvisitdetails:*");
-    await invalidateCacheByPattern("appointmentsmonthlysummary:*");
-    await invalidateCacheByPattern("financeSummary:*");
-    await invalidateCacheByPattern("patient:*");
+    const currentRating = Number(dentist.ratings || 0);
+    const currentCount = Number(dentist.reviews_count || 0);
 
-    // 3. Get dentistId for this appointment
-    const dentistId =
-      await appointmentModel.getDentistIdByTenantIdAndAppointmentId(
-        tenant_id,
-        appointment_id,
-        status
-      );
-    if (!dentistId) {
-      throw new CustomError("Dentist not found for this appointment.", 404);
-    }
+    // Step 4: Always update rating and count
+    const updatedCount = currentCount + 1;
+    const updatedRating = (currentRating * currentCount + newRating) / updatedCount;
 
-    // 4. Get dentist details
-    const dentist = await getDentistByTenantIdAndDentistId(
-      tenant_id,
-      dentistId
-    );
-    if (!dentist) {
-      throw new CustomError("Dentist details not found.", 404);
-    }
-
-    // 5. Calculate new average rating
-    const prevRating = Number(dentist.ratings) || 0;
-    const prevCount = Number(dentist.reviews_count) || 0;
-    const newRating = Number(details.doctor_rating) || 0;
-
-    const totalRating = (prevRating * prevCount + newRating) / (prevCount + 1);
-
-    // 6. Update dentist's rating and review count
-    const dentistRating = await updateDentistRatingAndReviewCount(
+    // Step 5: Update dentist rating
+    const result = await updateDentistRatingAndReviewCount(
       tenant_id,
       dentistId,
-      totalRating,
-      prevCount + 1
+      updatedRating,
+      updatedCount
     );
+    if (result === 0) throw new CustomError("Dentist rating update failed.", 404);
 
-    if (dentistRating === 0) {
-      throw new CustomError(
-        "Dentist rating update failed or no changes made.",
-        404
-      );
-    }
+    return result;
 
-    return dentistRating;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError(
-      error.message || "Failed to update appointment",
-      error.statusCode || 500
-    );
+    throw new CustomError(error.message || "Failed to update appointment", error.statusCode || 500);
   }
 };
+
+
+
+
 
 const updateAppoinmentStatus = async (
   appointment_id,

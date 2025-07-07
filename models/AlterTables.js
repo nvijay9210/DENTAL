@@ -104,7 +104,7 @@ async function dropColumnIfExists(pool, table, column) {
 }
 
 
-
+//--------------------- Apply Queries-----------------------------------
 
 async function renameMonthlyWeekdayColumn(conn) {
   await renameColumnIfSafe(
@@ -156,6 +156,46 @@ async function dropToothDetailsColumn(conn) {
   await dropColumnIfExists(conn, "patient", "tooth_details");
 }
 
+async function updatePhoneFields(conn) {
+  // Make phone_number NOT NULL in clinic
+  await modifyColumnTypeIfNotMatch(
+    conn,
+    "clinic",
+    "phone_number",
+    "VARCHAR(15) NOT NULL",
+    "Primary phone number of clinic"
+  );
+
+  // Make phone_number NOT NULL in reception
+  await modifyColumnTypeIfNotMatch(
+    conn,
+    "reception",
+    "phone_number",
+    "VARCHAR(15) NOT NULL",
+    "Primary phone number of reception"
+  );
+
+  // Make alternate_phone_number NULLABLE in supplier
+  await modifyColumnTypeIfNotMatch(
+    conn,
+    "supplier",
+    "alternate_phone_number",
+    "VARCHAR(15) NULL",
+    "Alternate contact number"
+  );
+}
+
+async function addShowFieldReviews(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "appointment",
+    "feedback_display",
+    "TINYINT(1) NULL Default 1",
+    "For Feedback Show or not"
+  );
+}
+
+
 
 
 
@@ -172,6 +212,8 @@ async function dropToothDetailsColumn(conn) {
     await updateNotificationFileUrlColumn(conn);
     await addColumnsToSupplierPayment(conn);
     await dropToothDetailsColumn(conn);
+    await updatePhoneFields(conn);
+    await addShowFieldReviews(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");

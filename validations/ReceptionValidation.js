@@ -3,6 +3,7 @@ const { validateInput } = require("./InputValidation");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
 const { recordExists } = require("../query/Records");
 const { checkPhoneConflicts } = require("../utils/PhonenumbersValidation");
+const { checkEmailConflicts } = require("../utils/EmailValidation");
 
 const receptionColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 6, null: false },

@@ -23,6 +23,7 @@ const createTableQuery = {
   cancellation_reason text DEFAULT NULL,
   is_virtual tinyint(1) DEFAULT 0,
   reminder_send tinyint(1) DEFAULT 0,
+  feedback_display tinyint(1) DEFAULT 1,
   meeting_link varchar(255) DEFAULT NULL,
   checkin_time datetime DEFAULT NULL,
   checkout_time datetime DEFAULT NULL,
