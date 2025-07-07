@@ -23,6 +23,7 @@ const {
   UPDATE_APPOINTMENT_STATUS,
   UPDATE_APPOINTMENT_RATING_FEEDBACK,
   GET_ROOMID_APPOINTMENTID,
+  UPDATE_APPOINTMENT_FEEDBACK_DISPLAY,
 } = require("./RouterPath");
 const {
   authenticateTenantClinicGroup,
@@ -133,6 +134,17 @@ router.put(
     "dentist",
   ]),
   appointmentController.updateAppoinmentFeedback
+);
+
+router.put(
+  UPDATE_APPOINTMENT_FEEDBACK_DISPLAY,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "patient",
+    "dentist",
+  ]),
+  appointmentController.updateAppoinmentFeedbackDisplay
 );
 
 // Delete Appointment
