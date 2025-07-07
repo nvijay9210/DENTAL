@@ -1,6 +1,5 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const dentistService = require("../services/DentistService");
-const { validatePhonesGlobally } = require("../utils/PhoneValidationHelper");
 const {
   checkIfExistsWithoutId,
   checkIfExists,
@@ -8,7 +7,6 @@ const {
 } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
-const { globalValidationEmail } = require("../utils/GlobalValidationEmail");
 const { checkPhoneConflicts } = require("../utils/PhonenumbersValidation");
 const { checkEmailConflicts } = require("../utils/EmailValidation");
 
@@ -183,19 +181,6 @@ const updateColumnConfig = [
   { columnname: "updated_by", type: "varchar", size: 30, null: false },
 ];
 
-const validateDentistPhones = async (data, dentistId = 0) => {
-  const tenantId = data.tenant_id;
-
-  await validatePhonesGlobally(data, dentistId, "dentist", tenantId);
-
-  if (
-    data.alternate_phone_number &&
-    data.phone_number === data.alternate_phone_number
-  ) {
-    throw new CustomError("Phone and alternate phone cannot be the same", 409);
-  }
-};
-
 const validateUniqueFields = async (
   details,
   isUpdate = false,
@@ -259,8 +244,6 @@ const updateDentistValidation = async (dentistId, details, tenant_id) => {
       409
     );
   }
-
-  await validateDentistPhones(details, dentistId);
 };
 
 // Check if Dentist exists by Dentist ID

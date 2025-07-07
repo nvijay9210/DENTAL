@@ -3,8 +3,7 @@ const { tenantQuery } = require("../query/TenantQuery")
 
 const record = require("../query/Records");
 const { CustomError } = require("../middlewares/CustomeError");
-const { tablesToCheck } = require("../utils/GolbalValidationPhone");
-;
+
 const TABLE = "tenant";
 
 const createTenant = async (table,columns, values) => {

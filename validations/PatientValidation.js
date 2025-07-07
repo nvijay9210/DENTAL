@@ -3,8 +3,6 @@ const patientService = require("../services/PatientService");
 const { checkIfExistsWithoutId, checkIfExists } = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
-const { validatePhonesGlobally } = require("../utils/PhoneValidationHelper");
-const { globalValidationEmail } = require("../utils/GlobalValidationEmail");
 const { checkPhoneConflicts } = require("../utils/PhonenumbersValidation");
 const { checkEmailConflicts } = require("../utils/EmailValidation");
 
@@ -141,19 +139,6 @@ const UpdateColumnConfig = [
   ...patientColumnConfig,
   { columnname: "updated_by", type: "varchar", size: 30, null: false },
 ];
-
-const validatePatientPhones = async (data, patientId = 0) => {
-  const tenantId = data.tenant_id;
-
-  await validatePhonesGlobally(data, patientId, "patient", tenantId);
-
-  if (
-    data.alternate_phone_number &&
-    data.phone_number === data.alternate_phone_number
-  ) {
-    throw new CustomError("Phone and alternate phone cannot be the same", 409);
-  }
-};
 
 const validateUniqueFields = async (
   details,
