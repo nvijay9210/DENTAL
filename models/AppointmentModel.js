@@ -348,7 +348,6 @@ const getAppointmentByTenantIdAndAppointmentId = async (
       "appointment_id",
       appointment_id
     );
-    console.log(tenant_id, appointment_id, rows);
     return rows || null;
   } catch (error) {
     console.error("Error executing query:", error);
@@ -796,7 +795,8 @@ const updateAppoinmentFeedback = async (
   appointment_id,
   tenant_id,
   details,
-  status
+  status,
+  feedback_display
 ) => {
   const { doctor_rating, feedback } = details;
 
@@ -805,6 +805,7 @@ const updateAppoinmentFeedback = async (
     SET doctor_rating = ?,feedback=?  WHERE appointment_id = ? 
       AND tenant_id = ? 
       AND status = ?
+      AND feedback_display=?
   `;
 
   let queryParams = [
@@ -813,6 +814,7 @@ const updateAppoinmentFeedback = async (
     appointment_id,
     tenant_id,
     status,
+    feedback_display
   ];
 
   const conn = await pool.getConnection();

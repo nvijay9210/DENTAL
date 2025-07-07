@@ -283,6 +283,9 @@ exports.updateAppoinmentStatus = async (req, res, next) => {
 exports.updateAppoinmentFeedback = async (req, res, next) => {
   const { appointment_id, tenant_id } = req.params;
   const details=req.body
+  if(details.feedback_display===1){
+    if(!feedback || !doctor_rating) throw new CustomError('Feedback and doctorrating is required',400)
+  }
   try {
     // Validate if appointment exists before update
     const appointment1 = await checkIfExists(
