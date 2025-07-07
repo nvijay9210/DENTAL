@@ -283,9 +283,7 @@ exports.updateAppoinmentStatus = async (req, res, next) => {
 exports.updateAppoinmentFeedback = async (req, res, next) => {
   const { appointment_id, tenant_id } = req.params;
   const details=req.body
-  if(details.feedback_display===1){
-    if(!feedback || !doctor_rating) throw new CustomError('Feedback and doctorrating is required',400)
-  }
+  details['feedback_display']=1
   try {
     // Validate if appointment exists before update
     const appointment1 = await checkIfExists(
@@ -300,6 +298,32 @@ exports.updateAppoinmentFeedback = async (req, res, next) => {
     // Update the appointment
     await appointmentService.updateAppoinmentFeedback( 
       appointment_id,tenant_id,details
+    );
+    res
+      .status(200)
+      .json({ message: "Appointment and Dentist Feedback updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+exports.updateAppoinmentFeedbackDisplay = async (req, res, next) => {
+  const { appointment_id, tenant_id } = req.params;
+  const {feedback_display}=req.query
+  const status="completed"
+  try {
+    // Validate if appointment exists before update
+    const appointment1 = await checkIfExists(
+      "appointment",
+      "appointment_id",
+      appointment_id,
+      tenant_id
+    );
+
+    if (!appointment1) throw new CustomError("Appointment not found", 404);
+
+    // Update the appointment
+    await appointmentService.updateAppoinmentFeedbackDisplay( 
+      appointment_id,tenant_id,status,feedback_display
     );
     res
       .status(200)

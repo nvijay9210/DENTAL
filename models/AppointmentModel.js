@@ -829,6 +829,40 @@ const updateAppoinmentFeedback = async (
   }
 };
 
+const updateAppoinmentFeedbackDisplay = async (
+  appointment_id,
+  tenant_id,
+  status,
+  feedback_display
+) => {
+
+  let query = `
+    UPDATE appointment 
+    SET feedback_display=?  WHERE appointment_id = ? 
+      AND tenant_id = ? 
+      AND status = ?
+  `;
+
+  let queryParams = [
+    feedback_display,
+    appointment_id,
+    tenant_id,
+    status,
+    
+  ];
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, queryParams);
+    return rows.affectedRows > 0;
+  } catch (error) {
+    console.error("Error updating appointment status:", error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
 const updateAppoinmentStatus = async (
   appointment_id,
   tenantId,
@@ -1015,4 +1049,5 @@ module.exports = {
   getDentistIdByTenantIdAndAppointmentId,
   getRoomIdByTenantIdAndAppointmentId,
   updateAppointmentStats,
+  updateAppoinmentFeedbackDisplay
 };
