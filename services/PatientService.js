@@ -44,8 +44,8 @@ const patiendFields = {
   emergency_contact_number: (val) => val || null,
   insurance_provider: (val) => val || null,
   insurance_policy_number: (val) => val || null,
-  insurance_policy_start_date:(val)=>(val ? formatDateOnly(val) : null),
-  insurance_policy_end_date:(val)=>(val ? formatDateOnly(val) : null),
+  insurance_policy_start_date: (val) => (val ? formatDateOnly(val) : null),
+  insurance_policy_end_date: (val) => (val ? formatDateOnly(val) : null),
   profile_picture: (val) => val || null,
 };
 
@@ -79,8 +79,8 @@ const patientFieldsReverseMap = {
   emergency_contact_number: (val) => val,
   insurance_provider: (val) => val,
   insurance_policy_number: (val) => val,
-  insurance_policy_start_date:(val)=>(val ? formatDateOnly(val) : null),
-  insurance_policy_end_date:(val)=>(val ? formatDateOnly(val) : null),
+  insurance_policy_start_date: (val) => (val ? formatDateOnly(val) : null),
+  insurance_policy_end_date: (val) => (val ? formatDateOnly(val) : null),
   profile_picture: (val) => val,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
@@ -170,6 +170,7 @@ const createPatient = async (data, token, realm) => {
     );
     await invalidateCacheByPattern("patients:*");
     await invalidateCacheByPattern("patient:*");
+    await invalidateCacheByPattern("patient:mostvisited:*");
 
     return patientId;
     // return {
@@ -424,14 +425,28 @@ const getMostVisitedPatientsByDentistPeriods = async (
 //   return rows;
 // };
 
-const getMostVisitedPatientsByClinicPeriods = async (tenant_id, clinic_id, startDate, endDate, dentist_id) => {
+const getMostVisitedPatientsByClinicPeriods = async (
+  tenant_id,
+  clinic_id,
+  startDate,
+  endDate,
+  dentist_id
+) => {
+  const cacheKey = `patient:mostvisited:${tenant_id}:${clinic_id}:${dentist_id}:start:${startDate}:end:${endDate}`;
   try {
-    const patient = await patientModel.getMostVisitedPatientsByClinicPeriods(
-      tenant_id, clinic_id, startDate, endDate, dentist_id
-    );
-   
+    const patients = await getOrSetCache(cacheKey, async () => {
+      const patient = await patientModel.getMostVisitedPatientsByClinicPeriods(
+        tenant_id,
+        clinic_id,
+        startDate,
+        endDate,
+        dentist_id
+      );
 
-    return patient;
+      console.log("✅ Serving patients from DB and caching result");
+      return patient;
+    });
+    return patients;
   } catch (error) {
     throw new CustomError("Failed to get patient: " + error.message, 404);
   }
@@ -787,6 +802,7 @@ const updatePatient = async (patientId, data, tenant_id) => {
 
     await invalidateCacheByPattern("patients:*");
     await invalidateCacheByPattern("patient:*");
+    await invalidateCacheByPattern("patient:mostvisited:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -807,6 +823,7 @@ const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
 
     await invalidateCacheByPattern("patients:*");
     await invalidateCacheByPattern("patient:*");
+    await invalidateCacheByPattern("patient:mostvisited:*");
     return affectedRows;
   } catch (error) {
     throw new CustomError(`Failed to delete patient: ${error.message}`, 404);
@@ -827,6 +844,7 @@ const updateToothDetails = async (data, patientId, tenant_id) => {
     }
 
     await invalidateCacheByPattern("patients:*");
+    await invalidateCacheByPattern("toothdetails:*");
     return affectedRows;
   } catch (error) {
     throw new CustomError(`Failed to delete patient: ${error.message}`, 404);
@@ -967,18 +985,25 @@ const updateToothDetails = async (data, patientId, tenant_id) => {
 //   return rows;
 // }
 
-const groupToothProceduresByTimeRangeCumulative = async (tenantId,clinicId,dentistId,startDate,endDate) => {
-  const cacheKey = `patients:${tenantId}:appointmentswise`;
+const groupToothProceduresByTimeRangeCumulative = async (
+  tenantId,
+  clinicId,
+  dentistId,
+  startDate,
+  endDate
+) => {
+  const cacheKey = `toothdetails:${tenantId}:${clinicId}:${dentistId}:start:${startDate}:end${endDate}`;
 
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
-      const result = await patientModel.groupToothProceduresByTimeRangeCumulative(
-        tenantId,
-        clinicId,
-        startDate,
-        endDate,
-        dentistId
-      );
+      const result =
+        await patientModel.groupToothProceduresByTimeRangeCumulative(
+          tenantId,
+          clinicId,
+          startDate,
+          endDate,
+          dentistId
+        );
       console.log("✅ Serving patients from DB and caching result");
       return result;
     });
@@ -1121,15 +1146,19 @@ async function groupToothProceduresByTimeRangeCumulativeByDentist(
   return rows;
 }
 
-const getAllPatientsByTenantIdAndClinicIdUsingAppointment = async (tenantId,clinic_id) => {
+const getAllPatientsByTenantIdAndClinicIdUsingAppointment = async (
+  tenantId,
+  clinic_id
+) => {
   const cacheKey = `patients:${tenantId}:appointmentswise`;
 
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
-      const result = await patientModel.getAllPatientsByTenantIdAndClinicIdUsingAppointment(
-        tenantId,
-        clinic_id
-      );
+      const result =
+        await patientModel.getAllPatientsByTenantIdAndClinicIdUsingAppointment(
+          tenantId,
+          clinic_id
+        );
       console.log("✅ Serving patients from DB and caching result");
       return result;
     });
@@ -1141,16 +1170,21 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointment = async (tenantId,clin
   }
 };
 
-const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (tenantId,clinic_id,dentist_id) => {
+const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
+  tenantId,
+  clinic_id,
+  dentist_id
+) => {
   const cacheKey = `patients:${tenantId}:appointmentstatus`;
 
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
-      const result = await patientModel.getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus(
-        tenantId,
-        clinic_id,
-        dentist_id
-      );
+      const result =
+        await patientModel.getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus(
+          tenantId,
+          clinic_id,
+          dentist_id
+        );
       console.log("✅ Serving patients from DB and caching result");
       return result;
     });
@@ -1180,5 +1214,5 @@ module.exports = {
   groupToothProceduresByTimeRangeCumulative,
   groupToothProceduresByTimeRangeCumulativeByDentist,
   getAllPatientsByTenantIdAndClinicIdUsingAppointment,
-  getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus
+  getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus,
 };

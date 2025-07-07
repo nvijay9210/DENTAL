@@ -169,6 +169,7 @@ exports.getAgeGenderByClinic = async (req, res, next) => {
     next(err);
   }
 };
+
 exports.groupToothProceduresByTimeRangeCumulative = async (req, res, next) => {
   const { tenant_id,clinic_id } = req.params;
   const { dentist_id,startDate,endDate } = req.query;

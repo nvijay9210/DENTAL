@@ -115,7 +115,7 @@ const createAppointment = async (data) => {
     await invalidateCacheByPattern("appointment:*");
     await invalidateCacheByPattern("appointmentsdetails:*");
     await invalidateCacheByPattern("patientvisitdetails:*");
-    await invalidateCacheByPattern("appointmentsmonthlysummary:*");
+    await invalidateCacheByPattern("appointmentsummary:*");
     await invalidateCacheByPattern("financeSummary:*");
     await invalidateCacheByPattern("patient:*");
     console.log("appointment_id:", appointmentId);
@@ -409,7 +409,7 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
     await invalidateCacheByPattern("appointment:*");
     await invalidateCacheByPattern("appointmentsdetails:*");
     await invalidateCacheByPattern("patientvisitdetails:*");
-    await invalidateCacheByPattern("appointmentsmonthlysummary:*");
+    await invalidateCacheByPattern("appointmentsummary:*");
     await invalidateCacheByPattern("financeSummary:*");
     return affectedRows;
   } catch (error) {
@@ -555,7 +555,7 @@ const updateAppoinmentStatus = async (
     await invalidateCacheByPattern("appointment:*");
     await invalidateCacheByPattern("appointmentsdetails:*");
     await invalidateCacheByPattern("patientvisitdetails:*");
-    await invalidateCacheByPattern("appointmentsmonthlysummary:*");
+    await invalidateCacheByPattern("appointmentsummary:*");
     await invalidateCacheByPattern("financeSummary:*");
     await invalidateCacheByPattern("patient:*");
     return affectedRows;
@@ -724,78 +724,6 @@ const getAppointmentMonthlySummary = async (
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
-
-// const getAppointmentSummaryByDentist = async (
-//   tenant_id,
-//   clinic_id,
-//   dentist_id,
-//   period = 'monthly'
-// ) => {
-//   const conn = await pool.getConnection();
-
-//   try {
-//     const rows = await appointmentModel.getAllAppointmentsByTenantIdAndClinicIdAndDentistId(tenant_id,
-//       clinic_id,
-//       dentist_id)
-
-//     const summary = {};
-
-//     if (period.toLowerCase() === 'monthly') {
-//       // Group by year and month
-//       for (const row of rows) {
-//         const date = moment(row.appointment_date);
-//         const year = date.year();
-//         const month = date.format('MMMM');
-
-//         if (!summary[year]) summary[year] = {};
-
-//         if (!summary[year][month]) summary[year][month] = 1;
-//         else summary[year][month]++;
-//       }
-
-//       // Format output
-//       const formattedSummary = {};
-//       for (const [year, months] of Object.entries(summary)) {
-//         formattedSummary[year] = Object.entries(months).data.map(([month, count]) => ({
-//           month,
-//           count,
-//         }));
-//       }
-
-//       return {
-//         period: 'monthly',
-//         summary: formattedSummary,
-//       };
-//     }
-
-//     if (period.toLowerCase() === 'yearly') {
-//       // Group by year only
-//       for (const row of rows) {
-//         const year = moment(row.appointment_date).year();
-//         if (!summary[year]) summary[year] = 1;
-//         else summary[year]++;
-//       }
-
-//       const formatted = Object.entries(summary).data.map(([year, count]) => ({
-//         year: parseInt(year),
-//         count,
-//       }));
-
-//       return {
-//         period: 'yearly',
-//         summary: { 'All Years': formatted },
-//       };
-//     }
-
-//     throw new Error("Unsupported period. Use 'monthly' or 'yearly'.");
-
-//   } catch (error) {
-//     console.error("Error fetching appointment summary:", error);
-//     throw new Error("Failed to fetch appointment summary");
-//   } finally {
-//     conn.release();
-//   }
-// };
 
 const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
   tenantId,
@@ -1339,58 +1267,69 @@ async function getAppointmentSummaryByStartDateAndEndDate(
   clinic_id, // optional
   dentist_id // optional
 ) {
-  const queryParams = [tenant_id, startDate, endDate];
+  const cacheKey = `appointmentsummary:${tenant_id}:${clinic_id}:start:${startDate}:end:${endDate}`;
 
-  let query = `
-    SELECT 
-      a.stat_date AS date,
-      SUM(a.confirmed) AS confirmed,
-      SUM(a.completed) AS completed,
-      SUM(a.cancelled) AS cancelled
-    FROM appointment_stats a
-    WHERE a.tenant_id = ?
-      AND a.stat_date BETWEEN ? AND ?
-  `;
+  try{
+    const appointments = await getOrSetCache(cacheKey, async () => {
+      const queryParams = [tenant_id, startDate, endDate];
 
-  // Optional: Filter by clinic if valid
-  if (clinic_id && !isNaN(clinic_id)) {
-    query += ` AND a.clinic_id = ?`;
-    queryParams.push(clinic_id);
+      let query = `
+        SELECT 
+          a.stat_date AS date,
+          SUM(a.confirmed) AS confirmed,
+          SUM(a.completed) AS completed,
+          SUM(a.cancelled) AS cancelled
+        FROM appointment_stats a
+        WHERE a.tenant_id = ?
+          AND a.stat_date BETWEEN ? AND ?
+      `;
+    
+      // Optional: Filter by clinic if valid
+      if (clinic_id && !isNaN(clinic_id)) {
+        query += ` AND a.clinic_id = ?`;
+        queryParams.push(clinic_id);
+      }
+    
+      // Optional: Filter only if dentist_id is provided and valid
+      if (dentist_id && !isNaN(dentist_id)) {
+        query += `
+          AND EXISTS (
+            SELECT 1 FROM appointment app
+            WHERE app.tenant_id = a.tenant_id
+              AND app.appointment_date = a.stat_date
+              ${
+                clinic_id && !isNaN(clinic_id)
+                  ? `AND app.clinic_id = a.clinic_id`
+                  : ""
+              }
+              AND app.dentist_id = ?
+          )
+        `;
+        queryParams.push(dentist_id);
+      }
+    
+      query += ` GROUP BY a.stat_date ORDER BY a.stat_date`;
+    
+      try {
+        const [rows] = await pool.query(query, queryParams);
+    
+        return rows.map((row) => ({
+          date: formatDateOnly(row.date),
+          confirmed: Number(row.confirmed),
+          completed: Number(row.completed),
+          cancelled: Number(row.cancelled),
+        }));
+      } catch (error) {
+        console.error("❌ Error fetching appointment summary:", error);
+        throw new CustomError("Error fetching appointment summary", 500);
+      }
+    });
+   return appointments
   }
-
-  // Optional: Filter only if dentist_id is provided and valid
-  if (dentist_id && !isNaN(dentist_id)) {
-    query += `
-      AND EXISTS (
-        SELECT 1 FROM appointment app
-        WHERE app.tenant_id = a.tenant_id
-          AND app.appointment_date = a.stat_date
-          ${
-            clinic_id && !isNaN(clinic_id)
-              ? `AND app.clinic_id = a.clinic_id`
-              : ""
-          }
-          AND app.dentist_id = ?
-      )
-    `;
-    queryParams.push(dentist_id);
+  catch(err){
+    throw new CustomError('Failed to fetch financeSummary',404)
   }
-
-  query += ` GROUP BY a.stat_date ORDER BY a.stat_date`;
-
-  try {
-    const [rows] = await pool.query(query, queryParams);
-
-    return rows.map((row) => ({
-      date: formatDateOnly(row.date),
-      confirmed: Number(row.confirmed),
-      completed: Number(row.completed),
-      cancelled: Number(row.cancelled),
-    }));
-  } catch (error) {
-    console.error("❌ Error fetching appointment summary:", error);
-    throw new CustomError("Error fetching appointment summary", 500);
-  }
+  
 }
 
 module.exports = {
