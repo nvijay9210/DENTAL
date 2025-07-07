@@ -67,6 +67,7 @@ const createSupplierPayments = async (data) => {
         values
       );
     await invalidateCacheByPattern("supplier_payments:*");
+    await invalidateCacheByPattern("financeSummary:*");
     return supplier_paymentsId;
   } catch (error) {
     console.error("Failed to create supplier_payments:", error);
@@ -218,6 +219,7 @@ const updateSupplierPayments = async (supplier_paymentsId, data, tenant_id) => {
     }
 
     await invalidateCacheByPattern("supplier_payments:*");
+    await invalidateCacheByPattern("financeSummary:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);

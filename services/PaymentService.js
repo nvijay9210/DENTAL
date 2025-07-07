@@ -71,6 +71,7 @@ const createPayment = async (data) => {
       values
     );
     await invalidateCacheByPattern("payment:*");
+    await invalidateCacheByPattern("financeSummary:*");
     return paymentId;
   } catch (error) {
     console.error("Failed to create payment:", error);
@@ -161,6 +162,7 @@ const updatePayment = async (paymentId, data, tenant_id) => {
     }
 
     await invalidateCacheByPattern("payment:*");
+    await invalidateCacheByPattern("financeSummary:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
