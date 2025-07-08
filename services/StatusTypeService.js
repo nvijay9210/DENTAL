@@ -6,6 +6,7 @@ const {
 } = require("../config/redisConfig");
 const helper = require("../utils/Helpers");
 const { convertUTCToLocal } = require("../utils/DateUtils");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 const statusTypeField = {
   tenant_id: (val) => val,
@@ -47,7 +48,10 @@ const createStatusType = async (data) => {
 // Get All StatusTypes by Tenant ID with Caching
 const getAllStatusTypesByTenantId = async (page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `statusType:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("statustype", "list", {
+    page,
+    limit,
+  });
 
   try {
     const statusTypes = await getOrSetCache(cacheKey, async () => {

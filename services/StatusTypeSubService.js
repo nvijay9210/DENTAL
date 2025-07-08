@@ -10,6 +10,7 @@ const {
 } = require("../models/StatusTypeModel");
 const helper = require("../utils/Helpers");
 const { convertUTCToLocal } = require("../utils/DateUtils");
+const { buildCacheKey } = require("../utils/RedisCache");
 const statusTypeSubFields = {
   tenant_id: (val) => val,
   status_type_id: (val) => val,
@@ -47,7 +48,7 @@ const createStatusTypeSub = async (details, statusType) => {
       columns,
       values
     );
-    await invalidateCacheByPattern("statusTypeSub:*");
+    await invalidateCacheByPattern("statustypesub:*");
     return statusTypeSubId;
   } catch (error) {
     console.error("Failed to create statusTypeSub:", error);
@@ -65,7 +66,11 @@ const getAllStatusTypeSubsByTenantId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `statusTypeSub:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("statustypesub", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
 
   try {
     const statusTypeSubs = await getOrSetCache(cacheKey, async () => {
@@ -94,8 +99,12 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `statusTypeSub:${tenantId}:status_type_id:${status_type_id}:page:${page}:limit:${limit}`;
-
+  const cacheKey = buildCacheKey("statustypesub", "list", {
+    tenant_id: tenantId,
+    status_type_id,
+    page,
+    limit,
+  });
   try {
     const statusTypeSubs = await getOrSetCache(cacheKey, async () => {
       const result =
@@ -127,7 +136,12 @@ const getAllStatusTypeSubByTenantIdAndStatusType = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `statusTypeSub:${tenantId}:status_type:${status_type}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("statustypesub", "list", {
+    tenant_id: tenantId,
+    status_type,
+    page,
+    limit,
+  });
 
   try {
     const statusTypeSubs = await getOrSetCache(cacheKey, async () => {
@@ -230,7 +244,7 @@ const updateStatusTypeSub = async (statusTypeSubId, data, tenant_id) => {
       throw new CustomError("StatusTypeSub not found or no changes made.", 404);
     }
 
-    await invalidateCacheByPattern("statusTypeSub:*");
+    await invalidateCacheByPattern("statustypesub:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -253,7 +267,7 @@ const deleteStatusTypeSubByTenantIdAndStatusTypeSubId = async (
       throw new CustomError("StatusTypeSub not found.", 404);
     }
 
-    await invalidateCacheByPattern("statusTypeSub:*");
+    await invalidateCacheByPattern("statustypesub:*");
     return affectedRows;
   } catch (error) {
     throw new CustomError(

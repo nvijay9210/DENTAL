@@ -147,7 +147,10 @@ const createAppointment = async (data) => {
 // Get All Appointments by Tenant ID with Caching
 const getAllAppointmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `appointment:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("appointment", "list", {
+    tenant_id:tenantId,
+    page,limit
+  });
 
   try {
     const appointments = await getOrSetCache(cacheKey, async () => {
@@ -176,7 +179,11 @@ const getAllAppointmentsByTenantIdAndClinicId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `appointment:${tenantId}:clinicid:${clinic_id}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("appointment", "list", {
+    tenant_id:tenantId,
+    clinic_id,
+    page,limit
+  });
 
   try {
     const appointments = await getOrSetCache(cacheKey, async () => {
@@ -208,7 +215,12 @@ const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `appointment:${tenantId}:clinicid:${clinic_id}:dentist:${dentist_id}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("appointment", "list", {
+    tenant_id:tenantId,
+    clinic_id,
+    dentist_id,
+    page,limit
+  });
 
   try {
     const appointments = await getOrSetCache(cacheKey, async () => {
@@ -251,6 +263,7 @@ const getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
+
 const getAllRoomIdByTenantIdAndPatientId = async (tenantId, patient_id) => {
   try {
     const result = await appointmentModel.getAllRoomIdByTenantIdAndPatientId(
@@ -271,7 +284,11 @@ const getAllAppointmentsByTenantIdAndAndDentistId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `appointment:${tenantId}:dentist:${dentist_id}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("appointment", "list", {
+    tenant_id:tenantId,
+    dentist_id,
+    page,limit
+  });
 
   try {
     const appointments = await getOrSetCache(cacheKey, async () => {
@@ -302,7 +319,11 @@ const getAllAppointmentsByTenantIdAndPatientId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `appointment:${tenantId}:patient:${patient_id}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("appointment", "list", {
+    tenant_id:tenantId,
+    patient_id,
+    page,limit
+  });
 
   try {
     const appointments = await getOrSetCache(cacheKey, async () => {
@@ -630,7 +651,12 @@ const getAppointmentsWithDetails = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `appointmentsdetails:${tenantId}/${clinic_id}/${dentist_id}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("appointment", "appointmentwithdetails", {
+    tenant_id:tenantId,
+    clinic_id,
+    dentist_id,
+    page,limit
+  });
   const fieldsToDecode = ["visit_reason"];
 
   try {
@@ -661,7 +687,11 @@ const getAppointmentsWithDetailsByPatient = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `appointmentsdetails:${tenantId}${patient_id}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("appointment", "appointmentwithdetails", {
+    tenant_id:tenantId,
+    patient_id,
+    page,limit
+  });
   const fieldsToDecode = ["visit_reason", "working_hours"];
 
   try {
@@ -768,6 +798,7 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
 };
 
 const isoWeek = require("dayjs/plugin/isoWeek");
+const { buildCacheKey } = require("../utils/RedisCache");
 dayjs.extend(isoWeek);
 
 const getAppointmentSummary = async (tenant_id, clinic_id) => {
@@ -1267,7 +1298,12 @@ async function getAppointmentSummaryByStartDateAndEndDate(
   clinic_id, // optional
   dentist_id // optional
 ) {
-  const cacheKey = `appointmentsummary:${tenant_id}:${clinic_id}:start:${startDate}:end:${endDate}`;
+  const cacheKey = buildCacheKey("appointment", "appointmentsummary", {
+    tenant_id,
+    clinic_id,
+    dentist_id,
+    startDate,endDate
+  });
 
   try{
     const appointments = await getOrSetCache(cacheKey, async () => {

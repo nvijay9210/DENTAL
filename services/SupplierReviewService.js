@@ -73,7 +73,11 @@ const getAllSupplierReviewssByTenantId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `supplier_reviews:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("supplier_reviews", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
 
   try {
     const supplier_reviewss = await getOrSetCache(cacheKey, async () => {
@@ -106,7 +110,12 @@ const getAllSupplierReviewsByTenantIdAndSupplierId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `supplier_reviews:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("supplier_reviews", "list", {
+    tenant_id: tenantId,
+    supplier_id,
+    page,
+    limit,
+  });
 
   try {
     const supplier_reviewss = await getOrSetCache(cacheKey, async () => {

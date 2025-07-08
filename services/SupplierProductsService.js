@@ -10,6 +10,7 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 // Field mapping for supplier_productss (similar to treatment)
 
@@ -69,7 +70,11 @@ const createSupplierProducts = async (data) => {
 // Get All SupplierProductss by Tenant ID with Caching
 const getAllSupplierProductssByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `supplier_products:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("supplier_products", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
 
   try {
     const supplier_productss = await getOrSetCache(cacheKey, async () => {
@@ -94,8 +99,12 @@ const getAllSupplierProductssByTenantId = async (tenantId, page = 1, limit = 10)
 
 const getAllSupplierProductssByTenantIdAndSupplierId = async (tenantId,supplierId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `supplier_products:${tenantId}:page:${page}:limit:${limit}`;
-
+  const cacheKey = buildCacheKey("supplier_products", "list", {
+    tenant_id: tenantId,
+    supplier_id:supplierId,
+    page,
+    limit,
+  });
   try {
     const supplier_productss = await getOrSetCache(cacheKey, async () => {
       const result = await supplier_productsModel.getAllSupplierProductssByTenantIdAndSupplierId(

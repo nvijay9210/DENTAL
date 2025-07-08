@@ -6,13 +6,23 @@ const {
 } = require("../config/redisConfig");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
-const { formatDateOnly, compareDateTime,convertUTCToLocal } = require("../utils/DateUtils");
-const { duration } = require('../utils/Helpers');
+const {
+  formatDateOnly,
+  compareDateTime,
+  convertUTCToLocal,
+} = require("../utils/DateUtils");
+const { duration } = require("../utils/Helpers");
 const { checkIfExists } = require("../models/checkIfExists");
 
-const {  updateAppoinmentStatusCancelledAndReschedule, updateAppointmentStats } = require("../models/AppointmentModel");
-const appointmentService=require('../services/AppointmentService');
-const { createAppointmentValidation } = require("../validations/AppointmentValidation");
+const {
+  updateAppoinmentStatusCancelledAndReschedule,
+  updateAppointmentStats,
+} = require("../models/AppointmentModel");
+const appointmentService = require("../services/AppointmentService");
+const {
+  createAppointmentValidation,
+} = require("../validations/AppointmentValidation");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 // Field mapping for appointmentReschedules (similar to treatment)
 
@@ -31,7 +41,7 @@ const appointmentRescheduleFields = {
   rescheduled_by: (val) => val,
   rescheduled_at: (val) => val,
   charge_applicable: helper.parseBoolean,
-  charge_amount: (val) => val? parseFloat(val) : 0,
+  charge_amount: (val) => (val ? parseFloat(val) : 0),
 };
 
 const appointmentRescheduleFieldsReverseMap = {
@@ -50,7 +60,7 @@ const appointmentRescheduleFieldsReverseMap = {
   rescheduled_by: (val) => val,
   rescheduled_at: (val) => val,
   charge_applicable: (val) => Boolean(val),
-  charge_amount: (val) => val? parseFloat(val) : 0,
+  charge_amount: (val) => (val ? parseFloat(val) : 0),
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
@@ -64,30 +74,44 @@ const createAppointmentReschedules = async (details) => {
     created_by: (val) => val,
   };
   try {
+    const appointment =
+      await appointmentService.getAppointmentByTenantIdAndAppointmentId(
+        details.tenant_id,
+        details.original_appointment_id
+      );
 
-    const appointment=await appointmentService.getAppointmentByTenantIdAndAppointmentId(details.tenant_id,details.original_appointment_id)
+    await updateAppoinmentStatusCancelledAndReschedule(
+      details.original_appointment_id,
+      details.tenant_id,
+      details.clinic_id,
+      details.rescheduled_by,
+      details.reason
+    );
 
-    await updateAppoinmentStatusCancelledAndReschedule(details.original_appointment_id,details.tenant_id,details.clinic_id,details.rescheduled_by,details.reason)
+    await compareDateTime(
+      appointment.appointment_date,
+      appointment.start_time,
+      details.new_date,
+      details.new_start_time
+    );
 
-    await compareDateTime(appointment.appointment_date,appointment.start_time,details.new_date,details.new_start_time)
+    details.previous_date = appointment.appointment_date;
+    details.previous_time = appointment.start_time;
 
-    details.previous_date=appointment.appointment_date
-    details.previous_time=appointment.start_time
+    (appointment.appointment_date = details.new_date),
+      (appointment.start_time = details.new_start_time),
+      (appointment.end_time = details.new_end_time || "00:00:00"), //If new add
+      (appointment.rescheduled_from = appointment.appointment_id);
+    appointment.status = "pending";
+    appointment.room_id = "00000000-0000-0000-0000-000000000000";
 
-    appointment.appointment_date=details.new_date,
-    appointment.start_time=details.new_start_time,
-    appointment.end_time=details.new_end_time || '00:00:00',//If new add
-    appointment.rescheduled_from=appointment.appointment_id
-    appointment.status='pending'
-    appointment.room_id='00000000-0000-0000-0000-000000000000'
+    await createAppointmentValidation(appointment);
 
+    const newAppointment = await appointmentService.createAppointment(
+      appointment
+    );
 
-    await createAppointmentValidation(appointment)
-
-
-    const newAppointment=await appointmentService.createAppointment(appointment)
-
-    details.new_appointment_id=newAppointment
+    details.new_appointment_id = newAppointment;
 
     const { columns, values } = mapFields(details, fieldMap);
 
@@ -102,7 +126,7 @@ const createAppointmentReschedules = async (details) => {
       appointment.clinic_id,
       appointment.appointment_date
     );
-    await invalidateCacheByPattern("appointmentReschedule:*");
+    await invalidateCacheByPattern("appointmentreschedule:*");
     return appointmentRescheduleId;
   } catch (error) {
     console.error("Failed to create appointmentReschedule:", error);
@@ -120,8 +144,11 @@ const getAllAppointmentReschedulessByTenantId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `appointmentReschedule:${tenantId}:page:${page}:limit:${limit}`;
-
+  const cacheKey = buildCacheKey("appointmentreschedule", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
   try {
     const appointmentReschedules = await getOrSetCache(cacheKey, async () => {
       const result =
@@ -154,7 +181,12 @@ const getAllAppointmentReschedulessByTenantIdAndClinicId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `appointmentReschedule:${tenantId}:clinic:${clinic_id}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("appointmentreschedule", "list", {
+    tenant_id: tenantId,
+    clinic_id,
+    page,
+    limit,
+  });
 
   try {
     const appointmentReschedules = await getOrSetCache(cacheKey, async () => {
@@ -191,8 +223,13 @@ const getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `appointmentReschedule:${tenantId}:dentist:${dentist_id}:page:${page}:limit:${limit}`;
-
+  const cacheKey = buildCacheKey("appointmentreschedule", "list", {
+    tenant_id: tenantId,
+    clinic_id,
+    dentist_id,
+    page,
+    limit,
+  });
   try {
     const appointmentReschedules = await getOrSetCache(cacheKey, async () => {
       const result =
@@ -273,7 +310,7 @@ const updateAppointmentReschedules = async (
       );
     }
 
-    await invalidateCacheByPattern("appointmentReschedule:*");
+    await invalidateCacheByPattern("appointmentreschedule:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -294,7 +331,7 @@ const deleteAppointmentReschedulesByTenantIdAndAppointmentReschedulesId =
         throw new CustomError("AppointmentReschedules not found.", 404);
       }
 
-      await invalidateCacheByPattern("appointmentReschedule:*");
+      await invalidateCacheByPattern("appointmentreschedule:*");
       return affectedRows;
     } catch (error) {
       throw new CustomError(

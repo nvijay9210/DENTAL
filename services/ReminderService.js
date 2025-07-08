@@ -21,6 +21,7 @@ dayjs.extend(weekday);
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { duration } = require("moment");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 // Field mapping for reminders (similar to treatment)
 const reminderFields = {
@@ -105,7 +106,11 @@ const createReminder = async (data) => {
 // Get All Reminders by Tenant ID with Caching
 const getAllRemindersByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `reminder:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("reminder", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
 
   try {
     const reminders = await getOrSetCache(cacheKey, async () => {
@@ -137,8 +142,14 @@ const getAllRemindersByTenantAndClinicAndDentistAndType = async (
   type
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `reminder:${tenant_id}:type:${type}:page:${page}:limit:${limit}`;
-
+  const cacheKey = buildCacheKey("reminder", "list", {
+    tenant_id,
+    clinic_id,
+    dentist_id,
+    appointment_type:type,
+    page,
+    limit,
+  });
   try {
     const reminders = await getOrSetCache(cacheKey, async () => {
       const result =
@@ -165,19 +176,27 @@ const getAllRemindersByTenantAndClinicAndDentistAndType = async (
 };
 
 const getAllNotifyByDentist = async (tenant_id, clinic_id, dentist_id) => {
+  const cacheKey = buildCacheKey("reminder", "notify", {
+    tenant_id,
+    clinic_id,
+    dentist_id
+  });
   try {
-    const result = await reminderModel.getAllNotifyByDentist(
-      tenant_id,
-      clinic_id,
-      dentist_id
-    );
-    const result1 = result.map((r) => ({
-      ...r,
-      description: helper.safeJsonParse(r.description),
-      appointment_date: formatDateOnly(r.appointment_date),
-    }));
-
-    return result1;
+    const reminders = await getOrSetCache(cacheKey, async () => {
+      const result = await reminderModel.getAllNotifyByDentist(
+        tenant_id,
+        clinic_id,
+        dentist_id
+      );
+      const result1 = result.map((r) => ({
+        ...r,
+        description: helper.safeJsonParse(r.description),
+        appointment_date: formatDateOnly(r.appointment_date),
+      }));
+  
+      return result1;
+    });
+    return reminders
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
     throw new CustomError("Failed to fetch reminders", 404);
@@ -185,18 +204,26 @@ const getAllNotifyByDentist = async (tenant_id, clinic_id, dentist_id) => {
 };
 
 const getAllNotifyByPatient = async (tenant_id, clinic_id, patient_id) => {
+  const cacheKey = buildCacheKey("reminder", "notify", {
+    tenant_id,
+    clinic_id,
+    patient_id
+  });
   try {
-    const result = await reminderModel.getAllNotifyByPatient(
-      tenant_id,
-      clinic_id,
-      patient_id
-    );
-    const result1 = result.map((r) => ({
-      ...r,
-      description: helper.safeJsonParse(r.description),
-      appointment_date: formatDateOnly(r.appointment_date),
-    }));
-    return result1;
+    const reminders = await getOrSetCache(cacheKey, async () => {
+      const result = await reminderModel.getAllNotifyByPatient(
+        tenant_id,
+        clinic_id,
+        patient_id
+      );
+      const result1 = result.map((r) => ({
+        ...r,
+        description: helper.safeJsonParse(r.description),
+        appointment_date: formatDateOnly(r.appointment_date),
+      }));
+      return result1;
+    });
+    return reminders
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
     throw new CustomError("Failed to fetch reminders", 404);
@@ -204,18 +231,27 @@ const getAllNotifyByPatient = async (tenant_id, clinic_id, patient_id) => {
 };
 
 const getAllReminderNotifyByDentist = async (tenant_id, clinic_id, dentist_id) => {
+  const cacheKey = buildCacheKey("reminder", "remindernotify", {
+    tenant_id,
+    clinic_id,
+    dentist_id
+  });
   try {
-    const result = await reminderModel.getAllReminderNotifyByDentist(
-      tenant_id,
-      clinic_id,
-      dentist_id
-    );
-    const result1 = result.map((r) => ({
-      ...r,
-      description: helper.safeJsonParse(r.description),
-      start_date: formatDateOnly(r.start_date),
-    }));
-    return result1;
+    const reminders = await getOrSetCache(cacheKey, async () => {
+      const result = await reminderModel.getAllReminderNotifyByDentist(
+        tenant_id,
+        clinic_id,
+        dentist_id
+      );
+      const result1 = result.map((r) => ({
+        ...r,
+        description: helper.safeJsonParse(r.description),
+        start_date: formatDateOnly(r.start_date),
+      }));
+      return result1;
+    });
+    return reminders
+    
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
     throw new CustomError("Failed to fetch reminders", 404);

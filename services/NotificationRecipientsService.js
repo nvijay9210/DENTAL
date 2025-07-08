@@ -10,6 +10,7 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 // Field mapping for notificationRecipients (similar to treatment)
 
@@ -48,7 +49,7 @@ const createNotificationRecipient = async (data) => {
         columns,
         values
       );
-    await invalidateCacheByPattern("notificationRecipient:*");
+    await invalidateCacheByPattern("notificationrecipient:*");
     return notification_recipient_id;
   } catch (error) {
     console.error("Failed to create notificationRecipient:", error);
@@ -66,7 +67,11 @@ const getAllNotificationRecipientsByTenantId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `notificationRecipient:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("notificationrecipient", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
 
   try {
     const notificationRecipients = await getOrSetCache(cacheKey, async () => {
@@ -99,7 +104,12 @@ const getAllNotificationRecipientByTenantIdAndSupplierId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `notificationRecipient:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("notificationrecipient", "list", {
+    tenant_id: tenantId,
+    supplier_id,
+    page,
+    limit,
+  });
 
   try {
     const notificationRecipients = await getOrSetCache(cacheKey, async () => {
@@ -175,7 +185,7 @@ const updateNotificationRecipient = async (notification_recipient_id, data, tena
       );
     }
 
-    await invalidateCacheByPattern("notificationRecipient:*");
+    await invalidateCacheByPattern("notificationrecipient:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -197,7 +207,7 @@ const markNotificationAsRead = async (notification_recipient_id) => {
       );
     }
 
-    await invalidateCacheByPattern("notificationRecipient:*");
+    await invalidateCacheByPattern("notificationrecipient:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
@@ -220,7 +230,7 @@ const deleteNotificationRecipientByTenantIdAndNotificationRecipientId = async (
       throw new CustomError("NotificationRecipient not found.", 404);
     }
 
-    await invalidateCacheByPattern("notificationRecipient:*");
+    await invalidateCacheByPattern("notificationrecipient:*");
     return affectedRows;
   } catch (error) {
     throw new CustomError(

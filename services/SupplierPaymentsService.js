@@ -10,6 +10,7 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 // Field mapping for supplier_paymentss (similar to treatment)
 
@@ -85,7 +86,11 @@ const getAllSupplierPaymentssByTenantId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `supplier_payments:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("supplier_payments", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
 
   try {
     const supplier_paymentss = await getOrSetCache(cacheKey, async () => {
@@ -118,7 +123,12 @@ const getAllSupplierPaymentssByTenantIdAndSupplierId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `supplier_payments:${tenantId}:${supplier_id}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("supplier_payments", "list", {
+    tenant_id: tenantId,
+    supplier_id,
+    page,
+    limit,
+  });
 
   try {
     const supplier_paymentss = await getOrSetCache(cacheKey, async () => {

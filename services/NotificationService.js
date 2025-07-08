@@ -13,6 +13,7 @@ const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const {
   createNotificationRecipient,
 } = require("./NotificationRecipientsService");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 // Field mapping for notifications (similar to treatment)
 
@@ -124,7 +125,11 @@ const getAllNotificationsByTenantId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `notification:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("notification", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
 
   try {
     const notifications = await getOrSetCache(cacheKey, async () => {
@@ -167,7 +172,7 @@ const getNotificationsForReceiver = async (
     // ✅ Parse message field for each item safely
     notifications = notifications.map((n) => ({
       ...n,
-      message: helper.safeJsonParse(n.message)
+      message: helper.safeJsonParse(n.message),
     }));
 
     return notifications;

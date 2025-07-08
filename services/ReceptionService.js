@@ -14,6 +14,7 @@ const {
   assignRealmRoleToUser,
   addUserToGroup,
 } = require("../middlewares/KeycloakAdmin");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 // Field mapping for receptions (similar to treatment)
 
@@ -154,7 +155,12 @@ const createReception = async (data, token, realm) => {
 // Get All Receptions by Tenant ID with Caching
 const getAllReceptionsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `reception:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("reception", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
+
 
   try {
     const receptions = await getOrSetCache(cacheKey, async () => {

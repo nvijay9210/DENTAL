@@ -10,6 +10,7 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 const assetFields = {
   tenant_id: (val) => val,
@@ -72,8 +73,11 @@ const createAsset = async (data) => {
 // Get All Assets by Tenant ID with Caching
 const getAllAssetsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `asset:${tenantId}:page:${page}:limit:${limit}`;
-
+  const cacheKey = buildCacheKey("asset", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
   try {
     const assets = await getOrSetCache(cacheKey, async () => {
       const result = await assetModel.getAllAssetsByTenantId(
@@ -163,7 +167,14 @@ const getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   page=1,
   limit=10
 ) => {
-  const cacheKey = `asset:datewise:${tenantId}`;
+  const cacheKey = buildCacheKey("asset", "list", {
+    tenant_id: tenantId,
+    clinic_id: clinicId,
+    startDate,
+    endDate,
+    page,
+    limit,
+  });
   const offset = (page - 1) * limit;
   try {
     const assets = await getOrSetCache(cacheKey, async () => {
