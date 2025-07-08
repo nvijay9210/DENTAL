@@ -8,7 +8,6 @@ const { checkEmailConflicts } = require("../utils/EmailValidation");
 
 const uniqueFields = [
   "email",
-  "emergency_contact_number",
   "insurance_policy_number",
 ];
 

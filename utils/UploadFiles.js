@@ -781,6 +781,7 @@ const uploadFileMiddleware = (options) => {
         if (id) {
           await updateValidationFn(id, req.body, tenant_id);
         } else {
+          console.log('create')
           await createValidationFn(req.body);
         }
       }

@@ -35,7 +35,7 @@ async function checkEmailConflicts(email, tableName = null, recordId = null) {
 
   if (conflicts.length > 0) {
     const sources = [...new Set(conflicts.map(c => c.source))].join(', ');
-    throw new Error(`❌ Email already exists in: ${sources}`);
+    throw new Error(`Email already exists in: ${sources}`);
   }
 }
 
