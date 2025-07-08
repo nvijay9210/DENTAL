@@ -16,6 +16,7 @@ const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const helper = require("../utils/Helpers");
 
 const { encrypt } = require("../middlewares/PasswordHash");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 const dentistFieldMap = {
   tenant_id: (val) => val,
@@ -46,26 +47,26 @@ const dentistFieldMap = {
   awards_certifications: helper.safeStringify,
   member_of: helper.safeStringify,
 
-  experience_years: (val) => val? parseInt(val) : 0,
+  experience_years: (val) => (val ? parseInt(val) : 0),
   license_number: (val) => val,
   city: (val) => val,
   state: (val) => val,
   country: (val) => val,
   pin_code: (val) => val,
 
-  consultation_fee: (val) => val? parseFloat(val) : 0,
+  consultation_fee: (val) => (val ? parseFloat(val) : 0),
   currency_code: (val) => val,
-  min_booking_fee: (val) => val? parseFloat(val) : 0,
-  ratings: (val) => val? parseFloat(val) : 0,
-  reviews_count: (val) => val? parseInt(val) : 0,
-  appointment_count: (val) => val? parseInt(val) : 0,
+  min_booking_fee: (val) => (val ? parseFloat(val) : 0),
+  ratings: (val) => (val ? parseFloat(val) : 0),
+  reviews_count: (val) => (val ? parseInt(val) : 0),
+  appointment_count: (val) => (val ? parseInt(val) : 0),
 
   profile_picture: (val) => val || null,
 
   teleconsultation_supported: helper.parseBoolean,
 
   last_login: (val) => val,
-  duration:  (val) => val,
+  duration: (val) => val,
 };
 
 const dentistFieldReverseMap = {
@@ -98,19 +99,19 @@ const dentistFieldReverseMap = {
   awards_certifications: (val) => helper.safeJsonParse(val),
   member_of: (val) => helper.safeJsonParse(val),
 
-  experience_years: (val) => val? parseInt(val) : 0,
+  experience_years: (val) => (val ? parseInt(val) : 0),
   license_number: (val) => val,
   city: (val) => val,
   state: (val) => val,
   country: (val) => val,
   pin_code: (val) => val,
 
-  consultation_fee: (val) => val? parseFloat(val) : 0,
+  consultation_fee: (val) => (val ? parseFloat(val) : 0),
   currency_code: (val) => val,
-  min_booking_fee: (val) => val? parseFloat(val) : 0,
-  ratings: (val) => val? parseFloat(val) : 0,
-  reviews_count: (val) => val? parseInt(val) : 0,
-  appointment_count: (val) => val? parseInt(val) : 0,
+  min_booking_fee: (val) => (val ? parseFloat(val) : 0),
+  ratings: (val) => (val ? parseFloat(val) : 0),
+  reviews_count: (val) => (val ? parseInt(val) : 0),
+  appointment_count: (val) => (val ? parseInt(val) : 0),
 
   profile_picture: (val) => val,
   teleconsultation_supported: (val) => Boolean(val),
@@ -209,8 +210,7 @@ const createDentist = async (data, token, realm) => {
     );
 
     // 8. Invalidate cache
-    await invalidateCacheByPattern("dentists:*");
-    await invalidateCacheByPattern("dentistsbyclinic:*");
+    await invalidateCacheByPattern("dentist:*");
 
     return dentistId;
 
@@ -244,8 +244,7 @@ const updateDentist = async (dentistId, data, tenant_id) => {
       throw new CustomError("Dentist not found or no changes made.", 404);
     }
 
-    await invalidateCacheByPattern("dentists:*");
-    await invalidateCacheByPattern("dentistsbyclinic:*");
+    await invalidateCacheByPattern("dentist:*");
     return affectedRows;
   } catch (error) {
     console.error("Failed to update dentist:", error.message);
@@ -256,7 +255,11 @@ const updateDentist = async (dentistId, data, tenant_id) => {
 // -------------------- GET ALL --------------------
 const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `dentists:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("dentist", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
 
   try {
     const dentists = await getOrSetCache(cacheKey, async () => {
@@ -331,8 +334,7 @@ const deleteDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
       tenantId,
       dentistId
     );
-    await invalidateCacheByPattern("dentists:*");
-    await invalidateCacheByPattern("dentistsbyclinic:*");
+    await invalidateCacheByPattern("dentist:*");
     return result;
   } catch (error) {
     throw new CustomError(`Failed to delete dentist: ${error.message}`, 404);
@@ -360,11 +362,16 @@ const checkDentistExistsByTenantIdAndDentistId = async (
 const getAllDentistsByTenantIdAndClinicId = async (
   tenantId,
   clinicId,
-  page=1,
-  limit=10
+  page = 1,
+  limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `dentistsbyclinic:${tenantId}:${clinicId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("dentist", "list", {
+    tenant_id: tenantId,
+    clinic_id: clinicId,
+    page,
+    limit,
+  });
 
   try {
     const dentists = await getOrSetCache(cacheKey, async () => {
@@ -406,8 +413,7 @@ const updateClinicIdAndNameAndAddress = async (
       clinic_addrss,
       dentistId
     );
-    await invalidateCacheByPattern("dentists:*");
-    await invalidateCacheByPattern("dentistsbyclinic:*");
+    await invalidateCacheByPattern("dentist:*");
     return result;
   } catch (error) {
     throw new CustomError(`Failed to delete dentist: ${error.message}`, 404);
@@ -421,8 +427,7 @@ const updateNullClinicInfoWithJoin = async (tenantId, clinicId, dentistId) => {
       clinicId,
       dentistId
     );
-    await invalidateCacheByPattern("dentists:*");
-    await invalidateCacheByPattern("dentistsbyclinic:*");
+    await invalidateCacheByPattern("dentist:*");
     return result;
   } catch (error) {
     throw new CustomError(`Failed to delete dentist: ${error.message}`, 404);

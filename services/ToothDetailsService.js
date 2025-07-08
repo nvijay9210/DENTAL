@@ -78,7 +78,11 @@ const getAllToothDetailssByTenantId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `toothdetails:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("toothdetails", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
 
   try {
     const toothdetailss = await getOrSetCache(cacheKey, async () => {
@@ -109,7 +113,14 @@ const getAllToothDetailsByTenantAndClinicAndDentistAndPatientId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `toothdetails:${tenantId}:dentist:${dentistId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("toothdetails", "list", {
+    tenant_id: tenantId,
+    clinic_id:clinicId,
+    dentist_id:dentistId,
+    patient_id:patientId,
+    page,
+    limit,
+  });
 
   try {
     const toothdetailss = await getOrSetCache(cacheKey, async () => {
@@ -144,7 +155,13 @@ const getAllToothDetailsByTenantAndClinicAndPatientId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `toothdetails:${tenantId}:patient:${patientId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("toothdetails", "list", {
+    tenant_id: tenantId,
+    clinic_id:clinicId,
+    patient_id:patientId,
+    page,
+    limit,
+  });
 
   try {
     const toothdetailss = await getOrSetCache(cacheKey, async () => {

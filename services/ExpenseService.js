@@ -10,6 +10,7 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 // Field mapping for expenses (similar to treatment)
 
@@ -73,8 +74,11 @@ const createExpense = async (data) => {
 // Get All Expenses by Tenant ID with Caching
 const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `expense:${tenantId}:page:${page}:limit:${limit}`;
-
+  const cacheKey = buildCacheKey("expense", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
   try {
     const expenses = await getOrSetCache(cacheKey, async () => {
       const result = await expenseModel.getAllExpensesByTenantId(
@@ -104,7 +108,14 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   page=1,
   limit=10,
 ) => {
-  const cacheKey = `expense:datewise:${tenantId}`;
+  const cacheKey = buildCacheKey("expense", "list", {
+    tenant_id: tenantId,
+    clinic_id:clinicId,
+    startDate,
+    endDate,
+    page,
+    limit,
+  });
   const offset = (page - 1) * limit;
   try {
     const expenses = await getOrSetCache(cacheKey, async () => {

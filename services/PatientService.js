@@ -17,6 +17,7 @@ const {
   assignRealmRoleToUser,
 } = require("../middlewares/KeycloakAdmin");
 const { encrypt } = require("../middlewares/PasswordHash");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 const patiendFields = {
   tenant_id: (val) => val,
@@ -168,7 +169,7 @@ const createPatient = async (data, token, realm) => {
       columns,
       values
     );
-    await invalidateCacheByPattern("patients:*");
+    await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:mostvisited:*");
 
@@ -186,7 +187,11 @@ const createPatient = async (data, token, realm) => {
 
 const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `patients:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("patient", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
 
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
@@ -432,7 +437,13 @@ const getMostVisitedPatientsByClinicPeriods = async (
   endDate,
   dentist_id
 ) => {
-  const cacheKey = `patient:mostvisited:${tenant_id}:${clinic_id}:${dentist_id}:start:${startDate}:end:${endDate}`;
+  const cacheKey = buildCacheKey("patient", "mostvisitedpatients", {
+    tenant_id,
+    clinic_id,
+    dentist_id,
+    startDate,
+    endDate,
+  });
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
       const patient = await patientModel.getMostVisitedPatientsByClinicPeriods(
@@ -800,7 +811,7 @@ const updatePatient = async (patientId, data, tenant_id) => {
       throw new CustomError("Patient not found or no changes made.", 404);
     }
 
-    await invalidateCacheByPattern("patients:*");
+    await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:mostvisited:*");
     return affectedRows;
@@ -821,7 +832,7 @@ const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
       throw new CustomError("Patient not found.", 404);
     }
 
-    await invalidateCacheByPattern("patients:*");
+    await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:mostvisited:*");
     return affectedRows;
@@ -843,11 +854,11 @@ const updateToothDetails = async (data, patientId, tenant_id) => {
       throw new CustomError("Patient not found.", 404);
     }
 
-    await invalidateCacheByPattern("patients:*");
+    await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("toothdetails:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete patient: ${error.message}`, 404);
+    throw new CustomError(`Failed to update patient: ${error.message}`, 404);
   }
 };
 
@@ -992,7 +1003,13 @@ const groupToothProceduresByTimeRangeCumulative = async (
   startDate,
   endDate
 ) => {
-  const cacheKey = `toothdetails:${tenantId}:${clinicId}:${dentistId}:start:${startDate}:end${endDate}`;
+  const cacheKey = buildCacheKey("patient", "toothdetails", {
+    tenant_id:tenantId,
+    clinic_id:clinicId,
+    dentist_id:dentistId,
+    startDate,
+    endDate,
+  });
 
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
@@ -1150,7 +1167,10 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointment = async (
   tenantId,
   clinic_id
 ) => {
-  const cacheKey = `patients:${tenantId}:appointmentswise`;
+  const cacheKey = buildCacheKey("patient", "list", {
+    tenant_id:tenantId,
+    clinic_id:clinic_id
+  });
 
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
@@ -1175,7 +1195,11 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
   clinic_id,
   dentist_id
 ) => {
-  const cacheKey = `patients:${tenantId}:appointmentstatus`;
+  const cacheKey = buildCacheKey("patient", "list", {
+    tenant_id:tenantId,
+    clinic_id:clinic_id,
+    dentist_id
+  });
 
   try {
     const patients = await getOrSetCache(cacheKey, async () => {

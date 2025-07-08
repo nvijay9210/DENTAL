@@ -7,6 +7,7 @@ const {
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 const treatmentFields = {
   tenant_id: (val) => val,
@@ -89,7 +90,11 @@ const createTreatment = async (data) => {
 // Get All Treatments by Tenant ID with Caching
 const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `treatment:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("treatment", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
 
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
@@ -137,7 +142,14 @@ const getAllTreatmentsByTenantAndClinicId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `treatment_patient:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("treatment", "list", {
+    tenant_id: tenantId,
+    clinic_id,
+    appointment_id,
+    page,
+    limit,
+  });
+
 
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
@@ -173,7 +185,15 @@ const getAllTreatmentsByTenantAndClinicIdAndDentist = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `treatment_patient:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("treatment", "list", {
+    tenant_id: tenantId,
+    clinic_id,
+    dentist_id,
+    appointment_id,
+    page,
+    limit,
+  });
+
 
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
@@ -208,7 +228,12 @@ const getAllTreatmentsByTenantAndDentistId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `treatment:treatment_dentist:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("treatment", "list", {
+    tenant_id: tenantId,
+    dentist_id,
+    page,
+    limit,
+  });
 
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
@@ -241,7 +266,13 @@ const getAllTreatmentsByTenantAndPatientId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `treatment:treatment_patient:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("treatment", "list", {
+    tenant_id: tenantId,
+    patient_id,
+    page,
+    limit,
+  });
+
 
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {

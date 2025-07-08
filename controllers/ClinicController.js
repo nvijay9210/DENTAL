@@ -50,6 +50,7 @@ exports.getFinanceSummary = async (req, res, next) => {
     next(err);
   }
 };
+
 exports.getClinicSettingsByTenantIdAndClinicId = async (req, res, next) => {
   const { tenant_id, clinic_id } = req.params;
   await checkIfIdExists("tenant", "tenant_id", tenant_id);

@@ -7,6 +7,7 @@ const {
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 // Field mapping for payments (similar to treatment)
 
@@ -82,8 +83,11 @@ const createPayment = async (data) => {
 // Get All Payments by Tenant ID with Caching
 const getAllPaymentsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `payment:${tenantId}:page:${page}:limit:${limit}`;
-
+  const cacheKey = buildCacheKey("payment", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
   try {
     const payments = await getOrSetCache(cacheKey, async () => {
       const result = await paymentModel.getAllPaymentsByTenantId(

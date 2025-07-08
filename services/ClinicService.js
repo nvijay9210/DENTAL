@@ -17,6 +17,7 @@ const {
 const message = require("../middlewares/ErrorMessages");
 const { convertUTCToLocal } = require("../utils/DateUtils");
 const { createGroup } = require("../middlewares/KeycloakAdmin");
+const { buildCacheKey } = require("../utils/RedisCache");
 
 const clinicFieldMap = {
   tenant_id: (val) => val,
@@ -105,7 +106,7 @@ const createClinic = async (data, token, realm) => {
   try {
     const { columns, values } = mapFields(data, createClinicFieldMap);
     const clinicId = await clinicModel.createClinic("clinic", columns, values);
-    await invalidateCacheByPattern("clinics:*");
+    await invalidateCacheByPattern("clinic:*");
     if (clinicId && process.env.KEYCLOAK_POWER==='on') {
       const groupName = `dental-${data.tenant_id}-${clinicId}`;
 
@@ -146,7 +147,7 @@ const updateClinic = async (clinicId, data, tenant_id) => {
       throw new CustomError(message.CLINIC_UPDATE_FAIL, 404);
     }
 
-    await invalidateCacheByPattern("clinics:*");
+    await invalidateCacheByPattern("clinic:*");
     return affectedRows;
   } catch (error) {
     console.log("Service Error:", error);
@@ -157,7 +158,11 @@ const updateClinic = async (clinicId, data, tenant_id) => {
 // -------------------- GET ALL --------------------
 const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `clinics:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = buildCacheKey("clinic", "list", {
+    tenant_id: tenantId,
+    page,
+    limit,
+  });
 
   try {
     const clinics = await getOrSetCache(cacheKey, async () => {
@@ -207,7 +212,7 @@ const deleteClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
       tenantId,
       clinicId
     );
-    await invalidateCacheByPattern("clinics:*");
+    await invalidateCacheByPattern("clinic:*");
     return clinic;
   } catch (error) {
     throw new CustomError(message.CLINIC_DELETE_FAIL, 404);
@@ -286,240 +291,14 @@ const handleClinicAssignment = async (
   }
 };
 
-// const getFinanceSummary = async (tenant_id, clinic_id) => {
-//   const cacheKey = `financeSummary:${tenant_id}:${clinic_id}`;
-//   try {
-//     const result = await getOrSetCache(cacheKey, async () => {
-//       const { appointments, treatments, expenses } =
-//         await clinicModel.getFinanceSummary(tenant_id, clinic_id);
-
-//       const incomeData = [...appointments, ...treatments].map((item) => {
-//         const d = new Date(item.date);
-//         d.setHours(0, 0, 0, 0);
-//         return {
-//           date: d,
-//           amount: parseFloat(item.amount) || 0,
-//         };
-//       });
-
-//       const expenseData = expenses.map((item) => ({
-//         date: normalizeDate(item.date),
-//         amount: parseFloat(item.amount) || 0,
-//       }));
-
-//       // Helper functions...
-//       function normalizeDate(date) {
-//         const d = new Date(date);
-//         return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-//       }
-
-//       function groupByDay(data) {
-//         const result = Array(7).fill(0);
-//         const now = new Date();
-//         now.setHours(0, 0, 0, 0);
-//         const sevenDaysAgo = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
-//         for (const entry of data) {
-//           const entryDate = new Date(entry.date);
-//           entryDate.setHours(0, 0, 0, 0);
-//           if (entryDate >= sevenDaysAgo && entryDate <= now) {
-//             const dayIndex = entryDate.getDay();
-//             result[dayIndex] += entry.amount;
-//           }
-//         }
-//         const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-//         return dayLabels.map((label, i) => ({ label, amount: result[i] }));
-//       }
-
-//       function groupByWeek(data, numWeeks = 4) {
-//         const today = new Date();
-//         today.setHours(0, 0, 0, 0);
-//         let currentSunday = new Date(today);
-//         currentSunday.setDate(today.getDate() - today.getDay() - 7);
-//         const result = Array(numWeeks).fill(0);
-//         const weekRanges = [];
-//         for (let i = 0; i < numWeeks; i++) {
-//           const start = new Date(currentSunday);
-//           start.setDate(currentSunday.getDate() - i * 7);
-//           const end = new Date(start);
-//           end.setDate(start.getDate() + 6);
-//           weekRanges.push({ start, end });
-//         }
-//         for (const entry of data) {
-//           const entryDate = new Date(entry.date);
-//           entryDate.setHours(0, 0, 0, 0);
-//           for (let i = 0; i < numWeeks; i++) {
-//             const { start, end } = weekRanges[i];
-//             if (entryDate >= start && entryDate <= end) {
-//               result[i] += entry.amount;
-//               break;
-//             }
-//           }
-//         }
-//         return result.map((amount, i) => ({
-//           label: `Week ${i + 1}`,
-//           amount,
-//         }));
-//       }
-
-//       function groupByMonth(data, numMonths = 3) {
-//         const today = new Date();
-//         const result = Array(numMonths).fill(0);
-//         const monthLabels = [
-//           "Jan",
-//           "Feb",
-//           "Mar",
-//           "Apr",
-//           "May",
-//           "Jun",
-//           "Jul",
-//           "Aug",
-//           "Sep",
-//           "Oct",
-//           "Nov",
-//           "Dec",
-//         ];
-//         const refDates = [];
-//         for (let i = numMonths - 1; i >= 0; i--) {
-//           const refDate = new Date(
-//             today.getFullYear(),
-//             today.getMonth() - (numMonths - i - 1),
-//             1
-//           );
-//           refDates.push({
-//             year: refDate.getFullYear(),
-//             month: refDate.getMonth(),
-//             label: monthLabels[refDate.getMonth()],
-//           });
-//         }
-//         for (const entry of data) {
-//           const entryDate = new Date(entry.date);
-//           const entryYear = entryDate.getFullYear();
-//           const entryMonth = entryDate.getMonth();
-//           for (let i = 0; i < numMonths; i++) {
-//             const ref = refDates[i];
-//             if (entryYear === ref.year && entryMonth === ref.month) {
-//               result[i] += entry.amount;
-//               break;
-//             }
-//           }
-//         }
-//         return result.map((amount, i) => ({
-//           label: refDates[i].label,
-//           amount,
-//         }));
-//       }
-
-//       function groupByYear(data, numYears = 4) {
-//         const result = Array(numYears).fill(0);
-//         const currentYear = new Date().getFullYear();
-//         for (const entry of data) {
-//           const entryYear = new Date(entry.date).getFullYear();
-//           const offset = currentYear - entryYear;
-//           const yearIndex = numYears - offset - 1;
-//           if (yearIndex >= 0 && yearIndex < numYears) {
-//             result[yearIndex] += entry.amount;
-//           }
-//         }
-//         return result.map((amount, i) => ({
-//           date: `${currentYear - (numYears - i - 1)}`,
-//           amount,
-//         }));
-//       }
-
-//       return {
-//         "1w": {
-//           income: groupByDay(incomeData),
-//           expense: groupByDay(expenseData),
-//         },
-//         "2w": {
-//           income: groupByWeek(incomeData, 2),
-//           expense: groupByWeek(expenseData, 2),
-//         },
-//         "3w": {
-//           income: groupByWeek(incomeData, 3),
-//           expense: groupByWeek(expenseData, 3),
-//         },
-//         "4w": {
-//           income: groupByWeek(incomeData, 4),
-//           expense: groupByWeek(expenseData, 4),
-//         },
-//         "1m": {
-//           income: groupByMonth(incomeData, 1),
-//           expense: groupByMonth(expenseData, 1),
-//         },
-//         "2m": {
-//           income: groupByMonth(incomeData, 2),
-//           expense: groupByMonth(expenseData, 2),
-//         },
-//         "3m": {
-//           income: groupByMonth(incomeData, 3),
-//           expense: groupByMonth(expenseData, 3),
-//         },
-//         "4m": {
-//           income: groupByMonth(incomeData, 4),
-//           expense: groupByMonth(expenseData, 4),
-//         },
-//         "5m": {
-//           income: groupByMonth(incomeData, 5),
-//           expense: groupByMonth(expenseData, 5),
-//         },
-//         "6m": {
-//           income: groupByMonth(incomeData, 6),
-//           expense: groupByWeek(expenseData, 6),
-//         },
-//         "7m": {
-//           income: groupByMonth(incomeData, 7),
-//           expense: groupByMonth(expenseData, 7),
-//         },
-//         "8m": {
-//           income: groupByMonth(incomeData, 8),
-//           expense: groupByMonth(expenseData, 8),
-//         },
-//         "9m": {
-//           income: groupByMonth(incomeData, 9),
-//           expense: groupByMonth(expenseData, 9),
-//         },
-//         "10m": {
-//           income: groupByMonth(incomeData, 10),
-//           expense: groupByMonth(expenseData, 10),
-//         },
-//         "11m": {
-//           income: groupByMonth(incomeData, 11),
-//           expense: groupByMonth(expenseData, 11),
-//         },
-//         "12m": {
-//           income: groupByMonth(incomeData, 12),
-//           expense: groupByMonth(expenseData, 12),
-//         },
-//         "1y": {
-//           income: groupByYear(incomeData, 1),
-//           expense: groupByYear(expenseData, 1),
-//         },
-//         "2y": {
-//           income: groupByYear(incomeData, 2),
-//           expense: groupByYear(expenseData, 2),
-//         },
-//         "3y": {
-//           income: groupByYear(incomeData, 3),
-//           expense: groupByYear(expenseData, 3),
-//         },
-//         "4y": {
-//           income: groupByYear(incomeData, 4),
-//           expense: groupByYear(expenseData, 4),
-//         },
-//       };
-//     });
-
-//     return result;
-//   } catch (err) {
-//     console.error("Finance summary error", err);
-//     throw err;
-//   }
-// };
-
-
-const getFinanceSummary = async (tenantId,clinicId,dentistId,startDate,endDate) => {
-  const cacheKey = `financeSummary:incomes:${tenantId}:appointmentswise`;
+const getFinanceSummary = async (tenantId,clinicId,dentistId=null,startDate,endDate) => {
+  const cacheKey = buildCacheKey("clinic", "financesummary", {
+    tenant_id: tenantId,
+    clinic_id: clinicId,
+    dentist_id: dentistId,
+    startDate,
+    endDate,
+  });
   console.log(typeof startDate,typeof endDate)
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
@@ -528,7 +307,7 @@ const getFinanceSummary = async (tenantId,clinicId,dentistId,startDate,endDate) 
         clinicId,
         startDate,
         endDate,
-        dentistId=null
+        dentistId
       );
       console.log("✅ Serving patients from DB and caching result");
       return result;
