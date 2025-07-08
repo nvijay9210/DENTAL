@@ -6,10 +6,24 @@ async function checkPhoneConflicts(phone, alternatePhone = null, currentTable = 
 
   for (const table of tables) {
     const idField = `${table}_id`;
-    let query = `SELECT ${idField} FROM ${table} WHERE (phone_number = ? OR alternate_phone_number = ?)`;
-    const values = [phone, alternatePhone ?? phone]; // fallback if alternatePhone is null
+    const values = [phone, alternatePhone ?? phone];
+    let query;
 
-    // Skip same record during update
+    if (table === 'patient') {
+      // Include emergency_contact_number for patient table
+      query = `
+        SELECT ${idField} FROM ${table} 
+        WHERE (phone_number = ? OR alternate_phone_number = ? OR emergency_contact_number = ?)
+      `;
+      values.push(phone); // Check `phone` against emergency_contact_number
+    } else {
+      query = `
+        SELECT ${idField} FROM ${table} 
+        WHERE (phone_number = ? OR alternate_phone_number = ?)
+      `;
+    }
+
+    // Exclude current record if updating
     if (currentTable === table && currentId) {
       query += ` AND ${idField} != ?`;
       values.push(currentId);

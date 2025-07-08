@@ -195,7 +195,87 @@ async function addShowFieldReviews(conn) {
   );
 }
 
+async function updatExpensePaid(conn) {
+  
+  await modifyColumnTypeIfNotMatch(
+    conn,
+    "expense",
+    "paid_by",
+    "VARCHAR(100) NOT NULL",
+    "paid_by size change"
+  );
 
+  
+  await modifyColumnTypeIfNotMatch(
+    conn,
+   "expense",
+    "paid_by_user",
+    "VARCHAR(100) NOT NULL",
+    "paid_by_user size change"
+  );
+
+  
+  await modifyColumnTypeIfNotMatch(
+    conn,
+    "expense",
+    "paid_to",
+    "VARCHAR(100) NOT NULL",
+    "paid_to size change"
+  );
+}
+
+/**
+ * Safely modifies the default value of a status column if it exists and has default 0.
+ */
+async function updateStatusColumnDefault(conn, table) {
+  try {
+    const [colInfo] = await conn.query("SHOW COLUMNS FROM ?? LIKE 'status'", [table]);
+
+    if (colInfo.length === 0) {
+      console.log(`❌ Column \`status\` does not exist in \`${table}\`.`);
+      return;
+    }
+
+    const colDefinition = colInfo[0];
+    const currentType = colDefinition.Type.toUpperCase();
+    const currentNull = colDefinition.Null === "YES" ? "NULL" : "NOT NULL";
+    const currentDefault = colDefinition.Default;
+
+    if (currentDefault === "1") {
+      console.log(`ℹ️ Column \`status\` in \`${table}\` already has default value 1. Skipping.`);
+      return;
+    }
+
+    if (currentDefault !== "0") {
+      console.log(`ℹ️ Column \`status\` in \`${table}\` has unexpected default value: ${currentDefault}. Skipping.`);
+      return;
+    }
+
+    // Rebuild the column definition with new DEFAULT value
+    const nullClause = colDefinition.Null === "YES" ? "NULL" : "NOT NULL";
+    const defaultClause = "DEFAULT 1";
+    const commentClause = colDefinition.Comment ? `COMMENT '${colDefinition.Comment}'` : "";
+
+    const modifyQuery = `
+      ALTER TABLE ?? 
+      MODIFY COLUMN status ${currentType} ${nullClause} ${defaultClause} ${commentClause}
+    `;
+
+    await conn.query(modifyQuery, [table]);
+    console.log(`✅ Updated default for \`status\` column in \`${table}\` from 0 to 1`);
+  } catch (error) {
+    console.error(`❌ Error updating status column in \`${table}\`:`, error.message);
+    throw error;
+  }
+}
+
+// Wrapper to run the update on all relevant tables
+async function updateStatusDefaults(conn) {
+  const tables = ["dentist", "supplier", "reception"];
+  for (const table of tables) {
+    await updateStatusColumnDefault(conn, table);
+  }
+}
 
 
 
@@ -214,6 +294,8 @@ async function addShowFieldReviews(conn) {
     await dropToothDetailsColumn(conn);
     await updatePhoneFields(conn);
     await addShowFieldReviews(conn);
+    await updatExpensePaid(conn);
+    await updateStatusDefaults(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");
