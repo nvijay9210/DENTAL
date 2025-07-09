@@ -118,6 +118,7 @@ const dentistFieldReverseMap = {
 
   last_login: (val) => val,
   duration: (val) => val,
+  status: (val) => val,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
