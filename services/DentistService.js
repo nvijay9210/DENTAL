@@ -134,6 +134,7 @@ const createDentist = async (data, token, realm) => {
   };
 
   try {
+    let userData;
     if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username/email
       const username = helper.generateUsername(
@@ -144,7 +145,7 @@ const createDentist = async (data, token, realm) => {
         data.email ||
         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
 
-      const userData = {
+       userData = {
         username,
         email,
         "emailVerified": true,
@@ -181,7 +182,7 @@ const createDentist = async (data, token, realm) => {
 
       // 5. Optional: Add to Group (e.g., based on clinicId)
       if (data.clinic_id) {
-        const groupName = `dental-${data.tenantId}-${data.clinicId}`;
+        const groupName = `dental-${data.tenant_id}-${data.clinic_id}`;
         const groupAdded = await addUserToGroup(
           token,
           realm,
