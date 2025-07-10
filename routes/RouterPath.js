@@ -30,7 +30,6 @@ module.exports = {
   GETALL_PATIENT_TENANT_CLINIC_DENTIST: "/getallpatients/:tenant_id/:clinic_id/:dentist_id",
   GET_PATIENT_TENANT: "/getpatient/:patient_id/:tenant_id",
   UPDATE_PATIENT_TENANT: "/updatepatient/:patient_id/:tenant_id",
-  UPDATE_PATIENT_TOOTH_DETAILS: "/updatepatients_tooth/:patient_id/:tenant_id",
   DELETE_PATIENT_TENANT: "/deletepatient/:patient_id/:tenant_id",
 
   ADD_APPOINTMENT: "/addappointment",
@@ -41,12 +40,14 @@ module.exports = {
   GET_APPOINTMENT_TENANT: "/getappointment/:appointment_id/:tenant_id",
   UPDATE_APPOINTMENT_TENANT: "/updateappointment/:appointment_id/:tenant_id",
   DELETE_APPOINTMENT_TENANT: "/deleteappointment/:appointment_id/:tenant_id",
-  GETALL_APPOINTMENT_TENANT_CLINIC_DENTIST:
+  //fetch some specific data
+  GETALL_APPOINTMENT_TENANT_CLINIC_DENTIST: 
     "/getallappointments/:tenant_id/:clinic_id/:dentist_id",
   GETALL_APPOINTMENT_TENANT_DENTIST:
     "/getallappointments_dentistid/:tenant_id/:dentist_id",
   GETALL_APPOINTMENT_TENANT_PATIENTID:
     "/getallappointments_patientid/:tenant_id/:patient_id",
+    //doctor available data
   GETALL_APPOINTMENT_TENANT_PATIENT:
     "/getallappointmentsbypatient/:tenant_id/:patient_id",
   GET_APPOINTMENT_MONTHLY_SUMMARY:

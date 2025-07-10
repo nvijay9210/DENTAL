@@ -13,7 +13,7 @@ async function addUser(token, realm, userData) {
     firstName: userData.firstName || "",
     lastName: userData.lastName || "",
     enabled: true,
-    emailVerified: false,
+    emailVerified: true,
     credentials: [
       {
         type: "password",
@@ -108,21 +108,25 @@ async function assignRealmRoleToUser(token, realm, userId, roleName) {
 
 // ✅ 4. Add User to Group
 async function addUserToGroup(token, realm, userId, groupName) {
-  const groupUrl = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups-by-path?path=/${groupName}`;
+  const searchUrl = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups?search=${groupName}`;
   const addUrl = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/groups`;
 
   try {
-    // Get the group by name
-    const groupRes = await axios.get(groupUrl, {
+    // Search for group by name
+    const groupRes = await axios.get(searchUrl, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
-    const groupId = groupRes.data.id;
+    const group = groupRes.data.find(g => g.name === groupName);
+    if (!group) {
+      console.error(`❌ Group "${groupName}" not found in search results`);
+      return false;
+    }
 
     // Add user to group
-    await axios.put(`${addUrl}/${groupId}`, null, {
+    await axios.put(`${addUrl}/${group.id}`, null, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -138,6 +142,7 @@ async function addUserToGroup(token, realm, userId, groupName) {
     return false;
   }
 }
+
 
 require('dotenv').config();
 

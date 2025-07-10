@@ -103,12 +103,6 @@ router.put(
   patientController.updatePatient
 );
 
-router.put(
-  routerPath.UPDATE_PATIENT_TOOTH_DETAILS,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist"]),
-  patientController.updateToothDetails
-);
-
 // Delete Patient
 router.delete(
   routerPath.DELETE_PATIENT_TENANT,

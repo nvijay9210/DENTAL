@@ -15,6 +15,7 @@ const {
   addUser,
   getUserIdByUsername,
   assignRealmRoleToUser,
+  addUserToGroup,
 } = require("../middlewares/KeycloakAdmin");
 const { encrypt } = require("../middlewares/PasswordHash");
 const { buildCacheKey } = require("../utils/RedisCache");
@@ -90,7 +91,7 @@ const patientFieldsReverseMap = {
 };
 
 // Create patient
-const createPatient = async (data, token, realm) => {
+const createPatient = async (data, token, realm,user_clinic_id) => {
   const create = {
     ...patiendFields,
     created_by: (val) => val,
@@ -110,6 +111,7 @@ const createPatient = async (data, token, realm) => {
       const userData = {
         username,
         email,
+        "emailVerified": true,
         firstName: data.first_name,
         lastName: data.last_name,
         password: "1234", // For demo; use generateAlphanumericPassword() in production
@@ -127,7 +129,7 @@ const createPatient = async (data, token, realm) => {
       if (!userId)
         throw new CustomError("Could not fetch Keycloak user ID", 400);
 
-      console.log("🆔 Keycloak user ID fetched:", token, realm, userId);
+      console.log("🆔 Keycloak user ID fetched:", userData);
 
       // 4. Assign Role: 'patient'
       const roleAssigned = await assignRealmRoleToUser(
@@ -141,9 +143,11 @@ const createPatient = async (data, token, realm) => {
 
       console.log("🩺 Assigned 'patient' role");
 
+      console.log('data:',data)
+
       // 5. Optional: Add to Group (e.g., based on clinicId)
-      if (data.clinicId) {
-        const groupName = `dental-${data.tenantId}-${data.clinicId}`;
+      if (user_clinic_id) {
+        const groupName = `dental-${data.tenant_id}-${user_clinic_id}`;
         const groupAdded = await addUserToGroup(
           token,
           realm,
@@ -841,27 +845,6 @@ const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
   }
 };
 
-const updateToothDetails = async (data, patientId, tenant_id) => {
-  //console.log(data);
-  data = Object.keys(data).length > 0 ? JSON.stringify(data) : null;
-  try {
-    const affectedRows = await patientModel.updateToothDetails(
-      data,
-      patientId,
-      tenant_id
-    );
-    if (affectedRows === 0) {
-      throw new CustomError("Patient not found.", 404);
-    }
-
-    await invalidateCacheByPattern("patient:*");
-    await invalidateCacheByPattern("toothdetails:*");
-    return affectedRows;
-  } catch (error) {
-    throw new CustomError(`Failed to update patient: ${error.message}`, 404);
-  }
-};
-
 // async function groupToothProceduresByTimeRangeCumulative(
 //   tenantId,
 //   clinicId,
@@ -1227,7 +1210,6 @@ module.exports = {
   checkPatientExistsByTenantIdAndPatientId,
   updatePatient,
   deletePatientByTenantIdAndPatientId,
-  updateToothDetails,
   // getTopPatientsByAppointmentPeriod,
   getMostVisitedPatientsByDentistPeriods,
   getMostVisitedPatientsByClinicPeriods,
