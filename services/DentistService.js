@@ -147,6 +147,7 @@ const createDentist = async (data, token, realm) => {
       const userData = {
         username,
         email,
+        "emailVerified": true,
         firstName: data.first_name,
         lastName: data.last_name,
         password: "1234", // For demo; use generateAlphanumericPassword() in production
@@ -179,7 +180,7 @@ const createDentist = async (data, token, realm) => {
       console.log("🩺 Assigned 'doctor' role");
 
       // 5. Optional: Add to Group (e.g., based on clinicId)
-      if (data.clinicId) {
+      if (data.clinic_id) {
         const groupName = `dental-${data.tenantId}-${data.clinicId}`;
         const groupAdded = await addUserToGroup(
           token,
@@ -213,13 +214,13 @@ const createDentist = async (data, token, realm) => {
     // 8. Invalidate cache
     await invalidateCacheByPattern("dentist:*");
 
-    return dentistId;
+    // return dentistId;
 
-    // return {
-    //   dentistId,
-    //   username: userData.username,
-    //   password: userData.password,
-    // };
+    return {
+      dentistId,
+      username: userData.username,
+      password: userData.password,
+    };
   } catch (error) {
     console.error("❌ Failed to create dentist:", error.message);
     throw new CustomError(`Failed to create dentist: ${error.message}`, 400);

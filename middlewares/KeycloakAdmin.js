@@ -164,6 +164,8 @@ function extractUserInfo(token) {
   const clinicGroup = groups.find(g => g.startsWith("dental-"));
   let clinicId = null;
 
+  console.log(groups)
+
   if (clinicGroup) {
     const match = clinicGroup.match(/dental-(\d+)/);
     if (match && match[1]) {
@@ -172,6 +174,7 @@ function extractUserInfo(token) {
   }
 
   const globalRoles = token.realm_access?.roles || [];
+  console.log(globalRoles)
 
   const role = globalRoles.find(r =>
     ['super-user', 'dentist', 'patient', 'receptionist', 'supplier', 'dev', 'tenant'].includes(r)

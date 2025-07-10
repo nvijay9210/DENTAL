@@ -40,9 +40,12 @@ exports.getTenantByTenantId = async (req, res, next) => {
 
 exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   const { tenant_name, tenant_domain } = req.params;
+  let user;
 
   if (process.env.KEYCLOAK_POWER === "on") {
-    let user = extractUserInfo(req.user);
+    user = extractUserInfo(req.user);
+
+    console.log(user)
 
     if (user.role !== "tenant" && user.role !== "super-user") {
       const userdetails = await getUserIdUsingKeycloakId(
@@ -62,6 +65,8 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
 
     if (user.userId === null)
       throw new CustomError("User in inactive state", 404);
+
+    console.log("role:",user)
   }
 
   try {
@@ -80,11 +85,11 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
         tenant_domain
       );
     }
-    // res.status(200).json({
-    //   ...settings,
-    //   ...user,
-    // });
-    res.status(200).json(settings);
+    res.status(200).json({
+      ...settings,
+      ...user,
+    });
+    // res.status(200).json(settings);
   } catch (err) {
     next(err);
   }

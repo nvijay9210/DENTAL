@@ -61,7 +61,7 @@ router.get(
 
 router.get(
   GETALL_NOTIFY_DENTIST,
-  authenticateTenantClinicGroup(["tenant","super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["super-user", "dentist", "patient"]),
   reminderController.getAllNotifyByDentist
 );
 router.get(
