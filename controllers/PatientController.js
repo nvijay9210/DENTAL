@@ -10,13 +10,18 @@ exports.createPatient = async (req, res, next) => {
   const details = req.body;
   const token=req.token;
   const realm=req.realm;
+  const group = req.user.groups[0]; // 'dental-1-5'
+const value = group.split('-')[2]; // '5'
+console.log(value); // Output: '5'
+
+  
 
   try {
     // Validate patient data
     await patientValidation.createPatientValidation(details);
 
     // Create a new patient
-    const id = await patientService.createPatient(details,token,realm);
+    const id = await patientService.createPatient(details,token,realm,value);
     res.status(200).json({ message: "Patient created", id });
   } catch (err) {
     next(err);
@@ -228,6 +233,7 @@ exports.getPatientByTenantIdAndPatientId = async (req, res, next) => {
 exports.updatePatient = async (req, res, next) => {
   const { patient_id, tenant_id } = req.params;
   const details = req.body;
+  console.log(req.user)
   try {
     // Validate update input
     await patientValidation.updatePatientValidation(
@@ -238,28 +244,6 @@ exports.updatePatient = async (req, res, next) => {
 
     // Update patient
     await patientService.updatePatient(patient_id, details, tenant_id);
-    res.status(200).json({ message: "Patient updated successfully" });
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.updateToothDetails = async (req, res, next) => {
-  const { patient_id, tenant_id } = req.params;
-  const details = req.body;
-  console.log("details:", details);
-  try {
-    const patient = await checkIfExists(
-      "patient",
-      "patient_id",
-      patient_id,
-      tenant_id
-    );
-
-    if (!patient) throw new CustomError("Patient not found", 404);
-
-    // Update patient
-    await patientService.updateToothDetails(details, patient_id, tenant_id);
     res.status(200).json({ message: "Patient updated successfully" });
   } catch (err) {
     next(err);

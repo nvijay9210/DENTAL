@@ -51,7 +51,7 @@ router.get(
 // Get Clinic by Tenant & Clinic ID
 router.get(
   routerPath.GET_CLINIC_TENANT,
-  authenticateTenantClinicGroup(["tenant","super-user"]),
+  authenticateTenantClinicGroup(["tenant","super-user","dentist","receptionist","patient"]),
   clinicController.getClinicByTenantIdAndClinicId
 );
 
