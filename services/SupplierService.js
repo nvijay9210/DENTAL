@@ -8,9 +8,16 @@ const {
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
+const {
+  addUser,
+  getUserIdByUsername,
+  assignRealmRoleToUser,
+  addUserToGroup,
+} = require("../middlewares/KeycloakAdmin");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
+const { encrypt } = require("../middlewares/PasswordHash");
 
 // Field mapping for suppliers (similar to treatment)
 
@@ -80,7 +87,7 @@ const supplierFieldsReverseMap = {
   updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 // Create Supplier
-const createSupplier = async (data) => {
+const createSupplier = async (data, token, realm) => {
   const fieldMap = {
     ...supplierFields,
     created_by: (val) => val,
@@ -89,7 +96,7 @@ const createSupplier = async (data) => {
     if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username/email
       const username = helper.generateUsername(
-        data.first_name,
+        data.name,
         data.phone_number
       );
       const email =
@@ -128,11 +135,11 @@ const createSupplier = async (data) => {
       if (!roleAssigned)
         throw new CustomError("Failed to assign 'supplier' role", 400);
 
-      console.log("🩺 Assigned 'doctor' role");
+      console.log("🩺 Assigned 'supplier' role");
 
       // 5. Optional: Add to Group (e.g., based on clinicId)
-      if (data.clinicId) {
-        const groupName = `dental-${data.tenantId}-${data.clinicId}`;
+      if (data.clinic_id) {
+        const groupName = `dental-${data.tenant_id}-${data.clinic_id}`;
         const groupAdded = await addUserToGroup(
           token,
           realm,
