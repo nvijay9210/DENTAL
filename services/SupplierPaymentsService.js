@@ -116,6 +116,7 @@ const getAllSupplierPaymentssByTenantId = async (
     throw new CustomError("Failed to fetch supplier_paymentss", 404);
   }
 };
+
 const getAllSupplierPaymentssByTenantIdAndSupplierId = async (
   tenantId,
   supplier_id,
@@ -156,6 +157,46 @@ const getAllSupplierPaymentssByTenantIdAndSupplierId = async (
   }
 };
 
+const getSupplierPaymentsByTenantAndPurchaseOrderId = async (
+  tenantId,
+  purchase_order_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = buildCacheKey("supplier_payments", "list", {
+    tenant_id: tenantId,
+    purchase_order_id,
+    page,
+    limit,
+  });
+
+  try {
+    const supplier_paymentss = await getOrSetCache(cacheKey, async () => {
+      const result =
+        await supplier_paymentsModel.getSupplierPaymentsByTenantAndPurchaseOrderId(
+          tenantId,
+          purchase_order_id,
+          Number(limit),
+          offset
+        );
+      return result;
+    });
+
+    const convertedRows=supplier_paymentss.data.map(r=>({
+      ...r,
+      order_date:formatDateOnly(r.order_date),
+      delivery_date:formatDateOnly(r.delivery_date),
+      payment_date:formatDateOnly(r.payment_date)
+    }))
+
+    return { data: convertedRows, total: supplier_paymentss.total };
+  } catch (err) {
+    console.error("Database error while fetching supplier_paymentss:", err);
+    throw new CustomError("Failed to fetch supplier_paymentss", 404);
+  }
+};
+
 // Get SupplierPayments by ID & Tenant
 const getSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (
   tenantId,
@@ -181,32 +222,35 @@ const getSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (
     );
   }
 };
-const getSupplierPaymentsByTenantAndPurchaseOrderId = async (
-  tenantId,
-  purchase_order_id
-) => {
-  try {
-    const supplier_payments =
-      await supplier_paymentsModel.getSupplierPaymentsByTenantAndPurchaseOrderId(
-        tenantId,
-        purchase_order_id
-      );
 
-    const convertedRows = helper.convertDbToFrontend(
-      supplier_payments,
-      supplier_paymentsFieldsReverseMap
-    );
+// const getSupplierPaymentsByTenantAndPurchaseOrderId = async (
+//   tenantId,
+//   purchase_order_id
+// ) => {
+//   try {
+//     const supplier_payments =
+//       await supplier_paymentsModel.getSupplierPaymentsByTenantAndPurchaseOrderId(
+//         tenantId,
+//         purchase_order_id
+//       );
 
-    return convertedRows;
-  } catch (error) {
-    throw new CustomError(
-      "Failed to get supplier_payments: " + error.message,
-      404
-    );
-  }
-};
+//     const convertedRows = helper.convertDbToFrontend(
+//       supplier_payments,
+//       supplier_paymentsFieldsReverseMap
+//     );
+
+//     return convertedRows;
+//   } catch (error) {
+//     throw new CustomError(
+//       "Failed to get supplier_payments: " + error.message,
+//       404
+//     );
+//   }
+// };
 
 // Update SupplierPayments
+
+
 const updateSupplierPayments = async (supplier_paymentsId, data, tenant_id) => {
   const fieldMap = {
     ...supplier_paymentsFields,
