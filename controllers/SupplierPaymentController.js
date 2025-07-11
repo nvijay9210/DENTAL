@@ -97,7 +97,7 @@ exports.getSupplierPaymentsByTenantAndPurchaseOrderId = async (req, res, next) =
     if (!supplierPayments1) throw new CustomError("SupplierPayments not found", 404);
 
     // Fetch supplierPayments details
-    const supplierPayments = await supplierPaymentsService.getSupplierPaymentsByTenantIdAndSupplierPaymentsId(
+    const supplierPayments = await supplierPaymentsService.getSupplierPaymentsByTenantAndPurchaseOrderId(
       tenant_id,
       purchase_order_id
     );
