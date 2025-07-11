@@ -30,12 +30,11 @@ const getAllNotificationsByTenantId = async (tenantId, limit, offset) => {
 };
 
 const getNotificationsForReceiver = async (tenantId, receiverId, receiverRole) => {
-
-  // Receiver join
   let receiverJoinTable = '';
   let receiverAlias = '';
   let receiverNameExpr = '';
 
+  // Define the join and name expression for the receiver
   if (receiverRole === 'dentist') {
     receiverJoinTable = 'dentist';
     receiverAlias = 'ruser';
@@ -44,23 +43,27 @@ const getNotificationsForReceiver = async (tenantId, receiverId, receiverRole) =
     receiverJoinTable = 'patient';
     receiverAlias = 'ruser';
     receiverNameExpr = `CONCAT(ruser.first_name, ' ', ruser.last_name)`;
+  } else if (receiverRole === 'super-user') {
+    receiverJoinTable = 'clinic';
+    receiverAlias = 'ruser';
+    receiverNameExpr = `ruser.clinic_name`;
   } else {
     throw new Error("Invalid receiver role");
   }
 
-  // Dynamic LEFT JOINs for sender and clinic
   const senderJoin = `
     LEFT JOIN dentist sd ON sd.dentist_id = n.sender_id AND n.sender_role = 'dentist'
     LEFT JOIN patient sp ON sp.patient_id = n.sender_id AND n.sender_role = 'patient'
+    LEFT JOIN clinic sc ON sc.clinic_id = n.sender_id AND n.sender_role = 'super-user'
     LEFT JOIN clinic cd ON cd.clinic_id = sd.clinic_id
     LEFT JOIN clinic cp ON cp.tenant_id = sp.tenant_id
   `;
 
-  // Dynamic expressions
   const senderNameExpr = `
     CASE 
       WHEN n.sender_role = 'dentist' THEN CONCAT(sd.first_name, ' ', sd.last_name)
       WHEN n.sender_role = 'patient' THEN CONCAT(sp.first_name, ' ', sp.last_name)
+      WHEN n.sender_role = 'super-user' THEN sc.clinic_name
       ELSE NULL
     END
   `;
@@ -69,6 +72,7 @@ const getNotificationsForReceiver = async (tenantId, receiverId, receiverRole) =
     CASE
       WHEN n.sender_role = 'dentist' THEN cd.clinic_name
       WHEN n.sender_role = 'patient' THEN cp.clinic_name
+      WHEN n.sender_role = 'super-user' THEN sc.clinic_name
       ELSE NULL
     END
   `;
@@ -116,6 +120,7 @@ const getNotificationsForReceiver = async (tenantId, receiverId, receiverRole) =
     conn.release();
   }
 };
+
 
 
 // Get notification by tenant ID and notification ID
