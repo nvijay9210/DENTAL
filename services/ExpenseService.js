@@ -100,6 +100,42 @@ const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
   }
 };
 
+const getAllExpensesByTenantIdAndClinicId = async (
+  tenantId,
+  clinic_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = buildCacheKey("expense", "list", {
+    tenant_id: tenantId,
+    clinic_id,
+    page,
+    limit,
+  });
+
+  try {
+    const expenses = await getOrSetCache(cacheKey, async () => {
+      const result = await expenseModel.getAllExpensesByTenantIdAndClinicId(
+        tenantId,
+        clinic_id,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+
+    const convertedRows = expenses.data.map((expense) =>
+      helper.convertDbToFrontend(expense, expenseFieldsReverseMap)
+    );
+
+    return { data: convertedRows, total: expenses.total };
+  } catch (err) {
+    console.error("Database error while fetching expenses:", err);
+    throw new CustomError("Failed to fetch expenses", 404);
+  }
+};
+
 const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   tenantId,
   clinicId,
@@ -209,6 +245,7 @@ const deleteExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
 module.exports = {
   createExpense,
   getAllExpensesByTenantId,
+  getAllExpensesByTenantIdAndClinicId,
   getExpenseByTenantIdAndExpenseId,
   updateExpense,
   deleteExpenseByTenantIdAndExpenseId,

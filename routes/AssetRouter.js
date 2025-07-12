@@ -10,6 +10,7 @@ const {
   UPDATE_ASSET_TENANT,
   DELETE_ASSET_TENANT,
   GETALL_ASSET_REPORT_TENANT_CLINIC,
+  GETALL_ASSET_TENANT_CLINIC,
 } = require("./RouterPath");
 const {
   authenticateTenantClinicGroup,
@@ -44,27 +45,33 @@ router.post(
 // Get All Assets by Tenant ID with Pagination
 router.get(
   GETALL_ASSET_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "super-user","receptionist"]),
   assetController.getAllAssetsByTenantId
 );
 
 router.get(
+  GETALL_ASSET_TENANT_CLINIC,
+  authenticateTenantClinicGroup(["tenant", "dentist", "super-user","receptionist"]),
+  assetController.getAllAssetsByTenantIdAndClinicId
+);
+
+router.get(
   GETALL_ASSET_REPORT_TENANT_CLINIC,
-  authenticateTenantClinicGroup(["tenant", "dentist", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "super-user","receptionist"]),
   assetController.getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate
 );
 
 // Get Single Asset by Tenant ID & Asset ID
 router.get(
   GET_ASSET_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "super-user","receptionist"]),
   assetController.getAssetByTenantIdAndAssetId
 );
 
 // Update Asset
 router.put(
   UPDATE_ASSET_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "super-user","receptionist"]),
   upload.any(),
   assetFileMiddleware,
   assetController.updateAsset
@@ -73,7 +80,7 @@ router.put(
 // Delete Asset
 router.delete(
   DELETE_ASSET_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "super-user","receptionist"]),
   assetController.deleteAssetByTenantIdAndAssetId
 );
 

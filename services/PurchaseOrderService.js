@@ -104,6 +104,7 @@ const getAllPurchaseOrdersByTenantId = async (
     throw new CustomError("Failed to fetch purchase_orders", 404);
   }
 };
+
 const getAllPurchaseOrdersByTenantIdAndSupplierId = async (
   tenantId,
   supplier_id,
@@ -123,6 +124,42 @@ const getAllPurchaseOrdersByTenantIdAndSupplierId = async (
       const result = await purchase_orderModel.getAllPurchaseOrdersByTenantIdAndSupplierId(
         tenantId,
         supplier_id,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+
+    const convertedRows = purchase_orders.data.map((purchase_order) =>
+      helper.convertDbToFrontend(purchase_order, purchase_orderFieldsReverseMap)
+    );
+
+    return { data: convertedRows, total: purchase_orders.total };
+  } catch (err) {
+    console.error("Database error while fetching purchase_orders:", err);
+    throw new CustomError("Failed to fetch purchase_orders", 404);
+  }
+};
+
+const getAllPurchaseOrdersByTenantIdAndClinicId = async (
+  tenantId,
+  clinic_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = buildCacheKey("purchase_order", "list", {
+    tenant_id: tenantId,
+    clinic_id,
+    page,
+    limit,
+  });
+
+  try {
+    const purchase_orders = await getOrSetCache(cacheKey, async () => {
+      const result = await purchase_orderModel.getAllPurchaseOrdersByTenantIdAndClinicId(
+        tenantId,
+        clinic_id,
         Number(limit),
         offset
       );
@@ -224,5 +261,6 @@ module.exports = {
   getPurchaseOrderByTenantIdAndPurchaseOrderId,
   updatePurchaseOrder,
   deletePurchaseOrderByTenantIdAndPurchaseOrderId,
-  getAllPurchaseOrdersByTenantIdAndSupplierId
+  getAllPurchaseOrdersByTenantIdAndSupplierId,
+  getAllPurchaseOrdersByTenantIdAndClinicId
 };

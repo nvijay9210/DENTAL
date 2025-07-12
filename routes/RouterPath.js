@@ -27,7 +27,7 @@ module.exports = {
   ADD_PATIENT: "/addpatient",
   GETALL_PATIENT_TENANT: "/getallpatients/:tenant_id",
   GETALL_PATIENT_TENANT_CLINIC: "/getallpatients/:tenant_id/:clinic_id",
-  GETALL_PATIENT_TENANT_CLINIC_DENTIST: "/getallpatients/:tenant_id/:clinic_id/:dentist_id",
+  GETALL_PATIENT_TENANT_CLINIC_DENTIST: "/getallpatientsdentist/:tenant_id/:clinic_id/:dentist_id",
   GET_PATIENT_TENANT: "/getpatient/:patient_id/:tenant_id",
   UPDATE_PATIENT_TENANT: "/updatepatient/:patient_id/:tenant_id",
   DELETE_PATIENT_TENANT: "/deletepatient/:patient_id/:tenant_id",
@@ -115,6 +115,7 @@ module.exports = {
 
   ADD_ASSET: "/addasset",
   GETALL_ASSET_TENANT: "/getallassets/:tenant_id",
+  GETALL_ASSET_TENANT_CLINIC: "/getallassets/:tenant_id/:clinic_id",
   GET_ASSET_TENANT: "/getasset/:asset_id/:tenant_id",
   UPDATE_ASSET_TENANT: "/updateasset/:asset_id/:tenant_id",
   DELETE_ASSET_TENANT: "/deleteasset/:asset_id/:tenant_id",
@@ -123,6 +124,7 @@ module.exports = {
 
   ADD_EXPENSE: "/addexpense",
   GETALL_EXPENSE_TENANT: "/getallexpenses/:tenant_id",
+  GETALL_EXPENSE_TENANT_CLINIC: "/getallexpenses/:tenant_id/:clinic_id",
   GETALL_EXPENSE_REPORT_TENANT_CLINIC: "/getallexpenses/:tenant_id/:clinic_id",
   GET_EXPENSE_TENANT: "/getexpense/:expense_id/:tenant_id",
   UPDATE_EXPENSE_TENANT: "/updateexpense/:expense_id/:tenant_id",
@@ -172,6 +174,7 @@ module.exports = {
 
   ADD_PURCHASE_ORDER: "/addpurchaseorder",
   GETALL_PURCHASE_ORDER_TENANT: "/getallpurchaseorders/:tenant_id",
+  GETALL_PURCHASE_ORDER_TENANT_CLINIC: "/getallpurchaseordersclinic/:tenant_id/:clinic_id",
   GETALL_PURCHASE_ORDER_TENANT_SUPPLIER:
     "/getallpurchaseorders/:tenant_id/:supplier_id",
   GET_PURCHASE_ORDER_TENANT: "/getpurchaseorder/:purchase_order_id/:tenant_id",
@@ -182,12 +185,15 @@ module.exports = {
 
   ADD_RECEPTION: "/addreceptionist",
   GETALL_RECEPTION_TENANT: "/getallreceptionists/:tenant_id",
+  GETALL_RECEPTION_TENANT_CLINIC: "/getallreceptionists/:tenant_id/:clinic_id",
   GET_RECEPTION_TENANT: "/getreceptionist/:reception_id/:tenant_id",
   UPDATE_RECEPTION_TENANT: "/updatereceptionist/:reception_id/:tenant_id",
   DELETE_RECEPTION_TENANT: "/deletereceptionist/:reception_id/:tenant_id",
 
   ADD_REMINDER: "/addreminder",
   GETALL_REMINDER_TENANT: "/getallreminders/:tenant_id",
+  GETALL_REMINDER_TENANT_CLINIC: "/getallreminders/:tenant_id/:clinic_id",
+  GETALL_REMINDER_TENANT_CLINIC_DENTIST: "/getallreminders/:tenant_id/:clinic_id/:dentist_id",
   GET_REMINDER_TENANT: "/getreminder/:reminder_id/:tenant_id",
   GET_REMINDER_SCHEDULE:
     "/getreminder/:tenant_id/:clinic_id/:dentist_id/:reminder_id",

@@ -168,6 +168,7 @@ async function initializeTables() {
     await createTable.creatNotificationRecipientsTable();
     await createTable.createAppointmentStatsTable();
     await createTable.createToothDetailsTable();
+    await createTable.createPatientClinicJoinTable();
 
     console.log('All tables created in order.');
   } catch (err) {

@@ -29,6 +29,27 @@ const getAllAssetsByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
+const getAllAssetsByTenantIdAndClinicId = async (tenantId,clinicId, limit, offset) => {
+  const query1 = `SELECT * FROM asset  WHERE tenant_id = ? AND clinic_id = ? limit ? offset ?`;
+  const query2 = `SELECT count(*) as total FROM asset  WHERE tenant_id = ? AND clinic_id = ?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      clinicId,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [tenantId, clinicId]);
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
 // Get asset by tenant ID and asset ID
 const getAssetByTenantAndAssetId = async (tenant_id, asset_id) => {
   try {
@@ -94,6 +115,7 @@ const getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (tenantId,
 module.exports = {
   createAsset,
   getAllAssetsByTenantId,
+  getAllAssetsByTenantIdAndClinicId,
   getAssetByTenantAndAssetId,
   updateAsset,
   deleteAssetByTenantAndAssetId,

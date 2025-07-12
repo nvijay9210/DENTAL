@@ -71,7 +71,7 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
 
   try {
     let settings;
-    if (process.env.KEYCLOAK_POWER === "on" && user.role === "super-user") {
+    if (process.env.KEYCLOAK_POWER === "on" && user.role !== "tenant") {
       settings = await getClinicSettingsByTenantIdAndClinicId(
         user.tenantId,
         user.clinicId

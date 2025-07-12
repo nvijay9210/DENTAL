@@ -10,6 +10,7 @@ const {
   GET_RECEPTION_TENANT,
   UPDATE_RECEPTION_TENANT,
   DELETE_RECEPTION_TENANT,
+  GETALL_RECEPTION_TENANT_CLINIC,
 } = require("./RouterPath");
 
 const receptionValidation = require("../validations/ReceptionValidation");
@@ -55,6 +56,17 @@ router.get(
     "receptionist",
   ]),
   receptionController.getAllReceptionsByTenantId
+);
+router.get(
+  GETALL_RECEPTION_TENANT_CLINIC,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "patient",
+    "receptionist",
+  ]),
+  receptionController.getAllReceptionsByTenantIdAndClinicId
 );
 
 // Get Single Reception by Tenant ID & Reception ID

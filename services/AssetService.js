@@ -98,6 +98,42 @@ const getAllAssetsByTenantId = async (tenantId, page = 1, limit = 10) => {
   }
 };
 
+const getAllAssetsByTenantIdAndClinicId = async (
+  tenantId,
+  clinic_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = buildCacheKey("asset", "list", {
+    tenant_id: tenantId,
+    clinic_id,
+    page,
+    limit,
+  });
+
+  try {
+    const assets = await getOrSetCache(cacheKey, async () => {
+      const result = await assetModel.getAllAssetsByTenantIdAndClinicId(
+        tenantId,
+        clinic_id,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+
+    const convertedRows = assets.data.map((asset) =>
+      helper.convertDbToFrontend(asset, assetFieldsReverseMap)
+    );
+
+    return { data: convertedRows, total: assets.total };
+  } catch (err) {
+    console.error("Database error while fetching assets:", err);
+    throw new CustomError("Failed to fetch assets", 404);
+  }
+};
+
 // Get Asset by ID & Tenant
 const getAssetByTenantIdAndAssetId = async (tenantId, assetId) => {
   try {
@@ -202,6 +238,7 @@ const getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (
 module.exports = {
   createAsset,
   getAllAssetsByTenantId,
+  getAllAssetsByTenantIdAndClinicId,
   getAssetByTenantIdAndAssetId,
   updateAsset,
   deleteAssetByTenantIdAndAssetId,

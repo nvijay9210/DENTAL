@@ -138,6 +138,58 @@ exports.getAllRemindersByTenantAndClinicAndDentistAndType = async (
     next(err);
   }
 };
+exports.getAllRemindersByTenantAndClinicId = async (
+  req,
+  res,
+  next
+) => {
+  const { tenant_id, clinic_id } = req.params;
+  const {  page, limit } = req.query;
+
+  try {
+    await checkIfIdExists("clinic", "clinic_id", clinic_id);
+    await checkIfIdExists("tenant", "tenant_id", tenant_id);
+
+    // Fetch reminder details
+    const reminder =
+      await reminderService.getAllRemindersByTenantAndClinicId(
+        tenant_id,
+        clinic_id,
+        page,
+        limit
+      );
+    res.status(200).json(reminder);
+  } catch (err) {
+    next(err);
+  }
+};
+exports.getAllRemindersByTenantAndClinicAndDentistId = async (
+  req,
+  res,
+  next
+) => {
+  const { tenant_id, clinic_id,dentist_id } = req.params;
+  const {  page, limit } = req.query;
+
+  try {
+    await checkIfIdExists("clinic", "clinic_id", clinic_id);
+    await checkIfIdExists("tenant", "tenant_id", tenant_id);
+    await checkIfIdExists("dentist", "dentist_id", dentist_id);
+
+    // Fetch reminder details
+    const reminder =
+      await reminderService.getAllRemindersByTenantAndClinicAndDentistId(
+        tenant_id,
+        clinic_id,
+        dentist_id,
+        page,
+        limit
+      );
+    res.status(200).json(reminder);
+  } catch (err) {
+    next(err);
+  }
+};
 
 exports.getAllNotifyByDentist = async (
   req,
