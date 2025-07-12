@@ -93,6 +93,7 @@ router.get(
     "super-user",
     "receptionist",
     "dentist",
+    "patient"
   ]),
   appointmentController.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId
 );

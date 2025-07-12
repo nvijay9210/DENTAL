@@ -19,6 +19,7 @@ const {
 } = require("../middlewares/KeycloakAdmin");
 const { encrypt } = require("../middlewares/PasswordHash");
 const { buildCacheKey } = require("../utils/RedisCache");
+const { createPatientClinic } = require("./PatientClinicService");
 
 const patiendFields = {
   tenant_id: (val) => val,
@@ -98,6 +99,7 @@ const createPatient = async (data, token, realm,user_clinic_id) => {
   };
 
   try {
+    let userData;
     if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username/email
       const username = helper.generateUsername(
@@ -108,7 +110,7 @@ const createPatient = async (data, token, realm,user_clinic_id) => {
         data.email ||
         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
 
-      const userData = {
+      userData = {
         username,
         email,
         "emailVerified": true,
@@ -177,12 +179,14 @@ const createPatient = async (data, token, realm,user_clinic_id) => {
     await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:mostvisited:*");
 
-    return patientId;
-    // return {
-    //   patientId,
-    //   username: userData.username,
-    //   password: userData.password,
-    // };
+    const patientclinicId=await createPatientClinic({patient_id:patientId,clinic_id:data.clinic_id,created_by:data.created_by})
+    if(!patientclinicId) throw new CustomError('patientclinic not added',404)
+
+    return {
+      patientId,
+      username: userData.username,
+      password: userData.password,
+    };
   } catch (error) {
     console.trace(error);
     throw new CustomError(`Failed to create patient: ${error.message}`, 404);
@@ -1146,43 +1150,122 @@ async function groupToothProceduresByTimeRangeCumulativeByDentist(
   return rows;
 }
 
-const getAllPatientsByTenantIdAndClinicIdUsingAppointment = async (
+const getAllPatientsByTenantIdAndClinicId = async (
   tenantId,
-  clinic_id
+  clinic_id,
+  page = 1,
+  limit = 10
 ) => {
+  const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("patient", "list", {
-    tenant_id:tenantId,
-    clinic_id:clinic_id
+    tenant_id: tenantId,
+    clinic_id,
+    page,
+    limit,
   });
 
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
-      const result =
-        await patientModel.getAllPatientsByTenantIdAndClinicIdUsingAppointment(
-          tenantId,
-          clinic_id
-        );
+      const result = await patientModel.getAllPatientsByTenantIdAndClinicId(
+        tenantId,
+        clinic_id,
+        Number(limit),
+        offset
+      );
       console.log("✅ Serving patients from DB and caching result");
       return result;
     });
 
-    return patients;
+    const convertedRows = patients.data.map((row) => {
+      const { clinic_id, ...patientFields } = row;
+
+      const converted = helper.convertDbToFrontend(
+        patientFields,
+        patientFieldsReverseMap
+      );
+
+      return {
+        ...converted,
+        clinic_id, // keep original field as-is
+      };
+    });
+
+    return {
+      data: convertedRows,
+      total: patients.total,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new CustomError("Database error while fetching patients", 404);
+  }
+};
+const getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
+  tenantId,
+  clinic_id,
+  dentist_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = buildCacheKey("patient", "list", {
+    tenant_id: tenantId,
+    clinic_id,
+    dentist_id,
+    page,
+    limit,
+  });
+
+  try {
+    const patients = await getOrSetCache(cacheKey, async () => {
+      const result = await patientModel.getAllPatientsByTenantIdAndClinicIdAndDentistId(
+        tenantId,
+        clinic_id,
+        dentist_id,
+        Number(limit),
+        offset
+      );
+      console.log("✅ Serving patients from DB and caching result");
+      return result;
+    });
+
+    const convertedRows = patients.data.map((row) => {
+      const { clinic_id, ...patientFields } = row;
+
+      const converted = helper.convertDbToFrontend(
+        patientFields,
+        patientFieldsReverseMap
+      );
+
+      return {
+        ...converted,
+        clinic_id, // keep original field as-is
+      };
+    });
+
+    return {
+      data: convertedRows,
+      total: patients.total,
+    };
   } catch (error) {
     console.error(error);
     throw new CustomError("Database error while fetching patients", 404);
   }
 };
 
+
 const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
   tenantId,
   clinic_id,
-  dentist_id
+  dentist_id,
+  page=1,
+  limit=10
 ) => {
   const cacheKey = buildCacheKey("patient", "list", {
     tenant_id:tenantId,
     clinic_id:clinic_id,
     dentist_id
   });
+  const offset = (page - 1) * limit;
 
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
@@ -1190,13 +1273,32 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
         await patientModel.getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus(
           tenantId,
           clinic_id,
-          dentist_id
+          dentist_id,
+          Number(limit),
+          offset
         );
       console.log("✅ Serving patients from DB and caching result");
       return result;
     });
 
-    return patients;
+    const convertedRows = patients.data.map((row) => {
+      const { clinic_id, ...patientFields } = row;
+
+      const converted = helper.convertDbToFrontend(
+        patientFields,
+        patientFieldsReverseMap
+      );
+
+      return {
+        ...converted,
+        clinic_id, // keep original field as-is
+      };
+    });
+
+    return {
+      data: convertedRows,
+      total: patients.total,
+    };
   } catch (error) {
     console.error(error);
     throw new CustomError("Database error while fetching patients", 404);
@@ -1219,6 +1321,7 @@ module.exports = {
   getAgeGenderByClinic,
   groupToothProceduresByTimeRangeCumulative,
   groupToothProceduresByTimeRangeCumulativeByDentist,
-  getAllPatientsByTenantIdAndClinicIdUsingAppointment,
-  getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus,
+  getAllPatientsByTenantIdAndClinicId,
+  getAllPatientsByTenantIdAndClinicIdAndDentistId,
+  getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus
 };

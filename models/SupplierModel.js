@@ -36,6 +36,7 @@ const getAllSuppliersByTenantIdAndClinicId = async (tenantId,clinicId, limit, of
     conn.release();
   }
 };
+
 const getAllSuppliersByTenantId = async (tenantId, limit, offset) => {
   try {
     if (!Number.isInteger(limit) || !Number.isInteger(offset) || limit < 1 || offset < 0) {

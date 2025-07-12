@@ -43,25 +43,46 @@ exports.getAllPatientsByTenantId = async (req, res, next) => {
     next(err);
   }
 };
-exports.getAllPatientsByTenantIdAndClinicIdUsingAppointment = async (req, res, next) => {
+exports.getAllPatientsByTenantIdAndClinicId = async (req, res, next) => {
   const { tenant_id,clinic_id } = req.params;
+  const { page,limit } = req.query;
   try {
-    const patients = await patientService.getAllPatientsByTenantIdAndClinicIdUsingAppointment(
+    const patients = await patientService.getAllPatientsByTenantIdAndClinicId(
       tenant_id,
-      clinic_id
+      clinic_id,
+      page,limit
     );
     res.status(200).json(patients);
   } catch (err) {
     next(err);
   }
 };
+
+//no use dummy function
+exports.getAllPatientsByTenantIdAndClinicIdAndDentistId = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  const { page,limit } = req.query;
+  try {
+    const patients = await patientService.getAllPatientsByTenantIdAndClinicId(
+      tenant_id,
+      clinic_id,
+      page,limit
+    );
+    res.status(200).json(patients);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (req, res, next) => {
   const { tenant_id,clinic_id,dentist_id } = req.params;
+  const { page,limit } = req.query;
   try {
     const patients = await patientService.getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus(
       tenant_id,
       clinic_id,
-      dentist_id
+      dentist_id,
+      page,limit
     );
     res.status(200).json(patients);
   } catch (err) {

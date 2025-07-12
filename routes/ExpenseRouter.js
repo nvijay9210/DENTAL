@@ -12,6 +12,7 @@ const {
   UPDATE_EXPENSE_TENANT,
   DELETE_EXPENSE_TENANT,
   GETALL_EXPENSE_REPORT_TENANT_CLINIC,
+  GETALL_EXPENSE_TENANT_CLINIC,
 } = require("./RouterPath");
 const {
   authenticateTenantClinicGroup,
@@ -56,6 +57,15 @@ router.get(
     "dentist"
   ]),
   expenseController.getAllExpensesByTenantId
+);
+router.get(
+  GETALL_EXPENSE_TENANT_CLINIC,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist"
+  ]),
+  expenseController.getAllExpensesByTenantIdAndClinicId
 );
 
 router.get(

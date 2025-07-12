@@ -115,3 +115,20 @@ exports.deleteReceptionByTenantIdAndReceptionId = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getAllReceptionsByTenantIdAndClinicId = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  try {
+    const receptions = await receptionService.getAllReceptionsByTenantIdAndClinicId(
+      tenant_id,
+      clinic_id,
+      page,
+      limit
+    );
+    res.status(200).json(receptions);
+  } catch (err) {
+    next(err);
+  }
+};

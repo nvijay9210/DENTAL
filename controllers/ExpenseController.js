@@ -44,6 +44,23 @@ exports.getAllExpensesByTenantId = async (req, res, next) => {
   }
 };
 
+exports.getAllExpensesByTenantIdAndClinicId = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  try {
+    const expenses = await expenseService.getAllExpensesByTenantIdAndClinicId(
+      tenant_id,
+      clinic_id,
+      page,
+      limit
+    );
+    res.status(200).json(expenses);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   req,
   res,

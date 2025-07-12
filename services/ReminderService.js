@@ -133,6 +133,80 @@ const getAllRemindersByTenantId = async (tenantId, page = 1, limit = 10) => {
   }
 };
 
+const getAllRemindersByTenantAndClinicId = async (
+  tenant_id,
+  clinic_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = buildCacheKey("reminder", "list", {
+    tenant_id,
+    clinic_id,
+    page,
+    limit,
+  });
+  try {
+    const reminders = await getOrSetCache(cacheKey, async () => {
+      const result =
+        await reminderModel.getAllRemindersByTenantAndClinicId(
+          tenant_id,
+          clinic_id,
+          Number(limit),
+          offset
+        );
+      return result;
+    });
+
+    const convertedRows = reminders.data.map((reminder) =>
+      helper.convertDbToFrontend(reminder, reminderFieldsReverseMap)
+    );
+
+    return { data: convertedRows, total: reminders.total };
+  } catch (err) {
+    console.error("Database error while fetching reminders:", err);
+    throw new CustomError("Failed to fetch reminders", 404);
+  }
+};
+const getAllRemindersByTenantAndClinicAndDentistId = async (
+  tenant_id,
+  clinic_id,
+  dentist_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = buildCacheKey("reminder", "list", {
+    tenant_id,
+    clinic_id,
+    dentist_id,
+    page,
+    limit,
+  });
+  try {
+    const reminders = await getOrSetCache(cacheKey, async () => {
+      const result =
+        await reminderModel.getAllRemindersByTenantAndClinicAndDentistId(
+          tenant_id,
+          clinic_id,
+          dentist_id,
+          Number(limit),
+          offset
+        );
+      return result;
+    });
+
+    const convertedRows = reminders.data.map((reminder) =>
+      helper.convertDbToFrontend(reminder, reminderFieldsReverseMap)
+    );
+
+    return { data: convertedRows, total: reminders.total };
+  } catch (err) {
+    console.error("Database error while fetching reminders:", err);
+    throw new CustomError("Failed to fetch reminders", 404);
+  }
+};
+
 const getAllRemindersByTenantAndClinicAndDentistAndType = async (
   tenant_id,
   clinic_id,
@@ -608,5 +682,7 @@ module.exports = {
   getAllRemindersByTenantAndClinicAndDentistAndType,
   getAllNotifyByPatient,
   getAllNotifyByDentist,
-  getAllReminderNotifyByDentist
+  getAllReminderNotifyByDentist,
+  getAllRemindersByTenantAndClinicId,
+  getAllRemindersByTenantAndClinicAndDentistId
 };

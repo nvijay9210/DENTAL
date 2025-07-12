@@ -172,9 +172,9 @@ function extractUserInfo(token) {
   console.log(groups)
 
   if (clinicGroup) {
-    const match = clinicGroup.match(/dental-(\d+)/);
-    if (match && match[1]) {
-      clinicId = match[1];
+    const match = clinicGroup.match(/dental-(\d+)-(\d+)/);
+    if (match && match[2]) {
+      clinicId = match[2];
     }
   }
 

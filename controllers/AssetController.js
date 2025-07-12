@@ -38,6 +38,23 @@ exports.getAllAssetsByTenantId = async (req, res, next) => {
   }
 };
 
+exports.getAllAssetsByTenantIdAndClinicId = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
+  const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  try {
+    const assets = await assetService.getAllAssetsByTenantIdAndClinicId(
+      tenant_id,
+      clinic_id,
+      page,
+      limit
+    );
+    res.status(200).json(assets);
+  } catch (err) {
+    next(err);
+  }
+};
+
 /**
  * Get asset by tenant and asset ID
  */

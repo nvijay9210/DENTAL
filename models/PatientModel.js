@@ -108,7 +108,6 @@ const checkPatientExistsByTenantIdAndPatientId = async (
   }
 };
 
-
 const updatePatientAppointmentCount = async (
   tenantId,
   patientId,
@@ -246,7 +245,7 @@ const groupToothProceduresByTimeRangeCumulative = async (
       tenant_id = ?
       AND clinic_id = ?
       AND treatment_date BETWEEN ? AND ?
-      ${dentistId ? 'AND dentist_id = ?' : ''}
+      ${dentistId ? "AND dentist_id = ?" : ""}
     GROUP BY
       treatment_date,
       disease_type
@@ -270,7 +269,7 @@ const groupToothProceduresByTimeRangeCumulative = async (
   }
 
   return Object.entries(resultMap).map(([date, procedures]) => ({
-    date:formatDateOnly(date),
+    date: formatDateOnly(date),
     procedures,
   }));
 };
@@ -382,7 +381,13 @@ const getMostVisitedPatientsByDentistPeriods = async (
  * @param {number|null} dentist_id
  * @returns {Promise<{daily_patient_data: Array}>}
  */
-async function getMostVisitedPatientsByClinicPeriods(tenant_id, clinic_id, startDate, endDate, dentist_id = null) {
+async function getMostVisitedPatientsByClinicPeriods(
+  tenant_id,
+  clinic_id,
+  startDate,
+  endDate,
+  dentist_id = null
+) {
   const conn = await pool.getConnection();
   try {
     // Query appointments joined with patient table
@@ -428,7 +433,7 @@ function formatDailyPatientData(rows) {
   const dailyMap = {};
 
   // First pass: identify first visit for each patient
-  rows.forEach(row => {
+  rows.forEach((row) => {
     const key = `${row.name}-${row.age}-${row.gender}`;
     if (!firstVisitMap[key] || row.appointment_date < firstVisitMap[key]) {
       firstVisitMap[key] = row.appointment_date;
@@ -436,15 +441,15 @@ function formatDailyPatientData(rows) {
   });
 
   // Second pass: group by date and classify as new or repeat
-  rows.forEach(row => {
+  rows.forEach((row) => {
     const key = `${row.name}-${row.age}-${row.gender}`;
-    const dateStr = row.appointment_date.toISOString().split('T')[0];
+    const dateStr = row.appointment_date.toISOString().split("T")[0];
 
     if (!dailyMap[dateStr]) {
       dailyMap[dateStr] = {
         date: dateStr,
         new_patients: [],
-        repeated_patients: []
+        repeated_patients: [],
       };
     }
 
@@ -453,7 +458,7 @@ function formatDailyPatientData(rows) {
     const patientEntry = {
       name: row.name,
       age: row.age,
-      gender: row.gender
+      gender: row.gender,
     };
 
     if (isRepeat) {
@@ -469,10 +474,9 @@ function formatDailyPatientData(rows) {
   );
 
   return {
-    daily_patient_data: dailyData
+    daily_patient_data: dailyData,
   };
 }
-
 
 const getNewPatientsTrends = async (tenantId, clinicId) => {
   const query = `
@@ -588,52 +592,118 @@ const getAgeGenderByClinic = async (tenantId, clinicId) => {
   }
 };
 
-const getAllPatientsByTenantIdAndClinicIdUsingAppointment = async (
+const getAllPatientsByTenantIdAndClinicId = async (
   tenantId,
-  clinicId
+  clinicId,
+  limit,
+  offset
 ) => {
-  const query = `
-    SELECT
-      p.tenant_id,
-      a.clinic_id,
-      p.patient_id,
-      CONCAT(p.first_name, ' ', p.last_name) AS full_name
+  console.log(tenantId,clinicId,limit,offset)
+  const query1 = `SELECT
+      p.*,
+      pc.clinic_id
     FROM
       patient p
     JOIN
-      appointment a ON a.patient_id = p.patient_id
+      patient_clinic pc ON pc.patient_id = p.patient_id
     WHERE
-      a.tenant_id = ?
-      AND a.clinic_id = ?
-    GROUP BY
-      p.patient_id, a.clinic_id, p.tenant_id
-    ORDER BY
-      p.last_name ASC
-  `;
-
+      p.tenant_id = ?
+      AND pc.clinic_id = ? limit ? offset ?`;
+  const query2 = `SELECT
+     count(*) as total
+    FROM
+      patient p
+    JOIN
+      patient_clinic pc ON pc.patient_id = p.patient_id
+    WHERE
+      p.tenant_id = ?
+      AND pc.clinic_id = ?`;
   const conn = await pool.getConnection();
   try {
-    const [patients] = await conn.query(query, [tenantId, clinicId]);
-    return patients; // Returns array of patients with full_name
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      clinicId,
+      limit,
+      offset,
+    ]);
+    console.log(rows)
+    const [counts] = await conn.query(query2, [tenantId, clinicId]);
+    return { data: rows, total: counts[0].total };
   } catch (error) {
-    console.error("Error fetching patients:", error);
+    console.error(error);
     throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
 };
 
+const getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
+  tenantId,
+  clinicId,
+  dentistId,
+  limit,
+  offset
+) => {
+
+  const query1 = `SELECT
+      p.*,
+      pc.clinic_id
+    FROM
+      patient p
+    JOIN
+      patient_clinic pc ON pc.patient_id = p.patient_id
+    JOIN 
+      dentist d ON d.clinic_id = pc.clinic_id
+    WHERE
+      p.tenant_id = ?
+      AND pc.clinic_id = ? AND d.dentist_id=? limit ? offset ?`;
+  const query2 = `SELECT
+     count(*) as total
+    FROM
+      patient p
+    JOIN
+      patient_clinic pc ON pc.patient_id = p.patient_id
+    JOIN 
+      dentist d ON d.clinic_id = pc.clinic_id
+    WHERE
+      p.tenant_id = ?
+      AND pc.clinic_id = ? AND d.dentist_id=?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      clinicId,
+      dentistId,
+      limit,
+      offset,
+    ]);
+    console.log(rows)
+    const [counts] = await conn.query(query2, [tenantId, clinicId,dentistId]);
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
 const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
   tenantId,
   clinicId,
-  dentist_id
+  dentistId,
+  limit,
+  offset
 ) => {
-  const query = `
-    SELECT
-      p.tenant_id,
-      a.clinic_id,
-      p.patient_id,
-      CONCAT(p.first_name, ' ', p.last_name) AS full_name
+
+  console.log(tenantId,
+    clinicId,
+    dentistId,
+    limit,
+    offset)
+
+  const query1 = `SELECT
+      p.*,
+      a.clinic_id
     FROM
       patient p
     INNER JOIN
@@ -646,25 +716,80 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
     GROUP BY
       p.patient_id, a.clinic_id, p.tenant_id
     ORDER BY
-      p.last_name ASC
-  `;
-
+      p.last_name ASC limit ? offset ?`;
+  const query2 = `SELECT
+     count(*) as total
+    FROM
+      patient p
+    INNER JOIN
+      appointment a ON a.patient_id = p.patient_id
+    WHERE
+      a.tenant_id = ?
+      AND a.clinic_id = ?
+      AND a.dentist_id = ?
+      AND a.status IN ('completed', 'confirmed', 'pending')`;
   const conn = await pool.getConnection();
   try {
-    const [patients] = await conn.query(query, [
+    const [rows] = await conn.query(query1, [
       tenantId,
       clinicId,
-      dentist_id,
+      dentistId,
+      limit,
+      offset,
     ]);
-
-    return patients;
+    console.log(rows)
+    const [counts] = await conn.query(query2, [tenantId, clinicId,dentistId]);
+    return { data: rows, total: counts[0].total };
   } catch (error) {
-    console.error("Error fetching patients:", error);
+    console.error(error);
     throw new Error("Database Operation Failed");
   } finally {
     conn.release();
   }
 };
+
+// const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
+//   tenantId,
+//   clinicId,
+//   dentist_id
+// ) => {
+//   const query = `
+//     SELECT
+//       p.tenant_id,
+//       a.clinic_id,
+//       p.patient_id,
+//       CONCAT(p.first_name, ' ', p.last_name) AS full_name
+//     FROM
+//       patient p
+//     INNER JOIN
+//       appointment a ON a.patient_id = p.patient_id
+//     WHERE
+//       a.tenant_id = ?
+//       AND a.clinic_id = ?
+//       AND a.dentist_id = ?
+//       AND a.status IN ('completed', 'confirmed', 'pending')
+//     GROUP BY
+//       p.patient_id, a.clinic_id, p.tenant_id
+//     ORDER BY
+//       p.last_name ASC
+//   `;
+
+//   const conn = await pool.getConnection();
+//   try {
+//     const [patients] = await conn.query(query, [
+//       tenantId,
+//       clinicId,
+//       dentist_id,
+//     ]);
+
+//     return patients;
+//   } catch (error) {
+//     console.error("Error fetching patients:", error);
+//     throw new Error("Database Operation Failed");
+//   } finally {
+//     conn.release();
+//   }
+// };
 
 module.exports = {
   createPatient,
@@ -684,6 +809,7 @@ module.exports = {
   getNewPatientsTrendsByDentistAndClinic,
   getAgeGenderByDentist,
   getAgeGenderByClinic,
-  getAllPatientsByTenantIdAndClinicIdUsingAppointment,
-  getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus,
+  getAllPatientsByTenantIdAndClinicId,
+  getAllPatientsByTenantIdAndClinicIdAndDentistId,
+  getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus
 };

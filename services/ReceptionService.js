@@ -117,8 +117,8 @@ const createReception = async (data, token, realm) => {
       console.log("🩺 Assigned 'receptionist' role");
 
       // 5. Optional: Add to Group (e.g., based on clinicId)
-      if (data.clinicId) {
-        const groupName = `dental-${data.tenantId}-${data.clinicId}`;
+      if (data.clinic_id) {
+        const groupName = `dental-${data.tenant_id}-${data.clinic_id}`;
         const groupAdded = await addUserToGroup(
           token,
           realm,
@@ -251,10 +251,47 @@ const deleteReceptionByTenantIdAndReceptionId = async (
   }
 };
 
+const getAllReceptionsByTenantIdAndClinicId = async (
+  tenantId,
+  clinic_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = buildCacheKey("reception", "list", {
+    tenant_id: tenantId,
+    clinic_id,
+    page,
+    limit,
+  });
+
+  try {
+    const receptions = await getOrSetCache(cacheKey, async () => {
+      const result = await receptionModel.getAllReceptionsByTenantIdAndClinicId(
+        tenantId,
+        clinic_id,
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+
+    const convertedRows = receptions.data.map((reception) =>
+      helper.convertDbToFrontend(reception, receptionFieldsReverseMap)
+    );
+
+    return { data: convertedRows, total: receptions.total };
+  } catch (err) {
+    console.error("Database error while fetching receptions:", err);
+    throw new CustomError("Failed to fetch receptions", 404);
+  }
+};
+
 module.exports = {
   createReception,
   getAllReceptionsByTenantId,
   getReceptionByTenantIdAndReceptionId,
   updateReception,
   deleteReceptionByTenantIdAndReceptionId,
+  getAllReceptionsByTenantIdAndClinicId
 };

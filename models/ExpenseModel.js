@@ -30,6 +30,27 @@ const getAllExpensesByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
+const getAllExpensesByTenantIdAndClinicId = async (tenantId,clinicId, limit, offset) => {
+  const query1 = `SELECT * FROM expense  WHERE tenant_id = ? AND clinic_id = ? limit ? offset ?`;
+  const query2 = `SELECT count(*) as total FROM expense  WHERE tenant_id = ? AND clinic_id = ?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      clinicId,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [tenantId, clinicId]);
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
 // Get expense by tenant ID and expense ID
 const getExpenseByTenantAndExpenseId = async (tenant_id, expense_id) => {
   try {
@@ -95,6 +116,7 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (tenantI
 module.exports = {
   createExpense,
   getAllExpensesByTenantId,
+  getAllExpensesByTenantIdAndClinicId,
   getExpenseByTenantAndExpenseId,
   updateExpense,
   deleteExpenseByTenantAndExpenseId,

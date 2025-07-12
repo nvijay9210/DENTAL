@@ -197,9 +197,11 @@ const createDentist = async (data, token, realm) => {
         }
       }
 
-      (data.keycloak_id = userId),
-        (data.username = username),
-        (data.password = encrypt(userData.password).content);
+      console.log(userId,username)
+
+      data.keycloak_id = userId,
+        data.username = username,
+        data.password = encrypt(userData.password).content;
     }
 
     // 6. Map fields for DB

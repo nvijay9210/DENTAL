@@ -67,7 +67,7 @@ router.get(
     "dentist",
     "receptionist"
   ]),
-  patientController.getAllPatientsByTenantIdAndClinicIdUsingAppointment
+  patientController.getAllPatientsByTenantIdAndClinicId
 );
 router.get(
   routerPath.GETALL_PATIENT_TENANT_CLINIC_DENTIST,

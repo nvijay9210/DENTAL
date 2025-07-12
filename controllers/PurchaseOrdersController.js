@@ -67,6 +67,29 @@ exports.getAllPurchaseOrdersByTenantIdAndSupplierId = async (
   }
 };
 
+exports.getAllPurchaseOrdersByTenantIdAndClinicId = async (
+  req,
+  res,
+  next
+) => {
+  const { tenant_id, clinic_id } = req.params;
+  const { page, limit } = req.query;
+  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
+  try {
+    const purchaseOrderss =
+      await purchaseOrdersService.getAllPurchaseOrdersByTenantIdAndClinicId(
+        tenant_id,
+        clinic_id,
+        page,
+        limit
+      );
+    res.status(200).json(purchaseOrderss);
+  } catch (err) {
+    next(err);
+  }
+};
+
 /**
  * Get purchaseOrders by tenant and purchaseOrders ID
  */

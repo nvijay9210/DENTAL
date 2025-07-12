@@ -849,6 +849,24 @@ CREATE TABLE IF NOT EXISTS payment (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 `,
+addPatientClinic:`CREATE TABLE patient_clinic (
+  patient_clinic_id INT PRIMARY KEY AUTO_INCREMENT,
+  patient_id INT NOT NULL,
+  clinic_id INT NOT NULL,
+  
+  created_by VARCHAR(50),
+  created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_by VARCHAR(50),
+  updated_time TIMESTAMP DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (patient_id) REFERENCES patient(patient_id) ON DELETE CASCADE,
+  FOREIGN KEY (clinic_id) REFERENCES clinic(clinic_id) ON DELETE CASCADE,
+
+  UNIQUE (patient_id, clinic_id) -- Prevent duplicate entries
+);
+`
 };
+
+
 
 module.exports = { createTableQuery };

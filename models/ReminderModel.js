@@ -132,6 +132,97 @@ const getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (
   }
 };
 
+const getAllRemindersByTenantAndClinicId = async (
+  tenant_id,
+  clinic_id,
+  limit,
+  offset
+) => {
+  const query1 = `
+    SELECT * 
+    FROM reminder 
+    WHERE tenant_id = ? 
+      AND clinic_id = ? 
+    LIMIT ? OFFSET ?`;  // ✅ Proper syntax
+
+  const query2 = `
+    SELECT COUNT(*) as total 
+    FROM reminder 
+    WHERE tenant_id = ? 
+      AND clinic_id = ? `
+
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(query1, [
+      tenant_id,
+      clinic_id,
+      Number(limit),   // ✅ ensure they are numbers
+      Number(offset)
+    ]);
+
+    const [counts] = await conn.query(query2, [
+      tenant_id,
+      clinic_id
+    ]);
+
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.error("Database error in getAllRemindersBy...:", error);
+    throw new CustomError("Error fetching reminder.", 500);
+  } finally {
+    conn.release();
+  }
+};
+
+const getAllRemindersByTenantAndClinicAndDentistId = async (
+  tenant_id,
+  clinic_id,
+  dentist_id,
+  limit,
+  offset
+) => {
+  const query1 = `
+    SELECT * 
+    FROM reminder 
+    WHERE tenant_id = ? 
+      AND clinic_id = ? 
+      AND dentist_id = ? 
+    LIMIT ? OFFSET ?`;  // ✅ Proper syntax
+
+  const query2 = `
+    SELECT COUNT(*) as total 
+    FROM reminder 
+    WHERE tenant_id = ? 
+      AND clinic_id = ? 
+      AND dentist_id = ? `
+
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(query1, [
+      tenant_id,
+      clinic_id,
+      dentist_id,
+      Number(limit),   // ✅ ensure they are numbers
+      Number(offset)
+    ]);
+
+    const [counts] = await conn.query(query2, [
+      tenant_id,
+      clinic_id,
+      dentist_id,
+    ]);
+
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.error("Database error in getAllRemindersBy...:", error);
+    throw new CustomError("Error fetching reminder.", 500);
+  } finally {
+    conn.release();
+  }
+};
+
 const getAllRemindersByTenantAndClinicAndDentistAndType = async (
   tenant_id,
   clinic_id,
@@ -362,5 +453,7 @@ module.exports = {
   getAllRemindersByTenantAndClinicAndDentistAndType,
   getAllNotifyByPatient,
   getAllNotifyByDentist,
-  getAllReminderNotifyByDentist
+  getAllReminderNotifyByDentist,
+  getAllRemindersByTenantAndClinicId,
+  getAllRemindersByTenantAndClinicAndDentistId
 };
