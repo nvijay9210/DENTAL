@@ -38,7 +38,7 @@ router.post(
     "tenant",
     "receptionist",
     "patient",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.createAppointment
 );
@@ -49,7 +49,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "receptionist",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.getAllAppointmentsByTenantId
 );
@@ -58,7 +58,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "receptionist",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.getAllAppointmentsByTenantIdAndClinicId
 );
@@ -68,7 +68,7 @@ router.get(
     "tenant",
     "receptionist",
     "patient",
-    "dentist","redceptionist"
+    "dentist","super-user",
     "receptionist"
   ]),
   appointmentController.getAllAppointmentsByTenantIdAndClinicIdByDentist
@@ -81,7 +81,7 @@ router.get(
     "tenant",
     "receptionist",
     "patient",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.getAppointmentByTenantIdAndAppointmentId
 );
@@ -90,9 +90,8 @@ router.get(
   GETALL_PATIENT_VISITEDETAILS,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
     "receptionist",
-    "dentist","redceptionist"
+    "dentist","super-user",
     "patient"
   ]),
   appointmentController.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId
@@ -105,7 +104,7 @@ router.put(
     "tenant",
     "receptionist",
     "patient",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.updateAppointment
 );
@@ -121,7 +120,7 @@ router.put(
     "tenant",
     "receptionist",
     "patient",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.updateAppoinmentStatus
 );
@@ -132,7 +131,7 @@ router.put(
     "tenant",
     "receptionist",
     "patient",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.updateAppoinmentFeedback
 );
@@ -143,7 +142,7 @@ router.put(
     "tenant",
     "receptionist",
     "patient",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.updateAppoinmentFeedbackDisplay
 );
@@ -155,7 +154,7 @@ router.delete(
     "tenant",
     "receptionist",
     "patient",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.deleteAppointmentByTenantIdAndAppointmentId
 );
@@ -174,7 +173,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "receptionist",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.getAllAppointmentsByTenantIdAndDentistId
 );
@@ -183,7 +182,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "receptionist",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.getAllAppointmentsByTenantIdAndPatientId
 );
@@ -193,7 +192,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "receptionist",
-    "dentist","redceptionist"
+    "dentist","super-user",
     "patient"
   ]),
   appointmentController.getAppointmentsWithDetailsByPatient
@@ -203,7 +202,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "patient",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.getAllRoomIdByTenantIdAndClinicIdAndDentistId
 );
@@ -212,7 +211,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "patient",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.getAllRoomIdByTenantIdAndPatientId
 );
@@ -221,7 +220,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "patient",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.getRoomIdByTenantIdAndAppointmentId
 );
@@ -230,10 +229,9 @@ router.get(
   GET_APPOINTMENT_MONTHLY_SUMMARY,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
     "receptionist",
     "patient",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.getAppointmentMonthlySummary
 );
@@ -242,9 +240,8 @@ router.get(
   GET_APPOINTMENT_MONTHLY_SUMMARY,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
     "receptionist",
-    "dentist","redceptionist"
+    "dentist","super-user",
   ]),
   appointmentController.getAppointmentMonthlySummary
 );
