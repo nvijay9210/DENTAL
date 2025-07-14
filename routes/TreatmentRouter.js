@@ -51,43 +51,43 @@ router.post(
 // Get All Treatments by Tenant ID with Pagination
 router.get(
   GETALL_TREATMENT_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient"]),
   treatmentController.getAllTreatmentsByTenantId
 );
 
 router.get(
   GETALL_TREATMENT_TENANT_CLIENT_APPOINTEMENT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient"]),
   treatmentController.getAllTreatmentsByTenantAndClinicId
 );
 
 router.get(
   GETALL_TREATMENT_TENANT_CLINIC_DENTIST_APPOINTEMENT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient"]),
   treatmentController.getAllTreatmentsByTenantAndClinicIdAndDentist
 );
 router.get(
   GETALL_TREATMENT_TENANT_DENTIST,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient"]),
   treatmentController.getAllTreatmentsByTenantAndDentistId
 );
 router.get(
   GETALL_TREATMENT_TENANT_PATIENT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient"]),
   treatmentController.getAllTreatmentsByTenantAndPatientId
 );
 
 // Get Single Treatment by Tenant ID & Treatment ID
 router.get(
   GET_TREATMENT_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient"]),
   treatmentController.getTreatmentByTenantIdAndTreatmentId
 );
 
 // Update Treatment
 router.put(
   UPDATE_TREATMENT_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient"]),
   upload.any(),
   treatmentFileMiddleware,
   treatmentController.updateTreatment
@@ -96,7 +96,7 @@ router.put(
 // Delete Treatment
 router.delete(
   DELETE_TREATMENT_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient"]),
   treatmentController.deleteTreatmentByTenantIdAndTreatmentId
 );
 

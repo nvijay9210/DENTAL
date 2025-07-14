@@ -41,7 +41,7 @@ router.post(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist",
+    "dentist","receptionist",
     "supplier",
   ]),
   upload.any(),
@@ -55,7 +55,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist",
+    "dentist","receptionist",
     "supplier",
   ]),
   supplierController.getAllSupplierProductssByTenantId
@@ -65,7 +65,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist",
+    "dentist","receptionist",
     "supplier",
   ]),
   supplierController.getAllSupplierProductssByTenantIdAndSupplierId
@@ -77,7 +77,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist",
+    "dentist","receptionist",
     "supplier",
   ]),
   supplierController.getSupplierProductsByTenantIdAndSupplierProductsId
@@ -89,7 +89,7 @@ router.put(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist",
+    "dentist","receptionist",
     "supplier",
   ]),
   upload.any(),
@@ -103,7 +103,7 @@ router.delete(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist",
+    "dentist","receptionist",
     "supplier",
   ]),
   supplierController.deleteSupplierProductsByTenantIdAndSupplierProductsId

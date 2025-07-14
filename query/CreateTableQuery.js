@@ -77,7 +77,7 @@ const createTableQuery = {
   purchased_date date DEFAULT NULL,
   purchased_by varchar(50) NOT NULL,
   expired_date date DEFAULT NULL,
-  invoice_number varchar(16) DEFAULT NULL,
+  invoice_number varchar(50) DEFAULT NULL,
   description text DEFAULT NULL,
   created_by varchar(30) NOT NULL DEFAULT 'ADMIN',
   created_time timestamp NOT NULL DEFAULT current_timestamp(),
