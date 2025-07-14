@@ -52,6 +52,8 @@ module.exports = {
     "/getallappointmentsbypatient/:tenant_id/:patient_id",
   GET_APPOINTMENT_MONTHLY_SUMMARY:
     "/getallappointments/monthlysummary/:tenant_id/:clinic_id/:dentist_id",
+  GET_APPOINTMENT_MONTHLY_SUMMARY_CLINIC:
+    "/getallappointments/monthlysummary/:tenant_id/:clinic_id",
   GETALL_PATIENT_VISITEDETAILS:
     "/getallvisitdetails/:tenant_id/:clinic_id/:patient_id",
   UPDATE_APPOINTMENT_RATING_FEEDBACK:

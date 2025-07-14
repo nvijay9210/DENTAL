@@ -754,6 +754,26 @@ const getAppointmentMonthlySummary = async (
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
+const getAppointmentMonthlySummaryClinic = async (
+  tenantId,
+  clinic_id
+) => {
+  try {
+    const cacheKey = `appointmentsmonthlysummary:${tenantId}/${clinic_id}`;
+    const appointment = await getOrSetCache(cacheKey, async () => {
+      const result = await appointmentModel.getAppointmentMonthlySummaryClinic(
+        tenantId,
+        clinic_id
+      );
+      return result; // 🔁 Important: return from cache function
+    });
+
+    return appointment;
+  } catch (error) {
+    console.error("Database error while fetching appointment:", error);
+    throw new CustomError("Failed to fetch appointment", 404);
+  }
+};
 
 const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
   tenantId,
@@ -1394,4 +1414,5 @@ module.exports = {
   getRoomIdByTenantIdAndAppointmentId,
   getAppointmentSummaryByStartDateAndEndDate,
   updateAppoinmentFeedbackDisplay,
+  getAppointmentMonthlySummaryClinic
 };
