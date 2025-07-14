@@ -22,7 +22,7 @@ router.post(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist",
+    "dentist","receptionist",
     "supplier",
   ]),
   supplierController.createPurchaseOrder
@@ -34,7 +34,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist",
+    "dentist","receptionist",
     "supplier",
   ]),
   supplierController.getAllPurchaseOrdersByTenantId
@@ -44,7 +44,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist",
+    "dentist","receptionist",
     "supplier",
   ]),
   supplierController.getAllPurchaseOrdersByTenantIdAndSupplierId
@@ -54,7 +54,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist",
+    "dentist","receptionist",
     "clinic",
   ]),
   supplierController.getAllPurchaseOrdersByTenantIdAndClinicId
@@ -66,7 +66,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist",
+    "dentist","receptionist",
     "supplier",
   ]),
   supplierController.getPurchaseOrderByTenantIdAndPurchaseOrderId
@@ -78,7 +78,7 @@ router.put(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist",
+    "dentist","receptionist",
     "supplier",
   ]),
   supplierController.updatePurchaseOrder
@@ -90,7 +90,7 @@ router.delete(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist",
+    "dentist","receptionist",
     "supplier",
   ]),
   supplierController.deletePurchaseOrderByTenantIdAndPurchaseOrderId

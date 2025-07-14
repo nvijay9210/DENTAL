@@ -269,12 +269,23 @@ async function updateStatusColumnDefault(conn, table) {
   }
 }
 
+
 // Wrapper to run the update on all relevant tables
 async function updateStatusDefaults(conn) {
   const tables = ["dentist", "supplier", "reception"];
   for (const table of tables) {
     await updateStatusColumnDefault(conn, table);
   }
+}
+
+async function modifyInvoiceNumberSize(conn) {
+  await modifyColumnTypeIfNotMatch(
+    conn,
+    "asset",
+    "invoice_number",
+    "VARCHAR(50) NULL",
+    "Invoice number with increased size"
+  );
 }
 
 
@@ -296,6 +307,7 @@ async function updateStatusDefaults(conn) {
     await addShowFieldReviews(conn);
     await updatExpensePaid(conn);
     await updateStatusDefaults(conn);
+    await modifyInvoiceNumberSize(conn)
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");

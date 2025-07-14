@@ -20,47 +20,47 @@ const {
 // Create StatusTypeSub
 router.post(
   ADD_STATUS_TYPE_SUB,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","supplier"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient","supplier"]),
   StatusTypeSubController.createStatusTypeSub
 );
 
 // Get All StatusTypeSubs by Tenant ID with Pagination
 router.get(
   GETALL_STATUS_TYPE_SUB_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","supplier"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient","supplier"]),
   StatusTypeSubController.getAllStatusTypeSubsByTenantId
 );
 
 // Get Single StatusTypeSub by Tenant ID & StatusTypeSub ID
 router.get(
   GET_STATUS_TYPE_SUB_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","supplier"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient","supplier"]),
   StatusTypeSubController.getStatusTypeSubByTenantIdAndStatusTypeSubId
 );
 
 router.get(
   GET_STATUS_TYPE_SUB_STATUS_TYPE_ID,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","supplier"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient","supplier"]),
   StatusTypeSubController.getAllStatusTypeSubByTenantIdAndStatusTypeId
 );
 
 router.get(
   GET_STATUS_TYPE_SUB_STATUS_TYPE,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","supplier"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient","supplier"]),
   StatusTypeSubController.getAllStatusTypeSubByTenantIdAndStatusType
 );
 
 // Update StatusTypeSub
 router.put(
   UPDATE_STATUS_TYPE_SUB,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","supplier"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient","supplier"]),
   StatusTypeSubController.updateStatusTypeSub
 );
 
 // Delete StatusTypeSub
 router.delete(
   DELETE_STATUS_TYPE_SUB_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","supplier"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient","supplier"]),
   StatusTypeSubController.deleteStatusTypeSubByTenantIdAndStatusTypeSubId
 );
 

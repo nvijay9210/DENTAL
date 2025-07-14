@@ -13,91 +13,107 @@ const {
   GETALL_PRESCRIPTION_TENANT_CLINIC_TREATMENT,
   GETALL_PRESCRIPTION_TENANT_DENTIST,
 } = require("./RouterPath");
-const { authenticateTenantClinicGroup } = require("../Keycloak/AuthenticateTenantAndClient");
+const {
+  authenticateTenantClinicGroup,
+} = require("../Keycloak/AuthenticateTenantAndClient");
 
 // Create Prescription
 router.post(ADD_PRESCRIPTION, prescriptionController.createPrescription);
 
 // Get All Prescriptions by Tenant ID with Pagination
 router.get(
-  GETALL_PRESCRIPTION_TENANT,authenticateTenantClinicGroup([
+  GETALL_PRESCRIPTION_TENANT,
+  authenticateTenantClinicGroup([
     "tenant",
     "super-user",
     "dentist",
+    "receptionist",
     "patient",
-    "receptionist"
   ]),
   prescriptionController.getAllPrescriptionsByTenantId
 );
 
 router.get(
-  GETALL_PRESCRIPTION_TENANT_CLINIC_TREATMENT,authenticateTenantClinicGroup([
+  GETALL_PRESCRIPTION_TENANT_CLINIC_TREATMENT,
+  authenticateTenantClinicGroup([
     "tenant",
     "super-user",
     "dentist",
-    "patient"
+    "receptionist",
+    "patient",
   ]),
   prescriptionController.getAllPrescriptionsByTenantAndClinicIdAndTreatmentId
 );
 
 router.get(
-  GETALL_PRESCRIPTION_TENANT_CLINIC_DENTIST_TREATMENT,authenticateTenantClinicGroup([
-    "receptionist",
+  GETALL_PRESCRIPTION_TENANT_CLINIC_DENTIST_TREATMENT,
+  authenticateTenantClinicGroup([
     "tenant",
     "super-user",
     "dentist",
-    "patient"
+    "receptionist",
+    "patient",
   ]),
   prescriptionController.getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId
 );
 router.get(
-  GETALL_PRESCRIPTION_TENANT_DENTIST,authenticateTenantClinicGroup([
+  GETALL_PRESCRIPTION_TENANT_DENTIST,
+  authenticateTenantClinicGroup([
     "tenant",
     "super-user",
     "dentist",
-    "patient"
+    "receptionist",
+    "patient",
   ]),
   prescriptionController.getAllPrescriptionsByTenantIdAndDentistId
 );
 router.get(
-  GETALL_PRESCRIPTION_TENANT_PATIENT,authenticateTenantClinicGroup([
+  GETALL_PRESCRIPTION_TENANT_PATIENT,
+  authenticateTenantClinicGroup([
     "tenant",
     "super-user",
     "dentist",
-    "patient"
+    "receptionist",
+    "patient",
   ]),
   prescriptionController.getAllPrescriptionsByTenantIdAndPatientId
 );
 
 // Get Single Prescription by Tenant ID & Prescription ID
 router.get(
-  GET_PRESCRIPTION_TENANT,authenticateTenantClinicGroup([
+  GET_PRESCRIPTION_TENANT,
+  authenticateTenantClinicGroup([
     "tenant",
     "super-user",
     "dentist",
-    "patient"
+    "receptionist",
+    "patient",
   ]),
   prescriptionController.getPrescriptionByTenantIdAndPrescriptionId
 );
 
 // Update Prescription
 router.put(
-  UPDATE_PRESCRIPTION_TENANT,authenticateTenantClinicGroup([
+  UPDATE_PRESCRIPTION_TENANT,
+  authenticateTenantClinicGroup([
     "tenant",
     "super-user",
     "dentist",
-    "patient"
+    "receptionist",
+    "patient",
   ]),
   prescriptionController.updatePrescription
 );
 
 // Delete Prescription
 router.delete(
-  DELETE_PRESCRIPTION_TENANT,authenticateTenantClinicGroup([
+  DELETE_PRESCRIPTION_TENANT,
+  authenticateTenantClinicGroup([
     "tenant",
     "super-user",
     "dentist",
-    "patient"
+    "receptionist",
+    "patient",
   ]),
   prescriptionController.deletePrescriptionByTenantIdAndPrescriptionId
 );

@@ -72,14 +72,14 @@ router.get(
 // Get Single Reception by Tenant ID & Reception ID
 router.get(
   GET_RECEPTION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","receptionist"]),
   receptionController.getReceptionByTenantIdAndReceptionId
 );
 
 // Update Reception
 router.put(
   UPDATE_RECEPTION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","receptionist"]),
   upload.any(),
   receptionFileMiddleware,
   receptionController.updateReception
@@ -88,7 +88,7 @@ router.put(
 // Delete Reception
 router.delete(
   DELETE_RECEPTION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","receptionist"]),
   receptionController.deleteReceptionByTenantIdAndReceptionId
 );
 
