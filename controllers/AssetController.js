@@ -123,8 +123,9 @@ exports.getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   const { tenant_id, clinic_id } = req.params;
   const {start_date, end_date,limit,page } = req.query;
   try {
-    // if (!(isValidDate(start_date) && isValidDate(end_date)))
-    //   throw new CustomError("Startdate or enddate format invalid", 400);
+    if (!(isValidDate(start_date) && isValidDate(end_date)))
+      throw new CustomError("Startdate or enddate format invalid", 400);
+    if(!page || !limit) throw new CustomError('Page and limit is required',400)
     const assets =
       await assetService.getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate(
         tenant_id,
