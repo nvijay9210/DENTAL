@@ -82,11 +82,14 @@ const createReception = async (data, token, realm) => {
         data.email ||
         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
 
+      const [firstName, ...rest] = data.full_name.trim().split(" ");
+      const lastName = rest.length > 0 ? rest.join(" ") : "-";
+
       const userData = {
         username,
         email,
-        firstName: data.full_name,
-        lastName: data.last_name,
+        firstName,
+        lastName,
         password: "1234", // For demo; use generateAlphanumericPassword() in production
       };
 
@@ -160,7 +163,6 @@ const getAllReceptionsByTenantId = async (tenantId, page = 1, limit = 10) => {
     page,
     limit,
   });
-
 
   try {
     const receptions = await getOrSetCache(cacheKey, async () => {
@@ -293,5 +295,5 @@ module.exports = {
   getReceptionByTenantIdAndReceptionId,
   updateReception,
   deleteReceptionByTenantIdAndReceptionId,
-  getAllReceptionsByTenantIdAndClinicId
+  getAllReceptionsByTenantIdAndClinicId,
 };
