@@ -43,6 +43,8 @@ module.exports = {
   //fetch some specific data
   GETALL_APPOINTMENT_TENANT_CLINIC_DENTIST: 
     "/getallappointments/:tenant_id/:clinic_id/:dentist_id",
+  GETALL_APPOINTMENT_WITHDETAILS_TENANT_CLINIC: 
+    "/getallappointments_withdetails/:tenant_id/:clinic_id",
   GETALL_APPOINTMENT_TENANT_DENTIST:
     "/getallappointments_dentistid/:tenant_id/:dentist_id",
   GETALL_APPOINTMENT_TENANT_PATIENTID:

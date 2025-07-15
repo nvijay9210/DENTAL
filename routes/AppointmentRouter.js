@@ -25,6 +25,7 @@ const {
   GET_ROOMID_APPOINTMENTID,
   UPDATE_APPOINTMENT_FEEDBACK_DISPLAY,
   GET_APPOINTMENT_MONTHLY_SUMMARY_CLINIC,
+  GETALL_APPOINTMENT_WITHDETAILS_TENANT_CLINIC,
 } = require("./RouterPath");
 const {
   authenticateTenantClinicGroup,
@@ -177,6 +178,11 @@ router.get(
   appointmentController.getAppointmentsWithDetails
 );
 router.get(
+  GETALL_APPOINTMENT_WITHDETAILS_TENANT_CLINIC,
+  authenticateTenantClinicGroup(["tenant", "receptionist", "dentist","super-user"]),
+  appointmentController.getAppointmentsWithDetailsByClinic
+);
+router.get(
   GETALL_APPOINTMENT_TENANT_DENTIST,
   authenticateTenantClinicGroup([
     "tenant",
@@ -226,18 +232,13 @@ router.get(
 
 router.get(
   GET_APPOINTMENT_MONTHLY_SUMMARY,
-  authenticateTenantClinicGroup([
-    "dentist"
-  ]),
+  authenticateTenantClinicGroup(["dentist"]),
   appointmentController.getAppointmentMonthlySummary
 );
 
 router.get(
   GET_APPOINTMENT_MONTHLY_SUMMARY_CLINIC,
-  authenticateTenantClinicGroup([
-    "super-user",
-    "receptionist"
-  ]),
+  authenticateTenantClinicGroup(["super-user", "receptionist"]),
   appointmentController.getAppointmentMonthlySummaryClinic
 );
 

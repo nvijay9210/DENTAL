@@ -507,6 +507,59 @@ WHERE app.tenant_id = ?
   }
 };
 
+const getAppointmentsWithDetailsByClinic = async (
+  tenantId,
+  clinic_id,
+  limit,
+  offset
+) => {
+  const query1 = `SELECT 
+  CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
+  p.profile_picture,
+  p.gender,
+  p.date_of_birth,
+  app.status,
+  p.patient_id,
+  app.visit_reason,
+  app.appointment_id,
+  app.appointment_date,
+  app.start_time,
+  app.end_time
+FROM appointment AS app
+JOIN patient AS p ON p.patient_id = app.patient_id
+WHERE app.tenant_id = ? 
+  AND app.clinic_id = ?
+  limit ? offset ?;
+`;
+
+  const query2 = `SELECT 
+  COUNT(*) as total
+FROM appointment AS app
+JOIN patient AS p ON p.patient_id = app.patient_id
+WHERE app.tenant_id = ? 
+  AND app.clinic_id = ? `;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      clinic_id,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [
+      tenantId,
+      clinic_id,
+    ]);
+
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
 const getAppointmentsWithDetailsByPatient = async (
   tenantId,
   patientId,
@@ -1101,5 +1154,6 @@ module.exports = {
   getRoomIdByTenantIdAndAppointmentId,
   updateAppointmentStats,
   updateAppoinmentFeedbackDisplay,
-  getAppointmentMonthlySummaryClinic
+  getAppointmentMonthlySummaryClinic,
+  getAppointmentsWithDetailsByClinic
 };

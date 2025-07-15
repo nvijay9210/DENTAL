@@ -680,6 +680,45 @@ const getAppointmentsWithDetails = async (
   }
 };
 
+
+const getAppointmentsWithDetailsByClinic = async (
+  tenantId,
+  clinic_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = buildCacheKey("appointment", "appointmentwithdetails", {
+    tenant_id: tenantId,
+    clinic_id,
+    page,
+    limit
+  });
+
+  try {
+    const appointments = await getOrSetCache(cacheKey, async () => {
+      const result = await appointmentModel.getAppointmentsWithDetailsByClinic(
+        tenantId,
+        clinic_id,
+        Number(limit),
+        offset
+      );
+      return result
+    });
+    const convertedRows=appointments.data.map(appointment=>({
+      ...appointment,
+      visit_reason:safeJsonParse(appointment.visit_reason),
+      date_of_birth:formatDateOnly(appointment.date_of_birth),
+      appointment_date:formatDateOnly(appointment.appointment_date)
+    }))
+    return {data:convertedRows,total:appointments.total}
+  } catch (error) {
+    console.error("Database error while fetching appointment:", error);
+    throw new CustomError("Failed to fetch appointment", 404);
+  }
+};
+
+
 const getAppointmentsWithDetailsByPatient = async (
   tenantId,
   patient_id,
@@ -754,6 +793,7 @@ const getAppointmentMonthlySummary = async (
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
+
 const getAppointmentMonthlySummaryClinic = async (
   tenantId,
   clinic_id
@@ -1414,5 +1454,6 @@ module.exports = {
   getRoomIdByTenantIdAndAppointmentId,
   getAppointmentSummaryByStartDateAndEndDate,
   updateAppoinmentFeedbackDisplay,
-  getAppointmentMonthlySummaryClinic
+  getAppointmentMonthlySummaryClinic,
+  getAppointmentsWithDetailsByClinic
 };
