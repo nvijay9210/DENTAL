@@ -419,8 +419,9 @@ exports.getAppointmentMonthlySummary = async (req, res, next) => {
     next(err);
   }
 };
+
 exports.getAppointmentMonthlySummaryClinic = async (req, res, next) => {
-  const { tenant_id, clinic_id, dentist_id } = req.params;
+  const { tenant_id, clinic_id } = req.params;
   await checkIfIdExists("tenant", "tenant_id", tenant_id);
   await checkIfIdExists("clinic", "clinic_id", clinic_id);
   try {

@@ -135,6 +135,8 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         const realmRoles = decoded?.realm_access?.roles || [];
         const userGroups = decoded?.groups || [];
 
+        console.log(realmRoles,requiredRoles)
+
         const hasRequiredRole =
           requiredRoles.length === 0 ||
           requiredRoles.some((role) => realmRoles.includes(role));
