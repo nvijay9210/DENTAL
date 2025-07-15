@@ -384,6 +384,24 @@ exports.getAppointmentsWithDetails = async (req, res, next) => {
     next(err);
   }
 };
+exports.getAppointmentsWithDetailsByClinic = async (req, res, next) => {
+  const { tenant_id, clinic_id } = req.params;
+  const { page, limit } = req.query;
+  try {
+    await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+    await checkIfIdExists("tenant", "tenant_id", tenant_id);
+    await checkIfIdExists("clinic", "clinic_id", clinic_id);
+    const appointments = await appointmentService.getAppointmentsWithDetailsByClinic(
+      tenant_id,
+      clinic_id,
+      page,
+      limit
+    );
+    res.status(200).json(appointments);
+  } catch (err) {
+    next(err);
+  }
+};
 
 exports.getAppointmentsWithDetailsByPatient = async (req, res, next) => {
   const { tenant_id,patient_id } = req.params;
