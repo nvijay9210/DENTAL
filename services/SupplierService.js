@@ -102,14 +102,18 @@ const createSupplier = async (data, token, realm) => {
       const email =
         data.email ||
         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
+        
 
-      const userData = {
-        username,
-        email,
-        firstName: data.first_name,
-        lastName: data.last_name,
-        password: "1234", // For demo; use generateAlphanumericPassword() in production
-      };
+        const [firstName, ...rest] = data.name.trim().split(" ");
+        const lastName = rest.length > 0 ? rest.join(" ") : "-";
+  
+        const userData = {
+          username,
+          email,
+          firstName,
+          lastName,
+          password: "1234", // For demo; use generateAlphanumericPassword() in production
+        };
 
       // 2. Create Keycloak User
       const isUserCreated = await addUser(token, realm, userData);
