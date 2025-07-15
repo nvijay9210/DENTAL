@@ -91,6 +91,8 @@ module.exports = {
   GET_PRESCRIPTION_TENANT: "/getprescription/:prescription_id/:tenant_id",
   GETALL_PRESCRIPTION_TENANT_CLINIC_TREATMENT:
     "/getallprescriptions/:tenant_id/:clinic_id/:treatment_id",
+  GETALL_PRESCRIPTION_TENANT_CLINIC_APPOINTMENT:
+    "/getallprescriptions_appointment/:tenant_id/:clinic_id/:appointment_id",
   GETALL_PRESCRIPTION_TENANT_CLINIC_DENTIST_TREATMENT:
     "/getallprescriptions/:tenant_id/:clinic_id/:dentist_id/:treatment_id",
   GETALL_PRESCRIPTION_TENANT_DENTIST:

@@ -12,6 +12,7 @@ const {
   GETALL_PRESCRIPTION_TENANT_CLINIC_DENTIST_TREATMENT,
   GETALL_PRESCRIPTION_TENANT_CLINIC_TREATMENT,
   GETALL_PRESCRIPTION_TENANT_DENTIST,
+  GETALL_PRESCRIPTION_TENANT_CLINIC_APPOINTMENT,
 } = require("./RouterPath");
 const {
   authenticateTenantClinicGroup,
@@ -46,7 +47,7 @@ router.get(
 );
 
 router.get(
-  GETALL_PRESCRIPTION_TENANT_CLINIC_DENTIST_TREATMENT,
+  GETALL_PRESCRIPTION_TENANT_CLINIC_APPOINTMENT,
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
@@ -54,7 +55,7 @@ router.get(
     "receptionist",
     "patient",
   ]),
-  prescriptionController.getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId
+  prescriptionController.getAllPrescriptionsByTenantAndClinicIdAndAppointmentId
 );
 router.get(
   GETALL_PRESCRIPTION_TENANT_DENTIST,

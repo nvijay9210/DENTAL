@@ -151,6 +151,54 @@ WHERE
     conn.release();
   }
 };
+const getAllPrescriptionsByTenantAndClinicIdAndAppointmentId = async (
+  tenantId,
+  clinic_id,
+  appointment_id,
+  limit,
+  offset
+) => {
+  const query1 = `SELECT *
+FROM 
+    prescription p
+  JOIN treatment t on t.treatment_id=p.treatment_id
+WHERE 
+    p.tenant_id = ? AND 
+    p.clinic_id = ? AND 
+    t. appointment_id=?
+    limit ? offset ? 
+`;
+  const query2 = `SELECT COUNT(*) AS total
+FROM 
+    prescription p
+  JOIN treatment t on t.treatment_id=p.treatment_id
+WHERE 
+    p.tenant_id = ? AND 
+    p.clinic_id = ? AND 
+    t. appointment_id=?
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      clinic_id,
+      appointment_id,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [
+      tenantId,
+      clinic_id,
+      appointment_id
+    ]);
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
 
 const getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (
   tenantId,
@@ -290,5 +338,6 @@ module.exports = {
   getAllPrescriptionsByTenantAndClinicIdAndTreatmentId,
   getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId,
   getAllPrescriptionsByTenantIdAndDentistId,
-  getAllPrescriptionsByTenantIdAndPatientId
+  getAllPrescriptionsByTenantIdAndPatientId,
+  getAllPrescriptionsByTenantAndClinicIdAndAppointmentId
 };

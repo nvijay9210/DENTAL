@@ -465,6 +465,7 @@ const getAppointmentsWithDetails = async (
   p.patient_id,
   app.visit_reason,
   app.appointment_id,
+  app.dentist_id,
   app.appointment_date,
   app.start_time,
   app.end_time
@@ -522,6 +523,7 @@ const getAppointmentsWithDetailsByClinic = async (
   p.patient_id,
   app.visit_reason,
   app.appointment_id,
+  app.dentist_id,
   app.appointment_date,
   app.start_time,
   app.end_time
