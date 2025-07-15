@@ -71,6 +71,28 @@ exports.getAllPrescriptionsByTenantAndClinicIdAndTreatmentId = async (req, res, 
     next(err);
   }
 };
+exports.getAllPrescriptionsByTenantAndClinicIdAndAppointmentId = async (req, res, next) => {
+  const { tenant_id, clinic_id,appointment_id } = req.params;
+  const { page, limit } = req.query;
+
+  await checkIfIdExists('tenant','tenant_id',tenant_id)
+  await checkIfIdExists('clinic','clinic_id',clinic_id)
+  await checkIfIdExists('appointment','appointment_id',appointment_id)
+
+  try {
+    const prescriptions =
+      await prescriptionService.getAllPrescriptionsByTenantAndClinicIdAndAppointmentId(
+        tenant_id,
+        clinic_id,
+        appointment_id,
+        page,
+        limit
+      );
+    res.status(200).json(prescriptions);
+  } catch (err) {
+    next(err);
+  }
+};
 
 exports.getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (req, res, next) => {
   const { tenant_id, clinic_id,dentist_id,treatment_id } = req.params;

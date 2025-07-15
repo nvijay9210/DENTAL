@@ -162,6 +162,47 @@ const getAllPrescriptionsByTenantAndClinicIdAndTreatmentId = async (
   }
 };
 
+const getAllPrescriptionsByTenantAndClinicIdAndAppointmentId = async (
+  tenantId,
+  clinic_id,
+  appointment_id,
+  page = 1,
+  limit = 10
+) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = buildCacheKey("treatment", "list", {
+    tenant_id: tenantId,
+    clinic_id,
+    appointment_id,
+    page,
+    limit,
+  });
+
+
+  try {
+    const prescriptions = await getOrSetCache(cacheKey, async () => {
+      const result =
+        await prescriptionModel.getAllPrescriptionsByTenantAndClinicIdAndAppointmentId(
+          tenantId,
+          clinic_id,
+          appointment_id,
+          Number(limit),
+          offset
+        );
+      return result;
+    });
+
+    const convertedRows = prescriptions.data.map((prescription) =>
+          helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
+        );
+    
+        return {data:convertedRows,total:prescriptions.total};;
+  } catch (err) {
+    console.error("Database error while fetching prescriptions:", err);
+    throw new CustomError("Failed to fetch prescriptions", 404);
+  }
+};
+
 const getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (
   tenantId,
   clinic_id,
@@ -364,5 +405,6 @@ module.exports = {
   getAllPrescriptionsByTenantAndClinicIdAndTreatmentId,
   getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId,
   getAllPrescriptionsByTenantIdAndDentistId,
-  getAllPrescriptionsByTenantIdAndPatientId
+  getAllPrescriptionsByTenantIdAndPatientId,
+  getAllPrescriptionsByTenantAndClinicIdAndAppointmentId
 };
