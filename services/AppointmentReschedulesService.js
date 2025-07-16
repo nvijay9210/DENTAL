@@ -113,7 +113,10 @@ const createAppointmentReschedules = async (details) => {
 
     details.new_appointment_id = newAppointment;
 
+    
+
     const { columns, values } = mapFields(details, fieldMap);
+    
 
     const appointmentRescheduleId =
       await appointmentRescheduleModel.createAppointmentReschedules(
@@ -124,6 +127,7 @@ const createAppointmentReschedules = async (details) => {
     await updateAppointmentStats(
       appointment.tenant_id,
       appointment.clinic_id,
+      appointment.dentist_id,
       appointment.appointment_date
     );
     await invalidateCacheByPattern("appointmentreschedule:*");

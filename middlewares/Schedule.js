@@ -1,6 +1,7 @@
 const cron = require('node-cron');
-const { updateRoomIdBeforeAppointment } = require('../models/AppointmentModel');
+const { updateRoomIdBeforeAppointment, updateAppoinmentStatusCompleted, updateAppointmentStats } = require('../models/AppointmentModel');
 const { archiveOldReadNotifications } = require('../models/NotificationModel');
+const { getSystemTimeOnly } = require('../utils/DateUtils');
 
 function getSystemDateTime() {
   const now = new Date();
@@ -17,6 +18,7 @@ function getSystemDateTime() {
   return formatter.format(now).replace(',', '');
 }
 
+// ✅ Every minute check for upcoming appointments
 cron.schedule('* * * * *', () => {
   setImmediate(async () => {
     const systemTime = getSystemDateTime();
@@ -31,12 +33,33 @@ cron.schedule('* * * * *', () => {
   });
 });
 
+// ✅ Every minute check and mark completed appointments
+
+cron.schedule('* * * * *', () => {
+  setImmediate(async () => {
+    const systemTime = getSystemTimeOnly(); // <-- get local system time (HH:MM:SS)
+    console.log(`[${new Date().toLocaleString()}] 🔁 Checking for appointments to complete with system time: ${systemTime}`);
+    
+    try {
+      const count = await updateAppoinmentStatusCompleted(systemTime); // ⬅ pass time to your query
+      console.log(`✅ Marked ${count} appointments as completed.`);
+    } catch (err) {
+      console.error("❌ Error updating appointment status:", err.message);
+    }
+  });
+});
+
+
+// ✅ Midnight task for archiving notifications
 cron.schedule('0 0 * * *', () => {
   setImmediate(async () => {
     console.log("🕒 Running daily maintenance tasks at 00:00...");
     try {
       await archiveOldReadNotifications();
       console.log("✅ Old read notifications archived");
+
+      await updateAppointmentStats(); // ✅ Call the stats update function
+      console.log("✅ Appointment stats updated");
     } catch (err) {
       console.error("❌ Maintenance task failed:", err.message);
     }

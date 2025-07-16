@@ -8,7 +8,6 @@ const TABLE = "appointment_reschedules";
 const createAppointmentReschedules = async (table,columns, values) => {
   try {
     const appointment_reschedules = await record.createRecord(table, columns, values);
-    console.log(appointment_reschedules)
     return appointment_reschedules;
   } catch (error) {
     console.error("Error creating appointment_reschedules:", error);
