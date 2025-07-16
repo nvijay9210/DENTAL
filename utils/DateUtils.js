@@ -127,6 +127,12 @@ function checkPreviousDatetimeOrNot(date, time) {
   return inputDateTime.isSameOrAfter(now, 'minute');
 }
 
+function getSystemTimeOnly() {
+  const now = new Date();
+  return now.toTimeString().split(" ")[0]; // returns 'HH:MM:SS'
+}
+
+
 
 
 module.exports = {
@@ -137,5 +143,6 @@ module.exports = {
   compareDateTime,
   isEarlier,
   convertUTCToLocal,
-  checkPreviousDatetimeOrNot
+  checkPreviousDatetimeOrNot,
+  getSystemTimeOnly
 };

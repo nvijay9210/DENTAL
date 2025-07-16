@@ -548,10 +548,7 @@ WHERE app.tenant_id = ?
       limit,
       offset,
     ]);
-    const [counts] = await conn.query(query2, [
-      tenantId,
-      clinic_id,
-    ]);
+    const [counts] = await conn.query(query2, [tenantId, clinic_id]);
 
     return { data: rows, total: counts[0].total };
   } catch (error) {
@@ -641,19 +638,17 @@ const getAppointmentMonthlySummary = async (
 
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [
-      tenantId,
-      clinic_id,
-      dentist_id,
-    ]);
+    const [rows] = await conn.query(query, [tenantId, clinic_id, dentist_id]);
 
-    return rows?.[0] || {
-      total_appointments: 0,
-      completed_appointments: 0,
-      pending_appointments: 0,
-      cancelled_appointments: 0,
-      confirmed_appointments: 0,
-    };
+    return (
+      rows?.[0] || {
+        total_appointments: 0,
+        completed_appointments: 0,
+        pending_appointments: 0,
+        cancelled_appointments: 0,
+        confirmed_appointments: 0,
+      }
+    );
   } catch (error) {
     console.error("Error fetching appointment monthly summary:", error);
     throw new Error("Database Operation Failed");
@@ -662,10 +657,7 @@ const getAppointmentMonthlySummary = async (
   }
 };
 
-const getAppointmentMonthlySummaryClinic = async (
-  tenantId,
-  clinic_id
-) => {
+const getAppointmentMonthlySummaryClinic = async (tenantId, clinic_id) => {
   const query = `
     SELECT 
       COUNT(*) AS total_appointments,
@@ -685,18 +677,17 @@ const getAppointmentMonthlySummaryClinic = async (
 
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [
-      tenantId,
-      clinic_id
-    ]);
+    const [rows] = await conn.query(query, [tenantId, clinic_id]);
 
-    return rows?.[0] || {
-      total_appointments: 0,
-      completed_appointments: 0,
-      pending_appointments: 0,
-      cancelled_appointments: 0,
-      confirmed_appointments: 0,
-    };
+    return (
+      rows?.[0] || {
+        total_appointments: 0,
+        completed_appointments: 0,
+        pending_appointments: 0,
+        cancelled_appointments: 0,
+        confirmed_appointments: 0,
+      }
+    );
   } catch (error) {
     console.error("Error fetching appointment monthly summary:", error);
     throw new Error("Database Operation Failed");
@@ -704,7 +695,6 @@ const getAppointmentMonthlySummaryClinic = async (
     conn.release();
   }
 };
-
 
 //query based on monthly and yearly and weekly
 
@@ -920,7 +910,7 @@ const updateAppoinmentFeedback = async (
     appointment_id,
     tenant_id,
     status,
-    feedback_display
+    feedback_display,
   ];
 
   const conn = await pool.getConnection();
@@ -941,7 +931,6 @@ const updateAppoinmentFeedbackDisplay = async (
   status,
   feedback_display
 ) => {
-
   let query = `
     UPDATE appointment 
     SET feedback_display=?  WHERE appointment_id = ? 
@@ -949,13 +938,7 @@ const updateAppoinmentFeedbackDisplay = async (
       AND status = ?
   `;
 
-  let queryParams = [
-    feedback_display,
-    appointment_id,
-    tenant_id,
-    status,
-    
-  ];
+  let queryParams = [feedback_display, appointment_id, tenant_id, status];
 
   const conn = await pool.getConnection();
   try {
@@ -1094,7 +1077,34 @@ const updateRoomIdBeforeAppointment = async () => {
   }
 };
 
-async function updateAppointmentStats(tenant_id, clinic_id, dentist_id,appointment_date) {
+const updateAppoinmentStatusCompleted = async (userTime) => {
+  const conn = await pool.getConnection();
+  try {
+    const query = `
+      UPDATE appointment
+      SET status = 'completed'
+      WHERE status = 'confirmed'
+        AND room_id != '00000000-0000-0000-0000-000000000000'
+        AND end_time < ?
+    `;
+    const [result] = await conn.query(query, [userTime]);
+    console.log(`✅ Completed ${result.affectedRows} appointments before ${userTime}`);
+    return result.affectedRows;
+  } catch (err) {
+    console.error("❌ Error updating completed appointments:", err);
+    throw err;
+  } finally {
+    conn.release();
+  }
+};
+
+
+async function updateAppointmentStats(
+  tenant_id,
+  clinic_id,
+  dentist_id,
+  appointment_date
+) {
   const [results] = await pool.query(
     `SELECT
        SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) AS confirmed,
@@ -1102,11 +1112,12 @@ async function updateAppointmentStats(tenant_id, clinic_id, dentist_id,appointme
        SUM(CASE WHEN status IN ('cancelled', 'clinic_cancelled', 'noshow') THEN 1 ELSE 0 END) AS cancelled
      FROM appointment
      WHERE tenant_id = ? AND clinic_id=? AND dentist_id=? AND appointment_date = ?`,
-    [tenant_id, clinic_id,dentist_id, appointment_date]
+    [tenant_id, clinic_id, dentist_id, appointment_date]
   );
 
   const row = results[0];
 
+  console.log('row:',row)
 
   // Update stats table
   await pool.query(
@@ -1157,5 +1168,6 @@ module.exports = {
   updateAppointmentStats,
   updateAppoinmentFeedbackDisplay,
   getAppointmentMonthlySummaryClinic,
-  getAppointmentsWithDetailsByClinic
+  getAppointmentsWithDetailsByClinic,
+  updateAppoinmentStatusCompleted,
 };
