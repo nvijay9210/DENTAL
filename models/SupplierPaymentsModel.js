@@ -45,8 +45,8 @@ const getAllSupplierPaymentssByTenantIdAndSupplierId = async (
   limit,
   offset
 ) => {
-  const query1 = `SELECT * FROM supplier_payments  WHERE tenant_id = ? AND supplier_id = ? limit ? offset ?`;
-  const query2 = `SELECT count(*) as total FROM supplier_payments  WHERE tenant_id = ? AND supplier_id = ?`;
+  const query1 = `SELECT sup.product_name,sup.unit_price,po.quantity,po.order_date,po.delivery_date,sp.* FROM supplier_payments sp JOIN purchase_orders po on po.purchase_order_id=sp.purchase_order_id JOIN supplier_products sup on sup.supplier_product_id=po.supplier_product_id  WHERE sp.tenant_id = ? AND sp.supplier_id = ? limit ? offset ?`;
+  const query2 = `SELECT count(*) as total FROM supplier_payments sp JOIN purchase_orders po on po.purchase_order_id=sp.purchase_order_id JOIN supplier_products sup on sup.supplier_product_id=po.supplier_product_id  WHERE sp.tenant_id = ? AND sp.supplier_id = ?`;
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query1, [

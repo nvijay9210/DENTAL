@@ -158,9 +158,7 @@ exports.getAllAppointmentsByTenantIdAndDentistId = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-};
-
-// status=pending pending+cofirmed and completed 
+}; 
 
 exports.getAllAppointmentsByTenantIdAndPatientId = async (req, res, next) => {
   const { tenant_id, patient_id } = req.params;
@@ -427,6 +425,8 @@ exports.getAppointmentsWithDetailsByClinic = async (req, res, next) => {
     next(err);
   }
 };
+
+// status=pending pending+cofirmed and completed
 
 exports.getAppointmentsWithDetailsByPatient = async (req, res, next) => {
   const { tenant_id, patient_id } = req.params;
