@@ -135,8 +135,6 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         const realmRoles = decoded?.realm_access?.roles || [];
         const userGroups = decoded?.groups || [];
 
-        console.log(realmRoles,requiredRoles)
-
         const hasRequiredRole =
           requiredRoles.length === 0 ||
           requiredRoles.some((role) => realmRoles.includes(role));
@@ -178,7 +176,6 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
           req.body?.clinic_id || req.query?.clinic_id || req.params?.clinic_id;
 
         if (tenant_id && clinic_id) {
-          console.log(tenant_id,clinic_id)
           const groupName = `dental-${tenant_id}-${clinic_id}`;
           if (!userGroups.includes(groupName)) {
             return res
