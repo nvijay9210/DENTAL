@@ -51,6 +51,7 @@ function buildCacheKey(type, scope, options = {}) {
     start_date,
     end_date,
     appointment_type,
+    status,
     // Add more fields as needed
   } = options;
 
@@ -75,6 +76,7 @@ function buildCacheKey(type, scope, options = {}) {
   if (start_date) parts.push(`start_date:${start_date}`);
   if (end_date) parts.push(`end_date:${end_date}`);
   if (appointment_type) parts.push(`appointment_type:${appointment_type}`);
+  if (status) parts.push(`status:${status}`);
 
   return parts.join(":");
 }

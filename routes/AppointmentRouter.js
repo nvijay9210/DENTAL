@@ -199,6 +199,7 @@ router.get(
     "receptionist",
     "dentist",
     "super-user",
+    "patient"
   ]),
   appointmentController.getAllAppointmentsByTenantIdAndPatientId
 );

@@ -297,35 +297,53 @@ WHERE
 const getAllAppointmentsByTenantIdAndPatientId = async (
   tenantId,
   patient_id,
+  status,
   limit,
   offset
 ) => {
-  const query1 = `SELECT 
-   *
-FROM 
-    appointment AS app
-WHERE 
-    app.tenant_id = ? 
-    AND app.patient_id = ?
-    limit ? offset ?
-`;
-  const query2 = `SELECT 
-    COUNT(*) as total
-FROM 
-    appointment AS app
-WHERE 
-    app.tenant_id = ? 
-    AND app.patient_id = ?
-`;
+  // Dynamic WHERE clause based on status
+  let statusCondition = "";
+  let statusParams = [];
+
+  if (status === "pending") {
+    statusCondition = "AND app.status IN (?, ?)";
+    statusParams = ["pending", "confirmed"];
+  } else {
+    statusCondition = "AND app.status = ?";
+    statusParams = ["completed"];
+  }
+
+  const query1 = `
+    SELECT *
+    FROM appointment AS app
+    WHERE app.tenant_id = ? 
+      AND app.patient_id = ?
+      ${statusCondition}
+    LIMIT ? OFFSET ?
+  `;
+
+  const query2 = `
+    SELECT COUNT(*) as total
+    FROM appointment AS app
+    WHERE app.tenant_id = ? 
+      AND app.patient_id = ?
+      ${statusCondition}
+  `;
+
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query1, [
       tenantId,
       patient_id,
+      ...statusParams,
       limit,
       offset,
     ]);
-    const [counts] = await conn.query(query2, [tenantId, patient_id]);
+    const [counts] = await conn.query(query2, [
+      tenantId,
+      patient_id,
+      ...statusParams,
+    ]);
 
     return { data: rows, total: counts[0].total };
   } catch (error) {
@@ -335,6 +353,7 @@ WHERE
     conn.release();
   }
 };
+
 
 const getAppointmentByTenantIdAndAppointmentId = async (
   tenant_id,
@@ -453,6 +472,7 @@ const getAppointmentsWithDetails = async (
   tenantId,
   clinic_id,
   dentist_id,
+  status,
   limit,
   offset
 ) => {
@@ -474,6 +494,7 @@ JOIN patient AS p ON p.patient_id = app.patient_id
 WHERE app.tenant_id = ? 
   AND app.clinic_id = ? 
   AND app.dentist_id = ?
+  AND app.status =?
   limit ? offset ?;
 `;
 
@@ -483,13 +504,15 @@ FROM appointment AS app
 JOIN patient AS p ON p.patient_id = app.patient_id
 WHERE app.tenant_id = ? 
   AND app.clinic_id = ? 
-  AND app.dentist_id = ?`;
+  AND app.dentist_id = ?
+  AND app.status =?`;
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query1, [
       tenantId,
       clinic_id,
       dentist_id,
+      status,
       limit,
       offset,
     ]);
@@ -497,6 +520,7 @@ WHERE app.tenant_id = ?
       tenantId,
       clinic_id,
       dentist_id,
+      status,
     ]);
 
     return { data: rows, total: counts[0].total };
@@ -511,6 +535,7 @@ WHERE app.tenant_id = ?
 const getAppointmentsWithDetailsByClinic = async (
   tenantId,
   clinic_id,
+  status,
   limit,
   offset
 ) => {
@@ -531,6 +556,7 @@ FROM appointment AS app
 JOIN patient AS p ON p.patient_id = app.patient_id
 WHERE app.tenant_id = ? 
   AND app.clinic_id = ?
+  AND app.status =?
   limit ? offset ?;
 `;
 
@@ -539,16 +565,18 @@ WHERE app.tenant_id = ?
 FROM appointment AS app
 JOIN patient AS p ON p.patient_id = app.patient_id
 WHERE app.tenant_id = ? 
-  AND app.clinic_id = ? `;
+  AND app.clinic_id = ?
+  AND app.status =? `;
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query1, [
       tenantId,
       clinic_id,
+      status,
       limit,
       offset,
     ]);
-    const [counts] = await conn.query(query2, [tenantId, clinic_id]);
+    const [counts] = await conn.query(query2, [tenantId, clinic_id, status]);
 
     return { data: rows, total: counts[0].total };
   } catch (error) {
@@ -562,6 +590,7 @@ WHERE app.tenant_id = ?
 const getAppointmentsWithDetailsByPatient = async (
   tenantId,
   patientId,
+  status,
   limit,
   offset
 ) => {
@@ -585,6 +614,7 @@ FROM appointment AS app
 JOIN dentist AS d ON d.dentist_id = app.dentist_id
 WHERE app.tenant_id = ? 
   AND app.patient_id = ?
+  AND app.status = ?
   limit ? offset ?;
 `;
   const query2 = `SELECT 
@@ -593,16 +623,17 @@ FROM appointment AS app
 JOIN dentist AS d ON d.dentist_id = app.dentist_id
 WHERE app.tenant_id = ? 
   AND app.patient_id = ?
+  AND app.status = ?
 `;
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query1, [
       tenantId,
-      patientId,
+      patientId,status,
       limit,
       offset,
     ]);
-    const [counts] = await conn.query(query2, [tenantId, patientId]);
+    const [counts] = await conn.query(query2, [tenantId, patientId,status]);
 
     return { data: rows, total: counts[0].total };
   } catch (error) {
@@ -1088,7 +1119,9 @@ const updateAppoinmentStatusCompleted = async (userTime) => {
         AND end_time < ?
     `;
     const [result] = await conn.query(query, [userTime]);
-    console.log(`✅ Completed ${result.affectedRows} appointments before ${userTime}`);
+    console.log(
+      `✅ Completed ${result.affectedRows} appointments before ${userTime}`
+    );
     return result.affectedRows;
   } catch (err) {
     console.error("❌ Error updating completed appointments:", err);
@@ -1097,7 +1130,6 @@ const updateAppoinmentStatusCompleted = async (userTime) => {
     conn.release();
   }
 };
-
 
 async function updateAppointmentStats(
   tenant_id,
@@ -1117,7 +1149,7 @@ async function updateAppointmentStats(
 
   const row = results[0];
 
-  console.log('row:',row)
+  console.log("row:", row);
 
   // Update stats table
   await pool.query(
