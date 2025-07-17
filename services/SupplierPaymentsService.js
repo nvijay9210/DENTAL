@@ -21,9 +21,9 @@ const supplier_paymentsFields = {
   purchase_order_id: (val) => val,
   amount: (val) => parseFloat(val),
   mode_of_payment: (val) => val,
-  paid_amount: (val) => val?parseFloat(val):0,
-  balance_amount: (val) => val?parseFloat(val):0,
-  supplier_payment_documents: (val) => val?helper.safeStringify(val):null,
+  paid_amount: (val) => (val ? parseFloat(val) : 0),
+  balance_amount: (val) => (val ? parseFloat(val) : 0),
+  supplier_payment_documents: (val) => (val ? helper.safeStringify(val) : null),
   receipt_number: (val) => val,
   bank_name: (val) => val,
   bank_account_number: (val) => val,
@@ -39,9 +39,9 @@ const supplier_paymentsFieldsReverseMap = {
   purchase_order_id: (val) => val,
   amount: (val) => parseFloat(val),
   mode_of_payment: (val) => val,
-  paid_amount: (val) => val?parseFloat(val):0,
-  balance_amount: (val) => val?parseFloat(val):0,
-  supplier_payment_documents: (val) => val?helper.safeJsonParse(val):null,
+  paid_amount: (val) => (val ? parseFloat(val) : 0),
+  balance_amount: (val) => (val ? parseFloat(val) : 0),
+  supplier_payment_documents: (val) => (val ? helper.safeJsonParse(val) : null),
   receipt_number: (val) => val,
   bank_name: (val) => val,
   bank_account_number: (val) => val,
@@ -143,12 +143,13 @@ const getAllSupplierPaymentssByTenantIdAndSupplierId = async (
       return result;
     });
 
-    const convertedRows = supplier_paymentss.data.map((supplier_payments) =>
-      helper.convertDbToFrontend(
-        supplier_payments,
-        supplier_paymentsFieldsReverseMap
-      )
-    );
+    const convertedRows = supplier_paymentss.data.map((supplier_payments) => ({
+      ...supplier_payments,
+      order_date: formatDateOnly(supplier_payments.order_date),
+      delivery_date: formatDateOnly(supplier_payments.delivery_date),
+      payment_date: formatDateOnly(supplier_payments.payment_date),
+      created_time: formatDateOnly(supplier_payments.created_time),
+    }));
 
     return { data: convertedRows, total: supplier_paymentss.total };
   } catch (err) {
@@ -183,12 +184,12 @@ const getSupplierPaymentsByTenantAndPurchaseOrderId = async (
       return result;
     });
 
-    const convertedRows=supplier_paymentss.data.map(r=>({
+    const convertedRows = supplier_paymentss.data.map((r) => ({
       ...r,
-      order_date:formatDateOnly(r.order_date),
-      delivery_date:formatDateOnly(r.delivery_date),
-      payment_date:formatDateOnly(r.payment_date)
-    }))
+      order_date: formatDateOnly(r.order_date),
+      delivery_date: formatDateOnly(r.delivery_date),
+      payment_date: formatDateOnly(r.payment_date),
+    }));
 
     return { data: convertedRows, total: supplier_paymentss.total };
   } catch (err) {
@@ -249,7 +250,6 @@ const getSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (
 // };
 
 // Update SupplierPayments
-
 
 const updateSupplierPayments = async (supplier_paymentsId, data, tenant_id) => {
   const fieldMap = {
@@ -313,5 +313,5 @@ module.exports = {
   updateSupplierPayments,
   deleteSupplierPaymentsByTenantIdAndSupplierPaymentsId,
   getSupplierPaymentsByTenantAndPurchaseOrderId,
-  getAllSupplierPaymentssByTenantIdAndSupplierId
+  getAllSupplierPaymentssByTenantIdAndSupplierId,
 };
