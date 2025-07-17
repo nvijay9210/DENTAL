@@ -44,13 +44,14 @@ exports.getAllAppointmentsByTenantId = async (req, res, next) => {
 };
 
 exports.getRoomIdByTenantIdAndAppointmentId = async (req, res, next) => {
-  const { tenant_id,appointment_id } = req.params;
-  checkIfExists('appointment','appointment_id',appointment_id,tenant_id)
+  const { tenant_id, appointment_id } = req.params;
+  checkIfExists("appointment", "appointment_id", appointment_id, tenant_id);
   try {
-    const appointments = await appointmentService.getRoomIdByTenantIdAndAppointmentId(
-      tenant_id,
-      appointment_id
-    );
+    const appointments =
+      await appointmentService.getRoomIdByTenantIdAndAppointmentId(
+        tenant_id,
+        appointment_id
+      );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
@@ -58,55 +59,65 @@ exports.getRoomIdByTenantIdAndAppointmentId = async (req, res, next) => {
 };
 
 exports.getAllAppointmentsByTenantIdAndClinicId = async (req, res, next) => {
-  const { tenant_id,clinic_id } = req.params;
+  const { tenant_id, clinic_id } = req.params;
   const { page, limit } = req.query;
   await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
-    const appointments = await appointmentService.getAllAppointmentsByTenantIdAndClinicId(
-      tenant_id,
-      clinic_id,
-      page,
-      limit
-    );
+    const appointments =
+      await appointmentService.getAllAppointmentsByTenantIdAndClinicId(
+        tenant_id,
+        clinic_id,
+        page,
+        limit
+      );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
   }
 };
 
-exports.getAllAppointmentsByTenantIdAndClinicIdByDentist = async (req, res, next) => {
-  const { tenant_id,clinic_id,dentist_id } = req.params;
+exports.getAllAppointmentsByTenantIdAndClinicIdByDentist = async (
+  req,
+  res,
+  next
+) => {
+  const { tenant_id, clinic_id, dentist_id } = req.params;
   const { page, limit } = req.query;
   await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
-  await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('clinic','clinic_id',clinic_id)
-  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
+  await checkIfIdExists("dentist", "dentist_id", dentist_id);
   try {
-    const appointments = await appointmentService.getAllAppointmentsByTenantIdAndClinicIdByDentist(
-      tenant_id,
-      clinic_id,
-      dentist_id,
-      page,
-      limit
-    );
+    const appointments =
+      await appointmentService.getAllAppointmentsByTenantIdAndClinicIdByDentist(
+        tenant_id,
+        clinic_id,
+        dentist_id,
+        page,
+        limit
+      );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
   }
 };
 
-exports.getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (req, res, next) => {
-  const { tenant_id,clinic_id,dentist_id } = req.params;
-  await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('clinic','clinic_id',clinic_id)
-  await checkIfIdExists('dentist','dentist_id',dentist_id)
+exports.getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (
+  req,
+  res,
+  next
+) => {
+  const { tenant_id, clinic_id, dentist_id } = req.params;
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
+  await checkIfIdExists("dentist", "dentist_id", dentist_id);
   try {
-    const appointments = await appointmentService.getAllRoomIdByTenantIdAndClinicIdAndDentistId(
-      tenant_id,
-      clinic_id,
-      dentist_id,
-      
-    );
+    const appointments =
+      await appointmentService.getAllRoomIdByTenantIdAndClinicIdAndDentistId(
+        tenant_id,
+        clinic_id,
+        dentist_id
+      );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
@@ -114,14 +125,15 @@ exports.getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (req, res, next) =
 };
 
 exports.getAllRoomIdByTenantIdAndPatientId = async (req, res, next) => {
-  const { tenant_id,patient_id } = req.params;
-  await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('patient','patient_id',patient_id)
+  const { tenant_id, patient_id } = req.params;
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("patient", "patient_id", patient_id);
   try {
-    const appointments = await appointmentService.getAllRoomIdByTenantIdAndPatientId(
-      tenant_id,
-      patient_id
-    );
+    const appointments =
+      await appointmentService.getAllRoomIdByTenantIdAndPatientId(
+        tenant_id,
+        patient_id
+      );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
@@ -129,37 +141,42 @@ exports.getAllRoomIdByTenantIdAndPatientId = async (req, res, next) => {
 };
 
 exports.getAllAppointmentsByTenantIdAndDentistId = async (req, res, next) => {
-  const { tenant_id,dentist_id } = req.params;
+  const { tenant_id, dentist_id } = req.params;
   const { page, limit } = req.query;
   await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
-  await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('dentist','dentist_id',dentist_id)
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("dentist", "dentist_id", dentist_id);
   try {
-    const appointments = await appointmentService.getAllAppointmentsByTenantIdAndAndDentistId(
-      tenant_id,
-      dentist_id,
-      page,
-      limit
-    );
+    const appointments =
+      await appointmentService.getAllAppointmentsByTenantIdAndAndDentistId(
+        tenant_id,
+        dentist_id,
+        page,
+        limit
+      );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
   }
 };
 
+// status=pending pending+cofirmed and completed 
+
 exports.getAllAppointmentsByTenantIdAndPatientId = async (req, res, next) => {
-  const { tenant_id,patient_id } = req.params;
-  const { page, limit } = req.query;
+  const { tenant_id, patient_id } = req.params;
+  const { status, page, limit } = req.query;
   await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
-  await checkIfIdExists('tenant','tenant_id',tenant_id)
-  await checkIfIdExists('patient','patient_id',patient_id)
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("patient", "patient_id", patient_id);
   try {
-    const appointments = await appointmentService.getAllAppointmentsByTenantIdAndPatientId(
-      tenant_id,
-      patient_id,
-      page,
-      limit
-    );
+    const appointments =
+      await appointmentService.getAllAppointmentsByTenantIdAndPatientId(
+        tenant_id,
+        patient_id,
+        status,
+        page,
+        limit
+      );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
@@ -253,7 +270,7 @@ exports.updateAppointment = async (req, res, next) => {
 
 exports.updateAppoinmentStatus = async (req, res, next) => {
   const { appointment_id, tenant_id, clinic_id } = req.params;
-  const details=req.body
+  const details = req.body;
   try {
     // Validate if appointment exists before update
     const appointment1 = await checkIfExists(
@@ -282,8 +299,8 @@ exports.updateAppoinmentStatus = async (req, res, next) => {
 
 exports.updateAppoinmentFeedback = async (req, res, next) => {
   const { appointment_id, tenant_id } = req.params;
-  const details=req.body
-  details['feedback_display']=1
+  const details = req.body;
+  details["feedback_display"] = 1;
   try {
     // Validate if appointment exists before update
     const appointment1 = await checkIfExists(
@@ -296,20 +313,22 @@ exports.updateAppoinmentFeedback = async (req, res, next) => {
     if (!appointment1) throw new CustomError("Appointment not found", 404);
 
     // Update the appointment
-    await appointmentService.updateAppoinmentFeedback( 
-      appointment_id,tenant_id,details
+    await appointmentService.updateAppoinmentFeedback(
+      appointment_id,
+      tenant_id,
+      details
     );
-    res
-      .status(200)
-      .json({ message: "Appointment and Dentist Feedback updated successfully" });
+    res.status(200).json({
+      message: "Appointment and Dentist Feedback updated successfully",
+    });
   } catch (err) {
     next(err);
   }
 };
 exports.updateAppoinmentFeedbackDisplay = async (req, res, next) => {
   const { appointment_id, tenant_id } = req.params;
-  const {feedback_display}=req.query
-  const status="completed"
+  const { feedback_display } = req.query;
+  const status = "completed";
   try {
     // Validate if appointment exists before update
     const appointment1 = await checkIfExists(
@@ -322,12 +341,15 @@ exports.updateAppoinmentFeedbackDisplay = async (req, res, next) => {
     if (!appointment1) throw new CustomError("Appointment not found", 404);
 
     // Update the appointment
-    await appointmentService.updateAppoinmentFeedbackDisplay( 
-      appointment_id,tenant_id,status,feedback_display
+    await appointmentService.updateAppoinmentFeedbackDisplay(
+      appointment_id,
+      tenant_id,
+      status,
+      feedback_display
     );
-    res
-      .status(200)
-      .json({ message: "Appointment and Dentist Feedback updated successfully" });
+    res.status(200).json({
+      message: "Appointment and Dentist Feedback updated successfully",
+    });
   } catch (err) {
     next(err);
   }
@@ -366,7 +388,7 @@ exports.deleteAppointmentByTenantIdAndAppointmentId = async (
 
 exports.getAppointmentsWithDetails = async (req, res, next) => {
   const { tenant_id, clinic_id, dentist_id } = req.params;
-  const { page, limit } = req.query;
+  const { status, page, limit } = req.query;
   try {
     await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
     await checkIfIdExists("tenant", "tenant_id", tenant_id);
@@ -376,6 +398,7 @@ exports.getAppointmentsWithDetails = async (req, res, next) => {
       tenant_id,
       clinic_id,
       dentist_id,
+      status,
       page,
       limit
     );
@@ -386,17 +409,19 @@ exports.getAppointmentsWithDetails = async (req, res, next) => {
 };
 exports.getAppointmentsWithDetailsByClinic = async (req, res, next) => {
   const { tenant_id, clinic_id } = req.params;
-  const { page, limit } = req.query;
+  const { status, page, limit } = req.query;
   try {
     await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
     await checkIfIdExists("tenant", "tenant_id", tenant_id);
     await checkIfIdExists("clinic", "clinic_id", clinic_id);
-    const appointments = await appointmentService.getAppointmentsWithDetailsByClinic(
-      tenant_id,
-      clinic_id,
-      page,
-      limit
-    );
+    const appointments =
+      await appointmentService.getAppointmentsWithDetailsByClinic(
+        tenant_id,
+        clinic_id,
+        status,
+        page,
+        limit
+      );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
@@ -404,17 +429,19 @@ exports.getAppointmentsWithDetailsByClinic = async (req, res, next) => {
 };
 
 exports.getAppointmentsWithDetailsByPatient = async (req, res, next) => {
-  const { tenant_id,patient_id } = req.params;
-  const { page, limit } = req.query;
+  const { tenant_id, patient_id } = req.params;
+  const { status, page, limit } = req.query;
   try {
     await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
     await checkIfIdExists("patient", "patient_id", patient_id);
-    const appointments = await appointmentService.getAppointmentsWithDetailsByPatient(
-      tenant_id,
-      patient_id,
-      page,
-      limit
-    );
+    const appointments =
+      await appointmentService.getAppointmentsWithDetailsByPatient(
+        tenant_id,
+        patient_id,
+        status,
+        page,
+        limit
+      );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
@@ -443,10 +470,11 @@ exports.getAppointmentMonthlySummaryClinic = async (req, res, next) => {
   await checkIfIdExists("tenant", "tenant_id", tenant_id);
   await checkIfIdExists("clinic", "clinic_id", clinic_id);
   try {
-    const appointments = await appointmentService.getAppointmentMonthlySummaryClinic(
-      tenant_id,
-      clinic_id
-    );
+    const appointments =
+      await appointmentService.getAppointmentMonthlySummaryClinic(
+        tenant_id,
+        clinic_id
+      );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
@@ -455,22 +483,25 @@ exports.getAppointmentMonthlySummaryClinic = async (req, res, next) => {
 
 exports.getAppointmentSummary = async (req, res, next) => {
   const { tenant_id, clinic_id } = req.params;
-  const{dentist_id,startDate,endDate}=req.query
+  const { dentist_id, startDate, endDate } = req.query;
   await checkIfIdExists("tenant", "tenant_id", tenant_id);
   await checkIfIdExists("clinic", "clinic_id", clinic_id);
   // if(period!=='monthly' && period!=='yearly' && period!=='weekly') throw new CustomError('Period mustbe a weekly,monthly or yearly',400)
   try {
     if (!startDate || !endDate) {
-      return res.status(400).json({ message: "Start and end dates are required." });
+      return res
+        .status(400)
+        .json({ message: "Start and end dates are required." });
     }
-    const appointments = await appointmentService.getAppointmentSummaryByStartDateAndEndDate(
-      parseInt(tenant_id),
-      startDate,
-      endDate,
-      parseInt(clinic_id),
-      parseInt(dentist_id)
-      // period
-    );
+    const appointments =
+      await appointmentService.getAppointmentSummaryByStartDateAndEndDate(
+        parseInt(tenant_id),
+        startDate,
+        endDate,
+        parseInt(clinic_id),
+        parseInt(dentist_id)
+        // period
+      );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
