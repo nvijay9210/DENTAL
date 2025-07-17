@@ -670,7 +670,7 @@ const getAppointmentMonthlySummaryClinic = async (tenantId, clinic_id) => {
     WHERE 
       app.tenant_id = ? 
       AND app.clinic_id = ? 
-      AND app.rescheduled_from IS NULL
+      AND app.status!="rescheduled"
       AND app.appointment_date >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
       AND app.appointment_date < DATE_FORMAT(CURDATE() + INTERVAL 1 MONTH, '%Y-%m-01')
   `;
