@@ -259,9 +259,13 @@ const getAllAppointmentsByTenantIdAndDentistId = async (
   offset
 ) => {
   const query1 = `SELECT 
-    *
+    app.*,
+    CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
+      CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,
 FROM 
     appointment AS app
+    JOIN patient p on p.patient_id=app.patient_id
+      JOIN dentist d on d.dentist_id=app.dentist_id
 WHERE 
     app.tenant_id = ? 
     AND app.dentist_id = ?
@@ -271,6 +275,8 @@ WHERE
     COUNT(*) as total
 FROM 
     appointment AS app
+    JOIN patient p on p.patient_id=app.patient_id
+      JOIN dentist d on d.dentist_id=app.dentist_id
 WHERE 
     app.tenant_id = ? 
     AND app.dentist_id = ?
@@ -353,7 +359,6 @@ const getAllAppointmentsByTenantIdAndPatientId = async (
     conn.release();
   }
 };
-
 
 const getAppointmentByTenantIdAndAppointmentId = async (
   tenant_id,
@@ -594,46 +599,68 @@ const getAppointmentsWithDetailsByPatient = async (
   limit,
   offset
 ) => {
-  console.log(tenantId, patientId, limit, offset);
-  const query1 = `SELECT 
-  CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,
-  d.specialisation,
-  d.profile_picture,
-  d.gender,
-  d.date_of_birth,
-  app.status,
-  d.dentist_id,
-  d.working_hours,
-  d.duration,
-  app.visit_reason,
-  app.appointment_id,
-  app.appointment_date,
-  app.start_time,
-  app.end_time
-FROM appointment AS app
-JOIN dentist AS d ON d.dentist_id = app.dentist_id
-WHERE app.tenant_id = ? 
-  AND app.patient_id = ?
-  AND app.status = ?
-  limit ? offset ?;
-`;
-  const query2 = `SELECT 
-  COUNT(*) as total
-FROM appointment AS app
-JOIN dentist AS d ON d.dentist_id = app.dentist_id
-WHERE app.tenant_id = ? 
-  AND app.patient_id = ?
-  AND app.status = ?
-`;
+  console.log(tenantId, patientId, status, limit, offset);
+
+  let statusCondition = "";
+  let statusParams = [];
+
+  // Handle status condition dynamically
+  if (status === "pending") {
+    statusCondition = "AND app.status IN (?, ?)";
+    statusParams = ["pending", "confirmed"];
+  } else {
+    statusCondition = "AND app.status = ?";
+    statusParams = ["completed"];
+  }
+
+  const query1 = `
+    SELECT 
+      CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,
+      d.specialisation,
+      d.profile_picture,
+      d.gender,
+      d.date_of_birth,
+      app.status,
+      d.dentist_id,
+      d.working_hours,
+      d.duration,
+      app.visit_reason,
+      app.appointment_id,
+      app.appointment_date,
+      app.start_time,
+      app.end_time
+    FROM appointment AS app
+    JOIN dentist AS d ON d.dentist_id = app.dentist_id
+    WHERE app.tenant_id = ? 
+      AND app.patient_id = ?
+      ${statusCondition}
+    LIMIT ? OFFSET ?
+  `;
+
+  const query2 = `
+    SELECT COUNT(*) as total
+    FROM appointment AS app
+    JOIN dentist AS d ON d.dentist_id = app.dentist_id
+    WHERE app.tenant_id = ? 
+      AND app.patient_id = ?
+      ${statusCondition}
+  `;
+
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query1, [
       tenantId,
-      patientId,status,
+      patientId,
+      ...statusParams,
       limit,
       offset,
     ]);
-    const [counts] = await conn.query(query2, [tenantId, patientId,status]);
+
+    const [counts] = await conn.query(query2, [
+      tenantId,
+      patientId,
+      ...statusParams,
+    ]);
 
     return { data: rows, total: counts[0].total };
   } catch (error) {
@@ -643,6 +670,7 @@ WHERE app.tenant_id = ?
     conn.release();
   }
 };
+
 
 const getAppointmentMonthlySummary = async (
   tenantId,

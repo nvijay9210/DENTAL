@@ -49,9 +49,11 @@ module.exports = {
     "/getallappointments_dentistid/:tenant_id/:dentist_id",
   GETALL_APPOINTMENT_TENANT_PATIENTID:
     "/getallappointments_patientid/:tenant_id/:patient_id",
-    //doctor available data
+
+  //appointment show by patient
   GETALL_APPOINTMENT_TENANT_PATIENT:
     "/getallappointmentsbypatient/:tenant_id/:patient_id",
+    
   GET_APPOINTMENT_MONTHLY_SUMMARY:
     "/getallappointments/monthlysummary/:tenant_id/:clinic_id/:dentist_id",
   GET_APPOINTMENT_MONTHLY_SUMMARY_CLINIC:
