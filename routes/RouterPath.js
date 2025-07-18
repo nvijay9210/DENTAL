@@ -87,6 +87,9 @@ module.exports = {
   GET_TREATMENT_TENANT: "/gettreatment/:treatment_id/:tenant_id",
   UPDATE_TREATMENT_TENANT: "/updatetreatment/:treatment_id/:tenant_id",
   DELETE_TREATMENT_TENANT: "/deletetreatment/:treatment_id/:tenant_id",
+  //use query role and user-id 
+  GETALL_TREATMENT_FOLLOWUP_NOTIFY:
+    "/getallfollowup/:tenant_id/:clinic_id",
 
   ADD_PRESCRIPTION: "/addprescription",
   GETALL_PRESCRIPTION_TENANT: "/getallprescriptions/:tenant_id",

@@ -396,6 +396,7 @@ ORDER BY r.reminder_id DESC;`;
 };
 
 
+
 const getMonthlywiseRemindersByTenantAndClinicIdAndDentistId = async (
   tenant_id,
   clinic_id,

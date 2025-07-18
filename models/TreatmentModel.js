@@ -197,6 +197,90 @@ const deleteTreatmentByTenantAndTreatmentId = async (tenant_id, treatment_id) =>
   }
 };
 
+// const getTodayFollowUpsByDentist = async (tenant_id, clinic_id, dentist_id) => {
+//   const query = `
+//     SELECT 
+//       t.treatment_id,
+//       t.treatment_date,
+//       t.follow_up_date,
+//       t.treatment_type,
+//       t.treatment_status,
+//       t.diagnosis,
+//       t.treatment_procedure,
+//       t.patient_id,
+//       p.first_name AS patient_first_name,
+//       p.last_name AS patient_last_name
+//     FROM treatment t
+//     JOIN patient p ON p.patient_id = t.patient_id
+//     WHERE t.follow_up_date = CURDATE()
+//       AND t.tenant_id = ?
+//       AND t.clinic_id = ?
+//       AND t.dentist_id = ?
+//     ORDER BY t.treatment_id DESC;
+//   `;
+
+//   const conn = await pool.getConnection();
+
+//   try {
+//     const [rows] = await conn.query(query, [tenant_id, clinic_id, dentist_id]);
+//     return rows;
+//   } catch (error) {
+//     console.error("Database error in getTodayFollowUpsByDentist:", error);
+//     throw new CustomError("Error fetching today's follow-ups.", 500);
+//   } finally {
+//     conn.release();
+//   }
+// };
+
+const getTodayFollowUps = async ( tenant_id, clinic_id, role, user_id ) => {
+  let query = `
+    SELECT 
+  t.treatment_id,
+  t.treatment_date,
+  t.follow_up_date,
+  t.treatment_type,
+  t.treatment_status,
+  t.diagnosis,
+  t.treatment_procedure,
+  t.patient_id,
+  t.dentist_id,
+  CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
+  CONCAT(d.first_name, ' ', d.last_name) AS dentist_name
+FROM treatment t
+JOIN patient p ON p.patient_id = t.patient_id
+JOIN dentist d ON d.dentist_id = t.dentist_id
+WHERE t.follow_up_date = CURDATE()
+  AND t.tenant_id = ?
+  AND t.clinic_id = ?
+
+  `;
+
+  const values = [tenant_id, clinic_id];
+
+  if (role === "dentist") {
+    query += ` AND t.dentist_id = ?`;
+    values.push(user_id);
+  } else if (role === "patient") {
+    query += ` AND t.patient_id = ?`;
+    values.push(user_id);
+  }
+
+  query += ` ORDER BY t.treatment_id DESC;`;
+
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(query, values);
+    return rows;
+  } catch (error) {
+    console.error("Database error in getTodayFollowUps:", error);
+    throw new CustomError("Error fetching today's follow-ups.", 500);
+  } finally {
+    conn.release();
+  }
+};
+
+
 
 
 module.exports = {
@@ -208,5 +292,6 @@ module.exports = {
   getAllTreatmentsByTenantAndClinicId,
   getAllTreatmentsByTenantAndClinicIdAndDentist,
   getAllTreatmentsByTenantAndDentistId,
-  getAllTreatmentsByTenantAndPatientId
+  getAllTreatmentsByTenantAndPatientId,
+  getTodayFollowUps
 };
