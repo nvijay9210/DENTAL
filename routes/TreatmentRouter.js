@@ -18,6 +18,8 @@ const {
   GETALL_TREATMENT_TENANT_CLINIC_DENTIST_APPOINTEMENT,
   GETALL_TREATMENT_TENANT_DENTIST,
   GETALL_TREATMENT_TENANT_PATIENT,
+  GETALL_TREATMENT_FOLLOWUP_NOTIFY_DENTIST,
+  GETALL_TREATMENT_FOLLOWUP_NOTIFY,
 } = require("./RouterPath");
 const {
   authenticateTenantClinicGroup,
@@ -71,10 +73,17 @@ router.get(
   authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient"]),
   treatmentController.getAllTreatmentsByTenantAndDentistId
 );
+
 router.get(
   GETALL_TREATMENT_TENANT_PATIENT,
   authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient"]),
   treatmentController.getAllTreatmentsByTenantAndPatientId
+);
+
+router.get(
+  GETALL_TREATMENT_FOLLOWUP_NOTIFY,
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient"]),
+  treatmentController.getTodayFollowUps
 );
 
 // Get Single Treatment by Tenant ID & Treatment ID

@@ -1,7 +1,9 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
 const treatmentService = require("../services/TreatmentService");
-const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
+const {
+  validateTenantIdAndPageAndLimit,
+} = require("../validations/CommonValidations");
 const treatmentValidation = require("../validations/TreatmentValidation");
 
 /**
@@ -219,6 +221,34 @@ exports.deleteTreatmentByTenantIdAndTreatmentId = async (req, res, next) => {
       treatment_id
     );
     res.status(200).json({ message: "Treatment deleted successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getTodayFollowUps = async (req, res, next) => {
+  const { tenant_id, clinic_id } = req.params;
+  const { role, user_id } = req.query;
+
+  if (role!=='super-user' && !role || !user_id) throw new CustomError("Role and userid required", 400);
+
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
+  if(role === "dentist"){
+    await checkIfIdExists("dentist", "dentist_id", user_id)
+  }
+  else if(role==='patient'){
+    await checkIfIdExists("patient", "patient_id", user_id);
+  }
+
+  try {
+    const treatments = await treatmentService.getTodayFollowUps(
+      tenant_id,
+      clinic_id,
+      role,
+      user_id
+    );
+    res.status(200).json(treatments);
   } catch (err) {
     next(err);
   }

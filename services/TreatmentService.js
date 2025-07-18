@@ -20,7 +20,7 @@ const treatmentFields = {
   treatment_type: (val) => val,
   treatment_status: (val) => val,
   treatment_date: (val) => val,
-  cost: (val) => val? parseFloat(val) : 0,
+  cost: (val) => (val ? parseFloat(val) : 0),
   duration: (val) => val || null,
   teeth_involved: (val) => val || null,
   complications: helper.safeStringify,
@@ -46,7 +46,7 @@ const treatmentFieldsReverseMap = {
   treatment_type: (val) => val,
   treatment_status: (val) => val,
   treatment_date: (val) => formatDateOnly(val),
-  cost: (val) => val? parseFloat(val) : 0,
+  cost: (val) => (val ? parseFloat(val) : 0),
   duration: (val) => val,
   teeth_involved: (val) => val,
   complications: helper.safeJsonParse,
@@ -150,7 +150,6 @@ const getAllTreatmentsByTenantAndClinicId = async (
     limit,
   });
 
-
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
       const result = await treatmentModel.getAllTreatmentsByTenantAndClinicId(
@@ -193,7 +192,6 @@ const getAllTreatmentsByTenantAndClinicIdAndDentist = async (
     page,
     limit,
   });
-
 
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
@@ -272,7 +270,6 @@ const getAllTreatmentsByTenantAndPatientId = async (
     page,
     limit,
   });
-
 
   try {
     const treatments = await getOrSetCache(cacheKey, async () => {
@@ -370,6 +367,36 @@ const deleteTreatmentByTenantIdAndTreatmentId = async (
   }
 };
 
+const getTodayFollowUps = async (tenant_id, clinic_id, role, user_id = 0) => {
+  const cacheKey = buildCacheKey("treatment", "followupnotify", {
+    tenant_id,
+    clinic_id,
+    role: role,
+    user_id: user_id,
+  });
+  try {
+    const reminders = await getOrSetCache(cacheKey, async () => {
+      const result = await treatmentModel.getTodayFollowUps(
+        tenant_id,
+        clinic_id,
+        role,
+        user_id
+      );
+      const result1 = result.map((r) => ({
+        ...r,
+        treatment_date: formatDateOnly(r.treatment_date),
+        follow_up_date: formatDateOnly(r.follow_up_date),
+        diagnosis: helper.safeJsonParse(r.diagnosis),
+      }));
+      return result1;
+    });
+    return reminders;
+  } catch (err) {
+    console.error("Database error while fetching followup:", err);
+    throw new CustomError("Failed to fetch followup", 404);
+  }
+};
+
 module.exports = {
   createTreatment,
   getAllTreatmentsByTenantId,
@@ -380,4 +407,5 @@ module.exports = {
   getAllTreatmentsByTenantAndClinicIdAndDentist,
   getAllTreatmentsByTenantAndDentistId,
   getAllTreatmentsByTenantAndPatientId,
+  getTodayFollowUps,
 };

@@ -45,7 +45,7 @@ const createNotificationRecipient = async (data) => {
     const { columns, values } = mapFields(data, fieldMap);
     const notification_recipient_id =
       await notificationRecipientModel.createNotificationRecipient(
-        "notificationRecipients",
+        "notificationrecipients",
         columns,
         values
       );
