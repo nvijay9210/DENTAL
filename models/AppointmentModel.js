@@ -544,44 +544,65 @@ const getAppointmentsWithDetailsByClinic = async (
   limit,
   offset
 ) => {
-  const query1 = `SELECT 
-  CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
-  p.profile_picture,
-  p.gender,
-  p.date_of_birth,
-  app.status,
-  p.patient_id,
-  app.visit_reason,
-  app.appointment_id,
-  app.dentist_id,
-  app.appointment_date,
-  app.start_time,
-  app.end_time
-FROM appointment AS app
-JOIN patient AS p ON p.patient_id = app.patient_id
-WHERE app.tenant_id = ? 
-  AND app.clinic_id = ?
-  AND app.status =?
-  limit ? offset ?;
-`;
+  let statusCondition = "";
+  let statusParams = [];
 
-  const query2 = `SELECT 
-  COUNT(*) as total
-FROM appointment AS app
-JOIN patient AS p ON p.patient_id = app.patient_id
-WHERE app.tenant_id = ? 
-  AND app.clinic_id = ?
-  AND app.status =? `;
+  // Handle status condition dynamically
+  if (status === "pending") {
+    statusCondition = "AND app.status IN (?, ?)";
+    statusParams = ["pending", "confirmed"];
+  } else {
+    statusCondition = "AND app.status = ?";
+    statusParams = [status];
+  }
+
+  const query1 = `
+    SELECT 
+      CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
+      p.profile_picture,
+      p.gender,
+      p.date_of_birth,
+      app.status,
+      p.patient_id,
+      app.visit_reason,
+      app.appointment_id,
+      app.dentist_id,
+      app.appointment_date,
+      app.start_time,
+      app.end_time
+    FROM appointment AS app
+    JOIN patient AS p ON p.patient_id = app.patient_id
+    WHERE app.tenant_id = ? 
+      AND app.clinic_id = ?
+      ${statusCondition}
+    LIMIT ? OFFSET ?
+  `;
+
+  const query2 = `
+    SELECT 
+      COUNT(*) AS total
+    FROM appointment AS app
+    JOIN patient AS p ON p.patient_id = app.patient_id
+    WHERE app.tenant_id = ? 
+      AND app.clinic_id = ?
+      ${statusCondition}
+  `;
+
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query1, [
       tenantId,
       clinic_id,
-      status,
+      ...statusParams,
       limit,
       offset,
     ]);
-    const [counts] = await conn.query(query2, [tenantId, clinic_id, status]);
+
+    const [counts] = await conn.query(query2, [
+      tenantId,
+      clinic_id,
+      ...statusParams,
+    ]);
 
     return { data: rows, total: counts[0].total };
   } catch (error) {
@@ -591,6 +612,7 @@ WHERE app.tenant_id = ?
     conn.release();
   }
 };
+
 
 const getAppointmentsWithDetailsByPatient = async (
   tenantId,
