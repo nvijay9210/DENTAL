@@ -76,7 +76,10 @@ const getSupplierPaymentsByTenantAndPurchaseOrderId = async (
      sp.paid_amount,
      sp.balance_amount,
      sp.payment_date,
-     sp.supplier_payment_id
+     sp.supplier_payment_id,
+     sp.mode_of_payment,
+     sp.receipt_number,
+     transaction_id
     FROM
       supplier_payments sp
     JOIN
