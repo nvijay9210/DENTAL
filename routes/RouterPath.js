@@ -191,6 +191,8 @@ module.exports = {
   GET_PURCHASE_ORDER_TENANT: "/getpurchaseorder/:purchase_order_id/:tenant_id",
   UPDATE_PURCHASE_ORDER_TENANT:
     "/updatepurchaseorder/:purchase_order_id/:tenant_id",
+  UPDATE_PURCHASE_ORDER_STATUS_CLINIC:
+    "/updatepurchaseorderstatus/:purchase_order_id/:tenant_id/:clinic_id",
   DELETE_PURCHASE_ORDER_TENANT:
     "/deletepurchaseorder/:purchase_order_id/:tenant_id",
 
