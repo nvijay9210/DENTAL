@@ -125,6 +125,21 @@ exports.getPurchaseOrderByTenantIdAndPurchaseOrderId = async (
 /**
  * Update an existing purchaseOrders
  */
+exports.updatePurchaseOrderStatus = async (req, res, next) => {
+  const { purchase_order_id, tenant_id,clinic_id } = req.params;
+  const {status}=req.query
+  try {
+
+    // Update the purchaseOrders
+    await purchaseOrdersService.updatePurchaseOrderStatus(
+      purchase_order_id, tenant_id,clinic_id,status
+    );
+    res.status(200).json({ message: "PurchaseOrder Status updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.updatePurchaseOrder = async (req, res, next) => {
   const { purchase_order_id, tenant_id } = req.params;
   const details = req.body;

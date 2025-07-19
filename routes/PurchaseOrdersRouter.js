@@ -10,6 +10,7 @@ const {
   DELETE_PURCHASE_ORDER_TENANT,
   GETALL_PURCHASE_ORDER_TENANT_SUPPLIER,
   GETALL_PURCHASE_ORDER_TENANT_CLINIC,
+  UPDATE_PURCHASE_ORDER_STATUS_CLINIC,
 } = require("./RouterPath");
 const suppliervalidation = require("../validations/PurchaseOrderValidation");
 const {
@@ -22,7 +23,8 @@ router.post(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist","receptionist",
+    "dentist",
+    "receptionist",
     "supplier",
   ]),
   supplierController.createPurchaseOrder
@@ -34,7 +36,8 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist","receptionist",
+    "dentist",
+    "receptionist",
     "supplier",
   ]),
   supplierController.getAllPurchaseOrdersByTenantId
@@ -44,7 +47,8 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist","receptionist",
+    "dentist",
+    "receptionist",
     "supplier",
   ]),
   supplierController.getAllPurchaseOrdersByTenantIdAndSupplierId
@@ -54,7 +58,8 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist","receptionist",
+    "dentist",
+    "receptionist",
     "clinic",
   ]),
   supplierController.getAllPurchaseOrdersByTenantIdAndClinicId
@@ -66,7 +71,8 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist","receptionist",
+    "dentist",
+    "receptionist",
     "supplier",
   ]),
   supplierController.getPurchaseOrderByTenantIdAndPurchaseOrderId
@@ -78,10 +84,22 @@ router.put(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist","receptionist",
+    "dentist",
+    "receptionist",
     "supplier",
   ]),
   supplierController.updatePurchaseOrder
+);
+router.put(
+  UPDATE_PURCHASE_ORDER_STATUS_CLINIC,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "receptionist",
+    "supplier",
+  ]),
+  supplierController.updatePurchaseOrderStatus
 );
 
 // Delete PurchaseOrder
@@ -90,7 +108,8 @@ router.delete(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist","receptionist",
+    "dentist",
+    "receptionist",
     "supplier",
   ]),
   supplierController.deletePurchaseOrderByTenantIdAndPurchaseOrderId

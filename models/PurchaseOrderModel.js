@@ -102,6 +102,41 @@ const updatePurchaseOrders = async (purchase_order_id, columns, values, tenant_i
   }
 };
 
+const updatePurchaseOrderStatus = async (
+  purchase_order_id,
+  tenantId,
+  clinicId,
+  status
+) => {
+
+  let query = `
+    UPDATE purchase_orders 
+    SET status = ?
+  `;
+
+  let queryParams = [status];
+
+  query += `
+    WHERE purchase_order_id = ? 
+      AND tenant_id = ? 
+      AND clinic_id = ?
+  `;
+
+  queryParams.push(purchase_order_id, tenantId, clinicId);
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, queryParams);
+    return rows.affectedRows > 0;
+  } catch (error) {
+    console.error("Error updating purchaseorder status:", error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+
 // Delete purchase_orders
 const deletePurchaseOrdersByTenantAndPurchaseOrdersId = async (tenant_id, purchase_order_id) => {
   try {
@@ -125,5 +160,6 @@ module.exports = {
   updatePurchaseOrders,
   deletePurchaseOrdersByTenantAndPurchaseOrdersId,
   getAllPurchaseOrdersByTenantIdAndSupplierId,
-  getAllPurchaseOrdersByTenantIdAndClinicId
+  getAllPurchaseOrdersByTenantIdAndClinicId,
+  updatePurchaseOrderStatus
 };

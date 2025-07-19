@@ -232,6 +232,24 @@ const updatePurchaseOrder = async (purchase_orderId, data, tenant_id) => {
   }
 };
 
+const updatePurchaseOrderStatus = async (purchase_orderId, tenant_id,clinic_id,status) => {
+  try {
+    const affectedRows = await purchase_orderModel.updatePurchaseOrders(
+      purchase_orderId, tenant_id,clinic_id,status
+    );
+
+    if (affectedRows === 0) {
+      throw new CustomError("PurchaseOrder not found or no changes made.", 404);
+    }
+
+    await invalidateCacheByPattern("purchase_order:*");
+    return affectedRows;
+  } catch (error) {
+    console.error("Update Error:", error);
+    throw new CustomError("Failed to update purchase_order", 404);
+  }
+};
+
 // Delete PurchaseOrder
 const deletePurchaseOrderByTenantIdAndPurchaseOrderId = async (
   tenantId,
@@ -264,5 +282,6 @@ module.exports = {
   updatePurchaseOrder,
   deletePurchaseOrderByTenantIdAndPurchaseOrderId,
   getAllPurchaseOrdersByTenantIdAndSupplierId,
-  getAllPurchaseOrdersByTenantIdAndClinicId
+  getAllPurchaseOrdersByTenantIdAndClinicId,
+  updatePurchaseOrderStatus
 };
