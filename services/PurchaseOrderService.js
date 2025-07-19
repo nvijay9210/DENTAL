@@ -11,6 +11,7 @@ const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
+const { randomUUID } = require("crypto");
 
 // Field mapping for purchase_orders (similar to treatment)
 
@@ -53,6 +54,7 @@ const createPurchaseOrder = async (data) => {
     ...purchase_orderFields,
     created_by: (val) => val,
   };
+  data['order_number']=randomUUID()
   try {
     const { columns, values } = mapFields(data, fieldMap);
     const purchase_orderId = await purchase_orderModel.createPurchaseOrders(
