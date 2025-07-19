@@ -232,9 +232,10 @@ const updatePurchaseOrder = async (purchase_orderId, data, tenant_id) => {
   }
 };
 
+
 const updatePurchaseOrderStatus = async (purchase_orderId, tenant_id,clinic_id,status) => {
   try {
-    const affectedRows = await purchase_orderModel.updatePurchaseOrders(
+    const affectedRows = await purchase_orderModel.updatePurchaseOrderStatus(
       purchase_orderId, tenant_id,clinic_id,status
     );
 
