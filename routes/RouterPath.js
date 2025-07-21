@@ -222,6 +222,8 @@ module.exports = {
     "/getallnoticationpatient/:tenant_id/:clinic_id/:patient_id",
   GETALL_REMINDER_NOTIFY_DENTIST:
     "/getallremindernoticationdentist/:tenant_id/:clinic_id/:dentist_id",
+  GETALL_REMINDER_NOTIFY_CLINIC:
+    "/getallremindernoticationclinic/:tenant_id/:clinic_id",
 
   ADD_PAYMENT: "/addpayment",
   GETALL_PAYMENT_TENANT: "/getallpayments/:tenant_id",
