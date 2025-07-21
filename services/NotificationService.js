@@ -19,6 +19,7 @@ const { buildCacheKey } = require("../utils/RedisCache");
 
 const notificationFields = {
   tenant_id: (val) => val,
+  clinic_id:(val)=>val,
   sender_role: (val) => val,
   sender_id: (val) => val,
   type: (val) => val,
@@ -30,6 +31,7 @@ const notificationFields = {
 const notificationFieldsReverseMap = {
   notification_id: (val) => val,
   tenant_id: (val) => val,
+  clinic_id:(val)=>val,
   sender_role: (val) => val,
   sender_id: (val) => val,
   type: (val) => val,
