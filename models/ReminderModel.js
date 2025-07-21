@@ -394,6 +394,40 @@ ORDER BY r.reminder_id DESC;`;
     conn.release();
   }
 };
+const getAllReminderNotifyByClinic = async (
+  tenant_id,
+  clinic_id
+) => {
+  const query = `
+    SELECT 
+  r.reminder_id,
+  r.title,
+  r.description,
+  r.category,
+  r.start_date,
+  r.type
+FROM reminder r
+WHERE r.start_date = CURDATE()
+  AND r.tenant_id = ?
+  AND r.clinic_id = ?
+ORDER BY r.reminder_id DESC;`;
+
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(query, [
+      tenant_id,
+      clinic_id
+    ]);
+
+    return rows
+  } catch (error) {
+    console.error("Database error in getAllRemindersBy...:", error);
+    throw new CustomError("Error fetching reminder.", 500);
+  } finally {
+    conn.release();
+  }
+};
 
 
 
@@ -456,5 +490,6 @@ module.exports = {
   getAllNotifyByDentist,
   getAllReminderNotifyByDentist,
   getAllRemindersByTenantAndClinicId,
-  getAllRemindersByTenantAndClinicAndDentistId
+  getAllRemindersByTenantAndClinicAndDentistId,
+  getAllReminderNotifyByClinic
 };

@@ -265,6 +265,28 @@ exports.getAllReminderNotifyByDentist = async (
     next(err);
   }
 };
+exports.getAllReminderNotifyByClinic = async (
+  req,
+  res,
+  next
+) => {
+  const { tenant_id, clinic_id } = req.params;
+ 
+  try {
+    await checkIfIdExists("clinic", "clinic_id", clinic_id);
+    await checkIfIdExists("tenant", "tenant_id", tenant_id);
+
+    // Fetch reminder details
+    const reminder =
+      await reminderService.getAllReminderNotifyByClinic(
+        tenant_id,
+        clinic_id
+      );
+    res.status(200).json(reminder);
+  } catch (err) {
+    next(err);
+  }
+};
 
 exports.getMonthlywiseRemindersByTenantAndClinicIdAndDentistId = async (
   req,
