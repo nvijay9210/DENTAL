@@ -37,10 +37,7 @@ const getAllNotificationsByTenantId = async (tenantId, limit, offset) => {
  * @param {string} receiverRole
  * @param {number} clinicId
  */
-async function getNotificationsForReceiver(tenantId, receiverId, receiverRole, clinicId=1) {
-  if (!clinicId) throw new Error("clinicId is required");
-  if (!tenantId) throw new Error("tenantId is required");
-  if (!receiverRole) throw new Error("receiverRole is required");
+async function getNotificationsForReceiver(tenantId, receiverId, receiverRole, clinicId) {
 
   // Roles that bypass receiver_id / receiver_role filtering
   const bypassRoles = ['super-user', 'receptionist'];
@@ -106,14 +103,13 @@ async function getNotificationsForReceiver(tenantId, receiverId, receiverRole, c
 
   const conn = await pool.getConnection();
   try {
+    // console.log(query,params)
     const [rows] = await conn.query(query, params);
     return rows;
   } finally {
     conn.release();
   }
 }
-
-
 
 
 

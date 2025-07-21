@@ -154,6 +154,7 @@ const getAllNotificationsByTenantId = async (
 
 const getNotificationsForReceiver = async (
   tenantId,
+  clinicId,
   receiverId,
   receiverRole
 ) => {
@@ -164,7 +165,8 @@ const getNotificationsForReceiver = async (
       const result = await notificationModel.getNotificationsForReceiver(
         tenantId,
         receiverId,
-        receiverRole
+        receiverRole,
+        clinicId
       );
       return result;
     });

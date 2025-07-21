@@ -251,7 +251,7 @@ module.exports = {
   ADD_NOTIFICATION: "/addnotification",
   GETALL_NOTIFICATION_TENANT: "/getallnotifications/:tenant_id",
   GET_NOTIFICATION_TENANT: "/getnotification/:notification_id/:tenant_id",
-  GET_NOTIFICATION_TENANT_RECEIVER: "/getnotificationreceiver/:tenant_id",
+  GET_NOTIFICATION_TENANT_RECEIVER: "/getnotificationreceiver/:tenant_id/:clinic_id",
   UPDATE_NOTIFICATION_TENANT: "/updatenotification/:notification_id/:tenant_id",
   UPDATE_NOTIFICATION_RECIPIENTS_STATUS_TENANT: "/updatenotificationrecipients/:notification_recipient_id",
   DELETE_NOTIFICATION_TENANT: "/deletenotification/:notification_id/:tenant_id",
