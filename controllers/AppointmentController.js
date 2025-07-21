@@ -386,7 +386,7 @@ exports.deleteAppointmentByTenantIdAndAppointmentId = async (
 
 exports.getAppointmentsWithDetails = async (req, res, next) => {
   const { tenant_id, clinic_id, dentist_id } = req.params;
-  const { status, page, limit } = req.query;
+  const {  page, limit } = req.query;
   try {
     await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
     await checkIfIdExists("tenant", "tenant_id", tenant_id);
@@ -396,7 +396,6 @@ exports.getAppointmentsWithDetails = async (req, res, next) => {
       tenant_id,
       clinic_id,
       dentist_id,
-      status,
       page,
       limit
     );
@@ -407,7 +406,7 @@ exports.getAppointmentsWithDetails = async (req, res, next) => {
 };
 exports.getAppointmentsWithDetailsByClinic = async (req, res, next) => {
   const { tenant_id, clinic_id } = req.params;
-  const { status, page, limit } = req.query;
+  const {  page, limit } = req.query;
   try {
     await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
     await checkIfIdExists("tenant", "tenant_id", tenant_id);
@@ -416,7 +415,7 @@ exports.getAppointmentsWithDetailsByClinic = async (req, res, next) => {
       await appointmentService.getAppointmentsWithDetailsByClinic(
         tenant_id,
         clinic_id,
-        status,
+        
         page,
         limit
       );

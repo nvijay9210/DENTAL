@@ -177,6 +177,7 @@ router.get(
   authenticateTenantClinicGroup(["tenant", "receptionist", "dentist"]),
   appointmentController.getAppointmentsWithDetails
 );
+
 router.get(
   GETALL_APPOINTMENT_WITHDETAILS_TENANT_CLINIC,
   authenticateTenantClinicGroup(["tenant", "receptionist", "dentist","super-user"]),
