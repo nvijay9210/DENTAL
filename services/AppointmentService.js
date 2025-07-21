@@ -660,7 +660,6 @@ const getAppointmentsWithDetails = async (
     dentist_id,
     page,limit
   });
-  const fieldsToDecode = ["visit_reason"];
 
   try {
     const appointment = await getOrSetCache(cacheKey, async () => {
@@ -671,12 +670,17 @@ const getAppointmentsWithDetails = async (
         Number(limit),
         offset
       );
-
-      const formatted = await formatAppointments(result); // ✅ Use the returned value
-      return decodeJsonFields(formatted, fieldsToDecode); // ✅ Pass formatted data
+      return result
     });
 
-    return appointment;
+    const convertedRows=appointment.data.map(app=>({
+      ...app,
+      date_of_birth:formatDateOnly(app.date_of_birth),
+      visit_reason:safeJsonParse(app.visit_reason),
+      appointment_date:formatDateOnly(app.appointment_date)
+    }))
+
+    return {data:convertedRows,total:appointment.total};
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
     throw new CustomError("Failed to fetch appointment", 404);
