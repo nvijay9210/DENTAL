@@ -51,7 +51,7 @@ router.get(
 );
 router.get(
   GET_NOTIFICATION_TENANT_RECEIVER,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","patient"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","patient","receptionist"]),
   notificationController.getNotificationsForReceiver
 );
 
