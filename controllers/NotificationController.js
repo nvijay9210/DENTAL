@@ -45,13 +45,17 @@ exports.getAllNotificationsByTenantId = async (req, res, next) => {
   }
 };
 exports.getNotificationsForReceiver = async (req, res, next) => {
-  const { tenant_id } = req.params;
+  const { tenant_id,clinic_id } = req.params;
   const { receiver_role, receiver_id } = req.query;
+  const roles=['super-user','patient','dentist','receptionist']
+  if(!roles.includes(receiver_role)) throw new CustomError('Role not exists',400)
 
   await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
   try {
     const notifications = await notificationService.getNotificationsForReceiver(
       tenant_id,
+      clinic_id,
       receiver_id,
       receiver_role
     );
