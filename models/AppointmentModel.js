@@ -477,7 +477,6 @@ const getAppointmentsWithDetails = async (
   tenantId,
   clinic_id,
   dentist_id,
-  status,
   limit,
   offset
 ) => {
@@ -499,7 +498,6 @@ JOIN patient AS p ON p.patient_id = app.patient_id
 WHERE app.tenant_id = ? 
   AND app.clinic_id = ? 
   AND app.dentist_id = ?
-  AND app.status =?
   limit ? offset ?;
 `;
 
@@ -509,23 +507,20 @@ FROM appointment AS app
 JOIN patient AS p ON p.patient_id = app.patient_id
 WHERE app.tenant_id = ? 
   AND app.clinic_id = ? 
-  AND app.dentist_id = ?
-  AND app.status =?`;
+  AND app.dentist_id = ?`
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query1, [
       tenantId,
       clinic_id,
       dentist_id,
-      status,
       limit,
       offset,
     ]);
     const [counts] = await conn.query(query2, [
       tenantId,
       clinic_id,
-      dentist_id,
-      status,
+      dentist_id
     ]);
 
     return { data: rows, total: counts[0].total };
@@ -540,21 +535,9 @@ WHERE app.tenant_id = ?
 const getAppointmentsWithDetailsByClinic = async (
   tenantId,
   clinic_id,
-  status,
   limit,
   offset
 ) => {
-  let statusCondition = "";
-  let statusParams = [];
-
-  // Handle status condition dynamically
-  if (status === "pending") {
-    statusCondition = "AND app.status IN (?, ?)";
-    statusParams = ["pending", "confirmed"];
-  } else {
-    statusCondition = "AND app.status = ?";
-    statusParams = [status];
-  }
 
   const query1 = `
     SELECT 
@@ -574,7 +557,6 @@ const getAppointmentsWithDetailsByClinic = async (
     JOIN patient AS p ON p.patient_id = app.patient_id
     WHERE app.tenant_id = ? 
       AND app.clinic_id = ?
-      ${statusCondition}
     LIMIT ? OFFSET ?
   `;
 
@@ -585,7 +567,6 @@ const getAppointmentsWithDetailsByClinic = async (
     JOIN patient AS p ON p.patient_id = app.patient_id
     WHERE app.tenant_id = ? 
       AND app.clinic_id = ?
-      ${statusCondition}
   `;
 
   const conn = await pool.getConnection();
@@ -593,15 +574,13 @@ const getAppointmentsWithDetailsByClinic = async (
     const [rows] = await conn.query(query1, [
       tenantId,
       clinic_id,
-      ...statusParams,
       limit,
       offset,
     ]);
 
     const [counts] = await conn.query(query2, [
       tenantId,
-      clinic_id,
-      ...statusParams,
+      clinic_id
     ]);
 
     return { data: rows, total: counts[0].total };

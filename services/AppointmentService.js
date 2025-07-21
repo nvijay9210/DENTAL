@@ -650,7 +650,6 @@ const getAppointmentsWithDetails = async (
   tenantId,
   clinic_id,
   dentist_id,
-  status,
   page = 1,
   limit = 10
 ) => {
@@ -659,7 +658,6 @@ const getAppointmentsWithDetails = async (
     tenant_id:tenantId,
     clinic_id,
     dentist_id,
-    status,
     page,limit
   });
   const fieldsToDecode = ["visit_reason"];
@@ -670,7 +668,6 @@ const getAppointmentsWithDetails = async (
         tenantId,
         clinic_id,
         dentist_id,
-        status,
         Number(limit),
         offset
       );
@@ -690,7 +687,7 @@ const getAppointmentsWithDetails = async (
 const getAppointmentsWithDetailsByClinic = async (
   tenantId,
   clinic_id,
-  status,
+  
   page = 1,
   limit = 10
 ) => {
@@ -698,7 +695,7 @@ const getAppointmentsWithDetailsByClinic = async (
   const cacheKey = buildCacheKey("appointment", "appointmentwithdetails", {
     tenant_id: tenantId,
     clinic_id,
-    status,
+    
     page,
     limit
   });
@@ -708,7 +705,7 @@ const getAppointmentsWithDetailsByClinic = async (
       const result = await appointmentModel.getAppointmentsWithDetailsByClinic(
         tenantId,
         clinic_id,
-        status,
+        
         Number(limit),
         offset
       );
