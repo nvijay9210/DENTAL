@@ -218,6 +218,8 @@ module.exports = {
   DELETE_REMINDER_TENANT: "/deletereminder/:reminder_id/:tenant_id",
   GETALL_NOTIFY_DENTIST:
     "/getallnoticationdentist/:tenant_id/:clinic_id/:dentist_id",
+    GETALL_NOTIFY_CLINIC:
+    "/getallnoticationclinic/:tenant_id/:clinic_id",
   GETALL_NOTIFY_PATIENT:
     "/getallnoticationpatient/:tenant_id/:clinic_id/:patient_id",
   GETALL_REMINDER_NOTIFY_DENTIST:

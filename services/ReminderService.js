@@ -29,7 +29,7 @@ const reminderFields = {
   clinic_id: (val) => val,
   dentist_id: (val) => val,
   title: (val) => val,
-  description: (val) => val? helper.safeStringify(val):null,
+  description: (val) => (val ? helper.safeStringify(val) : null),
   reminder_reason: (val) => val,
   reminder_type: (val) => val,
   type: (val) => val,
@@ -40,9 +40,9 @@ const reminderFields = {
   reminder_repeat: (val) => val,
   repeat_interval: (val) => (val ? parseInt(val) : 0),
   repeat_count: (val) => (val ? parseInt(val) : 0),
-  repeat_weekdays: (val) => val? helper.safeStringify(val):null,
-  monthly_week: (val) => val? helper.safeStringify(val):null,
-  monthly_weekdays: (val) => val? helper.safeStringify(val):null,
+  repeat_weekdays: (val) => (val ? helper.safeStringify(val) : null),
+  monthly_week: (val) => (val ? helper.safeStringify(val) : null),
+  monthly_weekdays: (val) => (val ? helper.safeStringify(val) : null),
   monthly_option: (val) => val,
   repeat_end_date: (val) => (val ? formatDateOnly(val) : null),
   notify: helper.parseBoolean,
@@ -148,13 +148,12 @@ const getAllRemindersByTenantAndClinicId = async (
   });
   try {
     const reminders = await getOrSetCache(cacheKey, async () => {
-      const result =
-        await reminderModel.getAllRemindersByTenantAndClinicId(
-          tenant_id,
-          clinic_id,
-          Number(limit),
-          offset
-        );
+      const result = await reminderModel.getAllRemindersByTenantAndClinicId(
+        tenant_id,
+        clinic_id,
+        Number(limit),
+        offset
+      );
       return result;
     });
 
@@ -220,7 +219,7 @@ const getAllRemindersByTenantAndClinicAndDentistAndType = async (
     tenant_id,
     clinic_id,
     dentist_id,
-    appointment_type:type,
+    appointment_type: type,
     page,
     limit,
   });
@@ -253,7 +252,7 @@ const getAllNotifyByDentist = async (tenant_id, clinic_id, dentist_id) => {
   const cacheKey = buildCacheKey("reminder", "notify", {
     tenant_id,
     clinic_id,
-    dentist_id
+    dentist_id,
   });
   try {
     const reminders = await getOrSetCache(cacheKey, async () => {
@@ -267,10 +266,36 @@ const getAllNotifyByDentist = async (tenant_id, clinic_id, dentist_id) => {
         description: helper.safeJsonParse(r.description),
         appointment_date: formatDateOnly(r.appointment_date),
       }));
-  
+
       return result1;
     });
-    return reminders
+    return reminders;
+  } catch (err) {
+    console.error("Database error while fetching reminders:", err);
+    throw new CustomError("Failed to fetch reminders", 404);
+  }
+};
+const getAllNotifyByClinic = async (tenant_id, clinic_id) => {
+  const cacheKey = buildCacheKey("reminder", "notify", {
+    tenant_id,
+    clinic_id,
+  });
+  try {
+    const reminders = await getOrSetCache(cacheKey, async () => {
+      const result = await reminderModel.getAllNotifyByClinic(
+        tenant_id,
+        clinic_id
+      );
+      const result1 = result.map((r) => ({
+        ...r,
+        description: helper.safeJsonParse(r.description),
+        visit_reason: helper.safeJsonParse(r.visit_reason),
+        appointment_date: formatDateOnly(r.appointment_date),
+      }));
+
+      return result1;
+    });
+    return reminders;
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
     throw new CustomError("Failed to fetch reminders", 404);
@@ -281,7 +306,7 @@ const getAllNotifyByPatient = async (tenant_id, clinic_id, patient_id) => {
   const cacheKey = buildCacheKey("reminder", "notify", {
     tenant_id,
     clinic_id,
-    patient_id
+    patient_id,
   });
   try {
     const reminders = await getOrSetCache(cacheKey, async () => {
@@ -297,18 +322,22 @@ const getAllNotifyByPatient = async (tenant_id, clinic_id, patient_id) => {
       }));
       return result1;
     });
-    return reminders
+    return reminders;
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
     throw new CustomError("Failed to fetch reminders", 404);
   }
 };
 
-const getAllReminderNotifyByDentist = async (tenant_id, clinic_id, dentist_id) => {
+const getAllReminderNotifyByDentist = async (
+  tenant_id,
+  clinic_id,
+  dentist_id
+) => {
   const cacheKey = buildCacheKey("reminder", "remindernotify", {
     tenant_id,
     clinic_id,
-    dentist_id
+    dentist_id,
   });
   try {
     const reminders = await getOrSetCache(cacheKey, async () => {
@@ -324,8 +353,7 @@ const getAllReminderNotifyByDentist = async (tenant_id, clinic_id, dentist_id) =
       }));
       return result1;
     });
-    return reminders
-    
+    return reminders;
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
     throw new CustomError("Failed to fetch reminders", 404);
@@ -335,7 +363,7 @@ const getAllReminderNotifyByDentist = async (tenant_id, clinic_id, dentist_id) =
 const getAllReminderNotifyByClinic = async (tenant_id, clinic_id) => {
   const cacheKey = buildCacheKey("reminder", "remindernotify", {
     tenant_id,
-    clinic_id
+    clinic_id,
   });
   try {
     const reminders = await getOrSetCache(cacheKey, async () => {
@@ -350,8 +378,7 @@ const getAllReminderNotifyByClinic = async (tenant_id, clinic_id) => {
       }));
       return result1;
     });
-    return reminders
-    
+    return reminders;
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
     throw new CustomError("Failed to fetch reminders", 404);
@@ -711,5 +738,6 @@ module.exports = {
   getAllReminderNotifyByDentist,
   getAllRemindersByTenantAndClinicId,
   getAllRemindersByTenantAndClinicAndDentistId,
-  getAllReminderNotifyByClinic
+  getAllReminderNotifyByClinic,
+  getAllNotifyByClinic,
 };
