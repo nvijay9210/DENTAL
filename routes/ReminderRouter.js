@@ -26,52 +26,52 @@ const {
 // Create Reminder
 router.post(
   ADD_REMINDER,
-  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist","super-user"]),
   reminderController.createReminder
 );
 
 // Get All Reminders by Tenant ID with Pagination
 router.get(
   GETALL_REMINDER_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist","super-user"]),
   reminderController.getAllRemindersByTenantId
 );
 
 // Get Single Reminder by Tenant ID & Reminder ID
 router.get(
   GET_REMINDER_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist","super-user"]),
   reminderController.getReminderByTenantIdAndReminderId
 );
 
 // Get Single Reminder by Tenant ID & Reminder ID
 router.get(
   GET_REMINDER_SCHEDULE,
-  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist","super-user"]),
   reminderController.getReminderByTenantAndClinicIdAndDentistIdAndReminderId
 );
 
 router.get(
   GET_REMINDER_SCHEDULE_MONTHLY,
-  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist","super-user"]),
   reminderController.getMonthlywiseRemindersByTenantAndClinicIdAndDentistId
 );
 
 router.get(
   GET_REMINDER_DENTIST_TYPE,
-  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist","super-user"]),
   reminderController.getAllRemindersByTenantAndClinicAndDentistAndType
 );
 
 router.get(
   GETALL_REMINDER_TENANT_CLINIC,
-  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist","super-user","receptionist"]),
   reminderController.getAllRemindersByTenantAndClinicId
 );
 
 router.get(
   GETALL_REMINDER_TENANT_CLINIC_DENTIST,
-  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist","super-user","receptionist"]),
   reminderController.getAllRemindersByTenantAndClinicAndDentistId
 );
 
@@ -104,14 +104,14 @@ router.get(
 // Update Reminder
 router.put(
   UPDATE_REMINDER_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist","super-user"]),
   reminderController.updateReminder
 );
 
 // Delete Reminder
 router.delete(
   DELETE_REMINDER_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "patient","receptionist","super-user"]),
   reminderController.deleteReminderByTenantIdAndReminderId
 );
 
