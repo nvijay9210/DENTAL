@@ -118,7 +118,7 @@ const createAppointment = async (data) => {
     await invalidateCacheByPattern("appointmentsummary:*");
     await invalidateCacheByPattern("financeSummary:*");
     await invalidateCacheByPattern("patient:*");
-    console.log("appointment_id:", appointmentId);
+    
     if (appointmentId)
       await updatePatientCount(data.tenant_id, data.clinic_id, true);
     await updatePatientAppointmentCount(data.tenant_id, data.patient_id, true);

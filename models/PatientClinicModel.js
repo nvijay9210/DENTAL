@@ -8,7 +8,7 @@ const TABLE = "patient_clinic";
 const createPatientClinic = async (table,columns, values) => {
   try {
     const patient_clinic = await record.createRecord(table, columns, values);
-    console.log(patient_clinic)
+   
     return patient_clinic.insertId;
   } catch (error) {
     console.error("Error creating patient_clinic:", error);

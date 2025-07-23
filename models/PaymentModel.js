@@ -8,7 +8,7 @@ const TABLE = "payment";
 const createPayment = async (table,columns, values) => {
   try {
     const payment = await record.createRecord(table, columns, values);
-    console.log(payment)
+   
     return payment;
   } catch (error) {
     console.error("Error creating payment:", error);

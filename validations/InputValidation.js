@@ -43,7 +43,7 @@ function sanitizeInput(value, type) {
     case "date":
     case "datetime":
     case "timestamp":
-      console.log('due_date:',value,typeof value)
+     
       if (value === null || value === "") return null;
       return value;
 

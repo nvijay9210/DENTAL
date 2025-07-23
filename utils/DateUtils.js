@@ -67,12 +67,12 @@ const compareDateTime = async (d1, t1, d2, t2) => {
   const datetime1 = new Date(`${d1}T${t1}`);
   const datetime2 = new Date(`${d2}T${t2}`);
 
-  console.log(datetime1, datetime2);
+
 
   const millis1 = datetime1.getTime();
   const millis2 = datetime2.getTime();
 
-  console.log(millis1, millis2);
+
 
   if (millis1 > millis2) {
     throw new CustomError(`${d1} ${t1} is later than ${d2} ${t2}`, 400);

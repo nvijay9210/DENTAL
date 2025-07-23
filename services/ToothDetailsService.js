@@ -177,7 +177,7 @@ const getAllToothDetailsByTenantAndClinicAndPatientId = async (
       return result;
     });
 
-    console.log(toothdetailss)
+   
 
     const convertedRows = toothdetailss.data.map((r) => ({
       ...r,

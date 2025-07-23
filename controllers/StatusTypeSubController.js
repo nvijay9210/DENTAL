@@ -9,7 +9,7 @@ const statusTypeSubValidation = require("../validations/StatusTypeSubValidation"
  */
 exports.createStatusTypeSub = async (req, res, next) => {
   const details = req.body;
-  console.log("details:controller,", details);
+
   const { status_type } = req.params;
 
   try {

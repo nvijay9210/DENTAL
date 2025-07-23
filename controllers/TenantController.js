@@ -45,9 +45,7 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   if (process.env.KEYCLOAK_POWER === "on") {
     user = extractUserInfo(req.user);
 
-    console.log(user)
-
-    if (user.role !== "tenant" && user.role !== "super-user") {
+    if (user.role !== "tenant" && user.role !== "super-user" && user.role !== "guest") {
       const userdetails = await getUserIdUsingKeycloakId(
         user.role,
         user.userId,
@@ -57,7 +55,6 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
       user.userId = userdetails[0]?.userid || null;
       user.username = userdetails[0]?.username || null;
     } else {
-      console.log(user);
       const fullName = user.preferred_username;
       const firstName = (fullName?.split(" ") || [])[0] || "user";
       user["user_name"] = firstName;
@@ -71,13 +68,14 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
 
   try {
     let settings;
-    if (process.env.KEYCLOAK_POWER === "on" && user.role !== "tenant") {
+    if (process.env.KEYCLOAK_POWER === "on" && user.role !== "tenant" && user.role !== "guest") {
       settings = await getClinicSettingsByTenantIdAndClinicId(
         user.tenantId,
         user.clinicId
       );
       // console.log("settings:",settings)
     } else {
+ 
       if (!tenant_name || !tenant_domain)
         throw new CustomError("Tenantname and domain is requried", 400);
       settings = await tenantService.getTenantByTenantNameAndTenantDomain(

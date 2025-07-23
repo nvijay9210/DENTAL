@@ -592,7 +592,7 @@ CREATE TABLE IF NOT EXISTS reminder (
   reminder_id int(11) NOT NULL AUTO_INCREMENT,
   tenant_id int(6) NOT NULL,
   clinic_id int(11) NOT NULL,
-  dentist_id int(11) NOT NULL,
+  dentist_id int(11) NULL,
   title varchar(255) NOT NULL,
   description text DEFAULT NULL,
   reminder_repeat enum('daily','weekly','monthly','yearly') DEFAULT NULL,
@@ -620,9 +620,7 @@ CREATE TABLE IF NOT EXISTS reminder (
   PRIMARY KEY (reminder_id),
   KEY fk_reminder_clinic (clinic_id),
   KEY fk_reminder_tenant (tenant_id),
-  KEY fk_reminder_dentist (dentist_id),
   CONSTRAINT fk_reminder_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
-  CONSTRAINT fk_reminder_dentist FOREIGN KEY (dentist_id) REFERENCES dentist (dentist_id) ON UPDATE CASCADE,
   CONSTRAINT fk_reminder_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 

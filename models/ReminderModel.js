@@ -7,10 +7,10 @@ const TABLE = "reminder";
 
 // Create Reminder
 const createReminder = async (table, columns, values) => {
-  console.log(columns, values);
+
   try {
     const reminder = await record.createRecord(table, columns, values);
-    console.log(reminder);
+
     return reminder.insertId;
   } catch (error) {
     console.error("Error creating reminder:", error);
@@ -120,8 +120,6 @@ const getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (
     ]);
 
     if (!rows || rows.length === 0) return null;
-
-    console.log("models:", rows[0]);
 
     return rows[0];
   } catch (error) {

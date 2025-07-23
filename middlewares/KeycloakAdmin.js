@@ -169,7 +169,6 @@ function extractUserInfo(token) {
   const clinicGroup = groups.find(g => g.startsWith("dental-"));
   let clinicId = null;
 
-  console.log(groups)
 
   if (clinicGroup) {
     const match = clinicGroup.match(/dental-(\d+)-(\d+)/);
@@ -183,7 +182,7 @@ function extractUserInfo(token) {
 
   const role = globalRoles.find(r =>
     ['super-user', 'dentist', 'patient', 'receptionist', 'supplier', 'dev', 'tenant'].includes(r)
-  ) || "user";
+  ) || "guest";
 
   console.log(role,"is logged in")
 
@@ -264,6 +263,46 @@ async function createGroup(token, realm, groupName, attributes = {}) {
   }
 }
 
+// ✅ 7. Delete User by Username
+async function deleteUserByUsername(token, realm, username) {
+  try {
+    // Get user ID from username
+    const userId = await getUserIdByUsername(token, realm, username);
+
+    if (!userId) {
+      console.error(`❌ Cannot delete user: username "${username}" not found`);
+      return false;
+    }
+
+    const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}`;
+
+    await axios.delete(url, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+    });
+
+    console.log(`🗑️ User deleted: ${username} (ID: ${userId})`);
+    return true;
+  } catch (error) {
+    console.error(
+      `❌ Failed to delete user "${username}":`,
+      error.response?.data || error.message
+    );
+    return false;
+  }
+}
+
+//For Frontend new User created by old user and delete a old user
+
+//get UserId
+// GET {KEYCLOAK_BASE_URL}/admin/realms/{realm}/users?username={username}
+// Authorization: Bearer {access_token}
+
+//delete userId
+// DELETE {KEYCLOAK_BASE_URL}/admin/realms/{realm}/users/{userId}
+// Authorization: Bearer {access_token}
+
 
 
 // ✅ Export all functions
@@ -274,5 +313,6 @@ module.exports = {
   addUserToGroup,
   extractUserInfo,
   resetUserPassword,
-  createGroup
+  createGroup,
+  deleteUserByUsername
 };

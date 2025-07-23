@@ -46,7 +46,7 @@ const getUserByPhoneNumber = async (mobile) => {
 const getExcludeUserByPhoneNumberAndUserId = async (mobile,userId=null) => {
   try {
     const exists = await userModel.getExcludeUserByPhoneNumberAndUserId(mobile,userId); // Call model function to check user by mobile
-    console.log(exists)
+ 
     return exists;
   } catch (error) {
     throw new Error('Failed to check user by phone number and userId: ' + error.message);

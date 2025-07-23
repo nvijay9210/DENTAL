@@ -40,13 +40,13 @@ router.get(
 
 router.get(
   GET_STATUS_TYPE_SUB_STATUS_TYPE_ID,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient","supplier"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient","supplier","guest"]),
   StatusTypeSubController.getAllStatusTypeSubByTenantIdAndStatusTypeId
 );
 
 router.get(
   GET_STATUS_TYPE_SUB_STATUS_TYPE,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient","supplier"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","receptionist", "patient","supplier","guest"]),
   StatusTypeSubController.getAllStatusTypeSubByTenantIdAndStatusType
 );
 

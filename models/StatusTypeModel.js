@@ -113,7 +113,7 @@ const getStatusTypeIdByTenantAndStatusType = async (status_type) => {
   const conn = await pool.getConnection();
   try {
     const rows = await conn.query(query, [status_type]);
-    console.log('stsid:',rows[0]);
+  
     
     return rows[0][0].status_type_id;
   } catch (error) {

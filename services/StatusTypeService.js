@@ -23,7 +23,7 @@ const statusTypeFieldReverseMap = {
 };
 // Create StatusType
 const createStatusType = async (data) => {
-  console.log("data:", data);
+  
   const fieldMap = {
     statusTypeField,
     created_by: (val) => val,

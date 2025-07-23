@@ -8,7 +8,7 @@ const TABLE = "asset";
 const createAsset = async (table,columns, values) => {
   try {
     const asset = await record.createRecord(table, columns, values);
-    console.log(asset)
+
     return asset.insertId;
   } catch (error) {
     console.error("Error creating asset:", error);

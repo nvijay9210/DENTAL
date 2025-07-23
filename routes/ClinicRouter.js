@@ -43,7 +43,7 @@ router.post(
 // Get All Clinics by Tenant
 router.get(
   routerPath.GETALL_CLINIC_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "super-user","guest"]),
   //  multiTenantAuthMiddleware,
   clinicController.getAllClinicByTenantId
 );

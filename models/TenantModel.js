@@ -112,7 +112,7 @@ const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = 
 
   try {
     const rows = await conn.query(query, queryParams);
-    console.log('rows:',query,queryParams,rows)
+
     return rows[0];
   } catch (error) {
     console.error("Database error:", error.message);

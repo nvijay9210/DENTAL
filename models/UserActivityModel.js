@@ -8,7 +8,7 @@ const TABLE = "useractivity";
 const createUserActivity = async (table,columns, values) => {
   try {
     const useractivity = await record.createRecord(table, columns, values);
-    console.log(useractivity)
+
     return useractivity.insertId;
   } catch (error) {
     console.error("Error creating useractivity:", error);

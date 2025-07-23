@@ -12,7 +12,6 @@ exports.createPatient = async (req, res, next) => {
   const realm=req.realm;
   const group = req.user.groups[0]; // 'dental-1-5'
 const value = group.split('-')[2]; // '5'
-console.log(value); // Output: '5'
 
   
 
@@ -254,7 +253,7 @@ exports.getPatientByTenantIdAndPatientId = async (req, res, next) => {
 exports.updatePatient = async (req, res, next) => {
   const { patient_id, tenant_id } = req.params;
   const details = req.body;
-  console.log(req.user)
+
   try {
     // Validate update input
     await patientValidation.updatePatientValidation(
