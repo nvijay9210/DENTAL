@@ -604,7 +604,7 @@ const getMonthlywiseRemindersByTenantAndClinicIdAndDentistId = async (
         month,
         year
       );
-    console.log("reminders:", reminders);
+ 
 
     for (const reminder of reminders) {
       const {

@@ -598,7 +598,7 @@ const getAllPatientsByTenantIdAndClinicId = async (
   limit,
   offset
 ) => {
-  console.log(tenantId,clinicId,limit,offset)
+
   const query1 = `SELECT
       p.*,
       pc.clinic_id
@@ -626,7 +626,7 @@ const getAllPatientsByTenantIdAndClinicId = async (
       limit,
       offset,
     ]);
-    console.log(rows)
+
     const [counts] = await conn.query(query2, [tenantId, clinicId]);
     return { data: rows, total: counts[0].total };
   } catch (error) {
@@ -677,7 +677,7 @@ const getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
       limit,
       offset,
     ]);
-    console.log(rows)
+  
     const [counts] = await conn.query(query2, [tenantId, clinicId,dentistId]);
     return { data: rows, total: counts[0].total };
   } catch (error) {
@@ -695,11 +695,6 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
   offset
 ) => {
 
-  console.log(tenantId,
-    clinicId,
-    dentistId,
-    limit,
-    offset)
 
   const query1 = `SELECT
       p.*,
@@ -737,7 +732,7 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
       limit,
       offset,
     ]);
-    console.log(rows)
+  
     const [counts] = await conn.query(query2, [tenantId, clinicId,dentistId]);
     return { data: rows, total: counts[0].total };
   } catch (error) {

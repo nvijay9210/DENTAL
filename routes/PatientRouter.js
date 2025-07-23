@@ -41,7 +41,7 @@ const patientFileMiddleware = uploadFileMiddleware({
 // Create Patient
 router.post(
   routerPath.ADD_PATIENT,
-  authenticateTenantClinicGroup(["tenant","super-user","dentist"]),
+  authenticateTenantClinicGroup(["tenant","super-user","dentist","guest"]),
   upload.any(),
   patientFileMiddleware,
   patientController.createPatient

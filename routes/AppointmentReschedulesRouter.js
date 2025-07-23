@@ -19,7 +19,7 @@ const {
 // Create AppointmentReschedules
 router.post(
   ADD_APPOINTMENT_RESCHEDULES,
-  authenticateTenantClinicGroup(['tenant','receptionist',,'super-user','dentist']),
+  authenticateTenantClinicGroup(['tenant','receptionist',,'super-user','dentist','patient']),
   appointmentRescheduleController.createAppointmentReschedules
 );
 

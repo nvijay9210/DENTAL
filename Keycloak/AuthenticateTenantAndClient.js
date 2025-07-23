@@ -162,12 +162,13 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         }
 
         // If user has 'tenant' role, skip group validation
-        if (realmRoles.includes("tenant")) {
+        if (realmRoles.includes("tenant") || realmRoles.includes("guest")) {
           req.token = token;
           req.user = decoded;
           req.realm = realm;
           return next();
         }
+        
 
         // Validate group if tenant_id and clinic_id are provided
         const tenant_id =

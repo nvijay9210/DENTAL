@@ -54,6 +54,7 @@ router.get(
     "patient",
     "receptionist",
     "supplier",
+    "guest"
   ]),
   tenantController.getTenantByTenantNameAndTenantDomain
 );

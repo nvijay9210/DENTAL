@@ -299,7 +299,7 @@ const getFinanceSummary = async (tenantId,clinicId,dentistId=null,startDate,endD
     startDate,
     endDate,
   });
-  console.log(typeof startDate,typeof endDate)
+  
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
       const result = await clinicModel.getFinanceSummary(
@@ -346,9 +346,6 @@ const getFinanceSummarybyDentist = async (tenant_id, clinic_id, dentist_id) => {
         date: normalizeDate(item.date),
         amount: parseFloat(item.amount) || 0,
       }));
-
-      console.log(expenses);
-      console.log(expenseData);
 
       function groupByDay(data) {
         const result = Array(7).fill(0);

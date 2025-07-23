@@ -600,7 +600,6 @@ const getAppointmentsWithDetailsByPatient = async (
   limit,
   offset
 ) => {
-  console.log(tenantId, patientId, status, limit, offset);
 
   let statusCondition = "";
   let statusParams = [];
@@ -876,7 +875,6 @@ WHERE
       offset,
     ]);
     const [counts] = await conn.query(query2, [tenantId, clinicId, patientId]);
-    console.log({ data: rows, total: counts[0].total });
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.log(error);
@@ -1178,7 +1176,6 @@ async function updateAppointmentStats(
 
   const row = results[0];
 
-  console.log("row:", row);
 
   // Update stats table
   await pool.query(

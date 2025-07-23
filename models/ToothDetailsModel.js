@@ -8,7 +8,7 @@ const TABLE = "toothdetails";
 const createToothDetails = async (table, columns, values) => {
   try {
     const toothdetails = await record.createRecord(table, columns, values);
-    console.log(toothdetails);
+
     return toothdetails.insertId;
   } catch (error) {
     console.error("Error creating toothdetails:", error);

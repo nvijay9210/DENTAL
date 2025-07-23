@@ -197,7 +197,6 @@ const createDentist = async (data, token, realm) => {
         }
       }
 
-      console.log(userId,username)
 
       data.keycloak_id = userId,
         data.username = username,

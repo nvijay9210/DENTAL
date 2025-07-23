@@ -45,7 +45,7 @@ const createToothDetailsValidation = async (details) => {
  * Validate Update ToothDetails Input with Tenant Scope
  */
 const updateToothDetailsValidation = async (toothdetailsId, details) => {
-  console.log(details)
+  
   validateInput(details, updateColumnConfig);
 
   const exists = await checkIfExists(

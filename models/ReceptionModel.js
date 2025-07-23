@@ -8,7 +8,7 @@ const TABLE = "reception";
 const createReception = async (table,columns, values) => {
   try {
     const reception = await record.createRecord(table, columns, values);
-    console.log(reception)
+
     return reception.insertId;
   } catch (error) {
     console.error("Error creating reception:", error);

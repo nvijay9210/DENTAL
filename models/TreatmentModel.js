@@ -189,7 +189,7 @@ const deleteTreatmentByTenantAndTreatmentId = async (tenant_id, treatment_id) =>
     const conditionValue = [tenant_id, treatment_id];
 
     const [result] = await record.deleteRecord(TABLE, conditionColumn, conditionValue);
-    console.log(result)
+ 
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting treatment:", error);

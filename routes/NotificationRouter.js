@@ -37,7 +37,7 @@ const notificationFileMiddleware = uploadFileMiddleware({
 // Create Notification
 router.post(
   ADD_NOTIFICATION,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","patient","receptionist"]),
   upload.any(),
   notificationFileMiddleware,
   notificationController.createNotification

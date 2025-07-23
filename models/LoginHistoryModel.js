@@ -8,7 +8,7 @@ const TABLE = "loginhistory";
 const createLoginHistory = async (table,columns, values) => {
   try {
     const loginhistory = await record.createRecord(table, columns, values);
-    console.log(loginhistory)
+ 
     return loginhistory.insertId;
   } catch (error) {
     console.error("Error creating loginhistory:", error);

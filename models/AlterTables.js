@@ -103,6 +103,51 @@ async function dropColumnIfExists(pool, table, column) {
   }
 }
 
+/**
+ * Drops foreign key on a column if it exists
+ */
+async function dropForeignKeyAndIndexIfExists(conn, table, column) {
+  // Find foreign key constraint name
+  const [fkResults] = await conn.query(
+    `SELECT CONSTRAINT_NAME
+     FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+     WHERE TABLE_NAME = ?
+       AND COLUMN_NAME = ?
+       AND TABLE_SCHEMA = DATABASE()
+       AND REFERENCED_TABLE_NAME IS NOT NULL`,
+    [table, column]
+  );
+
+  if (fkResults.length > 0) {
+    const fkName = fkResults[0].CONSTRAINT_NAME;
+    await conn.query(`ALTER TABLE ?? DROP FOREIGN KEY ??`, [table, fkName]);
+    console.log(`✅ Dropped FOREIGN KEY \`${fkName}\` on \`${table}.${column}\``);
+  } else {
+    console.log(`ℹ️ No foreign key found on \`${table}.${column}\``);
+  }
+
+  // Find index on the column
+  const [indexResults] = await conn.query(
+    `SHOW INDEX FROM ?? WHERE Column_name = ?`,
+    [table, column]
+  );
+
+  for (const row of indexResults) {
+    const indexName = row.Key_name;
+    // Avoid dropping PRIMARY key accidentally
+    if (indexName !== 'PRIMARY') {
+      await conn.query(`ALTER TABLE ?? DROP INDEX ??`, [table, indexName]);
+      console.log(`✅ Dropped INDEX \`${indexName}\` on \`${table}.${column}\``);
+    }
+  }
+
+  if (indexResults.length === 0) {
+    console.log(`ℹ️ No index found on \`${table}.${column}\``);
+  }
+}
+
+
+
 
 //--------------------- Apply Queries-----------------------------------
 
@@ -234,6 +279,17 @@ async function updatExpensePaid(conn) {
   );
 }
 
+async function deleteReminderDentistIdForeignkey(conn){
+  await dropForeignKeyAndIndexIfExists(conn,'reminder','dentist_id')
+  await modifyColumnTypeIfNotMatch(
+    conn,
+    "reminder",
+    "dentist_id",
+    "INT(11) NULL",
+    "Alternate dentist_id key"
+  );
+}
+
 
 
 // Main migration runner
@@ -247,6 +303,7 @@ async function updatExpensePaid(conn) {
     // Run migrations
 
     await addColumnsToNotifications(conn)
+    await deleteReminderDentistIdForeignkey(conn)
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");

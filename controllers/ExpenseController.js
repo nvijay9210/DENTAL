@@ -112,8 +112,6 @@ exports.updateExpense = async (req, res, next) => {
   const { expense_id, tenant_id } = req.params;
   const details = req.body;
 
-  console.log('userinput:',details)
-
   try {
     // Validate update input
     await expenseValidation.updateExpenseValidation(expense_id, details);
