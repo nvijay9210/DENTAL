@@ -258,4 +258,17 @@ const uploadFileMiddleware = (options) => {
   };
 };
 
-module.exports = { uploadFileMiddleware };
+const deleteFileIfExists = (filePath) => {
+  if (!filePath) return;
+
+  const fullPath = path.join(__dirname, "..", filePath);
+  if (fs.existsSync(fullPath)) {
+    fs.unlink(fullPath, (err) => {
+      if (err) console.error("Error deleting file:", err);
+      else console.log("Deleted file:", fullPath);
+    });
+  }
+};
+
+
+module.exports = { uploadFileMiddleware,deleteFileIfExists };

@@ -1,5 +1,7 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const dentistModel = require("../models/DentistModel"); // Make sure this model exists
+const fs = require("fs");
+const path = require("path");
 const {
   getOrSetCache,
   invalidateCacheByPattern,
@@ -236,6 +238,12 @@ const updateDentist = async (dentistId, data, tenant_id) => {
     updated_by: (val) => val,
   };
   try {
+     const dentist = dentistModel.getDentistByTenantIdAndDentistId(
+          dentistId,tenant_id
+        );
+    
+        const old_image = dentist.profile_picture;
+    
     const { columns, values } = mapFields(data, update);
     const affectedRows = await dentistModel.updateDentist(
       dentistId,
@@ -247,6 +255,17 @@ const updateDentist = async (dentistId, data, tenant_id) => {
     if (affectedRows === 0) {
       throw new CustomError("Dentist not found or no changes made.", 404);
     }
+
+     if (
+          data.profile_picture &&
+          data.profile_picture !== old_image &&
+          old_image
+        ) {
+          const oldPhotoPath = path.join(__dirname, `../../uploads/${oldPhoto}`);
+          if (fs.existsSync(oldPhotoPath)) {
+            fs.unlinkSync(oldPhotoPath);
+          }
+        }
 
     await invalidateCacheByPattern("dentist:*");
     return affectedRows;

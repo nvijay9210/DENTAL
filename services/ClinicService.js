@@ -1,6 +1,6 @@
-const { CustomError } = require("../middlewares/CustomeError");
-const pool = require("../config/db");
-const dayjs = require("dayjs");
+const { CustomError } = require("../middlewares/CustomeError")
+const fs = require("fs");
+const path = require("path");
 const clinicModel = require("../models/ClinicModel");
 const {
   invalidateCacheByPattern,
@@ -35,24 +35,24 @@ const clinicFieldMap = {
   license_number: (val) => val,
   gst_number: (val) => val || null,
   pan_number: (val) => val || null,
-  established_year: (val) => val? parseInt(val) : 0,
-  total_doctors: (val) => val? parseInt(val) : 0,
-  total_patients: (val) => val? parseInt(val) : 0,
-  seating_capacity: (val) => val? parseInt(val) : 0,
-  number_of_assistants: (val) => val? parseInt(val) : 0,
+  established_year: (val) => (val ? parseInt(val) : 0),
+  total_doctors: (val) => (val ? parseInt(val) : 0),
+  total_patients: (val) => (val ? parseInt(val) : 0),
+  seating_capacity: (val) => (val ? parseInt(val) : 0),
+  number_of_assistants: (val) => (val ? parseInt(val) : 0),
   available_services: (val) => (val ? JSON.stringify(val) : null),
   operating_hours: (val) => (val ? JSON.stringify(val) : null),
   insurance_supported: helper.parseBoolean,
-  ratings: (val) => val? parseFloat(val) : 0,
-  reviews_count: (val) => val? parseInt(val) : 0,
+  ratings: (val) => (val ? parseFloat(val) : 0),
+  reviews_count: (val) => (val ? parseInt(val) : 0),
   emergency_support: helper.parseBoolean,
   teleconsultation_supported: helper.parseBoolean,
   clinic_logo: (val) => val || null,
   parking_availability: helper.parseBoolean,
   pharmacy: helper.parseBoolean,
   wifi: helper.parseBoolean,
-  clinic_app_font:(val)=>val,
-  clinic_app_themes:(val)=>val
+  clinic_app_font: (val) => val,
+  clinic_app_themes: (val) => val,
 };
 
 const clinicFieldReverseMap = {
@@ -72,24 +72,24 @@ const clinicFieldReverseMap = {
   license_number: (val) => val,
   gst_number: (val) => val,
   pan_number: (val) => val,
-  established_year: (val) => val? parseInt(val) : 0,
-  total_doctors: (val) => val? parseInt(val) : 0,
-  total_patients: (val) => val? parseInt(val) : 0,
-  seating_capacity: (val) => val? parseInt(val) : 0,
-  number_of_assistants: (val) => val? parseInt(val) : 0,
+  established_year: (val) => (val ? parseInt(val) : 0),
+  total_doctors: (val) => (val ? parseInt(val) : 0),
+  total_patients: (val) => (val ? parseInt(val) : 0),
+  seating_capacity: (val) => (val ? parseInt(val) : 0),
+  number_of_assistants: (val) => (val ? parseInt(val) : 0),
   available_services: (val) => helper.safeJsonParse(val),
   operating_hours: (val) => helper.safeJsonParse(val),
   insurance_supported: (val) => Boolean(val),
-  ratings: (val) => val? parseFloat(val) : 0,
-  reviews_count: (val) => val? parseInt(val) : 0,
+  ratings: (val) => (val ? parseFloat(val) : 0),
+  reviews_count: (val) => (val ? parseInt(val) : 0),
   emergency_support: (val) => Boolean(val),
   teleconsultation_supported: (val) => Boolean(val),
   clinic_logo: (val) => val,
   parking_availability: (val) => Boolean(val),
   pharmacy: (val) => Boolean(val),
   wifi: (val) => Boolean(val),
-  clinic_app_font:(val)=>val,
-  clinic_app_themes:(val)=>val,
+  clinic_app_font: (val) => val,
+  clinic_app_themes: (val) => val,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
@@ -107,7 +107,7 @@ const createClinic = async (data, token, realm) => {
     const { columns, values } = mapFields(data, createClinicFieldMap);
     const clinicId = await clinicModel.createClinic("clinic", columns, values);
     await invalidateCacheByPattern("clinic:*");
-    if (clinicId && process.env.KEYCLOAK_POWER==='on') {
+    if (clinicId && process.env.KEYCLOAK_POWER === "on") {
       const groupName = `dental-${data.tenant_id}-${clinicId}`;
 
       const attributes = {
@@ -134,6 +134,13 @@ const updateClinic = async (clinicId, data, tenant_id) => {
   };
 
   try {
+    const clinic = clinicModel.getClinicByTenantIdAndClinicId(
+      clinicId,
+      tenant_id
+    );
+
+    const old_clinic_image = clinic.clinic_logo;
+
     const { columns, values } = mapFields(data, updateClinicFieldMap);
 
     const affectedRows = await clinicModel.updateClinic(
@@ -145,6 +152,18 @@ const updateClinic = async (clinicId, data, tenant_id) => {
 
     if (affectedRows === 0) {
       throw new CustomError(message.CLINIC_UPDATE_FAIL, 404);
+    }
+
+    // Delete old photo if a new one is uploaded
+    if (
+      data.clinic_logo &&
+      data.clinic_logo !== old_clinic_image &&
+      old_clinic_image
+    ) {
+      const oldPhotoPath = path.join(__dirname, `../../uploads/${oldPhoto}`);
+      if (fs.existsSync(oldPhotoPath)) {
+        fs.unlinkSync(oldPhotoPath);
+      }
     }
 
     await invalidateCacheByPattern("clinic:*");
@@ -291,7 +310,13 @@ const handleClinicAssignment = async (
   }
 };
 
-const getFinanceSummary = async (tenantId,clinicId,dentistId=null,startDate,endDate) => {
+const getFinanceSummary = async (
+  tenantId,
+  clinicId,
+  dentistId = null,
+  startDate,
+  endDate
+) => {
   const cacheKey = buildCacheKey("clinic", "financesummary", {
     tenant_id: tenantId,
     clinic_id: clinicId,
@@ -299,7 +324,7 @@ const getFinanceSummary = async (tenantId,clinicId,dentistId=null,startDate,endD
     startDate,
     endDate,
   });
-  
+
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
       const result = await clinicModel.getFinanceSummary(
@@ -584,10 +609,7 @@ const getFinanceSummarybyDentist = async (tenant_id, clinic_id, dentist_id) => {
   }
 };
 
-const getClinicSettingsByTenantIdAndClinicId = async (
-  tenantId,
-  clinicId
-) => {
+const getClinicSettingsByTenantIdAndClinicId = async (tenantId, clinicId) => {
   try {
     const clinic = await clinicModel.getClinicSettingsByTenantIdAndClinicId(
       tenantId,
@@ -599,11 +621,7 @@ const getClinicSettingsByTenantIdAndClinicId = async (
   }
 };
 
-const updateClinicSettings = async (
-  tenantId,
-  clinicId,
-  details
-) => {
+const updateClinicSettings = async (tenantId, clinicId, details) => {
   try {
     const clinic = await clinicModel.updateClinicSettings(
       tenantId,
@@ -627,5 +645,5 @@ module.exports = {
   getFinanceSummary,
   getFinanceSummarybyDentist,
   getClinicSettingsByTenantIdAndClinicId,
-  updateClinicSettings
+  updateClinicSettings,
 };
