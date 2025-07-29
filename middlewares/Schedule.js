@@ -35,19 +35,19 @@ cron.schedule('* * * * *', () => {
 
 // ✅ Every minute check and mark completed appointments
 
-cron.schedule('* * * * *', () => {
-  setImmediate(async () => {
-    const systemTime = getSystemTimeOnly(); // <-- get local system time (HH:MM:SS)
-    console.log(`[${new Date().toLocaleString()}] 🔁 Checking for appointments to complete with system time: ${systemTime}`);
+// cron.schedule('* * * * *', () => {
+//   setImmediate(async () => {
+//     const systemTime = getSystemTimeOnly(); // <-- get local system time (HH:MM:SS)
+//     console.log(`[${new Date().toLocaleString()}] 🔁 Checking for appointments to complete with system time: ${systemTime}`);
     
-    try {
-      const count = await updateAppoinmentStatusCompleted(systemTime); // ⬅ pass time to your query
-      console.log(`✅ Marked ${count} appointments as completed.`);
-    } catch (err) {
-      console.error("❌ Error updating appointment status:", err.message);
-    }
-  });
-});
+//     try {
+//       const count = await updateAppoinmentStatusCompleted(systemTime); // ⬅ pass time to your query
+//       console.log(`✅ Marked ${count} appointments as completed.`);
+//     } catch (err) {
+//       console.error("❌ Error updating appointment status:", err.message);
+//     }
+//   });
+// });
 
 
 // ✅ Midnight task for archiving notifications

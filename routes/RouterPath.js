@@ -284,6 +284,7 @@ module.exports = {
   GET_PATIENT_SUMMARY_DENTIST:
     "/getallpatients/patientsummarydentist/:tenant_id/:clinic_id/:dentist_id",
 
+  //used
   GET_PATIENT_SUMMARY_CLINIC:
     "/getallpatients/patientsummaryclinic/:tenant_id/:clinic_id",
 
