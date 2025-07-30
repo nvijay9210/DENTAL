@@ -12,7 +12,7 @@ const createPurchaseOrders = async (table,columns, values) => {
     return purchase_orders.insertId;
   } catch (error) {
     console.error("Error creating purchase_orders:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -20,12 +20,12 @@ const createPurchaseOrders = async (table,columns, values) => {
 const getAllPurchaseOrderssByTenantId = async (tenantId, limit, offset) => {
   try {
     if (!Number.isInteger(limit) || !Number.isInteger(offset) || limit < 1 || offset < 0) {
-      throw new CustomError("Invalid pagination parameters.", 400);
+      throw error
     }
     return await record.getAllRecords("purchase_orders", "tenant_id", tenantId, limit, offset);
   } catch (error) {
     console.error("Error fetching purchase_orderss:", error);
-    throw new CustomError("Error fetching purchase_orderss.", 500);
+    throw error
   }
 };
 
@@ -42,7 +42,7 @@ const getPurchaseOrdersByTenantAndPurchaseOrdersId = async (tenant_id, purchase_
     return rows;
   } catch (error) {
     console.error("Error fetching purchase_orders:", error);
-    throw new CustomError("Error fetching purchase_orders.", 500);
+    throw error
   }
 };
 
@@ -98,7 +98,7 @@ const updatePurchaseOrders = async (purchase_order_id, columns, values, tenant_i
     return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
     console.error("Error updating purchase_orders:", error);
-    throw new CustomError("Error updating purchase_orders.", 500);
+    throw error
   }
 };
 
@@ -148,7 +148,7 @@ const deletePurchaseOrdersByTenantAndPurchaseOrdersId = async (tenant_id, purcha
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting purchase_orders:", error);
-    throw new CustomError("Error deleting purchase_orders.", 500);
+    throw error
   }
 };
 

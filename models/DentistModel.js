@@ -8,14 +8,12 @@ const createDentist = async (table, columns, values) => {
     return dentist.insertId;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw new Error("Database Operation Failed");
+    throw error
   }
 };
 
 const getAllDentistsByTenantId = async (tenantId, limit, offset) => {
   try {
-    if (limit < 1 || offset < 0)
-      throw new Error("Invalid pagination parameters.");
     const dentists = await record.getAllRecords(
       "dentist",
       "tenant_id",
@@ -26,7 +24,7 @@ const getAllDentistsByTenantId = async (tenantId, limit, offset) => {
     return dentists;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw new Error("Error fetching dentists.");
+    throw error
   }
 };
 
@@ -38,7 +36,7 @@ const getDentistByTenantIdAndDentistId = async (tenant_id, dentist_id) => {
     return rows[0][0];
   } catch (error) {
     console.error(error);
-    throw new Error("Database Operation Failed");
+    throw error
   } finally {
     conn.release();
   }
@@ -59,7 +57,7 @@ const updateDentist = async (dentist_id, columns, values, tenant_id) => {
     return result.affectedRows;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw new Error(error);
+    throw error
   }
 };
 
@@ -76,7 +74,7 @@ const deleteDentistByTenantIdAndDentistId = async (tenant_id, dentist_id) => {
     return result.affectedRows;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw new Error("Error deleting dentist.");
+    throw error
   }
 };
 
@@ -89,7 +87,7 @@ const checkDentistExistsByTenantIdAndDentistId = async (
     return await record.recordExists("dentist", columns);
   } catch (error) {
     console.log(error);
-    throw new Error("Database Operation Failed");
+    throw error
   }
 };
 
@@ -113,7 +111,7 @@ const getAllDentistsByTenantIdAndClinicId = async (
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.error(error);
-    throw new Error("Database Operation Failed");
+    throw error
   } finally {
     conn.release();
   }
@@ -127,7 +125,7 @@ const getAllDentistsByClinicId = async (tenantId, clinicId) => {
     return rows.length > 0;
   } catch (error) {
     console.error(error);
-    throw new Error("Database Operation Failed");
+    throw error
   } finally {
     conn.release();
   }
@@ -153,7 +151,7 @@ const updateClinicIdAndNameAndAddress = async (
     return rows.length > 0;
   } catch (error) {
     console.error(error);
-    throw new Error("Database Operation Failed");
+    throw error
   } finally {
     conn.release();
   }
@@ -177,7 +175,7 @@ const updateDentistRatingAndReviewCount = async (
     return rows.length > 0;
   } catch (error) {
     console.error(error);
-    throw new Error("Database Operation Failed");
+    throw error
   } finally {
     conn.release();
   }
@@ -203,7 +201,7 @@ const updateNullClinicInfoWithJoin = async (tenantId, clinicId, dentistId) => {
     return result.affectedRows > 0;
   } catch (error) {
     console.error("Error updating with join and clinic_id:", error);
-    throw new Error("Database update failed");
+    throw error
   } finally {
     conn.release();
   }
@@ -230,7 +228,7 @@ const checkDentistExistsUsingTenantIdAndClinicIdAnddentistId = async (
       "Error in checkDentistExistsUsingTenantIdAndClinicIdAnddentistId:",
       error
     );
-    throw new Error("DentistId Not Exists");
+    throw error
   } finally {
     conn.release();
   }

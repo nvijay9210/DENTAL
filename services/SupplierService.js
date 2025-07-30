@@ -174,7 +174,7 @@ const createSupplier = async (data, token, realm) => {
     return supplierId;
   } catch (error) {
     console.error("Failed to create supplier:", error);
-    throw new CustomError(`Failed to create supplier: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -207,7 +207,7 @@ const getAllSuppliersByTenantIdAndClinicId = async (tenantId,clinicId, page = 1,
     return { data: convertedRows, total: suppliers.total };
   } catch (err) {
     console.error("Database error while fetching suppliers:", err);
-    throw new CustomError("Failed to fetch suppliers", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -235,7 +235,7 @@ const getAllSuppliersByTenantId = async (tenantId, page = 1, limit = 10) => {
     return { data: convertedRows, total: suppliers.total };
   } catch (err) {
     console.error("Database error while fetching suppliers:", err);
-    throw new CustomError("Failed to fetch suppliers", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -254,7 +254,7 @@ const getSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get supplier: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -273,15 +273,15 @@ const updateSupplier = async (supplierId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("Supplier not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("supplier:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update supplier", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -293,14 +293,14 @@ const deleteSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
         tenantId,
         supplierId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("Supplier not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("supplier:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete supplier: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 

@@ -67,7 +67,7 @@ const createExpense = async (data) => {
     return expenseId;
   } catch (error) {
     console.error("Failed to create expense:", error);
-    throw new CustomError(`Failed to create expense: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -96,7 +96,7 @@ const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
     return {data:convertedRows,total:expenses.total};;
   } catch (err) {
     console.error("Database error while fetching expenses:", err);
-    throw new CustomError("Failed to fetch expenses", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -132,7 +132,7 @@ const getAllExpensesByTenantIdAndClinicId = async (
     return { data: convertedRows, total: expenses.total };
   } catch (err) {
     console.error("Database error while fetching expenses:", err);
-    throw new CustomError("Failed to fetch expenses", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -173,7 +173,7 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
     return {data:convertedRows,total:expenses.total};;
   } catch (err) {
     console.error("Database error while fetching expenses:", err);
-    throw new CustomError("Failed to fetch expenses", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -191,7 +191,7 @@ const getExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get expense: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -210,16 +210,16 @@ const updateExpense = async (expenseId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("Expense not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("Expense not found or no changes made.", 404);
+    // }
 
     await invalidateCacheByPattern("expense:*");
     await invalidateCacheByPattern("financeSummary:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update expense", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -230,15 +230,15 @@ const deleteExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
       tenantId,
       expenseId
     );
-    if (affectedRows === 0) {
-      throw new CustomError("Expense not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("expense:*");
     await invalidateCacheByPattern("financeSummary:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete expense: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 

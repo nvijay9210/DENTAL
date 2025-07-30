@@ -12,7 +12,7 @@ const createExpense = async (table,columns, values) => {
     return expense.insertId;
   } catch (error) {
     console.error("Error creating expense:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -20,13 +20,13 @@ const createExpense = async (table,columns, values) => {
 const getAllExpensesByTenantId = async (tenantId, limit, offset) => {
   try {
     if (!Number.isInteger(limit) || !Number.isInteger(offset) || limit < 1 || offset < 0) {
-      throw new CustomError("Invalid pagination parameters.", 400);
+      throw error
     }
     const expenes=await record.getAllRecords("expense", "tenant_id", tenantId, limit, offset);
     return expenes
   } catch (error) {
     console.error("Error fetching expenses:", error);
-    throw new CustomError("Error fetching expenses.", 500);
+    throw error
   }
 };
 
@@ -45,7 +45,7 @@ const getAllExpensesByTenantIdAndClinicId = async (tenantId,clinicId, limit, off
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.error(error);
-    throw new Error("Database Operation Failed");
+    throw error
   } finally {
     conn.release();
   }
@@ -64,7 +64,7 @@ const getExpenseByTenantAndExpenseId = async (tenant_id, expense_id) => {
     return rows;
   } catch (error) {
     console.error("Error fetching expense:", error);
-    throw new CustomError("Error fetching expense.", 500);
+    throw error
   }
 };
 
@@ -77,7 +77,7 @@ const updateExpense = async (expense_id, columns, values, tenant_id) => {
     return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
     console.error("Error updating expense:", error);
-    throw new CustomError("Error updating expense.", 500);
+    throw error
   }
 };
 
@@ -91,7 +91,7 @@ const deleteExpenseByTenantAndExpenseId = async (tenant_id, expense_id) => {
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting expense:", error);
-    throw new CustomError("Error deleting expense.", 500);
+    throw error
   }
 };
 
@@ -105,7 +105,7 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (tenantI
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.error(error);
-    throw new Error("Database Operation Failed");
+    throw error
   } finally {
     conn.release();
   }

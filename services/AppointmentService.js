@@ -137,10 +137,7 @@ const createAppointment = async (data) => {
     return appointmentId;
   } catch (error) {
     console.error("Failed to create appointment:", error);
-    throw new CustomError(
-      `Failed to create appointment: ${error.message}`,
-      404
-    );
+    throw new CustomError(err, 500);
   }
 };
 
@@ -168,7 +165,7 @@ const getAllAppointmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
     return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError("Failed to fetch appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -203,7 +200,7 @@ const getAllAppointmentsByTenantIdAndClinicId = async (
     return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError("Failed to fetch appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -241,7 +238,7 @@ const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (
     return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError("Failed to fetch appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -260,7 +257,7 @@ const getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (
     return result;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError("Failed to fetch appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -273,7 +270,7 @@ const getAllRoomIdByTenantIdAndPatientId = async (tenantId, patient_id) => {
     return result;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError("Failed to fetch appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -308,7 +305,7 @@ const getAllAppointmentsByTenantIdAndAndDentistId = async (
     return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError("Failed to fetch appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -346,7 +343,7 @@ const getAllAppointmentsByTenantIdAndPatientId = async (
     return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError("Failed to fetch appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -370,7 +367,7 @@ const getAppointmentByTenantIdAndAppointmentId = async (
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get appointment: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -400,7 +397,7 @@ const getRoomIdByTenantIdAndAppointmentId = async (tenantId, appointmentId) => {
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get appointment: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -420,9 +417,9 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("Appointment not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("Appointment not found or no changes made.", 404);
+    // }
 
     await appointmentModel.updateAppointmentStats(
       data.tenant_id,
@@ -438,7 +435,7 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -542,7 +539,7 @@ const updateAppoinmentFeedbackDisplay = async (
 
     return result;
   } catch (error) {
-    throw new CustomError(`Failed to delete dentist: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -560,9 +557,9 @@ const updateAppoinmentStatus = async (
       details
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("Appointment not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("Appointment not found or no changes made.", 404);
+    // }
 
     const appointment = await getAppointmentByTenantIdAndAppointmentId(
       tenant_id,
@@ -585,7 +582,7 @@ const updateAppoinmentStatus = async (
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -600,9 +597,9 @@ const deleteAppointmentByTenantIdAndAppointmentId = async (
         tenantId,
         appointmentId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("Appointment not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("Appointment not found.", 404);
+    // }
 
     await appointmentModel.updateAppointmentStats(
       data.tenant_id,
@@ -642,7 +639,7 @@ const checkAppointmentExistsByStartTimeAndEndTimeAndDate = async (
       appointment_id
     );
   } catch (error) {
-    throw new CustomError("Failed to check overlapping appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -683,7 +680,7 @@ const getAppointmentsWithDetails = async (
     return {data:convertedRows,total:appointment.total};
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError("Failed to fetch appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -724,7 +721,7 @@ const getAppointmentsWithDetailsByClinic = async (
     return {data:convertedRows,total:appointments.total}
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError("Failed to fetch appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -780,7 +777,7 @@ const getAppointmentsWithDetailsByPatient = async (
     return appointment;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError("Failed to fetch appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -803,7 +800,7 @@ const getAppointmentMonthlySummary = async (
     return appointment;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError("Failed to fetch appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -824,7 +821,7 @@ const getAppointmentMonthlySummaryClinic = async (
     return appointment;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError("Failed to fetch appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -866,7 +863,7 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
     return appointment;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError("Failed to fetch appointment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -1430,7 +1427,7 @@ async function getAppointmentSummaryByStartDateAndEndDate(
         }));
       } catch (error) {
         console.error("❌ Error fetching appointment summary:", error);
-        throw new CustomError("Error fetching appointment summary", 500);
+        throw new CustomError(err, 500);
       }
     });
    return appointments

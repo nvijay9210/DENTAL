@@ -113,7 +113,7 @@ const getAllSupplierPaymentssByTenantId = async (
     return { data: convertedRows, total: supplier_paymentss.total };
   } catch (err) {
     console.error("Database error while fetching supplier_paymentss:", err);
-    throw new CustomError("Failed to fetch supplier_paymentss", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -154,7 +154,7 @@ const getAllSupplierPaymentssByTenantIdAndSupplierId = async (
     return { data: convertedRows, total: supplier_paymentss.total };
   } catch (err) {
     console.error("Database error while fetching supplier_paymentss:", err);
-    throw new CustomError("Failed to fetch supplier_paymentss", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -194,7 +194,7 @@ const getSupplierPaymentsByTenantAndPurchaseOrderId = async (
     return { data: convertedRows, total: supplier_paymentss.total };
   } catch (err) {
     console.error("Database error while fetching supplier_paymentss:", err);
-    throw new CustomError("Failed to fetch supplier_paymentss", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -265,19 +265,19 @@ const updateSupplierPayments = async (supplier_paymentsId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError(
-        "SupplierPayments not found or no changes made.",
-        404
-      );
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(
+    //     "SupplierPayments not found or no changes made.",
+    //     404
+    //   );
+    // }
 
     await invalidateCacheByPattern("supplier_payments:*");
     await invalidateCacheByPattern("financeSummary:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update supplier_payments", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -292,9 +292,9 @@ const deleteSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (
         tenantId,
         supplier_paymentsId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("SupplierPayments not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("supplier_payments:*");
     return affectedRows;

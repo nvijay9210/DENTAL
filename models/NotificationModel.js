@@ -12,7 +12,7 @@ const createNotification = async (table,columns, values) => {
     return notification.insertId;
   } catch (error) {
     console.error("Error creating notification:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -20,12 +20,12 @@ const createNotification = async (table,columns, values) => {
 const getAllNotificationsByTenantId = async (tenantId, limit, offset) => {
   try {
     if (!Number.isInteger(limit) || !Number.isInteger(offset) || limit < 1 || offset < 0) {
-      throw new CustomError("Invalid pagination parameters.", 400);
+      throw error
     }
     return await record.getAllRecords("notifications", "tenant_id", tenantId, limit, offset);
   } catch (error) {
     console.error("Error fetching notifications:", error);
-    throw new CustomError("Error fetching notifications.", 500);
+    throw error
   }
 };
 
@@ -126,7 +126,7 @@ const getNotificationByTenantAndNotificationId = async (tenant_id, notification_
     return rows;
   } catch (error) {
     console.error("Error fetching notification:", error);
-    throw new CustomError("Error fetching notification.", 500);
+    throw error
   }
 };
 
@@ -139,7 +139,7 @@ const updateNotification = async (notification_id, columns, values, tenant_id) =
     return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
     console.error("Error updating notification:", error);
-    throw new CustomError("Error updating notification.", 500);
+    throw error
   }
 };
 
@@ -153,7 +153,7 @@ const deleteNotificationByTenantAndNotificationId = async (tenant_id, notificati
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting notification:", error);
-    throw new CustomError("Error deleting notification.", 500);
+    throw error
   }
 };
 

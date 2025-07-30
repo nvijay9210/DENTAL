@@ -11,7 +11,7 @@ const createAppointmentReschedules = async (table,columns, values) => {
     return appointment_reschedules;
   } catch (error) {
     console.error("Error creating appointment_reschedules:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -21,7 +21,7 @@ const getAllAppointmentReschedulessByTenantId = async (tenantId, limit, offset) 
     return await record.getAllRecords("appointment_reschedules", "tenant_id", tenantId, limit, offset);
   } catch (error) {
     console.error("Error fetching appointment_rescheduless:", error);
-    throw new CustomError("Error fetching appointment_rescheduless.", 500);
+    throw error
   }
 };
 const getAllAppointmentReschedulessByTenantIdAndClinicId = async (tenantId,clinicId, limit, offset) => {
@@ -64,7 +64,7 @@ const getAppointmentReschedulesByTenantAndAppointmentReschedulesId = async (tena
     return rows?.[0] ?? null;
   } catch (error) {
     console.error("Error fetching appointment_reschedules:", error);
-    throw new CustomError("Error fetching appointment_reschedules.", 500);
+    throw error
   }
 };
 
@@ -77,7 +77,7 @@ const updateAppointmentReschedules = async (appointment_reschedules_id, columns,
     return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
     console.error("Error updating appointment_reschedules:", error);
-    throw new CustomError("Error updating appointment_reschedules.", 500);
+    throw error
   }
 };
 
@@ -91,7 +91,7 @@ const deleteAppointmentReschedulesByTenantAndAppointmentReschedulesId = async (t
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting appointment_reschedules:", error);
-    throw new CustomError("Error deleting appointment_reschedules.", 500);
+    throw error
   }
 };
 

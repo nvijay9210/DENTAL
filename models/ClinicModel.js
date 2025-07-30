@@ -12,7 +12,7 @@ const createClinic = async (table, columns, values) => {
     return clinic.insertId;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw new Error("Database Operation Failed");
+    throw error
   }
 };
 
@@ -29,7 +29,7 @@ const getAllClinicsByTenantId = async (tenantId, limit, offset) => {
     return clinics;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw new Error("Error fetching clinics.");
+    throw error
   }
 };
 
@@ -47,7 +47,7 @@ const getClinicByTenantIdAndClinicId = async (tenant_id, clinic_id) => {
     return rows || null;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw new Error("Error fetching clinic.");
+    throw error
   }
 };
 
@@ -67,7 +67,7 @@ const updateClinic = async (clinic_id, columns, values, tenant_id) => {
     return result.affectedRows;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw new Error(error);
+    throw error
   }
 };
 
@@ -85,7 +85,7 @@ const deleteClinicByTenantIdAndClinicId = async (tenant_id, clinic_id) => {
     return result.affectedRows;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw new Error("Error deleting clinic.");
+    throw error
   }
 };
 
@@ -98,7 +98,7 @@ const checkClinicExistsByTenantIdAndClinicId = async (tenantId, clinicId) => {
     return rows.length > 0;
   } catch (error) {
     console.error(error);
-    throw new Error("Database Operation Failed");
+    throw error
   } finally {
     conn.release();
   }
@@ -112,7 +112,7 @@ const getClinicNameAndAddressByClinicId = async (tenantId, clinicId) => {
     return rows[0][0];
   } catch (error) {
     console.error(error);
-    throw new Error("Database Operation Failed");
+    throw error
   } finally {
     conn.release();
   }
@@ -432,7 +432,7 @@ const getClinicSettingsByTenantIdAndClinicId = async (tenantId, clinicId) => {
     return rows[0][0];
   } catch (error) {
     console.error(error);
-    throw new Error("Database Operation Failed");
+    throw error
   } finally {
     conn.release();
   }
@@ -458,7 +458,7 @@ const updateClinicSettings = async (tenantId, clinicId, details) => {
     ]);
     return result.affectedRows > 0;
   } catch (error) {
-    throw new Error(`Database Operation Failed while updating clinic settings`);
+    throw error
   } finally {
     conn.release();
   }

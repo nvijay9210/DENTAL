@@ -189,7 +189,7 @@ const createPatient = async (data, token, realm,user_clinic_id) => {
     };
   } catch (error) {
     console.trace(error);
-    throw new CustomError(`Failed to create patient: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -219,7 +219,7 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
     return { data: convertedRows, total: patients.total };
   } catch (error) {
     console.error(error);
-    throw new CustomError("Database error while fetching patients", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -467,7 +467,7 @@ const getMostVisitedPatientsByClinicPeriods = async (
     });
     return patients;
   } catch (error) {
-    throw new CustomError("Failed to get patient: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -782,7 +782,7 @@ const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get patient: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -797,7 +797,7 @@ const checkPatientExistsByTenantIdAndPatientId = async (
       patientId
     );
   } catch (error) {
-    throw new CustomError("Failed to check patient: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -815,9 +815,9 @@ const updatePatient = async (patientId, data, tenant_id) => {
       values,
       tenant_id
     );
-    if (affectedRows === 0) {
-      throw new CustomError("Patient not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("Patient not found or no changes made.", 404);
+    // }
 
     await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:*");
@@ -825,7 +825,7 @@ const updatePatient = async (patientId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update patient", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -836,16 +836,16 @@ const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
       tenantId,
       patientId
     );
-    if (affectedRows === 0) {
-      throw new CustomError("Patient not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:mostvisited:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete patient: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -1015,7 +1015,7 @@ const groupToothProceduresByTimeRangeCumulative = async (
     return patients;
   } catch (error) {
     console.error(error);
-    throw new CustomError("Database error while fetching patients", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -1196,7 +1196,7 @@ const getAllPatientsByTenantIdAndClinicId = async (
     };
   } catch (error) {
     console.error(error);
-    throw new CustomError("Database error while fetching patients", 404);
+    throw new CustomError(err, 500);
   }
 };
 const getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
@@ -1248,7 +1248,7 @@ const getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
     };
   } catch (error) {
     console.error(error);
-    throw new CustomError("Database error while fetching patients", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -1301,7 +1301,7 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
     };
   } catch (error) {
     console.error(error);
-    throw new CustomError("Database error while fetching patients", 404);
+    throw new CustomError(err, 500);
   }
 };
 

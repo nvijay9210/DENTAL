@@ -12,7 +12,7 @@ const createStatusTypeSub = async (table, columns, values) => {
     return statusTypeSub.insertId;
   } catch (error) {
     console.error("Error creating statusTypeSub:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -25,7 +25,7 @@ const getAllStatusTypeSubsByTenantId = async (tenantId, limit, offset) => {
       limit < 1 ||
       offset < 0
     ) {
-      throw new CustomError("Invalid pagination parameters.", 400);
+      throw error
     }
     return await record.getAllRecords(
       TABLE,
@@ -36,7 +36,7 @@ const getAllStatusTypeSubsByTenantId = async (tenantId, limit, offset) => {
     );
   } catch (error) {
     console.error("Error fetching statusTypeSubs:", error);
-    throw new CustomError("Error fetching statusTypeSubs.", 500);
+    throw error
   }
 };
 
@@ -56,7 +56,7 @@ const getStatusTypeSubByTenantAndStatusTypeSubId = async (
     return rows?.[0] ?? null;
   } catch (error) {
     console.error("Error fetching statusTypeSub:", error);
-    throw new CustomError("Error fetching statusTypeSub.", 500);
+    throw error
   }
 };
 
@@ -80,7 +80,7 @@ const updateStatusTypeSub = async (
     );
   } catch (error) {
     console.error("Error updating statusTypeSub:", error);
-    throw new CustomError("Error updating statusTypeSub.", 500);
+    throw error
   }
 };
 
@@ -95,7 +95,7 @@ const deleteStatusTypeSubByTenantAndStatusTypeSubId = async (tenant_id, statusTy
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting statusTypeSub:", error);
-    throw new CustomError("Subject Not Exists", 500);
+    throw error
   }
 };
 
@@ -115,7 +115,7 @@ const getAllStatusTypeSubByStatusTypeAndTenantId = async (
     return result;
   } catch (err) {
     console.log(err.message);
-    throw new CustomError(err.message, 404);
+    throw error
   } finally {
     conn.release();
   }
@@ -163,7 +163,7 @@ const getAllStatusTypeSubByTenantIdAndStatusType = async (
   try {
     // Input validation
     if (!tenant_id || !status_type) {
-      throw new CustomError("tenant_id and status_type are required", 400);
+      throw error
     }
 
     if (typeof limit !== "number" || limit < 1 || limit > 100) {
@@ -182,7 +182,7 @@ const getAllStatusTypeSubByTenantIdAndStatusType = async (
     return rows;
   } catch (err) {
     console.error("Error fetching statustypesub:", err.message);
-    throw new CustomError("Failed to fetch data", 500);
+    throw error
   } finally {
     conn.release();
   }
@@ -201,7 +201,7 @@ const checkStatusTypeSubExistsByStatusTypeIdAndStatusTypeSubAndTenantId =
       return result.length > 0 ? true : false;
     } catch (err) {
       console.log(err.message);
-      throw new CustomError(err.message, 404);
+      throw error
     } finally {
       conn.release();
     }
@@ -220,7 +220,7 @@ const checkStatusTypeSubExistsByStatusTypeIdAndStatusTypeSubAndTenantId =
       return result.length > 0 ? true : false;
     } catch (err) {
       console.log(err.message);
-      throw new CustomError(err.message, 404);
+      throw error
     } finally {
       conn.release();
     }
@@ -239,7 +239,7 @@ const checkStatusTypeSubRefExistsByStatusTypeIdAndStatusTypeSubAndTenantId =
       return result[0].length > 0 ? true : false;
     } catch (err) {
       console.log(err.message);
-      throw new CustomError(err.message, 404);
+      throw error
     } finally {
       conn.release();
     }
@@ -257,7 +257,7 @@ const checkStatusTypeSubRefExistsByStatusTypeSubIdAndStatusTypeSubAndStatusTypeS
       return result[0].length > 0 ? true : false;
     } catch (err) {
       console.log(err.message);
-      throw new CustomError(err.message, 404);
+      throw error
     } finally {
       conn.release();
     }

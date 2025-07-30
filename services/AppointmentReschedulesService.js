@@ -175,7 +175,7 @@ const getAllAppointmentReschedulessByTenantId = async (
     return { data: convertedRows, total: appointmentReschedules.total };
   } catch (err) {
     console.error("Database error while fetching appointmentReschedules:", err);
-    throw new CustomError("Failed to fetch appointmentReschedules", 404);
+    throw new CustomError(err, 500);
   }
 };
 const getAllAppointmentReschedulessByTenantIdAndClinicId = async (
@@ -215,7 +215,7 @@ const getAllAppointmentReschedulessByTenantIdAndClinicId = async (
     return { data: convertedRows, total: appointmentReschedules.total };
   } catch (err) {
     console.error("Database error while fetching appointmentReschedules:", err);
-    throw new CustomError("Failed to fetch appointmentReschedules", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -258,7 +258,7 @@ const getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId = async (
     return { data: convertedRows, total: appointmentReschedules.total };
   } catch (err) {
     console.error("Database error while fetching appointmentReschedules:", err);
-    throw new CustomError("Failed to fetch appointmentReschedules", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -307,18 +307,18 @@ const updateAppointmentReschedules = async (
         tenant_id
       );
 
-    if (affectedRows === 0) {
-      throw new CustomError(
-        "AppointmentReschedules not found or no changes made.",
-        404
-      );
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(
+    //     "AppointmentReschedules not found or no changes made.",
+    //     404
+    //   );
+    // }
 
     await invalidateCacheByPattern("appointmentreschedule:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update appointmentReschedule", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -331,9 +331,9 @@ const deleteAppointmentReschedulesByTenantIdAndAppointmentReschedulesId =
           tenantId,
           appointmentRescheduleId
         );
-      if (affectedRows === 0) {
-        throw new CustomError("AppointmentReschedules not found.", 404);
-      }
+      // if (affectedRows === 0) {
+      //   throw new CustomError("AppointmentReschedules not found.", 404);
+      // }
 
       await invalidateCacheByPattern("appointmentreschedule:*");
       return affectedRows;

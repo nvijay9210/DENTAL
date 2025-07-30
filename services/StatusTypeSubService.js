@@ -220,7 +220,7 @@ const getStatusTypeSubByTenantIdAndStatusTypeSubId = async (
 
     return {data:convertedRows,total:statusTypeSub.total};;
   } catch (error) {
-    throw new CustomError("Failed to get statusTypeSub: " + error.message, 404);
+    throw new CustomError("Failed to fetch statusTypeSub: " + error.message, 404);
   }
 };
 
@@ -240,9 +240,9 @@ const updateStatusTypeSub = async (statusTypeSubId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("StatusTypeSub not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("StatusTypeSub not found or no changes made.", 404);
+    // }
 
     await invalidateCacheByPattern("statustypesub:*");
     return affectedRows;
@@ -263,9 +263,9 @@ const deleteStatusTypeSubByTenantIdAndStatusTypeSubId = async (
         tenantId,
         statusTypeSubId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("StatusTypeSub not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("StatusTypeSub not found.", 404);
+    // }
 
     await invalidateCacheByPattern("statustypesub:*");
     return affectedRows;

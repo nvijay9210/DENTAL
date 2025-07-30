@@ -12,7 +12,7 @@ const createLoginHistory = async (table,columns, values) => {
     return loginhistory.insertId;
   } catch (error) {
     console.error("Error creating loginhistory:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -20,12 +20,12 @@ const createLoginHistory = async (table,columns, values) => {
 const getAllLoginHistorysByTenantId = async (tenantId, limit, offset) => {
   try {
     if (!Number.isInteger(limit) || !Number.isInteger(offset) || limit < 1 || offset < 0) {
-      throw new CustomError("Invalid pagination parameters.", 400);
+      throw error
     }
     return await record.getAllRecords("loginhistory", "tenant_id", tenantId, limit, offset);
   } catch (error) {
     console.error("Error fetching loginhistorys:", error);
-    throw new CustomError("Error fetching loginhistorys.", 500);
+    throw error
   }
 };
 
@@ -42,7 +42,7 @@ const getLoginHistoryByTenantAndLoginHistoryId = async (tenant_id, loginhistory_
     return rows;
   } catch (error) {
     console.error("Error fetching loginhistory:", error);
-    throw new CustomError("Error fetching loginhistory.", 500);
+    throw error
   }
 };
 
@@ -55,7 +55,7 @@ const updateLoginHistory = async (loginhistory_id, columns, values, tenant_id) =
     return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
     console.error("Error updating loginhistory:", error);
-    throw new CustomError("Error updating loginhistory.", 500);
+    throw error
   }
 };
 
@@ -69,7 +69,7 @@ const deleteLoginHistoryByTenantAndLoginHistoryId = async (tenant_id, loginhisto
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting loginhistory:", error);
-    throw new CustomError("Error deleting loginhistory.", 500);
+    throw error
   }
 };
 

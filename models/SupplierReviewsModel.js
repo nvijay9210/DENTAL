@@ -12,7 +12,7 @@ const createSupplierReviews = async (table,columns, values) => {
     return supplier_reviews.insertId;
   } catch (error) {
     console.error("Error creating supplier_reviews:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -20,12 +20,12 @@ const createSupplierReviews = async (table,columns, values) => {
 const getAllSupplierReviewssByTenantId = async (tenantId, limit, offset) => {
   try {
     if (!Number.isInteger(limit) || !Number.isInteger(offset) || limit < 1 || offset < 0) {
-      throw new CustomError("Invalid pagination parameters.", 400);
+      throw error
     }
     return await record.getAllRecords("supplier_reviews", "tenant_id", tenantId, limit, offset);
   } catch (error) {
     console.error("Error fetching supplier_reviewss:", error);
-    throw new CustomError("Error fetching supplier_reviewss.", 500);
+    throw error
   }
 };
 
@@ -63,7 +63,7 @@ const getSupplierReviewsByTenantAndSupplierReviewsId = async (tenant_id, supplie
     return rows;
   } catch (error) {
     console.error("Error fetching supplier_reviews:", error);
-    throw new CustomError("Error fetching supplier_reviews.", 500);
+    throw error
   }
 };
 
@@ -76,7 +76,7 @@ const updateSupplierReviews = async (supplier_review_id, columns, values, tenant
     return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
     console.error("Error updating supplier_reviews:", error);
-    throw new CustomError("Error updating supplier_reviews.", 500);
+    throw error
   }
 };
 
@@ -90,7 +90,7 @@ const deleteSupplierReviewsByTenantAndSupplierReviewsId = async (tenant_id, supp
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting supplier_reviews:", error);
-    throw new CustomError("Error deleting supplier_reviews.", 500);
+    throw error
   }
 };
 

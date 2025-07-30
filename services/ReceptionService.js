@@ -151,7 +151,7 @@ const createReception = async (data, token, realm) => {
     return receptionId;
   } catch (error) {
     console.error("Failed to create reception:", error);
-    throw new CustomError(`Failed to create reception: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -181,7 +181,7 @@ const getAllReceptionsByTenantId = async (tenantId, page = 1, limit = 10) => {
     return { data: convertedRows, total: receptions.total };
   } catch (err) {
     console.error("Database error while fetching receptions:", err);
-    throw new CustomError("Failed to fetch receptions", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -200,7 +200,7 @@ const getReceptionByTenantIdAndReceptionId = async (tenantId, receptionId) => {
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get reception: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -219,15 +219,15 @@ const updateReception = async (receptionId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("Reception not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("Reception not found or no changes made.", 404);
+    // }
 
     await invalidateCacheByPattern("reception:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update reception", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -242,14 +242,14 @@ const deleteReceptionByTenantIdAndReceptionId = async (
         tenantId,
         receptionId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("Reception not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("Reception not found.", 404);
+    // }
 
     await invalidateCacheByPattern("reception:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete reception: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -285,7 +285,7 @@ const getAllReceptionsByTenantIdAndClinicId = async (
     return { data: convertedRows, total: receptions.total };
   } catch (err) {
     console.error("Database error while fetching receptions:", err);
-    throw new CustomError("Failed to fetch receptions", 404);
+    throw new CustomError(err, 500);
   }
 };
 

@@ -12,7 +12,7 @@ const createTenant = async (table,columns, values) => {
     return tenant.insertId;
   } catch (error) {
     console.error("Error creating tenant:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -38,7 +38,7 @@ const getTenantByTenantId = async (tenant_id) => {
     const [rows] = await conn.query(query, [tenant_id]);
     return rows[0];
   } catch (error) {
-    throw new CustomError("Database error occurred while fetching the Tenant.",404);
+    throw error
   } finally {
     conn.release();
   }
@@ -51,7 +51,7 @@ const checkTenantExistsByTenantId = async (tenant_id) => {
     const [rows] = await conn.query(query, [tenant_id]);
     return rows.length > 0;
   } catch (error) {
-    throw new CustomError("Database error occurred while fetching the Tenant.");
+    throw error
   } finally {
     conn.release();
   }
@@ -64,7 +64,7 @@ const checkTenantExistsByTenantnameAndTenantdomain = async (tenantName,tenantDom
     const [rows] = await conn.query(query, [tenantName,tenantDomain]);
     return rows.length > 0;
   } catch (error) {
-    throw new CustomError("Database error occurred while fetching the Tenant.");
+    throw error
   } finally {
     conn.release();
   }
@@ -78,7 +78,7 @@ const getTenantByTenantNameAndTenantDomain = async (tenantName,tenantDomain) => 
     return rows[0];
   } catch (error) {
     console.log(error.message)
-    throw new CustomError("Database error occurred while fetching the Tenant.");
+    throw error
   } finally {
     conn.release();
   }
@@ -116,7 +116,7 @@ const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = 
     return rows[0];
   } catch (error) {
     console.error("Database error:", error.message);
-    throw new CustomError("Database error occurred while fetching the UserId.");
+    throw error
   } finally {
     conn.release();
   }
@@ -131,7 +131,7 @@ const updateTenant = async (tenant_id, columns,values) => {
     return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
     console.error("Error updating tenant:", error);
-    throw new CustomError("Error updating tenant.", 500);
+    throw error
   }
 };
 
@@ -144,7 +144,23 @@ const deleteTenant = async (tenant_id) => {
     return result.affectedRows; // Return the number of rows affected (should be 1 if successful)
   } catch (error) {
     console.error("Error deleting Tenant:", error.message);
-    throw new CustomError("Database error occurred while deleting the Tenant.");
+    throw error
+  } finally {
+    conn.release();
+  }
+};
+
+const getAllTenantIds = async () => {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute(`
+      SELECT tenant_id 
+      FROM tenant
+    `);
+    return rows.map(row => row.tenant_id);
+  } catch (err) {
+    console.error("❌ Error fetching tenant IDs:", err);
+    return [];
   } finally {
     conn.release();
   }
@@ -159,5 +175,6 @@ module.exports = {
   updateTenant,
   deleteTenant,
   getTenantByTenantNameAndTenantDomain,
-  getUserIdUsingKeycloakId
+  getUserIdUsingKeycloakId,
+  getAllTenantIds
 };

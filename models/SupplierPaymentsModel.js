@@ -11,7 +11,7 @@ const createSupplierPayments = async (table, columns, values) => {
     return supplier_payments.insertId;
   } catch (error) {
     console.error("Error creating supplier_payments:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -24,7 +24,7 @@ const getAllSupplierPaymentssByTenantId = async (tenantId, limit, offset) => {
       limit < 1 ||
       offset < 0
     ) {
-      throw new CustomError("Invalid pagination parameters.", 400);
+      throw error
     }
     return await record.getAllRecords(
       "supplier_payments",
@@ -35,7 +35,7 @@ const getAllSupplierPaymentssByTenantId = async (tenantId, limit, offset) => {
     );
   } catch (error) {
     console.error("Error fetching supplier_paymentss:", error);
-    throw new CustomError("Error fetching supplier_paymentss.", 500);
+    throw error
   }
 };
 
@@ -130,7 +130,7 @@ const getSupplierPaymentsByTenantAndSupplierPaymentsId = async (
     return rows;
   } catch (error) {
     console.error("Error fetching supplier_payments:", error);
-    throw new CustomError("Error fetching supplier_payments.", 500);
+    throw error
   }
 };
 
@@ -146,7 +146,7 @@ const getSupplierPaymentsByTenantAndSupplierPaymentsId = async (
 //     return rows;
 //   } catch (error) {
 //     console.error("Error fetching supplier_payments by purchase_order_id:", error);
-//     throw new CustomError("Error fetching supplier_payments by purchase_order_id.", 500);
+//     throw error
 //   }
 // };
 
@@ -197,7 +197,7 @@ const updateSupplierPayments = async (
     );
   } catch (error) {
     console.error("Error updating supplier_payments:", error);
-    throw new CustomError("Error updating supplier_payments.", 500);
+    throw error
   }
 };
 
@@ -218,7 +218,7 @@ const deleteSupplierPaymentsByTenantAndSupplierPaymentsId = async (
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting supplier_payments:", error);
-    throw new CustomError("Error deleting supplier_payments.", 500);
+    throw error
   }
 };
 

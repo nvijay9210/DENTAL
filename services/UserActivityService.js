@@ -79,7 +79,7 @@ const getAllUserActivitysByTenantId = async (
     return { data: convertedRows, total: useractivitys.total };
   } catch (err) {
     console.error("Database error while fetching useractivitys:", err);
-    throw new CustomError("Failed to fetch useractivitys", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -102,7 +102,7 @@ const getUserActivityByTenantIdAndUserActivityId = async (
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get useractivity: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -116,15 +116,15 @@ const updateUserActivity = async (useractivityId, data) => {
       values
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("UserActivity not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("useractivity:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update useractivity", 404);
+    throw new CustomError(err, 500);
   }
 };
 

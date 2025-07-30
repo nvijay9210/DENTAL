@@ -63,7 +63,7 @@ const createSupplierProducts = async (data) => {
     return supplier_productsId;
   } catch (error) {
     console.error("Failed to create supplier_products:", error);
-    throw new CustomError(`Failed to create supplier_products: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -93,7 +93,7 @@ const getAllSupplierProductssByTenantId = async (tenantId, page = 1, limit = 10)
     return { data: convertedRows, total: supplier_productss.total };
   } catch (err) {
     console.error("Database error while fetching supplier_productss:", err);
-    throw new CustomError("Failed to fetch supplier_productss", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -123,7 +123,7 @@ const getAllSupplierProductssByTenantIdAndSupplierId = async (tenantId,supplierI
     return { data: convertedRows, total: supplier_productss.total };
   } catch (err) {
     console.error("Database error while fetching supplier_productss:", err);
-    throw new CustomError("Failed to fetch supplier_productss", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -142,7 +142,7 @@ const getSupplierProductsByTenantIdAndSupplierProductsId = async (tenantId, supp
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get supplier_products: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -161,15 +161,15 @@ const updateSupplierProducts = async (supplier_productsId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("SupplierProducts not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("supplier_products:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update supplier_products", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -181,14 +181,14 @@ const deleteSupplierProductsByTenantIdAndSupplierProductsId = async (tenantId, s
         tenantId,
         supplier_productsId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("SupplierProducts not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("supplier_products:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete supplier_products: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 

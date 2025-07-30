@@ -1,67 +1,93 @@
-const cron = require('node-cron');
-const { updateRoomIdBeforeAppointment, updateAppoinmentStatusCompleted, updateAppointmentStats } = require('../models/AppointmentModel');
-const { archiveOldReadNotifications } = require('../models/NotificationModel');
-const { getSystemTimeOnly } = require('../utils/DateUtils');
+const cron = require("node-cron");
+const {
+  updateRoomIdBeforeAppointment,
+  updateAppoinmentStatusCompleted,
+  updateAppointmentStats,
+} = require("../models/AppointmentModel");
+const { archiveOldReadNotifications } = require("../models/NotificationModel");
+const { getAllTenantIds } = require("../models/TenantModel");
 
-function getSystemDateTime() {
+// ✅ Get system's local time zone dynamically
+const systemTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+// ✅ Get current system-local time (converted from UTC if needed)
+const getSystemDateTime = (timeZone = systemTimeZone) => {
   const now = new Date();
-  const formatter = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Kolkata',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
-  return formatter.format(now).replace(',', '');
-}
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  })
+    .format(now)
+    .replace(",", "");
+};
 
-// ✅ Every minute check for upcoming appointments
-cron.schedule('* * * * *', () => {
-  setImmediate(async () => {
-    const systemTime = getSystemDateTime();
-    console.log(`[${systemTime}] ⏳ Checking virtual appointments...`);
-    try {
-      const start = Date.now();
-      await updateRoomIdBeforeAppointment();
-      console.log(`✅ Completed in ${Date.now() - start}ms`);
-    } catch (err) {
-      console.error("❌ Appointment cron failed:", err.message);
+// 🔒 Locking mechanism to prevent job overlapping
+const locks = {
+  roomUpdate: false,
+  statusUpdate: true,
+  dailyMaintenance: false,
+};
+
+// ⏰ CRON 1: Update Room ID 5 minutes before appointment start (every 1 minute)
+cron.schedule("* * * * *", async () => {
+  if (locks.roomUpdate) return;
+  locks.roomUpdate = true;
+
+  try {
+    const tenants = await getAllTenantIds();
+    for (const tenantId of tenants) {
+      await updateRoomIdBeforeAppointment(tenantId); // Your DB logic should subtract 5 minutes in query
     }
-  });
+    console.log(`[${getSystemDateTime()}] ✅ Room IDs updated`);
+  } catch (err) {
+    console.error(`[${getSystemDateTime()}] ❌ Room ID update failed:`, err);
+  } finally {
+    locks.roomUpdate = false;
+  }
 });
 
-// ✅ Every minute check and mark completed appointments
+// ⏰ CRON 2: Mark appointments as completed if end_time < now (every 1 minute)
+cron.schedule("* * * * *", async () => {
+  if (locks.statusUpdate) return;
+  locks.statusUpdate = true;
 
-// cron.schedule('* * * * *', () => {
-//   setImmediate(async () => {
-//     const systemTime = getSystemTimeOnly(); // <-- get local system time (HH:MM:SS)
-//     console.log(`[${new Date().toLocaleString()}] 🔁 Checking for appointments to complete with system time: ${systemTime}`);
-    
-//     try {
-//       const count = await updateAppoinmentStatusCompleted(systemTime); // ⬅ pass time to your query
-//       console.log(`✅ Marked ${count} appointments as completed.`);
-//     } catch (err) {
-//       console.error("❌ Error updating appointment status:", err.message);
-//     }
-//   });
-// });
-
-
-// ✅ Midnight task for archiving notifications
-cron.schedule('0 0 * * *', () => {
-  setImmediate(async () => {
-    console.log("🕒 Running daily maintenance tasks at 00:00...");
-    try {
-      await archiveOldReadNotifications();
-      console.log("✅ Old read notifications archived");
-
-      await updateAppointmentStats(); // ✅ Call the stats update function
-      console.log("✅ Appointment stats updated");
-    } catch (err) {
-      console.error("❌ Maintenance task failed:", err.message);
+  try {
+    const tenants = await getAllTenantIds();
+    for (const tenantId of tenants) {
+      await updateAppoinmentStatusCompleted(tenantId); // Use local time inside your SQL
     }
-  });
+    console.log(`[${getSystemDateTime()}] ✅ Appointments status updated`);
+  } catch (err) {
+    console.error(`[${getSystemDateTime()}] ❌ Status update failed:`, err);
+  } finally {
+    locks.statusUpdate = false;
+  }
+});
+
+// 🌙 CRON 3: Daily maintenance at 00:00 system-local time
+cron.schedule("0 0 * * *", async () => {
+  if (locks.dailyMaintenance) return;
+  locks.dailyMaintenance = true;
+
+  try {
+    console.log(`[${getSystemDateTime()}] 🛠️ Daily maintenance started`);
+
+    await archiveOldReadNotifications();
+    console.log("✅ Archived old notifications");
+
+    await updateAppointmentStats();
+    console.log("✅ Updated appointment stats");
+
+    console.log(`[${getSystemDateTime()}] ✅ Maintenance completed`);
+  } catch (err) {
+    console.error(`[${getSystemDateTime()}] ❌ Maintenance failed:`, err);
+  } finally {
+    locks.dailyMaintenance = false;
+  }
 });

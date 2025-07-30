@@ -258,17 +258,86 @@ const uploadFileMiddleware = (options) => {
   };
 };
 
+/**
+ * Delete a single file if it's inside the uploads folder
+ */
 const deleteFileIfExists = (filePath) => {
-  if (!filePath) return;
+  if (!filePath || typeof filePath !== "string") return;
 
-  const fullPath = path.join(__dirname, "..", filePath);
+  const normalizedPath = filePath.replace(/^\/+/, "").replace(/\\/g, "/");
+
+  if (!normalizedPath.startsWith("uploads/")) {
+    console.warn("Skipping file deletion (external or invalid):", normalizedPath);
+    return;
+  }
+
+  const fullPath = path.join(__dirname, "..", normalizedPath);
   if (fs.existsSync(fullPath)) {
-    fs.unlink(fullPath, (err) => {
-      if (err) console.error("Error deleting file:", err);
-      else console.log("Deleted file:", fullPath);
-    });
+    try {
+      fs.unlinkSync(fullPath);
+      console.log("✅ Deleted:", fullPath);
+    } catch (err) {
+      console.error("❌ Failed to delete:", fullPath, err);
+    }
+  } else {
+    console.warn("⚠️ File not found:", fullPath);
+  }
+};
+
+/**
+ * Delete one or many files from array or string
+ */
+const deleteUploadedFiles = (filePaths) => {
+  if (!filePaths) return;
+
+  if (Array.isArray(filePaths)) {
+    for (const item of filePaths) {
+      if (typeof item === "string") {
+        deleteFileIfExists(item);
+      } else if (typeof item === "object" && item.image) {
+        // For objects like: { image: 'uploads/...' }
+        deleteFileIfExists(item.image);
+      }
+    }
+  } else if (typeof filePaths === "string") {
+    deleteFileIfExists(filePaths);
+  }
+};
+
+/**
+ * Extract all awards_certification_* fields from an object
+ */
+const extractAwardsCertificationFiles = (data) => {
+  const files = [];
+  for (const key in data) {
+    if (key.startsWith("awards_certification_") && typeof data[key] === "string") {
+      files.push(data[key]);
+    }
+  }
+  return files;
+};
+
+/**
+ * Delete all image fields like treatment_images, awards_certification, etc.
+ * 
+ * @param {*} data - Object containing image fields
+ * @param {*} fieldsToCheck - Array of keys like ['treatment_images']
+ */
+const deleteFilesOnUpdateOrDelete = (data, fieldsToCheck = []) => {
+  // Delete from treatment_images: array of strings or objects
+  for (const field of fieldsToCheck) {
+    if (data[field]) {
+      deleteUploadedFiles(data[field]);
+    }
+  }
+
+  // Special case: awards_certification_* fields
+  const awardFiles = extractAwardsCertificationFiles(data);
+  if (awardFiles.length > 0) {
+    deleteUploadedFiles(awardFiles);
   }
 };
 
 
-module.exports = { uploadFileMiddleware,deleteFileIfExists };
+
+module.exports = { uploadFileMiddleware,deleteFileIfExists,deleteUploadedFiles };

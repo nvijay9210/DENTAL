@@ -1,7 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { validateInput } = require("./InputValidation");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
-const { recordExists } = require("../query/Records");
 const { checkPhoneConflicts } = require("../utils/PhonenumbersValidation");
 const { checkEmailConflicts } = require("../utils/EmailValidation");
 
@@ -27,7 +26,7 @@ const supplierColumnConfig = [
     columnname: "alternate_phone_number",
     type: "varchar",
     size: 20,
-    null: false,
+    null: true,
   },
   { columnname: "fax", type: "varchar", size: 50, null: true },
   { columnname: "website", type: "varchar", size: 255, null: true },

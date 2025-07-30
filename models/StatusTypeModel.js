@@ -12,7 +12,7 @@ const createStatusType = async (table,columns, values) => {
     return statusType.insertId;
   } catch (error) {
     console.error("Error creating statusType:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -84,7 +84,7 @@ const updateStatusType = async (statusType_id, columns, values, tenant_id) => {
     return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
     console.error("Error updating statusType:", error);
-    throw new CustomError("Error updating statusType.", 500);
+    throw error
   }
 };
 
@@ -98,7 +98,7 @@ const deleteStatusTypeByTenantAndStatusTypeId = async (tenant_id, statusType_id)
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting statusType:", error);
-    throw new CustomError("Error deleting statusType.", 500);
+    throw error
   }
 };
 

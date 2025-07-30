@@ -12,7 +12,7 @@ const createPatientClinic = async (table,columns, values) => {
     return patient_clinic.insertId;
   } catch (error) {
     console.error("Error creating patient_clinic:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -20,12 +20,12 @@ const createPatientClinic = async (table,columns, values) => {
 const getAllPatientClinicsByTenantId = async (tenantId, limit, offset) => {
   try {
     if (!Number.isInteger(limit) || !Number.isInteger(offset) || limit < 1 || offset < 0) {
-      throw new CustomError("Invalid pagination parameters.", 400);
+      throw error
     }
     return await record.getAllRecords("patient_clinic", "tenant_id", tenantId, limit, offset);
   } catch (error) {
     console.error("Error fetching patient_clinics:", error);
-    throw new CustomError("Error fetching patient_clinics.", 500);
+    throw error
   }
 };
 
@@ -42,7 +42,7 @@ const getPatientClinicByTenantAndPatientClinicId = async (tenant_id, patient_cli
     return rows;
   } catch (error) {
     console.error("Error fetching patient_clinic:", error);
-    throw new CustomError("Error fetching patient_clinic.", 500);
+    throw error
   }
 };
 
@@ -55,7 +55,7 @@ const updatePatientClinic = async (patient_clinic_id, columns, values, tenant_id
     return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
     console.error("Error updating patient_clinic:", error);
-    throw new CustomError("Error updating patient_clinic.", 500);
+    throw error
   }
 };
 
@@ -69,7 +69,7 @@ const deletePatientClinicByTenantAndPatientClinicId = async (tenant_id, patient_
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting patient_clinic:", error);
-    throw new CustomError("Error deleting patient_clinic.", 500);
+    throw error
   }
 };
 

@@ -12,7 +12,7 @@ const createToothDetails = async (table, columns, values) => {
     return toothdetails.insertId;
   } catch (error) {
     console.error("Error creating toothdetails:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -25,7 +25,7 @@ const getAllToothDetailssByTenantId = async (tenantId, limit, offset) => {
       limit < 1 ||
       offset < 0
     ) {
-      throw new CustomError("Invalid pagination parameters.", 400);
+      throw error
     }
     return await record.getAllRecords(
       "toothdetails",
@@ -36,7 +36,7 @@ const getAllToothDetailssByTenantId = async (tenantId, limit, offset) => {
     );
   } catch (error) {
     console.error("Error fetching toothdetailss:", error);
-    throw new CustomError("Error fetching toothdetailss.", 500);
+    throw error
   }
 };
 
@@ -123,7 +123,7 @@ const getToothDetailsByTenantAndToothDetailsId = async (
     return rows;
   } catch (error) {
     console.error("Error fetching toothdetails:", error);
-    throw new CustomError("Error fetching toothdetails.", 500);
+    throw error
   }
 };
 
@@ -147,7 +147,7 @@ const updateToothDetails = async (
     );
   } catch (error) {
     console.error("Error updating toothdetails:", error);
-    throw new CustomError("Error updating toothdetails.", 500);
+    throw error
   }
 };
 
@@ -168,7 +168,7 @@ const deleteToothDetailsByTenantAndToothDetailsId = async (
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting toothdetails:", error);
-    throw new CustomError("Error deleting toothdetails.", 500);
+    throw error
   }
 };
 

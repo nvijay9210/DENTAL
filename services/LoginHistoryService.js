@@ -105,7 +105,7 @@ const getLoginHistoryByTenantIdAndLoginHistoryId = async (
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get loginhistory: " + error.message, 404);
+    throw new CustomError("Failed to fetch loginhistory: " + error.message, 404);
   }
 };
 
@@ -120,9 +120,9 @@ const updateLoginHistory = async (loginhistoryId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("LoginHistory not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("LoginHistory not found or no changes made.", 404);
+    // }
 
     await invalidateCacheByPattern("loginhistory:*");
     return affectedRows;
@@ -143,9 +143,9 @@ const deleteLoginHistoryByTenantIdAndLoginHistoryId = async (
         tenantId,
         loginhistoryId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("LoginHistory not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("LoginHistory not found.", 404);
+    // }
 
     await invalidateCacheByPattern("loginhistory:*");
     return affectedRows;

@@ -121,8 +121,8 @@ const createClinic = async (data, token, realm) => {
 
     return clinicId;
   } catch (error) {
-    console.trace(error);
-    throw new CustomError(message.CLINIC_CREATE_FAIL, 404);
+    console.error(error);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -150,9 +150,9 @@ const updateClinic = async (clinicId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError(message.CLINIC_UPDATE_FAIL, 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(message.CLINIC_UPDATE_FAIL, 404);
+    // }
 
     // Delete old photo if a new one is uploaded
     if (
@@ -170,7 +170,7 @@ const updateClinic = async (clinicId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.log("Service Error:", error);
-    throw new CustomError(message.CLINIC_UPDATE_FAIL, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -202,7 +202,7 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
     };
   } catch (err) {
     console.error(err);
-    throw new CustomError(message.CLINICS_FETCH_FAIL, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -221,7 +221,7 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError(message.CLINIC_FETCH_FAIL, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -234,7 +234,7 @@ const deleteClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
     await invalidateCacheByPattern("clinic:*");
     return clinic;
   } catch (error) {
-    throw new CustomError(message.CLINIC_DELETE_FAIL, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -246,7 +246,7 @@ const checkClinicExistsByTenantIdAndClinicId = async (tenantId, clinicId) => {
       clinicId
     );
   } catch (error) {
-    throw new CustomError(message.CLINIC_CREATE_FAIL, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -341,7 +341,7 @@ const getFinanceSummary = async (
     return patients;
   } catch (error) {
     console.error(error);
-    throw new CustomError("Database error while fetching incomes", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -617,7 +617,7 @@ const getClinicSettingsByTenantIdAndClinicId = async (tenantId, clinicId) => {
     );
     return clinic;
   } catch (error) {
-    throw new CustomError(message.CLINIC_FETCH_FAIL, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -630,7 +630,7 @@ const updateClinicSettings = async (tenantId, clinicId, details) => {
     );
     return clinic;
   } catch (error) {
-    throw new CustomError(error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 

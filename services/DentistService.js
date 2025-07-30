@@ -19,6 +19,7 @@ const helper = require("../utils/Helpers");
 
 const { encrypt } = require("../middlewares/PasswordHash");
 const { buildCacheKey } = require("../utils/RedisCache");
+const { deleteUploadedFiles, deleteFileIfExists } = require("../utils/UploadFiles");
 
 const dentistFieldMap = {
   tenant_id: (val) => val,
@@ -227,7 +228,7 @@ const createDentist = async (data, token, realm) => {
     };
   } catch (error) {
     console.error("❌ Failed to create dentist:", error.message);
-    throw new CustomError(`Failed to create dentist: ${error.message}`, 400);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -237,13 +238,16 @@ const updateDentist = async (dentistId, data, tenant_id) => {
     ...dentistFieldMap,
     updated_by: (val) => val,
   };
+
   try {
-     const dentist = dentistModel.getDentistByTenantIdAndDentistId(
-          dentistId,tenant_id
-        );
-    
-        const old_image = dentist.profile_picture;
-    
+    const dentist = await dentistModel.getDentistByTenantIdAndDentistId(
+      tenant_id,
+      dentistId
+    );
+
+    const oldImagePath = dentist.profile_picture;
+    const newImagePath = data.profile_picture;
+
     const { columns, values } = mapFields(data, update);
     const affectedRows = await dentistModel.updateDentist(
       dentistId,
@@ -252,28 +256,52 @@ const updateDentist = async (dentistId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("Dentist not found or no changes made.", 404);
+    // if (affectedRows === 0) {
+    //   throw new CustomError("Dentist not found or no changes made.", 404);
+    // }
+
+    // ✅ Delete profile image if changed
+    if (
+      newImagePath &&
+      newImagePath !== oldImagePath &&
+      oldImagePath?.startsWith("uploads/")
+    ) {
+      deleteFileIfExists(oldImagePath);
     }
 
-     if (
-          data.profile_picture &&
-          data.profile_picture !== old_image &&
-          old_image
-        ) {
-          const oldPhotoPath = path.join(__dirname, `../../uploads/${oldPhoto}`);
-          if (fs.existsSync(oldPhotoPath)) {
-            fs.unlinkSync(oldPhotoPath);
-          }
-        }
+    // ✅ Delete old awards_certification if replaced
+    if (data.awards_certification && dentist.awards_certification) {
+      const oldAwards = JSON.parse(dentist.awards_certification || "[]");
+      const newAwards = JSON.parse(data.awards_certification || "[]");
+
+      const toDelete = oldAwards.filter(
+        (oldItem) => !newAwards.includes(oldItem)
+      );
+
+      deleteUploadedFiles(toDelete);
+    }
+
+    // ✅ Delete old treatment_images if replaced
+    // if (data.treatment_images && dentist.treatment_images) {
+    //   const oldTreatments = JSON.parse(dentist.treatment_images || "[]");
+    //   const newTreatments = JSON.parse(data.treatment_images || "[]");
+
+    //   const toDelete = oldTreatments.filter(
+    //     (oldItem) => !newTreatments.includes(oldItem)
+    //   );
+
+    //   deleteUploadedFiles(toDelete);
+    // }
 
     await invalidateCacheByPattern("dentist:*");
     return affectedRows;
   } catch (error) {
     console.error("Failed to update dentist:", error.message);
-    throw new CustomError(`Failed to update dentist: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
+
+
 
 // -------------------- GET ALL --------------------
 const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
@@ -302,7 +330,7 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
     return { data: convertedRows, total: dentists.total };
   } catch (err) {
     console.error("Database error while fetching dentists:", err.message);
-    throw new CustomError("Database error while fetching dentists", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -346,7 +374,7 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
 
     return result;
   } catch (error) {
-    throw new CustomError(`Failed to get dentist: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -360,7 +388,7 @@ const deleteDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
     await invalidateCacheByPattern("dentist:*");
     return result;
   } catch (error) {
-    throw new CustomError(`Failed to delete dentist: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -439,7 +467,7 @@ const updateClinicIdAndNameAndAddress = async (
     await invalidateCacheByPattern("dentist:*");
     return result;
   } catch (error) {
-    throw new CustomError(`Failed to delete dentist: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -453,7 +481,7 @@ const updateNullClinicInfoWithJoin = async (tenantId, clinicId, dentistId) => {
     await invalidateCacheByPattern("dentist:*");
     return result;
   } catch (error) {
-    throw new CustomError(`Failed to delete dentist: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 

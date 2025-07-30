@@ -99,7 +99,7 @@ const createReminder = async (data) => {
     return reminderId;
   } catch (error) {
     console.error("Failed to create reminder:", error);
-    throw new CustomError(`Failed to create reminder: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -129,7 +129,7 @@ const getAllRemindersByTenantId = async (tenantId, page = 1, limit = 10) => {
     return { data: convertedRows, total: reminders.total };
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
-    throw new CustomError("Failed to fetch reminders", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -164,7 +164,7 @@ const getAllRemindersByTenantAndClinicId = async (
     return { data: convertedRows, total: reminders.total };
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
-    throw new CustomError("Failed to fetch reminders", 404);
+    throw new CustomError(err, 500);
   }
 };
 const getAllRemindersByTenantAndClinicAndDentistId = async (
@@ -202,7 +202,7 @@ const getAllRemindersByTenantAndClinicAndDentistId = async (
     return { data: convertedRows, total: reminders.total };
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
-    throw new CustomError("Failed to fetch reminders", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -244,7 +244,7 @@ const getAllRemindersByTenantAndClinicAndDentistAndType = async (
     return { data: convertedRows, total: reminders.total };
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
-    throw new CustomError("Failed to fetch reminders", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -272,7 +272,7 @@ const getAllNotifyByDentist = async (tenant_id, clinic_id, dentist_id) => {
     return reminders;
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
-    throw new CustomError("Failed to fetch reminders", 404);
+    throw new CustomError(err, 500);
   }
 };
 const getAllNotifyByClinic = async (tenant_id, clinic_id) => {
@@ -298,7 +298,7 @@ const getAllNotifyByClinic = async (tenant_id, clinic_id) => {
     return reminders;
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
-    throw new CustomError("Failed to fetch reminders", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -325,7 +325,7 @@ const getAllNotifyByPatient = async (tenant_id, clinic_id, patient_id) => {
     return reminders;
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
-    throw new CustomError("Failed to fetch reminders", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -356,7 +356,7 @@ const getAllReminderNotifyByDentist = async (
     return reminders;
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
-    throw new CustomError("Failed to fetch reminders", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -381,7 +381,7 @@ const getAllReminderNotifyByClinic = async (tenant_id, clinic_id) => {
     return reminders;
   } catch (err) {
     console.error("Database error while fetching reminders:", err);
-    throw new CustomError("Failed to fetch reminders", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -400,7 +400,7 @@ const getReminderByTenantIdAndReminderId = async (tenantId, reminderId) => {
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get reminder: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -419,15 +419,15 @@ const updateReminder = async (reminderId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("Reminder not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("reminder:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update reminder", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -439,14 +439,14 @@ const deleteReminderByTenantIdAndReminderId = async (tenantId, reminderId) => {
         tenantId,
         reminderId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("Reminder not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("reminder:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete reminder: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -720,7 +720,7 @@ const getMonthlywiseRemindersByTenantAndClinicIdAndDentistId = async (
     return result;
   } catch (error) {
     console.error("Reminder Fetch Error:", error);
-    throw new CustomError("Error fetching reminders.", 500);
+    throw new CustomError(err, 500);
   }
 };
 

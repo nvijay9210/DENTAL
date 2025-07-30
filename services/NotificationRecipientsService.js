@@ -94,7 +94,7 @@ const getAllNotificationRecipientsByTenantId = async (
     return { data: convertedRows, total: notificationRecipients.total };
   } catch (err) {
     console.error("Database error while fetching notificationRecipients:", err);
-    throw new CustomError("Failed to fetch notificationRecipients", 404);
+    throw new CustomError(err, 500);
   }
 };
 const getAllNotificationRecipientByTenantIdAndSupplierId = async (
@@ -133,7 +133,7 @@ const getAllNotificationRecipientByTenantIdAndSupplierId = async (
     return { data: convertedRows, total: notificationRecipients.total };
   } catch (err) {
     console.error("Database error while fetching notificationRecipients:", err);
-    throw new CustomError("Failed to fetch notificationRecipients", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -178,18 +178,18 @@ const updateNotificationRecipient = async (notification_recipient_id, data, tena
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError(
-        "NotificationRecipient not found or no changes made.",
-        404
-      );
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(
+    //     "NotificationRecipient not found or no changes made.",
+    //     404
+    //   );
+    // }
 
     await invalidateCacheByPattern("notificationrecipient:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update notificationRecipient", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -211,7 +211,7 @@ const markNotificationAsRead = async (notification_recipient_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update notificationRecipient", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -226,9 +226,9 @@ const deleteNotificationRecipientByTenantIdAndNotificationRecipientId = async (
         tenantId,
         notification_recipient_id
       );
-    if (affectedRows === 0) {
-      throw new CustomError("NotificationRecipient not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("NotificationRecipient not found.", 404);
+    // }
 
     await invalidateCacheByPattern("notificationrecipient:*");
     return affectedRows;

@@ -40,7 +40,7 @@ const createPatientClinic = async (data) => {
     return patient_clinicId;
   } catch (error) {
     console.error("Failed to create patient_clinic:", error);
-    throw new CustomError(`Failed to create patient_clinic: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -63,7 +63,7 @@ const getAllPatientClinicsByTenantId = async (tenantId, page = 1, limit = 10) =>
     return { data: convertedRows, total: result.total };
   } catch (err) {
     console.error("Database error while fetching patient_clinics:", err);
-    throw new CustomError("Failed to fetch patient_clinics", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -82,7 +82,7 @@ const getPatientClinicByTenantIdAndPatientClinicId = async (tenantId, patient_cl
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get patient_clinic: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -101,15 +101,15 @@ const updatePatientClinic = async (patient_clinicId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("PatientClinic not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("PatientClinic not found or no changes made.", 404);
+    // }
 
     await invalidateCacheByPattern("patient_clinic:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update patient_clinic", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -124,14 +124,14 @@ const deletePatientClinicByTenantIdAndPatientClinicId = async (
         tenantId,
         patient_clinicId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("PatientClinic not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("PatientClinic not found.", 404);
+    // }
 
     await invalidateCacheByPattern("patient_clinic:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete patient_clinic: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -158,7 +158,7 @@ const getAllPatientClinicsByTenantIdAndClinicId = async (
     return { data: convertedRows, total: result.total };
   } catch (err) {
     console.error("Database error while fetching patient_clinics:", err);
-    throw new CustomError("Failed to fetch patient_clinics", 404);
+    throw new CustomError(err, 500);
   }
 };
 

@@ -12,7 +12,7 @@ const createUserActivity = async (table,columns, values) => {
     return useractivity.insertId;
   } catch (error) {
     console.error("Error creating useractivity:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -20,12 +20,12 @@ const createUserActivity = async (table,columns, values) => {
 const getAllUserActivitysByTenantId = async (tenantId, limit, offset) => {
   try {
     if (!Number.isInteger(limit) || !Number.isInteger(offset) || limit < 1 || offset < 0) {
-      throw new CustomError("Invalid pagination parameters.", 400);
+      throw error
     }
     return await record.getAllRecords("useractivity", "tenant_id", tenantId, limit, offset);
   } catch (error) {
     console.error("Error fetching useractivitys:", error);
-    throw new CustomError("Error fetching useractivitys.", 500);
+    throw error
   }
 };
 
@@ -42,7 +42,7 @@ const getUserActivityByTenantAndUserActivityId = async (tenant_id, useractivity_
     return rows;
   } catch (error) {
     console.error("Error fetching useractivity:", error);
-    throw new CustomError("Error fetching useractivity.", 500);
+    throw error
   }
 };
 
@@ -55,7 +55,7 @@ const updateUserActivity = async (useractivity_id, columns, values) => {
     return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
     console.error("Error updating useractivity:", error);
-    throw new CustomError("Error updating useractivity.", 500);
+    throw error
   }
 };
 

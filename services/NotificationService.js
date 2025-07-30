@@ -150,7 +150,7 @@ const getAllNotificationsByTenantId = async (
     return { data: convertedRows, total: notifications.total };
   } catch (err) {
     console.error("Database error while fetching notifications:", err);
-    throw new CustomError("Failed to fetch notifications", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -182,7 +182,7 @@ const getNotificationsForReceiver = async (
     return notifications;
   } catch (err) {
     console.error("Database error while fetching notifications:", err);
-    throw new CustomError("Failed to fetch notifications", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -205,7 +205,7 @@ const getNotificationByTenantIdAndNotificationId = async (
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get notification: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -224,15 +224,15 @@ const updateNotification = async (notification_id, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("Notification not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("notification:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update notification", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -247,9 +247,9 @@ const deleteNotificationByTenantIdAndNotificationId = async (
         tenantId,
         notification_id
       );
-    if (affectedRows === 0) {
-      throw new CustomError("Notification not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("notification:*");
     return affectedRows;

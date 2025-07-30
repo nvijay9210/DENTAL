@@ -14,7 +14,7 @@ const createReminder = async (table, columns, values) => {
     return reminder.insertId;
   } catch (error) {
     console.error("Error creating reminder:", error);
-    throw new CustomError(error.message, 500);
+    throw error
   }
 };
 
@@ -27,7 +27,7 @@ const getAllRemindersByTenantId = async (tenantId, limit, offset) => {
       limit < 1 ||
       offset < 0
     ) {
-      throw new CustomError("Invalid pagination parameters.", 400);
+      throw error
     }
     return await record.getAllRecords(
       "reminder",
@@ -38,7 +38,7 @@ const getAllRemindersByTenantId = async (tenantId, limit, offset) => {
     );
   } catch (error) {
     console.error("Error fetching reminders:", error);
-    throw new CustomError("Error fetching reminders.", 500);
+    throw error
   }
 };
 
@@ -55,7 +55,7 @@ const getReminderByTenantAndReminderId = async (tenant_id, reminder_id) => {
     return rows
   } catch (error) {
     console.error("Error fetching reminder:", error);
-    throw new CustomError("Error fetching reminder.", 500);
+    throw error
   }
 };
 
@@ -74,7 +74,7 @@ const updateReminder = async (reminder_id, columns, values, tenant_id) => {
     );
   } catch (error) {
     console.error("Error updating reminder:", error);
-    throw new CustomError("Error updating reminder.", 500);
+    throw error
   }
 };
 
@@ -92,7 +92,7 @@ const deleteReminderByTenantAndReminderId = async (tenant_id, reminder_id) => {
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting reminder:", error);
-    throw new CustomError("Error deleting reminder.", 500);
+    throw error
   }
 };
 
@@ -124,7 +124,7 @@ const getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (
     return rows[0];
   } catch (error) {
     console.error("Database error in getReminderBy...:", error);
-    throw new CustomError("Error fetching reminder.", 500);
+    throw error
   } finally {
     conn.release();
   }
@@ -167,7 +167,7 @@ const getAllRemindersByTenantAndClinicId = async (
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.error("Database error in getAllRemindersBy...:", error);
-    throw new CustomError("Error fetching reminder.", 500);
+    throw error
   } finally {
     conn.release();
   }
@@ -215,7 +215,7 @@ const getAllRemindersByTenantAndClinicAndDentistId = async (
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.error("Database error in getAllRemindersBy...:", error);
-    throw new CustomError("Error fetching reminder.", 500);
+    throw error
   } finally {
     conn.release();
   }
@@ -268,7 +268,7 @@ const getAllRemindersByTenantAndClinicAndDentistAndType = async (
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.error("Database error in getAllRemindersBy...:", error);
-    throw new CustomError("Error fetching reminder.", 500);
+    throw error
   } finally {
     conn.release();
   }
@@ -308,7 +308,7 @@ ORDER BY app.start_time ASC;`;
     return rows
   } catch (error) {
     console.error("Database error in getAllRemindersBy...:", error);
-    throw new CustomError("Error fetching reminder.", 500);
+    throw error
   } finally {
     conn.release();
   }
@@ -348,7 +348,7 @@ ORDER BY app.start_time ASC;`;
     return rows
   } catch (error) {
     console.error("Database error in getAllRemindersBy...:", error);
-    throw new CustomError("Error fetching reminder.", 500);
+    throw error
   } finally {
     conn.release();
   }
@@ -385,7 +385,7 @@ ORDER BY app.start_time ASC;`;
     return rows
   } catch (error) {
     console.error("Database error in getAllRemindersBy...:", error);
-    throw new CustomError("Error fetching reminder.", 500);
+    throw error
   } finally {
     conn.release();
   }
@@ -424,7 +424,7 @@ ORDER BY r.reminder_id DESC;`;
     return rows
   } catch (error) {
     console.error("Database error in getAllRemindersBy...:", error);
-    throw new CustomError("Error fetching reminder.", 500);
+    throw error
   } finally {
     conn.release();
   }
@@ -458,7 +458,7 @@ ORDER BY r.reminder_id DESC;`;
     return rows
   } catch (error) {
     console.error("Database error in getAllRemindersBy...:", error);
-    throw new CustomError("Error fetching reminder.", 500);
+    throw error
   } finally {
     conn.release();
   }
@@ -506,7 +506,7 @@ const getMonthlywiseRemindersByTenantAndClinicIdAndDentistId = async (
     return reminders;
   } catch (error) {
     console.error("Database error in getMonthlywiseReminders:", error);
-    throw new CustomError("Error fetching reminders.", 500);
+    throw error
   } finally {
     conn.release();
   }

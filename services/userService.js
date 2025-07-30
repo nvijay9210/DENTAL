@@ -57,9 +57,9 @@ const getExcludeUserByPhoneNumberAndUserId = async (mobile,userId=null) => {
 const updateUser = async (userId, data) => {
   try {
     const affectedRows = await userModel.updateUser(userId, data);
-    if (affectedRows === 0) {
-      throw new Error("User not found or no changes made.");
-    }
+    // if (affectedRows === 0) {
+    //   throw new Error("User not found or no changes made.");
+    // }
     return affectedRows;
   } catch (error) {
     throw new Error('Failed to update user: ' + error.message);
@@ -70,9 +70,9 @@ const updateUser = async (userId, data) => {
 const deleteUser = async (userId) => {
   try {
     const affectedRows = await userModel.deleteUser(userId);
-    if (affectedRows === 0) {
-      throw new Error("User not found.");
-    }
+    // if (affectedRows === 0) {
+    //   throw new Error("User not found.");
+    // }
     return affectedRows;
   } catch (error) {
     throw new Error('Failed to delete user: ' + error.message);

@@ -41,7 +41,7 @@ const createStatusType = async (data) => {
     return statusTypeId;
   } catch (error) {
     console.error("Failed to create statusType:", error);
-    throw new CustomError(`Failed to create statusType: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -67,7 +67,7 @@ const getAllStatusTypesByTenantId = async (page = 1, limit = 10) => {
         return convertedRows;
   } catch (err) {
     console.error("Database error while fetching statusTypes:", err);
-    throw new CustomError("Failed to fetch statusTypes", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -80,7 +80,7 @@ const getStatusTypeByStatusTypeId = async (statusTypeId) => {
     const convertedRows=helper.convertDbToFrontend(statusType, statusTypeFieldReverseMap)
     return {data:convertedRows,total:statusType.total};;
   } catch (error) {
-    throw new CustomError("Failed to get statusType: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -100,16 +100,16 @@ const updateStatusType = async (statusTypeId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("StatusType not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("statusType:*");
     await invalidateCacheByPattern("statusType_patient:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update statusType", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -124,15 +124,15 @@ const deleteStatusTypeByTenantIdAndStatusTypeId = async (
         tenantId,
         statusTypeId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("StatusType not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("statusType:*");
     await invalidateCacheByPattern("statusType_patient:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete statusType: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 

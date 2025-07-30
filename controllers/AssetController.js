@@ -1,5 +1,5 @@
 const { CustomError } = require("../middlewares/CustomeError");
-const { checkIfExists } = require("../models/checkIfExists");
+const { checkIfExists, checkExists } = require("../models/checkIfExists");
 const assetService = require("../services/AssetService");
 const { isValidDate } = require("../utils/DateUtils");
 const assetValidation = require("../validations/AssetValidation");
@@ -62,7 +62,7 @@ exports.getAssetByTenantIdAndAssetId = async (req, res, next) => {
   const { asset_id, tenant_id } = req.params;
 
   try {
-    const asset1=await checkIfExists('asset','asset_id',asset_id,tenant_id);
+    const asset1=await checkExists('asset','asset_id',asset_id,true,tenant_id);
     if(!asset1) throw new CustomError('Asset not found',404)
 
     // Fetch asset details

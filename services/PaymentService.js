@@ -76,7 +76,7 @@ const createPayment = async (data) => {
     return paymentId;
   } catch (error) {
     console.error("Failed to create payment:", error);
-    throw new CustomError(`Failed to create payment: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -105,7 +105,7 @@ const getAllPaymentsByTenantId = async (tenantId, page = 1, limit = 10) => {
     return {data:convertedRows,total:payments.total};;
   } catch (err) {
     console.error("Database error while fetching payments:", err);
-    throw new CustomError("Failed to fetch payments", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -123,7 +123,7 @@ const getPaymentByTenantIdAndPaymentId = async (tenantId, paymentId) => {
 
     return {data:convertedRows,total:payment.total};;
   } catch (error) {
-    throw new CustomError("Failed to get payment: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 const getPaymentByTenantAndAppointmentId = async (tenantId, appointment_id) => {
@@ -142,7 +142,7 @@ const getPaymentByTenantAndAppointmentId = async (tenantId, appointment_id) => {
     
     return result;
   } catch (error) {
-    throw new CustomError("Failed to get payment: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -161,16 +161,16 @@ const updatePayment = async (paymentId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("Payment not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("Payment not found or no changes made.", 404);
+    // }
 
     await invalidateCacheByPattern("payment:*");
     await invalidateCacheByPattern("financeSummary:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update payment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -181,14 +181,14 @@ const deletePaymentByTenantIdAndPaymentId = async (tenantId, paymentId) => {
       tenantId,
       paymentId
     );
-    if (affectedRows === 0) {
-      throw new CustomError("Payment not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError("Payment not found.", 404);
+    // }
 
     await invalidateCacheByPattern("payment:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete payment: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 

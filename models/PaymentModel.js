@@ -12,7 +12,7 @@ const createPayment = async (table,columns, values) => {
     return payment;
   } catch (error) {
     console.error("Error creating payment:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -22,7 +22,7 @@ const getAllPaymentsByTenantId = async (tenantId, limit, offset) => {
     return await record.getAllRecords("payment", "tenant_id", tenantId, limit, offset);
   } catch (error) {
     console.error("Error fetching payments:", error);
-    throw new CustomError("Error fetching payments.", 500);
+    throw error
   }
 };
 
@@ -39,7 +39,7 @@ const getPaymentByTenantAndPaymentId = async (tenant_id, payment_id) => {
     return rows?.[0] ?? null;
   } catch (error) {
     console.error("Error fetching payment:", error);
-    throw new CustomError("Error fetching payment.", 500);
+    throw error
   }
 };
 
@@ -66,7 +66,7 @@ const updatePayment = async (payment_id, columns, values, tenant_id) => {
     return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
     console.error("Error updating payment:", error);
-    throw new CustomError("Error updating payment.", 500);
+    throw error
   }
 };
 
@@ -80,7 +80,7 @@ const deletePaymentByTenantAndPaymentId = async (tenant_id, payment_id) => {
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting payment:", error);
-    throw new CustomError("Error deleting payment.", 500);
+    throw error
   }
 };
 

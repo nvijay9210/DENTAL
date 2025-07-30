@@ -117,7 +117,7 @@ const getAllPrescriptionsByTenantId = async (
         return {data:convertedRows,total:prescriptions.total};;
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
-    throw new CustomError("Failed to fetch prescriptions", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -158,7 +158,7 @@ const getAllPrescriptionsByTenantAndClinicIdAndTreatmentId = async (
         return {data:convertedRows,total:prescriptions.total};;
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
-    throw new CustomError("Failed to fetch prescriptions", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -199,7 +199,7 @@ const getAllPrescriptionsByTenantAndClinicIdAndAppointmentId = async (
         return {data:convertedRows,total:prescriptions.total};;
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
-    throw new CustomError("Failed to fetch prescriptions", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -243,7 +243,7 @@ const getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (
         return {data:convertedRows,total:prescriptions.total};;
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
-    throw new CustomError("Failed to fetch prescriptions", 404);
+    throw new CustomError(err, 500);
   }
 };
 const getAllPrescriptionsByTenantIdAndDentistId = async (
@@ -279,7 +279,7 @@ const getAllPrescriptionsByTenantIdAndDentistId = async (
         return {data:convertedRows,total:prescriptions.total};;
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
-    throw new CustomError("Failed to fetch prescriptions", 404);
+    throw new CustomError(err, 500);
   }
 };
 const getAllPrescriptionsByTenantIdAndPatientId = async (
@@ -316,7 +316,7 @@ const getAllPrescriptionsByTenantIdAndPatientId = async (
         return {data:convertedRows,total:prescriptions.total};;
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
-    throw new CustomError("Failed to fetch prescriptions", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -338,7 +338,7 @@ const getPrescriptionByTenantIdAndPrescriptionId = async (
     return convertedRows
     
   } catch (error) {
-    throw new CustomError("Failed to get prescription: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -357,16 +357,16 @@ const updatePrescription = async (prescriptionId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("Prescription not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("prescription:*");
     await invalidateCacheByPattern("prescriptionByPatientId:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update prescription", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -381,9 +381,9 @@ const deletePrescriptionByTenantIdAndPrescriptionId = async (
         tenantId,
         prescriptionId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("Prescription not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("prescription:*");
     await invalidateCacheByPattern("prescriptionByPatientId:*");

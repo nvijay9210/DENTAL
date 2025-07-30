@@ -190,7 +190,7 @@ const getAllRecords = async (table, tenantColumn, tenantId, limit = 100, offset 
     return { total, data };
   } catch (error) {
     console.error("Error executing SELECT ALL with count:", error);
-    throw error;
+    throw error.sqlMessage;
   } finally {
     if (conn) conn.release();
   }

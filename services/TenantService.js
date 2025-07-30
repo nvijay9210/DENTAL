@@ -88,9 +88,9 @@ const updateTenant = async (tenantId, data) => {
     };
     const { columns, values } = mapFields(data, update);
     const affectedRows = await tenantModel.updateTenant(tenantId, columns,values);
-    if (affectedRows === 0) {
-      throw new Error("Tenant not found or no changes made.");
-    }
+    // if (affectedRows === 0) {
+    //   throw new Error("Tenant not found or no changes made.");
+    // }
     return affectedRows;
   } catch (error) {
     throw new Error("Failed to update tenant: " + error.message);
@@ -101,9 +101,9 @@ const updateTenant = async (tenantId, data) => {
 const deleteTenant = async (tenantId) => {
   try {
     const affectedRows = await tenantModel.deleteTenant(tenantId);
-    if (affectedRows === 0) {
-      throw new Error("Tenant not found.");
-    }
+    // if (affectedRows === 0) {
+    //   throw new Error("Tenant not found.");
+    // }
     return affectedRows;
   } catch (error) {
     throw new Error("Failed to delete tenant: " + error.message);

@@ -102,7 +102,7 @@ const getAllToothDetailssByTenantId = async (
     return { data: convertedRows, total: toothdetailss.total };
   } catch (err) {
     console.error("Database error while fetching toothdetailss:", err);
-    throw new CustomError("Failed to fetch toothdetailss", 404);
+    throw new CustomError(err, 500);
   }
 };
 const getAllToothDetailsByTenantAndClinicAndDentistAndPatientId = async (
@@ -144,7 +144,7 @@ const getAllToothDetailsByTenantAndClinicAndDentistAndPatientId = async (
     return { data: convertedRows, total: toothdetailss.total };
   } catch (err) {
     console.error("Database error while fetching toothdetailss:", err);
-    throw new CustomError("Failed to fetch toothdetailss", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -187,7 +187,7 @@ const getAllToothDetailsByTenantAndClinicAndPatientId = async (
     return { data: convertedRows, total: toothdetailss.total };
   } catch (err) {
     console.error("Database error while fetching toothdetailss:", err);
-    throw new CustomError("Failed to fetch toothdetailss", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -209,7 +209,7 @@ const getToothDetailsByTenantIdAndToothDetailsId = async (
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get toothdetails: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -229,15 +229,15 @@ const updateToothDetails = async (toothdetailsId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("ToothDetails not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("toothdetails:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update toothdetails", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -252,9 +252,9 @@ const deleteToothDetailsByTenantIdAndToothDetailsId = async (
         tenantId,
         toothdetailsId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("ToothDetails not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("toothdetails:*");
     return affectedRows;

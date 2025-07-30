@@ -11,7 +11,7 @@ const createPrescription = async (table, columns, values) => {
     return prescription.insertId;
   } catch (error) {
     console.error("Error creating prescription:", error);
-    throw new CustomError("Database Operation Failed", 500);
+    throw error
   }
 };
 
@@ -24,7 +24,7 @@ const getAllPrescriptionsByTenantId = async (tenantId, limit, offset) => {
       limit < 1 ||
       offset < 0
     ) {
-      throw new CustomError("Invalid pagination parameters.", 400);
+      throw error
     }
     return await record.getAllRecords(
       TABLE,
@@ -35,7 +35,7 @@ const getAllPrescriptionsByTenantId = async (tenantId, limit, offset) => {
     );
   } catch (error) {
     console.error("Error fetching prescriptions:", error);
-    throw new CustomError("Error fetching prescriptions.", 500);
+    throw error
   }
 };
 
@@ -55,7 +55,7 @@ const getPrescriptionByTenantAndPrescriptionId = async (
     return rows;
   } catch (error) {
     console.error("Error fetching prescription:", error);
-    throw new CustomError("Error fetching prescription.", 500);
+    throw error
   }
 };
 
@@ -79,7 +79,7 @@ const updatePrescription = async (
     );
   } catch (error) {
     console.error("Error updating prescription:", error);
-    throw new CustomError("Error updating prescription.", 500);
+    throw error
   }
 };
 
@@ -101,7 +101,7 @@ const deletePrescriptionByTenantAndPrescriptionId = async (
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting prescription:", error);
-    throw new CustomError("Error deleting prescription.", 500);
+    throw error
   }
 };
 

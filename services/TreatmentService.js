@@ -83,7 +83,7 @@ const createTreatment = async (data) => {
     return treatmentId;
   } catch (error) {
     console.error("Failed to create treatment:", error);
-    throw new CustomError(`Failed to create treatment: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -113,7 +113,7 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
     return { data: convertedRows, total: treatments.total };
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
-    throw new CustomError("Failed to fetch treatments", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -171,7 +171,7 @@ const getAllTreatmentsByTenantAndClinicId = async (
     return { data: convertedRows, total: treatments.total };
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
-    throw new CustomError("Failed to fetch treatments", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -216,7 +216,7 @@ const getAllTreatmentsByTenantAndClinicIdAndDentist = async (
     return { data: convertedRows, total: treatments.total };
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
-    throw new CustomError("Failed to fetch treatments", 404);
+    throw new CustomError(err, 500);
   }
 };
 const getAllTreatmentsByTenantAndDentistId = async (
@@ -253,7 +253,7 @@ const getAllTreatmentsByTenantAndDentistId = async (
     return { data: convertedRows, total: treatments.total };
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
-    throw new CustomError("Failed to fetch treatments", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -291,7 +291,7 @@ const getAllTreatmentsByTenantAndPatientId = async (
     return { data: convertedRows, total: treatments.total };
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
-    throw new CustomError("Failed to fetch treatments", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -309,7 +309,7 @@ const getTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {
     flattenTreatmentImages(treatment);
     return { ...convertedRows, flattenTreatmentImages };
   } catch (error) {
-    throw new CustomError("Failed to get treatment: " + error.message, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -329,9 +329,9 @@ const updateTreatment = async (treatmentId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("Treatment not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("treatment:*");
     await invalidateCacheByPattern("treatment_patient:*");
@@ -339,7 +339,7 @@ const updateTreatment = async (treatmentId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update treatment", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -354,16 +354,16 @@ const deleteTreatmentByTenantIdAndTreatmentId = async (
         tenantId,
         treatmentId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("Treatment not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("treatment:*");
     await invalidateCacheByPattern("treatment_patient:*");
     await invalidateCacheByPattern("financeSummary:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete treatment: ${error.message}`, 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -393,7 +393,7 @@ const getTodayFollowUps = async (tenant_id, clinic_id, role, user_id = 0) => {
     return reminders;
   } catch (err) {
     console.error("Database error while fetching followup:", err);
-    throw new CustomError("Failed to fetch followup", 404);
+    throw new CustomError(err, 500);
   }
 };
 

@@ -2,25 +2,49 @@ const pool = require("../config/db");
 /**
  * Safely renames a column only if old column exists and new column doesn't.
  */
-async function renameColumnIfSafe(pool, table, oldName, newName, columnDefinition) {
+async function renameColumnIfSafe(
+  pool,
+  table,
+  oldName,
+  newName,
+  columnDefinition
+) {
   try {
-    const [oldCol] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [table, oldName]);
-    const [newCol] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [table, newName]);
+    const [oldCol] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [
+      table,
+      oldName,
+    ]);
+    const [newCol] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [
+      table,
+      newName,
+    ]);
 
     if (newCol.length > 0) {
-      console.log(`ℹ️ Column \`${newName}\` already exists in \`${table}\`. Skipping rename.`);
+      console.log(
+        `ℹ️ Column \`${newName}\` already exists in \`${table}\`. Skipping rename.`
+      );
       return;
     }
 
     if (oldCol.length === 0) {
-      console.log(`ℹ️ Column \`${oldName}\` does not exist in \`${table}\`. Skipping rename.`);
+      console.log(
+        `ℹ️ Column \`${oldName}\` does not exist in \`${table}\`. Skipping rename.`
+      );
       return;
     }
 
-    await pool.query(`ALTER TABLE ?? CHANGE COLUMN ?? ?? ${columnDefinition};`, [table, oldName, newName]);
-    console.log(`✅ Renamed column from \`${oldName}\` to \`${newName}\` in \`${table}\``);
+    await pool.query(
+      `ALTER TABLE ?? CHANGE COLUMN ?? ?? ${columnDefinition};`,
+      [table, oldName, newName]
+    );
+    console.log(
+      `✅ Renamed column from \`${oldName}\` to \`${newName}\` in \`${table}\``
+    );
   } catch (error) {
-    console.error(`❌ Error renaming column \`${oldName}\` in \`${table}\`:`, error.message);
+    console.error(
+      `❌ Error renaming column \`${oldName}\` in \`${table}\`:`,
+      error.message
+    );
     throw error;
   }
 }
@@ -28,12 +52,23 @@ async function renameColumnIfSafe(pool, table, oldName, newName, columnDefinitio
 /**
  * Safely adds a column only if it doesn't exist.
  */
-async function addColumnIfNotExists(pool, table, column, definition, comment = '') {
+async function addColumnIfNotExists(
+  pool,
+  table,
+  column,
+  definition,
+  comment = ""
+) {
   try {
-    const [existing] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [table, column]);
+    const [existing] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [
+      table,
+      column,
+    ]);
 
     if (existing.length > 0) {
-      console.log(`ℹ️ Column \`${column}\` already exists in \`${table}\`. Skipping.`);
+      console.log(
+        `ℹ️ Column \`${column}\` already exists in \`${table}\`. Skipping.`
+      );
       return;
     }
 
@@ -45,7 +80,10 @@ async function addColumnIfNotExists(pool, table, column, definition, comment = '
     await pool.query(query, [table, column]);
     console.log(`✅ Added column \`${column}\` to \`${table}\``);
   } catch (error) {
-    console.error(`❌ Error adding column \`${column}\` to \`${table}\`:`, error.message);
+    console.error(
+      `❌ Error adding column \`${column}\` to \`${table}\`:`,
+      error.message
+    );
     throw error;
   }
 }
@@ -53,9 +91,18 @@ async function addColumnIfNotExists(pool, table, column, definition, comment = '
 /**
  * Safely modifies a column type only if current type is different.
  */
-async function modifyColumnTypeIfNotMatch(pool, table, column, targetType, comment = '') {
+async function modifyColumnTypeIfNotMatch(
+  pool,
+  table,
+  column,
+  targetType,
+  comment = ""
+) {
   try {
-    const [colInfo] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [table, column]);
+    const [colInfo] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [
+      table,
+      column,
+    ]);
 
     if (colInfo.length === 0) {
       console.log(`❌ Column \`${column}\` does not exist in \`${table}\`.`);
@@ -66,7 +113,9 @@ async function modifyColumnTypeIfNotMatch(pool, table, column, targetType, comme
     const targetUpper = targetType.toUpperCase();
 
     if (currentType === targetUpper) {
-      console.log(`ℹ️ Column \`${column}\` in \`${table}\` already matches type: ${targetUpper}. Skipping.`);
+      console.log(
+        `ℹ️ Column \`${column}\` in \`${table}\` already matches type: ${targetUpper}. Skipping.`
+      );
       return;
     }
 
@@ -76,9 +125,14 @@ async function modifyColumnTypeIfNotMatch(pool, table, column, targetType, comme
     }
 
     await pool.query(query, [table, column]);
-    console.log(`✅ Modified column \`${column}\` in \`${table}\` from \`${currentType}\` to \`${targetType}\``);
+    console.log(
+      `✅ Modified column \`${column}\` in \`${table}\` from \`${currentType}\` to \`${targetType}\``
+    );
   } catch (error) {
-    console.error(`❌ Error modifying column \`${column}\` in \`${table}\`:`, error.message);
+    console.error(
+      `❌ Error modifying column \`${column}\` in \`${table}\`:`,
+      error.message
+    );
     throw error;
   }
 }
@@ -88,17 +142,25 @@ async function modifyColumnTypeIfNotMatch(pool, table, column, targetType, comme
  */
 async function dropColumnIfExists(pool, table, column) {
   try {
-    const [existing] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [table, column]);
+    const [existing] = await pool.query("SHOW COLUMNS FROM ?? LIKE ?", [
+      table,
+      column,
+    ]);
 
     if (existing.length === 0) {
-      console.log(`ℹ️ Column \`${column}\` does not exist in \`${table}\`. Skipping.`);
+      console.log(
+        `ℹ️ Column \`${column}\` does not exist in \`${table}\`. Skipping.`
+      );
       return;
     }
 
     await pool.query("ALTER TABLE ?? DROP COLUMN ??", [table, column]);
     console.log(`✅ Dropped column \`${column}\` from \`${table}\``);
   } catch (error) {
-    console.error(`❌ Error dropping column \`${column}\` from \`${table}\`:`, error.message);
+    console.error(
+      `❌ Error dropping column \`${column}\` from \`${table}\`:`,
+      error.message
+    );
     throw error;
   }
 }
@@ -121,7 +183,9 @@ async function dropForeignKeyAndIndexIfExists(conn, table, column) {
   if (fkResults.length > 0) {
     const fkName = fkResults[0].CONSTRAINT_NAME;
     await conn.query(`ALTER TABLE ?? DROP FOREIGN KEY ??`, [table, fkName]);
-    console.log(`✅ Dropped FOREIGN KEY \`${fkName}\` on \`${table}.${column}\``);
+    console.log(
+      `✅ Dropped FOREIGN KEY \`${fkName}\` on \`${table}.${column}\``
+    );
   } else {
     console.log(`ℹ️ No foreign key found on \`${table}.${column}\``);
   }
@@ -135,9 +199,11 @@ async function dropForeignKeyAndIndexIfExists(conn, table, column) {
   for (const row of indexResults) {
     const indexName = row.Key_name;
     // Avoid dropping PRIMARY key accidentally
-    if (indexName !== 'PRIMARY') {
+    if (indexName !== "PRIMARY") {
       await conn.query(`ALTER TABLE ?? DROP INDEX ??`, [table, indexName]);
-      console.log(`✅ Dropped INDEX \`${indexName}\` on \`${table}.${column}\``);
+      console.log(
+        `✅ Dropped INDEX \`${indexName}\` on \`${table}.${column}\``
+      );
     }
   }
 
@@ -146,8 +212,38 @@ async function dropForeignKeyAndIndexIfExists(conn, table, column) {
   }
 }
 
+/**
+ * Safely adds an index only if it doesn't already exist.
+ */
+async function addIndexIfNotExists(pool, table, indexName, columns) {
+  try {
+    const [indexes] = await pool.query(
+      `SHOW INDEX FROM ?? WHERE Key_name = ?`,
+      [table, indexName]
+    );
 
+    if (indexes.length > 0) {
+      console.log(
+        `ℹ️ Index \`${indexName}\` already exists on \`${table}\`. Skipping.`
+      );
+      return;
+    }
 
+    const columnList = columns.map((col) => `\`${col}\``).join(", ");
+    const query = `ALTER TABLE \`${table}\` ADD INDEX \`${indexName}\` (${columnList})`;
+
+    await pool.query(query);
+    console.log(
+      `✅ Added index \`${indexName}\` on \`${table}\` (${columns.join(", ")})`
+    );
+  } catch (error) {
+    console.error(
+      `❌ Error adding index \`${indexName}\` on \`${table}\`:`,
+      error.message
+    );
+    throw error;
+  }
+}
 
 //--------------------- Apply Queries-----------------------------------
 
@@ -204,7 +300,6 @@ async function addColumnsToNotifications(conn) {
     "int(11) NOT NULL",
     "clinic_id for super-user"
   );
- 
 }
 
 async function dropToothDetailsColumn(conn) {
@@ -251,7 +346,6 @@ async function addShowFieldReviews(conn) {
 }
 
 async function updatExpensePaid(conn) {
-  
   await modifyColumnTypeIfNotMatch(
     conn,
     "expense",
@@ -260,16 +354,14 @@ async function updatExpensePaid(conn) {
     "paid_by size change"
   );
 
-  
   await modifyColumnTypeIfNotMatch(
     conn,
-   "expense",
+    "expense",
     "paid_by_user",
     "VARCHAR(100) NOT NULL",
     "paid_by_user size change"
   );
 
-  
   await modifyColumnTypeIfNotMatch(
     conn,
     "expense",
@@ -279,8 +371,8 @@ async function updatExpensePaid(conn) {
   );
 }
 
-async function deleteReminderDentistIdForeignkey(conn){
-  await dropForeignKeyAndIndexIfExists(conn,'reminder','dentist_id')
+async function deleteReminderDentistIdForeignkey(conn) {
+  await dropForeignKeyAndIndexIfExists(conn, "reminder", "dentist_id");
   await modifyColumnTypeIfNotMatch(
     conn,
     "reminder",
@@ -290,7 +382,14 @@ async function deleteReminderDentistIdForeignkey(conn){
   );
 }
 
-
+async function addAppointmentIndex(conn) {
+  await addIndexIfNotExists(
+    conn,
+    "appointment",
+    "idx_tenant_date_time_status",
+    ["tenant_id", "appointment_date", "start_time", "status"]
+  );
+}
 
 // Main migration runner
 (async () => {
@@ -301,9 +400,7 @@ async function deleteReminderDentistIdForeignkey(conn){
     await conn.beginTransaction();
 
     // Run migrations
-
-    await addColumnsToNotifications(conn)
-    await deleteReminderDentistIdForeignkey(conn)
+    await addAppointmentIndex(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");

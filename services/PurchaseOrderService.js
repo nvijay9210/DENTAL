@@ -103,7 +103,7 @@ const getAllPurchaseOrdersByTenantId = async (
     return { data: convertedRows, total: purchase_orders.total };
   } catch (err) {
     console.error("Database error while fetching purchase_orders:", err);
-    throw new CustomError("Failed to fetch purchase_orders", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -139,7 +139,7 @@ const getAllPurchaseOrdersByTenantIdAndSupplierId = async (
     return { data: convertedRows, total: purchase_orders.total };
   } catch (err) {
     console.error("Database error while fetching purchase_orders:", err);
-    throw new CustomError("Failed to fetch purchase_orders", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -175,7 +175,7 @@ const getAllPurchaseOrdersByTenantIdAndClinicId = async (
     return { data: convertedRows, total: purchase_orders.total };
   } catch (err) {
     console.error("Database error while fetching purchase_orders:", err);
-    throw new CustomError("Failed to fetch purchase_orders", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -220,15 +220,15 @@ const updatePurchaseOrder = async (purchase_orderId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("PurchaseOrder not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("purchase_order:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update purchase_order", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -239,15 +239,15 @@ const updatePurchaseOrderStatus = async (purchase_orderId, tenant_id,clinic_id,s
       purchase_orderId, tenant_id,clinic_id,status
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError("PurchaseOrder not found or no changes made.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("purchase_order:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update purchase_order", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -262,9 +262,9 @@ const deletePurchaseOrderByTenantIdAndPurchaseOrderId = async (
         tenantId,
         purchase_orderId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("PurchaseOrder not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("purchase_order:*");
     return affectedRows;

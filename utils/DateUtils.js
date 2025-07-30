@@ -132,6 +132,15 @@ function getSystemTimeOnly() {
   return now.toTimeString().split(" ")[0]; // returns 'HH:MM:SS'
 }
 
+exports.getSystemDateTime = () => {
+  const now = new Date();
+  return now.toLocaleString('en-GB', {
+    timeZone: 'Asia/Kolkata',
+    hour12: false
+  }).replace(',', '');
+};
+
+
 
 
 

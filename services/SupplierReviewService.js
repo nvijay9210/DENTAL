@@ -100,7 +100,7 @@ const getAllSupplierReviewssByTenantId = async (
     return { data: convertedRows, total: supplier_reviewss.total };
   } catch (err) {
     console.error("Database error while fetching supplier_reviewss:", err);
-    throw new CustomError("Failed to fetch supplier_reviewss", 404);
+    throw new CustomError(err, 500);
   }
 };
 const getAllSupplierReviewsByTenantIdAndSupplierId = async (
@@ -139,7 +139,7 @@ const getAllSupplierReviewsByTenantIdAndSupplierId = async (
     return { data: convertedRows, total: supplier_reviewss.total };
   } catch (err) {
     console.error("Database error while fetching supplier_reviewss:", err);
-    throw new CustomError("Failed to fetch supplier_reviewss", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -184,18 +184,18 @@ const updateSupplierReviews = async (supplier_reviewsId, data, tenant_id) => {
       tenant_id
     );
 
-    if (affectedRows === 0) {
-      throw new CustomError(
-        "SupplierReviews not found or no changes made.",
-        404
-      );
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(
+    //     "SupplierReviews not found or no changes made.",
+    //     404
+    //   );
+    // }
 
     await invalidateCacheByPattern("supplier_reviews:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError("Failed to update supplier_reviews", 404);
+    throw new CustomError(err, 500);
   }
 };
 
@@ -210,9 +210,9 @@ const deleteSupplierReviewsByTenantIdAndSupplierReviewsId = async (
         tenantId,
         supplier_reviewsId
       );
-    if (affectedRows === 0) {
-      throw new CustomError("SupplierReviews not found.", 404);
-    }
+    // if (affectedRows === 0) {
+    //   throw new CustomError(err, 500);
+    // }
 
     await invalidateCacheByPattern("supplier_reviews:*");
     return affectedRows;
