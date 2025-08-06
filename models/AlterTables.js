@@ -247,147 +247,19 @@ async function addIndexIfNotExists(pool, table, indexName, columns) {
 
 //--------------------- Apply Queries-----------------------------------
 
-async function renameMonthlyWeekdayColumn(conn) {
-  await renameColumnIfSafe(
-    conn,
-    "reminder",
-    "monthly_weekday",
-    "monthly_weekdays",
-    "TEXT NULL COMMENT 'Monthly weekdays for reminder'"
-  );
-}
-
-async function updateNotificationFileUrlColumn(conn) {
-  await modifyColumnTypeIfNotMatch(
-    conn,
-    "notifications",
-    "file_url",
-    "VARCHAR(255) NULL",
-    "URL or path of associated file"
-  );
-}
-
-async function addColumnsToSupplierPayment(conn) {
-  await addColumnIfNotExists(
-    conn,
-    "supplier_payments",
-    "paid_amount",
-    "DECIMAL(10,2) NULL",
-    "Amount paid to supplier"
-  );
-
-  await addColumnIfNotExists(
-    conn,
-    "supplier_payments",
-    "balance_amount",
-    "DECIMAL(10,2) NULL",
-    "Remaining balance amount"
-  );
-
-  await addColumnIfNotExists(
-    conn,
-    "supplier_payments",
-    "supplier_payment_documents",
-    "text NULL",
-    "Supplier Payment documents"
-  );
-}
-async function addColumnsToNotifications(conn) {
-  await addColumnIfNotExists(
-    conn,
-    "notifications",
-    "clinic_id",
-    "int(11) NOT NULL",
-    "clinic_id for super-user"
-  );
-}
-
-async function dropToothDetailsColumn(conn) {
-  await dropColumnIfExists(conn, "patient", "tooth_details");
-}
-
-async function updatePhoneFields(conn) {
-  // Make phone_number NOT NULL in clinic
-  await modifyColumnTypeIfNotMatch(
-    conn,
-    "clinic",
-    "phone_number",
-    "VARCHAR(15) NOT NULL",
-    "Primary phone number of clinic"
-  );
-
-  // Make phone_number NOT NULL in reception
-  await modifyColumnTypeIfNotMatch(
-    conn,
-    "reception",
-    "phone_number",
-    "VARCHAR(15) NOT NULL",
-    "Primary phone number of reception"
-  );
-
-  // Make alternate_phone_number NULLABLE in supplier
-  await modifyColumnTypeIfNotMatch(
-    conn,
-    "supplier",
-    "alternate_phone_number",
-    "VARCHAR(15) NULL",
-    "Alternate contact number"
-  );
-}
-
-async function addShowFieldReviews(conn) {
-  await addColumnIfNotExists(
-    conn,
-    "appointment",
-    "feedback_display",
-    "TINYINT(1) NULL Default 1",
-    "For Feedback Show or not"
-  );
-}
-
-async function updatExpensePaid(conn) {
-  await modifyColumnTypeIfNotMatch(
-    conn,
-    "expense",
-    "paid_by",
-    "VARCHAR(100) NOT NULL",
-    "paid_by size change"
-  );
-
-  await modifyColumnTypeIfNotMatch(
-    conn,
-    "expense",
-    "paid_by_user",
-    "VARCHAR(100) NOT NULL",
-    "paid_by_user size change"
-  );
-
-  await modifyColumnTypeIfNotMatch(
-    conn,
-    "expense",
-    "paid_to",
-    "VARCHAR(100) NOT NULL",
-    "paid_to size change"
-  );
-}
-
-async function deleteReminderDentistIdForeignkey(conn) {
-  await dropForeignKeyAndIndexIfExists(conn, "reminder", "dentist_id");
-  await modifyColumnTypeIfNotMatch(
-    conn,
-    "reminder",
-    "dentist_id",
-    "INT(11) NULL",
-    "Alternate dentist_id key"
-  );
-}
-
 async function addAppointmentIndex(conn) {
   await addIndexIfNotExists(
     conn,
     "appointment",
     "idx_tenant_date_time_status",
     ["tenant_id", "appointment_date", "start_time", "status"]
+  );
+}
+async function removeExpenseDocumentField(conn) {
+  await dropColumnIfExists(
+    conn,
+    "expense",
+    "expense_documents",
   );
 }
 
@@ -401,6 +273,7 @@ async function addAppointmentIndex(conn) {
 
     // Run migrations
     await addAppointmentIndex(conn);
+    await removeExpenseDocumentField(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");

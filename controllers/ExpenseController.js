@@ -6,12 +6,14 @@ const {
   validateTenantIdAndPageAndLimit,
 } = require("../validations/CommonValidations");
 const expenseValidation = require("../validations/ExpenseValidation");
+const { normalizeFileUploads, updateDocumentsDiffBased } = require("../utils/UploadFiles");
 
 /**
  * Create a new expense
  */
 exports.createExpense = async (req, res, next) => {
   const details = req.body;
+  console.log(details)
 
   try {
     // Validate expense data
@@ -108,21 +110,46 @@ exports.getExpenseByTenantIdAndExpenseId = async (req, res, next) => {
 /**
  * Update an existing expense
  */
+
+// controllers/ExpenseController.js
 exports.updateExpense = async (req, res, next) => {
   const { expense_id, tenant_id } = req.params;
   const details = req.body;
+  const updated_by = req.user?.id || 1;
 
   try {
-    // Validate update input
-    await expenseValidation.updateExpenseValidation(expense_id, details);
+    // ✅ Normalize files
+    const expense_documents = await normalizeFileUploads({
+      req,
+      fieldName: "expense_documents",
+      folderName: "Expense",
+      tenant_id,
+    });
 
-    // Update the expense
+    // ✅ Inject into body
+    details.expense_documents = expense_documents;
+
+    // ✅ Validate
+    await expenseValidation.updateExpenseValidation(expense_id, details, tenant_id);
+
+    // ✅ Update main record
     await expenseService.updateExpense(expense_id, details, tenant_id);
+
+    // ✅ Sync documents
+    await updateDocumentsDiffBased({
+      table_name: "expense",
+      table_id: expense_id,
+      field_name: "expense_documents",
+      newFiles: expense_documents,
+      updated_by,
+    });
+
     res.status(200).json({ message: "Expense updated successfully" });
   } catch (err) {
     next(err);
   }
 };
+
 
 /**
  * Delete a expense by ID and tenant ID

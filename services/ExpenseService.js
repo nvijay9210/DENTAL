@@ -11,6 +11,8 @@ const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
+const { createDocument,deleteDocumentsByTableAndId, getDocumentsByTableAndId, getDocumentsByField } = require("../models/documentModel");
+const { deleteUploadedFiles, saveDocuments, updateDocumentsDiffBased, normalizeFileUploads } = require("../utils/UploadFiles");
 
 // Field mapping for expenses (similar to treatment)
 
@@ -25,8 +27,7 @@ const expenseFields = {
   receipt_number: (val) => val,
   paid_by: (val) => val,
   paid_by_user: (val) => val,
-  paid_to: (val) => val,
-  expense_documents: helper.safeStringify,
+  paid_to: (val) => val
 };
 const expenseFieldsReverseMap = {
   expense_id:val=>val,
@@ -42,7 +43,6 @@ const expenseFieldsReverseMap = {
   paid_by: (val) => val,
   paid_by_user: (val) => val,
   paid_to: (val) => val,
-  expense_documents: helper.safeJsonParse,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
@@ -55,21 +55,38 @@ const createExpense = async (data) => {
     ...expenseFields,
     created_by: (val) => val,
   };
+
   try {
     const { columns, values } = mapFields(data, fieldMap);
+
     const expenseId = await expenseModel.createExpense(
       "expense",
       columns,
       values
     );
+
+    console.log('expenseId:',expenseId)
+
+    // Handle single or multiple file upload
+    await saveDocuments({
+      table_name: "expense",
+      table_id: expenseId,
+      field_name: "expense_documents",
+      files: data.expense_documents,
+      created_by: data.created_by,
+    });
+  
+
     await invalidateCacheByPattern("expense:*");
     await invalidateCacheByPattern("financeSummary:*");
+
     return expenseId;
   } catch (error) {
     console.error("Failed to create expense:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
+
 
 // Get All Expenses by Tenant ID with Caching
 const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
@@ -89,8 +106,31 @@ const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = expenses.data.map((expense) =>
-      helper.convertDbToFrontend(expense, expenseFieldsReverseMap)
+    const convertedRows = await Promise.all(
+      expenses.data.map(async (expense) => {
+        const formatted = helper.convertDbToFrontend(
+          expense,
+          expenseFieldsReverseMap
+        );
+    
+        const docs = await getDocumentsByField(
+          "expense",
+          expense.expense_id,
+          "expense_documents"
+        );
+    
+        // Extract only file_url
+        const fileInfos = docs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+        
+    
+        return {
+          ...formatted,
+          expense_documents: fileInfos,
+        };
+      })
     );
 
     return {data:convertedRows,total:expenses.total};;
@@ -125,9 +165,33 @@ const getAllExpensesByTenantIdAndClinicId = async (
       return result;
     });
 
-    const convertedRows = expenses.data.map((expense) =>
-      helper.convertDbToFrontend(expense, expenseFieldsReverseMap)
+    const convertedRows = await Promise.all(
+      expenses.data.map(async (expense) => {
+        const formatted = helper.convertDbToFrontend(
+          expense,
+          expenseFieldsReverseMap
+        );
+    
+        const docs = await getDocumentsByField(
+          "expense",
+          expense.expense_id,
+          "expense_documents"
+        );
+    
+        // Extract only file_url
+        const fileInfos = docs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+        
+    
+        return {
+          ...formatted,
+          expense_documents: fileInfos,
+        };
+      })
     );
+    
 
     return { data: convertedRows, total: expenses.total };
   } catch (err) {
@@ -135,6 +199,7 @@ const getAllExpensesByTenantIdAndClinicId = async (
     throw new CustomError(err, 500);
   }
 };
+
 
 const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   tenantId,
@@ -166,8 +231,31 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
         );
       return result;
     });
-    const convertedRows = expenses.data.map((expense) =>
-      helper.convertDbToFrontend(expense, expenseFieldsReverseMap)
+    const convertedRows = await Promise.all(
+      expenses.data.map(async (expense) => {
+        const formatted = helper.convertDbToFrontend(
+          expense,
+          expenseFieldsReverseMap
+        );
+    
+        const docs = await getDocumentsByField(
+          "expense",
+          expense.expense_id,
+          "expense_documents"
+        );
+    
+        // Extract only file_url
+        const fileInfos = docs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+        
+    
+        return {
+          ...formatted,
+          expense_documents: fileInfos,
+        };
+      })
     );
 
     return {data:convertedRows,total:expenses.total};;
@@ -184,25 +272,54 @@ const getExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
       tenantId,
       expenseId
     );
+
+    if (!expense) {
+      throw new CustomError("Expense not found", 404);
+    }
+
+    // Convert DB record to frontend format
     const convertedRows = helper.convertDbToFrontend(
       expense,
       expenseFieldsReverseMap
     );
 
-    return convertedRows;
+    // Fetch document records for this expense
+    const documents = await getDocumentsByField(
+      "expense",
+      expenseId,
+      "expense_documents"
+    );
+
+    // Format each document
+    const expense_documents = documents.map((doc) => ({
+      document_id: doc.document_id,
+      file_url: doc.file_url,
+    }));
+
+    // Attach to the response
+    return {
+      ...convertedRows,
+      expense_documents,
+    };
   } catch (error) {
-    throw new CustomError(err, 500);
+    console.error("Failed to get expense:", error);
+    throw new CustomError(error.message || "Internal Server Error", 500);
   }
 };
 
 // Update Expense
-const updateExpense = async (expenseId, data, tenant_id) => {
+
+const updateExpense = async (expenseId, data, tenant_id, req) => {
   const fieldMap = {
     ...expenseFields,
     updated_by: (val) => val,
   };
+
   try {
+    // 1. Map fields for update
     const { columns, values } = mapFields(data, fieldMap);
+
+    // 2. Update the expense record
     const affectedRows = await expenseModel.updateExpense(
       expenseId,
       columns,
@@ -210,37 +327,56 @@ const updateExpense = async (expenseId, data, tenant_id) => {
       tenant_id
     );
 
-    // if (affectedRows === 0) {
-    //   throw new CustomError("Expense not found or no changes made.", 404);
-    // }
+    // 3. Normalize uploaded + existing documents
+    const expense_documents = await normalizeFileUploads({
+      req,
+      fieldName: "expense_documents",
+      folderName: "Expense",
+      tenant_id,
+    });
 
+    // 4. Perform diff-based update for expense_documents
+    await updateDocumentsDiffBased({
+      table_name: "expense",
+      table_id: expenseId,
+      field_name: "expense_documents",
+      newFiles: expense_documents,
+      updated_by: data.updated_by,
+    });
+
+    // 5. Invalidate related Redis caches
     await invalidateCacheByPattern("expense:*");
     await invalidateCacheByPattern("financeSummary:*");
+
     return affectedRows;
   } catch (error) {
-    console.error("Update Error:", error);
-    throw new CustomError(err, 500);
+    console.error("❌ Update Error:", error);
+    throw new CustomError(error, 500);
   }
 };
+
+
 
 // Delete Expense
 const deleteExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
   try {
+    await handleFileCleanupByTable("expense", expenseId);
     const affectedRows = await expenseModel.deleteExpenseByTenantAndExpenseId(
       tenantId,
       expenseId
     );
-    // if (affectedRows === 0) {
-    //   throw new CustomError(err, 500);
-    // }
 
+    // 5. Clear cache
     await invalidateCacheByPattern("expense:*");
     await invalidateCacheByPattern("financeSummary:*");
+
     return affectedRows;
   } catch (error) {
-    throw new CustomError(err, 500);
+    console.error("Failed to delete expense:", error);
+    throw new CustomError(error, 500);
   }
 };
+
 
 module.exports = {
   createExpense,

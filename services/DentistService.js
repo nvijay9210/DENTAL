@@ -19,7 +19,13 @@ const helper = require("../utils/Helpers");
 
 const { encrypt } = require("../middlewares/PasswordHash");
 const { buildCacheKey } = require("../utils/RedisCache");
-const { deleteUploadedFiles, deleteFileIfExists } = require("../utils/UploadFiles");
+const {
+  deleteUploadedFiles,
+  deleteFileIfExists,
+  saveDocuments,
+  updateDocumentsDiffBased,
+} = require("../utils/UploadFiles");
+const { getDocumentsByField } = require("../models/documentModel");
 
 const dentistFieldMap = {
   tenant_id: (val) => val,
@@ -148,10 +154,10 @@ const createDentist = async (data, token, realm) => {
         data.email ||
         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
 
-       userData = {
+      userData = {
         username,
         email,
-        "emailVerified": true,
+        emailVerified: true,
         firstName: data.first_name,
         lastName: data.last_name,
         password: "1234", // For demo; use generateAlphanumericPassword() in production
@@ -200,10 +206,9 @@ const createDentist = async (data, token, realm) => {
         }
       }
 
-
-      data.keycloak_id = userId,
-        data.username = username,
-        data.password = encrypt(userData.password).content;
+      (data.keycloak_id = userId),
+        (data.username = username),
+        (data.password = encrypt(userData.password).content);
     }
 
     // 6. Map fields for DB
@@ -215,6 +220,22 @@ const createDentist = async (data, token, realm) => {
       columns,
       values
     );
+
+    await saveDocuments({
+      table_name: "dentist",
+      table_id: dentistId,
+      field_name: "profile_picture",
+      files: data.profile_picture,
+      created_by: data.created_by,
+    });
+
+    await saveDocuments({
+      table_name: "dentist",
+      table_id: dentistId,
+      field_name: "awards_certifications",
+      files: data.awards_certifications,
+      created_by: data.created_by,
+    });
 
     // 8. Invalidate cache
     await invalidateCacheByPattern("dentist:*");
@@ -228,7 +249,7 @@ const createDentist = async (data, token, realm) => {
     };
   } catch (error) {
     console.error("❌ Failed to create dentist:", error.message);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -245,9 +266,6 @@ const updateDentist = async (dentistId, data, tenant_id) => {
       dentistId
     );
 
-    const oldImagePath = dentist.profile_picture;
-    const newImagePath = data.profile_picture;
-
     const { columns, values } = mapFields(data, update);
     const affectedRows = await dentistModel.updateDentist(
       dentistId,
@@ -256,53 +274,34 @@ const updateDentist = async (dentistId, data, tenant_id) => {
       tenant_id
     );
 
-    // if (affectedRows === 0) {
-    //   throw new CustomError("Dentist not found or no changes made.", 404);
-    // }
+    // 🔁 Diff-based profile picture update
+    await updateDocumentsDiffBased({
+      table_name: "dentist",
+      table_id: dentistId,
+      field_name: "profile_picture",
+      newFiles: Array.isArray(data.profile_picture)
+        ? data.profile_picture
+        : [data.profile_picture],
+      updated_by: data.updated_by,
+    });
 
-    // ✅ Delete profile image if changed
-    if (
-      newImagePath &&
-      newImagePath !== oldImagePath &&
-      oldImagePath?.startsWith("uploads/")
-    ) {
-      deleteFileIfExists(oldImagePath);
-    }
-
-    // ✅ Delete old awards_certification if replaced
-    if (data.awards_certification && dentist.awards_certification) {
-      const oldAwards = JSON.parse(dentist.awards_certification || "[]");
-      const newAwards = JSON.parse(data.awards_certification || "[]");
-
-      const toDelete = oldAwards.filter(
-        (oldItem) => !newAwards.includes(oldItem)
-      );
-
-      deleteUploadedFiles(toDelete);
-    }
-
-    // ✅ Delete old treatment_images if replaced
-    // if (data.treatment_images && dentist.treatment_images) {
-    //   const oldTreatments = JSON.parse(dentist.treatment_images || "[]");
-    //   const newTreatments = JSON.parse(data.treatment_images || "[]");
-
-    //   const toDelete = oldTreatments.filter(
-    //     (oldItem) => !newTreatments.includes(oldItem)
-    //   );
-
-    //   deleteUploadedFiles(toDelete);
-    // }
+    // 🔁 Diff-based awards_certifications update
+    await updateDocumentsDiffBased({
+      table_name: "dentist",
+      table_id: dentistId,
+      field_name: "awards_certifications",
+      newFiles: data.awards_certifications || [],
+      updated_by: data.updated_by,
+    });
 
     await invalidateCacheByPattern("dentist:*");
     return affectedRows;
   } catch (error) {
     console.error("Failed to update dentist:", error.message);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
-
-
-
+3;
 // -------------------- GET ALL --------------------
 const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
@@ -321,62 +320,117 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
       );
     });
 
-    const convertedRows = dentists.data
-      .map((dentist) =>
-        helper.convertDbToFrontend(dentist, dentistFieldReverseMap)
-      )
-      .map(flattenAwards);
+    const convertedRows = await Promise.all(
+      dentists.data.map(async (dentist) => {
+        const formatted = helper.convertDbToFrontend(
+          dentist,
+          dentistFieldReverseMap
+        );
+
+        // 📎 Get profile_picture documents
+        const profilePics = await getDocumentsByField(
+          "dentist",
+          dentist.dentist_id,
+          "profile_picture"
+        );
+        const profile_picture = profilePics.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+
+        // 🏆 Get awards_certifications documents
+        const awards = await getDocumentsByField(
+          "dentist",
+          dentist.dentist_id,
+          "awards_certifications"
+        );
+        const awards_certifications = awards.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+
+        return {
+          ...formatted,
+          profile_picture,
+          awards_certifications,
+        };
+      })
+    );
 
     return { data: convertedRows, total: dentists.total };
-  } catch (err) {
+  } catch (error) {
     console.error("Database error while fetching dentists:", err.message);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
-function flattenAwards(dentist) {
-  const flattened = {};
+// function flattenAwards(dentist) {
+//   const flattened = {};
 
-  if (Array.isArray(dentist.awards_certifications)) {
-    dentist.awards_certifications.forEach((cert, index) => {
-      flattened[`awards_certifications_${index}`] = cert.image || "";
-      flattened[`description_awards_certifications_${index}`] =
-        cert.description || "";
-    });
-  }
+//   if (Array.isArray(dentist.awards_certifications)) {
+//     dentist.awards_certifications.forEach((cert, index) => {
+//       flattened[`awards_certifications_${index}`] = cert.image || "";
+//       flattened[`description_awards_certifications_${index}`] =
+//         cert.description || "";
+//     });
+//   }
 
-  // Remove original field if not needed
-  delete dentist.awards_certifications;
+//   // Remove original field if not needed
+//   delete dentist.awards_certifications;
 
-  return {
-    ...dentist,
-    ...flattened,
-  };
-}
+//   return {
+//     ...dentist,
+//     ...flattened,
+//   };
+// }
 
 // -------------------- GET SINGLE --------------------
+
 const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
   try {
     const dentist = await dentistModel.getDentistByTenantIdAndDentistId(
       tenantId,
       dentistId
     );
+
     if (!dentist) {
       throw new CustomError("Dentist not found", 404);
     }
 
-    const convertedRows = helper.convertDbToFrontend(
+    // 1. Convert DB to frontend format
+    const formatted = helper.convertDbToFrontend(
       dentist,
       dentistFieldReverseMap
     );
 
-    const result = flattenAwards(convertedRows);
+    // 2. Fetch documents
+    const [profileDocs, awardDocs] = await Promise.all([
+      getDocumentsByField("dentist", dentistId, "profile_picture"),
+      getDocumentsByField("dentist", dentistId, "awards_certifications"),
+    ]);
 
-    return result;
+    // 3. Map document data
+    const profile_picture = profileDocs.map((doc) => ({
+      document_id: doc.document_id,
+      file_url: doc.file_url,
+    }));
+
+    const awards_certifications = awardDocs.map((doc) => ({
+      document_id: doc.document_id,
+      file_url: doc.file_url,
+    }));
+
+    // 4. Return combined response
+    return {
+      ...formatted,
+      profile_picture,
+      awards_certifications,
+    };
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
+
 
 // -------------------- DELETE --------------------
 const deleteDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
@@ -388,7 +442,7 @@ const deleteDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
     await invalidateCacheByPattern("dentist:*");
     return result;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -434,18 +488,47 @@ const getAllDentistsByTenantIdAndClinicId = async (
       );
     });
 
-    const convertedRows = dentists.data
-      .map((dentist) =>
-        helper.convertDbToFrontend(dentist, dentistFieldReverseMap)
-      )
-      .map(flattenAwards);
+    const convertedRows = await Promise.all(
+      dentists.data.map(async (dentist) => {
+        const formatted = helper.convertDbToFrontend(
+          dentist,
+          dentistFieldReverseMap
+        );
+
+        // 📎 Get profile_picture documents
+        const profilePics = await getDocumentsByField(
+          "dentist",
+          dentist.dentist_id,
+          "profile_picture"
+        );
+        const profile_picture = profilePics.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+
+        // 🏆 Get awards_certifications documents
+        const awards = await getDocumentsByField(
+          "dentist",
+          dentist.dentist_id,
+          "awards_certifications"
+        );
+        const awards_certifications = awards.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+
+        return {
+          ...formatted,
+          profile_picture,
+          awards_certifications,
+        };
+      })
+    );
 
     return { data: convertedRows, total: dentists.total };
   } catch (error) {
-    throw new CustomError(
-      `Failed to check dentist existence: ${error.message}`,
-      404
-    );
+    console.log(error)
+    throw new CustomError(error, 500);
   }
 };
 
@@ -467,7 +550,7 @@ const updateClinicIdAndNameAndAddress = async (
     await invalidateCacheByPattern("dentist:*");
     return result;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -481,7 +564,7 @@ const updateNullClinicInfoWithJoin = async (tenantId, clinicId, dentistId) => {
     await invalidateCacheByPattern("dentist:*");
     return result;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 

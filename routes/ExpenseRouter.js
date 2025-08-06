@@ -27,7 +27,7 @@ const expenseFileMiddleware = uploadFileMiddleware({
   fileFields: [
     {
       fieldName: "expense_documents",
-      maxSizeMB: 5,
+      maxSizeMB: 50,
       multiple: true
     },
   ],

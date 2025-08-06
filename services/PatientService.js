@@ -20,6 +20,11 @@ const {
 const { encrypt } = require("../middlewares/PasswordHash");
 const { buildCacheKey } = require("../utils/RedisCache");
 const { createPatientClinic } = require("./PatientClinicService");
+const {
+  saveDocuments,
+  updateDocumentsDiffBased,
+} = require("../utils/UploadFiles");
+const { getDocumentsByField } = require("../models/documentModel");
 
 const patiendFields = {
   tenant_id: (val) => val,
@@ -92,7 +97,7 @@ const patientFieldsReverseMap = {
 };
 
 // Create patient
-const createPatient = async (data, token, realm,user_clinic_id) => {
+const createPatient = async (data, token, realm, user_clinic_id) => {
   const create = {
     ...patiendFields,
     created_by: (val) => val,
@@ -113,7 +118,7 @@ const createPatient = async (data, token, realm,user_clinic_id) => {
       userData = {
         username,
         email,
-        "emailVerified": true,
+        emailVerified: true,
         firstName: data.first_name,
         lastName: data.last_name,
         password: "1234", // For demo; use generateAlphanumericPassword() in production
@@ -145,7 +150,7 @@ const createPatient = async (data, token, realm,user_clinic_id) => {
 
       console.log("🩺 Assigned 'patient' role");
 
-      console.log('data:',data)
+      console.log("data:", data);
 
       // 5. Optional: Add to Group (e.g., based on clinicId)
       if (user_clinic_id) {
@@ -175,12 +180,33 @@ const createPatient = async (data, token, realm,user_clinic_id) => {
       columns,
       values
     );
+
+    await saveDocuments({
+      table_name: "patient",
+      table_id: patientId,
+      field_name: "profile_picture",
+      files: data.profile_picture,
+      created_by: data.created_by,
+    });
+
     await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:mostvisited:*");
 
-    const patientclinicId=await createPatientClinic({patient_id:patientId,clinic_id:data.clinic_id,created_by:data.created_by})
-    if(!patientclinicId) throw new CustomError('patientclinic not added',404)
+    const patientclinicId = await createPatientClinic({
+      patient_id: patientId,
+      clinic_id: data.clinic_id,
+      created_by: data.created_by,
+    });
+    if (!patientclinicId) throw new CustomError("patientclinic not added", 404);
+
+    await saveDocuments({
+      table_name: "patient",
+      table_id: patientId,
+      field_name: "profile_picture",
+      files: data.profile_picture,
+      created_by: data.created_by,
+    });
 
     return {
       patientId,
@@ -189,7 +215,7 @@ const createPatient = async (data, token, realm,user_clinic_id) => {
     };
   } catch (error) {
     console.trace(error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -219,7 +245,7 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
     return { data: convertedRows, total: patients.total };
   } catch (error) {
     console.error(error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -467,7 +493,7 @@ const getMostVisitedPatientsByClinicPeriods = async (
     });
     return patients;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -782,7 +808,7 @@ const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -797,7 +823,7 @@ const checkPatientExistsByTenantIdAndPatientId = async (
       patientId
     );
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -815,9 +841,17 @@ const updatePatient = async (patientId, data, tenant_id) => {
       values,
       tenant_id
     );
-    // if (affectedRows === 0) {
-    //   throw new CustomError("Patient not found or no changes made.", 404);
-    // }
+
+    // 🔁 Diff-based profile picture update
+    await updateDocumentsDiffBased({
+      table_name: "patient",
+      table_id: patientId,
+      field_name: "profile_picture",
+      newFiles: Array.isArray(data.profile_picture)
+        ? data.profile_picture
+        : [data.profile_picture],
+      updated_by: data.updated_by,
+    });
 
     await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:*");
@@ -825,7 +859,7 @@ const updatePatient = async (patientId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -837,7 +871,7 @@ const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
       patientId
     );
     // if (affectedRows === 0) {
-    //   throw new CustomError(err, 500);
+    //   throw new CustomError(error, 500);
     // }
 
     await invalidateCacheByPattern("patient:*");
@@ -845,7 +879,7 @@ const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
     await invalidateCacheByPattern("patient:mostvisited:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -991,9 +1025,9 @@ const groupToothProceduresByTimeRangeCumulative = async (
   endDate
 ) => {
   const cacheKey = buildCacheKey("patient", "toothdetails", {
-    tenant_id:tenantId,
-    clinic_id:clinicId,
-    dentist_id:dentistId,
+    tenant_id: tenantId,
+    clinic_id: clinicId,
+    dentist_id: dentistId,
     startDate,
     endDate,
   });
@@ -1015,7 +1049,7 @@ const groupToothProceduresByTimeRangeCumulative = async (
     return patients;
   } catch (error) {
     console.error(error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -1176,19 +1210,35 @@ const getAllPatientsByTenantIdAndClinicId = async (
       return result;
     });
 
-    const convertedRows = patients.data.map((row) => {
-      const { clinic_id, ...patientFields } = row;
+    // 🔁 Convert + fetch profile_picture for each patient
+    const convertedRows = await Promise.all(
+      patients.data.map(async (row) => {
+        const { clinic_id, patient_id, ...patientFields } = row;
 
-      const converted = helper.convertDbToFrontend(
-        patientFields,
-        patientFieldsReverseMap
-      );
+        const converted = helper.convertDbToFrontend(
+          patientFields,
+          patientFieldsReverseMap
+        );
 
-      return {
-        ...converted,
-        clinic_id, // keep original field as-is
-      };
-    });
+        // Fetch documents (profile_picture only)
+        const profileDocs = await getDocumentsByField(
+          "patient",
+          patient_id,
+          "profile_picture"
+        );
+
+        const profile_picture = profileDocs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+
+        return {
+          ...converted,
+          clinic_id,
+          profile_picture,
+        };
+      })
+    );
 
     return {
       data: convertedRows,
@@ -1196,9 +1246,11 @@ const getAllPatientsByTenantIdAndClinicId = async (
     };
   } catch (error) {
     console.error(error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
+
+
 const getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
   tenantId,
   clinic_id,
@@ -1217,30 +1269,42 @@ const getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
 
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
-      const result = await patientModel.getAllPatientsByTenantIdAndClinicIdAndDentistId(
+      return await patientModel.getAllPatientsByTenantIdAndClinicIdAndDentistId(
         tenantId,
         clinic_id,
         dentist_id,
         Number(limit),
         offset
       );
-      console.log("✅ Serving patients from DB and caching result");
-      return result;
     });
 
-    const convertedRows = patients.data.map((row) => {
-      const { clinic_id, ...patientFields } = row;
+    const convertedRows = await Promise.all(
+      patients.data.map(async (row) => {
+        const { clinic_id, patient_id, ...patientFields } = row;
 
-      const converted = helper.convertDbToFrontend(
-        patientFields,
-        patientFieldsReverseMap
-      );
+        const converted = helper.convertDbToFrontend(
+          patientFields,
+          patientFieldsReverseMap
+        );
 
-      return {
-        ...converted,
-        clinic_id, // keep original field as-is
-      };
-    });
+        const docs = await getDocumentsByField(
+          "patient",
+          patient_id,
+          "profile_picture"
+        );
+
+        const profile_picture = docs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+
+        return {
+          ...converted,
+          clinic_id,
+          profile_picture,
+        };
+      })
+    );
 
     return {
       data: convertedRows,
@@ -1248,7 +1312,7 @@ const getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
     };
   } catch (error) {
     console.error(error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -1257,43 +1321,56 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
   tenantId,
   clinic_id,
   dentist_id,
-  page=1,
-  limit=10
+  page = 1,
+  limit = 10
 ) => {
   const cacheKey = buildCacheKey("patient", "list", {
-    tenant_id:tenantId,
-    clinic_id:clinic_id,
-    dentist_id
+    tenant_id: tenantId,
+    clinic_id,
+    dentist_id,
+    page,
+    limit,
   });
   const offset = (page - 1) * limit;
 
   try {
     const patients = await getOrSetCache(cacheKey, async () => {
-      const result =
-        await patientModel.getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus(
-          tenantId,
-          clinic_id,
-          dentist_id,
-          Number(limit),
-          offset
-        );
-      console.log("✅ Serving patients from DB and caching result");
-      return result;
-    });
-
-    const convertedRows = patients.data.map((row) => {
-      const { clinic_id, ...patientFields } = row;
-
-      const converted = helper.convertDbToFrontend(
-        patientFields,
-        patientFieldsReverseMap
+      return await patientModel.getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus(
+        tenantId,
+        clinic_id,
+        dentist_id,
+        Number(limit),
+        offset
       );
-
-      return {
-        ...converted,
-        clinic_id, // keep original field as-is
-      };
     });
+
+    const convertedRows = await Promise.all(
+      patients.data.map(async (row) => {
+        const { clinic_id, patient_id, ...patientFields } = row;
+
+        const converted = helper.convertDbToFrontend(
+          patientFields,
+          patientFieldsReverseMap
+        );
+
+        const docs = await getDocumentsByField(
+          "patient",
+          patient_id,
+          "profile_picture"
+        );
+
+        const profile_picture = docs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+
+        return {
+          ...converted,
+          clinic_id,
+          profile_picture,
+        };
+      })
+    );
 
     return {
       data: convertedRows,
@@ -1301,9 +1378,10 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
     };
   } catch (error) {
     console.error(error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
+
 
 module.exports = {
   createPatient,
@@ -1323,5 +1401,5 @@ module.exports = {
   groupToothProceduresByTimeRangeCumulativeByDentist,
   getAllPatientsByTenantIdAndClinicId,
   getAllPatientsByTenantIdAndClinicIdAndDentistId,
-  getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus
+  getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus,
 };

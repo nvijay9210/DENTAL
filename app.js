@@ -6,7 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
-require('./middlewares/Schedule') //appointment schedule
+// require('./middlewares/Schedule') //appointment schedule
 // const { logFilePath, logStream } = require('./logs/logger'); //log file
 
 const errorHandler = require('./middlewares/errorHandler');
@@ -169,6 +169,7 @@ async function initializeTables() {
     await createTable.createAppointmentStatsTable();
     await createTable.createToothDetailsTable();
     await createTable.createPatientClinicJoinTable();
+    await createTable.createDocumentJoinTable();
 
     console.log('All tables created in order.');
   } catch (err) {

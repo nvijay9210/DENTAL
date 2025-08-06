@@ -847,7 +847,7 @@ CREATE TABLE IF NOT EXISTS payment (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 `,
-addPatientClinic:`CREATE TABLE patient_clinic (
+addPatientClinic:`CREATE TABLE IF NOT EXISTS patient_clinic (
   patient_clinic_id INT PRIMARY KEY AUTO_INCREMENT,
   patient_id INT NOT NULL,
   clinic_id INT NOT NULL,
@@ -862,6 +862,24 @@ addPatientClinic:`CREATE TABLE patient_clinic (
 
   UNIQUE (patient_id, clinic_id) -- Prevent duplicate entries
 );
+`,
+
+addDocumentTable: `
+CREATE TABLE IF NOT EXISTS document (
+  document_id INT(11) NOT NULL AUTO_INCREMENT,
+  table_name VARCHAR(100) NOT NULL,
+  table_id INT(11) NOT NULL,
+  field_name VARCHAR(100) NOT NULL,
+  file_url VARCHAR(255) NOT NULL,
+
+  created_by VARCHAR(30) NOT NULL,
+  created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+  updated_by VARCHAR(30) DEFAULT NULL,
+  updated_time TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(),
+
+  PRIMARY KEY (document_id),
+  INDEX idx_table_reference (table_name, table_id,field_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 `
 };
 
