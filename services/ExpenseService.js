@@ -12,7 +12,7 @@ const helper = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
 const { createDocument,deleteDocumentsByTableAndId, getDocumentsByTableAndId, getDocumentsByField } = require("../models/documentModel");
-const { deleteUploadedFiles, saveDocuments, updateDocumentsDiffBased, normalizeFileUploads } = require("../utils/UploadFiles");
+const { deleteUploadedFiles, saveDocuments, updateDocumentsDiffBased, normalizeFileUploads, handleFileCleanupByTable } = require("../utils/UploadFiles");
 
 // Field mapping for expenses (similar to treatment)
 
@@ -316,10 +316,8 @@ const updateExpense = async (expenseId, data, tenant_id, req) => {
   };
 
   try {
-    // 1. Map fields for update
     const { columns, values } = mapFields(data, fieldMap);
 
-    // 2. Update the expense record
     const affectedRows = await expenseModel.updateExpense(
       expenseId,
       columns,
@@ -327,24 +325,18 @@ const updateExpense = async (expenseId, data, tenant_id, req) => {
       tenant_id
     );
 
-    // 3. Normalize uploaded + existing documents
-    const expense_documents = await normalizeFileUploads({
-      req,
-      fieldName: "expense_documents",
-      folderName: "Expense",
-      tenant_id,
-    });
+    // ✅ Fix: Extract from data or req.body
+    const expense_documents = data.expense_documents || req?.body?.expense_documents || [];
 
-    // 4. Perform diff-based update for expense_documents
     await updateDocumentsDiffBased({
       table_name: "expense",
       table_id: expenseId,
       field_name: "expense_documents",
       newFiles: expense_documents,
+      deletedFileIds:data.deletedFileIds,
       updated_by: data.updated_by,
     });
 
-    // 5. Invalidate related Redis caches
     await invalidateCacheByPattern("expense:*");
     await invalidateCacheByPattern("financeSummary:*");
 
@@ -357,10 +349,12 @@ const updateExpense = async (expenseId, data, tenant_id, req) => {
 
 
 
+
 // Delete Expense
 const deleteExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
+  
   try {
-    await handleFileCleanupByTable("expense", expenseId);
+    await deleteDocumentsByTableAndId('expense',expenseId)
     const affectedRows = await expenseModel.deleteExpenseByTenantAndExpenseId(
       tenantId,
       expenseId
