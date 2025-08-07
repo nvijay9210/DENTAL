@@ -15,6 +15,28 @@ const createSupplierPayments = async (table, columns, values) => {
   }
 };
 
+// Get unpaid supplier payment entries FIFO (where balance > 0)
+const getUnpaidEntriesFIFO = async (supplier_payment_id) => {
+  const query = `
+    SELECT * FROM supplier_payments
+    WHERE supplier_payment_id = ? AND balance_amount > 0
+    ORDER BY created_at ASC
+  `;
+  const [rows] = await pool.query(query, [supplier_payment_id]);
+  return rows;
+};
+
+// Update balance on existing unpaid entry
+const updateBalanceAmount = async (supplier_payment_id, newBalance) => {
+  const query = `
+    UPDATE supplier_payments
+    SET balance_amount = ?
+    WHERE supplier_payment_id = ?
+  `;
+  await pool.query(query, [newBalance, supplier_payment_id]);
+};
+
+
 // Get all supplier_paymentss by tenant ID with pagination
 const getAllSupplierPaymentssByTenantId = async (tenantId, limit, offset) => {
   try {
@@ -230,4 +252,6 @@ module.exports = {
   deleteSupplierPaymentsByTenantAndSupplierPaymentsId,
   getSupplierPaymentsByTenantAndPurchaseOrderId,
   getAllSupplierPaymentssByTenantIdAndSupplierId,
+  getUnpaidEntriesFIFO,
+  updateBalanceAmount
 };
