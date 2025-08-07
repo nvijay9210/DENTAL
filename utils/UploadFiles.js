@@ -35,10 +35,8 @@ const uploadFileMiddleware = (options) => {
   const { folderName, fileFields, createValidationFn, updateValidationFn } =
     options;
 
-    
-
   return async (req, res, next) => {
-    console.log(req.files)
+    console.log(req.files);
     try {
       if (!folderName || !Array.isArray(fileFields)) {
         return res
@@ -171,7 +169,7 @@ const uploadFileMiddleware = (options) => {
         uploadedFiles[fileField.fieldName] = fileField.multiple
           ? savedPaths
           : savedPaths[0];
-        console.log(uploadedFiles)
+        console.log(uploadedFiles);
         if (id) {
           const deletedFileIds = req.body.deletedFileIds || [];
 
@@ -293,16 +291,17 @@ const updateDocumentsDiffBased = async ({
   );
 
   if (Array.isArray(deletedFileIds) && deletedFileIds.length > 0) {
-    const toDelete = existingDocs.filter(doc =>
+    const toDelete = existingDocs.filter((doc) =>
       deletedFileIds.includes(String(doc.document_id))
     );
-  
-    await Promise.all(toDelete.map(async (doc) => {
-      await deleteDocumentById(doc.document_id);
-      await deleteUploadedFiles(doc.file_url);
-    }));
+
+    await Promise.all(
+      toDelete.map(async (doc) => {
+        await deleteDocumentById(doc.document_id);
+        await deleteUploadedFiles(doc.file_url);
+      })
+    );
   }
-  
 
   await Promise.all(
     toInsert.map((file) =>
@@ -317,33 +316,38 @@ const updateDocumentsDiffBased = async ({
   );
 };
 
-const saveDocuments = async (
+const saveDocuments = async ({
   table_name,
   table_id,
   field_name,
   files,
   created_by,
-) => {
+}) => {
   if (!files) return;
 
   const fileArray = Array.isArray(files) ? files : [files];
-  const validFiles = fileArray.filter(
-    (file) =>
-      typeof file === "string" || (file && typeof file.file_url === "string")
-  );
+  const validFiles = fileArray.filter((file) => {
+    const url = typeof file === "string" ? file : file?.file_url;
+    const isValid = typeof url === "string" && url.trim() !== "";
+    if (!isValid) {
+      console.warn("⚠️ Invalid file skipped in saveDocuments:", file);
+    }
+    return isValid;
+  });
 
   if (validFiles.length === 0) return;
 
   await Promise.all(
-    validFiles.map((file) =>
-      createDocument(
+    validFiles.map((file) => {
+      const fileUrl = typeof file === "string" ? file : file.file_url;
+      return createDocument(
         table_name,
         table_id,
         field_name,
-        typeof file === "string" ? file : file.file_url,
+        fileUrl,
         created_by
-      )
-    )
+      );
+    })
   );
 };
 
@@ -361,7 +365,6 @@ const handleFileCleanupByTable = async (table_name, table_id) => {
     for (const doc of documents) {
       await deleteDocumentById(doc.id);
     }
-
   } catch (error) {
     console.warn(
       `⚠️ Failed to clean up files for ${table_name} ID ${table_id}:`,
@@ -369,7 +372,6 @@ const handleFileCleanupByTable = async (table_name, table_id) => {
     );
   }
 };
-
 
 module.exports = {
   uploadFileMiddleware,

@@ -65,7 +65,7 @@ const createExpense = async (data) => {
       values
     );
 
-    console.log('expenseId:',expenseId)
+    console.log('expenseId:',data.expense_documents)
 
     // Handle single or multiple file upload
     await saveDocuments({
