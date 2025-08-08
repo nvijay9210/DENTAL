@@ -23,8 +23,10 @@ const { createPatientClinic } = require("./PatientClinicService");
 const {
   saveDocuments,
   updateDocumentsDiffBased,
+  updateSingleDocument2,
+  updateDocumentsDiffBased2,
 } = require("../utils/UploadFiles");
-const { getDocumentsByField } = require("../models/documentModel");
+const { getDocumentsByField, getDocumentsByTableAndId, deleteDocumentsByTableAndId } = require("../models/documentModel");
 
 const patiendFields = {
   tenant_id: (val) => val,
@@ -54,7 +56,6 @@ const patiendFields = {
   insurance_policy_number: (val) => val || null,
   insurance_policy_start_date: (val) => (val ? formatDateOnly(val) : null),
   insurance_policy_end_date: (val) => (val ? formatDateOnly(val) : null),
-  profile_picture: (val) => val || null,
 };
 
 const patientFieldsReverseMap = {
@@ -89,7 +90,6 @@ const patientFieldsReverseMap = {
   insurance_policy_number: (val) => val,
   insurance_policy_start_date: (val) => (val ? formatDateOnly(val) : null),
   insurance_policy_end_date: (val) => (val ? formatDateOnly(val) : null),
-  profile_picture: (val) => val,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
@@ -105,7 +105,8 @@ const createPatient = async (data, token, realm, user_clinic_id) => {
 
   try {
     let userData;
-    if (process.env.KEYCLOAK_POWER === "on") {
+    const allow='no';
+    if (process.env.KEYCLOAK_POWER === "on" && allow=='yes') {
       // 1. Generate username/email
       const username = helper.generateUsername(
         data.first_name,
@@ -150,8 +151,6 @@ const createPatient = async (data, token, realm, user_clinic_id) => {
 
       console.log("🩺 Assigned 'patient' role");
 
-      console.log("data:", data);
-
       // 5. Optional: Add to Group (e.g., based on clinicId)
       if (user_clinic_id) {
         const groupName = `dental-${data.tenant_id}-${user_clinic_id}`;
@@ -174,44 +173,43 @@ const createPatient = async (data, token, realm, user_clinic_id) => {
         (data.password = encrypt(userData.password).content);
     }
 
-    const { columns, values } = mapFields(data, create);
-    const patientId = await patientModel.createPatient(
-      "patient",
-      columns,
-      values
-    );
+     // Insert patient record
+     const { columns, values } = mapFields(data, create);
+     const patientId = await patientModel.createPatient("patient", columns, values);
 
-    await saveDocuments({
-      table_name: "patient",
-      table_id: patientId,
-      field_name: "profile_picture",
-      files: data.profile_picture,
-      created_by: data.created_by,
-    });
+     if (data['profile_picture[file_url]']) {
+      data.profile_picture = data['profile_picture[file_url]'][0];
+    }
+
+     console.log('data_profile_piture:',data.profile_picture)
+ 
+     // Save uploaded profile picture to DB
+     if (data?.profile_picture) {
+       await saveDocuments({
+         table_name: "patient",
+         table_id: patientId,
+         field_name: "profile_picture",
+         files: data?.profile_picture, // from middleware
+         created_by: data.created_by,
+       });
+     }
+ 
+     // Link patient to clinic
+     const patientclinicId = await createPatientClinic({
+       patient_id: patientId,
+       clinic_id: data.clinic_id,
+       created_by: data.created_by,
+     });
+     if (!patientclinicId) throw new CustomError("patientclinic not added", 404);
 
     await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:*");
-    await invalidateCacheByPattern("patient:mostvisited:*");
-
-    const patientclinicId = await createPatientClinic({
-      patient_id: patientId,
-      clinic_id: data.clinic_id,
-      created_by: data.created_by,
-    });
-    if (!patientclinicId) throw new CustomError("patientclinic not added", 404);
-
-    await saveDocuments({
-      table_name: "patient",
-      table_id: patientId,
-      field_name: "profile_picture",
-      files: data.profile_picture,
-      created_by: data.created_by,
-    });
+    await invalidateCacheByPattern("patient:mostvisited:*")
 
     return {
       patientId,
-      username: userData.username,
-      password: userData.password,
+      username: userData?.username,
+      password: userData?.password,
     };
   } catch (error) {
     console.trace(error);
@@ -806,7 +804,24 @@ const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
       patientFieldsReverseMap
     );
 
-    return convertedRows;
+     // Fetch document records for this expense
+     const documents = await getDocumentsByField(
+      "patient",
+      patientId,
+      "profile_picture"
+    );
+
+    // Format each document
+    const profile_picture = documents.map((doc) => ({
+      document_id: doc.document_id,
+      file_url: doc.file_url,
+    }));
+
+    // Attach to the response
+    return {
+      ...convertedRows,
+      profile_picture,
+    };
   } catch (error) {
     throw new CustomError(error, 500);
   }
@@ -842,16 +857,21 @@ const updatePatient = async (patientId, data, tenant_id) => {
       tenant_id
     );
 
+    // const patient=await getPatientByTenantIdAndPatientId(tenant_id,patientId)
+    // const deletedFileIds=[patient.profile_picture?.[0].document_id]
+    // console.log(deletedFileIds,patient)
+
     // 🔁 Diff-based profile picture update
-    await updateDocumentsDiffBased({
+    await updateSingleDocument2({
       table_name: "patient",
       table_id: patientId,
       field_name: "profile_picture",
-      newFiles: Array.isArray(data.profile_picture)
-        ? data.profile_picture
-        : [data.profile_picture],
-      updated_by: data.updated_by,
+      newFile: data?.profile_picture,
+      deleteOld: true,
+      created_by: data.created_by,
+      updated_by: data.updated_by
     });
+    
 
     await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:*");
@@ -866,13 +886,11 @@ const updatePatient = async (patientId, data, tenant_id) => {
 // Delete patient
 const deletePatientByTenantIdAndPatientId = async (tenantId, patientId) => {
   try {
+    await deleteDocumentsByTableAndId('patient',patientId)
     const affectedRows = await patientModel.deletePatientByTenantIdAndPatientId(
       tenantId,
       patientId
     );
-    // if (affectedRows === 0) {
-    //   throw new CustomError(error, 500);
-    // }
 
     await invalidateCacheByPattern("patient:*");
     await invalidateCacheByPattern("patient:*");
@@ -1210,36 +1228,35 @@ const getAllPatientsByTenantIdAndClinicId = async (
       return result;
     });
 
-    // 🔁 Convert + fetch profile_picture for each patient
-    const convertedRows = await Promise.all(
-      patients.data.map(async (row) => {
-        const { clinic_id, patient_id, ...patientFields } = row;
+    // console.log(patients)
 
-        const converted = helper.convertDbToFrontend(
-          patientFields,
+    const convertedRows = await Promise.all(
+      patients.data.map(async (patient) => {
+        // Convert employee fields using reverse mapping
+        const formatted = helper.convertDbToFrontend(
+          patient,
           patientFieldsReverseMap
         );
 
-        // Fetch documents (profile_picture only)
-        const profileDocs = await getDocumentsByField(
+        // Fetch employee photo documents
+        const docs = await getDocumentsByField(
           "patient",
-          patient_id,
+          patient.patient_id,
           "profile_picture"
         );
 
-        const profile_picture = profileDocs.map((doc) => ({
+        // Extract only document_id and file_url
+        const photoFiles = docs.map((doc) => ({
           document_id: doc.document_id,
           file_url: doc.file_url,
         }));
 
         return {
-          ...converted,
-          clinic_id,
-          profile_picture,
+          ...formatted,
+          profile_picture: photoFiles,
         };
       })
     );
-
     return {
       data: convertedRows,
       total: patients.total,

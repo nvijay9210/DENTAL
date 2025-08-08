@@ -87,7 +87,6 @@ const createExpense = async (data) => {
   }
 };
 
-
 // Get All Expenses by Tenant ID with Caching
 const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;

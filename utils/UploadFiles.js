@@ -31,6 +31,7 @@ const sanitizeFileName = (name) => {
   return name.replace(/[^a-zA-Z0-9_\-\.]/g, "_");
 };
 
+//Multiple Image upload
 const uploadFileMiddleware = (options) => {
   const { folderName, fileFields, createValidationFn, updateValidationFn } =
     options;
@@ -66,7 +67,7 @@ const uploadFileMiddleware = (options) => {
 
       let id = 0;
       switch (folderName) {
-        case "Expense":
+        case "":
           id = req.params.expense_id;
           break;
         case "Patient":
@@ -194,6 +195,143 @@ const uploadFileMiddleware = (options) => {
   };
 };
 
+//singleFile
+const uploadFileMiddleware2 = (options) => {
+  const { folderName, fileFields, createValidationFn, updateValidationFn } =
+    options;
+  return async (req, res, next) => {
+    try {
+      if (!folderName || !Array.isArray(fileFields)) {
+        return res
+          .status(400)
+          .json({ message: "Invalid upload configuration" });
+      }
+      const tenant_id =
+        req.body.tenant_id || req.params.tenant_id || req.query.tenant_id;
+      if (!tenant_id) {
+        return res.status(400).json({ message: "Missing tenant ID" });
+      }
+      let id = 0;
+      switch (folderName) {
+        case "Expense":
+          id = req.params.expense_id;
+          break;
+        case "Patient":
+          id = req.params.patient_id;
+          break;
+        default:
+          break;
+      }
+      const settings = parseInt(req.query.settings || "0", 10);
+      if (settings !== 1) {
+        if (id) {
+          await updateValidationFn(id, req.body, tenant_id);
+        } else {
+          await createValidationFn(req.body);
+        }
+      }
+      // ✅ Ensure folderName is valid
+      if (!folderName) {
+        return res.status(400).json({ message: "Missing folderName" });
+      }
+      const baseTenantPath = path.join(
+        path.dirname(__dirname),
+        "uploads",
+        `tenant_${sanitizeFileName(tenant_id)}`,
+        sanitizeFileName(folderName)
+      );
+      // ✅ Normalize req.files: convert array to object by fieldname
+      let requestfiles = {};
+      for (const file of req.files || []) {
+        if (!requestfiles[file.fieldname]) {
+          requestfiles[file.fieldname] = [];
+        }
+        requestfiles[file.fieldname].push(file);
+      }
+      // ✅ Only use indexed normalization for updates
+      if (id) {
+        requestfiles = normalizeFileUploads(req.files);
+      }
+      for (const fileField of fileFields) {
+        const fieldFiles = requestfiles[fileField.fieldName] || [];
+        const savedPaths = [];
+        for (const file of fieldFiles) {
+          if (!file || !file.originalname || !file.buffer) continue;
+          const extension = path.extname(file.originalname).toLowerCase();
+          if (!allowedExtensions.includes(extension)) {
+            return res.status(400).json({
+              message: `File type not allowed for ${fileField.fieldName}`,
+            });
+          }
+          const maxSizeBytes = (fileField.maxSizeMB || 2) * 1024 * 1024;
+          if (file.size > maxSizeBytes) {
+            return res.status(400).json({
+              message: `${fileField.fieldName} must be less than ${fileField.maxSizeMB}MB`,
+            });
+          }
+          const isImage = [
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".gif",
+            ".bmp",
+            ".webp",
+            ".tiff",
+          ].includes(extension);
+          const subFolder =
+            fileField.subFolder || (isImage ? "photo" : "document");
+          const fieldPath = path.join(
+            baseTenantPath,
+            sanitizeFileName(subFolder)
+          );
+          const bufferToSave = isImage
+            ? await compressImage(file.buffer, 80) // Reduced quality
+            : file.buffer;
+          const fileName = `${sanitizeFileName(
+            path.parse(file.originalname).name
+          )}_${Date.now()}_${Math.floor(Math.random() * 10000)}${extension}`;
+          try {
+            await fsp.mkdir(fieldPath, { recursive: true });
+            const filePath = path.join(fieldPath, fileName);
+            await fsp.writeFile(filePath, bufferToSave);
+            savedPaths.push(await relativePath(filePath));
+          } catch (err) {
+            console.trace(
+              `❌ Error saving ${fileField.fieldName}:`,
+              err.message
+            );
+            return res
+              .status(500)
+              .json({ message: `Failed to save ${fileField.fieldName}` });
+          }
+        }
+        req.body[fileField.fieldName] = fileField.multiple
+          ? savedPaths
+          : savedPaths[0];
+        if (id && savedPaths.length > 0) {
+          const deletedFileIds = Array.isArray(req.body.deletedFileIds)
+            ? req.body.deletedFileIds
+            : [];
+
+          await updateDocumentsDiffBased({
+            table_name: folderName,
+            table_id: id,
+            field_name: fileField.fieldName,
+            newFiles: savedPaths,
+            deletedFileIds,
+            updated_by: req.body.updated_by || req.body.created_by,
+          });
+        }
+      }
+
+      next();
+    } catch (error) {
+      console.error("Upload Error:", error);
+      return res.status(500).json({ message: "File upload failed" });
+    }
+  };
+};
+
 const normalizeFileUploads = (files) => {
   const normalized = {};
 
@@ -264,6 +402,15 @@ const updateDocumentsDiffBased = async ({
   created_by,
   updated_by,
 }) => {
+  console.log({
+    table_name,
+    table_id,
+    field_name,
+    newFiles,
+    deletedFileIds,
+    created_by,
+    updated_by,
+  });
   if (!Array.isArray(newFiles)) newFiles = [];
 
   const existingDocs = await getDocumentsByField(
@@ -306,7 +453,7 @@ const updateDocumentsDiffBased = async ({
   await Promise.all(
     toInsert.map((file) =>
       createDocument(
-        table_name,
+        table_name.toLowerCase(),
         table_id,
         field_name,
         typeof file === "string" ? file : file.file_url,
@@ -314,6 +461,43 @@ const updateDocumentsDiffBased = async ({
       )
     )
   );
+};
+
+const updateSingleDocument2 = async ({
+  table_name,
+  table_id,
+  field_name,
+  newFile,
+  deleteOld,
+  created_by,
+  updated_by,
+}) => {
+  try {
+    if (deleteOld) {
+      // Delete old record from DB
+      await deleteDocumentsByTableAndId(table_name, table_id, field_name);
+
+      // Optionally delete old file from disk
+      // const oldDocs = await getDocumentsByTableAndId(table_name, table_id);
+      // oldDocs.forEach(doc => fs.unlinkSync(doc.file_path));
+    }
+
+    if (newFile) {
+      // Save the new file in DB
+      await createDocument(
+        table_name,
+        table_id,
+        field_name,
+        newFile,
+        created_by
+      );
+    }
+
+    return { success: true, message: "Document updated successfully" };
+  } catch (error) {
+    console.error("Error in updateDiff:", error);
+    throw error;
+  }
 };
 
 const saveDocuments = async ({
@@ -379,4 +563,6 @@ module.exports = {
   updateDocumentsDiffBased,
   saveDocuments,
   handleFileCleanupByTable,
+  uploadFileMiddleware2,
+  updateSingleDocument2,
 };

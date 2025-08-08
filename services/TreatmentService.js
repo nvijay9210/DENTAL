@@ -8,6 +8,8 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
+const { saveDocuments, updateDocumentsDiffBased } = require("../utils/UploadFiles");
+const { deleteDocumentsByTableAndId, getDocumentsByField } = require("../models/documentModel");
 
 const treatmentFields = {
   tenant_id: (val) => val,
@@ -77,6 +79,16 @@ const createTreatment = async (data) => {
       columns,
       values
     );
+
+    // Handle single or multiple file upload
+    await saveDocuments({
+      table_name: "treatment",
+      table_id: treatmentId,
+      field_name: "treatment_images",
+      files: data.treatment_images,
+      created_by: data.created_by,
+    });
+
     await invalidateCacheByPattern("treatment:*");
     await invalidateCacheByPattern("treatment_patient:*");
     await invalidateCacheByPattern("financeSummary:*");
@@ -106,8 +118,28 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = treatments.data.map((treatment) =>
-      helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
+    const convertedRows = await Promise.all(
+      treatments.data.map(async (treatment) => {
+        const formatted =  helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
+    
+        const docs = await getDocumentsByField(
+          "treatment",
+          treatment.treatment_id,
+          "treatment_images"
+        );
+    
+        // Extract only file_url
+        const fileInfos = docs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+        
+    
+        return {
+          ...formatted,
+          treatment_images: fileInfos,
+        };
+      })
     );
 
     return { data: convertedRows, total: treatments.total };
@@ -162,11 +194,29 @@ const getAllTreatmentsByTenantAndClinicId = async (
       return result;
     });
 
-    const convertedRows = treatments.data
-      .map((treatment) =>
-        helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
-      )
-      .map(flattenTreatmentImages);
+    const convertedRows = await Promise.all(
+      treatments.data.map(async (treatment) => {
+        const formatted =  helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
+    
+        const docs = await getDocumentsByField(
+          "treatment",
+          treatment.treatment_id,
+          "treatment_images"
+        );
+    
+        // Extract only file_url
+        const fileInfos = docs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+        
+    
+        return {
+          ...formatted,
+          treatment_images: fileInfos,
+        };
+      })
+    );
 
     return { data: convertedRows, total: treatments.total };
   } catch (err) {
@@ -207,12 +257,29 @@ const getAllTreatmentsByTenantAndClinicIdAndDentist = async (
       return result;
     });
 
-    const convertedRows = treatments.data
-      .map((treatment) =>
-        helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
-      )
-      .map(flattenTreatmentImages);
-
+    const convertedRows = await Promise.all(
+      treatments.data.map(async (treatment) => {
+        const formatted =  helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
+    
+        const docs = await getDocumentsByField(
+          "treatment",
+          treatment.treatment_id,
+          "treatment_images"
+        );
+    
+        // Extract only file_url
+        const fileInfos = docs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+        
+    
+        return {
+          ...formatted,
+          treatment_images: fileInfos,
+        };
+      })
+    );
     return { data: convertedRows, total: treatments.total };
   } catch (err) {
     console.error("Database error while fetching treatments:", err);
@@ -244,11 +311,29 @@ const getAllTreatmentsByTenantAndDentistId = async (
       return result;
     });
 
-    const convertedRows = treatments.data
-      .map((treatment) =>
-        helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
-      )
-      .map(flattenTreatmentImages);
+    const convertedRows = await Promise.all(
+      treatments.data.map(async (treatment) => {
+        const formatted =  helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
+    
+        const docs = await getDocumentsByField(
+          "treatment",
+          treatment.treatment_id,
+          "treatment_images"
+        );
+    
+        // Extract only file_url
+        const fileInfos = docs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+        
+    
+        return {
+          ...formatted,
+          treatment_images: fileInfos,
+        };
+      })
+    );
 
     return { data: convertedRows, total: treatments.total };
   } catch (err) {
@@ -282,11 +367,29 @@ const getAllTreatmentsByTenantAndPatientId = async (
       return result;
     });
 
-    const convertedRows = treatments.data
-      .map((treatment) =>
-        helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
-      )
-      .map(flattenTreatmentImages);
+    const convertedRows = await Promise.all(
+      treatments.data.map(async (treatment) => {
+        const formatted =  helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
+    
+        const docs = await getDocumentsByField(
+          "treatment",
+          treatment.treatment_id,
+          "treatment_images"
+        );
+    
+        // Extract only file_url
+        const fileInfos = docs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+        
+    
+        return {
+          ...formatted,
+          treatment_images: fileInfos,
+        };
+      })
+    );
 
     return { data: convertedRows, total: treatments.total };
   } catch (err) {
@@ -298,23 +401,49 @@ const getAllTreatmentsByTenantAndPatientId = async (
 // Get Treatment by ID & Tenant
 const getTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {
   try {
+    // 1️⃣ Get treatment record
     const treatment = await treatmentModel.getTreatmentByTenantAndTreatmentId(
       tenantId,
       treatmentId
     );
-    const convertedRows = helper.convertDbToFrontend(
+
+    if (!treatment) {
+      throw new CustomError("Treatment not found", 404);
+    }
+
+    // 2️⃣ Convert DB → Frontend format
+    const formatted = helper.convertDbToFrontend(
       treatment,
       treatmentFieldsReverseMap
     );
-    flattenTreatmentImages(treatment);
-    return { ...convertedRows, flattenTreatmentImages };
-  } catch (error) {
+
+    // 3️⃣ Get related treatment images
+    const docs = await getDocumentsByField(
+      "treatment",
+      treatment.treatment_id,
+      "treatment_images"
+    );
+
+    // 4️⃣ Extract only needed info
+    const fileInfos = docs.map((doc) => ({
+      document_id: doc.document_id,
+      file_url: doc.file_url,
+    }));
+
+    // 5️⃣ Return merged object
+    return {
+      ...formatted,
+      treatment_images: fileInfos,
+    };
+  } catch (err) {
+    console.error("Database error while fetching treatment:", err);
     throw new CustomError(err, 500);
   }
 };
 
+
 // Update Treatment
-const updateTreatment = async (treatmentId, data, tenant_id) => {
+const updateTreatment = async (treatmentId, data, tenant_id,req) => {
   const update = {
     ...treatmentFields,
     updated_by: (val) => val,
@@ -329,9 +458,17 @@ const updateTreatment = async (treatmentId, data, tenant_id) => {
       tenant_id
     );
 
-    // if (affectedRows === 0) {
-    //   throw new CustomError(err, 500);
-    // }
+   // ✅ Fix: Extract from data or req.body
+   const treatment_images = data.treatment_images || req?.body?.treatment_images || [];
+
+   await updateDocumentsDiffBased({
+     table_name: "treatment",
+     table_id: treatmentId,
+     field_name: "treatment_images",
+     newFiles: treatment_images,
+     deletedFileIds:data.deletedFileIds,
+     updated_by: data.updated_by,
+   });
 
     await invalidateCacheByPattern("treatment:*");
     await invalidateCacheByPattern("treatment_patient:*");
@@ -349,6 +486,7 @@ const deleteTreatmentByTenantIdAndTreatmentId = async (
   treatmentId
 ) => {
   try {
+    await deleteDocumentsByTableAndId('treatment',treatmentId)
     const affectedRows =
       await treatmentModel.deleteTreatmentByTenantAndTreatmentId(
         tenantId,

@@ -3,7 +3,7 @@ const multer = require("multer");
 const router = express.Router();
 const patientController = require("../controllers/PatientController");
 
-const { uploadFileMiddleware } = require("../utils/UploadFiles");
+const { uploadFileMiddleware, uploadFileMiddleware2 } = require("../utils/UploadFiles");
 const patientValidation = require("../validations/PatientValidation");
 const routerPath = require("./RouterPath");
 const { multiTenantAuthMiddleware } = require("../middlewares/AuthToken");
@@ -25,7 +25,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 // ]);
 
 // File middleware options
-const patientFileMiddleware = uploadFileMiddleware({
+const patientFileMiddleware = uploadFileMiddleware2({
   folderName: "Patient",
   fileFields: [
     {
