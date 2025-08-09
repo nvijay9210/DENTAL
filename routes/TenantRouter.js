@@ -4,7 +4,7 @@ const tenantController = require("../controllers/TenantController");
 const routerPath = require("./RouterPath");
 const tenantValidation = require("../validations/TenantValidation");
 const multer = require("multer");
-const { uploadFileMiddleware } = require("../utils/UploadFiles");
+const { uploadFileMiddleware, uploadFileMiddleware2 } = require("../utils/UploadFiles");
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
@@ -15,7 +15,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Common upload fields
 
 // File middleware options
-const TenantFileMiddleware = uploadFileMiddleware({
+const TenantFileMiddleware = uploadFileMiddleware2({
   folderName: "Tenant",
   fileFields: [
     {

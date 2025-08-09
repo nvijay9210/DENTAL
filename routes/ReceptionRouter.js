@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const { uploadFileMiddleware } = require("../utils/UploadFiles");
+const { uploadFileMiddleware, uploadFileMiddleware2 } = require("../utils/UploadFiles");
 
 const receptionController = require("../controllers/ReceptionController");
 const {
@@ -22,7 +22,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // router.use(multiTenantAuthMiddleware)
 
-const receptionFileMiddleware = uploadFileMiddleware({
+const receptionFileMiddleware = uploadFileMiddleware2({
   folderName: "Reception",
   fileFields: [
     {

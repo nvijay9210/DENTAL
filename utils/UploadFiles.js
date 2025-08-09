@@ -67,11 +67,14 @@ const uploadFileMiddleware = (options) => {
 
       let id = 0;
       switch (folderName) {
-        case "":
+        case "Expense":
           id = req.params.expense_id;
           break;
-        case "Patient":
-          id = req.params.patient_id;
+        case "Treatment":
+          id = req.params.treatment_id;
+          break;
+        case "Dentist":
+          id = req.params.dentist_id;
           break;
         default:
           break;
@@ -213,11 +216,17 @@ const uploadFileMiddleware2 = (options) => {
       }
       let id = 0;
       switch (folderName) {
-        case "Expense":
-          id = req.params.expense_id;
+        case "Dentist":
+          id = req.params.dentist_id;
           break;
         case "Patient":
           id = req.params.patient_id;
+          break;
+        case "Supplier":
+          id = req.params.supplier_id;
+          break;
+        case "Reception":
+          id = req.params.reception_id;
           break;
         default:
           break;

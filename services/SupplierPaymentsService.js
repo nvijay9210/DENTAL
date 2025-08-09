@@ -11,6 +11,7 @@ const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
+const { saveDocuments } = require("../utils/UploadFiles");
 
 // Field mapping for supplier_paymentss (similar to treatment)
 
@@ -139,6 +140,16 @@ const createSupplierPayments = async (data) => {
 
       const { columns, values } = mapFields(advanceData, fieldMap);
       await supplier_paymentsModel.createSupplierPayments("supplier_payments", columns, values);
+    }
+
+    if (data?.supplier_payment_documents) {
+      await saveDocuments({
+        table_name: "supplier_payments",
+        table_id: supplier_payment_Id,
+        field_name: "supplier_payment_documents",
+        files: data?.supplier_payment_documents, // from middleware
+        created_by: data.created_by,
+      });
     }
 
     // Invalidate cache

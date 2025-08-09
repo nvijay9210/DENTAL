@@ -22,6 +22,7 @@ exports.createSupplierPayments = async (req, res, next) => {
     next(err);
   }
 };
+
 exports.allocateSupplierPayment = async (req, res, next) => {
   const details = req.body;
 

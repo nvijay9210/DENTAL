@@ -3,7 +3,7 @@ const multer = require("multer");
 const router = express.Router();
 const dentistController = require("../controllers/DentistController");
 const routerPath = require("./RouterPath");
-const { uploadFileMiddleware } = require("../utils/UploadFiles");
+const { uploadFileMiddleware, uploadFileMiddleware2 } = require("../utils/UploadFiles");
 const dentistValidation = require("../validations/DentistValidation");
 const {
   authenticateTenantClinicGroup,
@@ -21,14 +21,21 @@ const upload = multer({ storage: multer.memoryStorage() });
 // ]);
 
 // File middleware options
-const dentistFileMiddleware = uploadFileMiddleware({
+const dentistImageFileleMiddleware = uploadFileMiddleware2({
   folderName: "Dentist",
   fileFields: [
     {
       fieldName: "profile_picture",
       maxSizeMB: 2,
       multiple: false
-    },
+    }
+  ],
+  createValidationFn: dentistValidation.createDentistValidation,
+  updateValidationFn: dentistValidation.updateDentistValidation,
+});
+const dentistFileMiddleware = uploadFileMiddleware({
+  folderName: "Dentist",
+  fileFields: [
     {
       fieldName: "awards_certifications",
       maxSizeMB: 10,
@@ -46,6 +53,7 @@ router.post(
   routerPath.ADD_DENTIST,
   authenticateTenantClinicGroup(["tenant", "super-user"]),
   upload.any(),
+  dentistImageFileleMiddleware, // For profile picture
   dentistFileMiddleware,
   dentistController.createDentist
 );
@@ -94,6 +102,7 @@ router.put(
   ]),
   // dentistUploadFields,
   upload.any(),
+  dentistImageFileleMiddleware, // For profile picture
   dentistFileMiddleware,
   dentistController.updateDentist
 );

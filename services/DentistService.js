@@ -24,8 +24,9 @@ const {
   deleteFileIfExists,
   saveDocuments,
   updateDocumentsDiffBased,
+  updateSingleDocument2,
 } = require("../utils/UploadFiles");
-const { getDocumentsByField } = require("../models/documentModel");
+const { getDocumentsByField, deleteDocumentsByTableAndId } = require("../models/documentModel");
 
 const dentistFieldMap = {
   tenant_id: (val) => val,
@@ -144,7 +145,8 @@ const createDentist = async (data, token, realm) => {
 
   try {
     let userData;
-    if (process.env.KEYCLOAK_POWER === "on") {
+    const allow = "no";
+    if (process.env.KEYCLOAK_POWER === "on" && allow === "yes") {
       // 1. Generate username/email
       const username = helper.generateUsername(
         data.first_name,
@@ -221,21 +223,32 @@ const createDentist = async (data, token, realm) => {
       values
     );
 
-    await saveDocuments({
-      table_name: "dentist",
-      table_id: dentistId,
-      field_name: "profile_picture",
-      files: data.profile_picture,
-      created_by: data.created_by,
-    });
+    if (data["profile_picture[file_url]"]) {
+      data.profile_picture = data["profile_picture[file_url]"][0];
+    }
 
-    await saveDocuments({
-      table_name: "dentist",
-      table_id: dentistId,
-      field_name: "awards_certifications",
-      files: data.awards_certifications,
-      created_by: data.created_by,
-    });
+    console.log("data_profile_piture:", data.profile_picture);
+
+    // Save uploaded profile picture to DB
+    if (data?.profile_picture) {
+      await saveDocuments({
+        table_name: "dentist",
+        table_id: dentistId,
+        field_name: "profile_picture",
+        files: data.profile_picture,
+        created_by: data.created_by,
+      });
+    }
+
+    if (data?.awards_certifications) {
+      await saveDocuments({
+        table_name: "dentist",
+        table_id: dentistId,
+        field_name: "awards_certifications",
+        files: data.awards_certifications,
+        created_by: data.created_by,
+      });
+    }
 
     // 8. Invalidate cache
     await invalidateCacheByPattern("dentist:*");
@@ -244,8 +257,8 @@ const createDentist = async (data, token, realm) => {
 
     return {
       dentistId,
-      username: userData.username,
-      password: userData.password,
+      username: userData?.username,
+      password: userData?.password,
     };
   } catch (error) {
     console.error("❌ Failed to create dentist:", error.message);
@@ -275,24 +288,31 @@ const updateDentist = async (dentistId, data, tenant_id) => {
     );
 
     // 🔁 Diff-based profile picture update
-    await updateDocumentsDiffBased({
-      table_name: "dentist",
-      table_id: dentistId,
-      field_name: "profile_picture",
-      newFiles: Array.isArray(data.profile_picture)
-        ? data.profile_picture
-        : [data.profile_picture],
-      updated_by: data.updated_by,
-    });
+    if (data?.profile_picture) {
+      await updateSingleDocument2({
+        table_name: "dentist",
+        table_id: dentistId,
+        field_name: "profile_picture",
+        newFile: data?.profile_picture,
+        deleteOld: true,
+        created_by: data.created_by,
+        updated_by: data.updated_by,
+      });
+    }
+
+    const awards_certifications = data.awards_certifications || req?.body?.awards_certifications || [];
 
     // 🔁 Diff-based awards_certifications update
-    await updateDocumentsDiffBased({
-      table_name: "dentist",
-      table_id: dentistId,
-      field_name: "awards_certifications",
-      newFiles: data.awards_certifications || [],
-      updated_by: data.updated_by,
-    });
+    if (data?.awards_certifications) {
+      await updateDocumentsDiffBased({
+        table_name: "dentist",
+        table_id: dentistId,
+        field_name: "awards_certifications",
+        newFiles: awards_certifications,
+        deletedFileIds:data.deletedFileIds,
+        updated_by: data.updated_by,
+      });
+    }
 
     await invalidateCacheByPattern("dentist:*");
     return affectedRows;
@@ -327,7 +347,6 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
           dentistFieldReverseMap
         );
 
-        // 📎 Get profile_picture documents
         const profilePics = await getDocumentsByField(
           "dentist",
           dentist.dentist_id,
@@ -338,7 +357,6 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
           file_url: doc.file_url,
         }));
 
-        // 🏆 Get awards_certifications documents
         const awards = await getDocumentsByField(
           "dentist",
           dentist.dentist_id,
@@ -359,7 +377,7 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
 
     return { data: convertedRows, total: dentists.total };
   } catch (error) {
-    console.error("Database error while fetching dentists:", err.message);
+    console.error("Database error while fetching dentists:", error.message);
     throw new CustomError(error, 500);
   }
 };
@@ -397,30 +415,31 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
       throw new CustomError("Dentist not found", 404);
     }
 
-    // 1. Convert DB to frontend format
     const formatted = helper.convertDbToFrontend(
       dentist,
       dentistFieldReverseMap
     );
 
-    // 2. Fetch documents
-    const [profileDocs, awardDocs] = await Promise.all([
-      getDocumentsByField("dentist", dentistId, "profile_picture"),
-      getDocumentsByField("dentist", dentistId, "awards_certifications"),
-    ]);
-
-    // 3. Map document data
-    const profile_picture = profileDocs.map((doc) => ({
+    const profilePics = await getDocumentsByField(
+      "dentist",
+      dentistId,
+      "profile_picture"
+    );
+    const profile_picture = profilePics.map((doc) => ({
       document_id: doc.document_id,
       file_url: doc.file_url,
     }));
 
-    const awards_certifications = awardDocs.map((doc) => ({
+    const awards = await getDocumentsByField(
+      "dentist",
+      dentistId,
+      "awards_certifications"
+    );
+    const awards_certifications = awards.map((doc) => ({
       document_id: doc.document_id,
       file_url: doc.file_url,
     }));
 
-    // 4. Return combined response
     return {
       ...formatted,
       profile_picture,
@@ -431,10 +450,10 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
   }
 };
 
-
 // -------------------- DELETE --------------------
 const deleteDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
   try {
+    await deleteDocumentsByTableAndId('dentist',dentistId)
     const result = await dentistModel.deleteDentistByTenantIdAndDentistId(
       tenantId,
       dentistId
@@ -495,7 +514,6 @@ const getAllDentistsByTenantIdAndClinicId = async (
           dentistFieldReverseMap
         );
 
-        // 📎 Get profile_picture documents
         const profilePics = await getDocumentsByField(
           "dentist",
           dentist.dentist_id,
@@ -506,7 +524,6 @@ const getAllDentistsByTenantIdAndClinicId = async (
           file_url: doc.file_url,
         }));
 
-        // 🏆 Get awards_certifications documents
         const awards = await getDocumentsByField(
           "dentist",
           dentist.dentist_id,
@@ -527,7 +544,7 @@ const getAllDentistsByTenantIdAndClinicId = async (
 
     return { data: convertedRows, total: dentists.total };
   } catch (error) {
-    console.log(error)
+    console.log(error);
     throw new CustomError(error, 500);
   }
 };

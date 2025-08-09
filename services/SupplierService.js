@@ -18,6 +18,8 @@ const {
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
 const { encrypt } = require("../middlewares/PasswordHash");
+const { saveDocuments, updateSingleDocument2 } = require("../utils/UploadFiles");
+const { getDocumentsByField, deleteDocumentsByTableAndId } = require("../models/documentModel");
 
 // Field mapping for suppliers (similar to treatment)
 
@@ -93,7 +95,8 @@ const createSupplier = async (data, token, realm) => {
     created_by: (val) => val,
   };
   try {
-    if (process.env.KEYCLOAK_POWER === "on") {
+    const allow='no'
+    if (process.env.KEYCLOAK_POWER === "on" && allow==='yes') {
       // 1. Generate username/email
       const username = helper.generateUsername(
         data.name,
@@ -163,6 +166,8 @@ const createSupplier = async (data, token, realm) => {
         (data.password = encrypt(userData.password).content);
     }
 
+
+
     const { columns, values } = mapFields(data, fieldMap);
 
     const supplierId = await supplierModel.createSupplier(
@@ -170,6 +175,18 @@ const createSupplier = async (data, token, realm) => {
       columns,
       values
     );
+
+ 
+    
+    if (data?.logo_url) {
+      await saveDocuments({
+        table_name: "supplier",
+        table_id: supplierId,
+        field_name: "logo_url",
+        files: data?.logo_url, // from middleware
+        created_by: data.created_by,
+      });
+    }
     await invalidateCacheByPattern("supplier:*");
     return supplierId;
   } catch (error) {
@@ -200,8 +217,33 @@ const getAllSuppliersByTenantIdAndClinicId = async (tenantId,clinicId, page = 1,
       return result;
     });
 
-    const convertedRows = suppliers.data.map((supplier) =>
-      helper.convertDbToFrontend(supplier, supplierFieldsReverseMap)
+    const convertedRows = await Promise.all(
+      suppliers.data.map(async (supplier) => {
+        // Step 1: Convert DB fields to frontend fields
+        const formatted = helper.convertDbToFrontend(
+          supplier,
+          supplierFieldsReverseMap
+        );
+    
+        // Step 2: Fetch supplier documents
+        const docs = await getDocumentsByField(
+          "supplier", // table name
+          supplier.supplier_id, // supplier's primary key
+          "logo_url" // document field type
+        );
+    
+        // Step 3: Extract only required fields from docs
+        const fileInfos = docs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+    
+        // Step 4: Return supplier data with documents
+        return {
+          ...formatted,
+          logo_url: fileInfos,
+        };
+      })
     );
 
     return { data: convertedRows, total: suppliers.total };
@@ -228,9 +270,35 @@ const getAllSuppliersByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = suppliers.data.map((supplier) =>
-      helper.convertDbToFrontend(supplier, supplierFieldsReverseMap)
+    const convertedRows = await Promise.all(
+      suppliers.data.map(async (supplier) => {
+        // Step 1: Convert DB fields to frontend fields
+        const formatted = helper.convertDbToFrontend(
+          supplier,
+          supplierFieldsReverseMap
+        );
+    
+        // Step 2: Fetch supplier documents
+        const docs = await getDocumentsByField(
+          "supplier", // table name
+          supplier.supplier_id, // supplier's primary key
+          "logo_url" // document field type
+        );
+    
+        // Step 3: Extract only required fields from docs
+        const fileInfos = docs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+    
+        // Step 4: Return supplier data with documents
+        return {
+          ...formatted,
+          logo_url: fileInfos,
+        };
+      })
     );
+    
 
     return { data: convertedRows, total: suppliers.total };
   } catch (err) {
@@ -247,12 +315,28 @@ const getSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
       supplierId
     );
 
-    const convertedRows = helper.convertDbToFrontend(
+    const convertedRows =helper.convertDbToFrontend(
       supplier,
       supplierFieldsReverseMap
     );
 
-    return convertedRows;
+    const documents = await getDocumentsByField(
+      "supplier",
+      supplierId,
+      "logo_url"
+    );
+
+    // Format each document
+    const logo_url = documents.map((doc) => ({
+      document_id: doc.document_id,
+      file_url: doc.file_url,
+    }));
+
+    // Attach to the response
+    return {
+      ...convertedRows,
+      logo_url,
+    };
   } catch (error) {
     throw new CustomError(err, 500);
   }
@@ -273,9 +357,16 @@ const updateSupplier = async (supplierId, data, tenant_id) => {
       tenant_id
     );
 
-    // if (affectedRows === 0) {
-    //   throw new CustomError(err, 500);
-    // }
+    await updateSingleDocument2({
+      table_name: "supplier",
+      table_id: supplierId,
+      field_name: "profile_picture",
+      newFile: data?.profile_picture,
+      deleteOld: true,
+      created_by: data.created_by,
+      updated_by: data.updated_by
+    });
+    
 
     await invalidateCacheByPattern("supplier:*");
     return affectedRows;
@@ -288,6 +379,7 @@ const updateSupplier = async (supplierId, data, tenant_id) => {
 // Delete Supplier
 const deleteSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
   try {
+    await deleteDocumentsByTableAndId('supplier',supplierId)
     const affectedRows =
       await supplierModel.deleteSupplierByTenantAndSupplierId(
         tenantId,

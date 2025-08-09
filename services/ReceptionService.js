@@ -15,6 +15,8 @@ const {
   addUserToGroup,
 } = require("../middlewares/KeycloakAdmin");
 const { buildCacheKey } = require("../utils/RedisCache");
+const { deleteDocumentsByTableAndId, getDocumentsByField } = require("../models/documentModel");
+const { saveDocuments, updateSingleDocument2 } = require("../utils/UploadFiles");
 
 // Field mapping for receptions (similar to treatment)
 
@@ -72,7 +74,8 @@ const createReception = async (data, token, realm) => {
     created_by: (val) => val,
   };
   try {
-    if (process.env.KEYCLOAK_POWER === "on") {
+    const allow='off'
+    if (process.env.KEYCLOAK_POWER === "on" && allow==='yes') {
       // 1. Generate username/email
       const username = helper.generateUsername(
         data.full_name,
@@ -147,7 +150,19 @@ const createReception = async (data, token, realm) => {
       columns,
       values
     );
+
+    if (data?.profile_picture) {
+      await saveDocuments({
+        table_name: "supplier",
+        table_id: supplierId,
+        field_name: "profile_picture",
+        files: data?.profile_picture, // from middleware
+        created_by: data.created_by,
+      });
+    }
     await invalidateCacheByPattern("reception:*");
+
+
     return receptionId;
   } catch (error) {
     console.error("Failed to create reception:", error);
@@ -174,8 +189,28 @@ const getAllReceptionsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = receptions.data.map((reception) =>
-      helper.convertDbToFrontend(reception, receptionFieldsReverseMap)
+    const convertedRows = await Promise.all(
+      receptions.data.map(async (reception) => {
+        const formatted = helper.convertDbToFrontend(
+          reception,
+          receptionFieldsReverseMap
+        );
+
+        const profilePics = await getDocumentsByField(
+          "reception",
+          reception.reception_id,
+          "profile_picture"
+        );
+        const profile_picture = profilePics.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+
+        return {
+          ...formatted,
+          profile_picture
+        };
+      })
     );
 
     return { data: convertedRows, total: receptions.total };
@@ -198,7 +233,23 @@ const getReceptionByTenantIdAndReceptionId = async (tenantId, receptionId) => {
       receptionFieldsReverseMap
     );
 
-    return convertedRows;
+    const documents = await getDocumentsByField(
+      "reception",
+      receptionId,
+      "profile_picture"
+    );
+
+    // Format each document
+    const profile_picture = documents.map((doc) => ({
+      document_id: doc.document_id,
+      file_url: doc.file_url,
+    }));
+
+    // Attach to the response
+    return {
+      ...convertedRows,
+      profile_picture,
+    };
   } catch (error) {
     throw new CustomError(err, 500);
   }
@@ -219,9 +270,15 @@ const updateReception = async (receptionId, data, tenant_id) => {
       tenant_id
     );
 
-    // if (affectedRows === 0) {
-    //   throw new CustomError("Reception not found or no changes made.", 404);
-    // }
+    await updateSingleDocument2({
+      table_name: "supplier",
+      table_id: supplierId,
+      field_name: "profile_picture",
+      newFile: data?.profile_picture,
+      deleteOld: true,
+      created_by: data.created_by,
+      updated_by: data.updated_by
+    });
 
     await invalidateCacheByPattern("reception:*");
     return affectedRows;
@@ -237,6 +294,7 @@ const deleteReceptionByTenantIdAndReceptionId = async (
   receptionId
 ) => {
   try {
+    await deleteDocumentsByTableAndId('reception',receptionId)
     const affectedRows =
       await receptionModel.deleteReceptionByTenantAndReceptionId(
         tenantId,
@@ -278,8 +336,28 @@ const getAllReceptionsByTenantIdAndClinicId = async (
       return result;
     });
 
-    const convertedRows = receptions.data.map((reception) =>
-      helper.convertDbToFrontend(reception, receptionFieldsReverseMap)
+    const convertedRows = await Promise.all(
+      receptions.data.map(async (reception) => {
+        const formatted = helper.convertDbToFrontend(
+          reception,
+          receptionFieldsReverseMap
+        );
+
+        const profilePics = await getDocumentsByField(
+          "reception",
+          reception.reception_id,
+          "profile_picture"
+        );
+        const profile_picture = profilePics.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+
+        return {
+          ...formatted,
+          profile_picture
+        };
+      })
     );
 
     return { data: convertedRows, total: receptions.total };

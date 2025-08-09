@@ -15,11 +15,11 @@ const suppliervalidation = require("../validations/SupplierValidation");
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
-const { uploadFileMiddleware } = require("../utils/UploadFiles");
+const { uploadFileMiddleware, uploadFileMiddleware2 } = require("../utils/UploadFiles");
 // Setup multer memory storage once
 const upload = multer({ storage: multer.memoryStorage() });
 
-const supplierFileMiddleware = uploadFileMiddleware({
+const supplierFileMiddleware = uploadFileMiddleware2({
   folderName: "Supplier",
   fileFields: [
     {
