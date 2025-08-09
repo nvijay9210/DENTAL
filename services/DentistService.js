@@ -267,7 +267,7 @@ const createDentist = async (data, token, realm) => {
 };
 
 // -------------------- UPDATE --------------------
-const updateDentist = async (dentistId, data, tenant_id) => {
+const updateDentist = async (dentistId, data, tenant_id,req) => {
   const update = {
     ...dentistFieldMap,
     updated_by: (val) => val,
