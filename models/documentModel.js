@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+const pool = require("../config/db");
 const {
   redisClient,
   getOrSetCache,
@@ -7,15 +7,22 @@ const {
 const { buildCacheKey } = require("../utils/RedisCache");
 
 // Create a new document entry
-const createDocument = async (table_name, table_id, field_name, file_url, created_by) => {
+const createDocument = async (
+  table_name,
+  table_id,
+  field_name,
+  file_url,
+  created_by,
+  description
+) => {
   const conn = await pool.getConnection();
   const cacheKey = buildCacheKey("document", table_name, table_id);
 
   try {
     const [result] = await conn.query(
-      `INSERT INTO document (table_name, table_id, field_name, file_url, created_by)
-       VALUES (?, ?, ?, ?, ?)`,
-      [table_name, table_id, field_name, file_url, created_by]
+      `INSERT INTO document (table_name, table_id, field_name, file_url, created_by,description)
+       VALUES (?, ?, ?, ?, ?,?)`,
+      [table_name, table_id, field_name, file_url, created_by, description]
     );
 
     await invalidateCacheByPattern(cacheKey); // Invalidate cache // Invalidate cache
@@ -47,7 +54,7 @@ const getDocumentsByTableAndId = async (table_name, table_id) => {
       }
     });
 
-    return documents
+    return documents;
   } catch (error) {
     console.error("Error in getDocumentsByTableAndId:", error);
     throw error;
@@ -133,5 +140,5 @@ module.exports = {
   getDocumentsByField,
   updateDocument,
   deleteDocumentsByTableAndId,
-  deleteDocumentById
+  deleteDocumentById,
 };

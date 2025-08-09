@@ -168,11 +168,9 @@ const createTableQuery = {
   ratings decimal(3,2) DEFAULT 0.00,
   reviews_count int(11) DEFAULT 0,
   appointment_count int(11) DEFAULT 0,
-  profile_picture varchar(255) DEFAULT NULL,
   bio longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(bio)),
   teleconsultation_supported tinyint(1) NOT NULL DEFAULT 0,
   languages_spoken longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(languages_spoken)),
-  awards_certifications longtext DEFAULT NULL,
   social_links longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   internship longtext DEFAULT NULL,
   position_held longtext DEFAULT NULL,
@@ -229,7 +227,6 @@ const createTableQuery = {
   treatment_history longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(treatment_history)),
   appointment_count int(11) DEFAULT NULL,
   last_appointment_date timestamp NULL DEFAULT NULL,
-  profile_picture varchar(255) DEFAULT NULL,
   created_by varchar(30) NOT NULL,
   created_time timestamp NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
@@ -417,7 +414,6 @@ CREATE TABLE IF NOT EXISTS supplier (
   gst_number VARCHAR(50) DEFAULT NULL,
   tax_id VARCHAR(50) DEFAULT NULL,
   pan_number VARCHAR(50) DEFAULT NULL,
-  logo_url TEXT DEFAULT NULL,
   mode_of_payment VARCHAR(100) DEFAULT NULL,
   preferred_currency VARCHAR(10) DEFAULT NULL,
   credit_limit DECIMAL(15, 2) DEFAULT NULL,
@@ -451,7 +447,6 @@ CREATE TABLE IF NOT EXISTS supplier_products (
   clinic_id INT(11) NOT NULL,
   supplier_id INT(11) NOT NULL,
   product_name VARCHAR(255) DEFAULT NULL,
-  image_url VARCHAR(255) DEFAULT NULL,
   description TEXT DEFAULT NULL,
   unit_price DECIMAL(15, 2) DEFAULT NULL,
   unit VARCHAR(50) DEFAULT NULL,
@@ -713,7 +708,6 @@ CREATE TABLE IF NOT EXISTS payment (
   country varchar(50) NOT NULL,
   pincode varchar(6) NOT NULL,
   last_login datetime DEFAULT NULL,
-  profile_picture varchar(255) DEFAULT NULL,
   created_by varchar(30) NOT NULL,
   created_time timestamp NOT NULL DEFAULT current_timestamp(),
   updated_by varchar(30) DEFAULT NULL,
@@ -807,9 +801,6 @@ CREATE TABLE IF NOT EXISTS payment (
   reference_id INT NULL DEFAULT NULL,
   -- Optional: link to treatment_id, appointment_id, etc.
 
-  file_url TEXT,
-  -- Optional: attached PDF, image, doc path or URL
-
   created_by VARCHAR(50),
   created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_by VARCHAR(50),
@@ -870,6 +861,7 @@ CREATE TABLE IF NOT EXISTS document (
   table_id INT(11) NOT NULL,
   field_name VARCHAR(100) NOT NULL,
   file_url VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
 
   created_by VARCHAR(30) NOT NULL,
   created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),

@@ -26,7 +26,10 @@ const {
   updateDocumentsDiffBased,
   updateSingleDocument2,
 } = require("../utils/UploadFiles");
-const { getDocumentsByField, deleteDocumentsByTableAndId } = require("../models/documentModel");
+const {
+  getDocumentsByField,
+  deleteDocumentsByTableAndId,
+} = require("../models/documentModel");
 
 const dentistFieldMap = {
   tenant_id: (val) => val,
@@ -247,6 +250,7 @@ const createDentist = async (data, token, realm) => {
         field_name: "awards_certifications",
         files: data.awards_certifications,
         created_by: data.created_by,
+        descriptions: data.descriptions,
       });
     }
 
@@ -267,7 +271,7 @@ const createDentist = async (data, token, realm) => {
 };
 
 // -------------------- UPDATE --------------------
-const updateDentist = async (dentistId, data, tenant_id,req) => {
+const updateDentist = async (dentistId, data, tenant_id, req) => {
   const update = {
     ...dentistFieldMap,
     updated_by: (val) => val,
@@ -300,7 +304,8 @@ const updateDentist = async (dentistId, data, tenant_id,req) => {
       });
     }
 
-    const awards_certifications = data.awards_certifications || req?.body?.awards_certifications || [];
+    const awards_certifications =
+      data.awards_certifications || req?.body?.awards_certifications || [];
 
     // 🔁 Diff-based awards_certifications update
     if (data?.awards_certifications) {
@@ -309,8 +314,9 @@ const updateDentist = async (dentistId, data, tenant_id,req) => {
         table_id: dentistId,
         field_name: "awards_certifications",
         newFiles: awards_certifications,
-        deletedFileIds:data.deletedFileIds,
+        deletedFileIds: data.deletedFileIds,
         updated_by: data.updated_by,
+        descriptions: data.descriptions,
       });
     }
 
@@ -354,7 +360,7 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
         );
         const profile_picture = profilePics.map((doc) => ({
           document_id: doc.document_id,
-          file_url: doc.file_url,
+          file_url: doc.file_url
         }));
 
         const awards = await getDocumentsByField(
@@ -365,6 +371,7 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
         const awards_certifications = awards.map((doc) => ({
           document_id: doc.document_id,
           file_url: doc.file_url,
+          description:doc.description
         }));
 
         return {
@@ -438,6 +445,7 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
     const awards_certifications = awards.map((doc) => ({
       document_id: doc.document_id,
       file_url: doc.file_url,
+      description:doc.description
     }));
 
     return {
@@ -453,7 +461,7 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
 // -------------------- DELETE --------------------
 const deleteDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
   try {
-    await deleteDocumentsByTableAndId('dentist',dentistId)
+    await deleteDocumentsByTableAndId("dentist", dentistId);
     const result = await dentistModel.deleteDentistByTenantIdAndDentistId(
       tenantId,
       dentistId
@@ -521,7 +529,7 @@ const getAllDentistsByTenantIdAndClinicId = async (
         );
         const profile_picture = profilePics.map((doc) => ({
           document_id: doc.document_id,
-          file_url: doc.file_url,
+          profile_picture: doc.file_url,
         }));
 
         const awards = await getDocumentsByField(
@@ -531,7 +539,8 @@ const getAllDentistsByTenantIdAndClinicId = async (
         );
         const awards_certifications = awards.map((doc) => ({
           document_id: doc.document_id,
-          file_url: doc.file_url,
+          awards_certifications: doc.file_url,
+          description:doc.description
         }));
 
         return {

@@ -408,14 +408,85 @@ const deleteUploadedFiles = async (filePaths) => {
   await Promise.all(deleteTasks);
 };
 
+// const updateDocumentsDiffBased = async ({
+//   table_name,
+//   table_id,
+//   field_name,
+//   newFiles = [],
+//   deletedFileIds = [], // 👈 add this
+//   created_by,
+//   updated_by,
+// }) => {
+//   console.log({
+//     table_name,
+//     table_id,
+//     field_name,
+//     newFiles,
+//     deletedFileIds,
+//     created_by,
+//     updated_by,
+//   });
+//   if (!Array.isArray(newFiles)) newFiles = [];
+
+//   const existingDocs = await getDocumentsByField(
+//     table_name,
+//     table_id,
+//     field_name
+//   );
+
+//   // Use full filename (not just base) for comparison
+//   const getFileName = (fileUrl = "") => path.basename(fileUrl || "");
+
+//   const existingFileNames = new Set(
+//     existingDocs.map((doc) => getFileName(doc.file_url))
+//   );
+
+//   const toInsert = newFiles.filter((file) => {
+//     const fileUrl = typeof file === "string" ? file : file.file_url;
+//     return fileUrl && !existingFileNames.has(getFileName(fileUrl));
+//   });
+
+//   const newFileNames = new Set(
+//     newFiles
+//       .map((f) => getFileName(typeof f === "string" ? f : f.file_url))
+//       .filter(Boolean)
+//   );
+
+//   if (Array.isArray(deletedFileIds) && deletedFileIds.length > 0) {
+//     const toDelete = existingDocs.filter((doc) =>
+//       deletedFileIds.includes(String(doc.document_id))
+//     );
+
+//     await Promise.all(
+//       toDelete.map(async (doc) => {
+//         await deleteDocumentById(doc.document_id);
+//         await deleteUploadedFiles(doc.file_url);
+//       })
+//     );
+//   }
+
+//   await Promise.all(
+//     toInsert.map((file) =>
+//       createDocument(
+//         table_name.toLowerCase(),
+//         table_id,
+//         field_name,
+//         typeof file === "string" ? file : file.file_url,
+//         created_by || updated_by
+//       )
+//     )
+//   );
+// };
+
 const updateDocumentsDiffBased = async ({
   table_name,
   table_id,
   field_name,
   newFiles = [],
-  deletedFileIds = [], // 👈 add this
+  deletedFileIds = [],
   created_by,
   updated_by,
+  descriptions = [], // 👈 added
 }) => {
   console.log({
     table_name,
@@ -425,7 +496,9 @@ const updateDocumentsDiffBased = async ({
     deletedFileIds,
     created_by,
     updated_by,
+    descriptions,
   });
+
   if (!Array.isArray(newFiles)) newFiles = [];
 
   const existingDocs = await getDocumentsByField(
@@ -434,24 +507,19 @@ const updateDocumentsDiffBased = async ({
     field_name
   );
 
-  // Use full filename (not just base) for comparison
   const getFileName = (fileUrl = "") => path.basename(fileUrl || "");
 
   const existingFileNames = new Set(
     existingDocs.map((doc) => getFileName(doc.file_url))
   );
 
+  // Determine which files to insert
   const toInsert = newFiles.filter((file) => {
     const fileUrl = typeof file === "string" ? file : file.file_url;
     return fileUrl && !existingFileNames.has(getFileName(fileUrl));
   });
 
-  const newFileNames = new Set(
-    newFiles
-      .map((f) => getFileName(typeof f === "string" ? f : f.file_url))
-      .filter(Boolean)
-  );
-
+  // Delete files if needed
   if (Array.isArray(deletedFileIds) && deletedFileIds.length > 0) {
     const toDelete = existingDocs.filter((doc) =>
       deletedFileIds.includes(String(doc.document_id))
@@ -465,16 +533,28 @@ const updateDocumentsDiffBased = async ({
     );
   }
 
+  // Insert new files with descriptions if provided
   await Promise.all(
-    toInsert.map((file) =>
-      createDocument(
+    toInsert.map((file, index) => {
+      const fileUrl = typeof file === "string" ? file : file.file_url;
+      let fileDescription = null;
+
+      // If descriptions is an array, map by index
+      if (Array.isArray(descriptions)) {
+        fileDescription = descriptions[index] || null;
+      } else if (typeof descriptions === "string") {
+        fileDescription = descriptions;
+      }
+
+      return createDocument(
         table_name.toLowerCase(),
         table_id,
         field_name,
-        typeof file === "string" ? file : file.file_url,
-        created_by || updated_by
-      )
-    )
+        fileUrl,
+        created_by || updated_by,
+        fileDescription // 👈 pass description
+      );
+    })
   );
 };
 
@@ -515,12 +595,50 @@ const updateSingleDocument2 = async ({
   }
 };
 
+// const saveDocuments = async ({
+//   table_name,
+//   table_id,
+//   field_name,
+//   files,
+//   created_by,
+//   description=null
+// }) => {
+//   if (!files) return;
+
+//   const fileArray = Array.isArray(files) ? files : [files];
+//   const validFiles = fileArray.filter((file) => {
+//     const url = typeof file === "string" ? file : file?.file_url;
+//     const isValid = typeof url === "string" && url.trim() !== "";
+//     if (!isValid) {
+//       console.warn("⚠️ Invalid file skipped in saveDocuments:", file);
+//     }
+//     return isValid;
+//   });
+
+//   if (validFiles.length === 0) return;
+
+//   await Promise.all(
+//     validFiles.map((file) => {
+//       const fileUrl = typeof file === "string" ? file : file.file_url;
+//       return createDocument(
+//         table_name,
+//         table_id,
+//         field_name,
+//         fileUrl,
+//         created_by,
+//         description
+//       );
+//     })
+//   );
+// };
+
 const saveDocuments = async ({
   table_name,
   table_id,
   field_name,
   files,
   created_by,
+  descriptions = null, // can be string or array
 }) => {
   if (!files) return;
 
@@ -537,14 +655,24 @@ const saveDocuments = async ({
   if (validFiles.length === 0) return;
 
   await Promise.all(
-    validFiles.map((file) => {
+    validFiles.map((file, index) => {
       const fileUrl = typeof file === "string" ? file : file.file_url;
+
+      // Pick description for this file
+      let fileDescription = null;
+      if (Array.isArray(descriptions)) {
+        fileDescription = descriptions[index] || null;
+      } else {
+        fileDescription = descriptions; // same description for all
+      }
+
       return createDocument(
         table_name,
         table_id,
         field_name,
         fileUrl,
-        created_by
+        created_by,
+        fileDescription
       );
     })
   );

@@ -255,6 +255,15 @@ async function addAppointmentIndex(conn) {
     ["tenant_id", "appointment_date", "start_time", "status"]
   );
 }
+async function addDescriptionInDocumet(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "document",
+    "description",
+    "VARCHAR(255) NULL",
+    "Add new description field"
+  );
+}
 async function removeExpenseDocumentField(conn) {
   await dropColumnIfExists(
     conn,
@@ -262,6 +271,21 @@ async function removeExpenseDocumentField(conn) {
     "expense_documents",
   );
 }
+
+async function removeUnwantedFields(conn) {
+  // Dentist table
+  await dropColumnIfExists(conn, "dentist", "profile_picture");
+  await dropColumnIfExists(conn, "dentist", "awards_certifications");
+
+  // Patient table
+  await dropColumnIfExists(conn, "patient", "profile_picture");
+  await dropColumnIfExists(conn, "clinic", "clinic_logo");
+  await dropColumnIfExists(conn, "reception", "profile_picture");
+  await dropColumnIfExists(conn, "supplier", "logo_url");
+  await dropColumnIfExists(conn, "supplier_products", "profile_picture");
+  await dropColumnIfExists(conn, "notifications", "file_url");
+}
+
 
 // Main migration runner
 (async () => {
@@ -274,6 +298,8 @@ async function removeExpenseDocumentField(conn) {
     // Run migrations
     await addAppointmentIndex(conn);
     await removeExpenseDocumentField(conn);
+    await removeUnwantedFields(conn);
+    await addDescriptionInDocumet(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");
