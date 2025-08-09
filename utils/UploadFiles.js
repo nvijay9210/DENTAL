@@ -228,6 +228,9 @@ const uploadFileMiddleware2 = (options) => {
         case "Reception":
           id = req.params.reception_id;
           break;
+        case "Supplier_products":
+          id = req.params.supplier_product_id;
+          break;
         default:
           break;
       }

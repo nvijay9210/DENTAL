@@ -360,8 +360,8 @@ const updateSupplier = async (supplierId, data, tenant_id) => {
     await updateSingleDocument2({
       table_name: "supplier",
       table_id: supplierId,
-      field_name: "profile_picture",
-      newFile: data?.profile_picture,
+      field_name: "logo_url",
+      newFile: data?.logo_url,
       deleteOld: true,
       created_by: data.created_by,
       updated_by: data.updated_by

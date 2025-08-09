@@ -86,7 +86,7 @@ router.put(
   authenticateTenantClinicGroup([
     "tenant",
     "super-user",
-    "dentist","receptionist","super-user",
+    "dentist","receptionist",
     "supplier",
   ]),
   upload.any(),
