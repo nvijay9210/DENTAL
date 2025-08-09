@@ -14,12 +14,17 @@ const {
   createNotificationRecipient,
 } = require("./NotificationRecipientsService");
 const { buildCacheKey } = require("../utils/RedisCache");
+const {
+  saveDocuments,
+  updateDocumentsDiffBased,
+} = require("../utils/UploadFiles");
+const { getDocumentsByField, deleteDocumentsByTableAndId } = require("../models/documentModel");
 
 // Field mapping for notifications (similar to treatment)
 
 const notificationFields = {
   tenant_id: (val) => val,
-  clinic_id:(val)=>val,
+  clinic_id: (val) => val,
   sender_role: (val) => val,
   sender_id: (val) => val,
   type: (val) => val,
@@ -31,7 +36,7 @@ const notificationFields = {
 const notificationFieldsReverseMap = {
   notification_id: (val) => val,
   tenant_id: (val) => val,
-  clinic_id:(val)=>val,
+  clinic_id: (val) => val,
   sender_role: (val) => val,
   sender_id: (val) => val,
   type: (val) => val,
@@ -108,6 +113,14 @@ const createNotification = async (data) => {
       recipientIds.push(notification_recipients_id);
     }
 
+    await saveDocuments({
+      table_name: "notifications",
+      table_id: notification_id,
+      field_name: "file_url",
+      files: data.file_url,
+      created_by: data.created_by,
+    });
+
     await invalidateCacheByPattern("notification:*");
 
     return recipientIds;
@@ -143,8 +156,30 @@ const getAllNotificationsByTenantId = async (
       return result;
     });
 
-    const convertedRows = notifications.data.map((notification) =>
-      helper.convertDbToFrontend(notification, notificationFieldsReverseMap)
+    const convertedRows = await Promise.all(
+      notifications.data.map(async (notification) => {
+        const formatted = helper.convertDbToFrontend(
+          notification,
+          notificationFieldsReverseMap
+        );
+
+        const docs = await getDocumentsByField(
+          "notifications",
+          notification.notification_id,
+          "file_url"
+        );
+
+        // Extract only file_url
+        const fileInfos = docs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+
+        return {
+          ...formatted,
+          file_url: fileInfos,
+        };
+      })
     );
 
     return { data: convertedRows, total: notifications.total };
@@ -173,13 +208,33 @@ const getNotificationsForReceiver = async (
       return result;
     });
 
-    // ✅ Parse message field for each item safely
-    notifications = notifications.map((n) => ({
-      ...n,
-      message: helper.safeJsonParse(n.message),
-    }));
+    const convertedRows = await Promise.all(
+      notifications.map(async (notification) => {
+        const formatted = {
+          ...n,
+          message: helper.safeJsonParse(n.message),
+        };
 
-    return notifications;
+        const docs = await getDocumentsByField(
+          "notifications",
+          notification.notification_id,
+          "file_url"
+        );
+
+        // Extract only file_url
+        const fileInfos = docs.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+
+        return {
+          ...formatted,
+          file_url: fileInfos,
+        };
+      })
+    );
+
+    return convertedRows;
   } catch (err) {
     console.error("Database error while fetching notifications:", err);
     throw new CustomError(err, 500);
@@ -203,7 +258,21 @@ const getNotificationByTenantIdAndNotificationId = async (
       notificationFieldsReverseMap
     );
 
-    return convertedRows;
+    const docs = await getDocumentsByField(
+      "notifications",
+      notification.notification_id,
+      "file_url"
+    );
+
+    const fileInfos = docs.map((doc) => ({
+      document_id: doc.document_id,
+      file_url: doc.file_url,
+    }));
+
+    return {
+      ...formatted,
+      file_url: fileInfos,
+    };
   } catch (error) {
     throw new CustomError(err, 500);
   }
@@ -224,9 +293,16 @@ const updateNotification = async (notification_id, data, tenant_id) => {
       tenant_id
     );
 
-    // if (affectedRows === 0) {
-    //   throw new CustomError(err, 500);
-    // }
+    const file_url = data.file_url || req?.body?.file_url || [];
+
+    await updateDocumentsDiffBased({
+      table_name: "notifications",
+      table_id: notification_id,
+      field_name: "file_url",
+      newFiles: file_url,
+      deletedFileIds: data.deletedFileIds,
+      updated_by: data.updated_by,
+    });
 
     await invalidateCacheByPattern("notification:*");
     return affectedRows;
@@ -242,6 +318,7 @@ const deleteNotificationByTenantIdAndNotificationId = async (
   notification_id
 ) => {
   try {
+    await deleteDocumentsByTableAndId('notification',notification_id)
     const affectedRows =
       await notificationModel.deleteNotificationByTenantAndNotificationId(
         tenantId,

@@ -76,6 +76,9 @@ const uploadFileMiddleware = (options) => {
         case "Dentist":
           id = req.params.dentist_id;
           break;
+        case "Notification":
+          id = req.params.notification_id;
+          break;
         default:
           break;
       }
