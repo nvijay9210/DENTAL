@@ -153,8 +153,8 @@ const createReception = async (data, token, realm) => {
 
     if (data?.profile_picture) {
       await saveDocuments({
-        table_name: "supplier",
-        table_id: supplierId,
+        table_name: "reception",
+        table_id: receptionId,
         field_name: "profile_picture",
         files: data?.profile_picture, // from middleware
         created_by: data.created_by,
@@ -271,8 +271,8 @@ const updateReception = async (receptionId, data, tenant_id) => {
     );
 
     await updateSingleDocument2({
-      table_name: "supplier",
-      table_id: supplierId,
+      table_name: "reception",
+      table_id: receptionId,
       field_name: "profile_picture",
       newFile: data?.profile_picture,
       deleteOld: true,
