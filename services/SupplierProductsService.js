@@ -183,7 +183,7 @@ const getAllSupplierProductssByTenantIdAndSupplierId = async (
         // Extract only file_url
         const fileInfos = docs.map((doc) => ({
           document_id: doc.document_id,
-          image_url: doc.file_url,
+          file_url: doc.file_url,
         }));
 
         return {
