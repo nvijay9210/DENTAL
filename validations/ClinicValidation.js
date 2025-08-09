@@ -178,7 +178,6 @@ const clinicColumnConfig = [
     null: false,
     is_boolean: true,
   },
-  { columnname: "clinic_logo", type: "varchar", size: 255, null: true },
   {
     columnname: "parking_availability",
     type: "tinyint",
@@ -305,7 +304,6 @@ const updateClinicSettingsValidation = async (tenantId, clinicId, details) => {
   if (!details.updated_by) throw new CustomError("Updated_by is required");
   if (
     details.clinic_name === undefined ||
-    details.clinic_logo === undefined ||
     details.clinic_app_themes === undefined ||
     details.clinic_app_font === undefined
   )

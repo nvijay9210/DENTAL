@@ -160,53 +160,6 @@ const updatePatientCount = async (tenantId, clinicId, assign = true) => {
   }
 };
 
-// const getFinanceSummary=async(tenant_id,clinic_id)=>{
-//   const conn = await pool.getConnection();
-
-//   const now = new Date();
-//   now.setHours(0, 0, 0, 0); // Normalize current date
-
-//   // Fetch raw data
-//   let [appointments, treatments, expenses] = await Promise.all([
-//      conn.query(
-//           `SELECT appointment_date AS date, (consultation_fee - discount_applied) AS amount FROM appointment
-//            WHERE status = 'CP' AND appointment_date >= ? AND tenant_id = ? AND clinic_id = ?`,
-//           [
-//             new Date(now.getTime() - 365 * 4 * 24 * 60 * 60 * 1000),
-//             tenant_id,
-//             clinic_id,
-
-//           ]
-//         ),
-//      conn.query(
-//           `SELECT treatment_date AS date, cost AS amount FROM treatment
-//            WHERE treatment_date >= ? AND tenant_id = ? AND clinic_id = ?`,
-//           [
-//             new Date(now.getTime() - 365 * 4 * 24 * 60 * 60 * 1000),
-//             tenant_id,
-//             clinic_id,
-
-//           ]
-//         ),
-//     conn.query(
-//       `SELECT e.expense_date AS date, e.expense_amount AS amount
-//        FROM expense e
-//        WHERE e.expense_date >= ? AND e.tenant_id = ? AND e.clinic_id = ?`,
-//       [
-//         new Date(now.getFullYear() - 4, now.getMonth(), now.getDate()),
-//         tenant_id,
-//         clinic_id,
-//       ]
-//     ),
-//   ]);
-
-//   appointments = appointments[0];
-//   treatments = treatments[0];
-//   expenses = expenses[0];
-
-//   return {appointments,treatments,expenses}
-// }
-
 
 async function getFinanceSummary(
   tenant_id,
@@ -425,7 +378,7 @@ const getFinanceSummarybyDentist = async (tenant_id, clinic_id, dentist_id) => {
 };
 
 const getClinicSettingsByTenantIdAndClinicId = async (tenantId, clinicId) => {
-  const query = `select t.tenant_name,t.tenant_domain, c.clinic_name,c.clinic_logo,c.clinic_app_themes,c.clinic_app_font from clinic c inner join tenant t on t.tenant_id=c.tenant_id  where c.tenant_id=? and c.clinic_id=?`;
+  const query = `select t.tenant_name,t.tenant_domain, c.clinic_name,c.clinic_app_themes,c.clinic_app_font from clinic c inner join tenant t on t.tenant_id=c.tenant_id  where c.tenant_id=? and c.clinic_id=?`;
   const conn = await pool.getConnection();
   try {
     const rows = await conn.query(query, [tenantId, clinicId]);
@@ -441,7 +394,7 @@ const getClinicSettingsByTenantIdAndClinicId = async (tenantId, clinicId) => {
 const updateClinicSettings = async (tenantId, clinicId, details) => {
   const query = `
     UPDATE clinic
-    SET clinic_name=?,clinic_logo=?,clinic_app_font=?,clinic_app_themes=?,updated_by=?
+    SET clinic_name=?,clinic_app_font=?,clinic_app_themes=?,updated_by=?
     WHERE tenant_id = ? AND clinic_id=?;
   `;
 
@@ -449,7 +402,6 @@ const updateClinicSettings = async (tenantId, clinicId, details) => {
   try {
     const [result] = await conn.query(query, [
       details.clinic_name,
-      details.clinic_logo,
       details.clinic_app_font,
       details.clinic_app_themes,
       details.updated_by,

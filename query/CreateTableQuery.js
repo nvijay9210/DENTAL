@@ -121,7 +121,6 @@ const createTableQuery = {
   reviews_count int(11) DEFAULT 0,
   emergency_support tinyint(1) NOT NULL DEFAULT 0,
   teleconsultation_supported tinyint(1) NOT NULL DEFAULT 0,
-  clinic_logo varchar(255) DEFAULT NULL,
   parking_availability tinyint(1) NOT NULL DEFAULT 0,
   pharmacy tinyint(1) NOT NULL DEFAULT 0,
   wifi tinyint(1) NOT NULL DEFAULT 0,

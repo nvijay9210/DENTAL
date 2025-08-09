@@ -12,11 +12,6 @@ const {
 // Setup multer memory storage once
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Setup common upload fields
-const clinicUploadFields = upload.fields([
-  { name: "clinic_logo", maxCount: 1 },
-]);
-
 // Setup common file middleware options
 const clinicFileMiddleware = uploadFileMiddleware({
   folderName: "Clinic",
@@ -30,6 +25,18 @@ const clinicFileMiddleware = uploadFileMiddleware({
   createValidationFn: clinicValidation.createClinicValidation,
   updateValidationFn: clinicValidation.updateClinicValidation,
 });
+const clinicFileMiddleware2 = uploadFileMiddleware({
+  folderName: "Clinic",
+  fileFields: [
+    {
+      fieldName: "clinic_images",
+      maxSizeMB: 5,
+      multiple: true,
+    },
+  ],
+  createValidationFn: clinicValidation.createClinicValidation,
+  updateValidationFn: clinicValidation.updateClinicValidation,
+});
 
 // Add Clinic
 router.post(
@@ -37,6 +44,7 @@ router.post(
   authenticateTenantClinicGroup(["tenant"]),
   upload.any(),
   clinicFileMiddleware,
+  clinicFileMiddleware2,
   clinicController.createClinic
 );
 
@@ -62,6 +70,7 @@ router.put(
   // clinicUploadFields,
   upload.any(),
   clinicFileMiddleware,
+  clinicFileMiddleware2,
   clinicController.updateClinic
 );
 

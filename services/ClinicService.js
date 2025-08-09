@@ -1,4 +1,4 @@
-const { CustomError } = require("../middlewares/CustomeError")
+const { CustomError } = require("../middlewares/CustomeError");
 const fs = require("fs");
 const path = require("path");
 const clinicModel = require("../models/ClinicModel");
@@ -18,6 +18,12 @@ const message = require("../middlewares/ErrorMessages");
 const { convertUTCToLocal } = require("../utils/DateUtils");
 const { createGroup } = require("../middlewares/KeycloakAdmin");
 const { buildCacheKey } = require("../utils/RedisCache");
+const {
+  saveDocuments,
+  updateDocumentsDiffBased,
+  updateSingleDocument2,
+} = require("../utils/UploadFiles");
+const { getDocumentsByField, deleteDocumentsByTableAndId } = require("../models/documentModel");
 
 const clinicFieldMap = {
   tenant_id: (val) => val,
@@ -47,7 +53,6 @@ const clinicFieldMap = {
   reviews_count: (val) => (val ? parseInt(val) : 0),
   emergency_support: helper.parseBoolean,
   teleconsultation_supported: helper.parseBoolean,
-  clinic_logo: (val) => val || null,
   parking_availability: helper.parseBoolean,
   pharmacy: helper.parseBoolean,
   wifi: helper.parseBoolean,
@@ -84,7 +89,6 @@ const clinicFieldReverseMap = {
   reviews_count: (val) => (val ? parseInt(val) : 0),
   emergency_support: (val) => Boolean(val),
   teleconsultation_supported: (val) => Boolean(val),
-  clinic_logo: (val) => val,
   parking_availability: (val) => Boolean(val),
   pharmacy: (val) => Boolean(val),
   wifi: (val) => Boolean(val),
@@ -119,6 +123,17 @@ const createClinic = async (data, token, realm) => {
       if (!response) throw new CustomError("Group created error", 404);
     }
 
+    // Save uploaded profile picture to DB
+    if (data?.clinic_logo) {
+      await saveDocuments({
+        table_name: "clinic",
+        table_id: clinicId,
+        field_name: "clinic_logo",
+        files: data.clinic_logo,
+        created_by: data.created_by,
+      });
+    }
+
     return clinicId;
   } catch (error) {
     console.error(error);
@@ -134,13 +149,6 @@ const updateClinic = async (clinicId, data, tenant_id) => {
   };
 
   try {
-    const clinic = clinicModel.getClinicByTenantIdAndClinicId(
-      clinicId,
-      tenant_id
-    );
-
-    const old_clinic_image = clinic.clinic_logo;
-
     const { columns, values } = mapFields(data, updateClinicFieldMap);
 
     const affectedRows = await clinicModel.updateClinic(
@@ -150,20 +158,17 @@ const updateClinic = async (clinicId, data, tenant_id) => {
       tenant_id
     );
 
-    // if (affectedRows === 0) {
-    //   throw new CustomError(message.CLINIC_UPDATE_FAIL, 404);
-    // }
-
-    // Delete old photo if a new one is uploaded
-    if (
-      data.clinic_logo &&
-      data.clinic_logo !== old_clinic_image &&
-      old_clinic_image
-    ) {
-      const oldPhotoPath = path.join(__dirname, `../../uploads/${oldPhoto}`);
-      if (fs.existsSync(oldPhotoPath)) {
-        fs.unlinkSync(oldPhotoPath);
-      }
+    // 🔁 Diff-based profile picture update
+    if (data?.clinic_logo) {
+      await updateSingleDocument2({
+        table_name: "clinic",
+        table_id: clinicId,
+        field_name: "clinic_logo",
+        newFile: data?.clinic_logo,
+        deleteOld: true,
+        created_by: data.created_by,
+        updated_by: data.updated_by,
+      });
     }
 
     await invalidateCacheByPattern("clinic:*");
@@ -192,8 +197,29 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
       );
       return result;
     });
-    const convertedRows = clinics.data.map((clinic) =>
-      helper.convertDbToFrontend(clinic, clinicFieldReverseMap)
+
+    const convertedRows = await Promise.all(
+      clinics.data.map(async (clinic) => {
+        const formatted = helper.convertDbToFrontend(
+          clinic,
+          clinicFieldReverseMap
+        );
+
+        const profilePics = await getDocumentsByField(
+          "clinic",
+          clinic.clinic_id,
+          "clinic_logo"
+        );
+        const clinic_logo = profilePics.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+
+        return {
+          ...formatted,
+          clinic_logo
+        };
+      })
     );
 
     return {
@@ -214,12 +240,22 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
       clinicId
     );
 
-    const convertedRows = helper.convertDbToFrontend(
-      clinic,
-      clinicFieldReverseMap
-    );
+    const formatted = helper.convertDbToFrontend(clinic, clinicFieldReverseMap);
 
-    return convertedRows;
+    const profilePics = await getDocumentsByField(
+      "clinic",
+      clinicId,
+      "clinic_logo"
+    );
+    const clinic_logo = profilePics.map((doc) => ({
+      document_id: doc.document_id,
+      file_url: doc.file_url,
+    }));
+
+    return {
+      ...formatted,
+      clinic_logo
+    };
   } catch (error) {
     throw new CustomError(err, 500);
   }
@@ -227,6 +263,7 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
 
 const deleteClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
   try {
+    await deleteDocumentsByTableAndId('clinic',clinicId)
     const clinic = await clinicModel.deleteClinicByTenantIdAndClinicId(
       tenantId,
       clinicId
@@ -615,7 +652,8 @@ const getClinicSettingsByTenantIdAndClinicId = async (tenantId, clinicId) => {
       tenantId,
       clinicId
     );
-    return clinic;
+    const document=await getDocumentsByField('clinic',clinicId,'clinic_logo')
+    return {...clinic,clinic_logo:document[0].file_url};
   } catch (error) {
     throw new CustomError(err, 500);
   }
@@ -628,6 +666,17 @@ const updateClinicSettings = async (tenantId, clinicId, details) => {
       clinicId,
       details
     );
+    if (data?.clinic_logo) {
+      await updateSingleDocument2({
+        table_name: "clinic",
+        table_id: clinicId,
+        field_name: "clinic_logo",
+        newFile: data?.clinic_logo,
+        deleteOld: true,
+        created_by: data.created_by,
+        updated_by: data.updated_by,
+      });
+    }
     return clinic;
   } catch (error) {
     throw new CustomError(err, 500);
