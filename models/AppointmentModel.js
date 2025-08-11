@@ -482,6 +482,7 @@ const getAppointmentsWithDetails = async (
 ) => {
   const query1 = `SELECT 
   CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
+  p.profile_picture,
   p.gender,
   p.date_of_birth,
   app.status,
@@ -506,7 +507,7 @@ FROM appointment AS app
 JOIN patient AS p ON p.patient_id = app.patient_id
 WHERE app.tenant_id = ? 
   AND app.clinic_id = ? 
-  AND app.dentist_id = ?`;
+  AND app.dentist_id = ?`
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query1, [
@@ -519,7 +520,7 @@ WHERE app.tenant_id = ?
     const [counts] = await conn.query(query2, [
       tenantId,
       clinic_id,
-      dentist_id,
+      dentist_id
     ]);
 
     return { data: rows, total: counts[0].total };
@@ -537,10 +538,11 @@ const getAppointmentsWithDetailsByClinic = async (
   limit,
   offset
 ) => {
+
   const query1 = `
     SELECT 
       CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
-      p.patient_id,
+      p.profile_picture,
       p.gender,
       p.date_of_birth,
       app.status,
@@ -576,7 +578,10 @@ const getAppointmentsWithDetailsByClinic = async (
       offset,
     ]);
 
-    const [counts] = await conn.query(query2, [tenantId, clinic_id]);
+    const [counts] = await conn.query(query2, [
+      tenantId,
+      clinic_id
+    ]);
 
     return { data: rows, total: counts[0].total };
   } catch (error) {
@@ -587,6 +592,7 @@ const getAppointmentsWithDetailsByClinic = async (
   }
 };
 
+
 const getAppointmentsWithDetailsByPatient = async (
   tenantId,
   patientId,
@@ -594,6 +600,7 @@ const getAppointmentsWithDetailsByPatient = async (
   limit,
   offset
 ) => {
+
   let statusCondition = "";
   let statusParams = [];
 
@@ -610,7 +617,7 @@ const getAppointmentsWithDetailsByPatient = async (
     SELECT 
       CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,
       d.specialisation,
-      d.dentist_id,
+      d.profile_picture,
       d.gender,
       d.date_of_birth,
       app.status,
@@ -663,6 +670,7 @@ const getAppointmentsWithDetailsByPatient = async (
     conn.release();
   }
 };
+
 
 const getAppointmentMonthlySummary = async (
   tenantId,
@@ -1077,104 +1085,51 @@ const updateAppoinmentStatusCancelledAndReschedule = async (
   }
 };
 
-// const updateRoomIdBeforeAppointment = async () => {
-//   const conn = await pool.getConnection();
-//   try {
-//     const [appointments] = await conn.execute(`
-//       SELECT appointment_id, appointment_date, start_time
-//       FROM appointment
-//       WHERE
-//         appointment_date = CURDATE()
-//         AND is_virtual = 1
-//         AND room_id =  '00000000-0000-0000-0000-000000000000'
-//         AND status="confirmed"
-//         AND appointment_type="video"
-//     `);
-
-//     const now = Date.now();
-//     const fiveMinutesLater = now + 5 * 60 * 1000;
-
-//     const toUpdate = appointments.filter(({ appointment_date, start_time }) => {
-//       const dateStr = appointment_date.toISOString().split("T")[0]; // "YYYY-MM-DD"
-//       const [year, month, day] = dateStr.split("-").map(Number);
-//       const [hour, minute, second] = start_time.split(":").map(Number);
-
-//       const dateTime = new Date(year, month - 1, day, hour, minute, second);
-//       const timestamp = dateTime.getTime();
-
-//       return timestamp >= now && timestamp <= fiveMinutesLater;
-//     });
-
-//     if (toUpdate.length === 0) {
-//       console.log("⏳ No appointments to update.");
-//       return;
-//     }
-
-//     const updatePromises = toUpdate.map(({ appointment_id }) => {
-//       const newRoomId = uuidv4();
-//       return conn.execute(
-//         `UPDATE appointment SET room_id = ? WHERE appointment_id = ?`,
-//         [newRoomId, appointment_id]
-//       );
-//     });
-
-//     await Promise.all(updatePromises);
-//     console.log(`✅ Updated ${toUpdate.length} room_id(s)`);
-//   } catch (err) {
-//     console.error("❌ Error:", err);
-//   } finally {
-//     conn.release();
-//   }
-// };
-
-const updateRoomIdBeforeAppointment = async (tenantId) => {
+const updateRoomIdBeforeAppointment = async () => {
   const conn = await pool.getConnection();
   try {
-    // Get today's appointments that are virtual, confirmed, video, and have empty room_id
-    const [appointments] = await conn.execute(
-      `
+    const [appointments] = await conn.execute(`
       SELECT appointment_id, appointment_date, start_time
       FROM appointment
       WHERE 
-        tenant_id = ?
-        AND appointment_date = CURDATE()
+        appointment_date = CURDATE()
         AND is_virtual = 1
-        AND room_id = '00000000-0000-0000-0000-000000000000'
-        AND status = 'confirmed'
-        AND appointment_type = 'video'
-    `,
-      [tenantId]
-    );
+        AND room_id =  '00000000-0000-0000-0000-000000000000'
+        AND status="confirmed"
+        AND appointment_type="video"
+    `);
 
-    const now = new Date();
-    const fiveMinutesLater = new Date(now.getTime() + 5 * 60 * 1000);
+    const now = Date.now();
+    const fiveMinutesLater = now + 5 * 60 * 1000;
 
     const toUpdate = appointments.filter(({ appointment_date, start_time }) => {
+      const dateStr = appointment_date.toISOString().split("T")[0]; // "YYYY-MM-DD"
+      const [year, month, day] = dateStr.split("-").map(Number);
       const [hour, minute, second] = start_time.split(":").map(Number);
-      const appointmentTime = new Date(appointment_date);
-      appointmentTime.setHours(hour, minute, second);
 
-      return appointmentTime >= now && appointmentTime <= fiveMinutesLater;
+      const dateTime = new Date(year, month - 1, day, hour, minute, second);
+      const timestamp = dateTime.getTime();
+
+      return timestamp >= now && timestamp <= fiveMinutesLater;
     });
 
     if (toUpdate.length === 0) {
-      console.log(`⏳ [${tenantId}] No appointments to update.`);
+      console.log("⏳ No appointments to update.");
       return;
     }
 
-    // Run update queries in parallel
     const updatePromises = toUpdate.map(({ appointment_id }) => {
       const newRoomId = uuidv4();
       return conn.execute(
-        `UPDATE appointment SET room_id = ? WHERE tenant_id = ? AND appointment_id = ?`,
-        [newRoomId, tenantId, appointment_id]
+        `UPDATE appointment SET room_id = ? WHERE appointment_id = ?`,
+        [newRoomId, appointment_id]
       );
     });
 
     await Promise.all(updatePromises);
-    console.log(`✅ [${tenantId}] Updated ${toUpdate.length} room_id(s)`);
+    console.log(`✅ Updated ${toUpdate.length} room_id(s)`);
   } catch (err) {
-    console.error(`❌ [${tenantId}] Error updating room_id(s):`, err);
+    console.error("❌ Error:", err);
   } finally {
     conn.release();
   }
@@ -1220,6 +1175,7 @@ async function updateAppointmentStats(
   );
 
   const row = results[0];
+
 
   // Update stats table
   await pool.query(
