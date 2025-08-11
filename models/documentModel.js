@@ -95,6 +95,22 @@ const updateDocument = async (document_id, file_url, updated_by) => {
   }
 };
 
+const updateDocumentDescription = async (document_id, description) => {
+  const conn = await pool.getConnection();
+  try {
+    const [result] = await conn.query(
+      `UPDATE document SET description = ? WHERE document_id = ?`,
+      [description, document_id]
+    );
+    return result.affectedRows;
+  } catch (error) {
+    console.error("Error in updateDocument:", error);
+    throw error;
+  } finally {
+    conn.release();
+  }
+};
+
 // Delete all documents for a record
 const deleteDocumentsByTableAndId = async (table_name, table_id) => {
   const conn = await pool.getConnection();
@@ -141,4 +157,5 @@ module.exports = {
   updateDocument,
   deleteDocumentsByTableAndId,
   deleteDocumentById,
+  updateDocumentDescription
 };

@@ -157,12 +157,6 @@ const dentistColumnConfig = [
     data_type: "json",
   },
   {
-    columnname: "awards_certifications",
-    type: "longtext",
-    size: 255,
-    null: true,
-  },
-  {
     columnname: "social_links",
     type: "longtext",
     null: true,

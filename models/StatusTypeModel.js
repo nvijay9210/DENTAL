@@ -103,7 +103,6 @@ const deleteStatusTypeByTenantAndStatusTypeId = async (tenant_id, statusType_id)
 };
 
 const getStatusTypeIdByTenantAndStatusType = async (status_type) => {
-  console.log('getStatusTypeIdByTenantAndStatusTypeModel')
   const query = `
     SELECT status_type_id
     FROM statustype

@@ -286,6 +286,7 @@ const updateDentist = async (dentistId, data, tenant_id, req) => {
         field_name: "awards_certifications",
         newFiles: awards_certifications,
         deletedFileIds: data.deletedFileIds,
+        created_by: data.created_by,
         updated_by: data.updated_by,
         descriptions: data.descriptions,
       });
