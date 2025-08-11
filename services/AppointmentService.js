@@ -32,7 +32,7 @@ const appointmentFields = {
   patient_id: (val) => val,
   dentist_id: (val) => val,
   clinic_id: (val) => val,
-  room_id: (val) => val||'00000000-0000-0000-0000-000000000000',
+  room_id: (val) => val || "00000000-0000-0000-0000-000000000000",
   appointment_date: (val) => formatDateOnly(val),
   start_time: (val) => val,
   end_time: (val) => val,
@@ -118,7 +118,7 @@ const createAppointment = async (data) => {
     await invalidateCacheByPattern("appointmentsummary:*");
     await invalidateCacheByPattern("financeSummary:*");
     await invalidateCacheByPattern("patient:*");
-    
+
     if (appointmentId)
       await updatePatientCount(data.tenant_id, data.clinic_id, true);
     await updatePatientAppointmentCount(data.tenant_id, data.patient_id, true);
@@ -145,8 +145,9 @@ const createAppointment = async (data) => {
 const getAllAppointmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointment", "list", {
-    tenant_id:tenantId,
-    page,limit
+    tenant_id: tenantId,
+    page,
+    limit,
   });
 
   try {
@@ -177,9 +178,10 @@ const getAllAppointmentsByTenantIdAndClinicId = async (
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointment", "list", {
-    tenant_id:tenantId,
+    tenant_id: tenantId,
     clinic_id,
-    page,limit
+    page,
+    limit,
   });
 
   try {
@@ -213,10 +215,11 @@ const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointment", "list", {
-    tenant_id:tenantId,
+    tenant_id: tenantId,
     clinic_id,
     dentist_id,
-    page,limit
+    page,
+    limit,
   });
 
   try {
@@ -282,9 +285,10 @@ const getAllAppointmentsByTenantIdAndAndDentistId = async (
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointment", "list", {
-    tenant_id:tenantId,
+    tenant_id: tenantId,
     dentist_id,
-    page,limit
+    page,
+    limit,
   });
 
   try {
@@ -318,10 +322,11 @@ const getAllAppointmentsByTenantIdAndPatientId = async (
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointment", "list", {
-    tenant_id:tenantId,
+    tenant_id: tenantId,
     patient_id,
     status,
-    page,limit
+    page,
+    limit,
   });
 
   try {
@@ -652,10 +657,11 @@ const getAppointmentsWithDetails = async (
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointment", "appointmentwithdetails", {
-    tenant_id:tenantId,
+    tenant_id: tenantId,
     clinic_id,
     dentist_id,
-    page,limit
+    page,
+    limit,
   });
 
   try {
@@ -667,28 +673,27 @@ const getAppointmentsWithDetails = async (
         Number(limit),
         offset
       );
-      return result
+      return result;
     });
 
-    const convertedRows=appointment.data.map(app=>({
+    const convertedRows = appointment.data.map((app) => ({
       ...app,
-      date_of_birth:formatDateOnly(app.date_of_birth),
-      visit_reason:safeJsonParse(app.visit_reason),
-      appointment_date:formatDateOnly(app.appointment_date)
-    }))
+      date_of_birth: formatDateOnly(app.date_of_birth),
+      visit_reason: safeJsonParse(app.visit_reason),
+      appointment_date: formatDateOnly(app.appointment_date),
+    }));
 
-    return {data:convertedRows,total:appointment.total};
+    return { data: convertedRows, total: appointment.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
     throw new CustomError(err, 500);
   }
 };
 
-
 const getAppointmentsWithDetailsByClinic = async (
   tenantId,
   clinic_id,
-  
+
   page = 1,
   limit = 10
 ) => {
@@ -696,9 +701,9 @@ const getAppointmentsWithDetailsByClinic = async (
   const cacheKey = buildCacheKey("appointment", "appointmentwithdetails", {
     tenant_id: tenantId,
     clinic_id,
-    
+
     page,
-    limit
+    limit,
   });
 
   try {
@@ -706,25 +711,50 @@ const getAppointmentsWithDetailsByClinic = async (
       const result = await appointmentModel.getAppointmentsWithDetailsByClinic(
         tenantId,
         clinic_id,
-        
+
         Number(limit),
         offset
       );
-      return result
+      return result;
     });
-    const convertedRows=appointments.data.map(appointment=>({
-      ...appointment,
-      visit_reason:safeJsonParse(appointment.visit_reason),
-      date_of_birth:formatDateOnly(appointment.date_of_birth),
-      appointment_date:formatDateOnly(appointment.appointment_date)
-    }))
-    return {data:convertedRows,total:appointments.total}
+    // const convertedRows = appointments.data.map((appointment) => ({
+    //   ...appointment,
+    //   visit_reason: safeJsonParse(appointment.visit_reason),
+    //   date_of_birth: formatDateOnly(appointment.date_of_birth),
+    //   appointment_date: formatDateOnly(appointment.appointment_date),
+    // }));
+
+    const convertedRows = await Promise.all(
+      appointments.data.map(async (appointment) => {
+        const formatted = {
+          ...appointment,
+          visit_reason: safeJsonParse(appointment.visit_reason),
+          date_of_birth: formatDateOnly(appointment.date_of_birth),
+          appointment_date: formatDateOnly(appointment.appointment_date),
+        };
+
+        const profilePics = await getDocumentsByField(
+          "patient",
+          appointment.patient_id,
+          "profile_picture"
+        );
+        const profile_picture = profilePics.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+        }));
+
+        return {
+          ...formatted,
+          profile_picture,
+        };
+      })
+    );
+    return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
     throw new CustomError(err, 500);
   }
 };
-
 
 const getAppointmentsWithDetailsByPatient = async (
   tenantId,
@@ -735,10 +765,11 @@ const getAppointmentsWithDetailsByPatient = async (
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointment", "appointmentwithdetails", {
-    tenant_id:tenantId,
+    tenant_id: tenantId,
     patient_id,
-    status:status,
-    page,limit
+    status: status,
+    page,
+    limit,
   });
   const fieldsToDecode = ["visit_reason", "working_hours"];
 
@@ -804,10 +835,7 @@ const getAppointmentMonthlySummary = async (
   }
 };
 
-const getAppointmentMonthlySummaryClinic = async (
-  tenantId,
-  clinic_id
-) => {
+const getAppointmentMonthlySummaryClinic = async (tenantId, clinic_id) => {
   try {
     const cacheKey = `appointmentsmonthlysummary:${tenantId}/${clinic_id}`;
     const appointment = await getOrSetCache(cacheKey, async () => {
@@ -1372,10 +1400,11 @@ async function getAppointmentSummaryByStartDateAndEndDate(
     tenant_id,
     clinic_id,
     dentist_id,
-    startDate,endDate
+    startDate,
+    endDate,
   });
 
-  try{
+  try {
     const appointments = await getOrSetCache(cacheKey, async () => {
       const queryParams = [tenant_id, startDate, endDate];
 
@@ -1389,13 +1418,13 @@ async function getAppointmentSummaryByStartDateAndEndDate(
         WHERE a.tenant_id = ?
           AND a.stat_date BETWEEN ? AND ?
       `;
-    
+
       // Optional: Filter by clinic if valid
       if (clinic_id && !isNaN(clinic_id)) {
         query += ` AND a.clinic_id = ?`;
         queryParams.push(clinic_id);
       }
-    
+
       // Optional: Filter only if dentist_id is provided and valid
       if (dentist_id && !isNaN(dentist_id)) {
         query += `
@@ -1413,12 +1442,12 @@ async function getAppointmentSummaryByStartDateAndEndDate(
         `;
         queryParams.push(dentist_id);
       }
-    
+
       query += ` GROUP BY a.stat_date ORDER BY a.stat_date`;
-    
+
       try {
         const [rows] = await pool.query(query, queryParams);
-    
+
         return rows.map((row) => ({
           date: formatDateOnly(row.date),
           confirmed: Number(row.confirmed),
@@ -1430,12 +1459,10 @@ async function getAppointmentSummaryByStartDateAndEndDate(
         throw new CustomError(err, 500);
       }
     });
-   return appointments
+    return appointments;
+  } catch (err) {
+    throw new CustomError("Failed to fetch financeSummary", 404);
   }
-  catch(err){
-    throw new CustomError('Failed to fetch financeSummary',404)
-  }
-  
 }
 
 module.exports = {
@@ -1465,5 +1492,5 @@ module.exports = {
   getAppointmentSummaryByStartDateAndEndDate,
   updateAppoinmentFeedbackDisplay,
   getAppointmentMonthlySummaryClinic,
-  getAppointmentsWithDetailsByClinic
+  getAppointmentsWithDetailsByClinic,
 };

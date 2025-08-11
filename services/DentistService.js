@@ -528,7 +528,7 @@ const getAllDentistsByTenantIdAndClinicId = async (
         );
         const profile_picture = profilePics.map((doc) => ({
           document_id: doc.document_id,
-          profile_picture: doc.file_url,
+          file_url: doc.file_url,
         }));
 
         const awards = await getDocumentsByField(

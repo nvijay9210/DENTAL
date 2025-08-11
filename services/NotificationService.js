@@ -211,8 +211,8 @@ const getNotificationsForReceiver = async (
     const convertedRows = await Promise.all(
       notifications.map(async (notification) => {
         const formatted = {
-          ...n,
-          message: helper.safeJsonParse(n.message),
+          ...notification,
+          message: helper.safeJsonParse(notification.message),
         };
 
         const docs = await getDocumentsByField(

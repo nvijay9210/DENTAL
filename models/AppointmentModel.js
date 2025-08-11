@@ -541,7 +541,7 @@ const getAppointmentsWithDetailsByClinic = async (
   const query1 = `
     SELECT 
       CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
-      p.profile_picture,
+      p.patient_id,
       p.gender,
       p.date_of_birth,
       app.status,
