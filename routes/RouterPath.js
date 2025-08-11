@@ -160,6 +160,7 @@ module.exports = {
     "/deletesupplierproduct/:supplier_product_id/:tenant_id",
 
   ADD_SUPPLIER_PAYMENTS: "/addsupplierpayment",
+  ADD_SUPPLIER_FULL_PAYMENTS: "/addsupplierfullpayment",
   GETALL_SUPPLIER_PAYMENTS_TENANT: "/getallsupplierpayments/:tenant_id",
   GETALL_SUPPLIER_PAYMENTS_TENANT_SUPPLIER:
     "/getallsupplierpayments/:tenant_id/:supplier_id",

@@ -1,6 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
-const { allocateSupplierPayment } = require("../models/SupplierPaymentsModel");
+const { allocateSupplierPayment, getAllUnpaidSupplierPaymentssByTenantIdAndSupplierId } = require("../models/SupplierPaymentsModel");
 const supplierPaymentsService = require("../services/SupplierPaymentsService");
 const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 const supplierPaymentsValidation = require("../validations/SupplierPaymentsValidation");
@@ -18,6 +18,25 @@ exports.createSupplierPayments = async (req, res, next) => {
     // Create the supplierPayments
     const id = await supplierPaymentsService.createSupplierPayments(details);
     res.status(201).json({ message: "SupplierPayments created", id });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.createSupplierFullPayments = async (req, res, next) => {
+  const details = req.body;
+
+  try {
+    // Validate supplierPayments data
+    await supplierPaymentsValidation.createSupplierPaymentsValidation(details);
+
+    const supplierpayments=await getAllUnpaidSupplierPaymentssByTenantIdAndSupplierId(details.tenant_id,details.clinic_id,details.supplier_id)
+    let ids=[]
+    supplierpayments.forEach(async(supplierpayment) => {
+      const sup=await supplierPaymentsService.createSupplierFullPayments(supplierpayments);
+      ids.push(sup)
+    });
+    res.status(201).json({ message: "SupplierPayments created", ids });
   } catch (err) {
     next(err);
   }

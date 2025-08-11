@@ -87,6 +87,28 @@ const getAllSupplierPaymentssByTenantIdAndSupplierId = async (
   }
 };
 
+const getAllUnpaidSupplierPaymentssByTenantIdAndSupplierId = async (
+  tenantId,
+  supplierId
+) => {
+  const query1 = `SELECT * FROM supplier_payments WHERE sp.tenant_id = ? AND clinic_id=? AND supplier_id = ? AND balance_amount>0`
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      supplierId,
+      limit,
+      offset,
+    ]);
+    return rows
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
 const getSupplierPaymentsByTenantAndPurchaseOrderId = async (
   tenantId,
   purchase_order_id,
@@ -253,5 +275,6 @@ module.exports = {
   getSupplierPaymentsByTenantAndPurchaseOrderId,
   getAllSupplierPaymentssByTenantIdAndSupplierId,
   getUnpaidEntriesFIFO,
-  updateBalanceAmount
+  updateBalanceAmount,
+  getAllUnpaidSupplierPaymentssByTenantIdAndSupplierId
 };

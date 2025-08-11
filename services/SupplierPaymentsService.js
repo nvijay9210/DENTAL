@@ -80,93 +80,93 @@ const createSupplierPayments = async (data) => {
   }
 };
 
-// const createSupplierPayments = async (data) => {
-//   const fieldMap = {
-//     ...supplier_paymentsFields,
-//     created_by: (val) => val,
-//   };
+const createSupplierFullPayments = async (data) => {
+  const fieldMap = {
+    ...supplier_paymentsFields,
+    created_by: (val) => val,
+  };
+  try {
+    let remainingAmount = data.amount;
+    const supplierId = data.supplier_id;
+    const supplierpaymentid = data.supplier_payment_id;
+    const createdBy = data.created_by;
 
-//   try {
-//     let remainingAmount = data.amount;
-//     const supplierId = data.supplier_id;
-//     const supplierpaymentid = data.supplier_payment_id;
-//     const createdBy = data.created_by;
+    // Step 1: Get previous unpaid supplier_payment records (FIFO style)
+    const unpaidPayments = await supplier_paymentsModel.getUnpaidEntriesFIFO(supplierpaymentid);
+    // These entries must have: balance_amount > 0
 
-//     // Step 1: Get previous unpaid supplier_payment records (FIFO style)
-//     const unpaidPayments = await supplier_paymentsModel.getUnpaidEntriesFIFO(supplierpaymentid);
-//     // These entries must have: balance_amount > 0
+    // Step 2: Start applying the new payment
+    for (const unpaid of unpaidPayments) {
+      if (remainingAmount <= 0) break;
 
-//     // Step 2: Start applying the new payment
-//     for (const unpaid of unpaidPayments) {
-//       if (remainingAmount <= 0) break;
+      const pending = unpaid.balance_amount;
+      const paidNow = Math.min(remainingAmount, pending);
+      const newBalance = pending - paidNow;
 
-//       const pending = unpaid.balance_amount;
-//       const paidNow = Math.min(remainingAmount, pending);
-//       const newBalance = pending - paidNow;
+      // New record showing payment applied to previous unpaid entry
+      const paymentData = {
+        supplier_id: supplierId,
+        reference_id: unpaid.id, // refers to the old unpaid entry
+        paid_amount: paidNow,
+        balance_amount: 0,
+        created_by: createdBy,
+        payment_type: "payment", // optional: helps identify this as a payment
+        payment_mode: data.payment_mode || null,
+        remarks: data.remarks || null,
+      };
 
-//       // New record showing payment applied to previous unpaid entry
-//       const paymentData = {
-//         supplier_id: supplierId,
-//         reference_id: unpaid.id, // refers to the old unpaid entry
-//         paid_amount: paidNow,
-//         balance_amount: 0,
-//         created_by: createdBy,
-//         payment_type: "payment", // optional: helps identify this as a payment
-//         payment_mode: data.payment_mode || null,
-//         remarks: data.remarks || null,
-//       };
+      const { columns, values } = mapFields(paymentData, fieldMap);
 
-//       const { columns, values } = mapFields(paymentData, fieldMap);
+      await supplier_paymentsModel.createSupplierPayments("supplier_payments", columns, values);
 
-//       await supplier_paymentsModel.createSupplierPayments("supplier_payments", columns, values);
+      // Update the balance of the original unpaid record
+      await supplier_paymentsModel.updateBalanceAmount(unpaid.supplier_payment_id, newBalance);
 
-//       // Update the balance of the original unpaid record
-//       await supplier_paymentsModel.updateBalanceAmount(unpaid.supplier_payment_id, newBalance);
+      remainingAmount -= paidNow;
+    }
 
-//       remainingAmount -= paidNow;
-//     }
+    // If amount still remains, and there’s no previous due, insert as advance
+    if (remainingAmount > 0) {
+      const advanceData = {
+        supplier_id: supplierId,
+        paid_amount: remainingAmount,
+        balance_amount: 0,
+        created_by: createdBy,
+        payment_type: "advance", // to differentiate it
+        payment_mode: data.payment_mode || null,
+        remarks: data.remarks || "Advance payment",
+      };
 
-//     // If amount still remains, and there’s no previous due, insert as advance
-//     if (remainingAmount > 0) {
-//       const advanceData = {
-//         supplier_id: supplierId,
-//         paid_amount: remainingAmount,
-//         balance_amount: 0,
-//         created_by: createdBy,
-//         payment_type: "advance", // to differentiate it
-//         payment_mode: data.payment_mode || null,
-//         remarks: data.remarks || "Advance payment",
-//       };
+      const { columns, values } = mapFields(advanceData, fieldMap);
+      await supplier_paymentsModel.createSupplierPayments("supplier_payments", columns, values);
+    }
 
-//       const { columns, values } = mapFields(advanceData, fieldMap);
-//       await supplier_paymentsModel.createSupplierPayments("supplier_payments", columns, values);
-//     }
+    if (data?.supplier_payment_documents) {
+      await saveDocuments({
+        table_name: "supplier_payments",
+        table_id: supplier_payment_Id,
+        field_name: "supplier_payment_documents",
+        files: data?.supplier_payment_documents, // from middleware
+        created_by: data.created_by,
+      });
+    }
 
-//     if (data?.supplier_payment_documents) {
-//       await saveDocuments({
-//         table_name: "supplier_payments",
-//         table_id: supplier_payment_Id,
-//         field_name: "supplier_payment_documents",
-//         files: data?.supplier_payment_documents, // from middleware
-//         created_by: data.created_by,
-//       });
-//     }
+    // Invalidate cache
+    await invalidateCacheByPattern("supplier_payments:*");
+    await invalidateCacheByPattern("financeSummary:*");
 
-//     // Invalidate cache
-//     await invalidateCacheByPattern("supplier_payments:*");
-//     await invalidateCacheByPattern("financeSummary:*");
+    return { message: "Supplier payments recorded successfully." };
 
-//     return { message: "Supplier payments recorded successfully." };
-
-//   } catch (error) {
-//     console.error("Failed to create supplier_payments:", error);
-//     throw new CustomError(`Failed to create supplier_payments: ${error.message}`, 404);
-//   }
-// };
+  } catch (error) {
+    console.error("Failed to create supplier_payments:", error);
+    throw new CustomError(`Failed to create supplier_payments: ${error.message}`, 404);
+  }
+};
 
 
 
 // Get All SupplierPaymentss by Tenant ID with Caching
+
 
 const getAllSupplierPaymentssByTenantId = async (
   tenantId,
@@ -396,6 +396,7 @@ const deleteSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (
 
 module.exports = {
   createSupplierPayments,
+  createSupplierFullPayments,
   getAllSupplierPaymentssByTenantId,
   getSupplierPaymentsByTenantIdAndSupplierPaymentsId,
   updateSupplierPayments,

@@ -10,6 +10,7 @@ const {
   DELETE_SUPPLIER_PAYMENTS_TENANT,
   GET_SUPPLIER_PAYMENTS_TENANT_PURCHASEORDER,
   GETALL_SUPPLIER_PAYMENTS_TENANT_SUPPLIER,
+  ADD_SUPPLIER_FULL_PAYMENTS,
 } = require("./RouterPath");
 const supplierPaymentvalidation = require("../validations/SupplierPaymentsValidation");
 const {
@@ -47,6 +48,19 @@ router.post(
   upload.any(),
   supplierPaymentFileMiddleware,
   supplierPaymentController.createSupplierPayments
+);
+
+router.post(
+  ADD_SUPPLIER_FULL_PAYMENTS,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "supplier",
+  ]),
+  upload.any(),
+  supplierPaymentFileMiddleware,
+  supplierPaymentController.createSupplierFullPayments
 );
 
 // Get All SupplierPaymentss by Tenant ID with Pagination
