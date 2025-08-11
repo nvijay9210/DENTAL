@@ -482,7 +482,6 @@ const getAppointmentsWithDetails = async (
 ) => {
   const query1 = `SELECT 
   CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
-  p.profile_picture,
   p.gender,
   p.date_of_birth,
   app.status,
@@ -611,7 +610,7 @@ const getAppointmentsWithDetailsByPatient = async (
     SELECT 
       CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,
       d.specialisation,
-      d.profile_picture,
+      d.dentist_id,
       d.gender,
       d.date_of_birth,
       app.status,

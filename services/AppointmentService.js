@@ -137,7 +137,7 @@ const createAppointment = async (data) => {
     return appointmentId;
   } catch (error) {
     console.error("Failed to create appointment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -166,7 +166,7 @@ const getAllAppointmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
     return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -202,7 +202,7 @@ const getAllAppointmentsByTenantIdAndClinicId = async (
     return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -241,7 +241,7 @@ const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (
     return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -260,7 +260,7 @@ const getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (
     return result;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -273,7 +273,7 @@ const getAllRoomIdByTenantIdAndPatientId = async (tenantId, patient_id) => {
     return result;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -309,7 +309,7 @@ const getAllAppointmentsByTenantIdAndAndDentistId = async (
     return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -348,7 +348,7 @@ const getAllAppointmentsByTenantIdAndPatientId = async (
     return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -372,7 +372,7 @@ const getAppointmentByTenantIdAndAppointmentId = async (
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -402,7 +402,7 @@ const getRoomIdByTenantIdAndAppointmentId = async (tenantId, appointmentId) => {
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -440,7 +440,7 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -544,7 +544,7 @@ const updateAppoinmentFeedbackDisplay = async (
 
     return result;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -587,7 +587,7 @@ const updateAppoinmentStatus = async (
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -644,7 +644,7 @@ const checkAppointmentExistsByStartTimeAndEndTimeAndDate = async (
       appointment_id
     );
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -676,17 +676,24 @@ const getAppointmentsWithDetails = async (
       return result;
     });
 
-    const convertedRows = appointment.data.map((app) => ({
-      ...app,
-      date_of_birth: formatDateOnly(app.date_of_birth),
-      visit_reason: safeJsonParse(app.visit_reason),
-      appointment_date: formatDateOnly(app.appointment_date),
-    }));
-
-    return { data: convertedRows, total: appointment.total };
+    const convertedRows = await convertRowsWithDocs({
+      rows: appointment.data,
+      convertFn: helper.convertDbToFrontend,
+      jsonFields: ["visit_reason"],
+      dateFields: ["created_at", "updated_at","appointment_date","date_of_birth"],
+      docOptions: [
+        {
+          tableName: "patient",
+          idField: "patient_id",
+          docFieldName: "profile_picture",
+          extractFields: ["document_id", "file_url"]
+        }
+      ]
+    });
+    return { data: convertedRows, total: receptions.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -717,12 +724,6 @@ const getAppointmentsWithDetailsByClinic = async (
       );
       return result;
     });
-    // const convertedRows = appointments.data.map((appointment) => ({
-    //   ...appointment,
-    //   visit_reason: safeJsonParse(appointment.visit_reason),
-    //   date_of_birth: formatDateOnly(appointment.date_of_birth),
-    //   appointment_date: formatDateOnly(appointment.appointment_date),
-    // }));
 
     const convertedRows = await Promise.all(
       appointments.data.map(async (appointment) => {
@@ -752,7 +753,7 @@ const getAppointmentsWithDetailsByClinic = async (
     return { data: convertedRows, total: appointments.total };
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -804,11 +805,10 @@ const getAppointmentsWithDetailsByPatient = async (
         return { ...result, data: formattedData };
       }
     });
-
     return appointment;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -831,7 +831,7 @@ const getAppointmentMonthlySummary = async (
     return appointment;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -849,7 +849,7 @@ const getAppointmentMonthlySummaryClinic = async (tenantId, clinic_id) => {
     return appointment;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -891,12 +891,13 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
     return appointment;
   } catch (error) {
     console.error("Database error while fetching appointment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
 const isoWeek = require("dayjs/plugin/isoWeek");
 const { buildCacheKey } = require("../utils/RedisCache");
+const { getDocumentsByTableAndId, getDocumentsByField } = require("../models/documentModel");
 dayjs.extend(isoWeek);
 
 const getAppointmentSummary = async (tenant_id, clinic_id) => {
@@ -1456,12 +1457,13 @@ async function getAppointmentSummaryByStartDateAndEndDate(
         }));
       } catch (error) {
         console.error("❌ Error fetching appointment summary:", error);
-        throw new CustomError(err, 500);
+        throw new CustomError(error, 500);
       }
     });
     return appointments;
-  } catch (err) {
-    throw new CustomError("Failed to fetch financeSummary", 404);
+  } catch (error) {
+    console.log(error)
+    throw error.message
   }
 }
 

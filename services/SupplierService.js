@@ -20,6 +20,7 @@ const { buildCacheKey } = require("../utils/RedisCache");
 const { encrypt } = require("../middlewares/PasswordHash");
 const { saveDocuments, updateSingleDocument2 } = require("../utils/UploadFiles");
 const { getDocumentsByField, deleteDocumentsByTableAndId } = require("../models/documentModel");
+const { convertRowsWithDocs } = require("../utils/ResponseConvertion");
 
 // Field mapping for suppliers (similar to treatment)
 
@@ -214,34 +215,19 @@ const getAllSuppliersByTenantIdAndClinicId = async (tenantId,clinicId, page = 1,
       return result;
     });
 
-    const convertedRows = await Promise.all(
-      suppliers.data.map(async (supplier) => {
-        // Step 1: Convert DB fields to frontend fields
-        const formatted = helper.convertDbToFrontend(
-          supplier,
-          supplierFieldsReverseMap
-        );
-    
-        // Step 2: Fetch supplier documents
-        const docs = await getDocumentsByField(
-          "supplier", // table name
-          supplier.supplier_id, // supplier's primary key
-          "logo_url" // document field type
-        );
-    
-        // Step 3: Extract only required fields from docs
-        const fileInfos = docs.map((doc) => ({
-          document_id: doc.document_id,
-          file_url: doc.file_url,
-        }));
-    
-        // Step 4: Return supplier data with documents
-        return {
-          ...formatted,
-          logo_url: fileInfos,
-        };
-      })
-    );
+    const convertedRows = await convertRowsWithDocs({
+      rows: suppliers.data,
+      convertFn: helper.convertDbToFrontend,
+      convertArgs: [supplierFieldsReverseMap],
+      docOptions: [
+        {
+          tableName: "supplier",
+          idField: "supplier_id",
+          docFieldName: "logo_url",
+          extractFields: ["document_id", "file_url"]
+        }
+      ]
+    });
 
     return { data: convertedRows, total: suppliers.total };
   } catch (err) {

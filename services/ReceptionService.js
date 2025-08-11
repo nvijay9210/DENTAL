@@ -17,6 +17,7 @@ const {
 const { buildCacheKey } = require("../utils/RedisCache");
 const { deleteDocumentsByTableAndId, getDocumentsByField } = require("../models/documentModel");
 const { saveDocuments, updateSingleDocument2 } = require("../utils/UploadFiles");
+const { convertRowsWithDocs } = require("../utils/ResponseConvertion");
 
 // Field mapping for receptions (similar to treatment)
 
@@ -189,31 +190,22 @@ const getAllReceptionsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = await Promise.all(
-      receptions.data.map(async (reception) => {
-        const formatted = helper.convertDbToFrontend(
-          reception,
-          receptionFieldsReverseMap
-        );
-
-        const profilePics = await getDocumentsByField(
-          "reception",
-          reception.reception_id,
-          "profile_picture"
-        );
-        const profile_picture = profilePics.map((doc) => ({
-          document_id: doc.document_id,
-          file_url: doc.file_url,
-        }));
-
-        return {
-          ...formatted,
-          profile_picture
-        };
-      })
-    );
+    const convertedRows = await convertRowsWithDocs({
+      rows: receptions.data,
+      convertFn: helper.convertDbToFrontend,
+      convertArgs: [receptionFieldsReverseMap],
+      docOptions: [
+        {
+          tableName: "reception",
+          idField: "reception_id",
+          docFieldName: "profile_picture",
+          extractFields: ["document_id", "file_url"]
+        }
+      ]
+    });
 
     return { data: convertedRows, total: receptions.total };
+
   } catch (err) {
     console.error("Database error while fetching receptions:", err);
     throw new CustomError(err, 500);
@@ -336,29 +328,19 @@ const getAllReceptionsByTenantIdAndClinicId = async (
       return result;
     });
 
-    const convertedRows = await Promise.all(
-      receptions.data.map(async (reception) => {
-        const formatted = helper.convertDbToFrontend(
-          reception,
-          receptionFieldsReverseMap
-        );
-
-        const profilePics = await getDocumentsByField(
-          "reception",
-          reception.reception_id,
-          "profile_picture"
-        );
-        const profile_picture = profilePics.map((doc) => ({
-          document_id: doc.document_id,
-          file_url: doc.file_url,
-        }));
-
-        return {
-          ...formatted,
-          profile_picture
-        };
-      })
-    );
+    const convertedRows = await convertRowsWithDocs({
+      rows: receptions.data,
+      convertFn: helper.convertDbToFrontend,
+      convertArgs: [receptionFieldsReverseMap],
+      docOptions: [
+        {
+          tableName: "reception",
+          idField: "reception_id",
+          docFieldName: "profile_picture",
+          extractFields: ["document_id", "file_url"]
+        }
+      ]
+    });
 
     return { data: convertedRows, total: receptions.total };
   } catch (err) {
