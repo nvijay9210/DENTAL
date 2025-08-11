@@ -53,7 +53,6 @@ async function getNotificationsForReceiver(tenantId, receiverId, receiverRole, c
       n.title,
       n.message,
       n.reference_id,
-      n.file_url,
       n.created_by,
       n.created_time,
       n.updated_by,
@@ -106,6 +105,9 @@ async function getNotificationsForReceiver(tenantId, receiverId, receiverRole, c
     // console.log(query,params)
     const [rows] = await conn.query(query, params);
     return rows;
+  }catch(err){
+    console.log(err.message)
+    throw err
   } finally {
     conn.release();
   }

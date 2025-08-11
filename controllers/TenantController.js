@@ -41,7 +41,6 @@ exports.getTenantByTenantId = async (req, res, next) => {
 exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   const { tenant_name, tenant_domain } = req.params;
   let user;
-
   if (process.env.KEYCLOAK_POWER === "on") {
     user = extractUserInfo(req.user);
 
@@ -62,8 +61,6 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
 
     if (user.userId === null)
       throw new CustomError("User in inactive state", 404);
-
-    console.log("role:",user)
   }
 
   try {
@@ -75,7 +72,6 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
       );
       // console.log("settings:",settings)
     } else {
- 
       if (!tenant_name || !tenant_domain)
         throw new CustomError("Tenantname and domain is requried", 400);
       settings = await tenantService.getTenantByTenantNameAndTenantDomain(

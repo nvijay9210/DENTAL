@@ -148,8 +148,7 @@ const createDentist = async (data, token, realm) => {
 
   try {
     let userData;
-    const allow = "no";
-    if (process.env.KEYCLOAK_POWER === "on" && allow === "yes") {
+    if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username/email
       const username = helper.generateUsername(
         data.first_name,

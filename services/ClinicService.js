@@ -23,7 +23,10 @@ const {
   updateDocumentsDiffBased,
   updateSingleDocument2,
 } = require("../utils/UploadFiles");
-const { getDocumentsByField, deleteDocumentsByTableAndId } = require("../models/documentModel");
+const {
+  getDocumentsByField,
+  deleteDocumentsByTableAndId,
+} = require("../models/documentModel");
 
 const clinicFieldMap = {
   tenant_id: (val) => val,
@@ -137,7 +140,7 @@ const createClinic = async (data, token, realm) => {
     return clinicId;
   } catch (error) {
     console.error(error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -175,7 +178,7 @@ const updateClinic = async (clinicId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.log("Service Error:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -217,7 +220,7 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
 
         return {
           ...formatted,
-          clinic_logo
+          clinic_logo,
         };
       })
     );
@@ -226,9 +229,9 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
       data: convertedRows,
       total: clinics.total,
     };
-  } catch (err) {
-    console.error(err);
-    throw new CustomError(err, 500);
+  } catch (error) {
+    console.error(error);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -254,16 +257,16 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
 
     return {
       ...formatted,
-      clinic_logo
+      clinic_logo,
     };
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
 const deleteClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
   try {
-    await deleteDocumentsByTableAndId('clinic',clinicId)
+    await deleteDocumentsByTableAndId("clinic", clinicId);
     const clinic = await clinicModel.deleteClinicByTenantIdAndClinicId(
       tenantId,
       clinicId
@@ -271,7 +274,7 @@ const deleteClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
     await invalidateCacheByPattern("clinic:*");
     return clinic;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -283,7 +286,7 @@ const checkClinicExistsByTenantIdAndClinicId = async (tenantId, clinicId) => {
       clinicId
     );
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -378,7 +381,7 @@ const getFinanceSummary = async (
     return patients;
   } catch (error) {
     console.error(error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -640,9 +643,9 @@ const getFinanceSummarybyDentist = async (tenant_id, clinic_id, dentist_id) => {
       return finalResult;
     });
     return finance;
-  } catch (err) {
-    console.error("Finance summary dentist error", err);
-    throw err;
+  } catch (error) {
+    console.error("Finance summary dentist error", error);
+    throw error;
   }
 };
 
@@ -652,10 +655,17 @@ const getClinicSettingsByTenantIdAndClinicId = async (tenantId, clinicId) => {
       tenantId,
       clinicId
     );
-    const document=await getDocumentsByField('clinic',clinicId,'clinic_logo')
-    return {...clinic,clinic_logo:document[0].file_url};
+    const document = await getDocumentsByField(
+      "clinic",
+      clinicId,
+      "clinic_logo"
+    );
+    return {
+      ...clinic,
+      clinic_logo: document.length > 0 ? document?.[0].file_url : null,
+    };
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -679,7 +689,7 @@ const updateClinicSettings = async (tenantId, clinicId, details) => {
     }
     return clinic;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 

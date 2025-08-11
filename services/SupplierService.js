@@ -95,8 +95,7 @@ const createSupplier = async (data, token, realm) => {
     created_by: (val) => val,
   };
   try {
-    const allow='no'
-    if (process.env.KEYCLOAK_POWER === "on" && allow==='yes') {
+    if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username/email
       const username = helper.generateUsername(
         data.name,
@@ -165,8 +164,6 @@ const createSupplier = async (data, token, realm) => {
         (data.username = username),
         (data.password = encrypt(userData.password).content);
     }
-
-
 
     const { columns, values } = mapFields(data, fieldMap);
 

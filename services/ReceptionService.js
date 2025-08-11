@@ -74,8 +74,8 @@ const createReception = async (data, token, realm) => {
     created_by: (val) => val,
   };
   try {
-    const allow='off'
-    if (process.env.KEYCLOAK_POWER === "on" && allow==='yes') {
+
+    if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username/email
       const username = helper.generateUsername(
         data.full_name,

@@ -142,7 +142,7 @@ const getTenantByTenantNameAndTenantDomain = async (
 
     const documents = await getDocumentsByField(
       "tenant",
-      tenantId,
+      tenant.tenant_id,
       "tenant_app_logo"
     );
 
@@ -158,6 +158,7 @@ const getTenantByTenantNameAndTenantDomain = async (
       tenant_app_logo,
     };
   } catch (error) {
+    console.log(error)
     throw new Error("Failed to get tenants: " + error.message);
   }
 };

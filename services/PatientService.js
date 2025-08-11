@@ -105,8 +105,7 @@ const createPatient = async (data, token, realm, user_clinic_id) => {
 
   try {
     let userData;
-    const allow='no';
-    if (process.env.KEYCLOAK_POWER === "on" && allow=='yes') {
+    if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username/email
       const username = helper.generateUsername(
         data.first_name,
@@ -181,7 +180,7 @@ const createPatient = async (data, token, realm, user_clinic_id) => {
       data.profile_picture = data['profile_picture[file_url]'][0];
     }
 
-     console.log('data_profile_piture:',data.profile_picture)
+     console.log('data_profile_piture:',data?.profile_picture)
  
      // Save uploaded profile picture to DB
      if (data?.profile_picture) {
