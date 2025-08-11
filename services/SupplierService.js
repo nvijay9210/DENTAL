@@ -18,9 +18,6 @@ const {
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
 const { encrypt } = require("../middlewares/PasswordHash");
-const { saveDocuments, updateSingleDocument2 } = require("../utils/UploadFiles");
-const { getDocumentsByField, deleteDocumentsByTableAndId } = require("../models/documentModel");
-const { convertRowsWithDocs } = require("../utils/ResponseConvertion");
 
 // Field mapping for suppliers (similar to treatment)
 
@@ -41,6 +38,7 @@ const supplierFields = {
   gst_number: (val) => val,
   pan_number: (val) => val,
   tax_id: (val) => val,
+  logo_url: (val) => val,
   mode_of_payment: (val) => val,
   preferred_currency: (val) => val,
   credit_limit: (val) =>val? parseFloat(val):0,
@@ -71,6 +69,7 @@ const supplierFieldsReverseMap = {
   gst_number: (val) => val,
   pan_number: (val) => val,
   tax_id: (val) => val,
+  logo_url: (val) => val,
   mode_of_payment: (val) => val,
   preferred_currency: (val) => val,
   credit_limit: (val) =>val? parseFloat(val):0,
@@ -171,23 +170,11 @@ const createSupplier = async (data, token, realm) => {
       columns,
       values
     );
-
- 
-    
-    if (data?.logo_url) {
-      await saveDocuments({
-        table_name: "supplier",
-        table_id: supplierId,
-        field_name: "logo_url",
-        files: data?.logo_url, // from middleware
-        created_by: data.created_by,
-      });
-    }
     await invalidateCacheByPattern("supplier:*");
     return supplierId;
   } catch (error) {
     console.error("Failed to create supplier:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(`Failed to create supplier: ${error.message}`, 404);
   }
 };
 
@@ -213,24 +200,14 @@ const getAllSuppliersByTenantIdAndClinicId = async (tenantId,clinicId, page = 1,
       return result;
     });
 
-    const convertedRows = await convertRowsWithDocs({
-      rows: suppliers.data,
-      convertFn: helper.convertDbToFrontend,
-      convertArgs: [supplierFieldsReverseMap],
-      docOptions: [
-        {
-          tableName: "supplier",
-          idField: "supplier_id",
-          docFieldName: "logo_url",
-          extractFields: ["document_id", "file_url"]
-        }
-      ]
-    });
+    const convertedRows = suppliers.data.map((supplier) =>
+      helper.convertDbToFrontend(supplier, supplierFieldsReverseMap)
+    );
 
     return { data: convertedRows, total: suppliers.total };
   } catch (err) {
     console.error("Database error while fetching suppliers:", err);
-    throw new CustomError(err, 500);
+    throw new CustomError("Failed to fetch suppliers", 404);
   }
 };
 
@@ -251,40 +228,14 @@ const getAllSuppliersByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = await Promise.all(
-      suppliers.data.map(async (supplier) => {
-        // Step 1: Convert DB fields to frontend fields
-        const formatted = helper.convertDbToFrontend(
-          supplier,
-          supplierFieldsReverseMap
-        );
-    
-        // Step 2: Fetch supplier documents
-        const docs = await getDocumentsByField(
-          "supplier", // table name
-          supplier.supplier_id, // supplier's primary key
-          "logo_url" // document field type
-        );
-    
-        // Step 3: Extract only required fields from docs
-        const fileInfos = docs.map((doc) => ({
-          document_id: doc.document_id,
-          file_url: doc.file_url,
-        }));
-    
-        // Step 4: Return supplier data with documents
-        return {
-          ...formatted,
-          logo_url: fileInfos,
-        };
-      })
+    const convertedRows = suppliers.data.map((supplier) =>
+      helper.convertDbToFrontend(supplier, supplierFieldsReverseMap)
     );
-    
 
     return { data: convertedRows, total: suppliers.total };
   } catch (err) {
     console.error("Database error while fetching suppliers:", err);
-    throw new CustomError(err, 500);
+    throw new CustomError("Failed to fetch suppliers", 404);
   }
 };
 
@@ -296,30 +247,14 @@ const getSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
       supplierId
     );
 
-    const convertedRows =helper.convertDbToFrontend(
+    const convertedRows = helper.convertDbToFrontend(
       supplier,
       supplierFieldsReverseMap
     );
 
-    const documents = await getDocumentsByField(
-      "supplier",
-      supplierId,
-      "logo_url"
-    );
-
-    // Format each document
-    const logo_url = documents.map((doc) => ({
-      document_id: doc.document_id,
-      file_url: doc.file_url,
-    }));
-
-    // Attach to the response
-    return {
-      ...convertedRows,
-      logo_url,
-    };
+    return convertedRows;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError("Failed to get supplier: " + error.message, 404);
   }
 };
 
@@ -338,42 +273,34 @@ const updateSupplier = async (supplierId, data, tenant_id) => {
       tenant_id
     );
 
-    await updateSingleDocument2({
-      table_name: "supplier",
-      table_id: supplierId,
-      field_name: "logo_url",
-      newFile: data?.logo_url,
-      deleteOld: true,
-      created_by: data.created_by,
-      updated_by: data.updated_by
-    });
-    
+    if (affectedRows === 0) {
+      throw new CustomError("Supplier not found or no changes made.", 404);
+    }
 
     await invalidateCacheByPattern("supplier:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError("Failed to update supplier", 404);
   }
 };
 
 // Delete Supplier
 const deleteSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
   try {
-    await deleteDocumentsByTableAndId('supplier',supplierId)
     const affectedRows =
       await supplierModel.deleteSupplierByTenantAndSupplierId(
         tenantId,
         supplierId
       );
-    // if (affectedRows === 0) {
-    //   throw new CustomError(err, 500);
-    // }
+    if (affectedRows === 0) {
+      throw new CustomError("Supplier not found.", 404);
+    }
 
     await invalidateCacheByPattern("supplier:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(`Failed to delete supplier: ${error.message}`, 404);
   }
 };
 

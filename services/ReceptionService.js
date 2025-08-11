@@ -15,9 +15,6 @@ const {
   addUserToGroup,
 } = require("../middlewares/KeycloakAdmin");
 const { buildCacheKey } = require("../utils/RedisCache");
-const { deleteDocumentsByTableAndId, getDocumentsByField } = require("../models/documentModel");
-const { saveDocuments, updateSingleDocument2 } = require("../utils/UploadFiles");
-const { convertRowsWithDocs } = require("../utils/ResponseConvertion");
 
 // Field mapping for receptions (similar to treatment)
 
@@ -30,6 +27,7 @@ const receptionFields = {
   full_name: (val) => val,
   email: (val) => val,
   status: (val) => helper.parseBoolean(val),
+  profile_picture: (val) => val,
   phone_number: (val) => val,
   alternate_phone_number: (val) => val,
   date_of_birth: (val) => val,
@@ -51,6 +49,7 @@ const receptionFieldsReverseMap = {
   full_name: (val) => val,
   email: (val) => val,
   status: (val) => Boolean(val),
+  profile_picture: (val) => val,
   phone_number: (val) => val,
   alternate_phone_number: (val) => val,
   date_of_birth: (val) => formatDateOnly(val),
@@ -73,7 +72,6 @@ const createReception = async (data, token, realm) => {
     created_by: (val) => val,
   };
   try {
-
     if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username/email
       const username = helper.generateUsername(
@@ -149,23 +147,11 @@ const createReception = async (data, token, realm) => {
       columns,
       values
     );
-
-    if (data?.profile_picture) {
-      await saveDocuments({
-        table_name: "reception",
-        table_id: receptionId,
-        field_name: "profile_picture",
-        files: data?.profile_picture, // from middleware
-        created_by: data.created_by,
-      });
-    }
     await invalidateCacheByPattern("reception:*");
-
-
     return receptionId;
   } catch (error) {
     console.error("Failed to create reception:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(`Failed to create reception: ${error.message}`, 404);
   }
 };
 
@@ -188,25 +174,14 @@ const getAllReceptionsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = await convertRowsWithDocs({
-      rows: receptions.data,
-      convertFn: helper.convertDbToFrontend,
-      convertArgs: [receptionFieldsReverseMap],
-      docOptions: [
-        {
-          tableName: "reception",
-          idField: "reception_id",
-          docFieldName: "profile_picture",
-          extractFields: ["document_id", "file_url"]
-        }
-      ]
-    });
+    const convertedRows = receptions.data.map((reception) =>
+      helper.convertDbToFrontend(reception, receptionFieldsReverseMap)
+    );
 
     return { data: convertedRows, total: receptions.total };
-
   } catch (err) {
     console.error("Database error while fetching receptions:", err);
-    throw new CustomError(err, 500);
+    throw new CustomError("Failed to fetch receptions", 404);
   }
 };
 
@@ -223,25 +198,9 @@ const getReceptionByTenantIdAndReceptionId = async (tenantId, receptionId) => {
       receptionFieldsReverseMap
     );
 
-    const documents = await getDocumentsByField(
-      "reception",
-      receptionId,
-      "profile_picture"
-    );
-
-    // Format each document
-    const profile_picture = documents.map((doc) => ({
-      document_id: doc.document_id,
-      file_url: doc.file_url,
-    }));
-
-    // Attach to the response
-    return {
-      ...convertedRows,
-      profile_picture,
-    };
+    return convertedRows;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError("Failed to get reception: " + error.message, 404);
   }
 };
 
@@ -260,21 +219,15 @@ const updateReception = async (receptionId, data, tenant_id) => {
       tenant_id
     );
 
-    await updateSingleDocument2({
-      table_name: "reception",
-      table_id: receptionId,
-      field_name: "profile_picture",
-      newFile: data?.profile_picture,
-      deleteOld: true,
-      created_by: data.created_by,
-      updated_by: data.updated_by
-    });
+    if (affectedRows === 0) {
+      throw new CustomError("Reception not found or no changes made.", 404);
+    }
 
     await invalidateCacheByPattern("reception:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError("Failed to update reception", 404);
   }
 };
 
@@ -284,20 +237,19 @@ const deleteReceptionByTenantIdAndReceptionId = async (
   receptionId
 ) => {
   try {
-    await deleteDocumentsByTableAndId('reception',receptionId)
     const affectedRows =
       await receptionModel.deleteReceptionByTenantAndReceptionId(
         tenantId,
         receptionId
       );
-    // if (affectedRows === 0) {
-    //   throw new CustomError("Reception not found.", 404);
-    // }
+    if (affectedRows === 0) {
+      throw new CustomError("Reception not found.", 404);
+    }
 
     await invalidateCacheByPattern("reception:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(`Failed to delete reception: ${error.message}`, 404);
   }
 };
 
@@ -326,24 +278,14 @@ const getAllReceptionsByTenantIdAndClinicId = async (
       return result;
     });
 
-    const convertedRows = await convertRowsWithDocs({
-      rows: receptions.data,
-      convertFn: helper.convertDbToFrontend,
-      convertArgs: [receptionFieldsReverseMap],
-      docOptions: [
-        {
-          tableName: "reception",
-          idField: "reception_id",
-          docFieldName: "profile_picture",
-          extractFields: ["document_id", "file_url"]
-        }
-      ]
-    });
+    const convertedRows = receptions.data.map((reception) =>
+      helper.convertDbToFrontend(reception, receptionFieldsReverseMap)
+    );
 
     return { data: convertedRows, total: receptions.total };
   } catch (err) {
     console.error("Database error while fetching receptions:", err);
-    throw new CustomError(err, 500);
+    throw new CustomError("Failed to fetch receptions", 404);
   }
 };
 

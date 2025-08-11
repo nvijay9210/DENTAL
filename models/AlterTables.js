@@ -291,7 +291,7 @@ async function removeExpenseDocumentField(conn) {
 
 async function removeUnwantedFields(conn) {
   // Dentist table
-  await dropColuadmnIfExists(conn, "dentist", "profile_picture");
+  await dropColumnIfExists(conn, "dentist", "profile_picture");
   await dropColumnIfExists(conn, "dentist", "awards_certifications");
 
   // Patient table
@@ -302,6 +302,59 @@ async function removeUnwantedFields(conn) {
   await dropColumnIfExists(conn, "supplier_products", "image_url");
   await dropColumnIfExists(conn, "notifications", "file_url");
   await dropColumnIfExists(conn, "treatment", "treatment_images");
+}
+async function createFileFields(conn) {
+  // Dentist table
+  await addColumnIfNotExists(
+    conn,
+    "dentist",
+    "profile_picture",
+    "VARCHAR(255) NULL",
+    "Add new ProfilePicture field"
+  )
+  // Patient table
+  await addColumnIfNotExists(
+    conn,
+    "patient",
+    "profile_picture",
+    "VARCHAR(255) NULL",
+    "Add new ProfilePicture field"
+  )
+  await addColumnIfNotExists(
+    conn,
+    "clinic",
+    "clinic_logo",
+    "VARCHAR(255) NULL",
+    "Add new ProfilePicture field"
+  )
+  await addColumnIfNotExists(
+    conn,
+    "reception",
+    "profile_picture",
+    "VARCHAR(255) NULL",
+    "Add new ProfilePicture field"
+  )
+  await addColumnIfNotExists(
+    conn,
+    "supplier",
+    "logo_url",
+    "VARCHAR(255) NULL",
+    "Add new ProfilePicture field"
+  )
+  await addColumnIfNotExists(
+    conn,
+    "supplier_products",
+    "image_url",
+    "VARCHAR(255) NULL",
+    "Add new product photo"
+  )
+  await addColumnIfNotExists(
+    conn,
+    "notifications",
+    "file_url",
+    "VARCHAR(255) NULL",
+    "Add new files"
+  )
 }
 
 
@@ -319,6 +372,7 @@ async function removeUnwantedFields(conn) {
     // await removeUnwantedFields(conn);
     await addDescriptionInDocumet(conn);
     await addProfilePictureInDentist(conn);
+    await createFileFields(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");
