@@ -274,7 +274,7 @@ async function removeExpenseDocumentField(conn) {
 
 async function removeUnwantedFields(conn) {
   // Dentist table
-  await dropColumnIfExists(conn, "dentist", "profile_picture");
+  await addColumnIfNotExists(conn, "dentist", "profile_picture");
   await dropColumnIfExists(conn, "dentist", "awards_certifications");
 
   // Patient table

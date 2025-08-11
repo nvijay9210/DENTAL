@@ -65,6 +65,7 @@ const dentistFieldMap = {
   state: (val) => val,
   country: (val) => val,
   pin_code: (val) => val,
+  profile_picture: (val) => val,
 
   consultation_fee: (val) => (val ? parseFloat(val) : 0),
   currency_code: (val) => val,
@@ -107,6 +108,7 @@ const dentistFieldReverseMap = {
   research_projects: (val) => helper.safeJsonParse(val),
   publication: (val) => helper.safeJsonParse(val),
   member_of: (val) => helper.safeJsonParse(val),
+  profile_picture: (val) => val,
 
   experience_years: (val) => (val ? parseInt(val) : 0),
   license_number: (val) => val,
@@ -220,22 +222,7 @@ const createDentist = async (data, token, realm) => {
       values
     );
 
-    if (data["profile_picture[file_url]"]) {
-      data.profile_picture = data["profile_picture[file_url]"][0];
-    }
-
-    console.log("data_profile_piture:", data.profile_picture);
-
     // Save uploaded profile picture to DB
-    if (data?.profile_picture) {
-      await saveDocuments({
-        table_name: "dentist",
-        table_id: dentistId,
-        field_name: "profile_picture",
-        files: data.profile_picture,
-        created_by: data.created_by,
-      });
-    }
 
     if (data?.awards_certifications) {
       await saveDocuments({
@@ -286,21 +273,11 @@ const updateDentist = async (dentistId, data, tenant_id, req) => {
     );
 
     // 🔁 Diff-based profile picture update
-    if (data?.profile_picture) {
-      await updateSingleDocument2({
-        table_name: "dentist",
-        table_id: dentistId,
-        field_name: "profile_picture",
-        newFile: data?.profile_picture,
-        deleteOld: true,
-        created_by: data.created_by,
-        updated_by: data.updated_by,
-      });
-    }
 
     const awards_certifications =
       data.awards_certifications || req?.body?.awards_certifications || [];
 
+    console.log('description:',data?.descriptions)
     // 🔁 Diff-based awards_certifications update
     if (data?.awards_certifications) {
       await updateDocumentsDiffBased({
@@ -347,16 +324,6 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
           dentistFieldReverseMap
         );
 
-        const profilePics = await getDocumentsByField(
-          "dentist",
-          dentist.dentist_id,
-          "profile_picture"
-        );
-        const profile_picture = profilePics.map((doc) => ({
-          document_id: doc.document_id,
-          file_url: doc.file_url
-        }));
-
         const awards = await getDocumentsByField(
           "dentist",
           dentist.dentist_id,
@@ -370,7 +337,6 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
 
         return {
           ...formatted,
-          profile_picture,
           awards_certifications,
         };
       })
@@ -421,16 +387,6 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
       dentistFieldReverseMap
     );
 
-    const profilePics = await getDocumentsByField(
-      "dentist",
-      dentistId,
-      "profile_picture"
-    );
-    const profile_picture = profilePics.map((doc) => ({
-      document_id: doc.document_id,
-      file_url: doc.file_url,
-    }));
-
     const awards = await getDocumentsByField(
       "dentist",
       dentistId,
@@ -444,7 +400,6 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
 
     return {
       ...formatted,
-      profile_picture,
       awards_certifications,
     };
   } catch (error) {
@@ -516,16 +471,6 @@ const getAllDentistsByTenantIdAndClinicId = async (
           dentistFieldReverseMap
         );
 
-        const profilePics = await getDocumentsByField(
-          "dentist",
-          dentist.dentist_id,
-          "profile_picture"
-        );
-        const profile_picture = profilePics.map((doc) => ({
-          document_id: doc.document_id,
-          file_url: doc.file_url,
-        }));
-
         const awards = await getDocumentsByField(
           "dentist",
           dentist.dentist_id,
@@ -539,7 +484,6 @@ const getAllDentistsByTenantIdAndClinicId = async (
 
         return {
           ...formatted,
-          profile_picture,
           awards_certifications,
         };
       })
