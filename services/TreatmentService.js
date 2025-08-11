@@ -32,7 +32,6 @@ const treatmentFields = {
   anesthesia_used: helper.parseBoolean,
   anesthesia_type: (val) => val || null,
   technician_assisted: (val) => val || null,
-  treatment_images: helper.safeStringify,
   notes: helper.safeStringify,
 };
 
@@ -58,7 +57,6 @@ const treatmentFieldsReverseMap = {
   anesthesia_used: (val) => Boolean(val),
   anesthesia_type: (val) => val,
   technician_assisted: (val) => val,
-  treatment_images: (val) => helper.safeJsonParse(val),
   notes: helper.safeJsonParse,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),

@@ -32,7 +32,6 @@ const supplier_productsFields = {
   unit_price: (val) => (val ? parseFloat(val) : 0),
   moq: (val) => (val ? parseInt(val) : 0),
   lead_time_days: (val) => (val ? parseInt(val) : 0),
-  image_url: (val) => val,
   active: (val) => helper.parseBoolean(val),
 };
 const supplier_productsFieldsReverseMap = {
@@ -46,7 +45,6 @@ const supplier_productsFieldsReverseMap = {
   unit_price: (val) => (val ? parseFloat(val) : 0),
   moq: (val) => (val ? parseInt(val) : 0),
   lead_time_days: (val) => (val ? parseInt(val) : 0),
-  image_url: (val) => val,
   active: (val) => Boolean(val),
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),

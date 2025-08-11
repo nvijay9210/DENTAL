@@ -31,7 +31,6 @@ const notificationFields = {
   title: (val) => val,
   message: (val) => helper.safeStringify(val),
   reference_id: (val) => (val ? parseInt(val) : null),
-  file_url: (val) => val,
 };
 const notificationFieldsReverseMap = {
   notification_id: (val) => val,
@@ -43,7 +42,6 @@ const notificationFieldsReverseMap = {
   title: (val) => val,
   message: (val) => helper.safeJsonParse(val),
   reference_id: (val) => (val ? parseInt(val) : null),
-  file_url: (val) => val,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,

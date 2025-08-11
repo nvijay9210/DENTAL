@@ -57,7 +57,6 @@ const dentistFieldMap = {
   position_held: helper.safeStringify,
   research_projects: helper.safeStringify,
   publication: helper.safeStringify,
-  awards_certifications: helper.safeStringify,
   member_of: helper.safeStringify,
 
   experience_years: (val) => (val ? parseInt(val) : 0),
@@ -73,8 +72,6 @@ const dentistFieldMap = {
   ratings: (val) => (val ? parseFloat(val) : 0),
   reviews_count: (val) => (val ? parseInt(val) : 0),
   appointment_count: (val) => (val ? parseInt(val) : 0),
-
-  profile_picture: (val) => val || null,
 
   teleconsultation_supported: helper.parseBoolean,
 
@@ -109,7 +106,6 @@ const dentistFieldReverseMap = {
   position_held: (val) => helper.safeJsonParse(val),
   research_projects: (val) => helper.safeJsonParse(val),
   publication: (val) => helper.safeJsonParse(val),
-  awards_certifications: (val) => helper.safeJsonParse(val),
   member_of: (val) => helper.safeJsonParse(val),
 
   experience_years: (val) => (val ? parseInt(val) : 0),
@@ -126,7 +122,6 @@ const dentistFieldReverseMap = {
   reviews_count: (val) => (val ? parseInt(val) : 0),
   appointment_count: (val) => (val ? parseInt(val) : 0),
 
-  profile_picture: (val) => val,
   teleconsultation_supported: (val) => Boolean(val),
 
   last_login: (val) => val,
