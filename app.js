@@ -151,7 +151,7 @@ async function initializeTables() {
     await createTable.createPrescriptionTable();
     await createTable.createStatusTypeTable();
     await createTable.createStatusTypeSubTable();
-    await createTable.createAssetTable();
+    // await createTable.createAssetTable();
     await createTable.createExpenseTable();
     await createTable.createSupplierTable();
     await createTable.createSupplierProdutsTable();
@@ -179,7 +179,7 @@ async function initializeTables() {
 
 // initializeTables(); // Uncomment if you want to auto-create tables on startup
 
-// require('./models/AlterTables')
+require('./models/AlterTables')
 
 
 // ✅ Log viewer route

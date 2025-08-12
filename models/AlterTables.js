@@ -355,6 +355,13 @@ async function createFileFields(conn) {
     "VARCHAR(255) NULL",
     "Add new files"
   )
+  await addColumnIfNotExists(
+    conn,
+    "supplier_payments",
+    "supplier_payment_type",
+    "ENUM('SP','FP') DEFAULT 'SP'",
+    "SinglePayment,FullPayment"
+  )
 }
 
 
