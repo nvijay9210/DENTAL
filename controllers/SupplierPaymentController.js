@@ -23,6 +23,7 @@ exports.createSupplierPayments = async (req, res, next) => {
   }
 };
 
+//working
 exports.createSupplierFullPayments = async (req, res, next) => {
   const details = req.body;
 
@@ -41,6 +42,21 @@ exports.createSupplierFullPayments = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.updateSupplierPayment=async(req, res) =>{
+  try {
+    const { tenant_id, clinic_id,supplier_payment_id } = req.params;
+    const updateData = req.body;
+
+    const result = await supplierPaymentsService.updateSupplierPaymentService(
+      supplier_payment_id, tenant_id, clinic_id, updateData
+    );
+
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+}
 
 exports.allocateSupplierPayment = async (req, res, next) => {
   const details = req.body;

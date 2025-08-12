@@ -1,6 +1,7 @@
 const pool = require("../config/db");
 const { CustomError } = require("../middlewares/CustomeError");
 const record = require("../query/Records");
+const { formatDateOnly } = require("../utils/DateUtils");
 
 const TABLE = "supplier_payments";
 
@@ -50,21 +51,22 @@ async function allocateSupplierPaymentFIFO(paymentData) {
         `INSERT INTO supplier_payments 
          (tenant_id, clinic_id, supplier_id, purchase_order_id, amount, paid_amount, balance_amount,
           mode_of_payment, receipt_number, bank_name, bank_account_number, bank_ifsc, transaction_id, 
-          payment_date, created_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          payment_date,supplier_payment_type, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           paymentData.tenant_id, paymentData.clinic_id, paymentData.supplier_id, order.purchase_order_id,
-          paymentAmount, // Original amount for tracking
+          paymentData.paymentAmount, // Original amount for tracking
           payForThisOrder,
           balanceForOrder - payForThisOrder,
-          paymentData.mode_of_payment || null,
+          formatDateOnly(paymentData.mode_of_payment) || null,
           paymentData.receipt_number || null,
           paymentData.bank_name || null,
           paymentData.bank_account_number || null,
           paymentData.bank_ifsc || null,
           paymentData.transaction_id || null,
-          paymentData.payment_date || new Date(),
-          paymentData.created_by || "system"
+          formatDateOnly(paymentData.payment_date) || new Date(),
+          paymentData.supplier_payment_type,
+          paymentData.created_by || "user"
         ]
       );
 
@@ -81,6 +83,46 @@ async function allocateSupplierPaymentFIFO(paymentData) {
   }
 }
 
+// models/supplierPaymentModel.js
+const { employeePool } = require("../config/db");
+
+// Get supplier payment by ID + tenant + clinic
+async function getSupplierPaymentById(paymentId, tenantId, clinicId) {
+  const [rows] = await employeePool.query(
+    `SELECT * FROM supplier_payments 
+     WHERE supplier_payment_id = ? AND tenant_id = ? AND clinic_id = ?`,
+    [paymentId, tenantId, clinicId]
+  );
+  return rows[0] || null;
+}
+
+// Update supplier payment record
+async function updateSupplierPayment(paymentId, tenantId, clinicId, data) {
+  await employeePool.query(
+    `UPDATE supplier_payments
+     SET amount = ?, paid_amount = ?, balance_amount = ?, supplier_payment_documents = ?, 
+         mode_of_payment = ?, receipt_number = ?, bank_name = ?, bank_account_number = ?, 
+         bank_ifsc = ?, transaction_id = ?, payment_date = ?, updated_by = ?, updated_time = NOW()
+     WHERE supplier_payment_id = ? AND tenant_id = ? AND clinic_id = ?`,
+    [
+      data.amount,
+      data.paid_amount,
+      data.balance_amount,
+      data.supplier_payment_documents,
+      data.mode_of_payment,
+      data.receipt_number,
+      data.bank_name,
+      data.bank_account_number,
+      data.bank_ifsc,
+      data.transaction_id,
+      data.payment_date,
+      data.updated_by,
+      paymentId,
+      tenantId,
+      clinicId
+    ]
+  );
+}
 
 // Get unpaid supplier payment entries FIFO (where balance > 0)
 const getUnpaidEntriesFIFO = async (supplier_payment_id) => {
@@ -344,5 +386,7 @@ module.exports = {
   getUnpaidEntriesFIFO,
   updateBalanceAmount,
   getAllUnpaidSupplierPaymentssByTenantIdAndSupplierId,
-  allocateSupplierPaymentFIFO
+  allocateSupplierPaymentFIFO,
+  getSupplierPaymentById,
+  updateSupplierPayment
 };

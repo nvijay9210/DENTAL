@@ -333,6 +333,7 @@ const updateExpense = async (expenseId, data, tenant_id, req) => {
       field_name: "expense_documents",
       newFiles: expense_documents,
       deletedFileIds:data.deletedFileIds,
+      created_by: data.created_by,
       updated_by: data.updated_by,
     });
 

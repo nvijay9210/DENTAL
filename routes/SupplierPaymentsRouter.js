@@ -11,6 +11,7 @@ const {
   GET_SUPPLIER_PAYMENTS_TENANT_PURCHASEORDER,
   GETALL_SUPPLIER_PAYMENTS_TENANT_SUPPLIER,
   ADD_SUPPLIER_FULL_PAYMENTS,
+  UPDATE_SUPPLIER_FULL_PAYMENT_TENANT,
 } = require("./RouterPath");
 const supplierPaymentvalidation = require("../validations/SupplierPaymentsValidation");
 const {
@@ -120,6 +121,18 @@ router.put(
   upload.any(),
   supplierPaymentFileMiddleware,
   supplierPaymentController.updateSupplierPayments
+);
+router.put(
+  UPDATE_SUPPLIER_FULL_PAYMENT_TENANT,
+  authenticateTenantClinicGroup([
+    "tenant",
+    "super-user",
+    "dentist",
+    "supplier",
+  ]),
+  upload.any(),
+  supplierPaymentFileMiddleware,
+  supplierPaymentController.updateSupplierPayment
 );
 
 // Delete SupplierPayments

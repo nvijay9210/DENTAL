@@ -11,7 +11,8 @@ const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
-const { saveDocuments } = require("../utils/UploadFiles");
+const { saveDocuments, updateDocumentsDiffBased } = require("../utils/UploadFiles");
+const { convertRowsWithDocs } = require("../utils/ResponseConvertion");
 
 // Field mapping for supplier_paymentss (similar to treatment)
 
@@ -68,6 +69,15 @@ const createSupplierPayments = async (data) => {
         columns,
         values
       );
+
+      await saveDocuments({
+        table_name: "supplier_payments",
+        table_id: supplier_paymentsId,
+        field_name: "supplier_payment_documents",
+        files: data.supplier_payment_documents,
+        created_by: data.created_by,
+      });
+
     await invalidateCacheByPattern("supplier_payments:*");
     await invalidateCacheByPattern("financeSummary:*");
     return supplier_paymentsId;
@@ -80,12 +90,24 @@ const createSupplierPayments = async (data) => {
   }
 };
 
+//fullpayment create
+
 const createSupplierFullPayments = async (data) => {
   try {
     const supplier_paymentsId =
       await supplier_paymentsModel.allocateSupplierPaymentFIFO(data);
+
+      await saveDocuments({
+        table_name: "supplier_payments",
+        table_id: supplier_paymentsId,
+        field_name: "supplier_payment_documents",
+        files: data.supplier_payment_documents,
+        created_by: data.created_by,
+      });
+
     await invalidateCacheByPattern("supplier_payments:*");
     await invalidateCacheByPattern("financeSummary:*");
+
     return supplier_paymentsId;
   }  catch (error) {
     console.error("Failed to create supplier_payments:", error);
@@ -93,11 +115,49 @@ const createSupplierFullPayments = async (data) => {
   }
 };
 
+// fullpayment update
+async function updateSupplierPaymentService(paymentId, tenantId, clinicId, updateData) {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
 
+    // 1. Fetch existing payment
+    const currentPayment = await supplier_paymentsModel.getSupplierPaymentById(paymentId, tenantId, clinicId);
+    if (!currentPayment) {
+      throw new Error("Supplier payment not found");
+    }
+
+    // 2. Merge fields
+    const updatedFields = {
+      amount: updateData.amount ?? currentPayment.amount,
+      paid_amount: updateData.paid_amount ?? currentPayment.paid_amount,
+      balance_amount: updateData.balance_amount ?? currentPayment.balance_amount,
+      supplier_payment_documents: updateData.supplier_payment_documents ?? currentPayment.supplier_payment_documents,
+      mode_of_payment: updateData.mode_of_payment ?? currentPayment.mode_of_payment,
+      receipt_number: updateData.receipt_number ?? currentPayment.receipt_number,
+      bank_name: updateData.bank_name ?? currentPayment.bank_name,
+      bank_account_number: updateData.bank_account_number ?? currentPayment.bank_account_number,
+      bank_ifsc: updateData.bank_ifsc ?? currentPayment.bank_ifsc,
+      transaction_id: updateData.transaction_id ?? currentPayment.transaction_id,
+      payment_date: updateData.payment_date ?? currentPayment.payment_date,
+      supplier_payment_type: updateData.supplier_payment_type ?? currentPayment.supplier_payment_type,
+      updated_by: updateData.updated_by || "system"
+    };
+
+    // 3. Update in DB
+    await supplier_paymentsModel.updateSupplierPayment(paymentId, tenantId, clinicId, updatedFields);
+
+    await conn.commit();
+    return { success: true, message: "Supplier payment updated successfully" };
+  } catch (error) {
+    await conn.rollback();
+    throw error;
+  } finally {
+    conn.release();
+  }
+}
 
 // Get All SupplierPaymentss by Tenant ID with Caching
-
-
 const getAllSupplierPaymentssByTenantId = async (
   tenantId,
   page = 1,
@@ -121,12 +181,19 @@ const getAllSupplierPaymentssByTenantId = async (
       return result;
     });
 
-    const convertedRows = supplier_paymentss.data.map((supplier_payments) =>
-      helper.convertDbToFrontend(
-        supplier_payments,
-        supplier_paymentsFieldsReverseMap
-      )
-    );
+    const convertedRows = await convertRowsWithDocs({
+      rows: supplier_paymentss.data,
+      convertFn: helper.convertDbToFrontend,
+      convertArgs: [supplier_paymentsFieldsReverseMap],
+      docOptions: [
+        {
+          tableName: "supplier_payments",
+          idField: "supplier_payment_id",
+          docFieldName: "supplier_payment_documents",
+          extractFields: ["document_id", "file_url"]
+        }
+      ]
+    });
 
     return { data: convertedRows, total: supplier_paymentss.total };
   } catch (err) {
@@ -161,13 +228,26 @@ const getAllSupplierPaymentssByTenantIdAndSupplierId = async (
       return result;
     });
 
-    const convertedRows = supplier_paymentss.data.map((supplier_payments) => ({
-      ...supplier_payments,
-      order_date: formatDateOnly(supplier_payments.order_date),
-      delivery_date: formatDateOnly(supplier_payments.delivery_date),
-      payment_date: formatDateOnly(supplier_payments.payment_date),
-      created_time: formatDateOnly(supplier_payments.created_time),
-    }));
+    // const convertedRows = supplier_paymentss.data.map((supplier_payments) => ({
+    //   ...supplier_payments,
+    //   order_date: formatDateOnly(supplier_payments.order_date),
+    //   delivery_date: formatDateOnly(supplier_payments.delivery_date),
+    //   payment_date: formatDateOnly(supplier_payments.payment_date),
+    //   created_time: formatDateOnly(supplier_payments.created_time),
+    // }));
+
+    const convertedRows = await convertRowsWithDocs({
+      rows: supplier_paymentss.data,
+      dateFields: ["order_date", "delivery_date","payment_date","created_time"],
+      docOptions: [
+        {
+          tableName: "supplier_payments",
+          idField: "supplier_payment_id",
+          docFieldName: "supplier_payment_documents",
+          extractFields: ["document_id", "file_url"]
+        }
+      ]
+    });
 
     return { data: convertedRows, total: supplier_paymentss.total };
   } catch (err) {
@@ -202,12 +282,18 @@ const getSupplierPaymentsByTenantAndPurchaseOrderId = async (
       return result;
     });
 
-    const convertedRows = supplier_paymentss.data.map((r) => ({
-      ...r,
-      order_date: formatDateOnly(r.order_date),
-      delivery_date: formatDateOnly(r.delivery_date),
-      payment_date: formatDateOnly(r.payment_date),
-    }));
+    const convertedRows = await convertRowsWithDocs({
+      rows: supplier_paymentss.data,
+      dateFields: ["order_date", "delivery_date","payment_date","created_time"],
+      docOptions: [
+        {
+          tableName: "supplier_payments",
+          idField: "supplier_payment_id",
+          docFieldName: "supplier_payment_documents",
+          extractFields: ["document_id", "file_url"]
+        }
+      ]
+    });
 
     return { data: convertedRows, total: supplier_paymentss.total };
   } catch (err) {
@@ -228,10 +314,24 @@ const getSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (
         supplier_paymentsId
       );
 
-    const convertedRows = helper.convertDbToFrontend(
-      supplier_payments,
-      supplier_paymentsFieldsReverseMap
-    );
+    // const convertedRows = helper.convertDbToFrontend(
+    //   supplier_payments,
+    //   supplier_paymentsFieldsReverseMap
+    // );
+
+    const convertedRows = await convertRowsWithDocs({
+      rows: supplier_payments,
+      convertFn: helper.convertDbToFrontend,
+      convertArgs: [supplier_paymentsFieldsReverseMap],
+      docOptions: [
+        {
+          tableName: "supplier_payments",
+          idField: "supplier_payment_id",
+          docFieldName: "supplier_payment_documents",
+          extractFields: ["document_id", "file_url"]
+        }
+      ]
+    });
 
     return convertedRows;
   } catch (error) {
@@ -283,12 +383,15 @@ const updateSupplierPayments = async (supplier_paymentsId, data, tenant_id) => {
       tenant_id
     );
 
-    // if (affectedRows === 0) {
-    //   throw new CustomError(
-    //     "SupplierPayments not found or no changes made.",
-    //     404
-    //   );
-    // }
+    await updateDocumentsDiffBased({
+      table_name: "supplier_payments",
+      table_id: supplier_paymentsId,
+      field_name: "supplier_payment_documents",
+      newFiles: data.supplier_payment_documents,
+      deletedFileIds:data.deletedFileIds,
+      created_by: data.created_by,
+      updated_by: data.updated_by,
+    });
 
     await invalidateCacheByPattern("supplier_payments:*");
     await invalidateCacheByPattern("financeSummary:*");
@@ -305,6 +408,7 @@ const deleteSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (
   supplier_paymentsId
 ) => {
   try {
+    await deleteDocumentsByTableAndId('supplier_payments',supplier_paymentsId)
     const affectedRows =
       await supplier_paymentsModel.deleteSupplierPaymentsByTenantAndSupplierPaymentsId(
         tenantId,
@@ -333,4 +437,5 @@ module.exports = {
   deleteSupplierPaymentsByTenantIdAndSupplierPaymentsId,
   getSupplierPaymentsByTenantAndPurchaseOrderId,
   getAllSupplierPaymentssByTenantIdAndSupplierId,
+  updateSupplierPaymentService
 };

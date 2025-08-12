@@ -170,6 +170,8 @@ module.exports = {
     "/getsupplierpayment/:supplier_payment_id/:tenant_id",
   UPDATE_SUPPLIER_PAYMENTS_TENANT:
     "/updatesupplierpayment/:supplier_payment_id/:tenant_id",
+  UPDATE_SUPPLIER_FULL_PAYMENT_TENANT:
+    "/updatesupplierfullpayment/:supplier_payment_id/:tenant_id",
   DELETE_SUPPLIER_PAYMENTS_TENANT:
     "/deletesupplierpayment/:supplier_payment_id/:tenant_id",
 
