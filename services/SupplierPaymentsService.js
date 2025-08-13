@@ -90,30 +90,6 @@ const createSupplierPayments = async (data) => {
   }
 };
 
-//fullpayment create
-
-const createSupplierFullPayments = async (data) => {
-  try {
-    const supplier_paymentsId =
-      await supplier_paymentsModel.allocateSupplierPaymentFIFO(data);
-
-      await saveDocuments({
-        table_name: "supplier_payments",
-        table_id: supplier_paymentsId,
-        field_name: "supplier_payment_documents",
-        files: data.supplier_payment_documents,
-        created_by: data.created_by,
-      });
-
-    await invalidateCacheByPattern("supplier_payments:*");
-    await invalidateCacheByPattern("financeSummary:*");
-
-    return supplier_paymentsId;
-  }  catch (error) {
-    console.error("Failed to create supplier_payments:", error);
-    throw new CustomError(error.message,500);
-  }
-};
 
 // fullpayment update
 async function updateSupplierPaymentService(paymentId, tenantId, clinicId, updateData) {
@@ -430,7 +406,6 @@ const deleteSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (
 
 module.exports = {
   createSupplierPayments,
-  createSupplierFullPayments,
   getAllSupplierPaymentssByTenantId,
   getSupplierPaymentsByTenantIdAndSupplierPaymentsId,
   updateSupplierPayments,

@@ -12,30 +12,107 @@ const createSupplierPayments = async (table, columns, values) => {
     return supplier_payments.insertId;
   } catch (error) {
     console.error("Error creating supplier_payments:", error);
-    throw error
+    throw error;
   }
 };
 
-async function allocateSupplierPaymentFIFO(paymentData) {
+// async function allocateSupplierPaymentFIFO(paymentData) {
+//   const conn = await pool.getConnection();
+//   try {
+//     await conn.beginTransaction();
+
+//     // 1. Fetch unpaid purchase orders for this supplier (FIFO)
+//     const [orders] = await conn.query(
+//       `SELECT po.purchase_order_id, po.total_amount,
+//               IFNULL(SUM(sp.paid_amount), 0) AS already_paid
+//        FROM purchase_orders po
+//        LEFT JOIN supplier_payments sp
+//          ON po.purchase_order_id = sp.purchase_order_id
+//        WHERE po.supplier_id = ?
+//          AND po.clinic_id = ?
+//          AND po.tenant_id = ?
+//          AND po.status != 'cancelled'
+//        GROUP BY po.purchase_order_id
+//        HAVING total_amount > already_paid
+//        ORDER BY po.order_date ASC, po.purchase_order_id ASC`,
+//       [paymentData.supplier_id, paymentData.clinic_id, paymentData.tenant_id]
+//     );
+
+//     let remainingPayment = paymentData.amount;
+//     let ids=[]
+
+//     for (const order of orders) {
+//       if (remainingPayment <= 0) break;
+
+//       const balanceForOrder = parseFloat(order.total_amount) - parseFloat(order.already_paid);
+//       const payForThisOrder = Math.min(balanceForOrder, remainingPayment);
+
+//       // Insert payment record
+//       const [id]=await conn.query(
+//         `INSERT INTO supplier_payments
+//          (tenant_id, clinic_id, supplier_id, purchase_order_id, amount, paid_amount, balance_amount,
+//           mode_of_payment, receipt_number, bank_name, bank_account_number, bank_ifsc, transaction_id,
+//           payment_date,supplier_payment_type, created_by)
+//          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+//         [
+//           paymentData.tenant_id, paymentData.clinic_id, paymentData.supplier_id, order.purchase_order_id,
+//           paymentData.amount, // Original amount for tracking
+//           payForThisOrder,
+//           balanceForOrder - payForThisOrder,
+//           formatDateOnly(paymentData.mode_of_payment) || null,
+//           paymentData.receipt_number || null,
+//           paymentData.bank_name || null,
+//           paymentData.bank_account_number || null,
+//           paymentData.bank_ifsc || null,
+//           paymentData.transaction_id || null,
+//           formatDateOnly(paymentData.payment_date) || new Date(),
+//           paymentData.supplier_payment_type,
+//           paymentData.created_by || "user"
+//         ]
+//       );
+
+//       remainingPayment -= payForThisOrder;
+//       ids.push(id.insertId)
+//     }
+
+//     await conn.commit();
+//     return ids
+//   } catch (error) {
+//     await conn.rollback();
+//     throw error;
+//   } finally {
+//     conn.release();
+//   }
+// }
+
+// Get supplier payment by ID + tenant + clinic
+
+async function allocateSupplierPaymentFIFO(
+  supplierId,
+  clinicId,
+  tenantId,
+  paymentAmount,
+  paymentData
+) {
   const conn = await pool.getConnection();
+  let newSupplierPaymentId = null; // To store the last inserted ID
   try {
     await conn.beginTransaction();
 
-    // 1. Fetch unpaid purchase orders for this supplier (FIFO)
     const [orders] = await conn.query(
-      `SELECT purchase_order_id, total_amount, 
+      `SELECT po.purchase_order_id, po.total_amount, 
               IFNULL(SUM(sp.paid_amount), 0) AS already_paid
        FROM purchase_orders po
        LEFT JOIN supplier_payments sp 
          ON po.purchase_order_id = sp.purchase_order_id
        WHERE po.supplier_id = ? 
          AND po.clinic_id = ? 
-         AND po.tenant_id = ?
+         AND po.tenant_id = ? 
          AND po.status != 'cancelled'
        GROUP BY po.purchase_order_id
        HAVING total_amount > already_paid
        ORDER BY po.order_date ASC, po.purchase_order_id ASC`,
-      [paymentData.supplier_id, paymentData.clinic_id, paymentData.tenant_id]
+      [supplierId, clinicId, tenantId]
     );
 
     let remainingPayment = paymentAmount;
@@ -43,38 +120,41 @@ async function allocateSupplierPaymentFIFO(paymentData) {
     for (const order of orders) {
       if (remainingPayment <= 0) break;
 
-      const balanceForOrder = parseFloat(order.total_amount) - parseFloat(order.already_paid);
+      const balanceForOrder =
+        parseFloat(order.total_amount) - parseFloat(order.already_paid);
       const payForThisOrder = Math.min(balanceForOrder, remainingPayment);
 
-      // Insert payment record
-      await conn.query(
+      const [result] = await conn.query(
         `INSERT INTO supplier_payments 
          (tenant_id, clinic_id, supplier_id, purchase_order_id, amount, paid_amount, balance_amount,
           mode_of_payment, receipt_number, bank_name, bank_account_number, bank_ifsc, transaction_id, 
-          payment_date,supplier_payment_type, created_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          payment_date, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          paymentData.tenant_id, paymentData.clinic_id, paymentData.supplier_id, order.purchase_order_id,
-          paymentData.paymentAmount, // Original amount for tracking
+          tenantId,
+          clinicId,
+          supplierId,
+          order.purchase_order_id,
+          paymentAmount,
           payForThisOrder,
           balanceForOrder - payForThisOrder,
-          formatDateOnly(paymentData.mode_of_payment) || null,
+          paymentData.mode_of_payment || null,
           paymentData.receipt_number || null,
           paymentData.bank_name || null,
           paymentData.bank_account_number || null,
           paymentData.bank_ifsc || null,
           paymentData.transaction_id || null,
-          formatDateOnly(paymentData.payment_date) || new Date(),
-          paymentData.supplier_payment_type,
-          paymentData.created_by || "user"
+          paymentData.payment_date || new Date(),
+          paymentData.created_by || "system",
         ]
       );
 
+      newSupplierPaymentId = result.insertId; // capture last inserted ID
       remainingPayment -= payForThisOrder;
     }
 
     await conn.commit();
-    return { success: true, message: "FIFO payment allocation completed" };
+    return newSupplierPaymentId; // return the latest payment ID
   } catch (error) {
     await conn.rollback();
     throw error;
@@ -83,12 +163,9 @@ async function allocateSupplierPaymentFIFO(paymentData) {
   }
 }
 
-// models/supplierPaymentModel.js
-const { employeePool } = require("../config/db");
 
-// Get supplier payment by ID + tenant + clinic
 async function getSupplierPaymentById(paymentId, tenantId, clinicId) {
-  const [rows] = await employeePool.query(
+  const [rows] = await pool.query(
     `SELECT * FROM supplier_payments 
      WHERE supplier_payment_id = ? AND tenant_id = ? AND clinic_id = ?`,
     [paymentId, tenantId, clinicId]
@@ -98,7 +175,7 @@ async function getSupplierPaymentById(paymentId, tenantId, clinicId) {
 
 // Update supplier payment record
 async function updateSupplierPayment(paymentId, tenantId, clinicId, data) {
-  await employeePool.query(
+  await pool.query(
     `UPDATE supplier_payments
      SET amount = ?, paid_amount = ?, balance_amount = ?, supplier_payment_documents = ?, 
          mode_of_payment = ?, receipt_number = ?, bank_name = ?, bank_account_number = ?, 
@@ -119,7 +196,7 @@ async function updateSupplierPayment(paymentId, tenantId, clinicId, data) {
       data.updated_by,
       paymentId,
       tenantId,
-      clinicId
+      clinicId,
     ]
   );
 }
@@ -145,7 +222,6 @@ const updateBalanceAmount = async (supplier_payment_id, newBalance) => {
   await pool.query(query, [newBalance, supplier_payment_id]);
 };
 
-
 // Get all supplier_paymentss by tenant ID with pagination
 const getAllSupplierPaymentssByTenantId = async (tenantId, limit, offset) => {
   try {
@@ -155,7 +231,7 @@ const getAllSupplierPaymentssByTenantId = async (tenantId, limit, offset) => {
       limit < 1 ||
       offset < 0
     ) {
-      throw error
+      throw error;
     }
     return await record.getAllRecords(
       "supplier_payments",
@@ -166,7 +242,7 @@ const getAllSupplierPaymentssByTenantId = async (tenantId, limit, offset) => {
     );
   } catch (error) {
     console.error("Error fetching supplier_paymentss:", error);
-    throw error
+    throw error;
   }
 };
 
@@ -200,19 +276,31 @@ const getAllUnpaidSupplierPaymentssByTenantIdAndSupplierId = async (
   tenantId,
   supplierId
 ) => {
-  const query1 = `SELECT * FROM supplier_payments WHERE sp.tenant_id = ? AND clinic_id=? AND supplier_id = ? AND balance_amount>0`
+  const query1 = `SELECT * FROM supplier_payments WHERE tenant_id = ? AND clinic_id=? AND supplier_id = ? AND balance_amount>0`;
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query1, [
-      tenantId,
-      supplierId,
-      limit,
-      offset,
-    ]);
-    return rows
+    const [rows] = await conn.query(query1, [tenantId, supplierId]);
+    return rows;
   } catch (error) {
     console.error(error);
-    throw new Error("Database Operation Failed");
+    throw error;
+  } finally {
+    conn.release();
+  }
+};
+const getAllUnpaidSupplierPaymentssByTenantIdAndClinicIdAndSupplierId = async (
+  tenantId,
+  clinic_id,
+  supplierId
+) => {
+  const query1 = `SELECT * FROM supplier_payments WHERE tenant_id = ? AND clinic_id=? AND supplier_id = ? AND balance_amount>0`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [tenantId, clinic_id, supplierId]);
+    return rows;
+  } catch (error) {
+    console.error(error);
+    throw error;
   } finally {
     conn.release();
   }
@@ -255,7 +343,7 @@ const getSupplierPaymentsByTenantAndPurchaseOrderId = async (
       tenantId,
       purchase_order_id,
       limit,
-      offset
+      offset,
     ]);
     const [counts] = await conn.query(query2, [tenantId, purchase_order_id]);
     return { data: rows, total: counts[0].total };
@@ -283,7 +371,7 @@ const getSupplierPaymentsByTenantAndSupplierPaymentsId = async (
     return rows;
   } catch (error) {
     console.error("Error fetching supplier_payments:", error);
-    throw error
+    throw error;
   }
 };
 
@@ -350,7 +438,7 @@ const updateSupplierPayments = async (
     );
   } catch (error) {
     console.error("Error updating supplier_payments:", error);
-    throw error
+    throw error;
   }
 };
 
@@ -371,7 +459,7 @@ const deleteSupplierPaymentsByTenantAndSupplierPaymentsId = async (
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting supplier_payments:", error);
-    throw error
+    throw error;
   }
 };
 
@@ -388,5 +476,6 @@ module.exports = {
   getAllUnpaidSupplierPaymentssByTenantIdAndSupplierId,
   allocateSupplierPaymentFIFO,
   getSupplierPaymentById,
-  updateSupplierPayment
+  updateSupplierPayment,
+  getAllUnpaidSupplierPaymentssByTenantIdAndClinicIdAndSupplierId,
 };

@@ -176,9 +176,13 @@ const invalidateCacheByTenant = async (tableName, tenantId) => {
 
 // Clear entire Redis cache (for emergency/reset)
 const clearAllCache = async () => {
+  if (process.env.NODE_ENV === 'production') {
+    console.warn("🚨 clearAllCache blocked in production!");
+    return;
+  }
   try {
     await redisClient.flushDb();
-    console.log("🧹 Cleared all Redis cache");
+    console.log("🧹 Cleared all Redis cache (dev only)");
   } catch (err) {
     console.error("❌ Failed to clear Redis cache:", err.message);
   }
