@@ -128,7 +128,7 @@ async function allocateSupplierPaymentFIFO(
         `INSERT INTO supplier_payments 
          (tenant_id, clinic_id, supplier_id, purchase_order_id, amount, paid_amount, balance_amount,
           mode_of_payment, receipt_number, bank_name, bank_account_number, bank_ifsc, transaction_id, 
-          payment_date, created_by)
+          payment_date,supplier_payment_type, created_by)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           tenantId,
@@ -145,6 +145,7 @@ async function allocateSupplierPaymentFIFO(
           paymentData.bank_ifsc || null,
           paymentData.transaction_id || null,
           paymentData.payment_date || new Date(),
+          paymentData.supplier_payment_type,
           paymentData.created_by || "system",
         ]
       );

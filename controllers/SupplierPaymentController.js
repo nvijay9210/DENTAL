@@ -39,37 +39,24 @@ exports.createSupplierFullPayments = async (req, res, next) => {
     // Validate supplierPayments data
     await supplierPaymentsValidation.createSupplierPaymentsValidation(details);
 
-    const supplierpayments =
-      await getAllUnpaidSupplierPaymentssByTenantIdAndClinicIdAndSupplierId(
-        details.tenant_id,
-        details.clinic_id,
-        details.supplier_id
-      );
+    const ids = await allocateSupplierPaymentFIFO(
+      details.supplier_id,
+      details.clinic_id,
+      details.tenant_id,
+      details.amount,
+      details
+    );
 
-    let ids = [];
-
-    // Use for...of to properly await each async call
-    for (const supplierpayment of supplierpayments) {
-      const sup = await allocateSupplierPaymentFIFO(
-        details.supplier_id,
-        details.clinic_id,
-        details.tenant_id,
-        details.amount,
-        supplierpayment
-      );
-      ids.push(sup);
-    }
+    console.log(ids)
 
     // Now loop again to save documents for all IDs
-    for (const id of ids) {
       await saveDocuments({
         table_name: "supplier_payments",
-        table_id: id,
+        table_id: ids,
         field_name: "supplier_payment_documents",
         files: details.supplier_payment_documents,
         created_by: details.created_by,
       });
-    }
 
     res.status(201).json({ message: "SupplierPayments created", ids });
   } catch (err) {
