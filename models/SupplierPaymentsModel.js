@@ -129,7 +129,7 @@ async function allocateSupplierPaymentFIFO(
          (tenant_id, clinic_id, supplier_id, purchase_order_id, amount, paid_amount, balance_amount,
           mode_of_payment, receipt_number, bank_name, bank_account_number, bank_ifsc, transaction_id, 
           payment_date,supplier_payment_type, created_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?)`,
         [
           tenantId,
           clinicId,
@@ -163,7 +163,6 @@ async function allocateSupplierPaymentFIFO(
     conn.release();
   }
 }
-
 
 async function getSupplierPaymentById(paymentId, tenantId, clinicId) {
   const [rows] = await pool.query(
