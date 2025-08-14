@@ -94,6 +94,40 @@ const deleteSupplierProductsByTenantAndSupplierProductsId = async (tenant_id, su
   }
 };
 
+const updateSupplierProductCount = async (
+  supplier_product_id,
+  tenantId,
+  clinicId,
+  count
+) => {
+
+  let query = `
+    UPDATE supplier_products 
+    SET moq = ?
+  `;
+
+  let queryParams = [count];
+
+  query += `
+    WHERE supplier_product_id = ? 
+      AND tenant_id = ? 
+      AND clinic_id = ?
+  `;
+
+  queryParams.push(supplier_product_id, tenantId, clinicId);
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, queryParams);
+    return rows.affectedRows > 0;
+  } catch (error) {
+    console.error("Error updating productcount:", error);
+    throw error
+  } finally {
+    conn.release();
+  }
+};
+
 
 
 module.exports = {
@@ -102,5 +136,6 @@ module.exports = {
   getSupplierProductsByTenantAndSupplierProductsId,
   updateSupplierProducts,
   deleteSupplierProductsByTenantAndSupplierProductsId,
-  getAllSupplierProductssByTenantIdAndSupplierId
+  getAllSupplierProductssByTenantIdAndSupplierId,
+  updateSupplierProductCount
 };

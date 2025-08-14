@@ -12,6 +12,10 @@ const helper = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
 const { randomUUID } = require("crypto");
+const {
+  updateSupplierProductCount,
+  getSupplierProductsByTenantAndSupplierProductsId,
+} = require("../models/SupplierProductsModel");
 
 // Field mapping for purchase_orders (similar to treatment)
 
@@ -24,8 +28,8 @@ const purchase_orderFields = {
   product_name: (val) => val,
   order_number: (val) => val,
   order_date: (val) => formatDateOnly(val),
-  quantity: (val) => val? parseInt(val) : 0,
-  total_amount: (val) => val? parseFloat(val) : 0,
+  quantity: (val) => (val ? parseInt(val) : 0),
+  total_amount: (val) => (val ? parseFloat(val) : 0),
   status: (val) => val,
   delivery_date: (val) => formatDateOnly(val),
 };
@@ -39,8 +43,8 @@ const purchase_orderFieldsReverseMap = {
   product_name: (val) => val,
   order_number: (val) => val,
   order_date: (val) => formatDateOnly(val),
-  quantity: (val) => val? parseInt(val) : 0,
-  total_amount: (val) => val? parseFloat(val) : 0,
+  quantity: (val) => (val ? parseInt(val) : 0),
+  total_amount: (val) => (val ? parseFloat(val) : 0),
   status: (val) => val,
   delivery_date: (val) => formatDateOnly(val),
   created_by: (val) => val,
@@ -54,7 +58,7 @@ const createPurchaseOrder = async (data) => {
     ...purchase_orderFields,
     created_by: (val) => val,
   };
-  data['order_number']=randomUUID()
+  data["order_number"] = randomUUID();
   try {
     const { columns, values } = mapFields(data, fieldMap);
     const purchase_orderId = await purchase_orderModel.createPurchaseOrders(
@@ -62,6 +66,25 @@ const createPurchaseOrder = async (data) => {
       columns,
       values
     );
+
+    const product = await getSupplierProductsByTenantAndSupplierProductsId(
+      data.tenant_id,
+      data.supplier_product_id
+    );
+
+    console.log(product);
+
+    const count = product.moq - data.quantity;
+
+    await updateSupplierProductCount(
+      data.supplier_product_id,
+      data.tenant_id,
+      data.clinic_id,
+      count
+    );
+
+    await invalidateCacheByPattern("supplier_products:*");
+
     await invalidateCacheByPattern("purchase_order:*");
     return purchase_orderId;
   } catch (error) {
@@ -123,12 +146,13 @@ const getAllPurchaseOrdersByTenantIdAndSupplierId = async (
 
   try {
     const purchase_orders = await getOrSetCache(cacheKey, async () => {
-      const result = await purchase_orderModel.getAllPurchaseOrdersByTenantIdAndSupplierId(
-        tenantId,
-        supplier_id,
-        Number(limit),
-        offset
-      );
+      const result =
+        await purchase_orderModel.getAllPurchaseOrdersByTenantIdAndSupplierId(
+          tenantId,
+          supplier_id,
+          Number(limit),
+          offset
+        );
       return result;
     });
 
@@ -159,12 +183,13 @@ const getAllPurchaseOrdersByTenantIdAndClinicId = async (
 
   try {
     const purchase_orders = await getOrSetCache(cacheKey, async () => {
-      const result = await purchase_orderModel.getAllPurchaseOrdersByTenantIdAndClinicId(
-        tenantId,
-        clinic_id,
-        Number(limit),
-        offset
-      );
+      const result =
+        await purchase_orderModel.getAllPurchaseOrdersByTenantIdAndClinicId(
+          tenantId,
+          clinic_id,
+          Number(limit),
+          offset
+        );
       return result;
     });
 
@@ -232,22 +257,52 @@ const updatePurchaseOrder = async (purchase_orderId, data, tenant_id) => {
   }
 };
 
-
-const updatePurchaseOrderStatus = async (purchase_orderId, tenant_id,clinic_id,status) => {
+const updatePurchaseOrderStatus = async (
+  purchase_orderId,
+  tenant_id,
+  clinic_id,
+  status
+) => {
   try {
     const affectedRows = await purchase_orderModel.updatePurchaseOrderStatus(
-      purchase_orderId, tenant_id,clinic_id,status
+      purchase_orderId,
+      tenant_id,
+      clinic_id,
+      status
     );
 
-    // if (affectedRows === 0) {
-    //   throw new CustomError(err, 500);
-    // }
+    if (status === "cancelled") {
+      const purchase_order = await getPurchaseOrderByTenantIdAndPurchaseOrderId(
+        tenant_id,
+        purchase_orderId
+      );
+
+      console.log(purchase_order);
+
+      const product = await getSupplierProductsByTenantAndSupplierProductsId(
+        tenant_id,
+        purchase_order.supplier_product_id
+      );
+
+      console.log(product);
+
+      const count = product.moq + purchase_order.quantity;
+
+      await updateSupplierProductCount(
+        purchase_order.supplier_product_id,
+        tenant_id,
+        clinic_id,
+        count
+      );
+
+      await invalidateCacheByPattern("supplier_products:*");
+    }
 
     await invalidateCacheByPattern("purchase_order:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -284,5 +339,5 @@ module.exports = {
   deletePurchaseOrderByTenantIdAndPurchaseOrderId,
   getAllPurchaseOrdersByTenantIdAndSupplierId,
   getAllPurchaseOrdersByTenantIdAndClinicId,
-  updatePurchaseOrderStatus
+  updatePurchaseOrderStatus,
 };
