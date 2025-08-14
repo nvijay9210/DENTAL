@@ -46,6 +46,9 @@ const toothdetailsRouter = require('./routes/ToothDetailsRouter');
 // const compressionMiddleware = require('./middlewares/CompressionMiddleware');
 const { redisconnect } = require('./config/redisConfig');
 
+
+const { connect: redisConnect, closeRedis } = require('./config/redisConfig');
+
 // Initialize Express
 const app = express();
 
@@ -150,7 +153,13 @@ app.use("/files", express.static("uploads/"));
 
 
 // Redis connection
-redisconnect();
+// redisconnect();
+
+redisConnect().catch((err) => console.warn("Redis failed:", err.message));
+
+process.on("SIGINT", async () => { await closeRedis(); process.exit(0); });
+process.on("SIGTERM", async () => { await closeRedis(); process.exit(0); });
+
 
 // Initialize tables
 async function initializeTables() {
