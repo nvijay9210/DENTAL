@@ -2,7 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const router = express.Router();
 const clinicController = require("../controllers/ClinicController");
-const { uploadFileMiddleware } = require("../utils/UploadFiles");
+const { uploadFileMiddleware, uploadFileMiddleware2 } = require("../utils/UploadFiles");
 const clinicValidation = require("../validations/ClinicValidation");
 const routerPath = require("./RouterPath");
 const {
@@ -13,7 +13,7 @@ const {
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Setup common file middleware options
-const clinicFileMiddleware = uploadFileMiddleware({
+const clinicFileMiddleware = uploadFileMiddleware2({
   folderName: "Clinic",
   fileFields: [
     {
@@ -25,6 +25,7 @@ const clinicFileMiddleware = uploadFileMiddleware({
   createValidationFn: clinicValidation.createClinicValidation,
   updateValidationFn: clinicValidation.updateClinicValidation,
 });
+
 const clinicFileMiddleware2 = uploadFileMiddleware({
   folderName: "Clinic",
   fileFields: [
@@ -44,7 +45,7 @@ router.post(
   authenticateTenantClinicGroup(["tenant"]),
   upload.any(),
   clinicFileMiddleware,
-  clinicFileMiddleware2,
+  // clinicFileMiddleware2,
   clinicController.createClinic
 );
 
@@ -70,7 +71,7 @@ router.put(
   // clinicUploadFields,
   upload.any(),
   clinicFileMiddleware,
-  clinicFileMiddleware2,
+  // clinicFileMiddleware2,
   clinicController.updateClinic
 );
 
