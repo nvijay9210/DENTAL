@@ -61,6 +61,7 @@ const clinicFieldMap = {
   wifi: helper.parseBoolean,
   clinic_app_font: (val) => val,
   clinic_app_themes: (val) => val,
+  clinic_logo: (val) => val,
 };
 
 const clinicFieldReverseMap = {
@@ -97,6 +98,7 @@ const clinicFieldReverseMap = {
   wifi: (val) => Boolean(val),
   clinic_app_font: (val) => val,
   clinic_app_themes: (val) => val,
+  clinic_logo: (val) => val,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,

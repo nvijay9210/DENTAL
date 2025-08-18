@@ -351,6 +351,14 @@ async function createFileFields(conn) {
   await addColumnIfNotExists(
     conn,
     "notifications",
+    "clinic_id",
+    "int(11) NOT NULL",
+    ""
+  )
+  
+  await addColumnIfNotExists(
+    conn,
+    "notifications",
     "file_url",
     "VARCHAR(255) NULL",
     "Add new files"

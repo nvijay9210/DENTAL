@@ -792,6 +792,7 @@ CREATE TABLE IF NOT EXISTS payment (
   notification_id INT(11) NOT NULL AUTO_INCREMENT,
 
   tenant_id INT NOT NULL,
+  clinic_id INT NOT NULL,
   sender_role VARCHAR(20) NOT NULL,
   sender_id INT NOT NULL, -- e.g., doctor_id, patient_id
   file_url varchar(255) DEFAULT NULL,
