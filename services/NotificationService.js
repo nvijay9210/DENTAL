@@ -109,19 +109,17 @@ const createNotification = async (data) => {
         recipientData
       );
 
-      await saveDocuments({
-        table_name: "notifications",
-        table_id: notification_recipients_id,
-        field_name: "file_url",
-        files: data.file_url,
-        created_by: data.created_by,
-      });
-
       recipientIds.push(notification_recipients_id);
     }
 
     
-  
+    await saveDocuments({
+      table_name: "notifications",
+      table_id: notification_id,
+      field_name: "file_url",
+      files: data.file_url,
+      created_by: data.created_by,
+    });
 
     await invalidateCacheByPattern("notification:*");
 
