@@ -108,7 +108,7 @@ async function allocateSupplierPaymentFIFO(
        WHERE po.supplier_id = ? 
          AND po.clinic_id = ? 
          AND po.tenant_id = ? 
-         AND po.status != 'cancelled'
+         AND po.status NOT IN('cancelled','pending')
        GROUP BY po.purchase_order_id
        HAVING total_amount > already_paid
        ORDER BY po.order_date ASC, po.purchase_order_id ASC`,

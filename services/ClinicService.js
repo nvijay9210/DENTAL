@@ -128,17 +128,6 @@ const createClinic = async (data, token, realm) => {
       if (!response) throw new CustomError("Group created error", 404);
     }
 
-    // Save uploaded profile picture to DB
-    if (data?.clinic_logo) {
-      await saveDocuments({
-        table_name: "clinic",
-        table_id: clinicId,
-        field_name: "clinic_logo",
-        files: data.clinic_logo,
-        created_by: data.created_by,
-      });
-    }
-
     return clinicId;
   } catch (error) {
     console.error(error);
@@ -162,20 +151,6 @@ const updateClinic = async (clinicId, data, tenant_id) => {
       values,
       tenant_id
     );
-
-    // 🔁 Diff-based profile picture update
-    if (data?.clinic_logo) {
-      await updateSingleDocument2({
-        table_name: "clinic",
-        table_id: clinicId,
-        field_name: "clinic_logo",
-        newFile: data?.clinic_logo,
-        deleteOld: true,
-        created_by: data.created_by,
-        updated_by: data.updated_by,
-      });
-    }
-
     await invalidateCacheByPattern("clinic:*");
     return affectedRows;
   } catch (error) {
@@ -209,17 +184,6 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
           clinic,
           clinicFieldReverseMap
         );
-
-        const profilePics = await getDocumentsByField(
-          "clinic",
-          clinic.clinic_id,
-          "clinic_logo"
-        );
-        const clinic_logo = profilePics.map((doc) => ({
-          document_id: doc.document_id,
-          file_url: doc.file_url,
-        }));
-
         return {
           ...formatted,
           clinic_logo,
@@ -247,19 +211,10 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
 
     const formatted = helper.convertDbToFrontend(clinic, clinicFieldReverseMap);
 
-    const profilePics = await getDocumentsByField(
-      "clinic",
-      clinicId,
-      "clinic_logo"
-    );
-    const clinic_logo = profilePics.map((doc) => ({
-      document_id: doc.document_id,
-      file_url: doc.file_url,
-    }));
+    
 
     return {
-      ...formatted,
-      clinic_logo,
+      ...formatted
     };
   } catch (error) {
     throw new CustomError(error, 500);
@@ -657,14 +612,9 @@ const getClinicSettingsByTenantIdAndClinicId = async (tenantId, clinicId) => {
       tenantId,
       clinicId
     );
-    const document = await getDocumentsByField(
-      "clinic",
-      clinicId,
-      "clinic_logo"
-    );
+  
     return {
-      ...clinic,
-      clinic_logo: document.length > 0 ? document?.[0].file_url : null,
+      ...clinic
     };
   } catch (error) {
     throw new CustomError(error, 500);
@@ -678,17 +628,6 @@ const updateClinicSettings = async (tenantId, clinicId, details) => {
       clinicId,
       details
     );
-    if (data?.clinic_logo) {
-      await updateSingleDocument2({
-        table_name: "clinic",
-        table_id: clinicId,
-        field_name: "clinic_logo",
-        newFile: data?.clinic_logo,
-        deleteOld: true,
-        created_by: data.created_by,
-        updated_by: data.updated_by,
-      });
-    }
     return clinic;
   } catch (error) {
     throw new CustomError(error, 500);

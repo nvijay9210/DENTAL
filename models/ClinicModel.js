@@ -378,7 +378,7 @@ const getFinanceSummarybyDentist = async (tenant_id, clinic_id, dentist_id) => {
 };
 
 const getClinicSettingsByTenantIdAndClinicId = async (tenantId, clinicId) => {
-  const query = `select t.tenant_name,t.tenant_domain, c.clinic_name,c.clinic_app_themes,c.clinic_app_font from clinic c inner join tenant t on t.tenant_id=c.tenant_id  where c.tenant_id=? and c.clinic_id=?`;
+  const query = `select t.tenant_name,t.tenant_domain, c.clinic_name,c.clinic_app_themes,c.clinic_app_font,c.clinic_logo from clinic c inner join tenant t on t.tenant_id=c.tenant_id  where c.tenant_id=? and c.clinic_id=?`;
   const conn = await pool.getConnection();
   try {
     const rows = await conn.query(query, [tenantId, clinicId]);
@@ -394,7 +394,7 @@ const getClinicSettingsByTenantIdAndClinicId = async (tenantId, clinicId) => {
 const updateClinicSettings = async (tenantId, clinicId, details) => {
   const query = `
     UPDATE clinic
-    SET clinic_name=?,clinic_app_font=?,clinic_app_themes=?,updated_by=?
+    SET clinic_name=?,clinic_logo=?,clinic_app_font=?,clinic_app_themes=?,updated_by=?
     WHERE tenant_id = ? AND clinic_id=?;
   `;
 
@@ -402,6 +402,7 @@ const updateClinicSettings = async (tenantId, clinicId, details) => {
   try {
     const [result] = await conn.query(query, [
       details.clinic_name,
+      details.clinic_logo,
       details.clinic_app_font,
       details.clinic_app_themes,
       details.updated_by,
