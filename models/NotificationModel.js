@@ -38,8 +38,9 @@ const getAllNotificationsByTenantId = async (tenantId, limit, offset) => {
  * @param {number} clinicId
  */
 async function getNotificationsForReceiver(tenantId, receiverId, receiverRole, clinicId) {
-
-  // Roles that bypass receiver_id / receiver_role filtering
+  const conn = await pool.getConnection();
+  try {
+    // Roles that bypass receiver_id / receiver_role filtering
   const bypassRoles = ['super-user', 'receptionist'];
 
   let query = `
@@ -100,8 +101,6 @@ async function getNotificationsForReceiver(tenantId, receiverId, receiverRole, c
 
   query += ` ORDER BY n.created_time DESC`;
 
-  const conn = await pool.getConnection();
-  try {
     // console.log(query,params)
     const [rows] = await conn.query(query, params);
     return rows;
