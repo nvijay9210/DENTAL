@@ -104,6 +104,8 @@ const uploadFileMiddleware = (options) => {
 
       const requestfiles = normalizeFileUploads(req.files);
 
+      console.log(req.files)
+
       for (const fileField of fileFields) {
         const files = (requestfiles[fileField.fieldName] || []).flatMap((obj) =>
           Object.values(obj)

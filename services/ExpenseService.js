@@ -19,7 +19,7 @@ const { deleteUploadedFiles, saveDocuments, updateDocumentsDiffBased, normalizeF
 const expenseFields = {
   tenant_id: (val) => val,
   clinic_id: (val) => val,
-  expense_date: (val) => val,
+  expense_date: (val) => formatDateOnly(val),
   expense_category: (val) => val,
   expense_reason: (val) => val,
   expense_amount: (val) => val? parseFloat(val) : 0,
