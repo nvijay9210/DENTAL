@@ -396,7 +396,7 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
     const awards_certifications = awards.map((doc) => ({
       document_id: doc.document_id,
       file_url: doc.file_url,
-      description:doc.description
+      description:doc.descriptions
     }));
 
     return {
