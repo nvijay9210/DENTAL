@@ -176,11 +176,68 @@ function unflattenAwards(data) {
   return data;
 }
 
-function generateUsername(firstname, mobileno) {
-  const namePart = firstname.slice(0, 4).toLowerCase(); // first 4 letters
-  const mobilePart = mobileno.slice(-4);                // last 4 digits
-  return namePart + mobilePart;
+// function generateUsername(firstname, mobileno) {
+//   const namePart = firstname.slice(0, 4).toLowerCase(); // first 4 letters
+//   const mobilePart = mobileno.slice(-4);                // last 4 digits
+//   return namePart + mobilePart;
+// }
+
+// utils/usernameGenerator.js
+
+const axios = require("axios");
+
+// 🔹 Function to generate random username
+function generatePatternUsername(tenant, roleShort) {
+  const safeTenant = tenant.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const safeRole = roleShort.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const randomId = Math.floor(1000 + Math.random() * 9000); // 4-digit random
+  return `${safeTenant}-${safeRole}-${randomId}`;
 }
+
+// 🔹 Function to check if username exists in Keycloak
+async function checkUsernameExists(username, keycloakUrl, realm, token) {
+  try {
+    const response = await axios.get(
+      `${keycloakUrl}/admin/realms/${realm}/users`,
+      {
+        params: { username },
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data.length > 0; // true if exists
+  } catch (error) {
+    console.error("Error checking username:", error.response?.data || error.message);
+    throw error;
+  }
+}
+
+// 🔹 Main function to generate unique username
+async function generateUsername( roleShort, realm, token) {
+  let username;
+  let exists = true;
+  const keycloakUrl=process.env.KEYCLOAK_BASE_URL
+  const tenant=realm
+
+  while (exists) {
+    username = generatePatternUsername(tenant, roleShort);
+    exists = await checkUsernameExists(username, keycloakUrl, realm, token);
+  }
+
+  return username;
+}
+
+// ✅ Example usage
+// (async () => {
+//   const keycloakUrl = "http://localhost:8080"; // your keycloak base URL
+//   const realm = "myrealm"; // your realm
+//   const token = "YOUR_ADMIN_ACCESS_TOKEN"; // get from Keycloak admin auth
+
+//   const username = await generateUniqueUsername("smilecare", "pat", keycloakUrl, realm, token);
+//   console.log("Generated unique username:", username);
+// })();
+
+
+
 
 function generateAlphanumericPassword(length = 6) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -209,5 +266,6 @@ module.exports = {
   getExistingAwardsIfNoneUploaded,
   unflattenAwards,
   generateUsername,
-  generateAlphanumericPassword
+  generateAlphanumericPassword,
+  generateUsername
 };

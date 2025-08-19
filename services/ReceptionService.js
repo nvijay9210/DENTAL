@@ -74,10 +74,9 @@ const createReception = async (data, token, realm) => {
   try {
     if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username/email
-      const username = helper.generateUsername(
-        data.full_name,
-        data.phone_number
-      );
+      const username =await helper.generateUsername(
+             'REC',realm,token
+           );
       const email =
         data.email ||
         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;

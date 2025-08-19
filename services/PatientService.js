@@ -102,10 +102,9 @@ const createPatient = async (data, token, realm,user_clinic_id) => {
     let userData;
     if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username/email
-      const username = helper.generateUsername(
-        data.first_name,
-        data.phone_number
-      );
+      const username =await helper.generateUsername(
+             'PAT',realm,token
+           );
       const email =
         data.email ||
         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;

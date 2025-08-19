@@ -11,8 +11,19 @@ const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
-const { createDocument,deleteDocumentsByTableAndId, getDocumentsByTableAndId, getDocumentsByField } = require("../models/documentModel");
-const { deleteUploadedFiles, saveDocuments, updateDocumentsDiffBased, normalizeFileUploads, handleFileCleanupByTable } = require("../utils/UploadFiles");
+const {
+  createDocument,
+  deleteDocumentsByTableAndId,
+  getDocumentsByTableAndId,
+  getDocumentsByField,
+} = require("../models/documentModel");
+const {
+  deleteUploadedFiles,
+  saveDocuments,
+  updateDocumentsDiffBased,
+  normalizeFileUploads,
+  handleFileCleanupByTable,
+} = require("../utils/UploadFiles");
 
 // Field mapping for expenses (similar to treatment)
 
@@ -22,22 +33,21 @@ const expenseFields = {
   expense_date: (val) => formatDateOnly(val),
   expense_category: (val) => val,
   expense_reason: (val) => val,
-  expense_amount: (val) => val? parseFloat(val) : 0,
+  expense_amount: (val) => (val ? parseFloat(val) : 0),
   mode_of_payment: (val) => val,
   receipt_number: (val) => val,
   paid_by: (val) => val,
   paid_by_user: (val) => val,
-  paid_to: (val) => val
+  paid_to: (val) => val,
 };
 const expenseFieldsReverseMap = {
-  expense_id:val=>val,
+  expense_id: (val) => val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
-  expense_date: (val) =>
-    val ? formatDateOnly(val) : null,
+  expense_date: (val) => (val ? formatDateOnly(val) : null),
   expense_category: (val) => val,
   expense_reason: (val) => val,
-  expense_amount: (val) => val? parseFloat(val) : 0,
+  expense_amount: (val) => (val ? parseFloat(val) : 0),
   mode_of_payment: (val) => val,
   receipt_number: (val) => val,
   paid_by: (val) => val,
@@ -65,7 +75,7 @@ const createExpense = async (data) => {
       values
     );
 
-    console.log('expenseId:',data.expense_documents)
+    console.log("expenseId:", data.expense_documents);
 
     // Handle single or multiple file upload
     await saveDocuments({
@@ -75,7 +85,6 @@ const createExpense = async (data) => {
       files: data.expense_documents,
       created_by: data.created_by,
     });
-  
 
     await invalidateCacheByPattern("expense:*");
     await invalidateCacheByPattern("financeSummary:*");
@@ -111,20 +120,19 @@ const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
           expense,
           expenseFieldsReverseMap
         );
-    
+
         const docs = await getDocumentsByField(
           "expense",
           expense.expense_id,
           "expense_documents"
         );
-    
+
         // Extract only file_url
         const fileInfos = docs.map((doc) => ({
           document_id: doc.document_id,
           file_url: doc.file_url,
         }));
-        
-    
+
         return {
           ...formatted,
           expense_documents: fileInfos,
@@ -132,7 +140,7 @@ const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
       })
     );
 
-    return {data:convertedRows,total:expenses.total};;
+    return { data: convertedRows, total: expenses.total };
   } catch (err) {
     console.error("Database error while fetching expenses:", err);
     throw new CustomError(err, 500);
@@ -170,27 +178,25 @@ const getAllExpensesByTenantIdAndClinicId = async (
           expense,
           expenseFieldsReverseMap
         );
-    
+
         const docs = await getDocumentsByField(
           "expense",
           expense.expense_id,
           "expense_documents"
         );
-    
+
         // Extract only file_url
         const fileInfos = docs.map((doc) => ({
           document_id: doc.document_id,
           file_url: doc.file_url,
         }));
-        
-    
+
         return {
           ...formatted,
           expense_documents: fileInfos,
         };
       })
     );
-    
 
     return { data: convertedRows, total: expenses.total };
   } catch (err) {
@@ -199,18 +205,17 @@ const getAllExpensesByTenantIdAndClinicId = async (
   }
 };
 
-
 const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   tenantId,
   clinicId,
   startDate,
   endDate,
-  page=1,
-  limit=10,
+  page = 1,
+  limit = 10
 ) => {
   const cacheKey = buildCacheKey("expense", "list", {
     tenant_id: tenantId,
-    clinic_id:clinicId,
+    clinic_id: clinicId,
     startDate,
     endDate,
     page,
@@ -219,12 +224,14 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   const offset = (page - 1) * limit;
   try {
     const expenses = await getOrSetCache(cacheKey, async () => {
+      const startDateStr = new Date(startDate).toISOString().split("T")[0];
+      const endDateStr = new Date(endDate).toISOString().split("T")[0];
       const result =
         await expenseModel.getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate(
           tenantId,
           clinicId,
-          startDate,
-          endDate,
+          startDateStr,
+          endDateStr,
           parseInt(limit),
           parseInt(offset)
         );
@@ -236,20 +243,19 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
           expense,
           expenseFieldsReverseMap
         );
-    
+
         const docs = await getDocumentsByField(
           "expense",
           expense.expense_id,
           "expense_documents"
         );
-    
+
         // Extract only file_url
         const fileInfos = docs.map((doc) => ({
           document_id: doc.document_id,
           file_url: doc.file_url,
         }));
-        
-    
+
         return {
           ...formatted,
           expense_documents: fileInfos,
@@ -257,7 +263,7 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
       })
     );
 
-    return {data:convertedRows,total:expenses.total};;
+    return { data: convertedRows, total: expenses.total };
   } catch (err) {
     console.error("Database error while fetching expenses:", err);
     throw new CustomError(err, 500);
@@ -325,14 +331,15 @@ const updateExpense = async (expenseId, data, tenant_id, req) => {
     );
 
     // ✅ Fix: Extract from data or req.body
-    const expense_documents = data.expense_documents || req?.body?.expense_documents || [];
+    const expense_documents =
+      data.expense_documents || req?.body?.expense_documents || [];
 
     await updateDocumentsDiffBased({
       table_name: "expense",
       table_id: expenseId,
       field_name: "expense_documents",
       newFiles: expense_documents,
-      deletedFileIds:data.deletedFileIds,
+      deletedFileIds: data.deletedFileIds,
       created_by: data.created_by,
       updated_by: data.updated_by,
     });
@@ -347,14 +354,10 @@ const updateExpense = async (expenseId, data, tenant_id, req) => {
   }
 };
 
-
-
-
 // Delete Expense
 const deleteExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
-  
   try {
-    await deleteDocumentsByTableAndId('expense',expenseId)
+    await deleteDocumentsByTableAndId("expense", expenseId);
     const affectedRows = await expenseModel.deleteExpenseByTenantAndExpenseId(
       tenantId,
       expenseId
@@ -370,7 +373,6 @@ const deleteExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
     throw new CustomError(error, 500);
   }
 };
-
 
 module.exports = {
   createExpense,

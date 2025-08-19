@@ -147,10 +147,9 @@ const createDentist = async (data, token, realm) => {
     let userData;
     if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username/email
-      const username = helper.generateUsername(
-        data.first_name,
-        data.phone_number
-      );
+      const username =await helper.generateUsername(
+        'DEN',realm,token
+    );
       const email =
         data.email ||
         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
@@ -163,6 +162,7 @@ const createDentist = async (data, token, realm) => {
         lastName: data.last_name,
         password: "1234", // For demo; use generateAlphanumericPassword() in production
       };
+
 
       // 2. Create Keycloak User
       const isUserCreated = await addUser(token, realm, userData);
