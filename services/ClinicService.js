@@ -186,7 +186,6 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
         );
         return {
           ...formatted,
-          clinic_logo,
         };
       })
     );
