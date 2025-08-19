@@ -161,6 +161,7 @@ const createTableQuery = {
   state varchar(100) NOT NULL,
   country varchar(50) NOT NULL,
   pin_code varchar(6) NOT NULL,
+  profile_picture varchar(255) DEFAULT NULL,
   working_hours longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(working_hours)),
   available_days longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(available_days)),
   consultation_fee decimal(10,2) DEFAULT 0.00,
@@ -795,7 +796,6 @@ CREATE TABLE IF NOT EXISTS payment (
   clinic_id INT NOT NULL,
   sender_role VARCHAR(20) NOT NULL,
   sender_id INT NOT NULL, -- e.g., doctor_id, patient_id
-  file_url varchar(255) DEFAULT NULL,
 
   type VARCHAR(50) NOT NULL,
   -- Example values: 'treatment', 'document', 'message', 'appointment', 'reminder', 'invoice'
@@ -842,7 +842,7 @@ CREATE TABLE IF NOT EXISTS payment (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 
 `,
-addPatientClinic:`CREATE TABLE IF NOT EXISTS patient_clinic (
+  addPatientClinic: `CREATE TABLE IF NOT EXISTS patient_clinic (
   patient_clinic_id INT PRIMARY KEY AUTO_INCREMENT,
   patient_id INT NOT NULL,
   clinic_id INT NOT NULL,
@@ -859,7 +859,7 @@ addPatientClinic:`CREATE TABLE IF NOT EXISTS patient_clinic (
 );
 `,
 
-addDocumentTable: `
+  addDocumentTable: `
 CREATE TABLE IF NOT EXISTS document (
   document_id INT(11) NOT NULL AUTO_INCREMENT,
   table_name VARCHAR(100) NOT NULL,
@@ -876,9 +876,7 @@ CREATE TABLE IF NOT EXISTS document (
   PRIMARY KEY (document_id),
   INDEX idx_table_reference (table_name, table_id,field_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
-`
+`,
 };
-
-
 
 module.exports = { createTableQuery };
