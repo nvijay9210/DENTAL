@@ -6,9 +6,9 @@ const { formatDateOnly } = require("../utils/DateUtils");
 const moment = require('moment');
 
 // Create Clinic
-const createClinic = async (table, columns, values) => {
+const createClinic = async (connection,table, columns, values) => {
   try {
-    const clinic = await record.createRecord(table, columns, values);
+    const clinic = await record.createRecord(table, columns, values,connection);
     return clinic.insertId;
   } catch (error) {
     console.error("Error executing query:", error);
@@ -34,14 +34,15 @@ const getAllClinicsByTenantId = async (tenantId, limit, offset) => {
 };
 
 // Get Clinic by Tenant ID and Clinic ID
-const getClinicByTenantIdAndClinicId = async (tenant_id, clinic_id) => {
+const getClinicByTenantIdAndClinicId = async (tenant_id, clinic_id,conn) => {
   try {
     const rows = await record.getRecordByIdAndTenantId(
       "clinic",
       "tenant_id",
       tenant_id,
       "clinic_id",
-      clinic_id
+      clinic_id,
+      conn
     );
     // console.log(rows);
     return rows || null;
@@ -52,7 +53,7 @@ const getClinicByTenantIdAndClinicId = async (tenant_id, clinic_id) => {
 };
 
 // Update Clinic
-const updateClinic = async (clinic_id, columns, values, tenant_id) => {
+const updateClinic = async (connection,clinic_id, columns, values, tenant_id) => {
   const conditionColumn = ["tenant_id", "clinic_id"];
   const conditionValue = [tenant_id, clinic_id];
 
@@ -62,7 +63,8 @@ const updateClinic = async (clinic_id, columns, values, tenant_id) => {
       columns,
       values,
       conditionColumn,
-      conditionValue
+      conditionValue,
+      connection
     );
     return result.affectedRows;
   } catch (error) {
@@ -72,7 +74,7 @@ const updateClinic = async (clinic_id, columns, values, tenant_id) => {
 };
 
 // Delete Clinic
-const deleteClinicByTenantIdAndClinicId = async (tenant_id, clinic_id) => {
+const deleteClinicByTenantIdAndClinicId = async (conn,tenant_id, clinic_id) => {
   const conditionColumn = ["tenant_id", "clinic_id"];
   const conditionValue = [tenant_id, clinic_id];
 
@@ -80,7 +82,8 @@ const deleteClinicByTenantIdAndClinicId = async (tenant_id, clinic_id) => {
     const result = await record.deleteRecord(
       "clinic",
       conditionColumn,
-      conditionValue
+      conditionValue,
+      conn
     );
     return result.affectedRows;
   } catch (error) {

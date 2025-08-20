@@ -59,6 +59,8 @@ exports.getDentistByTenantIdAndDentistId = async (req, res, next) => {
 exports.updateDentist = async (req, res, next) => {
   const { dentist_id, tenant_id } = req.params;
   const details = req.body;
+  const token=req.token;
+  const realm=req.realm;
 
   try {
     await dentistValidation.updateDentistValidation(
@@ -67,7 +69,7 @@ exports.updateDentist = async (req, res, next) => {
       tenant_id
     );
 
-    await dentistService.updateDentist(dentist_id, details, tenant_id);
+    await dentistService.updateDentist(dentist_id, details, tenant_id,token,realm);
     res.status(200).json({ message: "Dentist updated successfully" });
   } catch (err) {
     next(err);
@@ -76,6 +78,8 @@ exports.updateDentist = async (req, res, next) => {
 
 exports.deleteDentistByTenantIdAndDentistId = async (req, res, next) => {
   const { dentist_id, tenant_id } = req.params;
+  const token=req.token;
+  const realm=req.realm;
 
   try {
     await dentistValidation.checkDentistExistsByDentistIdValidation(
@@ -85,7 +89,7 @@ exports.deleteDentistByTenantIdAndDentistId = async (req, res, next) => {
 
     await dentistService.deleteDentistByTenantIdAndDentistId(
       tenant_id,
-      dentist_id
+      dentist_id,token,realm
     );
     res.status(200).json({ message: "Dentist deleted successfully" });
   } catch (err) {

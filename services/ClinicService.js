@@ -1,7 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
-const fs = require("fs");
-const path = require("path");
 const clinicModel = require("../models/ClinicModel");
+const pool = require("../config/db");
 const {
   invalidateCacheByPattern,
   getOrSetCache,
@@ -16,7 +15,7 @@ const {
 
 const message = require("../middlewares/ErrorMessages");
 const { convertUTCToLocal } = require("../utils/DateUtils");
-const { createGroup } = require("../middlewares/KeycloakAdmin");
+const { createGroup, deleteKeycloakGroup, updateGroupAttributes, getGroupIdByName } = require("../middlewares/KeycloakAdmin");
 const { buildCacheKey } = require("../utils/RedisCache");
 const {
   saveDocuments,
@@ -112,50 +111,146 @@ const createClinic = async (data, token, realm) => {
     created_by: (val) => val,
   };
 
-  try {
-    const { columns, values } = mapFields(data, createClinicFieldMap);
-    const clinicId = await clinicModel.createClinic("clinic", columns, values);
-    await invalidateCacheByPattern("clinic:*");
-    if (clinicId && process.env.KEYCLOAK_POWER === "on") {
-      const groupName = `dental-${data.tenant_id}-${clinicId}`;
+  let groupId = null; // Track Keycloak group ID for rollback
+  const connection = await pool.getConnection();
 
+  try {
+    await connection.beginTransaction();
+
+    // 1. Create clinic in DB
+    const { columns, values } = mapFields(data, createClinicFieldMap);
+    const clinicId = await clinicModel.createClinic(
+      connection,
+      "clinic",
+      columns,
+      values
+    );
+
+    // 2. Create Keycloak group (if enabled)
+    if (process.env.KEYCLOAK_POWER === "on") {
+      const groupName = `dental-${data.tenant_id}-${clinicId}`;
       const attributes = {
         tenant_id: [String(data.tenant_id)],
         clinic_id: [String(clinicId)],
       };
 
-      const response = await createGroup(token, realm, groupName, attributes);
-      if (!response) throw new CustomError("Group created error", 404);
+      try {
+        const response = await createGroup(token, realm, groupName, attributes);
+        if (!response?.groupId) {
+          throw new CustomError("Failed to create Keycloak group", 500);
+        }
+        groupId = response.groupId;
+        console.log(`✅ Keycloak group created: ${groupName} (ID: ${groupId})`);
+      } catch (kcError) {
+        console.error("❌ Keycloak group creation failed:", kcError.response?.data || kcError.message);
+        throw new CustomError("Failed to create clinic group in Keycloak", 500);
+      }
     }
 
-    return clinicId;
+    // 3. Commit transaction
+    await connection.commit();
+
+    // 4. Invalidate cache
+    await invalidateCacheByPattern("clinic:*");
+
+    return { clinicId, groupId };
   } catch (error) {
-    console.error(error);
-    throw new CustomError(error, 500);
+    // 🔁 Rollback: Delete group if created
+    if (process.env.KEYCLOAK_POWER === "on" && groupId) {
+      try {
+        await deleteKeycloakGroup(token, realm, groupId);
+        console.log(`♻️ Rolled back Keycloak group: ${groupId}`);
+      } catch (rollbackErr) {
+        console.error("❌ Failed to rollback Keycloak group:", rollbackErr);
+      }
+    }
+
+    await connection.rollback();
+    console.error("❌ Failed to create clinic:", error.message);
+    throw new CustomError(`Failed to create clinic: ${error.message}`, 500);
+  } finally {
+    connection.release();
   }
 };
 
 // -------------------- UPDATE --------------------
-const updateClinic = async (clinicId, data, tenant_id) => {
+const updateClinic = async (clinicId, data, tenant_id, token, realm) => {
   const updateClinicFieldMap = {
     ...clinicFieldMap,
     updated_by: (val) => val,
   };
 
-  try {
-    const { columns, values } = mapFields(data, updateClinicFieldMap);
+  let groupId = null;
+  const connection = await pool.getConnection();
 
+  try {
+    await connection.beginTransaction();
+
+    // 1. Get current clinic (to get Keycloak group)
+    const clinic = await clinicModel.getClinicByTenantIdAndClinicId(
+      tenant_id,
+      clinicId,
+      connection
+    );
+
+    if (!clinic) {
+      throw new CustomError("Clinic not found", 404);
+    }
+
+    // 2. Update DB
+    const { columns, values } = mapFields(data, updateClinicFieldMap);
     const affectedRows = await clinicModel.updateClinic(
+      connection,
       clinicId,
       columns,
       values,
       tenant_id
     );
+
+    if (affectedRows === 0) {
+      await connection.commit();
+      return { affectedRows };
+    }
+
+    // 3. Optional: Sync attributes to Keycloak group
+    if (process.env.KEYCLOAK_POWER === "on") {
+      const groupName = `dental-${data.tenant_id}-${clinicId}`;
+      const groupId = await getGroupIdByName(token, realm, groupName);
+
+      if (groupId) {
+        const updatedAttributes = {
+          tenant_id: [String(data.tenant_id)],
+          clinic_id: [String(clinicId)],
+        };
+
+        try {
+          await updateGroupAttributes(token, realm, groupId, updatedAttributes);
+          console.log(`✅ Updated Keycloak group attributes for: ${groupName}`);
+        } catch (kcError) {
+          console.warn(
+            `⚠️ Failed to update Keycloak group attributes for clinic ${clinicId}. Continuing...`,
+            kcError.message
+          );
+          // 🟡 Do NOT rollback — best effort
+        }
+      } else {
+        console.warn(`⚠️ Keycloak group not found: ${groupName}`);
+      }
+    }
+
+    // 4. Commit
+    await connection.commit();
+
+    // 5. Invalidate cache
     await invalidateCacheByPattern("clinic:*");
-    return affectedRows;
+
+    return { affectedRows };
   } catch (error) {
-    console.log("Service Error:", error);
-    throw new CustomError(error, 500);
+    await connection.rollback();
+    console.error("Update Clinic Error:", error.message);
+    throw new CustomError(`Failed to update clinic: ${error.message}`, 500);
+  } finally {
+    connection.release();
   }
 };
 
@@ -220,20 +315,78 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
   }
 };
 
-const deleteClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
+const deleteClinicByTenantIdAndClinicId = async (
+  tenantId,
+  clinicId,
+  token,
+  realm
+) => {
+  let groupId = null;
+  const connection = await pool.getConnection();
+
   try {
-    await deleteDocumentsByTableAndId("clinic", clinicId);
-    const clinic = await clinicModel.deleteClinicByTenantIdAndClinicId(
+    await connection.beginTransaction();
+
+    // 1. Get clinic to find group
+    const clinic = await clinicModel.getClinicByTenantIdAndClinicId(
+      tenantId,
+      clinicId,
+      connection
+    );
+
+    if (!clinic) {
+      throw new CustomError("Clinic not found.", 404);
+    }
+
+    // 2. Delete documents
+    await deleteDocumentsByTableAndId(connection, "clinic", clinicId);
+
+    // 3. Delete from DB
+    const affectedRows = await clinicModel.deleteClinicByTenantIdAndClinicId(
+      connection,
       tenantId,
       clinicId
     );
+
+    if (affectedRows === 0) {
+      throw new CustomError("Failed to delete clinic from database.", 500);
+    }
+
+    // 4. Delete Keycloak group
+    if (process.env.KEYCLOAK_POWER === "on") {
+      const groupName = `dental-${tenantId}-${clinicId}`;
+      groupId = await getGroupIdByName(token, realm, groupName);
+
+      if (groupId) {
+        try {
+          await deleteKeycloakGroup(token, realm, groupId);
+          console.log(`✅ Keycloak group deleted: ${groupName}`);
+        } catch (kcError) {
+          console.error(`❌ Failed to delete Keycloak group ${groupName}:`, kcError.message);
+          // 🔁 Rollback DB
+          await connection.rollback();
+          throw new CustomError(
+            "Failed to delete clinic group in Keycloak. Aborting delete.",
+            500
+          );
+        }
+      }
+    }
+
+    // 5. Commit
+    await connection.commit();
+
+    // 6. Invalidate cache
     await invalidateCacheByPattern("clinic:*");
-    return clinic;
+
+    return { affectedRows };
   } catch (error) {
-    throw new CustomError(error, 500);
+    console.error("Delete Clinic Error:", error.message);
+    throw new CustomError(`Failed to delete clinic: ${error.message}`, 400);
+  } finally {
+    connection.release();
   }
 };
-
 // -------------------- CHECK EXISTS --------------------
 const checkClinicExistsByTenantIdAndClinicId = async (tenantId, clinicId) => {
   try {

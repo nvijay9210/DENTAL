@@ -1,16 +1,19 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const dentistModel = require("../models/DentistModel"); // Make sure this model exists
+const pool = require("../config/db");
 const fs = require("fs");
 const path = require("path");
 const {
-  getOrSetCache,
+  redisClient,
   invalidateCacheByPattern,
+  getOrSetCache,
 } = require("../config/redisConfig");
 const {
   addUser,
   getUserIdByUsername,
   assignRealmRoleToUser,
   addUserToGroup,
+  updateUserInKeycloak,
 } = require("../middlewares/KeycloakAdmin");
 const { mapFields } = require("../query/Records");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
@@ -30,6 +33,7 @@ const {
   getDocumentsByField,
   deleteDocumentsByTableAndId,
 } = require("../models/documentModel");
+const { rollbackKeycloakUser } = require("../Keycloak/KeycloakService");
 
 const dentistFieldMap = {
   tenant_id: (val) => val,
@@ -46,7 +50,7 @@ const dentistFieldMap = {
   alternate_phone_number: (val) => val,
 
   specialisation: (val) => val,
-  designation: (val) => helper.safeStringify(val),
+  designation:(val) => val,
   languages_spoken: helper.safeStringify,
   working_hours: helper.safeStringify,
   available_days: helper.safeStringify,
@@ -96,7 +100,7 @@ const dentistFieldReverseMap = {
   alternate_phone_number: (val) => val,
   specialisation: (val) => val,
 
-  designation: (val) => helper.safeJsonParse(val),
+  designation:(val) => val,
   languages_spoken: (val) => helper.safeJsonParse(val),
   working_hours: (val) => helper.safeJsonParse(val),
   available_days: (val) => helper.safeJsonParse(val),
@@ -143,163 +147,223 @@ const createDentist = async (data, token, realm) => {
     created_by: (val) => val,
   };
 
+  let userId = null;       // Track Keycloak user for rollback
+  let username = null;     // Generated username
+  let rawPassword = null;  // Raw password to return
+
+  const connection = await pool.getConnection();
   try {
-    let userData;
+    await connection.beginTransaction();
+
     if (process.env.KEYCLOAK_POWER === "on") {
-      // 1. Generate username/email
-      const username =await helper.generateUsername(
-        'DEN',realm,token
-    );
+      // 1. Generate username and password
+      username = await helper.generateUsername("DEN", realm, token);
+      rawPassword = "1234"; // For demo — replace with helper.generateAlphanumericPassword() in prod
       const email =
         data.email ||
         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
 
-      userData = {
+      const userData = {
         username,
         email,
         emailVerified: true,
         firstName: data.first_name,
         lastName: data.last_name,
-        password: "1234", // For demo; use generateAlphanumericPassword() in production
+        password: rawPassword,
       };
 
-
-      // 2. Create Keycloak User
+      // 2. Create Keycloak user
       const isUserCreated = await addUser(token, realm, userData);
-      if (!isUserCreated)
-        throw new CustomError("Keycloak user not created", 400);
+      if (!isUserCreated) {
+        throw new CustomError("Keycloak user creation failed", 400);
+      }
+      console.log("✅ Keycloak user created:", username);
 
-      console.log("✅ Keycloak user created:", userData.username);
-
-      // 3. Get User ID from Keycloak
-      const userId = await getUserIdByUsername(token, realm, userData.username);
-      if (!userId)
+      // 3. Get Keycloak user ID
+      userId = await getUserIdByUsername(token, realm, username);
+      if (!userId) {
         throw new CustomError("Could not fetch Keycloak user ID", 400);
-
+      }
       console.log("🆔 Keycloak user ID fetched:", userId);
 
-      // 4. Assign Role: 'doctor'
+      // 4. Assign 'dentist' role
       const roleAssigned = await assignRealmRoleToUser(
         token,
         realm,
         userId,
         "dentist"
       );
-      if (!roleAssigned)
-        throw new CustomError("Failed to assign 'doctor' role", 400);
+      if (!roleAssigned) {
+        throw new CustomError("Failed to assign 'dentist' role", 400);
+      }
+      console.log("🩺 Role 'dentist' assigned");
 
-      console.log("🩺 Assigned 'doctor' role");
-
-      // 5. Optional: Add to Group (e.g., based on clinicId)
+      // 5. Optional: Add to group (clinic-based)
       if (data.clinic_id) {
         const groupName = `dental-${data.tenant_id}-${data.clinic_id}`;
-        const groupAdded = await addUserToGroup(
-          token,
-          realm,
-          userId,
-          groupName
-        );
-
+        const groupAdded = await addUserToGroup(token, realm, userId, groupName);
         if (!groupAdded) {
-          console.warn(`⚠️ Failed to add user to group: ${groupName}`);
+          console.warn(`⚠️ Failed to add dentist to group: ${groupName}`);
         } else {
           console.log(`👥 Added to group: ${groupName}`);
         }
       }
 
-      (data.keycloak_id = userId),
-        (data.username = username),
-        (data.password = encrypt(userData.password).content);
+      // Attach to data for DB
+      data.keycloak_id = userId;
+      data.username = username;
+      data.password = encrypt(rawPassword).content;
     }
 
-    // 6. Map fields for DB
+    // 6. Insert dentist into DB
     const { columns, values } = mapFields(data, create);
-
-    // 7. Save to DB
     const dentistId = await dentistModel.createDentist(
+      connection,
       "dentist",
       columns,
       values
     );
 
-    // Save uploaded profile picture to DB
-
-    if (data?.awards_certifications) {
+    // 7. Save documents (awards, certifications) with descriptions
+    if (data.awards_certifications && data.awards_certifications.length > 0) {
       await saveDocuments({
         table_name: "dentist",
         table_id: dentistId,
         field_name: "awards_certifications",
         files: data.awards_certifications,
         created_by: data.created_by,
-        descriptions: data.descriptions,
+        descriptions: data.descriptions, // Pass descriptions if any
       });
     }
 
-    // 8. Invalidate cache
+    // 8. Commit transaction
+    await connection.commit();
+
+    // 9. Invalidate cache (only after commit)
     await invalidateCacheByPattern("dentist:*");
+    await invalidateCacheByPattern("dentist:clinic:*"); // Optional: more granular
 
-    // return dentistId;
-
+    // 10. Return result
     return {
       dentistId,
-      username: userData?.username,
-      password: userData?.password,
+      username,
+      password: rawPassword, // Return raw password only on create
     };
   } catch (error) {
+    // 🔴 Rollback transaction
+    await connection.rollback();
+
+    // 🔁 Rollback Keycloak user if created
+    if (process.env.KEYCLOAK_POWER === "on" && userId) {
+      try {
+        await rollbackKeycloakUser(token, realm, userId);
+        console.log(`♻️ Rolled back Keycloak user: ${userId}`);
+      } catch (rollbackErr) {
+        console.error("❌ Failed to rollback Keycloak user:", rollbackErr);
+      }
+    }
+
     console.error("❌ Failed to create dentist:", error.message);
-    throw new CustomError(error, 500);
+    throw new CustomError(`Failed to create dentist: ${error.message}`, 500);
+  } finally {
+    connection.release(); // Always release
   }
 };
 
 // -------------------- UPDATE --------------------
-const updateDentist = async (dentistId, data, tenant_id, req) => {
+const updateDentist = async (dentistId, data, tenant_id, token, realm) => {
   const update = {
     ...dentistFieldMap,
     updated_by: (val) => val,
   };
 
+  let userId = null;
+  const connection = await pool.getConnection();
+
   try {
+    await connection.beginTransaction();
+
+    // 1. Get current dentist (to get keycloak_id)
     const dentist = await dentistModel.getDentistByTenantIdAndDentistId(
       tenant_id,
-      dentistId
+      dentistId,
+      connection
     );
 
+    if (!dentist) {
+      throw new CustomError("Dentist not found", 404);
+    }
+
+    userId = dentist.keycloak_id;
+
+    // 2. Update DB
     const { columns, values } = mapFields(data, update);
     const affectedRows = await dentistModel.updateDentist(
+      connection,
       dentistId,
       columns,
       values,
       tenant_id
     );
 
-    // 🔁 Diff-based profile picture update
+    if (affectedRows === 0) {
+      await connection.commit();
+      return { affectedRows };
+    }
 
-    const awards_certifications =
-      data.awards_certifications || req?.body?.awards_certifications || [];
+    // 3. Sync to Keycloak (email, name)
+    if (process.env.KEYCLOAK_POWER === "on" && userId) {
+      const updatePayload = {};
+      if (data.email) updatePayload.email = data.email;
+      if (data.first_name) updatePayload.firstName = data.first_name;
+      if (data.last_name) updatePayload.lastName = data.last_name;
 
-    console.log('description:',data?.descriptions)
-    // 🔁 Diff-based awards_certifications update
-    if (data?.awards_certifications) {
+      if (Object.keys(updatePayload).length > 0) {
+        try {
+          await updateUserInKeycloak(token, realm, userId, updatePayload);
+          console.log(`✅ Synced dentist ${dentistId} to Keycloak`, updatePayload);
+        } catch (kcError) {
+          console.warn(
+            `⚠️ Keycloak sync failed for dentist ${dentistId}. Continuing with DB update.`,
+            kcError.message
+          );
+          // 🟡 Do NOT rollback — DB is source of truth
+        }
+      }
+    }
+
+    // 4. Handle file updates (awards_certifications)
+    const awards_certifications = data.awards_certifications || [];
+    if (awards_certifications.length > 0 || data.deletedFileIds?.length > 0) {
       await updateDocumentsDiffBased({
         table_name: "dentist",
         table_id: dentistId,
         field_name: "awards_certifications",
         newFiles: awards_certifications,
-        deletedFileIds: data.deletedFileIds,
+        deletedFileIds: data.deletedFileIds || [],
         created_by: data.created_by,
         updated_by: data.updated_by,
         descriptions: data.descriptions,
       });
     }
 
+    // 5. Commit transaction
+    await connection.commit();
+
+    // 6. Invalidate cache
     await invalidateCacheByPattern("dentist:*");
-    return affectedRows;
+    await invalidateCacheByPattern("dentist:clinic:*");
+
+    return { affectedRows };
   } catch (error) {
-    console.error("Failed to update dentist:", error.message);
-    throw new CustomError(error, 500);
+    await connection.rollback();
+    console.error("Update Dentist Error:", error.message);
+    throw new CustomError(`Failed to update dentist: ${error.message}`, 500);
+  } finally {
+    connection.release();
   }
 };
-3;
+
 // -------------------- GET ALL --------------------
 const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
@@ -372,11 +436,11 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
 
 // -------------------- GET SINGLE --------------------
 
-const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
+const getDentistByTenantIdAndDentistId = async (tenantId, dentistId,conn) => {
   try {
     const dentist = await dentistModel.getDentistByTenantIdAndDentistId(
       tenantId,
-      dentistId
+      dentistId,conn
     );
 
     if (!dentist) {
@@ -409,17 +473,76 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
 };
 
 // -------------------- DELETE --------------------
-const deleteDentistByTenantIdAndDentistId = async (tenantId, dentistId) => {
+const deleteDentistByTenantIdAndDentistId = async (
+  tenantId,
+  dentistId,
+  token,
+  realm
+) => {
+  let userId = null;
+  const connection = await pool.getConnection();
+
   try {
-    await deleteDocumentsByTableAndId("dentist", dentistId);
-    const result = await dentistModel.deleteDentistByTenantIdAndDentistId(
+    await connection.beginTransaction();
+
+    // 1. Get dentist from DB (to get keycloak_id)
+    const dentist = await dentistModel.getDentistByTenantIdAndDentistId(
+      tenantId,
+      dentistId,
+      connection
+    );
+
+    if (!dentist) {
+      throw new CustomError("Dentist not found.", 404);
+    }
+
+    userId = dentist.keycloak_id;
+
+    // 2. Delete documents (files metadata)
+    await deleteDocumentsByTableAndId(connection, "dentist", dentistId);
+
+    // 3. Delete from DB
+    const affectedRows = await dentistModel.deleteDentistByTenantIdAndDentistId(
+      connection,
       tenantId,
       dentistId
     );
+
+    if (affectedRows === 0) {
+      throw new CustomError("Failed to delete dentist from database.", 500);
+    }
+
+    // 4. Delete from Keycloak (if enabled)
+    if (process.env.KEYCLOAK_POWER === "on" && userId) {
+      try {
+        const success = await rollbackKeycloakUser(token, realm, userId);
+        if (!success) {
+          throw new CustomError("Failed to delete user from Keycloak", 500);
+        }
+        console.log(`✅ Keycloak user ${userId} deleted (dentist)`);
+      } catch (kcError) {
+        console.error(`❌ Keycloak deletion failed for dentist ${userId}:`, kcError.message);
+        // 🔁 Rollback DB
+        await connection.rollback();
+        throw new CustomError(
+          "Failed to delete dentist in Keycloak. Aborting delete.",
+          500
+        );
+      }
+    }
+
+    // 5. Commit only if all steps succeeded
+    await connection.commit();
+
+    // 6. Invalidate cache
     await invalidateCacheByPattern("dentist:*");
-    return result;
+
+    return { affectedRows };
   } catch (error) {
-    throw new CustomError(error, 500);
+    console.error("Delete Dentist Error:", error.message);
+    throw new CustomError(`Failed to delete dentist: ${error.message}`, 400);
+  } finally {
+    connection.release();
   }
 };
 

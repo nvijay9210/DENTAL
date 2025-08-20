@@ -293,6 +293,124 @@ async function deleteUserByUsername(token, realm, username) {
   }
 }
 
+/**
+ * Delete a Keycloak user by user ID
+ * @param {string} token - Admin bearer token
+ * @param {string} realm - Keycloak realm
+ * @param {string} userId - User ID in Keycloak
+ * @returns {Promise<boolean>} - true if deleted, false if not found or already deleted
+ */
+const deleteUser = async (token, realm, userId) => {
+  // Input validation
+  if (!token) throw new CustomError("Authorization token is required", 400);
+  if (!realm) throw new CustomError("Realm is required", 400);
+  if (!userId) throw new CustomError("User ID is required", 400);
+
+  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}`;
+
+  try {
+    const response = await axios.delete(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status === 204) {
+      console.log(`🗑️ User deleted: ID=${userId}`);
+      return true;
+    } else {
+      console.warn(`⚠️ Unexpected status code: ${response.status}`);
+      return false;
+    }
+  } catch (error) {
+    // Handle specific HTTP errors
+    if (error.response) {
+      const { status, data } = error.response;
+
+      if (status === 404) {
+        console.warn(`⚠️ User not found (ID: ${userId}) - may already be deleted`);
+        return false;
+      }
+
+      if (status === 403) {
+        console.error("❌ Permission denied: Check admin token has 'manage-users' role");
+        throw new CustomError("Insufficient permissions to delete user", 403);
+      }
+
+      console.error(`❌ Keycloak error [${status}]:`, data);
+    } else {
+      console.error("❌ Network or internal error:", error.message);
+    }
+
+    throw new CustomError("Failed to delete user from Keycloak", 500);
+  }
+};
+
+const updateUserInKeycloak = async (token, realm, userId, userData) => {
+  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}`;
+
+  try {
+    const response = await axios.put(
+      url,
+      {
+        ...userData,
+        // Important: preserve existing attributes you don't want to clear
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.status === 204 || response.status === 200) {
+      return true;
+    }
+    return false;
+  } catch (error) {
+    if (error.response) {
+      throw new Error(`HTTP ${error.response.status}: ${JSON.stringify(error.response.data)}`);
+    }
+    throw error;
+  }
+};
+
+const updateGroupAttributes = async (token, realm, groupId, attributes) => {
+  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups/${groupId}`;
+  await axios.put(
+    url,
+    { attributes },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const deleteKeycloakGroup = async (token, realm, groupId) => {
+  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups/${groupId}`;
+  const response = await axios.delete(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.status === 204;
+};
+
+const getGroupIdByName = async (token, realm, groupName) => {
+  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups`;
+  const response = await axios.get(url, {
+    params: { search: groupName },
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const group = response.data.find(g => g.name === groupName);
+  return group?.id || null;
+};
+
+
 //For Frontend new User created by old user and delete a old user
 
 //get UserId
@@ -314,5 +432,10 @@ module.exports = {
   extractUserInfo,
   resetUserPassword,
   createGroup,
-  deleteUserByUsername
+  deleteUserByUsername,
+  deleteUser,
+  updateUserInKeycloak,
+  updateGroupAttributes,
+  deleteKeycloakGroup,
+  getGroupIdByName
 };

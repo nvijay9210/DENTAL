@@ -113,6 +113,8 @@ exports.getClinicByTenantIdAndClinicId = async (req, res, next) => {
 exports.updateClinic = async (req, res, next) => {
   const { clinic_id, tenant_id } = req.params;
   const details = req.body;
+  const token = req.token;
+  const realm = req.realm;
 
   try {
     await clinicValidation.updateClinicValidation(
@@ -121,7 +123,7 @@ exports.updateClinic = async (req, res, next) => {
       tenant_id
     );
 
-    await clinicService.updateClinic(clinic_id, details, tenant_id);
+    await clinicService.updateClinic(clinic_id, details, tenant_id,token,realm);
     res.status(200).json({ message: "Clinic updated successfully" });
   } catch (err) {
     next(err);
@@ -130,6 +132,8 @@ exports.updateClinic = async (req, res, next) => {
 
 exports.deleteClinicByTenantIdAndClinicId = async (req, res, next) => {
   const { clinic_id, tenant_id } = req.params;
+  const token = req.token;
+  const realm = req.realm;
 
   try {
     const clinic = await checkIfExists(
@@ -140,7 +144,7 @@ exports.deleteClinicByTenantIdAndClinicId = async (req, res, next) => {
     );
     if (!clinic) throw new CustomError("ClinicId not Exists", 404);
 
-    await clinicService.deleteClinicByTenantIdAndClinicId(tenant_id, clinic_id);
+    await clinicService.deleteClinicByTenantIdAndClinicId(tenant_id, clinic_id,token,realm);
     res.status(200).json({ message: "Clinic deleted successfully" });
   } catch (err) {
     next(err);

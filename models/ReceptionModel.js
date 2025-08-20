@@ -5,9 +5,9 @@ const record = require("../query/Records");
 const TABLE = "reception";
 
 // Create Reception
-const createReception = async (table,columns, values) => {
+const createReception = async (conn,table,columns, values) => {
   try {
-    const reception = await record.createRecord(table, columns, values);
+    const reception = await record.createRecord(table, columns, values,conn);
 
     return reception.insertId;
   } catch (error) {
@@ -30,14 +30,15 @@ const getAllReceptionsByTenantId = async (tenantId, limit, offset) => {
 };
 
 // Get reception by tenant ID and reception ID
-const getReceptionByTenantAndReceptionId = async (tenant_id, reception_id) => {
+const getReceptionByTenantAndReceptionId = async (tenant_id, reception_id,connection) => {
   try {
     const rows = await record.getRecordByIdAndTenantId(
       TABLE,
       "tenant_id",
       tenant_id,
       "reception_id",
-      reception_id
+      reception_id,
+      connection
     );
     return rows;
   } catch (error) {
@@ -47,12 +48,12 @@ const getReceptionByTenantAndReceptionId = async (tenant_id, reception_id) => {
 };
 
 // Update reception
-const updateReception = async (reception_id, columns, values, tenant_id) => {
+const updateReception = async (connection,reception_id, columns, values, tenant_id) => {
   try {
     const conditionColumn = ["tenant_id", "reception_id"];
     const conditionValue = [tenant_id, reception_id];
 
-    return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
+    return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue,connection);
   } catch (error) {
     console.error("Error updating reception:", error);
     throw error
@@ -60,12 +61,12 @@ const updateReception = async (reception_id, columns, values, tenant_id) => {
 };
 
 // Delete reception
-const deleteReceptionByTenantAndReceptionId = async (tenant_id, reception_id) => {
+const deleteReceptionByTenantAndReceptionId = async (connection,tenant_id, reception_id) => {
   try {
     const conditionColumn = ["tenant_id", "reception_id"];
     const conditionValue = [tenant_id, reception_id];
 
-    const result = await record.deleteRecord(TABLE, conditionColumn, conditionValue);
+    const result = await record.deleteRecord(TABLE, conditionColumn, conditionValue,connection);
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting reception:", error);

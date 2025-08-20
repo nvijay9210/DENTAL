@@ -5,9 +5,9 @@ const record = require("../query/Records");
 const TABLE = "patient_clinic";
 
 // Create PatientClinic
-const createPatientClinic = async (table,columns, values) => {
+const createPatientClinic = async (table,columns, values,conn) => {
   try {
-    const patient_clinic = await record.createRecord(table, columns, values);
+    const patient_clinic = await record.createRecord(table, columns, values,conn);
    
     return patient_clinic.insertId;
   } catch (error) {

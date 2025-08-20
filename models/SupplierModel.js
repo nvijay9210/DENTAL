@@ -5,9 +5,9 @@ const record = require("../query/Records");
 const TABLE = "supplier";
 
 // Create Supplier
-const createSupplier = async (table,columns, values) => {
+const createSupplier = async (conn,table,columns, values) => {
   try {
-    const supplier = await record.createRecord(table, columns, values);
+    const supplier = await record.createRecord(table, columns, values,conn);
     return supplier.insertId;
   } catch (error) {
     console.error("Error creating supplier:", error);
@@ -50,14 +50,14 @@ const getAllSuppliersByTenantId = async (tenantId, limit, offset) => {
 };
 
 // Get supplier by tenant ID and supplier ID
-const getSupplierByTenantAndSupplierId = async (tenant_id, supplier_id) => {
+const getSupplierByTenantAndSupplierId = async (tenant_id, supplier_id,connection) => {
   try {
     const rows = await record.getRecordByIdAndTenantId(
       TABLE,
       "tenant_id",
       tenant_id,
       "supplier_id",
-      supplier_id
+      supplier_id,connection
     );
     return rows;
   } catch (error) {
@@ -67,12 +67,12 @@ const getSupplierByTenantAndSupplierId = async (tenant_id, supplier_id) => {
 };
 
 // Update supplier
-const updateSupplier = async (supplier_id, columns, values, tenant_id) => {
+const updateSupplier = async (connection,supplier_id, columns, values, tenant_id) => {
   try {
     const conditionColumn = ["tenant_id", "supplier_id"];
     const conditionValue = [tenant_id, supplier_id];
 
-    return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
+    return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue,connection);
   } catch (error) {
     console.error("Error updating supplier:", error);
     throw error
@@ -80,12 +80,12 @@ const updateSupplier = async (supplier_id, columns, values, tenant_id) => {
 };
 
 // Delete supplier
-const deleteSupplierByTenantAndSupplierId = async (tenant_id, supplier_id) => {
+const deleteSupplierByTenantAndSupplierId = async (connection,tenant_id, supplier_id) => {
   try {
     const conditionColumn = ["tenant_id", "supplier_id"];
     const conditionValue = [tenant_id, supplier_id];
 
-    const result = await record.deleteRecord(TABLE, conditionColumn, conditionValue);
+    const result = await record.deleteRecord(TABLE, conditionColumn, conditionValue,connection);
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting supplier:", error);

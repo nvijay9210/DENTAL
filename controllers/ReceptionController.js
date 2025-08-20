@@ -76,13 +76,15 @@ exports.getReceptionByTenantIdAndReceptionId = async (req, res, next) => {
 exports.updateReception = async (req, res, next) => {
   const { reception_id, tenant_id } = req.params;
   const details = req.body;
+  const token=req.token;
+  const realm=req.realm;
 
   try {
     // Validate update input
     await receptionValidation.updateReceptionValidation(reception_id, details);
 
     // Update the reception
-    await receptionService.updateReception(reception_id, details, tenant_id);
+    await receptionService.updateReception(reception_id, details, tenant_id,token,realm);
     res.status(200).json({ message: "Reception updated successfully" });
   } catch (err) {
     next(err);
@@ -94,7 +96,8 @@ exports.updateReception = async (req, res, next) => {
  */
 exports.deleteReceptionByTenantIdAndReceptionId = async (req, res, next) => {
   const { reception_id, tenant_id } = req.params;
-
+  const token=req.token;
+  const realm=req.realm;
   try {
     // Validate if reception exists
     const treatment = await checkIfExists(
@@ -108,7 +111,7 @@ exports.deleteReceptionByTenantIdAndReceptionId = async (req, res, next) => {
     // Delete the reception
     await receptionService.deleteReceptionByTenantIdAndReceptionId(
       tenant_id,
-      reception_id
+      reception_id,token,realm
     );
     res.status(200).json({ message: "Reception deleted successfully" });
   } catch (err) {

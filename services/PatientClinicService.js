@@ -25,7 +25,7 @@ const patient_clinicFieldsReverseMap = {
   updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 // Create PatientClinic
-const createPatientClinic = async (data) => {
+const createPatientClinic = async (data,conn) => {
   const fieldMap = {
     ...patient_clinicFields,
     created_by: (val) => val,
@@ -35,7 +35,8 @@ const createPatientClinic = async (data) => {
     const patient_clinicId = await patient_clinicModel.createPatientClinic(
       "patient_clinic",
       columns,
-      values
+      values,
+      conn
     );
     return patient_clinicId;
   } catch (error) {

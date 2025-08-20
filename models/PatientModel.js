@@ -9,10 +9,10 @@ const validateColumnValueLengthMatch = (columns, values) => {
   }
 };
 
-const createPatient = async (table, columns, values) => {
+const createPatient = async (conn,table, columns, values) => {
   try {
     validateColumnValueLengthMatch(columns, values);
-    const patient = await record.createRecord(table, columns, values);
+    const patient = await record.createRecord(table, columns, values,conn);
     return patient.insertId;
   } catch (error) {
     console.error("Error executing query:", error);
@@ -38,14 +38,14 @@ const getAllPatientsByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
-const getPatientByTenantIdAndPatientId = async (tenant_id, patient_id) => {
+const getPatientByTenantIdAndPatientId = async (tenant_id, patient_id,conn) => {
   try {
     const rows = await record.getRecordByIdAndTenantId(
       "patient",
       "tenant_id",
       tenant_id,
       "patient_id",
-      patient_id
+      patient_id,conn
     );
     return rows || null;
   } catch (error) {
@@ -54,7 +54,7 @@ const getPatientByTenantIdAndPatientId = async (tenant_id, patient_id) => {
   }
 };
 
-const updatePatient = async (patient_id, columns, values, tenant_id) => {
+const updatePatient = async (patient_id, columns, values, tenant_id,conn) => {
   const conditionColumn = ["tenant_id", "patient_id"];
   const conditionValue = [tenant_id, patient_id];
 
@@ -64,7 +64,7 @@ const updatePatient = async (patient_id, columns, values, tenant_id) => {
       columns,
       values,
       conditionColumn,
-      conditionValue
+      conditionValue,conn
     );
     return result.affectedRows;
   } catch (error) {
@@ -73,7 +73,7 @@ const updatePatient = async (patient_id, columns, values, tenant_id) => {
   }
 };
 
-const deletePatientByTenantIdAndPatientId = async (tenant_id, patient_id) => {
+const deletePatientByTenantIdAndPatientId = async (tenant_id, patient_id,conn) => {
   const conditionColumn = ["tenant_id", "patient_id"];
   const conditionValue = [tenant_id, patient_id];
 
@@ -81,7 +81,8 @@ const deletePatientByTenantIdAndPatientId = async (tenant_id, patient_id) => {
     const result = await record.deleteRecord(
       "patient",
       conditionColumn,
-      conditionValue
+      conditionValue,
+      conn
     );
     return result.affectedRows;
   } catch (error) {

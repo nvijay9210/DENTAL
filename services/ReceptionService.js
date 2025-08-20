@@ -1,5 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const receptionModel = require("../models/ReceptionModel");
+const pool = require("../config/db");
 const {
   getOrSetCache,
   invalidateCacheByPattern,
@@ -13,8 +14,10 @@ const {
   getUserIdByUsername,
   assignRealmRoleToUser,
   addUserToGroup,
+  updateUserInKeycloak,
 } = require("../middlewares/KeycloakAdmin");
 const { buildCacheKey } = require("../utils/RedisCache");
+const { rollbackKeycloakUser } = require("../Keycloak/KeycloakService");
 
 // Field mapping for receptions (similar to treatment)
 
@@ -71,16 +74,24 @@ const createReception = async (data, token, realm) => {
     ...receptionFields,
     created_by: (val) => val,
   };
+
+  let userId = null;           // Track Keycloak user for rollback
+  let username = null;         // Generated username
+  let rawPassword = null;      // Raw password to return (once)
+
+  const connection = await pool.getConnection();
   try {
+    await connection.beginTransaction();
+
     if (process.env.KEYCLOAK_POWER === "on") {
-      // 1. Generate username/email
-      const username =await helper.generateUsername(
-             'REC',realm,token
-           );
+      // 1. Generate username
+      username = await helper.generateUsername("REC", realm, token);
+      rawPassword = "1234"; // 🔐 For demo only — use helper.generateAlphanumericPassword() in production
       const email =
         data.email ||
         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
 
+      // 2. Extract firstName and lastName from full_name
       const [firstName, ...rest] = data.full_name.trim().split(" ");
       const lastName = rest.length > 0 ? rest.join(" ") : "-";
 
@@ -89,68 +100,93 @@ const createReception = async (data, token, realm) => {
         email,
         firstName,
         lastName,
-        password: "1234", // For demo; use generateAlphanumericPassword() in production
+        password: rawPassword,
+        emailVerified: true,
       };
 
-      // 2. Create Keycloak User
+      // 3. Create Keycloak user
       const isUserCreated = await addUser(token, realm, userData);
-      if (!isUserCreated)
-        throw new CustomError("Keycloak user not created", 400);
+      if (!isUserCreated) {
+        throw new CustomError("Keycloak user creation failed", 400);
+      }
+      console.log("✅ Keycloak user created:", username);
 
-      console.log("✅ Keycloak user created:", userData.username);
-
-      // 3. Get User ID from Keycloak
-      const userId = await getUserIdByUsername(token, realm, userData.username);
-      if (!userId)
+      // 4. Get Keycloak user ID
+      userId = await getUserIdByUsername(token, realm, username);
+      if (!userId) {
         throw new CustomError("Could not fetch Keycloak user ID", 400);
-
+      }
       console.log("🆔 Keycloak user ID fetched:", userId);
 
-      // 4. Assign Role: 'receptionist'
+      // 5. Assign 'receptionist' role
       const roleAssigned = await assignRealmRoleToUser(
         token,
         realm,
         userId,
         "receptionist"
       );
-      if (!roleAssigned)
+      if (!roleAssigned) {
         throw new CustomError("Failed to assign 'receptionist' role", 400);
+      }
+      console.log("🏷️ Role 'receptionist' assigned");
 
-      console.log("🩺 Assigned 'receptionist' role");
-
-      // 5. Optional: Add to Group (e.g., based on clinicId)
+      // 6. Optional: Add to group (clinic-based)
       if (data.clinic_id) {
         const groupName = `dental-${data.tenant_id}-${data.clinic_id}`;
-        const groupAdded = await addUserToGroup(
-          token,
-          realm,
-          userId,
-          groupName
-        );
-
+        const groupAdded = await addUserToGroup(token, realm, userId, groupName);
         if (!groupAdded) {
-          console.warn(`⚠️ Failed to add user to group: ${groupName}`);
+          console.warn(`⚠️ Failed to add receptionist to group: ${groupName}`);
         } else {
           console.log(`👥 Added to group: ${groupName}`);
         }
       }
 
-      (data.keycloak_id = userId),
-        (data.username = username),
-        (data.password = encrypt(userData.password).content);
+      // Attach to DB data
+      data.keycloak_id = userId;
+      data.username = username;
+      data.password = encrypt(rawPassword).content;
     }
 
+    // 7. Map fields and insert receptionist
     const { columns, values } = mapFields(data, fieldMap);
     const receptionId = await receptionModel.createReception(
+      connection,
       "reception",
       columns,
       values
     );
+
+    // 8. Commit transaction
+    await connection.commit();
+
+    // 9. Invalidate cache (after success)
     await invalidateCacheByPattern("reception:*");
-    return receptionId;
+    await invalidateCacheByPattern("reception:clinic:*"); // Optional: granular
+
+    // 10. Return result
+    return {
+      receptionId,
+      username,
+      password: rawPassword, // Only returned once — during creation
+    };
   } catch (error) {
-    console.error("Failed to create reception:", error);
-    throw new CustomError(`Failed to create reception: ${error.message}`, 404);
+    // 🔴 Rollback transaction
+    await connection.rollback();
+
+    // 🔁 Rollback Keycloak user if created
+    if (process.env.KEYCLOAK_POWER === "on" && userId) {
+      try {
+        await rollbackKeycloakUser(token, realm, userId);
+        console.log(`♻️ Rolled back Keycloak user: ${userId}`);
+      } catch (rollbackErr) {
+        console.error("❌ Failed to rollback Keycloak user:", rollbackErr);
+      }
+    }
+
+    console.error("❌ Failed to create reception:", error.message);
+    throw new CustomError(`Failed to create reception: ${error.message}`, 500);
+  } finally {
+    connection.release(); // Always release connection back to pool
   }
 };
 
@@ -204,14 +240,35 @@ const getReceptionByTenantIdAndReceptionId = async (tenantId, receptionId) => {
 };
 
 // Update Reception
-const updateReception = async (receptionId, data, tenant_id) => {
+const updateReception = async (receptionId, data, tenant_id, token, realm) => {
   const fieldMap = {
     ...receptionFields,
     updated_by: (val) => val,
   };
+
+  let userId = null;
+  const connection = await pool.getConnection();
+
   try {
+    await connection.beginTransaction();
+
+    // 1. Get current receptionist
+    const reception = await receptionModel.getReceptionByTenantAndReceptionId(
+      tenant_id,
+      receptionId,
+      connection
+    );
+
+    if (!reception) {
+      throw new CustomError("Reception not found", 404);
+    }
+
+    userId = reception.keycloak_id;
+
+    // 2. Update DB
     const { columns, values } = mapFields(data, fieldMap);
     const affectedRows = await receptionModel.updateReception(
+      connection,
       receptionId,
       columns,
       values,
@@ -219,36 +276,124 @@ const updateReception = async (receptionId, data, tenant_id) => {
     );
 
     if (affectedRows === 0) {
-      throw new CustomError("Reception not found or no changes made.", 404);
+      await connection.commit();
+      return { affectedRows };
     }
 
+    // 3. Sync to Keycloak (email, full_name → firstName/lastName)
+    if (process.env.KEYCLOAK_POWER === "on" && userId) {
+      const updatePayload = {};
+
+      if (data.email) {
+        updatePayload.email = data.email;
+        updatePayload.emailVerified = true; // 🔑 Required to update email
+      }
+
+      if (data.full_name) {
+        const [firstName, ...rest] = data.full_name.trim().split(" ");
+        updatePayload.firstName = firstName;
+        updatePayload.lastName = rest.length > 0 ? rest.join(" ") : "-";
+      }
+
+      if (Object.keys(updatePayload).length > 0) {
+        try {
+          await updateUserInKeycloak(token, realm, userId, updatePayload);
+          console.log(`✅ Synced receptionist ${receptionId} to Keycloak`, updatePayload);
+        } catch (kcError) {
+          console.warn(
+            `⚠️ Keycloak sync failed for receptionist ${receptionId}. Continuing with DB update.`,
+            kcError.message
+          );
+          // 🟡 Do NOT rollback DB — Keycloak sync is best-effort
+        }
+      }
+    }
+
+    // 4. Commit transaction
+    await connection.commit();
+
+    // 5. Invalidate cache
     await invalidateCacheByPattern("reception:*");
-    return affectedRows;
+
+    return { affectedRows };
   } catch (error) {
-    console.error("Update Error:", error);
-    throw new CustomError("Failed to update reception", 404);
+    await connection.rollback();
+    console.error("Update Reception Error:", error.message);
+    throw new CustomError(`Failed to update reception: ${error.message}`, 500);
+  } finally {
+    connection.release();
   }
 };
 
 // Delete Reception
 const deleteReceptionByTenantIdAndReceptionId = async (
   tenantId,
-  receptionId
+  receptionId,
+  token,
+  realm
 ) => {
+  let userId = null;
+  const connection = await pool.getConnection();
+
   try {
-    const affectedRows =
-      await receptionModel.deleteReceptionByTenantAndReceptionId(
-        tenantId,
-        receptionId
-      );
-    if (affectedRows === 0) {
+    await connection.beginTransaction();
+
+    // 1. Get receptionist from DB
+    const reception = await receptionModel.getReceptionByTenantAndReceptionId(
+      tenantId,
+      receptionId,
+      connection
+    );
+
+    if (!reception) {
       throw new CustomError("Reception not found.", 404);
     }
 
+    userId = reception.keycloak_id;
+
+    // 2. Delete from DB
+    const affectedRows =
+      await receptionModel.deleteReceptionByTenantAndReceptionId(
+        connection,
+        tenantId,
+        receptionId
+      );
+
+    if (affectedRows === 0) {
+      throw new CustomError("Failed to delete reception from database.", 500);
+    }
+
+    // 3. Delete from Keycloak
+    if (process.env.KEYCLOAK_POWER === "on" && userId) {
+      try {
+        const success = await rollbackKeycloakUser(token, realm, userId);
+        if (!success) {
+          throw new CustomError("Failed to delete user from Keycloak", 500);
+        }
+        console.log(`✅ Keycloak user ${userId} deleted (receptionist)`);
+      } catch (kcError) {
+        console.error(`❌ Keycloak deletion failed for receptionist ${userId}:`, kcError.message);
+        // 🔁 Rollback DB delete
+        await connection.rollback();
+        throw new CustomError(
+          "Failed to delete receptionist in Keycloak. Aborting delete.",
+          500
+        );
+      }
+    }
+
+    // 4. Commit only if all succeeded
+    await connection.commit();
+
+    // 5. Invalidate cache
     await invalidateCacheByPattern("reception:*");
-    return affectedRows;
+
+    return { affectedRows };
   } catch (error) {
-    throw new CustomError(`Failed to delete reception: ${error.message}`, 404);
+    console.error("Delete Reception Error:", error.message);
+    throw new CustomError(`Failed to delete reception: ${error.message}`, 400);
+  } finally {
+    connection.release();
   }
 };
 

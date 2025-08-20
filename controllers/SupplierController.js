@@ -92,13 +92,14 @@ exports.getSupplierByTenantIdAndSupplierId = async (req, res, next) => {
 exports.updateSupplier = async (req, res, next) => {
   const { supplier_id, tenant_id } = req.params;
   const details = req.body;
-
+  const token=req.token;
+  const realm=req.realm;
   try {
     // Validate update input
     await supplierValidation.updateSupplierValidation(supplier_id, details);
 
     // Update the supplier
-    await supplierService.updateSupplier(supplier_id, details, tenant_id);
+    await supplierService.updateSupplier(supplier_id, details, tenant_id,token,realm);
     res.status(200).json({ message: "Supplier updated successfully" });
   } catch (err) {
     next(err);
@@ -110,21 +111,25 @@ exports.updateSupplier = async (req, res, next) => {
  */
 exports.deleteSupplierByTenantIdAndSupplierId = async (req, res, next) => {
   const { supplier_id, tenant_id } = req.params;
-
+  const token=req.token;
+  const realm=req.realm;
   try {
     // Validate if supplier exists
     const treatment = await checkIfExists(
       "supplier",
       "supplier_id",
       supplier_id,
-      tenant_id
+      tenant_id,
+      
     );
     if (!treatment) throw new CustomError("supplierId not Exists", 404);
 
     // Delete the supplier
     await supplierService.deleteSupplierByTenantIdAndSupplierId(
       tenant_id,
-      supplier_id
+      supplier_id,
+      token,
+      realm
     );
     res.status(200).json({ message: "Supplier deleted successfully" });
   } catch (err) {

@@ -104,14 +104,14 @@ const uploadFileMiddleware = (options) => {
 
       const requestfiles = normalizeFileUploads(req.files);
 
-      console.log(req.files)
+      console.log(req.files);
 
       for (const fileField of fileFields) {
         const files = (requestfiles[fileField.fieldName] || []).flatMap((obj) =>
           Object.values(obj)
         ); // flatten [ { file_url: file }, ... ]
 
-        console.log('files:',files)
+        console.log("files:", files);
 
         // if (files.length === 0) continue;
 
@@ -172,14 +172,14 @@ const uploadFileMiddleware = (options) => {
             );
           }
         }
-     
+
         req.body[fileField.fieldName] = fileField.multiple
           ? savedPaths
           : savedPaths[0];
         uploadedFiles[fileField.fieldName] = fileField.multiple
           ? savedPaths
           : savedPaths[0];
-    
+
         if (id) {
           const deletedFileIds = req.body.deletedFileIds || [];
 
@@ -305,10 +305,21 @@ const uploadFileMiddleware2 = (options) => {
             id
           );
 
+          // ✅ Safe check
+          if (!data) {
+            console.warn(`No record found for ${folderName} ID: ${id}`);
+            return;
+          }
+
+          if (!data[fieldName]) {
+            console.log(`No old file to delete for ${fieldName}`);
+            return;
+          }
+
           await deleteFileIfExists(data[fieldName]);
         } catch (err) {
           console.warn(
-            `Failed to delete old files for ${folderName}.${fieldName}`,
+            `Failed to delete old file for ${folderName}.${fieldName}`,
             err
           );
         }
@@ -357,7 +368,6 @@ const uploadFileMiddleware2 = (options) => {
               id
             );
             oldFileUrls = oldDocs[fieldName];
-      
           } catch (err) {
             console.warn(`Could not fetch old files for ${fieldName}`, err);
           }
@@ -485,7 +495,6 @@ const normalizeFileUploads = (files) => {
 };
 
 const deleteUploadedFiles = async (filePaths) => {
-
   if (!filePaths) return;
 
   const deleteTasks = [];
@@ -604,7 +613,6 @@ const deleteUploadedFiles = async (filePaths) => {
 //   );
 // };
 
-
 const updateDocumentsDiffBased = async ({
   table_name,
   table_id,
@@ -615,15 +623,30 @@ const updateDocumentsDiffBased = async ({
   updated_by,
   descriptions = [], // Can be for both new & existing
 }) => {
-  console.log(table_name, table_id, field_name, newFiles, deletedFileIds, created_by, updated_by, descriptions);
+  console.log(
+    table_name,
+    table_id,
+    field_name,
+    newFiles,
+    deletedFileIds,
+    created_by,
+    updated_by,
+    descriptions
+  );
 
   if (!Array.isArray(newFiles)) newFiles = [];
 
-  const existingDocs = await getDocumentsByField(table_name, table_id, field_name);
+  const existingDocs = await getDocumentsByField(
+    table_name,
+    table_id,
+    field_name
+  );
 
   const getFileName = (fileUrl = "") => path.basename(fileUrl || "");
 
-  const existingFileNames = new Set(existingDocs.map((doc) => getFileName(doc.file_url)));
+  const existingFileNames = new Set(
+    existingDocs.map((doc) => getFileName(doc.file_url))
+  );
 
   // 1️⃣ Determine which files to insert
   const toInsert = newFiles.filter((file) => {
@@ -680,7 +703,6 @@ const updateDocumentsDiffBased = async ({
     })
   );
 };
-
 
 const updateSingleDocument2 = async ({
   table_name,

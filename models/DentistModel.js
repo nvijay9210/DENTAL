@@ -2,13 +2,13 @@ const pool = require("../config/db");
 const helper = require("../utils/Helpers");
 const record = require("../query/Records");
 
-const createDentist = async (table, columns, values) => {
+const createDentist = async (conn, table, columns, values) => {
   try {
-    const dentist = await record.createRecord(table, columns, values);
+    const dentist = await record.createRecord(table, columns, values, conn);
     return dentist.insertId;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw error
+    throw error;
   }
 };
 
@@ -24,25 +24,29 @@ const getAllDentistsByTenantId = async (tenantId, limit, offset) => {
     return dentists;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw error
+    throw error;
   }
 };
 
-const getDentistByTenantIdAndDentistId = async (tenant_id, dentist_id) => {
+const getDentistByTenantIdAndDentistId = async (
+  tenant_id,
+  dentist_id,
+  connection
+) => {
   const query = `select * from dentist where tenant_id=? and dentist_id=?`;
-  const conn = await pool.getConnection();
+  const conn = connection || (await pool.getConnection());
   try {
     const rows = await conn.query(query, [tenant_id, dentist_id]);
     return rows[0][0];
   } catch (error) {
     console.error(error);
-    throw error
+    throw error;
   } finally {
     conn.release();
   }
 };
 
-const updateDentist = async (dentist_id, columns, values, tenant_id) => {
+const updateDentist = async (conn, dentist_id, columns, values, tenant_id) => {
   const conditionColumn = ["tenant_id", "dentist_id"];
   const conditionValue = [tenant_id, dentist_id];
 
@@ -52,16 +56,17 @@ const updateDentist = async (dentist_id, columns, values, tenant_id) => {
       columns,
       values,
       conditionColumn,
-      conditionValue
+      conditionValue,
+      conn
     );
     return result.affectedRows;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw error
+    throw error;
   }
 };
 
-const deleteDentistByTenantIdAndDentistId = async (tenant_id, dentist_id) => {
+const deleteDentistByTenantIdAndDentistId = async (connection,tenant_id, dentist_id) => {
   const conditionColumn = ["tenant_id", "dentist_id"];
   const conditionValue = [tenant_id, dentist_id];
   try {
@@ -69,12 +74,13 @@ const deleteDentistByTenantIdAndDentistId = async (tenant_id, dentist_id) => {
     const result = await record.deleteRecord(
       "dentist",
       conditionColumn,
-      conditionValue
+      conditionValue,
+      connection
     );
     return result.affectedRows;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw error
+    throw error;
   }
 };
 
@@ -87,7 +93,7 @@ const checkDentistExistsByTenantIdAndDentistId = async (
     return await record.recordExists("dentist", columns);
   } catch (error) {
     console.log(error);
-    throw error
+    throw error;
   }
 };
 
@@ -111,7 +117,7 @@ const getAllDentistsByTenantIdAndClinicId = async (
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.error(error);
-    throw error
+    throw error;
   } finally {
     conn.release();
   }
@@ -125,7 +131,7 @@ const getAllDentistsByClinicId = async (tenantId, clinicId) => {
     return rows.length > 0;
   } catch (error) {
     console.error(error);
-    throw error
+    throw error;
   } finally {
     conn.release();
   }
@@ -151,7 +157,7 @@ const updateClinicIdAndNameAndAddress = async (
     return rows.length > 0;
   } catch (error) {
     console.error(error);
-    throw error
+    throw error;
   } finally {
     conn.release();
   }
@@ -175,7 +181,7 @@ const updateDentistRatingAndReviewCount = async (
     return rows.length > 0;
   } catch (error) {
     console.error(error);
-    throw error
+    throw error;
   } finally {
     conn.release();
   }
@@ -201,7 +207,7 @@ const updateNullClinicInfoWithJoin = async (tenantId, clinicId, dentistId) => {
     return result.affectedRows > 0;
   } catch (error) {
     console.error("Error updating with join and clinic_id:", error);
-    throw error
+    throw error;
   } finally {
     conn.release();
   }
@@ -228,7 +234,7 @@ const checkDentistExistsUsingTenantIdAndClinicIdAnddentistId = async (
       "Error in checkDentistExistsUsingTenantIdAndClinicIdAnddentistId:",
       error
     );
-    throw error
+    throw error;
   } finally {
     conn.release();
   }
