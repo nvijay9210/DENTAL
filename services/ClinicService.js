@@ -148,6 +148,14 @@ const createClinic = async (data, token, realm) => {
       }
     }
 
+    await saveDocuments({
+      table_name: "clinic",
+      table_id: clinicId,
+      field_name: "clinic_images",
+      files: data.clinic_images,
+      created_by: data.created_by,
+    });
+
     // 3. Commit transaction
     await connection.commit();
 
@@ -239,6 +247,20 @@ const updateClinic = async (clinicId, data, tenant_id, token, realm) => {
       }
     }
 
+    const clinic_images = data.clinic_images || [];
+    if (clinic_images.length > 0 || data.deletedFileIds?.length > 0) {
+      await updateDocumentsDiffBased({
+        table_name: "clinic",
+        table_id: clinicId,clinic_images,
+        field_name: "clinic_images",
+        newFiles: clinic_images,
+        deletedFileIds: data.deletedFileIds || [],
+        created_by: data.created_by,
+        updated_by: data.updated_by,
+        descriptions: data.descriptions,
+      });
+    }
+
     // 4. Commit
     await connection.commit();
 
@@ -280,8 +302,19 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
           clinic,
           clinicFieldReverseMap
         );
+        const images = await getDocumentsByField(
+          "clinic",
+          clinic.clinic_id,
+          "clinic_images"
+        );
+        const clinic_images = images.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+          description:doc.description
+        }));
         return {
           ...formatted,
+          clinic_images
         };
       })
     );
@@ -305,11 +338,20 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
     );
 
     const formatted = helper.convertDbToFrontend(clinic, clinicFieldReverseMap);
-
+    const images = await getDocumentsByField(
+      "clinic",
+      clinic.clinic_id,
+      "clinic_images"
+    );
+    const clinic_images = images.map((doc) => ({
+      document_id: doc.document_id,
+      file_url: doc.file_url,
+      description:doc.description
+    }));
     
 
     return {
-      ...formatted
+      ...formatted,clinic_images
     };
   } catch (error) {
     throw new CustomError(error, 500);
