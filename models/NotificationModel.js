@@ -41,7 +41,7 @@ async function getNotificationsForReceiver(tenantId, receiverId, receiverRole, c
   const conn = await pool.getConnection();
   try {
     // Roles that bypass receiver_id / receiver_role filtering
-  const bypassRoles = ['super-user', 'receptionist'];
+  const bypassRoles = [];
 
   let query = `
     SELECT
