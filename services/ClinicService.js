@@ -136,6 +136,7 @@ const createClinic = async (data, token, realm) => {
 
       try {
         const response = await createGroup(token, realm, groupName, attributes);
+        console.log(response)
         if (!response?.groupId) {
           throw new CustomError("Failed to create Keycloak group", 500);
         }

@@ -24,7 +24,11 @@ async function addUser(token, realm, userData) {
   };
 
   try {
-    const existingUser = await getUserIdByUsername(token, realm, payload.username);
+    const existingUser = await getUserIdByUsername(
+      token,
+      realm,
+      payload.username
+    );
     if (existingUser) throw new CustomError("Username already exists", 409);
 
     // console.log("user start to add",token,payload)
@@ -119,7 +123,7 @@ async function addUserToGroup(token, realm, userId, groupName) {
       },
     });
 
-    const group = groupRes.data.find(g => g.name === groupName);
+    const group = groupRes.data.find((g) => g.name === groupName);
     if (!group) {
       console.error(`❌ Group "${groupName}" not found in search results`);
       return false;
@@ -143,21 +147,18 @@ async function addUserToGroup(token, realm, userId, groupName) {
   }
 }
 
-
-require('dotenv').config();
+require("dotenv").config();
 
 function getTenantIdByRealm(realm) {
   const mapString = process.env.REALM_TENANT_MAP || "";
   const map = Object.fromEntries(
-    mapString.split(',').map(pair => {
-      const [k, v] = pair.split(':');
+    mapString.split(",").map((pair) => {
+      const [k, v] = pair.split(":");
       return [k.trim(), v.trim()];
     })
   );
   return map[realm] || realm;
 }
-
-
 
 function extractUserInfo(token) {
   const issuer = token.iss;
@@ -166,9 +167,8 @@ function extractUserInfo(token) {
   const tenantId = getTenantIdByRealm(realm);
 
   const groups = token.groups || [];
-  const clinicGroup = groups.find(g => g.startsWith("dental-"));
+  const clinicGroup = groups.find((g) => g.startsWith("dental-"));
   let clinicId = null;
-
 
   if (clinicGroup) {
     const match = clinicGroup.match(/dental-(\d+)-(\d+)/);
@@ -178,28 +178,42 @@ function extractUserInfo(token) {
   }
 
   const globalRoles = token.realm_access?.roles || [];
-  console.log(globalRoles)
+  console.log(globalRoles);
 
-  const role = globalRoles.find(r =>
-    ['super-user', 'dentist', 'patient', 'receptionist', 'supplier', 'dev', 'tenant'].includes(r)
-  ) || "guest";
+  const role =
+    globalRoles.find((r) =>
+      [
+        "super-user",
+        "dentist",
+        "patient",
+        "receptionist",
+        "supplier",
+        "dev",
+        "tenant",
+      ].includes(r)
+    ) || "guest";
 
-  console.log(role,"is logged in")
+  console.log(role, "is logged in");
 
   return {
     username: token.email,
     userId: token.sub,
     displayName: token.name,
     tenantId,
-    clinicId,  
+    clinicId,
     role,
-    preferred_username:token.preferred_username
+    preferred_username: token.preferred_username,
   };
 }
 
-
 // ✅ 5. Reset User Password
-async function resetUserPassword(token, realm, userId, newPassword, temporary = false) {
+async function resetUserPassword(
+  token,
+  realm,
+  userId,
+  newPassword,
+  temporary = false
+) {
   const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/reset-password`;
 
   try {
@@ -208,13 +222,13 @@ async function resetUserPassword(token, realm, userId, newPassword, temporary = 
       {
         type: "password",
         value: newPassword,
-        temporary: temporary
+        temporary: temporary,
       },
       {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       }
     );
 
@@ -231,24 +245,35 @@ async function resetUserPassword(token, realm, userId, newPassword, temporary = 
 
 // ✅ 6. Create Group in Realm
 async function createGroup(token, realm, groupName, attributes = {}) {
-  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups`;
+  const endpoint = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups`;
 
   const payload = {
     name: groupName,
-    attributes
+    attributes,
   };
 
   try {
-
-    const response = await axios.post(url, payload, {
+    const response = await axios.post(endpoint, payload, {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     console.log(`✅ Group "${groupName}" created`);
-    return true;
+
+    // Extract groupId from Location header
+    const location = response.headers.location;
+    if (!location) {
+      throw new Error("Location header missing in response");
+    }
+
+    const url = new URL(location);
+    const pathParts = url.pathname.split('/');
+    const groupId = pathParts[pathParts.length - 1];
+
+    console.log(`✅ Group ID: ${groupId}`);
+    return { groupId };
   } catch (error) {
     if (error.response?.status === 409) {
       console.warn(`⚠️ Group "${groupName}" already exists`);
@@ -278,7 +303,7 @@ async function deleteUserByUsername(token, realm, username) {
 
     await axios.delete(url, {
       headers: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -329,12 +354,16 @@ const deleteUser = async (token, realm, userId) => {
       const { status, data } = error.response;
 
       if (status === 404) {
-        console.warn(`⚠️ User not found (ID: ${userId}) - may already be deleted`);
+        console.warn(
+          `⚠️ User not found (ID: ${userId}) - may already be deleted`
+        );
         return false;
       }
 
       if (status === 403) {
-        console.error("❌ Permission denied: Check admin token has 'manage-users' role");
+        console.error(
+          "❌ Permission denied: Check admin token has 'manage-users' role"
+        );
         throw new CustomError("Insufficient permissions to delete user", 403);
       }
 
@@ -371,7 +400,9 @@ const updateUserInKeycloak = async (token, realm, userId, userData) => {
     return false;
   } catch (error) {
     if (error.response) {
-      throw new Error(`HTTP ${error.response.status}: ${JSON.stringify(error.response.data)}`);
+      throw new Error(
+        `HTTP ${error.response.status}: ${JSON.stringify(error.response.data)}`
+      );
     }
     throw error;
   }
@@ -406,10 +437,9 @@ const getGroupIdByName = async (token, realm, groupName) => {
     headers: { Authorization: `Bearer ${token}` },
   });
 
-  const group = response.data.find(g => g.name === groupName);
+  const group = response.data.find((g) => g.name === groupName);
   return group?.id || null;
 };
-
 
 //For Frontend new User created by old user and delete a old user
 
@@ -420,8 +450,6 @@ const getGroupIdByName = async (token, realm, groupName) => {
 //delete userId
 // DELETE {KEYCLOAK_BASE_URL}/admin/realms/{realm}/users/{userId}
 // Authorization: Bearer {access_token}
-
-
 
 // ✅ Export all functions
 module.exports = {
@@ -437,5 +465,5 @@ module.exports = {
   updateUserInKeycloak,
   updateGroupAttributes,
   deleteKeycloakGroup,
-  getGroupIdByName
+  getGroupIdByName,
 };

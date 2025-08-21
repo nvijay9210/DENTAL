@@ -1,14 +1,14 @@
 const pool = require("../config/db");
 
-const {createTableQuery}=require('../query/CreateTableQuery')
+const { createTableQuery } = require("../query/CreateTableQuery");
 
 const createTenantTable = async () => {
   // const query = tenantQuery.createTenantTable;
-  const query = createTableQuery.addTenant
+  const query = createTableQuery.addTenant;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
-    await seedTenantsFromEnv()
+    await seedTenantsFromEnv();
     console.log("Tenant table created successfully.");
   } catch (error) {
     console.error("Error creating Tenant table:", error);
@@ -19,7 +19,7 @@ const createTenantTable = async () => {
 };
 
 const createClinicTable = async () => {
-  const query = createTableQuery.addClinic
+  const query = createTableQuery.addClinic;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -35,7 +35,7 @@ const createClinicTable = async () => {
 };
 
 const createDentistTable = async () => {
-  const query = createTableQuery.addDentist
+  const query = createTableQuery.addDentist;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -50,7 +50,7 @@ const createDentistTable = async () => {
   }
 };
 const createPatientTable = async () => {
-  const query = createTableQuery.addPatient
+  const query = createTableQuery.addPatient;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -66,7 +66,7 @@ const createPatientTable = async () => {
 };
 
 const createAppointmentTable = async () => {
-  const query = createTableQuery.addAppointment
+  const query = createTableQuery.addAppointment;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -82,7 +82,7 @@ const createAppointmentTable = async () => {
 };
 
 const createTreatmentTable = async () => {
-  const query = createTableQuery.addTreatment
+  const query = createTableQuery.addTreatment;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -98,7 +98,7 @@ const createTreatmentTable = async () => {
 };
 
 const createPrescriptionTable = async () => {
-  const query = createTableQuery.addPrescription
+  const query = createTableQuery.addPrescription;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -114,10 +114,11 @@ const createPrescriptionTable = async () => {
 };
 
 const createStatusTypeTable = async () => {
-  const query =createTableQuery.addStatusType
+  const query = createTableQuery.addStatusType;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
+    await addStatusTypeTableData();
     console.log("statusType table created successfully.");
   } catch (error) {
     console.error("Error creating statusType table:", error);
@@ -130,11 +131,11 @@ const createStatusTypeTable = async () => {
 };
 
 const createStatusTypeSubTable = async () => {
-  const query = createTableQuery.addStatusTypeSub
+  const query = createTableQuery.addStatusTypeSub;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
-    await addStatusTypeTableData()
+    await addStatusTypeSubTableData();
     console.log("StatusTypeSub table created successfully.");
   } catch (error) {
     console.error("Error creating StatusTypeSub table:", error);
@@ -147,23 +148,21 @@ const createStatusTypeSubTable = async () => {
 };
 
 const createAssetTable = async () => {
-  const query =  createTableQuery.addAsset
+  const query = createTableQuery.addAsset;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
     console.log("Asset table created successfully.");
   } catch (error) {
     console.error("Error creating Asset table:", error);
-    throw new Error(
-      "Database error occurred while creating the Asset table."
-    );
+    throw new Error("Database error occurred while creating the Asset table.");
   } finally {
     conn.release();
   }
 };
 
 const createExpenseTable = async () => {
-  const query =  createTableQuery.addExpense
+  const query = createTableQuery.addExpense;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -179,7 +178,7 @@ const createExpenseTable = async () => {
 };
 
 const createSupplierTable = async () => {
-  const query =  createTableQuery.addSupplier
+  const query = createTableQuery.addSupplier;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -194,7 +193,7 @@ const createSupplierTable = async () => {
   }
 };
 const createSupplierProdutsTable = async () => {
-  const query =  createTableQuery.addSupplierProducts
+  const query = createTableQuery.addSupplierProducts;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -209,7 +208,7 @@ const createSupplierProdutsTable = async () => {
   }
 };
 const createPurchaseOrder = async () => {
-  const query =  createTableQuery.addPurchaseOrder
+  const query = createTableQuery.addPurchaseOrder;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -224,7 +223,7 @@ const createPurchaseOrder = async () => {
   }
 };
 const createSupplierPaymentsTable = async () => {
-  const query =  createTableQuery.addSupplierPayments
+  const query = createTableQuery.addSupplierPayments;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -239,7 +238,7 @@ const createSupplierPaymentsTable = async () => {
   }
 };
 const createSupplierReviewTable = async () => {
-  const query =  createTableQuery.addSupplierReview
+  const query = createTableQuery.addSupplierReview;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -255,7 +254,7 @@ const createSupplierReviewTable = async () => {
 };
 
 const createReminderTable = async () => {
-  const query =  createTableQuery.addReminder
+  const query = createTableQuery.addReminder;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -270,7 +269,7 @@ const createReminderTable = async () => {
   }
 };
 const createAppointmentReschedulesTable = async () => {
-  const query =  createTableQuery.addAppointmentReschedules
+  const query = createTableQuery.addAppointmentReschedules;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -285,7 +284,7 @@ const createAppointmentReschedulesTable = async () => {
   }
 };
 const createReception = async () => {
-  const query =  createTableQuery.addReception
+  const query = createTableQuery.addReception;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -301,7 +300,7 @@ const createReception = async () => {
 };
 
 const createPaymentTable = async () => {
-  const query =  createTableQuery.addPayment
+  const query = createTableQuery.addPayment;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -316,7 +315,7 @@ const createPaymentTable = async () => {
   }
 };
 const createUserActivityTable = async () => {
-  const query =  createTableQuery.addUserActivity
+  const query = createTableQuery.addUserActivity;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -331,7 +330,7 @@ const createUserActivityTable = async () => {
   }
 };
 const creatLoginHistoryTable = async () => {
-  const query =  createTableQuery.addLoginHistory
+  const query = createTableQuery.addLoginHistory;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -346,7 +345,7 @@ const creatLoginHistoryTable = async () => {
   }
 };
 const creatNotificationTable = async () => {
-  const query =  createTableQuery.addNotificationSend
+  const query = createTableQuery.addNotificationSend;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -360,8 +359,9 @@ const creatNotificationTable = async () => {
     conn.release();
   }
 };
+
 const creatNotificationRecipientsTable = async () => {
-  const query =  createTableQuery.addNotificationRecipients
+  const query = createTableQuery.addNotificationRecipients;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -377,7 +377,7 @@ const creatNotificationRecipientsTable = async () => {
 };
 
 const createAppointmentStatsTable = async () => {
-  const query =  createTableQuery.addAppointmentStats
+  const query = createTableQuery.addAppointmentStats;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -393,7 +393,7 @@ const createAppointmentStatsTable = async () => {
 };
 
 const createToothDetailsTable = async () => {
-  const query =  createTableQuery.addToothDetails
+  const query = createTableQuery.addToothDetails;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -409,7 +409,7 @@ const createToothDetailsTable = async () => {
 };
 
 const createPatientClinicJoinTable = async () => {
-  const query =  createTableQuery.addPatientClinic
+  const query = createTableQuery.addPatientClinic;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -440,38 +440,92 @@ const createUserTable = async () => {
 
 async function addStatusTypeTableData() {
   const conn = await pool.getConnection();
-  
+
   const sql = `
-    INSERT IGNORE INTO statustype (status_type_id, Status_Type) 
+    INSERT IGNORE INTO \`statustype\` 
+    (\`status_type_id\`, \`status_type\`, \`created_by\`) 
     VALUES 
-    (1, 'specialisation'),
-(2, 'designation'),
-(3, 'available_services'),
-(4, 'alcohol_consumption'),
-(5, 'mode_of_payment'),
-(6, 'asset_type'),
-(7, 'asset_status'),
-(8, 'languages_spoken'),
-(9, 'tenant_app_font'),
-(10, 'treatment_type'),
-(11, 'treatment_status'),
-(12, 'smoking_status'),
-(13, 'disease_type'),
-(14, 'currency_code');
+      (1, 'specialisation', 'ADMIN'),
+      (2, 'designation', 'ADMIN'),
+      (3, 'available_services', 'ADMIN'),
+      (4, 'alcohol_consumption', 'ADMIN'),
+      (5, 'mode_of_payment', 'ADMIN'),
+      (6, 'asset_type', 'ADMIN'),
+      (7, 'asset_status', 'ADMIN'),
+      (8, 'languages_spoken', 'ADMIN'),
+      (9, 'tenant_app_font', 'ADMIN'),
+      (10, 'treatment_type', 'ADMIN'),
+      (11, 'treatment_status', 'ADMIN'),
+      (12, 'smoking_status', 'ADMIN'),
+      (13, 'disease_type', 'ADMIN'),
+      (14, 'currency_code', 'ADMIN'),
+      (15, 'appointment_status', 'ADMIN'),
+      (16, 'purchase_order_status', 'ADMIN'),
+      (17, 'reminder_status', 'ADMIN');
   `;
 
   try {
     await conn.query(sql);
-    console.log("StatusType data added successfully");
+    console.log("✅ StatusType data added successfully with created_by = 'ADMIN'");
   } catch (err) {
-    console.error("Error inserting data:", err.message);
+    console.error("❌ Error inserting StatusType data:", err.message);
   } finally {
-    if (conn) conn.release();
+    conn.release();
+  }
+}
+
+async function addStatusTypeSubTableData() {
+  const conn = await pool.getConnection();
+
+  const sql = `
+    INSERT IGNORE INTO \`statustypesub\` 
+    (\`tenant_id\`, \`status_type_id\`, \`status_type_sub\`, \`status_type_sub_ref\`, \`created_by\`) 
+    VALUES 
+      -- appointment_status (status_type_id = 15)
+      (1, 15, 'pending', 'pending', 'ADMIN'),
+      (1, 15, 'confirmed', 'confirmed', 'ADMIN'),
+      (1, 15, 'checkedin', 'checked_in', 'ADMIN'),
+      (1, 15, 'inprogress', 'in_progress', 'ADMIN'),
+      (1, 15, 'completed', 'completed', 'ADMIN'),
+      (1, 15, 'cancelled', 'cancelled', 'ADMIN'),
+      (1, 15, 'clinic_cancelled', 'clinic_cancelled', 'ADMIN'),
+      (1, 15, 'noshow', 'no_show', 'ADMIN'),
+      (1, 15, 'rescheduled', 'rescheduled', 'ADMIN'),
+      (1, 15, 'followup', 'follow_up', 'ADMIN'),
+      (1, 15, 'rejected', 'rejected', 'ADMIN'),
+      (1, 15, 'expired', 'expired', 'ADMIN'),
+      (1, 15, 'payment_pending', 'payment_pending', 'ADMIN'),
+      (1, 15, 'paid', 'paid', 'ADMIN'),
+
+      -- purchase_order_status (status_type_id = 16)
+      (1, 16, 'pending', 'pending', 'ADMIN'),
+      (1, 16, 'confirmed', 'confirmed', 'ADMIN'),
+      (1, 16, 'shipped', 'shipped', 'ADMIN'),
+      (1, 16, 'delivered', 'delivered', 'ADMIN'),
+      (1, 16, 'cancelled', 'cancelled', 'ADMIN'),
+
+      -- reminder_status (status_type_id = 17)
+      (1, 17, 'pending', 'pending', 'ADMIN'),
+      (1, 17, 'completed', 'completed', 'ADMIN'),
+      (1, 17, 'dismissed', 'dismissed', 'ADMIN'),
+      (1, 17, 'overdue', 'overdue', 'ADMIN'),
+      (1, 17, 'in_progress', 'in_progress', 'ADMIN');
+  `;
+
+  try {
+    await conn.query(sql);
+    console.log("✅ statustypesub: All status sub-data added successfully");
+  } catch (err) {
+    console.error("❌ Error inserting statustypesub data:", err.message);
+    // Log full SQL for debugging if needed
+    // console.log("SQL:", sql);
+  } finally {
+    conn.release();
   }
 }
 
 const createDocumentJoinTable = async () => {
-  const query =  createTableQuery.addDocumentTable
+  const query = createTableQuery.addDocumentTable;
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
@@ -486,12 +540,12 @@ const createDocumentJoinTable = async () => {
   }
 };
 
-require('dotenv').config();
+require("dotenv").config();
 
 async function seedTenantsFromEnv() {
   const REALM_TENANT_MAP = process.env.REALM_TENANT_MAP;
   const REALM_TENANT_DOMAIN_MAP = process.env.REALM_TENANT_DOMAIN_MAP;
-  const DEFAULT_CREATED_BY = process.env.DEFAULT_CREATED_BY || 'ADMIN';
+  const DEFAULT_CREATED_BY = process.env.DEFAULT_CREATED_BY || "ADMIN";
 
   if (!REALM_TENANT_MAP || !REALM_TENANT_DOMAIN_MAP) {
     console.warn("Missing REALM_TENANT_MAP or REALM_TENANT_DOMAIN_MAP");
@@ -502,19 +556,24 @@ async function seedTenantsFromEnv() {
   const domainTenantMap = {};
 
   // Parse REALM_TENANT_MAP into object: {1: "smilecare", 2: "anotherrealm"}
-  for (const entry of REALM_TENANT_MAP.split(',')) {
-    const [realm, tenantId] = entry.trim().split(':');
+  for (const entry of REALM_TENANT_MAP.split(",")) {
+    const [realm, tenantId] = entry.trim().split(":");
     realmTenantMap[tenantId] = realm;
   }
 
   // Parse REALM_TENANT_DOMAIN_MAP into object: {1: ".in", 2: ".com"}
-  for (const entry of REALM_TENANT_DOMAIN_MAP.split(',')) {
-    const [domain, tenantId] = entry.trim().split(':');
+  for (const entry of REALM_TENANT_DOMAIN_MAP.split(",")) {
+    const [domain, tenantId] = entry.trim().split(":");
     domainTenantMap[tenantId] = domain;
   }
 
   // Combine and prepare inserts
-  const tenantIds = [...new Set([...Object.keys(realmTenantMap), ...Object.keys(domainTenantMap)])];
+  const tenantIds = [
+    ...new Set([
+      ...Object.keys(realmTenantMap),
+      ...Object.keys(domainTenantMap),
+    ]),
+  ];
 
   for (const tenantId of tenantIds) {
     const tenantName = realmTenantMap[tenantId] || null;
@@ -540,17 +599,17 @@ async function seedTenantsFromEnv() {
         parseInt(tenantId, 10),
         tenantName,
         tenantDomain,
-        DEFAULT_CREATED_BY
+        DEFAULT_CREATED_BY,
       ]);
-      console.log(`✅ Inserted/Updated tenant: ${tenantName} (${tenantDomain})`);
+      console.log(
+        `✅ Inserted/Updated tenant: ${tenantName} (${tenantDomain})`
+      );
       conn.release();
     } catch (err) {
       console.error(`❌ Error inserting tenant_id=${tenantId}:`, err.message);
     }
   }
 }
-
-
 
 module.exports = {
   createTenantTable,
@@ -581,6 +640,5 @@ module.exports = {
   createAppointmentStatsTable,
   createToothDetailsTable,
   createPatientClinicJoinTable,
-  createDocumentJoinTable
+  createDocumentJoinTable,
 };
-
