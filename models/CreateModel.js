@@ -135,7 +135,6 @@ const createStatusTypeSubTable = async () => {
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
-    await addStatusTypeSubTableData();
     console.log("StatusTypeSub table created successfully.");
   } catch (error) {
     console.error("Error creating StatusTypeSub table:", error);
@@ -466,7 +465,9 @@ async function addStatusTypeTableData() {
 
   try {
     await conn.query(sql);
-    console.log("✅ StatusType data added successfully with created_by = 'ADMIN'");
+    console.log(
+      "✅ StatusType data added successfully with created_by = 'ADMIN'"
+    );
   } catch (err) {
     console.error("❌ Error inserting StatusType data:", err.message);
   } finally {
@@ -641,4 +642,5 @@ module.exports = {
   createToothDetailsTable,
   createPatientClinicJoinTable,
   createDocumentJoinTable,
+  addStatusTypeSubTableData,
 };
