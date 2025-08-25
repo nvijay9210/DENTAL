@@ -37,7 +37,7 @@ const notificationFileMiddleware = uploadFileMiddleware({
 // Create Notification
 router.post(
   ADD_NOTIFICATION,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","patient","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier","patient","receptionist"]),
   upload.any(),
   notificationFileMiddleware,
   notificationController.createNotification
@@ -46,7 +46,7 @@ router.post(
 // Get All Notifications by Tenant ID with Pagination
 router.get(
   GETALL_NOTIFICATION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier","receptionist"]),
   notificationController.getAllNotificationsByTenantId
 );
 router.get(
@@ -58,14 +58,14 @@ router.get(
 // Get Single Notification by Tenant ID & Notification ID
 router.get(
   GET_NOTIFICATION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier","receptionist"]),
   notificationController.getNotificationByTenantIdAndNotificationId
 );
 
 // Update Notification
 router.put(
   UPDATE_NOTIFICATION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier","receptionist"]),
   upload.any(),
   notificationFileMiddleware,
   notificationController.updateNotification
@@ -73,14 +73,14 @@ router.put(
 
 router.put(
   UPDATE_NOTIFICATION_RECIPIENTS_STATUS_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","patient"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier","receptionist"]),
   notificationController.markNotificationAsRead
 );
 
 // Delete Notification
 router.delete(
   DELETE_NOTIFICATION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier","receptionist"]),
   notificationController.deleteNotificationByTenantIdAndNotificationId
 );
 
