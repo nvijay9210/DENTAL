@@ -174,6 +174,7 @@ async function initializeTables() {
     await createTable.createTreatmentTable();
     await createTable.createPrescriptionTable();
     await createTable.createStatusTypeTable();
+    await createTable.addStatusTypeTableData()
     await createTable.createStatusTypeSubTable();
     // await createTable.createAssetTable();
     await createTable.addStatusTypeSubTableData();

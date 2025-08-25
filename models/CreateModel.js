@@ -118,7 +118,6 @@ const createStatusTypeTable = async () => {
   const conn = await pool.getConnection();
   try {
     await conn.query(query);
-    await addStatusTypeTableData();
     console.log("statusType table created successfully.");
   } catch (error) {
     console.error("Error creating statusType table:", error);
@@ -643,4 +642,5 @@ module.exports = {
   createPatientClinicJoinTable,
   createDocumentJoinTable,
   addStatusTypeSubTableData,
+  addStatusTypeTableData
 };
