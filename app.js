@@ -147,6 +147,8 @@ app.use("/uploads/", express.static(path.join(__dirname, "uploads")));
 app.use("/files", express.static("uploads/"));
 
 
+
+
 // ✅ Morgan logging (system time)
 // morgan.token('local-date', () => new Date().toLocaleString());
 // app.use(morgan(':local-date :method :url :status', { stream: logStream }));
@@ -224,6 +226,34 @@ async function initializeTables() {
 app.get('/test', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Successfully Running' });
 });
+
+
+const bodyParser = require("body-parser");
+app.use(bodyParser.json())
+
+// In production use Redis/DB instead of memory
+let sharedToken = null;
+
+// Store token (called by Dental app)
+app.post("/store-token", (req, res) => {
+  const { token } = req.body;
+  if (!token) {
+    return res.status(400).json({ message: "Token is required" });
+  }
+  sharedToken = token;
+  return res.json({ message: "Token stored successfully" });
+});
+
+// Get token (called by Asset app)
+app.get("/get-token", (req, res) => {
+  if (!sharedToken) {
+    return res.status(404).json({ message: "No token available" });
+  }
+  return res.json({ token: sharedToken });
+});
+
+app.listen(4000, () => console.log("Backend running on http://localhost:4000"));
+
 
 // API Routes
 app.use('/v1/tenant', tenantRouter);

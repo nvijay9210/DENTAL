@@ -113,7 +113,7 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
     }
 
     const token = req.headers.authorization?.split(" ")[1];
-    const realm = req.headers["x-realm"];
+    const realm = req.headers["x-realm"]
 
     if (!token || !realm) {
       return res

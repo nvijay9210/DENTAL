@@ -1,6 +1,7 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
 const appointmentService = require("../services/AppointmentService");
+const { dateToString } = require("../utils/DateUtils");
 const appointmentValidation = require("../validations/AppointmentValidation");
 const {
   validateTenantIdAndPageAndLimit,
@@ -495,8 +496,8 @@ exports.getAppointmentSummary = async (req, res, next) => {
     const appointments =
       await appointmentService.getAppointmentSummaryByStartDateAndEndDate(
         parseInt(tenant_id),
-        startDate,
-        endDate,
+        dateToString(startDate),
+        dateToString(endDate),
         parseInt(clinic_id),
         parseInt(dentist_id)
         // period

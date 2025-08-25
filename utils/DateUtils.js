@@ -140,7 +140,10 @@ exports.getSystemDateTime = () => {
   }).replace(',', '');
 };
 
-
+function dateToString(dateString) {
+  const date = new Date(dateString);
+  return date.toISOString().split('T')[0];
+}
 
 
 
@@ -153,5 +156,6 @@ module.exports = {
   isEarlier,
   convertUTCToLocal,
   checkPreviousDatetimeOrNot,
-  getSystemTimeOnly
+  getSystemTimeOnly,
+  dateToString
 };

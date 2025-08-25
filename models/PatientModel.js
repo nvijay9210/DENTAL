@@ -9,10 +9,10 @@ const validateColumnValueLengthMatch = (columns, values) => {
   }
 };
 
-const createPatient = async (conn,table, columns, values) => {
+const createPatient = async (conn, table, columns, values) => {
   try {
     validateColumnValueLengthMatch(columns, values);
-    const patient = await record.createRecord(table, columns, values,conn);
+    const patient = await record.createRecord(table, columns, values, conn);
     return patient.insertId;
   } catch (error) {
     console.error("Error executing query:", error);
@@ -38,14 +38,19 @@ const getAllPatientsByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
-const getPatientByTenantIdAndPatientId = async (tenant_id, patient_id,conn) => {
+const getPatientByTenantIdAndPatientId = async (
+  tenant_id,
+  patient_id,
+  conn
+) => {
   try {
     const rows = await record.getRecordByIdAndTenantId(
       "patient",
       "tenant_id",
       tenant_id,
       "patient_id",
-      patient_id,conn
+      patient_id,
+      conn
     );
     return rows || null;
   } catch (error) {
@@ -54,7 +59,7 @@ const getPatientByTenantIdAndPatientId = async (tenant_id, patient_id,conn) => {
   }
 };
 
-const updatePatient = async (patient_id, columns, values, tenant_id,conn) => {
+const updatePatient = async (patient_id, columns, values, tenant_id, conn) => {
   const conditionColumn = ["tenant_id", "patient_id"];
   const conditionValue = [tenant_id, patient_id];
 
@@ -64,7 +69,8 @@ const updatePatient = async (patient_id, columns, values, tenant_id,conn) => {
       columns,
       values,
       conditionColumn,
-      conditionValue,conn
+      conditionValue,
+      conn
     );
     return result.affectedRows;
   } catch (error) {
@@ -73,7 +79,11 @@ const updatePatient = async (patient_id, columns, values, tenant_id,conn) => {
   }
 };
 
-const deletePatientByTenantIdAndPatientId = async (tenant_id, patient_id,conn) => {
+const deletePatientByTenantIdAndPatientId = async (
+  tenant_id,
+  patient_id,
+  conn
+) => {
   const conditionColumn = ["tenant_id", "patient_id"];
   const conditionValue = [tenant_id, patient_id];
 
@@ -393,17 +403,22 @@ async function getMostVisitedPatientsByClinicPeriods(
   try {
     // Query appointments joined with patient table
     let query = `
-      SELECT 
-        a.appointment_date,
-        p.patient_id,
-        p.first_name AS name,
-        TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) AS age,
-        CASE WHEN p.gender = 'M' THEN 'Male' ELSE 'Female' END AS gender
-      FROM appointment a
-      JOIN patient p ON a.patient_id = p.patient_id
-      WHERE a.tenant_id = ?
-        AND a.clinic_id = ?
-        AND a.appointment_date BETWEEN ? AND ?
+     SELECT 
+    a.appointment_date,
+    p.patient_id,
+    p.first_name AS name,
+    TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) AS age,
+    CASE 
+        WHEN p.gender = 'M' THEN 'Male'
+        WHEN p.gender = 'F' THEN 'Female'
+        ELSE 'Others'
+    END AS gender
+FROM appointment a
+JOIN patient p ON a.patient_id = p.patient_id
+WHERE a.tenant_id = ?
+  AND a.clinic_id = ?
+  AND a.appointment_date BETWEEN ? AND ?;
+
     `;
 
     const queryParams = [tenant_id, clinic_id, startDate, endDate];
@@ -599,7 +614,6 @@ const getAllPatientsByTenantIdAndClinicId = async (
   limit,
   offset
 ) => {
-
   const query1 = `SELECT
       p.*,
       pc.clinic_id
@@ -645,7 +659,6 @@ const getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
   limit,
   offset
 ) => {
-
   const query1 = `SELECT
       p.*,
       pc.clinic_id
@@ -678,8 +691,8 @@ const getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
       limit,
       offset,
     ]);
-  
-    const [counts] = await conn.query(query2, [tenantId, clinicId,dentistId]);
+
+    const [counts] = await conn.query(query2, [tenantId, clinicId, dentistId]);
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.error(error);
@@ -695,8 +708,6 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
   limit,
   offset
 ) => {
-
-
   const query1 = `SELECT
       p.*,
       a.clinic_id
@@ -733,8 +744,8 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
       limit,
       offset,
     ]);
-  
-    const [counts] = await conn.query(query2, [tenantId, clinicId,dentistId]);
+
+    const [counts] = await conn.query(query2, [tenantId, clinicId, dentistId]);
     return { data: rows, total: counts[0].total };
   } catch (error) {
     console.error(error);
@@ -807,5 +818,5 @@ module.exports = {
   getAgeGenderByClinic,
   getAllPatientsByTenantIdAndClinicId,
   getAllPatientsByTenantIdAndClinicIdAndDentistId,
-  getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus
+  getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus,
 };
