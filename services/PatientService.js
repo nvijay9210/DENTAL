@@ -59,7 +59,7 @@ const patientFieldsReverseMap = {
   tenant_id: (val) => val,
   keycloak_id: (val) => val,
   username: (val) => val,
-  password: (val) => val,
+  password: (val) => val?String(val):null,
   first_name: (val) => val,
   last_name: (val) => val,
   email: (val) => val,
@@ -212,11 +212,13 @@ const createPatient = async (data, token, realm, user_clinic_id) => {
     if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username/email
       username = await helper.generateUsername("PAT", realm, token);
-      rawPassword = helper.generateAlphanumericPassword();
+      const newpassword ="1234" || helper.generateAlphanumericPassword();
+      rawPassword= helper.encrypt(newpassword)
       const email =
         data.email ||
         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
 
+      
       const userData = {
         username,
         email,

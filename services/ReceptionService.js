@@ -48,7 +48,7 @@ const receptionFieldsReverseMap = {
   clinic_id: (val) => val,
   keycloak_id: (val) => val,
   username: (val) => val,
-  password: (val) => val,
+  password: (val) => val?String(val):null,
   full_name: (val) => val,
   email: (val) => val,
   status: (val) => Boolean(val),
@@ -75,9 +75,9 @@ const createReception = async (data, token, realm) => {
     created_by: (val) => val,
   };
 
-  let userId = null;           // Track Keycloak user for rollback
-  let username = null;         // Generated username
-  let rawPassword = null;      // Raw password to return (once)
+  let userId = null; // Track Keycloak user for rollback
+  let username = null; // Generated username
+  let rawPassword = null; // Raw password to return (once)
 
   const connection = await pool.getConnection();
   try {
@@ -86,7 +86,8 @@ const createReception = async (data, token, realm) => {
     if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username
       username = await helper.generateUsername("REC", realm, token);
-      rawPassword = "1234"; // 🔐 For demo only — use helper.generateAlphanumericPassword() in production
+      const newpassword = "1234" || helper.generateAlphanumericPassword();
+      rawPassword = helper.encrypt(newpassword);
       const email =
         data.email ||
         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
@@ -133,7 +134,12 @@ const createReception = async (data, token, realm) => {
       // 6. Optional: Add to group (clinic-based)
       if (data.clinic_id) {
         const groupName = `dental-${data.tenant_id}-${data.clinic_id}`;
-        const groupAdded = await addUserToGroup(token, realm, userId, groupName);
+        const groupAdded = await addUserToGroup(
+          token,
+          realm,
+          userId,
+          groupName
+        );
         if (!groupAdded) {
           console.warn(`⚠️ Failed to add receptionist to group: ${groupName}`);
         } else {
@@ -298,7 +304,10 @@ const updateReception = async (receptionId, data, tenant_id, token, realm) => {
       if (Object.keys(updatePayload).length > 0) {
         try {
           await updateUserInKeycloak(token, realm, userId, updatePayload);
-          console.log(`✅ Synced receptionist ${receptionId} to Keycloak`, updatePayload);
+          console.log(
+            `✅ Synced receptionist ${receptionId} to Keycloak`,
+            updatePayload
+          );
         } catch (kcError) {
           console.warn(
             `⚠️ Keycloak sync failed for receptionist ${receptionId}. Continuing with DB update.`,
@@ -372,7 +381,10 @@ const deleteReceptionByTenantIdAndReceptionId = async (
         }
         console.log(`✅ Keycloak user ${userId} deleted (receptionist)`);
       } catch (kcError) {
-        console.error(`❌ Keycloak deletion failed for receptionist ${userId}:`, kcError.message);
+        console.error(
+          `❌ Keycloak deletion failed for receptionist ${userId}:`,
+          kcError.message
+        );
         // 🔁 Rollback DB delete
         await connection.rollback();
         throw new CustomError(

@@ -16,92 +16,9 @@ function getKey(realm, header, callback) {
   });
 }
 
-// Middleware: skips group validation if user has 'tenant' role
-// function authenticateTenantClinicGroup(requiredRoles = []) {
-//   return (req, res, next) => {
-    
-//     if (process.env.KEYCLOAK_POWER === 'off') {
-//       req.user = {
-//         username: "dev-user",
-//         realm_access: { roles: requiredRoles },
-//         groups: ["dev-group"],
-//       };
-//       req.realm = req.headers["x-realm"] || "dev-realm";
-//       req.token = "dev-token";
-//       return next();
-//     }
-
-//     const token = req.headers.authorization?.split(" ")[1];
-//     const realm = req.headers["x-realm"];
-
-
-//     if (!token || !realm) {
-//       return res
-//         .status(401)
-//         .json({ message: "Missing token or realm in headers" });
-//     }
-
-//     jwt.verify(
-//       token,
-//       (header, callback) => getKey(realm, header, callback),
-//       { algorithms: ["RS256"] },
-//       (err, decoded) => {
-//         if (err) {
-//           return res
-//             .status(401)
-//             .json({ message: "Invalid token", error: err.message });
-//         }
-
-//         // Role check
-//         const realmRoles = decoded?.realm_access?.roles || [];
-//         const hasRequiredRole =
-//           requiredRoles.length === 0 ||
-//           requiredRoles.some((role) => realmRoles.includes(role));
-//         if (!hasRequiredRole) {
-//           return res
-//             .status(403)
-//             .json({ message: "Access denied: missing required realm role" });
-//         }
-
-//         // If user has 'tenant' role, skip group validation
-//         if (realmRoles.includes("tenant")) {
-//           req.token = token;
-//           req.user = decoded;
-//           req.realm = realm;
-//           return next();
-//         }
-
-//         // Fetch tenant_id and clinic_id from body, query, or params (optional)
-//         const tenant_id =
-//           req.body?.tenant_id || req.query?.tenant_id || req.params?.tenant_id;
-//         const clinic_id =
-//           req.body?.clinic_id || req.query?.clinic_id || req.params?.clinic_id;
-
-//         if (tenant_id && clinic_id) {
-//           // Construct group name and check group membership
-//           const groupName = `dental-${tenant_id}-${clinic_id}`;
-//           const userGroups = decoded.groups || [];
-//           if (!userGroups.includes(groupName)) {
-//             return res
-//               .status(403)
-//               .json({ message: `Access denied: user not in group` });
-//           }
-//         }
-//         // If tenant_id or clinic_id is missing, skip the group check and continue
-
-
-//         req.token = token;
-//         req.user = decoded;
-//         req.realm = realm;
-//         next();
-//       }
-//     );
-//   };
-// }
-
 function authenticateTenantClinicGroup(requiredRoles = []) {
   return (req, res, next) => {
-    if (process.env.KEYCLOAK_POWER === 'off') {
+    if (process.env.KEYCLOAK_POWER === "off") {
       req.user = {
         username: "dev-user",
         realm_access: { roles: requiredRoles },
@@ -113,7 +30,7 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
     }
 
     const token = req.headers.authorization?.split(" ")[1];
-    const realm = req.headers["x-realm"]
+    const realm = req.headers["x-realm"];
 
     if (!token || !realm) {
       return res
@@ -132,52 +49,74 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
             .json({ message: "Invalid token", error: err.message });
         }
 
-        const realmRoles = decoded?.realm_access?.roles || [];
+        const userRoles = decoded?.realm_access?.roles || [];
         const userGroups = decoded?.groups || [];
 
+        // Check required realm roles
         const hasRequiredRole =
           requiredRoles.length === 0 ||
-          requiredRoles.some((role) => realmRoles.includes(role));
-
+          requiredRoles.some((role) => userRoles.includes(role));
         if (!hasRequiredRole) {
           return res
             .status(403)
             .json({ message: "Access denied: missing required realm role" });
         }
 
-        // Auto-assign tenant and clinic ID if user is a super user
-        if (realmRoles.includes("super-user")) {
-          const group = userGroups.find((g) => g.startsWith("dental-"));
-          if (group) {
-            const match = group.match(/dental-(\d+)-(\d+)/);
-            if (match) {
+        // Auto-assign tenant/clinic for super-user
+        const dentalGroup = userGroups.find((g) => g.startsWith("dental-"));
+        let userTenantId = null;
+        let userClinicId = null;
+        if (dentalGroup) {
+          const match = dentalGroup.match(/dental-(\d+)-(\d+)/);
+          if (match) {
+            userTenantId = Number(match[1]);
+            userClinicId = Number(match[2]);
+
+            // If super-user, optionally auto-fill body
+            if (userRoles.includes("super-user")) {
               req.body = {
                 ...req.body,
-                tenant_id: Number(match[1]),
-                clinic_id: Number(match[2]),
+                tenant_id: userTenantId,
+                clinic_id: userClinicId,
               };
             }
-
           }
         }
 
-        // If user has 'tenant' role, skip group validation
-        if (realmRoles.includes("tenant") || realmRoles.includes("guest")) {
+        // --- ONLY skip if user has purely tenant or guest role ---
+        const SKIP_ROLES = ["tenant", "guest"];
+        const onlySkipRoles = userRoles.length > 0 && userRoles.every(r => SKIP_ROLES.includes(r));
+
+        if (onlySkipRoles) {
           req.token = token;
           req.user = decoded;
           req.realm = realm;
           return next();
         }
-        
 
-        // Validate group if tenant_id and clinic_id are provided
-        const tenant_id =
-          req.body?.tenant_id || req.query?.tenant_id || req.params?.tenant_id;
-        const clinic_id =
-          req.body?.clinic_id || req.query?.clinic_id || req.params?.clinic_id;
+        // --- Tenant/Clinic isolation ---
+        const requestedTenantId = Number(
+          req.params?.tenant_id || req.query?.tenant_id || req.body?.tenant_id
+        );
+        const requestedClinicId = Number(
+          req.params?.clinic_id || req.query?.clinic_id || req.body?.clinic_id
+        );
 
-        if (tenant_id && clinic_id) {
-          const groupName = `dental-${tenant_id}-${clinic_id}`;
+        if (requestedTenantId && userTenantId && requestedTenantId !== userTenantId) {
+          return res
+            .status(403)
+            .json({ message: "Access denied: cannot access another tenant's data" });
+        }
+
+        if (requestedClinicId && userClinicId && requestedClinicId !== userClinicId) {
+          return res
+            .status(403)
+            .json({ message: "Access denied: cannot access another clinic's data" });
+        }
+
+        // --- Optional: group membership validation ---
+        if (requestedTenantId && requestedClinicId) {
+          const groupName = `dental-${requestedTenantId}-${requestedClinicId}`;
           if (!userGroups.includes(groupName)) {
             return res
               .status(403)
@@ -193,6 +132,5 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
     );
   };
 }
-
 
 module.exports = { authenticateTenantClinicGroup };

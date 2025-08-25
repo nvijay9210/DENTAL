@@ -90,7 +90,7 @@ const dentistFieldReverseMap = {
   clinic_id: (val) => val,
   keycloak_id: (val) => val,
   username: (val) => val,
-  password: (val) => val,
+  password: (val) => val?String(val):null,
   first_name: (val) => val,
   last_name: (val) => val,
   gender: (val) => val,
@@ -158,7 +158,8 @@ const createDentist = async (data, token, realm) => {
     if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username and password
       username = await helper.generateUsername("DEN", realm, token);
-      rawPassword = "1234"; // For demo — replace with helper.generateAlphanumericPassword() in prod
+      const newpassword ="1234" || helper.generateAlphanumericPassword();
+            rawPassword= helper.encrypt(newpassword)
       const email =
         data.email ||
         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;

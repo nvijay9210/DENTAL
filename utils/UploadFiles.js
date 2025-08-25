@@ -276,7 +276,7 @@ const uploadFileMiddleware2 = (options) => {
       ];
 
       // Delete old file from disk and DB
-      const deleteOldFiles = async (fieldName, req) => {
+      const deleteOldFiles = async (fieldName, req, id, folderName, tenant_id) => {
         try {
           const tableMap = {
             Dentist: { table: "dentist", idField: "dentist_id" },
@@ -290,13 +290,10 @@ const uploadFileMiddleware2 = (options) => {
             },
             Notification: { table: "notification", idField: "notification_id" },
           };
-
+      
           const config = tableMap[folderName];
-          if (!config) {
-            console.warn(`No mapping found for folderName: ${folderName}`);
-            return;
-          }
-
+          if (!config) return;
+      
           const data = await record.getRecordByIdAndTenantId(
             config.table,
             "tenant_id",
@@ -304,19 +301,14 @@ const uploadFileMiddleware2 = (options) => {
             config.idField,
             id
           );
-
-          // ✅ Safe check
-          if (!data) {
-            console.warn(`No record found for ${folderName} ID: ${id}`);
-            return;
+      
+          // ✅ Skip if no record or no old file
+          if (!data || !data[fieldName] || data[fieldName].length === 0) {
+            console.log(`No old files to delete for ${folderName}.${fieldName}`);
+            return; // <-- skip deletion
           }
-
-          if (!data[fieldName]) {
-            console.log(`No old file to delete for ${fieldName}`);
-            return;
-          }
-
-          await deleteFileIfExists(data[fieldName]);
+      
+          await deleteUploadedFiles(data[fieldName]);
         } catch (err) {
           console.warn(
             `Failed to delete old file for ${folderName}.${fieldName}`,
@@ -324,6 +316,7 @@ const uploadFileMiddleware2 = (options) => {
           );
         }
       };
+      
 
       // Process file fields
       for (const fileField of fileFields) {

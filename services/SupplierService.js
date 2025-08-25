@@ -60,7 +60,7 @@ const supplierFieldsReverseMap = {
   clinic_id: (val) => val,
   keycloak_id: (val) => val,
   username: (val) => val,
-  password: (val) => val,
+  password: (val) => val?String(val):null,
   name: (val) => val,
   category: (val) => val,
   status: (val) => Boolean(val),
@@ -107,7 +107,8 @@ const createSupplier = async (data, token, realm) => {
     if (process.env.KEYCLOAK_POWER === "on") {
       // 1. Generate username
       username = await helper.generateUsername("SUP", realm, token);
-      rawPassword = "1234"; // 🔐 For demo only — use helper.generateAlphanumericPassword() in prod
+      const newpassword ="1234" || helper.generateAlphanumericPassword();
+            rawPassword= helper.encrypt(newpassword)
       const email =
         data.email ||
         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
