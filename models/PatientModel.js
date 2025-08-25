@@ -417,7 +417,7 @@ FROM appointment a
 JOIN patient p ON a.patient_id = p.patient_id
 WHERE a.tenant_id = ?
   AND a.clinic_id = ?
-  AND a.appointment_date BETWEEN ? AND ?;
+  AND a.appointment_date BETWEEN ? AND ?
 
     `;
 

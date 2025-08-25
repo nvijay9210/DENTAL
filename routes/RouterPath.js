@@ -27,7 +27,8 @@ module.exports = {
   ADD_PATIENT: "/addpatient",
   GETALL_PATIENT_TENANT: "/getallpatients/:tenant_id",
   GETALL_PATIENT_TENANT_CLINIC: "/getallpatients/:tenant_id/:clinic_id",
-  GETALL_PATIENT_TENANT_CLINIC_DENTIST: "/getallpatientsdentist/:tenant_id/:clinic_id/:dentist_id",
+  GETALL_PATIENT_TENANT_CLINIC_DENTIST:
+    "/getallpatientsdentist/:tenant_id/:clinic_id/:dentist_id",
   GET_PATIENT_TENANT: "/getpatient/:patient_id/:tenant_id",
   UPDATE_PATIENT_TENANT: "/updatepatient/:patient_id/:tenant_id",
   DELETE_PATIENT_TENANT: "/deletepatient/:patient_id/:tenant_id",
@@ -41,9 +42,9 @@ module.exports = {
   UPDATE_APPOINTMENT_TENANT: "/updateappointment/:appointment_id/:tenant_id",
   DELETE_APPOINTMENT_TENANT: "/deleteappointment/:appointment_id/:tenant_id",
   //fetch some specific data
-  GETALL_APPOINTMENT_TENANT_CLINIC_DENTIST: 
+  GETALL_APPOINTMENT_TENANT_CLINIC_DENTIST:
     "/getallappointments/:tenant_id/:clinic_id/:dentist_id",
-  GETALL_APPOINTMENT_WITHDETAILS_TENANT_CLINIC: 
+  GETALL_APPOINTMENT_WITHDETAILS_TENANT_CLINIC:
     "/getallappointments_withdetails/:tenant_id/:clinic_id",
   GETALL_APPOINTMENT_TENANT_DENTIST:
     "/getallappointments_dentistid/:tenant_id/:dentist_id",
@@ -53,7 +54,7 @@ module.exports = {
   //appointment show by patient
   GETALL_APPOINTMENT_TENANT_PATIENT:
     "/getallappointmentsbypatient/:tenant_id/:patient_id",
-    
+
   GET_APPOINTMENT_MONTHLY_SUMMARY:
     "/getallappointments/monthlysummary/:tenant_id/:clinic_id/:dentist_id",
   GET_APPOINTMENT_MONTHLY_SUMMARY_CLINIC:
@@ -87,9 +88,8 @@ module.exports = {
   GET_TREATMENT_TENANT: "/gettreatment/:treatment_id/:tenant_id",
   UPDATE_TREATMENT_TENANT: "/updatetreatment/:treatment_id/:tenant_id",
   DELETE_TREATMENT_TENANT: "/deletetreatment/:treatment_id/:tenant_id",
-  //use query role and user-id 
-  GETALL_TREATMENT_FOLLOWUP_NOTIFY:
-    "/getallfollowup/:tenant_id/:clinic_id",
+  //use query role and user-id
+  GETALL_TREATMENT_FOLLOWUP_NOTIFY: "/getallfollowup/:tenant_id/:clinic_id",
 
   ADD_PRESCRIPTION: "/addprescription",
   GETALL_PRESCRIPTION_TENANT: "/getallprescriptions/:tenant_id",
@@ -188,7 +188,8 @@ module.exports = {
 
   ADD_PURCHASE_ORDER: "/addpurchaseorder",
   GETALL_PURCHASE_ORDER_TENANT: "/getallpurchaseorders/:tenant_id",
-  GETALL_PURCHASE_ORDER_TENANT_CLINIC: "/getallpurchaseordersclinic/:tenant_id/:clinic_id",
+  GETALL_PURCHASE_ORDER_TENANT_CLINIC:
+    "/getallpurchaseordersclinic/:tenant_id/:clinic_id",
   GETALL_PURCHASE_ORDER_TENANT_SUPPLIER:
     "/getallpurchaseorders/:tenant_id/:supplier_id",
   GET_PURCHASE_ORDER_TENANT: "/getpurchaseorder/:purchase_order_id/:tenant_id",
@@ -209,7 +210,8 @@ module.exports = {
   ADD_REMINDER: "/addreminder",
   GETALL_REMINDER_TENANT: "/getallreminders/:tenant_id",
   GETALL_REMINDER_TENANT_CLINIC: "/getallreminders/:tenant_id/:clinic_id",
-  GETALL_REMINDER_TENANT_CLINIC_DENTIST: "/getallreminders/:tenant_id/:clinic_id/:dentist_id",
+  GETALL_REMINDER_TENANT_CLINIC_DENTIST:
+    "/getallreminders/:tenant_id/:clinic_id/:dentist_id",
   GET_REMINDER_TENANT: "/getreminder/:reminder_id/:tenant_id",
   GET_REMINDER_SCHEDULE:
     "/getreminder/:tenant_id/:clinic_id/:dentist_id/:reminder_id",
@@ -221,8 +223,7 @@ module.exports = {
   DELETE_REMINDER_TENANT: "/deletereminder/:reminder_id/:tenant_id",
   GETALL_NOTIFY_DENTIST:
     "/getallnoticationdentist/:tenant_id/:clinic_id/:dentist_id",
-    GETALL_NOTIFY_CLINIC:
-    "/getallnoticationclinic/:tenant_id/:clinic_id",
+  GETALL_NOTIFY_CLINIC: "/getallnoticationclinic/:tenant_id/:clinic_id",
   GETALL_NOTIFY_PATIENT:
     "/getallnoticationpatient/:tenant_id/:clinic_id/:patient_id",
   GETALL_REMINDER_NOTIFY_DENTIST:
@@ -254,24 +255,26 @@ module.exports = {
   ADD_NOTIFICATION: "/addnotification",
   GETALL_NOTIFICATION_TENANT: "/getallnotifications/:tenant_id",
   GET_NOTIFICATION_TENANT: "/getnotification/:notification_id/:tenant_id",
-  GET_NOTIFICATION_TENANT_RECEIVER: "/getnotificationreceiver/:tenant_id/:clinic_id",
+  GET_NOTIFICATION_TENANT_RECEIVER:
+    "/getnotificationreceiver/:tenant_id/:clinic_id",
   UPDATE_NOTIFICATION_TENANT: "/updatenotification/:notification_id/:tenant_id",
-  UPDATE_NOTIFICATION_RECIPIENTS_STATUS_TENANT: "/updatenotificationrecipients/:notification_recipient_id",
+  UPDATE_NOTIFICATION_RECIPIENTS_STATUS_TENANT:
+    "/updatenotificationrecipients/:notification_recipient_id",
   DELETE_NOTIFICATION_TENANT: "/deletenotification/:notification_id/:tenant_id",
 
-  
   ADD_TOOTHDETAILS: "/addtoothdetails",
   GETALL_TOOTHDETAILS_TENANT: "/getalltoothdetails/:tenant_id",
-  GETALL_TOOTHDETAILS_TENANT_CLINIC_DENTIST_PATIENT: "/getalltoothdetails/:tenant_id/:clinic_id/:dentist_id/:patient_id",
-  GETALL_TOOTHDETAILS_TENANT_CLINIC_PATIENT: "/getalltoothdetails/:tenant_id/:clinic_id/:patient_id",
+  GETALL_TOOTHDETAILS_TENANT_CLINIC_DENTIST_PATIENT:
+    "/getalltoothdetails/:tenant_id/:clinic_id/:dentist_id/:patient_id",
+  GETALL_TOOTHDETAILS_TENANT_CLINIC_PATIENT:
+    "/getalltoothdetails/:tenant_id/:clinic_id/:patient_id",
   GET_TOOTHDETAILS_TENANT: "/gettoothdetails/:toothdetails_id/:tenant_id",
   UPDATE_TOOTHDETAILS_TENANT: "/updatetoothdetails/:toothdetails_id/:tenant_id",
   DELETE_TOOTHDETAILS_TENANT: "/deletetoothdetails/:toothdetails_id/:tenant_id",
-  
-
 
   //dashboard Routes
 
+  //used
   GET_APPOINTMENT_SUMMARY_PERIOD:
     "/getallappointments/periodsummary/:tenant_id/:clinic_id",
 
@@ -303,12 +306,14 @@ module.exports = {
   GET_AGE_GENDER_SUMMARY_CLINIC:
     "/getallpatients/agegendersummaryclinic/:tenant_id/:clinic_id",
 
+  //used
   GET_CLINIC_FINANACE_SUMMARY_CLINIC:
     "/getallclinics/financesummary/:tenant_id/:clinic_id",
 
   GET_CLINIC_FINANACE_SUMMARY_DENTIST:
     "/getallclinics/financesummary/:tenant_id/:clinic_id/:dentist_id",
 
+  //used
   GET_TOOTH_DETAILS_CLINIC: "/toothdetails/:tenant_id/:clinic_id",
   GET_TOOTH_DETAILS_DENTIST: "/toothdetails/:tenant_id/:clinic_id/:dentist_id",
 
