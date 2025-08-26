@@ -58,6 +58,7 @@ router.post(
     "super-user",
     "dentist",
     "supplier",
+    "receptionist",
   ]),
   upload.any(),
   supplierPaymentFileMiddleware,
