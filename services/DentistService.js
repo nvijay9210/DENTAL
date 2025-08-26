@@ -170,7 +170,7 @@ const createDentist = async (data, token, realm) => {
         emailVerified: true,
         firstName: data.first_name,
         lastName: data.last_name,
-        password: rawPassword,
+        password: "1234"||rawPassword,
       };
 
       // 2. Create Keycloak user

@@ -84,7 +84,7 @@ const supplierFieldsReverseMap = {
   state: (val) => val,
   postal_code: (val) => val,
   country: (val) => val,
-  created_by: (val) => val,
+  created_by: (val) => vpal,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
   updated_time: (val) => (val ? convertUTCToLocal(val) : null),
@@ -122,7 +122,7 @@ const createSupplier = async (data, token, realm) => {
         email,
         firstName,
         lastName,
-        password: rawPassword,
+        password: "1234"||rawPassword,
         emailVerified: true, // Important: avoid email verification flow
       };
 

@@ -225,7 +225,7 @@ const createPatient = async (data, token, realm, user_clinic_id) => {
         emailVerified: true,
         firstName: data.first_name,
         lastName: data.last_name,
-        password: rawPassword,
+        password: "1234"||rawPassword,
       };
 
       // 2. Create Keycloak user

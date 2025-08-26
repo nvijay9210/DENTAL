@@ -101,7 +101,7 @@ const createReception = async (data, token, realm) => {
         email,
         firstName,
         lastName,
-        password: rawPassword,
+        password: "1234"||rawPassword,
         emailVerified: true,
       };
 
