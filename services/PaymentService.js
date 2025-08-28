@@ -129,9 +129,29 @@ const getPaymentByTenantIdAndPaymentId = async (tenantId, paymentId) => {
     throw new CustomError(error, 500);
   }
 };
+
 const getPaymentByTenantAndAppointmentId = async (tenantId, appointment_id) => {
   try {
     const payment = await paymentModel.getPaymentByTenantAndAppointmentId(
+      tenantId, appointment_id
+    );
+    console.log(payment,paymentFieldsReverseMap)
+    let result=payment;
+    if(payment){
+      result = helper.convertDbToFrontend(
+        payment,
+        paymentFieldsReverseMap
+      );
+    }
+    
+    return result;
+  } catch (error) {
+    throw new CustomError(error, 500);
+  }
+};
+const getallPaymentSummaryByAppointment = async (tenantId, appointment_id) => {
+  try {
+    const payment = await paymentModel.getallPaymentSummaryByAppointment(
       tenantId, appointment_id
     );
     console.log(payment,paymentFieldsReverseMap)

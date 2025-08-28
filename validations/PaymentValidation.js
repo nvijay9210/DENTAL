@@ -12,7 +12,7 @@ const paymentColumnConfig = [
     columnname: "amount",
     type: "decimal",
     size: "12,2",
-    null: false,
+    null: true,
     default: 0.0,
   },
   {
@@ -26,17 +26,17 @@ const paymentColumnConfig = [
     columnname: "final_amount",
     type: "decimal",
     size: "12,2",
-    null: false,
+    null: true,
     default: 0.0,
   },
-  { columnname: "mode_of_payment", type: "varchar", size: 100, null: false },
-  { columnname: "payment_source", type: "varchar", size: 100, null: false },
+  { columnname: "mode_of_payment", type: "varchar", size: 100, null: true },
+  { columnname: "payment_source", type: "varchar", size: 100, null: true },
   { columnname: "payment_reference", type: "varchar", size: 255, null: true },
   {
     columnname: "payment_status",
     type: "varchar",
     size: 100,
-    null: false
+    null: true
   },
   {
     columnname: "payment_verified",

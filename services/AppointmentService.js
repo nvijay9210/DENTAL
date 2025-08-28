@@ -1,5 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const appointmentModel = require("../models/AppointmentModel");
+const paymentService = require("../services/PaymentService");
 const pool = require("../config/db");
 const dayjs = require("dayjs");
 const helper = require("../utils/Helpers");
@@ -105,19 +106,39 @@ const createAppointment = async (data) => {
     created_by: (val) => val,
   };
 
+  const conn=await pool.getConnection()
+
   try {
+    await conn.beginTransaction()
     const { columns, values } = mapFields(data, fieldMap);
     const appointmentId = await appointmentModel.createAppointment(
       "appointment",
       columns,
       values
     );
-    await invalidateCacheByPattern("appointment:*");
-    await invalidateCacheByPattern("appointmentsdetails:*");
-    await invalidateCacheByPattern("patientvisitdetails:*");
-    await invalidateCacheByPattern("appointmentsummary:*");
-    await invalidateCacheByPattern("financeSummary:*");
-    await invalidateCacheByPattern("patient:*");
+
+
+    const paymentData = {
+      tenant_id: data?.tenant_id,
+      clinic_id: data?.clinic_id,
+      dentist_id: data?.dentist_id,
+      patient_id: data?.patient_id,
+      appointment_id: data?.appointment_id,
+      amount: parseFloat(data?.cost),
+      discount_applied: parseFloat(data?.discount_applied),
+      final_amount: parseFloat(data?.final_amount),
+      total_amount: parseFloat(data?.total_amount),
+      payment_for: data?.payment_for,
+      mode_of_payment: data?.mode_of_payment,
+      payment_source: data?.payment_source,
+      payment_reference: data?.payment_reference,
+      payment_verified: data?.payment_verified,
+      receipt_number: data?.receipt_number,
+      insurance_number: data?.insurance_number,
+      payment_date: formatDateOnly(data?.appoi),
+      payment_status: "unpaid",
+      created_by: data?.created_by,
+    };
     
     if (appointmentId)
       await updatePatientCount(data.tenant_id, data.clinic_id, true);
@@ -134,13 +155,29 @@ const createAppointment = async (data) => {
       data.dentist_id,
       data.appointment_date
     );
+
+    await paymentService.createPayment(paymentData, conn);
+
+    await conn.commit()
+
+    await invalidateCacheByPattern("appointment:*");
+    await invalidateCacheByPattern("appointmentsdetails:*");
+    await invalidateCacheByPattern("patientvisitdetails:*");
+    await invalidateCacheByPattern("appointmentsummary:*");
+    await invalidateCacheByPattern("financeSummary:*");
+    await invalidateCacheByPattern("patient:*");
+
     return appointmentId;
   } catch (error) {
     console.error("Failed to create appointment:", error);
+    await conn.rollback()
     throw new CustomError(
       `Failed to create appointment: ${error.message}`,
       404
     );
+  }
+  finally{
+   await conn.release()
   }
 };
 

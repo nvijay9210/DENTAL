@@ -69,6 +69,7 @@ exports.getPaymentByTenantIdAndPaymentId = async (req, res, next) => {
     next(err);
   }
 };
+
 exports.getPaymentByTenantAndAppointmentId = async (req, res, next) => {
   const { appointment_id, tenant_id } = req.params;
 
@@ -84,6 +85,29 @@ exports.getPaymentByTenantAndAppointmentId = async (req, res, next) => {
 
     // Fetch payment details
     const payment = await paymentService.getPaymentByTenantAndAppointmentId(
+      tenant_id,
+      appointment_id
+    );
+    res.status(200).json(payment);
+  } catch (err) {
+    next(err);
+  }
+};
+exports.getallPaymentSummaryByAppointment = async (req, res, next) => {
+  const { appointment_id, tenant_id } = req.params;
+
+  try {
+    // Validate if payment exists
+    const appointment1=await checkIfExists(
+      "appointment",
+      "appointment_id",
+      appointment_id,
+      tenant_id
+    );
+    if(!appointment1) throw new CustomError('Appointment not found',404)
+
+    // Fetch payment details
+    const payment = await paymentService.getallPaymentSummaryByAppointment(
       tenant_id,
       appointment_id
     );

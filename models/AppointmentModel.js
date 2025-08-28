@@ -1136,7 +1136,8 @@ const updateRoomIdBeforeAppointment = async () => {
   }
 };
 
-const updateAppoinmentStatusCompleted = async (userTime) => {
+const updateAppoinmentStatusCompleted = async (tenant_id,appointment_id
+) => {
   const conn = await pool.getConnection();
   try {
     const query = `
@@ -1144,9 +1145,9 @@ const updateAppoinmentStatusCompleted = async (userTime) => {
       SET status = 'completed'
       WHERE status = 'confirmed'
         AND room_id != '00000000-0000-0000-0000-000000000000'
-        AND end_time < ?
+        AND tenant_id=? AND appointment_id=?
     `;
-    const [result] = await conn.query(query, [userTime]);
+    const [result] = await conn.query(query, tenant_id,appointment_id);
     console.log(
       `✅ Completed ${result.affectedRows} appointments before ${userTime}`
     );

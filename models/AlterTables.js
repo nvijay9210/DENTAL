@@ -370,6 +370,20 @@ async function createFileFields(conn) {
     "ENUM('SP','FP') DEFAULT 'SP'",
     "SinglePayment,FullPayment"
   )
+  await addColumnIfNotExists(
+    conn,
+    "payment",
+    "total_amount",
+    "decimal(12,2)",
+    "TotalAmount"
+  )
+  await addColumnIfNotExists(
+    conn,
+    "payment",
+    "payment_for",
+    "ENUM('booking','treatment','late')",
+    "payment for which tables"
+  )
 }
 
 

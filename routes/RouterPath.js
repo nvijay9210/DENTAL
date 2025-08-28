@@ -233,6 +233,7 @@ module.exports = {
 
   ADD_PAYMENT: "/addpayment",
   GETALL_PAYMENT_TENANT: "/getallpayments/:tenant_id",
+  GETALL_PAYEMENT_TENANT_APPOINTMENT: "/getallpaymentsummary/:tenant_id/:appointment_id",
   GET_PAYEMENT_TENANT_APPOINTMENT: "/getpayment/:tenant_id/:appointment_id",
   GET_PAYMENT: "/getpayment/:payment_id",
   UPDATE_PAYMENT_TENANT: "/updatepayment/:payment_id/:tenant_id",

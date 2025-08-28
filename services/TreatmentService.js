@@ -18,6 +18,7 @@ const {
   getDocumentsByField,
 } = require("../models/documentModel");
 const pool = require("../config/db");
+const { updateAppoinmentStatusCompleted } = require("../models/AppointmentModel");
 
 const treatmentFields = {
   tenant_id: (val) => val,
@@ -90,14 +91,16 @@ const createTreatment = async (data) => {
     amount: parseFloat(data?.cost),
     discount_applied: parseFloat(data?.discount_applied),
     final_amount: parseFloat(data?.final_amount),
+    total_amount: parseFloat(data?.total_amount),
+    payment_for: data?.payment_for,
     mode_of_payment: data?.mode_of_payment,
     payment_source: data?.payment_source,
     payment_reference: data?.payment_reference,
     payment_verified: data?.payment_verified,
     receipt_number: data?.receipt_number,
     insurance_number: data?.insurance_number,
-    payment_date: formatDateOnly(data?.payment_date),
-    payment_status: "paid",
+    payment_date: formatDateOnly(data?.treatment_date),
+    payment_status: "unpaid",
     created_by: data?.created_by,
   };
 
@@ -121,6 +124,7 @@ const createTreatment = async (data) => {
     });
 
     await PaymentService.createPayment(paymentData, conn);
+    // await updateAppoinmentStatusCompleted(data.tenant_id,data.appointment_id);
     await conn.commit();
     await invalidateCacheByPattern("treatment:*");
     await invalidateCacheByPattern("treatment_patient:*");

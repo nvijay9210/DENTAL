@@ -10,6 +10,7 @@ const {
   DELETE_PAYMENT_TENANT,
   GETALL_PAYMENT_REPORT_TENANT_CLINIC,
   GET_PAYEMENT_TENANT_APPOINTMENT,
+  GETALL_PAYEMENT_TENANT_APPOINTMENT,
 } = require("./RouterPath");
 const {
   authenticateTenantClinicGroup,
@@ -63,6 +64,12 @@ router.get(
   GET_PAYEMENT_TENANT_APPOINTMENT,
   authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
   paymentController.getPaymentByTenantAndAppointmentId
+);
+
+router.get(
+  GETALL_PAYEMENT_TENANT_APPOINTMENT,
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  paymentController.getallPaymentSummaryByAppointment
 );
 
 // Update Payment
