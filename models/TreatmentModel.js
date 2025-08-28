@@ -6,10 +6,10 @@ const record = require("../query/Records");
 const TABLE = "treatment";
 
 // Create Treatment
-const createTreatment = async (table,columns, values) => {
+const createTreatment = async (conn,table,columns, values) => {
   try {
     await helper.sameLengthChecker(columns, values);
-    const treatment = await record.createRecord(table, columns, values);
+    const treatment = await record.createRecord(table, columns, values,conn);
     return treatment.insertId;
   } catch (error) {
     console.error("Error creating treatment:", error);

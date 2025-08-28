@@ -73,6 +73,7 @@ router.get(
     "super-user",
     "dentist",
     "supplier",
+    "receptionist",
   ]),
   supplierPaymentController.getAllSupplierPaymentssByTenantId
 );
@@ -84,6 +85,7 @@ router.get(
     "super-user",
     "dentist",
     "supplier",
+    "receptionist",
   ]),
   supplierPaymentController.getAllSupplierPaymentssByTenantIdAndSupplierId
 );
@@ -96,6 +98,7 @@ router.get(
     "super-user",
     "dentist",
     "supplier",
+    "receptionist",
   ]),
   supplierPaymentController.getSupplierPaymentsByTenantIdAndSupplierPaymentsId
 );
@@ -106,6 +109,7 @@ router.get(
     "super-user",
     "dentist",
     "supplier",
+    "receptionist",
   ]),
   supplierPaymentController.getSupplierPaymentsByTenantAndPurchaseOrderId
 );
@@ -118,6 +122,7 @@ router.put(
     "super-user",
     "dentist",
     "supplier",
+    "receptionist",
   ]),
   upload.any(),
   supplierPaymentFileMiddleware,
@@ -130,6 +135,7 @@ router.put(
     "super-user",
     "dentist",
     "supplier",
+    "receptionist",
   ]),
   upload.any(),
   supplierPaymentFileMiddleware,
@@ -144,6 +150,7 @@ router.delete(
     "super-user",
     "dentist",
     "supplier",
+    "receptionist",
   ]),
   supplierPaymentController.deleteSupplierPaymentsByTenantIdAndSupplierPaymentsId
 );

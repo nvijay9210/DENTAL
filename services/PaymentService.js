@@ -59,7 +59,7 @@ const paymentFields = {
   
 
 // Create Payment
-const createPayment = async (data) => {
+const createPayment = async (data,conn) => {
   const fieldMap = {
     ...paymentFields,
     created_by: (val) => val,
@@ -67,6 +67,7 @@ const createPayment = async (data) => {
   try {
     const { columns, values } = mapFields(data, fieldMap);
     const paymentId = await paymentModel.createPayment(
+      conn,
       "payment",
       columns,
       values

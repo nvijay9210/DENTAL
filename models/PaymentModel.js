@@ -5,9 +5,9 @@ const record = require("../query/Records");
 const TABLE = "payment";
 
 // Create Payment
-const createPayment = async (table,columns, values) => {
+const createPayment = async (conn,table,columns, values) => {
   try {
-    const payment = await record.createRecord(table, columns, values);
+    const payment = await record.createRecord(table, columns, values,conn);
    
     return payment;
   } catch (error) {

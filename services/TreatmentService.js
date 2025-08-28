@@ -1,5 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const treatmentModel = require("../models/TreatmentModel");
+const PaymentService = require("../services/PaymentService");
 const {
   getOrSetCache,
   invalidateCacheByPattern,
@@ -8,8 +9,15 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
-const { saveDocuments, updateDocumentsDiffBased } = require("../utils/UploadFiles");
-const { deleteDocumentsByTableAndId, getDocumentsByField } = require("../models/documentModel");
+const {
+  saveDocuments,
+  updateDocumentsDiffBased,
+} = require("../utils/UploadFiles");
+const {
+  deleteDocumentsByTableAndId,
+  getDocumentsByField,
+} = require("../models/documentModel");
+const pool = require("../config/db");
 
 const treatmentFields = {
   tenant_id: (val) => val,
@@ -70,9 +78,32 @@ const createTreatment = async (data) => {
     created_by: (val) => val,
   };
 
+  const conn = pool.getConnection();
+
+  const paymentData={
+    tenant_id:data?.tenant_id,
+    clinic_id:data?.clinic_id,
+    dentist_id:data?.dentist_id,
+    patient_id:data?.patient_id,
+    appointment_id:data?.appointment_id,
+    amount:parseFloat(data?.cost),
+    discount_applied:parseFloat(data?.discount_applied),
+    final_amount:parseFloat(data?.final_amount),
+    mode_of_payment:data?.mode_of_payment,
+    source_app:data?.source_app,
+    payment_reference:data?.payment_reference,
+    payment_verified:data?.payment_verified,
+    receipt_number:data?.receipt_number,
+    insurance_number:data?.insurance_number,
+    payment_date:formatDateOnly(data?.payment_date),
+    created_by:formatDateOnly(data?.created_by)
+  }
+
   try {
+    await conn.beginTransaction();
     const { columns, values } = mapFields(data, create);
     const treatmentId = await treatmentModel.createTreatment(
+      conn,
       "treatment",
       columns,
       values
@@ -87,13 +118,18 @@ const createTreatment = async (data) => {
       created_by: data.created_by,
     });
 
+    await PaymentService.createPayment(paymentData, conn);
+    await conn.commit();
     await invalidateCacheByPattern("treatment:*");
     await invalidateCacheByPattern("treatment_patient:*");
     await invalidateCacheByPattern("financeSummary:*");
     return treatmentId;
   } catch (error) {
     console.error("Failed to create treatment:", error);
+    await conn.rollback();
     throw new CustomError(err, 500);
+  } finally {
+    await conn.release();
   }
 };
 
@@ -118,21 +154,23 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
 
     const convertedRows = await Promise.all(
       treatments.data.map(async (treatment) => {
-        const formatted =  helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
-    
+        const formatted = helper.convertDbToFrontend(
+          treatment,
+          treatmentFieldsReverseMap
+        );
+
         const docs = await getDocumentsByField(
           "treatment",
           treatment.treatment_id,
           "treatment_images"
         );
-    
+
         // Extract only file_url
         const fileInfos = docs.map((doc) => ({
           document_id: doc.document_id,
           file_url: doc.file_url,
         }));
-        
-    
+
         return {
           ...formatted,
           treatment_images: fileInfos,
@@ -194,21 +232,23 @@ const getAllTreatmentsByTenantAndClinicId = async (
 
     const convertedRows = await Promise.all(
       treatments.data.map(async (treatment) => {
-        const formatted =  helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
-    
+        const formatted = helper.convertDbToFrontend(
+          treatment,
+          treatmentFieldsReverseMap
+        );
+
         const docs = await getDocumentsByField(
           "treatment",
           treatment.treatment_id,
           "treatment_images"
         );
-    
+
         // Extract only file_url
         const fileInfos = docs.map((doc) => ({
           document_id: doc.document_id,
           file_url: doc.file_url,
         }));
-        
-    
+
         return {
           ...formatted,
           treatment_images: fileInfos,
@@ -257,21 +297,23 @@ const getAllTreatmentsByTenantAndClinicIdAndDentist = async (
 
     const convertedRows = await Promise.all(
       treatments.data.map(async (treatment) => {
-        const formatted =  helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
-    
+        const formatted = helper.convertDbToFrontend(
+          treatment,
+          treatmentFieldsReverseMap
+        );
+
         const docs = await getDocumentsByField(
           "treatment",
           treatment.treatment_id,
           "treatment_images"
         );
-    
+
         // Extract only file_url
         const fileInfos = docs.map((doc) => ({
           document_id: doc.document_id,
           file_url: doc.file_url,
         }));
-        
-    
+
         return {
           ...formatted,
           treatment_images: fileInfos,
@@ -311,21 +353,23 @@ const getAllTreatmentsByTenantAndDentistId = async (
 
     const convertedRows = await Promise.all(
       treatments.data.map(async (treatment) => {
-        const formatted =  helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
-    
+        const formatted = helper.convertDbToFrontend(
+          treatment,
+          treatmentFieldsReverseMap
+        );
+
         const docs = await getDocumentsByField(
           "treatment",
           treatment.treatment_id,
           "treatment_images"
         );
-    
+
         // Extract only file_url
         const fileInfos = docs.map((doc) => ({
           document_id: doc.document_id,
           file_url: doc.file_url,
         }));
-        
-    
+
         return {
           ...formatted,
           treatment_images: fileInfos,
@@ -367,21 +411,23 @@ const getAllTreatmentsByTenantAndPatientId = async (
 
     const convertedRows = await Promise.all(
       treatments.data.map(async (treatment) => {
-        const formatted =  helper.convertDbToFrontend(treatment, treatmentFieldsReverseMap)
-    
+        const formatted = helper.convertDbToFrontend(
+          treatment,
+          treatmentFieldsReverseMap
+        );
+
         const docs = await getDocumentsByField(
           "treatment",
           treatment.treatment_id,
           "treatment_images"
         );
-    
+
         // Extract only file_url
         const fileInfos = docs.map((doc) => ({
           document_id: doc.document_id,
           file_url: doc.file_url,
         }));
-        
-    
+
         return {
           ...formatted,
           treatment_images: fileInfos,
@@ -439,9 +485,8 @@ const getTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {
   }
 };
 
-
 // Update Treatment
-const updateTreatment = async (treatmentId, data, tenant_id,req) => {
+const updateTreatment = async (treatmentId, data, tenant_id, req) => {
   const update = {
     ...treatmentFields,
     updated_by: (val) => val,
@@ -456,17 +501,18 @@ const updateTreatment = async (treatmentId, data, tenant_id,req) => {
       tenant_id
     );
 
-   // ✅ Fix: Extract from data or req.body
-   const treatment_images = data.treatment_images || req?.body?.treatment_images || [];
+    // ✅ Fix: Extract from data or req.body
+    const treatment_images =
+      data.treatment_images || req?.body?.treatment_images || [];
 
-   await updateDocumentsDiffBased({
-     table_name: "treatment",
-     table_id: treatmentId,
-     field_name: "treatment_images",
-     newFiles: treatment_images,
-     deletedFileIds:data.deletedFileIds,
-     updated_by: data.updated_by,
-   });
+    await updateDocumentsDiffBased({
+      table_name: "treatment",
+      table_id: treatmentId,
+      field_name: "treatment_images",
+      newFiles: treatment_images,
+      deletedFileIds: data.deletedFileIds,
+      updated_by: data.updated_by,
+    });
 
     await invalidateCacheByPattern("treatment:*");
     await invalidateCacheByPattern("treatment_patient:*");
@@ -484,7 +530,7 @@ const deleteTreatmentByTenantIdAndTreatmentId = async (
   treatmentId
 ) => {
   try {
-    await deleteDocumentsByTableAndId('treatment',treatmentId)
+    await deleteDocumentsByTableAndId("treatment", treatmentId);
     const affectedRows =
       await treatmentModel.deleteTreatmentByTenantAndTreatmentId(
         tenantId,

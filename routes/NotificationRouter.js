@@ -46,7 +46,7 @@ router.post(
 // Get All Notifications by Tenant ID with Pagination
 router.get(
   GETALL_NOTIFICATION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier","receptionist","patient"]),
   notificationController.getAllNotificationsByTenantId
 );
 router.get(
@@ -58,7 +58,7 @@ router.get(
 // Get Single Notification by Tenant ID & Notification ID
 router.get(
   GET_NOTIFICATION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "super-user", "dentist","supplier","receptionist","patient"]),
   notificationController.getNotificationByTenantIdAndNotificationId
 );
 
