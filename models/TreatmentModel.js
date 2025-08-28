@@ -183,12 +183,12 @@ const updateTreatment = async (treatment_id, columns, values, tenant_id) => {
 };
 
 // Delete treatment
-const deleteTreatmentByTenantAndTreatmentId = async (tenant_id, treatment_id) => {
+const deleteTreatmentByTenantAndTreatmentId = async (conn,tenant_id, treatment_id) => {
   try {
     const conditionColumn = ["tenant_id", "treatment_id"];
     const conditionValue = [tenant_id, treatment_id];
 
-    const [result] = await record.deleteRecord(TABLE, conditionColumn, conditionValue);
+    const [result] = await record.deleteRecord(TABLE, conditionColumn, conditionValue,conn);
  
     return result.affectedRows;
   } catch (error) {

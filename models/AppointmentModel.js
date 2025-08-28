@@ -439,6 +439,7 @@ const checkAppointmentExistsByStartTimeAndEndTimeAndDate = async (
             AND patient_id = ?
             AND dentist_id = ?
             AND tenant_id = ?
+            AND status not in('pending','rescheduled')
             AND NOT (
               ? >= end_time OR ? <= start_time
             )

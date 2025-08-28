@@ -31,7 +31,7 @@ const appoinmentColumnConfig = [
     enum_values: ['video','audio'],
     null: false,
   },
-  { columnname: "consultation_fee", type: "decimal", size: "10,2", null: true },
+  { columnname: "consultation_fee", type: "decimal", size: "12,2", null: true },
   {
     columnname: "discount_applied",
     type: "decimal",

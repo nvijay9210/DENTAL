@@ -104,6 +104,9 @@ const createAppointmentReschedules = async (details) => {
       (appointment.rescheduled_from = appointment.appointment_id);
     appointment.status = "pending";
     appointment.room_id = "00000000-0000-0000-0000-000000000000";
+    appointment.dentist_id=details.dentist_id
+
+    console.log('appointments:',appointment)
 
     await createAppointmentValidation(appointment);
 
@@ -173,9 +176,9 @@ const getAllAppointmentReschedulessByTenantId = async (
     );
 
     return { data: convertedRows, total: appointmentReschedules.total };
-  } catch (err) {
-    console.error("Database error while fetching appointmentReschedules:", err);
-    throw new CustomError(err, 500);
+  } catch (error) {
+    console.error("Database error while fetching appointmentReschedules:", error);
+    throw new CustomError(error, 500);
   }
 };
 const getAllAppointmentReschedulessByTenantIdAndClinicId = async (
@@ -213,9 +216,9 @@ const getAllAppointmentReschedulessByTenantIdAndClinicId = async (
     );
 
     return { data: convertedRows, total: appointmentReschedules.total };
-  } catch (err) {
-    console.error("Database error while fetching appointmentReschedules:", err);
-    throw new CustomError(err, 500);
+  } catch (error) {
+    console.error("Database error while fetching appointmentReschedules:", error);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -256,9 +259,9 @@ const getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId = async (
     );
 
     return { data: convertedRows, total: appointmentReschedules.total };
-  } catch (err) {
-    console.error("Database error while fetching appointmentReschedules:", err);
-    throw new CustomError(err, 500);
+  } catch (error) {
+    console.error("Database error while fetching appointmentReschedules:", error);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -318,7 +321,7 @@ const updateAppointmentReschedules = async (
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 

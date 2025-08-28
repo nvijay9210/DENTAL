@@ -8,6 +8,7 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
+const { createPaymentValidation } = require("../validations/PaymentValidation");
 
 // Field mapping for payments (similar to treatment)
 
@@ -65,6 +66,7 @@ const createPayment = async (data,conn) => {
     created_by: (val) => val,
   };
   try {
+    await createPaymentValidation(data)
     const { columns, values } = mapFields(data, fieldMap);
     const paymentId = await paymentModel.createPayment(
       conn,
@@ -77,7 +79,7 @@ const createPayment = async (data,conn) => {
     return paymentId;
   } catch (error) {
     console.error("Failed to create payment:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -104,9 +106,9 @@ const getAllPaymentsByTenantId = async (tenantId, page = 1, limit = 10) => {
     );
 
     return {data:convertedRows,total:payments.total};;
-  } catch (err) {
-    console.error("Database error while fetching payments:", err);
-    throw new CustomError(err, 500);
+  } catch (error) {
+    console.error("Database error while fetching payments:", error);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -124,7 +126,7 @@ const getPaymentByTenantIdAndPaymentId = async (tenantId, paymentId) => {
 
     return {data:convertedRows,total:payment.total};;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 const getPaymentByTenantAndAppointmentId = async (tenantId, appointment_id) => {
@@ -143,7 +145,7 @@ const getPaymentByTenantAndAppointmentId = async (tenantId, appointment_id) => {
     
     return result;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -171,7 +173,7 @@ const updatePayment = async (paymentId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -189,7 +191,7 @@ const deletePaymentByTenantIdAndPaymentId = async (tenantId, paymentId) => {
     await invalidateCacheByPattern("payment:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 

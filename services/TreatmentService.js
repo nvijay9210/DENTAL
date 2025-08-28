@@ -50,7 +50,7 @@ const treatmentFieldsReverseMap = {
   patient_id: (val) => val,
   dentist_id: (val) => val,
   clinic_id: (val) => val,
-  diagnosis: helper.safeJsonParse,
+  diagnosis: (val) => val,
   treatment_procedure: (val) => val,
   treatment_type: (val) => val,
   treatment_status: (val) => val,
@@ -77,30 +77,32 @@ const createTreatment = async (data) => {
     ...treatmentFields,
     created_by: (val) => val,
   };
+  console.log(data);
 
-  const conn = pool.getConnection();
+  const conn = await pool.getConnection();
 
-  const paymentData={
-    tenant_id:data?.tenant_id,
-    clinic_id:data?.clinic_id,
-    dentist_id:data?.dentist_id,
-    patient_id:data?.patient_id,
-    appointment_id:data?.appointment_id,
-    amount:parseFloat(data?.cost),
-    discount_applied:parseFloat(data?.discount_applied),
-    final_amount:parseFloat(data?.final_amount),
-    mode_of_payment:data?.mode_of_payment,
-    source_app:data?.source_app,
-    payment_reference:data?.payment_reference,
-    payment_verified:data?.payment_verified,
-    receipt_number:data?.receipt_number,
-    insurance_number:data?.insurance_number,
-    payment_date:formatDateOnly(data?.payment_date),
-    created_by:formatDateOnly(data?.created_by)
-  }
+  const paymentData = {
+    tenant_id: data?.tenant_id,
+    clinic_id: data?.clinic_id,
+    dentist_id: data?.dentist_id,
+    patient_id: data?.patient_id,
+    appointment_id: data?.appointment_id,
+    amount: parseFloat(data?.cost),
+    discount_applied: parseFloat(data?.discount_applied),
+    final_amount: parseFloat(data?.final_amount),
+    mode_of_payment: data?.mode_of_payment,
+    payment_source: data?.payment_source,
+    payment_reference: data?.payment_reference,
+    payment_verified: data?.payment_verified,
+    receipt_number: data?.receipt_number,
+    insurance_number: data?.insurance_number,
+    payment_date: formatDateOnly(data?.payment_date),
+    payment_status: "paid",
+    created_by: data?.created_by,
+  };
 
   try {
-    await conn.beginTransaction();
+    await await conn.beginTransaction();
     const { columns, values } = mapFields(data, create);
     const treatmentId = await treatmentModel.createTreatment(
       conn,
@@ -127,7 +129,7 @@ const createTreatment = async (data) => {
   } catch (error) {
     console.error("Failed to create treatment:", error);
     await conn.rollback();
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   } finally {
     await conn.release();
   }
@@ -179,9 +181,9 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
     );
 
     return { data: convertedRows, total: treatments.total };
-  } catch (err) {
-    console.error("Database error while fetching treatments:", err);
-    throw new CustomError(err, 500);
+  } catch (error) {
+    console.error("Database error while fetching treatments:", error);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -257,9 +259,9 @@ const getAllTreatmentsByTenantAndClinicId = async (
     );
 
     return { data: convertedRows, total: treatments.total };
-  } catch (err) {
-    console.error("Database error while fetching treatments:", err);
-    throw new CustomError(err, 500);
+  } catch (error) {
+    console.error("Database error while fetching treatments:", error);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -321,9 +323,9 @@ const getAllTreatmentsByTenantAndClinicIdAndDentist = async (
       })
     );
     return { data: convertedRows, total: treatments.total };
-  } catch (err) {
-    console.error("Database error while fetching treatments:", err);
-    throw new CustomError(err, 500);
+  } catch (error) {
+    console.error("Database error while fetching treatments:", error);
+    throw new CustomError(error, 500);
   }
 };
 const getAllTreatmentsByTenantAndDentistId = async (
@@ -378,9 +380,9 @@ const getAllTreatmentsByTenantAndDentistId = async (
     );
 
     return { data: convertedRows, total: treatments.total };
-  } catch (err) {
-    console.error("Database error while fetching treatments:", err);
-    throw new CustomError(err, 500);
+  } catch (error) {
+    console.error("Database error while fetching treatments:", error);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -436,9 +438,9 @@ const getAllTreatmentsByTenantAndPatientId = async (
     );
 
     return { data: convertedRows, total: treatments.total };
-  } catch (err) {
-    console.error("Database error while fetching treatments:", err);
-    throw new CustomError(err, 500);
+  } catch (error) {
+    console.error("Database error while fetching treatments:", error);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -479,9 +481,9 @@ const getTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {
       ...formatted,
       treatment_images: fileInfos,
     };
-  } catch (err) {
-    console.error("Database error while fetching treatment:", err);
-    throw new CustomError(err, 500);
+  } catch (error) {
+    console.error("Database error while fetching treatment:", error);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -492,16 +494,44 @@ const updateTreatment = async (treatmentId, data, tenant_id, req) => {
     updated_by: (val) => val,
   };
 
+  const conn = await pool.getConnection();
+
+  // Prepare payment data
+  const paymentData = {
+    tenant_id: data?.tenant_id,
+    clinic_id: data?.clinic_id,
+    dentist_id: data?.dentist_id,
+    patient_id: data?.patient_id,
+    appointment_id: data?.appointment_id,
+    amount: parseFloat(data?.cost),
+    discount_applied: parseFloat(data?.discount_applied),
+    final_amount: parseFloat(data?.final_amount),
+    mode_of_payment: data?.mode_of_payment,
+    payment_source: data?.payment_source,
+    payment_reference: data?.payment_reference,
+    payment_verified: data?.payment_verified,
+    receipt_number: data?.receipt_number,
+    insurance_number: data?.insurance_number,
+    payment_date: formatDateOnly(data?.payment_date),
+    payment_status: data?.payment_status || "paid",
+    created_by: data?.created_by,
+    updated_by: data?.updated_by,
+  };
+
   try {
+    await conn.beginTransaction();
+
+    // Update treatment
     const { columns, values } = mapFields(data, update);
     const affectedRows = await treatmentModel.updateTreatment(
       treatmentId,
       columns,
       values,
-      tenant_id
+      tenant_id,
+      conn
     );
 
-    // ✅ Fix: Extract from data or req.body
+    // ✅ Handle images
     const treatment_images =
       data.treatment_images || req?.body?.treatment_images || [];
 
@@ -514,13 +544,29 @@ const updateTreatment = async (treatmentId, data, tenant_id, req) => {
       updated_by: data.updated_by,
     });
 
+    // ✅ Handle payments (upsert style)
+    if (data?.payment_id) {
+      // If payment_id exists, update existing payment
+      await PaymentService.updatePayment(data.payment_id, paymentData, conn);
+    } else {
+      // Else create a new payment entry
+      await PaymentService.createPayment(paymentData, conn);
+    }
+
+    await conn.commit();
+
+    // Invalidate cache
     await invalidateCacheByPattern("treatment:*");
     await invalidateCacheByPattern("treatment_patient:*");
     await invalidateCacheByPattern("financeSummary:*");
+
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError(err, 500);
+    await conn.rollback();
+    throw new CustomError(error, 500);
+  } finally {
+    await conn.release();
   }
 };
 
@@ -529,23 +575,29 @@ const deleteTreatmentByTenantIdAndTreatmentId = async (
   tenantId,
   treatmentId
 ) => {
+  const conn = await pool.getConnection();
   try {
-    await deleteDocumentsByTableAndId("treatment", treatmentId);
+    await conn.beginTransaction();
+    await deleteDocumentsByTableAndId(conn,"treatment", treatmentId);
     const affectedRows =
       await treatmentModel.deleteTreatmentByTenantAndTreatmentId(
+        conn,
         tenantId,
         treatmentId
       );
     // if (affectedRows === 0) {
-    //   throw new CustomError(err, 500);
+    //   throw new CustomError(error, 500);
     // }
-
+      await conn.commit()
     await invalidateCacheByPattern("treatment:*");
     await invalidateCacheByPattern("treatment_patient:*");
     await invalidateCacheByPattern("financeSummary:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(err, 500);
+    await conn.rollback();
+    throw new CustomError(error, 500);
+  } finally {
+    await conn.release();
   }
 };
 
@@ -573,9 +625,9 @@ const getTodayFollowUps = async (tenant_id, clinic_id, role, user_id = 0) => {
       return result1;
     });
     return reminders;
-  } catch (err) {
-    console.error("Database error while fetching followup:", err);
-    throw new CustomError(err, 500);
+  } catch (error) {
+    console.error("Database error while fetching followup:", error);
+    throw new CustomError(error, 500);
   }
 };
 

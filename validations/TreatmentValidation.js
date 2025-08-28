@@ -26,7 +26,7 @@ const treatmentColumnConfig = [
     null: false,
   },
   { columnname: "treatment_date", type: "date", null: false },
-  { columnname: "cost", type: "decimal", size: "10,2", null: false },
+  { columnname: "cost", type: "decimal", size: "12,2", null: false },
   { columnname: "duration", type: "time", size: 50, null: false },
   { columnname: "teeth_involved", type: "varchar", size: 255, null: false },
   { columnname: "complications", type: "text", null: true },
@@ -46,7 +46,6 @@ const treatmentColumnConfig = [
   },
   { columnname: "anesthesia_type", type: "varchar", size: 100, null: true },
   { columnname: "technician_assisted", type: "varchar", size: 255, null: true },
-  { columnname: "treatment_images", type: "text", null: true },
   { columnname: "notes", type: "text", null: true },
 ];
 
