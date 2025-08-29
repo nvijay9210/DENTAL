@@ -145,10 +145,7 @@ const createAppointment = async (data) => {
       total_amount: parseFloat(data?.min_booking_fee + data?.consultation_fee),
       payment_for: data?.payment_for,
       mode_of_payment: data?.mode_of_payment,
-      payment_source:
-        data?.payment_source?.toLowerCase() === "cash"
-          ? "offline"
-          : "online" || "offline",
+      payment_source:data?.payment_source,
       payment_reference: data?.payment_reference,
       payment_verified: data?.payment_verified,
       receipt_number: data?.receipt_number,
