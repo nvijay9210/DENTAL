@@ -24,7 +24,10 @@ const {
   createAppointmentValidation,
 } = require("../validations/AppointmentValidation");
 const { buildCacheKey } = require("../utils/RedisCache");
-const { createPayment } = require("./PaymentService");
+const {
+  createPayment,
+  getPaymentByTenantAndAppointmentId,
+} = require("./PaymentService");
 
 // Field mapping for appointmentReschedules (similar to treatment)
 
@@ -80,22 +83,32 @@ const createAppointmentReschedules = async (details) => {
   try {
     await conn.beginTransaction();
 
-    // 1. Get the original appointment using the transaction connection
-    let appointment = await appointmentService.getAppointmentByTenantIdAndAppointmentId(
+    //console.log("[Reschedule] Transaction started");
+
+    // 1. Get original appointment
+    const appointment = await appointmentService.getAppointmentByTenantIdAndAppointmentId(
       details.tenant_id,
       details.original_appointment_id,
-      conn // pass connection
+      conn
     );
 
-    // 2. Cancel original appointment and mark for reschedule
+    if (!appointment) {
+      throw new CustomError("Original appointment not found", 404);
+    }
+
+    //console.log(`[Reschedule] Fetched original appointment: ID=${appointment.appointment_id}, Status=${appointment.status}`);
+
+    // 2. Cancel original appointment
     await updateAppoinmentStatusCancelledAndReschedule(
       details.original_appointment_id,
       details.tenant_id,
       details.clinic_id,
       details.rescheduled_by,
       details.reason,
-      conn // pass connection
+      conn
     );
+
+    //console.log(`[Reschedule] Original appointment cancelled: ID=${details.original_appointment_id}`);
 
     // 3. Validate new date/time
     await compareDateTime(
@@ -105,11 +118,10 @@ const createAppointmentReschedules = async (details) => {
       details.new_start_time
     );
 
-    // 4. Prepare new appointment data
-    details.previous_date = appointment.appointment_date;
-    details.previous_time = appointment.start_time;
+    //console.log("[Reschedule] New date/time validation passed");
 
-    appointment = {
+    // 4. Prepare new appointment data
+    const newAppointment = {
       ...appointment,
       appointment_date: details.new_date,
       start_time: details.new_start_time,
@@ -120,87 +132,133 @@ const createAppointmentReschedules = async (details) => {
       dentist_id: details.dentist_id,
     };
 
+    //console.log(`[Reschedule] Prepared new appointment: Date=${newAppointment.appointment_date}, Time=${newAppointment.start_time}`);
+
     // 5. Validate appointment fields
-    await createAppointmentValidation(appointment);
+    await createAppointmentValidation(newAppointment);
+    //console.log("[Reschedule] New appointment validation passed");
 
-    // 6. Prepare payment data for new appointment
-    const paymentData = {
-      tenant_id: appointment?.tenant_id,
-      clinic_id: appointment?.clinic_id,
-      dentist_id: appointment?.dentist_id,
-      patient_id: appointment?.patient_id,
-      appointment_id: appointment?.appointment_id,
-      discount_applied: parseFloat(appointment?.discount_applied || 0),
-      total_amount: parseFloat(
-        (appointment?.min_booking_fee || 0) +
-        (appointment?.consultation_fee || 0) +
-        (details.charge_amount || 0)
-      ),
-      final_amount: parseFloat(
-        (appointment?.min_booking_fee || 0) +
-        (appointment?.consultation_fee || 0) +
-        (details.charge_amount || 0)
-      ),
-      payment_for: appointment?.payment_for,
-      mode_of_payment: appointment?.mode_of_payment,
-      payment_source: appointment?.payment_source || "offline",
-      payment_reference: appointment?.payment_reference,
-      payment_verified: appointment?.payment_verified,
-      receipt_number: appointment?.receipt_number,
-      insurance_number: appointment?.insurance_number,
-      payment_date: formatDateOnly(appointment?.appointment_date),
-      payment_status: appointment?.payment_status,
-      created_by: appointment?.created_by,
-    };
-
-    appointment = { ...appointment, ...paymentData };
-
-    // 7. Create new appointment (using the same connection)
-    const newAppointmentId = await appointmentService.createAppointment(
-      appointment,
-      conn // pass connection
+    // 6. Fetch original payment If not details gets choose this
+    const payment = await getPaymentByTenantAndAppointmentId(
+      details.tenant_id,
+      details.original_appointment_id
     );
-    details.new_appointment_id = newAppointmentId;
 
-    // 8. Create appointment reschedule record
+    if (!payment) {
+      console.warn(`[Reschedule] No payment found for appointment ID=${details.original_appointment_id}. Proceeding without payment copy.`);
+    } else {
+      //console.log(`[Reschedule] Fetched original payment: ID=${payment.payment_id}, Status=${payment.payment_status}`);
+    }
+
+    // 7. Calculate total amount
+    const minBookingFee = parseFloat(appointment.min_booking_fee || 0);
+    const consultationFee = parseFloat(appointment.consultation_fee || 0);
+    const chargeAmount = parseFloat(details.charge_amount || 0);
+
+    const totalAmount = minBookingFee + consultationFee + chargeAmount;
+
+    //console.log(`[Reschedule] Calculated total amount: ₹${totalAmount} (Booking: ₹${minBookingFee}, Consultation: ₹${consultationFee}, Charge: ₹${chargeAmount})`);
+
+    // 8. Prepare payment data for new appointment
+    const paymentData = payment
+      ? {
+          tenant_id: payment.tenant_id,
+          clinic_id: payment.clinic_id,
+          dentist_id: payment.dentist_id,
+          patient_id: payment.patient_id,
+          discount_applied: parseFloat(payment.discount_applied || 0),
+          total_amount: totalAmount,
+          final_amount: totalAmount,
+          amount: totalAmount,
+          payment_for: payment.payment_for,
+          mode_of_payment: payment.mode_of_payment,
+          payment_source: payment.payment_source || "offline",
+          payment_reference: payment.payment_reference,
+          payment_verified: payment.payment_verified,
+          receipt_number: payment.receipt_number,
+          insurance_number: payment.insurance_number,
+          payment_date: formatDateOnly(new Date()),
+          payment_status: payment.payment_status,
+          created_by: payment.created_by,
+        }
+      : {
+          total_amount: totalAmount,
+          final_amount: totalAmount,
+          amount: totalAmount,
+          payment_for: "booking",
+          payment_status: "paid",
+          payment_source: "offline",
+          created_by: details.created_by,
+        };
+
+    //console.log(`[Reschedule] Payment data prepared: Status=${paymentData.payment_status}, Total=₹${paymentData.total_amount}`);
+
+    // 9. Merge payment into new appointment
+    const finalAppointment = { ...newAppointment, ...paymentData };
+
+    // 10. Create new appointment
+    const newAppointmentId = await appointmentService.createAppointment(
+      finalAppointment,
+      conn
+    );
+
+    //console.log(`[Reschedule] New appointment created: ID=${newAppointmentId}`);
+
+    // 11. Create reschedule record
+    details.new_appointment_id = newAppointmentId;
     const { columns, values } = mapFields(details, fieldMap);
-    const appointmentRescheduleId =
+
+    const rescheduleRecordId =
       await appointmentRescheduleModel.createAppointmentReschedules(
         "appointment_reschedules",
         columns,
         values,
-        conn // pass connection
+        conn
       );
 
-    // 9. Update appointment stats
+    //console.log(`[Reschedule] Reschedule record created: ID=${rescheduleRecordId}`);
+
+    // 12. Update stats
     await updateAppointmentStats(
-      appointment.tenant_id,
-      appointment.clinic_id,
-      appointment.dentist_id,
-      appointment.appointment_date,
-      conn // pass connection
+      finalAppointment.tenant_id,
+      finalAppointment.clinic_id,
+      finalAppointment.dentist_id,
+      finalAppointment.appointment_date,
+      conn
     );
 
+    //console.log("[Reschedule] Appointment stats updated");
 
-    // 11. Commit transaction
+    // 13. Commit transaction
     await conn.commit();
+    //console.log(`[Reschedule] ✅ Transaction committed successfully. New Appointment ID: ${newAppointmentId}, Reschedule Record ID: ${rescheduleRecordId}`);
 
-    // 12. Invalidate cache (non-transactional, outside rollback scope)
+    // 14. Invalidate cache (non-transactional)
     await invalidateCacheByPattern("appointmentreschedule:*");
+    //console.log("[Reschedule] Cache invalidated for pattern: appointmentreschedule:*");
 
-    return appointmentRescheduleId;
+    return rescheduleRecordId;
   } catch (error) {
     await conn.rollback();
-    console.error("Failed to create appointmentReschedule:", error);
+    console.error("[Reschedule] ❌ Transaction rolled back due to error:", {
+      message: error.message,
+      stack: error.stack,
+      details: {
+        tenant_id: details.tenant_id,
+        original_appointment_id: details.original_appointment_id,
+        new_date: details.new_date,
+      },
+    });
+
     throw new CustomError(
-      `Failed to create appointmentReschedule: ${error.message}`,
-      404
+      `Failed to reschedule appointment: ${error.message}`,
+      error.statusCode || 500
     );
   } finally {
-    await conn.release();
+    if (conn) await conn.release();
+    //console.log("[Reschedule] Database connection released");
   }
 };
-
 
 // Get All AppointmentRescheduless by Tenant ID with Caching
 const getAllAppointmentReschedulessByTenantId = async (

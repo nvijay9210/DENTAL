@@ -1164,39 +1164,70 @@ async function updateAppointmentStats(
   tenant_id,
   clinic_id,
   dentist_id,
-  appointment_date
+  appointment_date,
+  connection = null // Optional: pass connection (e.g., during transaction)
 ) {
-  const [results] = await pool.query(
-    `SELECT
-       SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) AS confirmed,
-       SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed,
-       SUM(CASE WHEN status IN ('cancelled', 'clinic_cancelled', 'noshow') THEN 1 ELSE 0 END) AS cancelled
-     FROM appointment
-     WHERE tenant_id = ? AND clinic_id=? AND dentist_id=? AND appointment_date = ?`,
-    [tenant_id, clinic_id, dentist_id, appointment_date]
-  );
+  try {
+    const conn = connection || pool;
 
-  const row = results[0];
+    // 1. Query appointment counts
+    const [results] = await conn.query(
+      `SELECT
+         COALESCE(SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END), 0) AS confirmed,
+         COALESCE(SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END), 0) AS completed,
+         COALESCE(SUM(CASE WHEN status IN ('cancelled', 'clinic_cancelled', 'noshow') THEN 1 ELSE 0 END), 0) AS cancelled
+       FROM appointment
+       WHERE tenant_id = ? 
+         AND clinic_id = ?
+         AND dentist_id = ?
+         AND appointment_date = ?`,
+      [tenant_id, clinic_id, dentist_id, appointment_date]
+    );
 
+    const row = results[0];
 
-  // Update stats table
-  await pool.query(
-    `INSERT INTO appointment_stats (tenant_id,clinic_id,dentist_id, stat_date, confirmed, completed, cancelled)
-     VALUES (?, ?, ?, ?, ?, ?,?)
-     ON DUPLICATE KEY UPDATE
-       confirmed = VALUES(confirmed),
-       completed = VALUES(completed),
-       cancelled = VALUES(cancelled)`,
-    [
+    if (!row) {
+      console.warn(
+        `[Stats] No appointments found for stats update: tenant=${tenant_id}, clinic=${clinic_id}, dentist=${dentist_id}, date=${appointment_date}`
+      );
+      return;
+    }
+
+    // 2. Insert or update stats
+    await conn.query(
+      `INSERT INTO appointment_stats 
+         (tenant_id, clinic_id, dentist_id, stat_date, confirmed, completed, cancelled)
+       VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         confirmed = VALUES(confirmed),
+         completed = VALUES(completed),
+         cancelled = VALUES(cancelled)`,
+      [
+        tenant_id,
+        clinic_id,
+        dentist_id,
+        appointment_date,
+        parseInt(row.confirmed) || 0,
+        parseInt(row.completed) || 0,
+        parseInt(row.cancelled) || 0,
+      ]
+    );
+
+    console.log(
+      `[Stats] Updated stats for: dentist=${dentist_id}, date=${appointment_date}, confirmed=${row.confirmed}, completed=${row.completed}, cancelled=${row.cancelled}`
+    );
+  } catch (error) {
+    console.error("[Stats] Failed to update appointment stats:", {
+      error: error.message,
       tenant_id,
       clinic_id,
       dentist_id,
       appointment_date,
-      row.confirmed,
-      row.completed,
-      row.cancelled,
-    ]
-  );
+    });
+
+    // Don't throw — this is non-critical
+    // Let the main flow continue
+  }
 }
 
 module.exports = {

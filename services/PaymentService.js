@@ -72,6 +72,7 @@ const createPayment = async (data,conn) => {
   };
   try {
     await createPaymentValidation(data)
+    console.log('data:',data)
     const { columns, values } = mapFields(data, fieldMap);
     const paymentId = await paymentModel.createPayment(
       conn,
@@ -140,7 +141,7 @@ const getPaymentByTenantAndAppointmentId = async (tenantId, appointment_id) => {
     const payment = await paymentModel.getPaymentByTenantAndAppointmentId(
       tenantId, appointment_id
     );
-    console.log(payment,paymentFieldsReverseMap)
+    console.log(tenantId,appointment_id)
     let result=payment;
     if(payment){
       result = helper.convertDbToFrontend(

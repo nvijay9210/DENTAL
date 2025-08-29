@@ -100,85 +100,163 @@ const appointmentFieldsReverseMap = {
 };
 
 // Create Appointment
-const createAppointment = async (data) => {
+const createAppointment = async (data, connection = null) => {
+  // console.log("[Appointment] Creating new appointment:", {
+  //   tenant_id: data.tenant_id,
+  //   clinic_id: data.clinic_id,
+  //   patient_id: data.patient_id,
+  //   appointment_date: data.appointment_date,
+  //   start_time: data.start_time,
+  // });
+
   const fieldMap = {
     ...appointmentFields,
     created_by: (val) => val,
   };
 
-  const conn = await pool.getConnection();
+  const conn = connection || (await pool.getConnection());
+  let committed = false;
 
   try {
     await conn.beginTransaction();
+
+    // 1. Create appointment
     const { columns, values } = mapFields(data, fieldMap);
     const appointmentId = await appointmentModel.createAppointment(
       "appointment",
       columns,
-      values
+      values,
+      conn
     );
 
-    if (appointmentId)
-      await updatePatientCount(data.tenant_id, data.clinic_id, true);
-    await updatePatientAppointmentCount(data.tenant_id, data.patient_id, true);
-    await updateDentistAppointmentCount(
-      data.tenant_id,
-      data.clinic_id,
-      data.dentist_id,
-      true
-    );
-    await appointmentModel.updateAppointmentStats(
-      data.tenant_id,
-      data.clinic_id,
-      data.dentist_id,
-      data.appointment_date
-    );
+    if (!appointmentId) {
+      throw new CustomError("Failed to create appointment record", 500);
+    }
+
+    //console.log(`[Appointment] Created with ID=${appointmentId}`);
+
+    // 2. Prepare and create payment (inside transaction)
+    const minBookingFee = parseFloat(data?.min_booking_fee) || 0;
+    const consultationFee = parseFloat(data?.consultation_fee) || 0;
+    const discountApplied = parseFloat(data?.discount_applied) || 0;
+
+    const totalAmount = minBookingFee + consultationFee;
+    const finalAmount = totalAmount - discountApplied;
 
     const paymentData = {
-      tenant_id: data?.tenant_id,
-      clinic_id: data?.clinic_id,
-      dentist_id: data?.dentist_id,
-      patient_id: data?.patient_id,
+      tenant_id: data.tenant_id,
+      clinic_id: data.clinic_id,
+      dentist_id: data.dentist_id,
+      patient_id: data.patient_id,
       appointment_id: appointmentId,
-      discount_applied: parseFloat(data?.discount_applied),
-      total_amount: parseFloat(data?.min_booking_fee + data?.consultation_fee),
-      final_amount: parseFloat(data?.min_booking_fee + data?.consultation_fee),
-      total_amount: parseFloat(data?.min_booking_fee + data?.consultation_fee),
-      payment_for: data?.payment_for,
-      mode_of_payment: data?.mode_of_payment,
-      payment_source:data?.payment_source,
-      payment_reference: data?.payment_reference,
-      payment_verified: data?.payment_verified,
-      receipt_number: data?.receipt_number,
-      insurance_number: data?.insurance_number,
-      payment_date: formatDateOnly(data?.appointment_date),
-      payment_status: data?.payment_status,
-      created_by: data?.created_by,
+      discount_applied: discountApplied,
+      amount: totalAmount,
+      final_amount: finalAmount,
+      total_amount: totalAmount,
+      payment_for: data.payment_for || "booking",
+      mode_of_payment: data.mode_of_payment || "Cash",
+      payment_source: data.payment_source || "offline",
+      payment_reference: data.payment_reference || {},
+      payment_verified: data.payment_verified || false,
+      receipt_number: data.receipt_number || null,
+      insurance_number: data.insurance_number || null,
+      payment_date: formatDateOnly(data.appointment_date),
+      payment_status: data.payment_status || "unpaid",
+      created_by: data.created_by,
     };
 
     await paymentService.createPayment(paymentData, conn);
+    // console.log(
+    //   `[Appointment] Payment created for appointment ID=${appointmentId}`
+    // );
 
+    // 3. Commit transaction
     await conn.commit();
+    committed = true;
+    // console.log(
+    //   `[Appointment] ✅ Transaction committed. Appointment ID: ${appointmentId}`
+    // );
 
-    await invalidateCacheByPattern("appointment:*");
-    await invalidateCacheByPattern("appointmentsdetails:*");
-    await invalidateCacheByPattern("patientvisitdetails:*");
-    await invalidateCacheByPattern("appointmentsummary:*");
-    await invalidateCacheByPattern("financeSummary:*");
-    await invalidateCacheByPattern("patient:*");
+    // =====================================================
+    // 🔽 Non-critical updates moved OUTSIDE transaction
+    // =====================================================
+
+    try {
+      // These can fail without affecting core flow
+      await updatePatientCount(data.tenant_id, data.clinic_id, true);
+      await updatePatientAppointmentCount(
+        data.tenant_id,
+        data.patient_id,
+        true
+      );
+      await updateDentistAppointmentCount(
+        data.tenant_id,
+        data.clinic_id,
+        data.dentist_id,
+        true
+      );
+      await appointmentModel.updateAppointmentStats(
+        data.tenant_id,
+        data.clinic_id,
+        data.dentist_id,
+        data.appointment_date,
+        conn
+      );
+      // console.log("[Appointment] Stats updated successfully");
+    } catch (statsErr) {
+      console.warn(
+        "[Appointment] Background stat update failed (non-critical):",
+        statsErr.message
+      );
+      // Continue — don't throw
+    }
+
+    // 4. Invalidate cache (non-blocking, best effort)
+    try {
+      await Promise.all([
+        invalidateCacheByPattern("appointment:*"),
+        invalidateCacheByPattern("appointmentsdetails:*"),
+        invalidateCacheByPattern("patientvisitdetails:*"),
+        invalidateCacheByPattern("appointmentsummary:*"),
+        invalidateCacheByPattern("financeSummary:*"),
+        invalidateCacheByPattern("patient:*"),
+      ]);
+      //console.log("[Appointment] Cache invalidated");
+    } catch (cacheErr) {
+      console.warn(
+        "[Appointment] Cache invalidation failed (non-critical):",
+        cacheErr.message
+      );
+    }
 
     return appointmentId;
   } catch (error) {
-    console.error("Failed to create appointment:", error);
-    await conn.rollback();
+    if (conn) {
+      await conn.rollback().catch(console.error);
+    }
+    console.error("[Appointment] ❌ Failed to create appointment:", {
+      message: error.message,
+      stack: error.stack,
+      data: {
+        tenant_id: data.tenant_id,
+        clinic_id: data.clinic_id,
+        patient_id: data.patient_id,
+        appointment_date: data.appointment_date,
+      },
+    });
+
     throw new CustomError(
       `Failed to create appointment: ${error.message}`,
-      404
+      error.statusCode || 500
     );
   } finally {
-    await conn.release();
+    if (conn && !connection) {
+      // Only release if we created the connection
+      await conn.release().catch(console.error);
+      //console.log("[Appointment] Database connection released");
+    }
   }
 };
-
 // Get All Appointments by Tenant ID with Caching
 const getAllAppointmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
