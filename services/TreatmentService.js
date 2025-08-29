@@ -26,7 +26,7 @@ const treatmentFields = {
   appointment_id: (val) => val,
   dentist_id: (val) => val,
   clinic_id: (val) => val,
-  diagnosis: helper.safeStringify,
+  diagnosis:(val) => val ,
   treatment_procedure: (val) => val,
   treatment_type: (val) => val,
   treatment_status: (val) => val,
