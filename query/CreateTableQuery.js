@@ -629,7 +629,7 @@ const createTableQuery = {
     final_amount DECIMAL(12,2) NULL DEFAULT 0.00,
     mode_of_payment VARCHAR(100) NULL,
     payment_source VARCHAR(100) NULL,
-    payment_reference VARCHAR(255) DEFAULT NULL,
+    payment_reference TEXT DEFAULT NULL,
     payment_status VARCHAR(100) NULL,
     payment_verified TINYINT(1) DEFAULT 0,
     receipt_number VARCHAR(25) DEFAULT NULL,

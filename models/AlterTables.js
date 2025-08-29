@@ -386,6 +386,16 @@ async function createFileFields(conn) {
   )
 }
 
+async function modifyPaymentReferenceToText(conn) {
+  await modifyColumnTypeIfNotMatch(
+    conn,
+    "payment",
+    "payment_reference",
+    "TEXT",
+    "Changed from VARCHAR to TEXT for longer reference values"
+  );
+}
+
 
 // Main migration runner
 (async () => {
@@ -402,6 +412,7 @@ async function createFileFields(conn) {
     await addDescriptionInDocumet(conn);
     await addProfilePictureInDentist(conn);
     await createFileFields(conn);
+    await modifyPaymentReferenceToText(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");

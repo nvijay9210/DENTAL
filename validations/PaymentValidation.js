@@ -29,14 +29,14 @@ const paymentColumnConfig = [
     null: true,
     default: 0.0,
   },
-  { columnname: "mode_of_payment", type: "varchar", size: 100, null: true },
-  { columnname: "payment_source", type: "varchar", size: 100, null: true },
+  { columnname: "mode_of_payment", type: "varchar", size: 100, null: false },
+  { columnname: "payment_source", type: "varchar", size: 100, null: false },
   { columnname: "payment_reference", type: "varchar", size: 255, null: true },
   {
     columnname: "payment_status",
     type: "varchar",
     size: 100,
-    null: true
+    null: false
   },
   {
     columnname: "payment_verified",
