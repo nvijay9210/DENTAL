@@ -87,7 +87,7 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         const SKIP_ROLES = ["tenant", "guest"];
         const onlySkipRoles = userRoles.length > 0 && userRoles.every(r => SKIP_ROLES.includes(r));
 
-        if (onlySkipRoles) {
+        if (onlySkipRoles || (userRoles.includes('tenant') && userRoles.includes('guest')) ) {
           req.token = token;
           req.user = decoded;
           req.realm = realm;
