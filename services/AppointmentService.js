@@ -140,8 +140,8 @@ const createAppointment = async (data, connection = null) => {
     const consultationFee = parseFloat(data?.consultation_fee) || 0;
     const discountApplied = parseFloat(data?.discount_applied) || 0;
 
-    const totalAmount = minBookingFee + consultationFee;
-    const finalAmount = totalAmount - discountApplied;
+    const totalAmount =  consultationFee;
+    const finalAmount = totalAmount - minBookingFee;
 
     const paymentData = {
       tenant_id: data.tenant_id,
@@ -150,7 +150,7 @@ const createAppointment = async (data, connection = null) => {
       patient_id: data.patient_id,
       appointment_id: appointmentId,
       discount_applied: discountApplied,
-      amount: totalAmount,
+      amount: minBookingFee,
       final_amount: finalAmount,
       total_amount: totalAmount,
       payment_for: data.payment_for || "booking",
@@ -232,7 +232,7 @@ const createAppointment = async (data, connection = null) => {
     return appointmentId;
   } catch (error) {
     if (conn) {
-      await conn.rollback().catch(console.error);
+      await conn.rollback()
     }
     console.error("[Appointment] ❌ Failed to create appointment:", {
       message: error.message,
@@ -252,7 +252,7 @@ const createAppointment = async (data, connection = null) => {
   } finally {
     if (conn && !connection) {
       // Only release if we created the connection
-      await conn.release().catch(console.error);
+      await conn.release()
       //console.log("[Appointment] Database connection released");
     }
   }

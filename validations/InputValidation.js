@@ -12,8 +12,6 @@ function sanitizeInput(value, type) {
 
   switch ((type || "").toLowerCase()) {
     case "varchar":
-    case "text":
-    case "longtext":
       return value;
 
     case "int":
@@ -127,8 +125,6 @@ function validateInput(userInput, columnConfig) {
       // Type-specific validations
       switch ((type || "").toLowerCase()) {
         case "varchar":
-        case "text":
-        case "longtext":
           if (typeof value !== "string") {
             throw new CustomError(`${columnname} must be a string`, 400);
           }

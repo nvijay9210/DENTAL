@@ -136,41 +136,73 @@ const getPaymentByTenantIdAndPaymentId = async (tenantId, paymentId) => {
   }
 };
 
-const getPaymentByTenantAndAppointmentId = async (tenantId, appointment_id) => {
-  try {
-    const payment = await paymentModel.getPaymentByTenantAndAppointmentId(
-      tenantId, appointment_id
-    );
-    console.log(tenantId,appointment_id)
-    let result=payment;
-    if(payment){
-      result = helper.convertDbToFrontend(
-        payment,
-        paymentFieldsReverseMap
-      );
-    }
+// const getPaymentByTenantAndAppointmentId = async (tenantId, appointment_id) => {
+//   try {
+//     const payment = await paymentModel.getPaymentByTenantAndAppointmentId(
+//       tenantId, appointment_id
+//     );
+//     console.log(tenantId,appointment_id)
+//     let result=payment;
+//     if(payment){
+//       result = helper.convertDbToFrontend(
+//         payment,
+//         paymentFieldsReverseMap
+//       );
+//     }
     
-    return result;
+//     return result;
+//   } catch (error) {
+//     throw new CustomError(error, 500);
+//   }
+// };
+
+const getPaymentByTenantAndAppointmentId = async (
+  tenantId, appointment_id
+) => {
+  const cacheKey = buildCacheKey("payment", "appointmentlist", {
+    tenant_id: tenantId,
+    appointment_id
+  });
+
+  try {
+    const payments = await getOrSetCache(cacheKey, async () => {
+      const result =
+        await paymentModel.getPaymentByTenantAndAppointmentId(
+          tenantId,
+          appointment_id
+        );
+      return result;
+    });
+    console.log(payments)
+    const convertedRows = payments.map((payment) =>
+      helper.convertDbToFrontend(payment, paymentFieldsReverseMap
+      )
+    );
+
+    return convertedRows
   } catch (error) {
-    throw new CustomError(error, 500);
+    console.error("Database error while fetching payments:", error);
+    throw new CustomError("Failed to fetch payments", 404);
   }
 };
+
 const getallPaymentSummaryByAppointment = async (tenantId, appointment_id) => {
+  const cacheKey = buildCacheKey("payments", "summarylist", {
+    tenant_id: tenantId,appointment_id:appointment_id
+
+  });
   try {
-    const payment = await paymentModel.getallPaymentSummaryByAppointment(
-      tenantId, appointment_id
-    );
-    console.log(payment,paymentFieldsReverseMap)
-    let result=payment;
-    if(payment){
-      result = helper.convertDbToFrontend(
-        payment,
-        paymentFieldsReverseMap
+    const payments = await getOrSetCache(cacheKey, async () => {
+      const result = await paymentModel.getallPaymentSummaryByAppointment(
+        tenantId,
+       appointment_id
       );
-    }
-    
-    return result;
+      return result;
+    });
+
+    return payments
   } catch (error) {
+    console.error("Database error while fetching payments:", error);
     throw new CustomError(error, 500);
   }
 };
@@ -227,5 +259,6 @@ module.exports = {
   getPaymentByTenantIdAndPaymentId,
   updatePayment,
   deletePaymentByTenantIdAndPaymentId,
-  getPaymentByTenantAndAppointmentId
+  getPaymentByTenantAndAppointmentId,
+  getallPaymentSummaryByAppointment
 };

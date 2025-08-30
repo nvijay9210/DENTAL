@@ -92,7 +92,7 @@ const createTreatment = async (data) => {
     discount_applied: parseFloat(data?.discount_applied),
     final_amount: parseFloat(data?.final_amount),
     total_amount: parseFloat(data?.cost),
-    payment_for: data?.payment_for,
+    payment_for: "treatment",
     mode_of_payment: data?.mode_of_payment,
     payment_source: data?.payment_source,
     payment_reference: data?.payment_reference,
@@ -100,7 +100,7 @@ const createTreatment = async (data) => {
     receipt_number: data?.receipt_number,
     insurance_number: data?.insurance_number,
     payment_date: formatDateOnly(data?.treatment_date),
-    payment_status: "unpaid",
+    payment_status: data?.payment_status,
     created_by: data?.created_by,
   };
 

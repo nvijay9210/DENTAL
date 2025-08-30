@@ -36,6 +36,7 @@ const updateColumnConfig = [
  * Validate Create AppointmentReschedules Input with Tenant Scope
  */
 const createAppointmentReschedulesValidation = async (details) => {
+  console.log('details:',details)
   validateInput(details, createColumnConfig);
 
   // Check if referenced records exist within the same tenant
