@@ -459,7 +459,8 @@ async function addStatusTypeTableData() {
       (14, 'currency_code', 'ADMIN'),
       (15, 'appointment_status', 'ADMIN'),
       (16, 'purchase_order_status', 'ADMIN'),
-      (17, 'reminder_status', 'ADMIN');
+      (17, 'reminder_status', 'ADMIN'),
+      (18, 'expense_category', 'ADMIN');
   `;
 
   try {
