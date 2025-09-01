@@ -85,23 +85,32 @@ const getTenantByTenantNameAndTenantDomain = async (tenantName,tenantDomain) => 
 };
 
 const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = null) => {
-  if(table==='receptionist') table='reception'
+  if (table === 'receptionist') table = 'reception';
+
   const idColumn = `${table}_id`;
+  let selectColumn = 'username';
+  
+  // Determine which extra column to fetch
+  if (['patient', 'dentist', 'reception'].includes(table)) {
+    selectColumn += ', profile_picture';
+  } else if (table === 'supplier') {
+    selectColumn += ', logo_url';
+  }
 
   let query = `
-    SELECT ?? AS userid,username
+    SELECT ?? AS userid, ${selectColumn}
     FROM ?? 
     WHERE keycloak_id = ? AND tenant_id = ?
   `;
 
   const queryParams = [idColumn, table, keycloakId, tenantId];
 
-  if (table==='dentist' || table==='reception') {
+  if (table === 'dentist' || table === 'reception') {
     query += ` AND status = ?`;
     queryParams.push('1');
   }
 
-  if (clinicId !== null && table!=='patient') {
+  if (clinicId !== null && table !== 'patient') {
     query += ` AND clinic_id = ?`;
     queryParams.push(clinicId);
   }
@@ -112,15 +121,15 @@ const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = 
 
   try {
     const rows = await conn.query(query, queryParams);
-
     return rows[0];
   } catch (error) {
     console.error("Database error:", error.message);
-    throw error
+    throw error;
   } finally {
     conn.release();
   }
 };
+
 
 
 const updateTenant = async (tenant_id, columns,values) => {
