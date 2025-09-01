@@ -133,7 +133,6 @@ const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = 
 
 
 
-
 const updateTenant = async (tenant_id, columns,values) => {
   try {
     const conditionColumn = ["tenant_id"];

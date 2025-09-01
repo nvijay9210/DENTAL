@@ -215,6 +215,7 @@ const uploadFileMiddleware2 = (options) => {
   } = options;
 
   return async (req, res, next) => {
+
     try {
       const ensureFolderExists = (folderPath) => {
         if (!fs.existsSync(folderPath)) {
@@ -527,85 +528,6 @@ const deleteUploadedFiles = async (filePaths) => {
   await Promise.all(deleteTasks);
 };
 
-// const updateDocumentsDiffBased = async ({
-//   table_name,
-//   table_id,
-//   field_name,
-//   newFiles = [],
-//   deletedFileIds = [],
-//   created_by,
-//   updated_by,
-//   descriptions = [], // 👈 added
-// }) => {
-
-//   console.log(table_name,
-//     table_id,
-//     field_name,
-//     newFiles ,
-//     deletedFileIds,
-//     created_by,
-//     updated_by,
-//     descriptions)
-
-//   if (!Array.isArray(newFiles)) newFiles = [];
-
-//   const existingDocs = await getDocumentsByField(
-//     table_name,
-//     table_id,
-//     field_name
-//   );
-
-//   const getFileName = (fileUrl = "") => path.basename(fileUrl || "");
-
-//   const existingFileNames = new Set(
-//     existingDocs.map((doc) => getFileName(doc.file_url))
-//   );
-
-//   // Determine which files to insert
-//   const toInsert = newFiles.filter((file) => {
-//     const fileUrl = typeof file === "string" ? file : file.file_url;
-//     return fileUrl && !existingFileNames.has(getFileName(fileUrl));
-//   });
-
-//   // Delete files if needed
-//   if (Array.isArray(deletedFileIds) && deletedFileIds.length > 0) {
-//     const toDelete = existingDocs.filter((doc) =>
-//       deletedFileIds.includes(String(doc.document_id))
-//     );
-
-//     await Promise.all(
-//       toDelete.map(async (doc) => {
-//         await deleteDocumentById(doc.document_id);
-//         await deleteUploadedFiles(doc.file_url);
-//       })
-//     );
-//   }
-
-//   // Insert new files with descriptions if provided
-//   await Promise.all(
-//     toInsert.map((file, index) => {
-//       const fileUrl = typeof file === "string" ? file : file.file_url;
-//       let fileDescription = null;
-
-//       // If descriptions is an array, map by index
-//       if (Array.isArray(descriptions)) {
-//         fileDescription = descriptions[index] || null;
-//       } else if (typeof descriptions === "string") {
-//         fileDescription = descriptions;
-//       }
-
-//       return createDocument(
-//         table_name.toLowerCase(),
-//         table_id,
-//         field_name,
-//         fileUrl,
-//         created_by || updated_by,
-//         fileDescription // 👈 pass description
-//       );
-//     })
-//   );
-// };
-
 const updateDocumentsDiffBased = async ({
   table_name,
   table_id,
@@ -616,16 +538,6 @@ const updateDocumentsDiffBased = async ({
   updated_by,
   descriptions = [], // Can be for both new & existing
 }) => {
-  console.log(
-    table_name,
-    table_id,
-    field_name,
-    newFiles,
-    deletedFileIds,
-    created_by,
-    updated_by,
-    descriptions
-  );
 
   if (!Array.isArray(newFiles)) newFiles = [];
 

@@ -142,7 +142,6 @@ const dentistColumnConfig = [
   { columnname: "ratings", type: "decimal", size: "3,2", null: true },
   { columnname: "reviews_count", type: "int", null: true },
   { columnname: "appointment_count", type: "int", null: true },
-  { columnname: "profile_picture", type: "varchar", size: 255, null: true },
   { columnname: "bio", type: "longtext", null: true, data_type: "json" },
   {
     columnname: "teleconsultation_supported",
@@ -217,6 +216,7 @@ const createDentistValidation = async (details) => {
 
 // Update Dentist Validation
 const updateDentistValidation = async (dentistId, details, tenant_id) => {
+
   validateInput(details, updateColumnConfig);
   await validateTenant(tenant_id);
   // await checkIfIdExists('clinic','clinic_id',details.clinic_id||0)
