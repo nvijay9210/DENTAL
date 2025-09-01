@@ -41,8 +41,10 @@ exports.getTenantByTenantId = async (req, res, next) => {
 exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   const { tenant_name, tenant_domain } = req.params;
   let user;
+
   if (process.env.KEYCLOAK_POWER === "on") {
     user = extractUserInfo(req.user);
+    console.log("Extracted user:", user);
 
     if (user.role !== "tenant" && user.role !== "super-user" && user.role !== "guest") {
       const userdetails = await getUserIdUsingKeycloakId(
@@ -51,43 +53,50 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
         user.tenantId,
         user.clinicId
       );
-      user.userId = userdetails[0]?.userid || null;
-      user.username = userdetails[0]?.username || null;
+
+      if (!userdetails) {
+        throw new CustomError("User not found or inactive", 404);
+      }
+
+      user.userId = userdetails.userid || null;
+      user.username = userdetails.username || null;
+      user.profile_picture = userdetails.profile_picture || null;
     } else {
       const fullName = user.preferred_username;
       const firstName = (fullName?.split(" ") || [])[0] || "user";
-      user["user_name"] = firstName;
+      user.username = firstName;
     }
 
-    if (user.userId === null)
+    if (user.userId === null) {
+      console.log("Inactive user:", user);
       throw new CustomError("User in inactive state", 404);
+    }
   }
 
   try {
     let settings;
+
     if (process.env.KEYCLOAK_POWER === "on" && user.role !== "tenant" && user.role !== "guest") {
-      settings = await getClinicSettingsByTenantIdAndClinicId(
-        user.tenantId,
-        user.clinicId
-      );
-      // console.log("settings:",settings)
+      settings = await getClinicSettingsByTenantIdAndClinicId(user.tenantId, user.clinicId);
     } else {
-      if (!tenant_name || !tenant_domain)
-        throw new CustomError("Tenantname and domain is requried", 400);
+      if (!tenant_name || !tenant_domain) {
+        throw new CustomError("Tenant name and domain are required", 400);
+      }
       settings = await tenantService.getTenantByTenantNameAndTenantDomain(
         tenant_name,
         tenant_domain
       );
     }
+
     res.status(200).json({
       ...settings,
       ...user,
     });
-    // res.status(200).json(settings);
   } catch (err) {
     next(err);
   }
 };
+
 
 exports.updateTenant = async (req, res, next) => {
   const tenantId = req.params.tenant_id;

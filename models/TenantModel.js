@@ -89,17 +89,17 @@ const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = 
 
   const idColumn = `${table}_id`;
   let selectColumn = 'username';
-  
-  // Determine which extra column to fetch
+
+  // Always return "profile_picture" (alias if needed)
   if (['patient', 'dentist', 'reception'].includes(table)) {
     selectColumn += ', profile_picture';
   } else if (table === 'supplier') {
-    selectColumn += ', logo_url';
+    selectColumn += ', logo_url AS profile_picture';
   }
 
   let query = `
     SELECT ?? AS userid, ${selectColumn}
-    FROM ?? 
+    FROM ??
     WHERE keycloak_id = ? AND tenant_id = ?
   `;
 
@@ -120,8 +120,9 @@ const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = 
   const conn = await pool.getConnection();
 
   try {
+    console.log(query)
     const rows = await conn.query(query, queryParams);
-    return rows[0];
+    return rows[0][0];
   } catch (error) {
     console.error("Database error:", error.message);
     throw error;
@@ -129,6 +130,7 @@ const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = 
     conn.release();
   }
 };
+
 
 
 
