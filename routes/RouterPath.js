@@ -319,9 +319,11 @@ module.exports = {
   GET_TOOTH_DETAILS_DENTIST: "/toothdetails/:tenant_id/:clinic_id/:dentist_id",
 
   ADD_USER_ACTIVITY_LOGIN: "/adduseractivity",
+  GETALL_USER_ACTIVITY: "/getalluseractivites/:tenant_id",
   ADD_USER_ACTIVITY_LOGOUT: "/updateuseractivity/:useractivity_id",
 
   ADD_LOGIN_HISTORY_LOGIN: "/addloginhistory",
+  GETALL_LOGIN_HISTORY: "/getallloginhistories/:tenant_id",
   ADD_LOGIN_HISTORY_LOGOUT: "/updateloginhistory/:loginhistory_id/:tenant_id",
 };
 

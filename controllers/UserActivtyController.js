@@ -2,6 +2,7 @@ const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
 const useractivityService = require("../services/UserActivityService");
 const { isEarlier } = require("../utils/DateUtils");
+const { getClientInfo } = require("../utils/LoginHistoryInfo");
 const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 const { createUserActivityValidation, updateUserActivityValidation } = require("../validations/UserActivityValidation");
 
@@ -12,9 +13,15 @@ exports.createUserActivity = async (req, res, next) => {
   const details = req.body;
 
   try {
+    const clientInfo=getClientInfo(req)
+    const userActivityData={
+      ...details,
+      ip_address:clientInfo.ip,
+      user_agent:clientInfo
+    }
     // Create the useractivity
-    await createUserActivityValidation(details)
-    const id = await useractivityService.createUserActivity(details);
+    await createUserActivityValidation(userActivityData)
+    const id = await useractivityService.createUserActivity(userActivityData);
     res.status(201).json({ message: "UserActivity created", id });
   } catch (err) {
     next(err);

@@ -1,6 +1,7 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
 const loginhistoryService = require("../services/LoginHistoryService");
+const { getClientInfo } = require("../utils/LoginHistoryInfo");
 const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 const { createLoginHistoryValidation, updateLoginHistoryValidation } = require("../validations/LoginHistoryValidation");
 const { v4: uuidv4 } = require('uuid');
@@ -12,9 +13,17 @@ exports.createLoginHistory = async (req, res, next) => {
   const details = req.body;
   details.session_id=uuidv4()
   try {
-    await createLoginHistoryValidation(details)
+    const clientInfo=await getClientInfo(req)
+    const loginHistoryData={
+      ...details,
+      ip_address:clientInfo.ip,
+      device_info:clientInfo.device,
+      browser_info:clientInfo.browser,
+      login_time:clientInfo.loginTime
+    }
+    await createLoginHistoryValidation(loginHistoryData)
     // Create the loginhistory
-    const id = await loginhistoryService.createLoginHistory(details);
+    const id = await loginhistoryService.createLoginHistory(loginHistoryData);
     res.status(201).json({ message: "LoginHistory created", id });
   } catch (err) {
     next(err);

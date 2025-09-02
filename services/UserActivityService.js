@@ -12,34 +12,29 @@ const { convertUTCToLocal } = require("../utils/DateUtils");
 // Field mapping for useractivitys (similar to treatment)
 
 const userActivityFields = {
+  user_activity_id: (val) => val,
   tenant_id: (val) => val,
-  clinic_id: (val) => val,
+  app_name: (val) => val,
   keycloak_user_id: (val) => val,
-  operation: (val) => val, // e.g., GET, POST
-  url: (val) => val,
-  method: (val) => val,
+  activity_type: (val) => val,
+  activity_desc: (val) => val,
   ip_address: (val) => val,
-  browser_info: (val) => helper.safeStringify(val),
-  device_info: (val) => helper.safeStringify(val),
-  status: (val) => val, // e.g., success/failure
-  message: (val) => val,
+  user_agent: (val) => helper.safeStringify(val),
+  activity_time: (val) => val, // keep as is or format when needed
 };
 
 const userActivityFieldsReverseMap = {
+  user_activity_id: (val) => val,
   tenant_id: (val) => val,
-  clinic_id: (val) => val,
+  app_name: (val) => val,
   keycloak_user_id: (val) => val,
-  operation: (val) => val,
-  url: (val) => val,
-  method: (val) => val,
+  activity_type: (val) => val,
+  activity_desc: (val) => val,
   ip_address: (val) => val,
-  browser_info: (val) => helper.safeJsonParse(val),
-  device_info: (val) => helper.safeJsonParse(val),
-  status: (val) => val,
-  message: (val) => val,
-  created_by: (val) => val,
-  created_time: (val) => (val ? convertUTCToLocal(val) : null),
+  user_agent: (val) => helper.safeJsonParse(val),
+  activity_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
+
 
 // Create UserActivity
 
