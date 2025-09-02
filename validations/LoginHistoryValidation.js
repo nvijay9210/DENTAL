@@ -10,14 +10,11 @@ const loginhistoryColumnConfig = [
   { columnname: "session_id", type: "varchar", size: 50, null: false },
   { columnname: "ip_address", type: "varchar", size: 45, null: true },
   { columnname: "browser_info", type: "text", null: true },
-  {
-    columnname: "device_info",
-    type: "text",
-    null: true,
-  },
+  { columnname: "device_info", type: "text", null: true },
   { columnname: "login_time", type: "datetime", null: false },
-  { columnname: "logout_time", type: "datetime", size: 50, null: true }
+  { columnname: "logout_time", type: "datetime", null: true }
 ];
+
 /**
  * Validate Create LoginHistory Input with Tenant Scope
  */

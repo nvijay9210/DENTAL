@@ -17,24 +17,26 @@ const loginhistoryFields = {
   keycloak_user_id: (val) => val,
   session_id: (val) => val,
   ip_address: (val) => val,
-  browser_info: (val) => helper.safeStringify(val),
+  browser_info: (val) => helper.safeStringify(val),  // object → string
   device_info: (val) => helper.safeStringify(val),
   login_time: (val) => val,
   logout_time: (val) => val,
 };
+
 const loginhistoryFieldsReverseMap = {
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   keycloak_user_id: (val) => val,
   session_id: (val) => val,
   ip_address: (val) => val,
-  browser_info: (val) => helper.safeJsonParse(val),
+  browser_info: (val) => helper.safeJsonParse(val),  // string → object
   device_info: (val) => helper.safeJsonParse(val),
   login_time: (val) => val,
   logout_time: (val) => val,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
+
 // Create LoginHistory
 const createLoginHistory = async (data) => {
   

@@ -11,32 +11,41 @@ const { convertUTCToLocal } = require("../utils/DateUtils");
 
 // Field mapping for useractivitys (similar to treatment)
 
-const useractivityFields = {
+const userActivityFields = {
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
   keycloak_user_id: (val) => val,
+  operation: (val) => val, // e.g., GET, POST
+  url: (val) => val,
+  method: (val) => val,
   ip_address: (val) => val,
-  browser: (val) => val,
-  device: (val) => val,
-  login_time: (val) => val,
-  logout_time: (val) => val,
-  duration: (val) => val,
+  browser_info: (val) => helper.safeStringify(val),
+  device_info: (val) => helper.safeStringify(val),
+  status: (val) => val, // e.g., success/failure
+  message: (val) => val,
 };
-const useractivityFieldsReverseMap = {
-  useractivity_id: (val) => val,
+
+const userActivityFieldsReverseMap = {
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
   keycloak_user_id: (val) => val,
+  operation: (val) => val,
+  url: (val) => val,
+  method: (val) => val,
   ip_address: (val) => val,
-  browser: (val) => val,
-  device: (val) => val,
-  login_time: (val) => val,
-  logout_time: (val) => val,
-  duration: (val) => val,
+  browser_info: (val) => helper.safeJsonParse(val),
+  device_info: (val) => helper.safeJsonParse(val),
+  status: (val) => val,
+  message: (val) => val,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
+
 // Create UserActivity
 
 const createUserActivity = async (data) => {
   try {
-    const { columns, values } = mapFields(data, useractivityFields);
+    const { columns, values } = mapFields(data, userActivityFields);
     const useractivityId = await useractivityModel.createUserActivity(
       "useractivity",
       columns,
@@ -73,7 +82,7 @@ const getAllUserActivitysByTenantId = async (
     });
 
     const convertedRows = useractivitys.data.map((useractivity) =>
-      helper.convertDbToFrontend(useractivity, useractivityFieldsReverseMap)
+      helper.convertDbToFrontend(useractivity, userActivityFieldsReverseMap)
     );
 
     return { data: convertedRows, total: useractivitys.total };
@@ -97,7 +106,7 @@ const getUserActivityByTenantIdAndUserActivityId = async (
 
     const convertedRows = helper.convertDbToFrontend(
       useractivity,
-      useractivityFieldsReverseMap
+      userActivityFieldsReverseMap
     );
 
     return convertedRows;
@@ -109,7 +118,7 @@ const getUserActivityByTenantIdAndUserActivityId = async (
 // Update UserActivity
 const updateUserActivity = async (useractivityId, data) => {
   try {
-    const { columns, values } = mapFields(data, useractivityFields);
+    const { columns, values } = mapFields(data, userActivityFields);
     const affectedRows = await useractivityModel.updateUserActivity(
       useractivityId,
       columns,

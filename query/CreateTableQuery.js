@@ -714,39 +714,38 @@ const createTableQuery = {
     CONSTRAINT fk_toothdetails_patient FOREIGN KEY (patient_id) REFERENCES patient (patient_id) ON UPDATE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;`,
 
-  addLoginHistory: `CREATE TABLE IF NOT EXISTS loginhistory (
-    loginhistory_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    tenant_id BIGINT UNSIGNED DEFAULT NULL,
-    clinic_id BIGINT UNSIGNED DEFAULT NULL,
-    keycloak_user_id CHAR(36) DEFAULT NULL,
-    session_id VARCHAR(36) DEFAULT NULL,
-    login_time DATETIME DEFAULT NULL,
-    logout_time DATETIME DEFAULT NULL,
-    ip_address VARCHAR(45) DEFAULT NULL,
-    device_info TEXT DEFAULT NULL,
-    browser_info TEXT DEFAULT NULL,
-    created_time TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
-    PRIMARY KEY (loginhistory_id),
-    KEY idx_loginhistory_keycloak_user_id (keycloak_user_id),
-    KEY fk_login_history_clinic (clinic_id),
-    KEY fk_login_history_tenant (tenant_id),
-    CONSTRAINT fk_login_history_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
-    CONSTRAINT fk_login_history_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;`,
+  addLoginHistory: `CREATE TABLE IF NOT EXISTS login_history (
+    login_history_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    tenant_id BIGINT UNSIGNED DEFAULT NULL,   -- Which tenant (company/app)
+    app_name VARCHAR(100) DEFAULT NULL,       -- Optional: which app (if multi-app)
+    keycloak_user_id CHAR(36) NOT NULL,       -- User UUID from Keycloak
+    session_id VARCHAR(36) DEFAULT NULL,      -- Track session
+    login_time DATETIME NOT NULL,             -- Login time
+    logout_time DATETIME DEFAULT NULL,        -- Logout time
+    ip_address VARCHAR(45) DEFAULT NULL,      -- User IP (IPv4/IPv6)
+    user_agent TEXT DEFAULT NULL,             -- Browser + device info combined
+    created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (login_history_id),
+    KEY idx_login_history_user (keycloak_user_id),
+    KEY idx_login_history_tenant (tenant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+`,
 
-  addUserActivity: `CREATE TABLE IF NOT EXISTS useractivity (
-    useractivity_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    keycloak_user_id CHAR(36) DEFAULT NULL,
-    ip_address VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-    browser VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-    device VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-    login_time TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
-    logout_time TIMESTAMP NULL DEFAULT NULL,
-    duration TIME DEFAULT NULL,
-    created_time TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
-    PRIMARY KEY (useractivity_id),
-    KEY idx_useractivity_keycloak_user_id (keycloak_user_id)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;`,
+  addUserActivity: `CREATE TABLE IF NOT EXISTS user_activity (
+    user_activity_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    tenant_id BIGINT UNSIGNED DEFAULT NULL,
+    app_name VARCHAR(100) DEFAULT NULL,
+    keycloak_user_id CHAR(36) NOT NULL,
+    activity_type VARCHAR(100) NOT NULL,   -- e.g., LOGIN, LOGOUT, CREATE_LOAN, UPDATE_PATIENT
+    activity_desc TEXT DEFAULT NULL,       -- Optional: more details (e.g., "Loan ID 123 updated")
+    ip_address VARCHAR(45) DEFAULT NULL,
+    user_agent TEXT DEFAULT NULL,
+    activity_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_activity_id),
+    KEY idx_user_activity_user (keycloak_user_id),
+    KEY idx_user_activity_tenant (tenant_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+`,
 
   addNotificationSend: `CREATE TABLE IF NOT EXISTS notifications (
     notification_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
