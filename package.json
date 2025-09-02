@@ -40,7 +40,8 @@
     "redis": "^4.7.0",
     "sharp": "^0.34.1",
     "socket.io": "^4.8.1",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3"

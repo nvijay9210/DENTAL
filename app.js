@@ -7,7 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
 // require('./middlewares/Schedule') //appointment schedule
-// const { logFilePath, logStream } = require('./logs/logger'); //log file
+const { logFilePath, logStream, logRequest } = require('./logs/logger'); //log file
 
 const errorHandler = require('./middlewares/errorHandler');
 const createTable = require('./models/CreateModel');
@@ -44,7 +44,6 @@ const toothdetailsRouter = require('./routes/ToothDetailsRouter');
 
 
 // const compressionMiddleware = require('./middlewares/CompressionMiddleware');
-const { redisconnect } = require('./config/redisConfig');
 
 
 const { connect: redisConnect, closeRedis } = require('./config/redisConfig');
@@ -145,13 +144,13 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads/", express.static(path.join(__dirname, "uploads")));
 app.use("/files", express.static("uploads/"));
-
+app.use(logRequest);
 
 
 
 // ✅ Morgan logging (system time)
-// morgan.token('local-date', () => new Date().toLocaleString());
-// app.use(morgan(':local-date :method :url :status', { stream: logStream }));
+morgan.token('local-date', () => new Date().toLocaleString());
+app.use(morgan(':local-date :method :url :status', { stream: logStream }));
 
 
 // Redis connection
@@ -209,19 +208,19 @@ async function initializeTables() {
 
 
 // ✅ Log viewer route
-// app.get('/logs', (req, res) => {
-//   if (!fs.existsSync(logFilePath)) {
-//     return res.status(404).send('Log file not found');
-//   }
+app.get('/logs', (req, res) => {
+  if (!fs.existsSync(logFilePath)) {
+    return res.status(404).send('Log file not found');
+  }
 
-//   fs.readFile(logFilePath, 'utf8', (err, data) => {
-//     if (err) {
-//       console.error('Error reading log file:', err.message);
-//       return res.status(500).send('Error reading log file');
-//     }
-//     res.type('text/plain').send(data);
-//   });
-// });
+  fs.readFile(logFilePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading log file:', err.message);
+      return res.status(500).send('Error reading log file');
+    }
+    res.type('text/plain').send(data);
+  });
+});
 
 
 // Test route

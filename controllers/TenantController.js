@@ -68,7 +68,6 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
     }
 
     if (user.userId === null) {
-      console.log("Inactive user:", user);
       throw new CustomError("User in inactive state", 404);
     }
   }

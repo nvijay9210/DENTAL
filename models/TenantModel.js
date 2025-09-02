@@ -77,7 +77,7 @@ const getTenantByTenantNameAndTenantDomain = async (tenantName,tenantDomain) => 
     const rows = await conn.query(query, [tenantName,tenantDomain]);
     return rows[0][0];
   } catch (error) {
-    console.log(error.message)
+    console.error(error.message)
     throw error
   } finally {
     conn.release();
@@ -120,7 +120,7 @@ const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = 
   const conn = await pool.getConnection();
 
   try {
-    console.log(query)
+ 
     const rows = await conn.query(query, queryParams);
     return rows[0][0];
   } catch (error) {

@@ -1283,15 +1283,16 @@ const getAllPatientsByTenantIdAndClinicId = async (
   page = 1,
   limit = 10
 ) => {
-  const offset = (page - 1) * limit;
-  const cacheKey = buildCacheKey("patient", "list", {
-    tenant_id: tenantId,
-    clinic_id,
-    page,
-    limit,
-  });
-
+ 
   try {
+    const offset = (page - 1) * limit;
+    const cacheKey = buildCacheKey("patient", "list", {
+      tenant_id: tenantId,
+      clinic_id,
+      page,
+      limit,
+    });
+
     const patients = await getOrSetCache(cacheKey, async () => {
       const result = await patientModel.getAllPatientsByTenantIdAndClinicId(
         tenantId,

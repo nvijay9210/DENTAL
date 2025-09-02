@@ -158,7 +158,7 @@ const getTenantByTenantNameAndTenantDomain = async (
       tenant_app_logo,
     };
   } catch (error) {
-    console.log(error)
+    console.error(error)
     throw new Error("Failed to get tenants: " + error.message);
   }
 };

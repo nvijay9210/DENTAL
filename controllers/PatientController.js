@@ -47,6 +47,8 @@ exports.getAllPatientsByTenantIdAndClinicId = async (req, res, next) => {
   const { tenant_id, clinic_id } = req.params;
   const { page, limit } = req.query;
   try {
+    await checkIfIdExists('tenant','tenant_id',tenant_id)
+    await checkIfIdExists('clinic','clinic_id',clinic_id)
     const patients = await patientService.getAllPatientsByTenantIdAndClinicId(
       tenant_id,
       clinic_id,
