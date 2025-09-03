@@ -38,6 +38,7 @@ const appointmentFields = {
   start_time: (val) => val,
   end_time: (val) => val,
   status: (val) => val,
+  appointment_final_status: (val) => val||'pending',
   doctor_rating: (val) => (val ? parseFloat(val) : 0),
   feedback: (val) => helper.safeStringify(val),
   appointment_type: (val) => val,
@@ -72,6 +73,7 @@ const appointmentFieldsReverseMap = {
   start_time: (val) => val,
   end_time: (val) => val,
   status: (val) => val,
+  appointment_final_status: (val) => val,
   doctor_rating: (val) => val,
   feedback: (val) => safeJsonParse(val),
   appointment_type: (val) => val,
@@ -682,6 +684,28 @@ const updateAppoinmentStatus = async (
       throw new CustomError("Appointment not found or no changes made.", 404);
     }
 
+    const payment=await getPaymentByTenantAndAppointmentId(tenant_id,appointment_id)
+
+    const paid_amount = payment.reduce((acc, curr) => {
+      return acc + (curr.amount || 0); // assuming "amount" field
+    }, 0);
+
+    if(details.status==='confirmed' && paid_amount>0){
+      await appointmentModel.updateAppoinmentFinalStatus(appointment_id,tenant_id,clinic_id,'pending_payment')
+    }
+    if(details.status==='confirmed' && paid_amount===0){
+      await appointmentModel.updateAppoinmentFinalStatus(appointment_id,tenant_id,clinic_id,'inprogress')
+    }
+    if(details.status==='completed' && paid_amount===0){
+      await appointmentModel.updateAppoinmentFinalStatus(appointment_id,tenant_id,clinic_id,'completed')
+    }
+
+    const paymentsummary=await paymentService.getallPaymentSummaryByAppointment(tenant_id,appointment_id)
+
+    if(paymentsummary.balance_remaining===0){
+      await appointmentModel.updateAppoinmentFinalStatus(appointment_id,tenant_id,clinic_id,'fully_completed')
+    }
+
     const appointment = await getAppointmentByTenantIdAndAppointmentId(
       tenant_id,
       appointment_id
@@ -987,6 +1011,7 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
 
 const isoWeek = require("dayjs/plugin/isoWeek");
 const { buildCacheKey } = require("../utils/RedisCache");
+const { getPaymentByTenantAndAppointmentId } = require("../models/PaymentModel");
 dayjs.extend(isoWeek);
 
 const getAppointmentSummary = async (tenant_id, clinic_id) => {

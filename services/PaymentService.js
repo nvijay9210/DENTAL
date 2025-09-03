@@ -9,6 +9,7 @@ const helper = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
 const { createPaymentValidation } = require("../validations/PaymentValidation");
+const { updateAppoinmentFinalStatus } = require("../models/AppointmentModel");
 
 // Field mapping for payments (similar to treatment)
 
@@ -82,6 +83,7 @@ const createPayment = async (data,conn) => {
     );
     await invalidateCacheByPattern("payment:*");
     await invalidateCacheByPattern("financeSummary:*");
+
     return paymentId;
   } catch (error) {
     console.error("Failed to create payment:", error);

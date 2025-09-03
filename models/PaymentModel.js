@@ -103,7 +103,7 @@ const deletePaymentByTenantAndPaymentId = async (tenant_id, payment_id) => {
   }
 };
 
-const getallPaymentSummaryByAppointment = async (tenant_id, appointment_id) => {
+const getallPaymentSummaryByAppointment = async (tenant_id, appointment_id,connection=null) => {
   const query = `
     SELECT 
       p.appointment_id,
@@ -147,7 +147,7 @@ const getallPaymentSummaryByAppointment = async (tenant_id, appointment_id) => {
       p.clinic_id
   `;
 
-  const conn = await pool.getConnection();
+  const conn = connection || await pool.getConnection();
 
   try {
     const [rows] = await conn.query(query, [tenant_id, appointment_id]);
@@ -189,11 +189,13 @@ const getallPaymentSummaryByAppointment = async (tenant_id, appointment_id) => {
     // ✅ Apply consultation_fee and min_booking_fee only once per appointment
     const totalPayable = Math.max(
       0,
-      baseAmount - discount + (consultationFee - minBookingFee)
+      baseAmount  + consultationFee
     );
 
     // ✅ Amount already paid
-    const totalPaid = parseFloat(summary.total_paid) || 0.0;
+    const totalPaid = (parseFloat(summary.total_paid) || 0.0) + discount;
+
+    console.log(totalPayable,totalPaid)
 
     // ✅ Remaining balance
     const balanceRemaining = Math.max(0, totalPayable - totalPaid);

@@ -18,7 +18,11 @@ const {
   getDocumentsByField,
 } = require("../models/documentModel");
 const pool = require("../config/db");
-const { updateAppoinmentStatusCompleted } = require("../models/AppointmentModel");
+const {
+  updateAppoinmentStatusCompleted,
+  updateAppoinmentFinalStatus,
+} = require("../models/AppointmentModel");
+const { getallPaymentSummaryByAppointment } = require("../models/PaymentModel");
 
 const treatmentFields = {
   tenant_id: (val) => val,
@@ -26,7 +30,7 @@ const treatmentFields = {
   appointment_id: (val) => val,
   dentist_id: (val) => val,
   clinic_id: (val) => val,
-  diagnosis:(val) => val ,
+  diagnosis: (val) => val,
   treatment_procedure: (val) => val,
   treatment_type: (val) => val,
   treatment_status: (val) => val,
@@ -88,7 +92,7 @@ const createTreatment = async (data) => {
     dentist_id: data?.dentist_id,
     patient_id: data?.patient_id,
     appointment_id: data?.appointment_id,
-    amount: parseFloat(data?.amount),
+    amount: parseFloat(data?.amount)||0,
     discount_applied: parseFloat(data?.discount_applied),
     final_amount: parseFloat(data?.final_amount),
     total_amount: parseFloat(data?.cost),
@@ -105,7 +109,7 @@ const createTreatment = async (data) => {
   };
 
   try {
-    await await conn.beginTransaction();
+    await conn.beginTransaction();
     const { columns, values } = mapFields(data, create);
     const treatmentId = await treatmentModel.createTreatment(
       conn,
@@ -124,6 +128,32 @@ const createTreatment = async (data) => {
     });
 
     await PaymentService.createPayment(paymentData, conn);
+
+    const payment = await getallPaymentSummaryByAppointment(
+      data.tenant_id,
+      data.appointment_id,conn
+    );
+
+    console.log(payment);
+
+    if (payment.balance_remaining === 0) {
+      await updateAppoinmentFinalStatus(
+        data.appointment_id,
+        data.tenant_id,
+        data.clinic_id,
+        "fully_completed",
+        conn
+      );
+    }
+    if (payment.balance_remaining > 0) {
+      await updateAppoinmentFinalStatus(
+        data.appointment_id,
+        data.tenant_id,
+        data.clinic_id,
+        "pending_payment",
+        conn
+      );
+    }
     // await updateAppoinmentStatusCompleted(data.tenant_id,data.appointment_id);
     await conn.commit();
     await invalidateCacheByPattern("treatment:*");
@@ -135,7 +165,7 @@ const createTreatment = async (data) => {
     await conn.rollback();
     throw new CustomError(error, 500);
   } finally {
-    await conn.release();
+    conn.release();
   }
 };
 
@@ -582,7 +612,7 @@ const deleteTreatmentByTenantIdAndTreatmentId = async (
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    await deleteDocumentsByTableAndId(conn,"treatment", treatmentId);
+    await deleteDocumentsByTableAndId(conn, "treatment", treatmentId);
     const affectedRows =
       await treatmentModel.deleteTreatmentByTenantAndTreatmentId(
         conn,
@@ -592,7 +622,7 @@ const deleteTreatmentByTenantIdAndTreatmentId = async (
     // if (affectedRows === 0) {
     //   throw new CustomError(error, 500);
     // }
-      await conn.commit()
+    await conn.commit();
     await invalidateCacheByPattern("treatment:*");
     await invalidateCacheByPattern("treatment_patient:*");
     await invalidateCacheByPattern("financeSummary:*");

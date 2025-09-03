@@ -509,7 +509,7 @@ FROM appointment AS app
 JOIN patient AS p ON p.patient_id = app.patient_id
 WHERE app.tenant_id = ? 
   AND app.clinic_id = ? 
-  AND app.dentist_id = ?`
+  AND app.dentist_id = ?`;
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query1, [
@@ -522,7 +522,7 @@ WHERE app.tenant_id = ?
     const [counts] = await conn.query(query2, [
       tenantId,
       clinic_id,
-      dentist_id
+      dentist_id,
     ]);
 
     return { data: rows, total: counts[0].total };
@@ -540,7 +540,6 @@ const getAppointmentsWithDetailsByClinic = async (
   limit,
   offset
 ) => {
-
   const query1 = `
     SELECT 
       CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
@@ -581,10 +580,7 @@ const getAppointmentsWithDetailsByClinic = async (
       offset,
     ]);
 
-    const [counts] = await conn.query(query2, [
-      tenantId,
-      clinic_id
-    ]);
+    const [counts] = await conn.query(query2, [tenantId, clinic_id]);
 
     return { data: rows, total: counts[0].total };
   } catch (error) {
@@ -595,7 +591,6 @@ const getAppointmentsWithDetailsByClinic = async (
   }
 };
 
-
 const getAppointmentsWithDetailsByPatient = async (
   tenantId,
   patientId,
@@ -603,7 +598,6 @@ const getAppointmentsWithDetailsByPatient = async (
   limit,
   offset
 ) => {
-
   let statusCondition = "";
   let statusParams = [];
 
@@ -673,7 +667,6 @@ const getAppointmentsWithDetailsByPatient = async (
     conn.release();
   }
 };
-
 
 const getAppointmentMonthlySummary = async (
   tenantId,
@@ -1054,6 +1047,42 @@ const updateAppoinmentStatus = async (
   }
 };
 
+const updateAppoinmentFinalStatus = async (
+  appointment_id,
+  tenantId,
+  clinicId,
+  status,
+  connection=null
+) => {
+  console.log(appointment_id, tenantId, clinicId, status);
+
+  let query = `
+    UPDATE appointment 
+    SET appointment_final_status = ?
+  `;
+
+  let queryParams = [status];
+
+  query += `
+    WHERE appointment_id = ? 
+      AND tenant_id = ? 
+      AND clinic_id = ?
+  `;
+
+  queryParams.push(appointment_id, tenantId, clinicId);
+
+  const conn = connection||await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, queryParams);
+    return rows.affectedRows > 0;
+  } catch (error) {
+    console.error("Error updating appointment status:", error);
+    throw new Error(error.message);
+  } finally {
+    conn.release();
+  }
+};
+
 const updateAppoinmentStatusCancelledAndReschedule = async (
   appointment_id,
   tenantId,
@@ -1138,8 +1167,7 @@ const updateRoomIdBeforeAppointment = async () => {
   }
 };
 
-const updateAppoinmentStatusCompleted = async (tenant_id,appointment_id
-) => {
+const updateAppoinmentStatusCompleted = async (tenant_id, appointment_id) => {
   const conn = await pool.getConnection();
   try {
     const query = `
@@ -1149,7 +1177,7 @@ const updateAppoinmentStatusCompleted = async (tenant_id,appointment_id
         AND room_id != '00000000-0000-0000-0000-000000000000'
         AND tenant_id=? AND appointment_id=?
     `;
-    const [result] = await conn.query(query, tenant_id,appointment_id);
+    const [result] = await conn.query(query, tenant_id, appointment_id);
     console.log(
       `✅ Completed ${result.affectedRows} appointments before ${userTime}`
     );
@@ -1263,4 +1291,5 @@ module.exports = {
   getAppointmentMonthlySummaryClinic,
   getAppointmentsWithDetailsByClinic,
   updateAppoinmentStatusCompleted,
+  updateAppoinmentFinalStatus,
 };
