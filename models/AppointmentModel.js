@@ -494,7 +494,7 @@ const getAppointmentsWithDetails = async (
   app.appointment_date,
   app.start_time,
   app.end_time
-  app.is_virtual,
+  app.is_virtual
 FROM appointment AS app
 JOIN patient AS p ON p.patient_id = app.patient_id
 WHERE app.tenant_id = ? 
@@ -555,7 +555,7 @@ const getAppointmentsWithDetailsByClinic = async (
       app.appointment_date,
       app.start_time,
       app.end_time,
-      app.is_virtual,
+      app.is_virtual
     FROM appointment AS app
     JOIN patient AS p ON p.patient_id = app.patient_id
     WHERE app.tenant_id = ? 

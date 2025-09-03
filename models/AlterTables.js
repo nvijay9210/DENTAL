@@ -310,7 +310,7 @@ async function addFinalStatusInAppointment(conn){
     conn,
     "appointment",
     "appointment_final_status",
-    "ENUM('pending','inprogress','completed','cancelled','fully_completed') DEFAULT 'pending'",
+    "ENUM('pending','inprogress','completed','cancelled','fully_completed','pending_payment') DEFAULT 'pending'",
     "Add new appointment_final_status field"
   )
 }

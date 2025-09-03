@@ -10,7 +10,7 @@ const createTableQuery = {
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     status ENUM('pending','confirmed','checkedin','inprogress','completed','cancelled','clinic_cancelled','noshow','rescheduled','followup','rejected','expired','payment_pending','paid') NOT NULL DEFAULT 'pending',
-    appointment_final_status ENUM('pending','inprogress','completed','fully_completed','cancelled') DEFAULT 'pending',
+    appointment_final_status ENUM('pending','inprogress','completed','fully_completed','cancelled','pending_payment') DEFAULT 'pending',
     appointment_type ENUM('video','audio') DEFAULT NULL,
     doctor_rating DECIMAL(3,2) DEFAULT NULL,
     feedback TEXT DEFAULT NULL,
