@@ -272,6 +272,7 @@ async function addDescriptionInDocumet(conn) {
     "Add new description field"
   );
 }
+
 async function addProfilePictureInDentist(conn) {
   await addColumnIfNotExists(
     conn,
@@ -303,6 +304,17 @@ async function removeUnwantedFields(conn) {
   await dropColumnIfExists(conn, "notifications", "file_url");
   await dropColumnIfExists(conn, "treatment", "treatment_images");
 }
+
+async function addFinalStatusInAppointment(conn){
+  await addColumnIfNotExists(
+    conn,
+    "appointment",
+    "appointment_final_status",
+    "ENUM('pending','inprogress','completed','cancelled','fully_completed') DEFAULT 'pending'",
+    "Add new appointment_final_status field"
+  )
+}
+
 async function createFileFields(conn) {
   // Dentist table
   await addColumnIfNotExists(
@@ -413,6 +425,7 @@ async function modifyPaymentReferenceToText(conn) {
     await addProfilePictureInDentist(conn);
     await createFileFields(conn);
     await modifyPaymentReferenceToText(conn);
+    await addFinalStatusInAppointment(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");
