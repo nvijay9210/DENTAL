@@ -23,7 +23,7 @@ const createLoginHistoryValidation = async (details) => {
 /**
  * Validate Update LoginHistory Input with Tenant Scope
  */
-const updateLoginHistoryValidation = async (loginhistory_id, details) => {
+const updateLoginHistoryValidation = async (login_history_id, details) => {
   validateInput(details, loginhistoryColumnConfig);
 
   if (details.logout_time === null)
@@ -32,14 +32,13 @@ const updateLoginHistoryValidation = async (loginhistory_id, details) => {
   const earlier = isEarlier(details.login_time, details.logout_time);
   if (!earlier) throw new CustomError("logout_time is smaller than login_time");
 
-  const exists = await checkIfIdExists(
-    "loginhistory",
-    "loginhistory_id",
-    loginhistory_id
+
+
+   await checkIfIdExists(
+    "login_history",
+    "login_history_id",
+    login_history_id
   );
-  if (!exists) {
-    throw new CustomError("LoginHistory not found", 404);
-  }
 };
 
 module.exports = {

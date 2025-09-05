@@ -324,7 +324,8 @@ module.exports = {
 
   ADD_LOGIN_HISTORY_LOGIN: "/addloginhistory",
   GETALL_LOGIN_HISTORY: "/getallloginhistories/:tenant_id",
-  ADD_LOGIN_HISTORY_LOGOUT: "/updateloginhistory/:loginhistory_id/:tenant_id",
+  GET_LOGIN_HISTORY_KEYCLOAK_USER_ID: "/getloginhistory/:tenant_id/:keycloak_user_id",
+  ADD_LOGIN_HISTORY_LOGOUT: "/updateloginhistory/:login_history_id/:tenant_id",
 };
 
 // GET /api/tenant?page=2&limit=10

@@ -30,14 +30,14 @@ const getAllLoginHistorysByTenantId = async (tenantId, limit, offset) => {
 };
 
 // Get loginhistory by tenant ID and loginhistory ID
-const getLoginHistoryByTenantAndLoginHistoryId = async (tenant_id, loginhistory_id) => {
+const getLoginHistoryByTenantAndLoginHistoryId = async (tenant_id, login_history_id) => {
   try {
-    const rows = await record.getRecordByIdAndTenantId(
+    const [rows] = await record.getRecordByIdAndTenantId(
       TABLE,
       "tenant_id",
       tenant_id,
-      "loginhistory_id",
-      loginhistory_id
+      "login_history_id",
+      login_history_id
     );
     return rows;
   } catch (error) {
@@ -46,11 +46,50 @@ const getLoginHistoryByTenantAndLoginHistoryId = async (tenant_id, loginhistory_
   }
 };
 
-// Update loginhistory
-const updateLoginHistory = async (loginhistory_id, columns, values, tenant_id) => {
+
+const getLoginHistoryByTenantAndKeycloakUserId = async (tenantId,keycloak_user_id) => {
+  const query1 = `SELECT * FROM login_history  WHERE tenant_id = ? AND keycloak_user_id = ?`;
+  const conn = await pool.getConnection();
   try {
-    const conditionColumn = ["tenant_id", "loginhistory_id"];
-    const conditionValue = [tenant_id, loginhistory_id];
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      keycloak_user_id
+    ]);
+    
+    return rows.at(-1)
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+// const getLoginHistoryByTenantAndKeycloakUserId = async (tenant_id, keycloak_user_id) => {
+//   try {
+//     console.log(tenant_id,keycloak_user_id)
+//     const rows = await record.getRecordByIdAndTenantId(
+//       TABLE,
+//       "tenant_id",
+//       tenant_id,
+//       "keycloak_user_id",
+//       keycloak_user_id
+//     );
+//     console.log(rows)
+//     return rows
+//   } catch (error) {
+//     console.error("Error fetching loginhistory:", error);
+//     throw error
+//   }
+// };
+
+// Update loginhistory
+
+
+const updateLoginHistory = async (login_history_id, columns, values, tenant_id) => {
+  try {
+    const conditionColumn = ["tenant_id", "login_history_id"];
+    const conditionValue = [tenant_id, login_history_id];
 
     return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
@@ -60,10 +99,10 @@ const updateLoginHistory = async (loginhistory_id, columns, values, tenant_id) =
 };
 
 // Delete loginhistory
-const deleteLoginHistoryByTenantAndLoginHistoryId = async (tenant_id, loginhistory_id) => {
+const deleteLoginHistoryByTenantAndLoginHistoryId = async (tenant_id, login_history_id) => {
   try {
-    const conditionColumn = ["tenant_id", "loginhistory_id"];
-    const conditionValue = [tenant_id, loginhistory_id];
+    const conditionColumn = ["tenant_id", "login_history_id"];
+    const conditionValue = [tenant_id, login_history_id];
 
     const result = await record.deleteRecord(TABLE, conditionColumn, conditionValue);
     return result.affectedRows;
@@ -81,4 +120,5 @@ module.exports = {
   getLoginHistoryByTenantAndLoginHistoryId,
   updateLoginHistory,
   deleteLoginHistoryByTenantAndLoginHistoryId,
+  getLoginHistoryByTenantAndKeycloakUserId
 };

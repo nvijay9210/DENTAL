@@ -7,7 +7,8 @@ const {
 
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
-const { convertUTCToLocal, isoToSqlDatetime } = require("../utils/DateUtils");
+const { convertUTCToLocal, isoToSqlDatetime, formatDateOnly, formatDateTime } = require("../utils/DateUtils");
+const { default: KeycloakAdminClient } = require("keycloak-admin");
 
 // Field mapping for loginhistorys (similar to treatment)
 
@@ -25,8 +26,8 @@ const loginhistoryFields = {
     };
     return JSON.stringify(combined);
   },
-  login_time: (val) => val ? isoToSqlDatetime(val) : null,
-  logout_time: (val) => val ? isoToSqlDatetime(val) : null,
+  login_time: (val) => val,
+  logout_time: (val) => val,
   // created_time is auto-generated, skip
 };
 
@@ -36,8 +37,8 @@ const loginhistoryFieldsReverseMap = {
   app_name: (val) => val,
   keycloak_user_id: (val) => val,
   session_id: (val) => val,
-  login_time: (val) => val ? isoToSqlDatetime(val) : null,
-  logout_time: (val) => val ? isoToSqlDatetime(val) : null,
+  login_time: (val) => val?formatDateTime(val):null,
+  logout_time: (val) => val?formatDateTime(val):null,
   ip_address: (val) => val,
   // Parse user_agent JSON → split into browser_info & device_info
   user_agent: (val) => {
@@ -47,7 +48,7 @@ const loginhistoryFieldsReverseMap = {
       device_info: parsed.device_info || null
     };
   },
-  created_time: (val) => (val ? convertUTCToLocal(val) : null),
+  created_time: (val) => (val ? formatDateOnly(val) : null),
 };
 
 // Create LoginHistory
@@ -55,7 +56,7 @@ const createLoginHistory = async (data) => {
   
   try {
     const { columns, values } = mapFields(data, loginhistoryFields);
-    console.log(values)
+
     const loginhistoryId = await loginhistoryModel.createLoginHistory(
       "login_history",
       columns,
@@ -125,6 +126,29 @@ const getLoginHistoryByTenantIdAndLoginHistoryId = async (
   }
 };
 
+const getLoginHistoryByTenantAndKeycloakUserId = async (
+  tenantId,
+  keycloak_user_id
+) => {
+  try {
+    const login_history =
+      await loginhistoryModel.getLoginHistoryByTenantAndKeycloakUserId(
+        tenantId,
+        keycloak_user_id
+      );
+
+    const convertedRows = helper.convertDbToFrontend(
+      login_history,
+      loginhistoryFieldsReverseMap
+    );
+
+    return convertedRows;
+  } catch (error) {
+    console.log(error)
+    throw new CustomError("Failed to fetch login_history: " + error.message, 404);
+  }
+};
+
 // Update LoginHistory
 const updateLoginHistory = async (loginhistoryId, data, tenant_id) => {
   try {
@@ -179,4 +203,5 @@ module.exports = {
   getLoginHistoryByTenantIdAndLoginHistoryId,
   updateLoginHistory,
   deleteLoginHistoryByTenantIdAndLoginHistoryId,
+  getLoginHistoryByTenantAndKeycloakUserId
 };

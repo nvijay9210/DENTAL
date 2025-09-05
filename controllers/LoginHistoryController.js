@@ -1,17 +1,16 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
-const loginhistoryService = require("../services/LoginHistoryService");
+const login_historyService = require("../services/LoginHistoryService");
 const { getClientInfo } = require("../utils/LoginHistoryInfo");
 const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 const { createLoginHistoryValidation, updateLoginHistoryValidation } = require("../validations/LoginHistoryValidation");
 const { v4: uuidv4 } = require('uuid');
 
 /**
- * Create a new loginhistory
+ * Create a new login_history
  */
 exports.createLoginHistory = async (req, res, next) => {
   const details = req.body;
-  const operation = req.query.operation;
 
   try {
     // Generate session ID if not already set
@@ -21,28 +20,21 @@ exports.createLoginHistory = async (req, res, next) => {
 
     // Get client info (IP, browser, device, etc.)
     const clientInfo = await getClientInfo(req);
-    console.log('Client Info:', clientInfo);
+
 
     // Build login history data
     const loginHistoryData = {
       ...details,
       ip_address: clientInfo.ip,
       device_info: clientInfo.device,
-      browser_info: clientInfo.browser,
-      // Set login_time or logout_time based on operation
-      ...(operation === 'login' 
-        ? { login_time: clientInfo.loginTime } 
-        : operation === 'logout' 
-          ? { logout_time: clientInfo.loginTime }  // Note: use loginTime as current time
-          : {}
-      )
+      browser_info: clientInfo.browser
     };
 
     // Validate data
     await createLoginHistoryValidation(loginHistoryData);
 
     // Save to DB
-    const id = await loginhistoryService.createLoginHistory(loginHistoryData);
+    const id = await login_historyService.createLoginHistory(loginHistoryData);
 
     // Respond
     res.status(201).json({ message: "LoginHistory created", id });
@@ -53,64 +45,82 @@ exports.createLoginHistory = async (req, res, next) => {
 };
 
 /**
- * Get all loginhistorys by tenant ID with pagination
+ * Get all login_historys by tenant ID with pagination
  */
 exports.getAllLoginHistorysByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
   const { page, limit } = req.query;
   await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
-    const loginhistorys = await loginhistoryService.getAllLoginHistorysByTenantId(
+    const login_historys = await login_historyService.getAllLoginHistorysByTenantId(
       tenant_id,
       page,
       limit
     );
-    res.status(200).json(loginhistorys);
+    res.status(200).json(login_historys);
   } catch (err) {
     next(err);
   }
 };
 
 /**
- * Get loginhistory by tenant and loginhistory ID
+ * Get login_history by tenant and login_history ID
  */
 exports.getLoginHistoryByTenantIdAndLoginHistoryId = async (req, res, next) => {
-  const { loginhistory_id, tenant_id } = req.params;
+  const { login_history_id, tenant_id } = req.params;
 
   try {
-    const loginhistory1 = await checkIfExists(
-      "loginhistory",
-      "loginhistory_id",
-      loginhistory_id,
+    const login_history1 = await checkIfExists(
+      "login_history",
+      "login_history_id",
+      login_history_id,
       tenant_id
     );
 
-    if (!loginhistory1) throw new CustomError("LoginHistory not found", 404);
+    if (!login_history1) throw new CustomError("LoginHistory not found", 404);
 
-    // Fetch loginhistory details
-    const loginhistory = await loginhistoryService.getLoginHistoryByTenantIdAndLoginHistoryId(
+    // Fetch login_history details
+    const login_history = await login_historyService.getLoginHistoryByTenantIdAndLoginHistoryId(
       tenant_id,
-      loginhistory_id
+      login_history_id
     );
-    res.status(200).json(loginhistory);
+    res.status(200).json(login_history);
   } catch (err) {
     next(err);
   }
 };
 
+exports.getLoginHistoryByTenantAndKeycloakUserId = async (req, res, next) => {
+  const { keycloak_user_id, tenant_id } = req.params;
+
+  try {
+
+    // Fetch login_history details
+    const login_history = await login_historyService.getLoginHistoryByTenantAndKeycloakUserId(
+      tenant_id,
+      keycloak_user_id
+    );
+    res.status(200).json(login_history);
+  } catch (err) {
+    console.log(err)
+    next(err);
+  }
+};
+
 /**
- * Update an existing loginhistory
+ * Update an existing login_history
  */
 exports.updateLoginHistory = async (req, res, next) => {
-  const { loginhistory_id,tenant_id } = req.params;
+  const { login_history_id,tenant_id } = req.params;
   const details = req.body;
+
 
   try {
     // Validate update input
-    await updateLoginHistoryValidation(loginhistory_id, details);
+    await updateLoginHistoryValidation(login_history_id, details);
 
-    // Update the loginhistory
-    await loginhistoryService.updateLoginHistory(loginhistory_id, details, tenant_id);
+    // Update the login_history
+    await login_historyService.updateLoginHistory(login_history_id, details, tenant_id);
     res.status(200).json({ message: "LoginHistory updated successfully" });
   } catch (err) {
     next(err);
@@ -118,25 +128,25 @@ exports.updateLoginHistory = async (req, res, next) => {
 };
 
 /**
- * Delete a loginhistory by ID and tenant ID
+ * Delete a login_history by ID and tenant ID
  */
 exports.deleteLoginHistoryByTenantIdAndLoginHistoryId = async (req, res, next) => {
-  const { loginhistory_id, tenant_id } = req.params;
+  const { login_history_id, tenant_id } = req.params;
 
   try {
-    // Validate if loginhistory exists
+    // Validate if login_history exists
     const treatment = await checkIfExists(
-      "loginhistory",
-      "loginhistory_id",
-      loginhistory_id,
+      "login_history",
+      "login_history_id",
+      login_history_id,
       tenant_id
     );
-    if (!treatment) throw new CustomError("loginhistoryId not Exists", 404);
+    if (!treatment) throw new CustomError("login_historyId not Exists", 404);
 
-    // Delete the loginhistory
-    await loginhistoryService.deleteLoginHistoryByTenantIdAndLoginHistoryId(
+    // Delete the login_history
+    await login_historyService.deleteLoginHistoryByTenantIdAndLoginHistoryId(
       tenant_id,
-      loginhistory_id
+      login_history_id
     );
     res.status(200).json({ message: "LoginHistory deleted successfully" });
   } catch (err) {

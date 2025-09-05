@@ -6,7 +6,9 @@ const {
  
   ADD_LOGIN_HISTORY_LOGIN,
   ADD_LOGIN_HISTORY_LOGOUT,
-  GETALL_LOGIN_HISTORY
+  GETALL_LOGIN_HISTORY,
+  GET_LOGIN_HISTORY,
+  GET_LOGIN_HISTORY_KEYCLOAK_USER_ID
 } = require("./RouterPath");
 
 // Create LoginHistory
@@ -15,6 +17,14 @@ router.post(
   loginhistoryController.createLoginHistory
 );
 router.get(
+  GETALL_LOGIN_HISTORY,
+  loginhistoryController.getAllLoginHistorysByTenantId
+);
+router.get(
+  GET_LOGIN_HISTORY_KEYCLOAK_USER_ID,
+  loginhistoryController.getLoginHistoryByTenantAndKeycloakUserId
+);
+router.put(
   GETALL_LOGIN_HISTORY,
   loginhistoryController.getAllLoginHistorysByTenantId
 );

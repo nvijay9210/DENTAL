@@ -49,5 +49,3 @@ function getClientInfo(req) {
 
 module.exports = { getClientInfo };
 
-
-module.exports = {getClientInfo};
