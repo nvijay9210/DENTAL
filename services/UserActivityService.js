@@ -18,8 +18,7 @@ const userActivityFields = {
   activity_type: (val) => val,
   activity_desc: (val) => val,
   ip_address: (val) => val,
-  user_agent: (val) => helper.safeStringify(val),
-  activity_time: (val) => val, // keep as is or format when needed
+  user_agent: (val) => helper.safeStringify(val)
 };
 
 const userActivityFieldsReverseMap = {
@@ -40,17 +39,17 @@ const userActivityFieldsReverseMap = {
 const createUserActivity = async (data) => {
   try {
     const { columns, values } = mapFields(data, userActivityFields);
-    const useractivityId = await useractivityModel.createUserActivity(
-      "useractivity",
+    const user_activity_id = await useractivityModel.createUserActivity(
+      "user_activity",
       columns,
       values
     );
-    await invalidateCacheByPattern("useractivity:*");
-    return useractivityId;
+    await invalidateCacheByPattern("user_activity:*");
+    return user_activity_id;
   } catch (error) {
-    console.error("Failed to create useractivity:", error);
+    console.error("Failed to create user_activity:", error);
     throw new CustomError(
-      `Failed to create useractivity: ${error.message}`,
+      `Failed to create user_activity: ${error.message}`,
       404
     );
   }
@@ -63,7 +62,7 @@ const getAllUserActivitysByTenantId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = `useractivity:${tenantId}:page:${page}:limit:${limit}`;
+  const cacheKey = `user_activity:${tenantId}:page:${page}:limit:${limit}`;
 
   try {
     const useractivitys = await getOrSetCache(cacheKey, async () => {
@@ -75,8 +74,8 @@ const getAllUserActivitysByTenantId = async (
       return result;
     });
 
-    const convertedRows = useractivitys.data.map((useractivity) =>
-      helper.convertDbToFrontend(useractivity, userActivityFieldsReverseMap)
+    const convertedRows = useractivitys.data.map((user_activity) =>
+      helper.convertDbToFrontend(user_activity, userActivityFieldsReverseMap)
     );
 
     return { data: convertedRows, total: useractivitys.total };
@@ -89,17 +88,17 @@ const getAllUserActivitysByTenantId = async (
 // Get UserActivity by ID & Tenant
 const getUserActivityByTenantIdAndUserActivityId = async (
   tenantId,
-  useractivityId
+  user_activity_id
 ) => {
   try {
-    const useractivity =
+    const user_activity =
       await useractivityModel.getUserActivityByTenantAndUserActivityId(
         tenantId,
-        useractivityId
+        user_activity_id
       );
 
     const convertedRows = helper.convertDbToFrontend(
-      useractivity,
+      user_activity,
       userActivityFieldsReverseMap
     );
 
@@ -110,11 +109,11 @@ const getUserActivityByTenantIdAndUserActivityId = async (
 };
 
 // Update UserActivity
-const updateUserActivity = async (useractivityId, data) => {
+const updateUserActivity = async (user_activity_id, data) => {
   try {
     const { columns, values } = mapFields(data, userActivityFields);
     const affectedRows = await useractivityModel.updateUserActivity(
-      useractivityId,
+      user_activity_id,
       columns,
       values
     );
@@ -123,7 +122,7 @@ const updateUserActivity = async (useractivityId, data) => {
     //   throw new CustomError(err, 500);
     // }
 
-    await invalidateCacheByPattern("useractivity:*");
+    await invalidateCacheByPattern("user_activity:*");
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);

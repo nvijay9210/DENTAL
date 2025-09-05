@@ -13,6 +13,7 @@ const errorHandler = require('./middlewares/errorHandler');
 const createTable = require('./models/CreateModel');
 require('dotenv').config();
 const rateLimit = require('express-rate-limit');
+const userActivityLogger = require('./utils/UserActivityUtil');
 
 // Routers
 const userRouter = require('./routes/userRouter');
@@ -144,6 +145,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads/", express.static(path.join(__dirname, "uploads")));
 app.use("/files", express.static("uploads/"));
+app.use(userActivityLogger);
 // app.use(logRequest);
 
 
@@ -230,6 +232,7 @@ app.get('/test', (req, res) => {
 
 
 const bodyParser = require("body-parser");
+
 app.use(bodyParser.json())
 
 // In production use Redis/DB instead of memory

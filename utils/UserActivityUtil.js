@@ -1,53 +1,58 @@
-const {  createUserActivity } = require('../services/UserActivityService');
+// middleware/userActivityLogger.js
+const { createUserActivity } = require("../services/UserActivityService");
+const { getClientInfo } = require("./LoginHistoryInfo");
 
-/**
- * Reusable middleware to log user activity
- * @param {string} action - e.g., CREATE_PATIENT
- * @param {Function} descFn - (req, createdBy) => string
- */
-const activityLogger = (action, descFn) => {
-  return async (req, res, next) => {
-    res.on('finish', async () => {
-      if (res.statusCode >= 200 && res.statusCode < 300) {
+const userActivityLogger = async (req, res, next) => {
+  res.on("finish", async () => {
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      const method = req.method;
+
+      if (["POST", "PUT", "DELETE"].includes(method)) {
         try {
-          const tenant_id = req.params?.tenant_id || req.body?.tenant_id;
-          const keycloak_user_id = req.user?.sub;
-          const ip_address = req.clientInfo?.ip;
+          const tenant_id =
+            req.params?.tenant_id || req.body?.tenant_id || null;
+          const keycloak_user_id =
+            req.user?.sub || req.user?.keycloak_id || "anonymous";
 
-          // Build user_agent from client info
-          const clientInfo = req.clientInfo ? {
-            browser: req.clientInfo.browser,
-            device: req.clientInfo.device,
-            os: req.clientInfo.os,
-            deviceType: req.clientInfo.deviceType
-          } : {};
-          const user_agent = JSON.stringify(clientInfo);
+          // ✅ Get detailed client info
+          const clientInfo = getClientInfo(req);
 
-          // ✅ Only use created_by if it exists in req.body
-          const createdBy = req.body?.created_by || null;
+          // Map method → activity_type
+          let activity_type;
+          switch (method) {
+            case "POST":
+              activity_type = "CREATE";
+              break;
+            case "PUT":
+              activity_type = "UPDATE";
+              break;
+            case "DELETE":
+              activity_type = "DELETE";
+              break;
+          }
 
-          // Generate description (can include createdBy)
-          const activity_desc = descFn(req, createdBy);
+          const activity_desc = `${activity_type} ${req.originalUrl}`;
 
-          // Log only with allowed fields
-          await createUserActivity({
-            tenant_id,
-            app_name: 'dental-app',
-            keycloak_user_id,
-            activity_type: action,
-            activity_desc,
-            ip_address,
-            user_agent
-            // activity_time → auto-set by DB
-          }, req);
-
+          await createUserActivity(
+            {
+              tenant_id,
+              app_name: process.env.APP_NAME || "dental-app",
+              keycloak_user_id,
+              activity_type,
+              activity_desc,
+              ip_address: clientInfo.ip,
+              user_agent: JSON.stringify(clientInfo),
+            },
+            req
+          );
         } catch (err) {
-          console.error(`Failed to log ${action}:`, err.message);
+          console.error("User Activity Log Error:", err.message);
         }
       }
-    });
-    next();
-  };
+    }
+  });
+
+  next();
 };
 
-module.exports = {activityLogger};
+module.exports = userActivityLogger;

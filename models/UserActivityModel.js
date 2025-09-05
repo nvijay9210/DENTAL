@@ -2,7 +2,7 @@ const pool = require("../config/db");
 const { CustomError } = require("../middlewares/CustomeError");
 const record = require("../query/Records");
 
-const TABLE = "useractivity";
+const TABLE = "user_activity";
 
 // Create UserActivity
 const createUserActivity = async (table,columns, values) => {
@@ -22,7 +22,7 @@ const getAllUserActivitysByTenantId = async (tenantId, limit, offset) => {
     if (!Number.isInteger(limit) || !Number.isInteger(offset) || limit < 1 || offset < 0) {
       throw error
     }
-    return await record.getAllRecords("useractivity", "tenant_id", tenantId, limit, offset);
+    return await record.getAllRecords("user_activity", "tenant_id", tenantId, limit, offset);
   } catch (error) {
     console.error("Error fetching useractivitys:", error);
     throw error
@@ -30,14 +30,14 @@ const getAllUserActivitysByTenantId = async (tenantId, limit, offset) => {
 };
 
 // Get useractivity by tenant ID and useractivity ID
-const getUserActivityByTenantAndUserActivityId = async (tenant_id, useractivity_id) => {
+const getUserActivityByTenantAndUserActivityId = async (tenant_id, user_activity_id) => {
   try {
     const rows = await record.getRecordByIdAndTenantId(
       TABLE,
       "tenant_id",
       tenant_id,
-      "useractivity_id",
-      useractivity_id
+      "user_activity_id",
+      user_activity_id
     );
     return rows;
   } catch (error) {
@@ -47,10 +47,10 @@ const getUserActivityByTenantAndUserActivityId = async (tenant_id, useractivity_
 };
 
 // Update useractivity
-const updateUserActivity = async (useractivity_id, columns, values) => {
+const updateUserActivity = async (user_activity_id, columns, values) => {
   try {
-    const conditionColumn = ["useractivity_id"];
-    const conditionValue = [useractivity_id];
+    const conditionColumn = ["user_activity_id"];
+    const conditionValue = [user_activity_id];
 
     return await record.updateRecord(TABLE, columns, values, conditionColumn, conditionValue);
   } catch (error) {
