@@ -2,7 +2,7 @@ const pool = require("../config/db");
 const { CustomError } = require("../middlewares/CustomeError");
 const record = require("../query/Records");
 
-const TABLE = "loginhistory";
+const TABLE ="login_history";
 
 // Create LoginHistory
 const createLoginHistory = async (table,columns, values) => {

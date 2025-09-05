@@ -12,7 +12,6 @@ const { convertUTCToLocal } = require("../utils/DateUtils");
 // Field mapping for useractivitys (similar to treatment)
 
 const userActivityFields = {
-  user_activity_id: (val) => val,
   tenant_id: (val) => val,
   app_name: (val) => val,
   keycloak_user_id: (val) => val,

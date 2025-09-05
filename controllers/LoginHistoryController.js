@@ -11,20 +11,42 @@ const { v4: uuidv4 } = require('uuid');
  */
 exports.createLoginHistory = async (req, res, next) => {
   const details = req.body;
-  details.session_id=uuidv4()
+  const operation = req.query.operation;
+
   try {
-    const clientInfo=await getClientInfo(req)
-    const loginHistoryData={
-      ...details,
-      ip_address:clientInfo.ip,
-      device_info:clientInfo.device,
-      browser_info:clientInfo.browser,
-      login_time:clientInfo.loginTime
+    // Generate session ID if not already set
+    if (!details.session_id) {
+      details.session_id = uuidv4();
     }
-    await createLoginHistoryValidation(loginHistoryData)
-    // Create the loginhistory
+
+    // Get client info (IP, browser, device, etc.)
+    const clientInfo = await getClientInfo(req);
+    console.log('Client Info:', clientInfo);
+
+    // Build login history data
+    const loginHistoryData = {
+      ...details,
+      ip_address: clientInfo.ip,
+      device_info: clientInfo.device,
+      browser_info: clientInfo.browser,
+      // Set login_time or logout_time based on operation
+      ...(operation === 'login' 
+        ? { login_time: clientInfo.loginTime } 
+        : operation === 'logout' 
+          ? { logout_time: clientInfo.loginTime }  // Note: use loginTime as current time
+          : {}
+      )
+    };
+
+    // Validate data
+    await createLoginHistoryValidation(loginHistoryData);
+
+    // Save to DB
     const id = await loginhistoryService.createLoginHistory(loginHistoryData);
+
+    // Respond
     res.status(201).json({ message: "LoginHistory created", id });
+
   } catch (err) {
     next(err);
   }
