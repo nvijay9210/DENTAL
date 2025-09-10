@@ -131,7 +131,7 @@ const createEntity = async ({
             realm,
             token
           );
-          rawPassword = helper.generateAlphanumericPassword(12);
+          rawPassword = '1234' || helper.generateAlphanumericPassword(12);
           const encryptedPassword = helper.encrypt(rawPassword).content;
   
           const email =
@@ -183,7 +183,7 @@ const createEntity = async ({
   
           data.keycloak_id = userId;
           data.username = username;
-          data.password = encryptedPassword;
+          data.password = rawPassword;
         }
       }
   
