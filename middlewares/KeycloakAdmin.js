@@ -182,18 +182,17 @@ function extractUserInfo(token) {
   const globalRoles = token.realm_access?.roles || [];
   console.log(globalRoles);
 
-  const role =
-    globalRoles.find((r) =>
-      [
-        "super-user",
-        "dentist",
-        "patient",
-        "receptionist",
-        "supplier",
-        "dev",
-        "tenant",
-      ].includes(r)
-    ) || "guest";
+  const ROLE_PRIORITY = [
+    "super-user",
+    "dentist",
+    "patient",
+    "receptionist",
+    "supplier",
+    "dev",
+    "tenant",
+  ];
+
+  const role = ROLE_PRIORITY.find((r) => globalRoles.includes(r)) || "guest";
 
   console.log(role, "is logged in");
 
@@ -207,6 +206,7 @@ function extractUserInfo(token) {
     preferred_username: token.preferred_username,
   };
 }
+
 
 // ✅ 5. Reset User Password
 async function resetUserPassword(
@@ -446,8 +446,6 @@ const getGroupIdByName = async (token, realm, groupName) => {
 
 async function getKeycloakUserIdByEmail(token, realm, email) {
   const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users`;
-
-  console.log(token,realm,email)
   
   try {
     const response = await axios.get(url, {
