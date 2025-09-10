@@ -21,6 +21,7 @@ const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");
 const { encrypt } = require("../middlewares/PasswordHash");
 const { rollbackKeycloakUser } = require("../Keycloak/KeycloakService");
+const { createEntity, updateEntity } = require("../utils/Reusability");
 
 // Field mapping for suppliers (similar to treatment)
 
@@ -91,130 +92,18 @@ const supplierFieldsReverseMap = {
 };
 // Create Supplier
 const createSupplier = async (data, token, realm) => {
-  const fieldMap = {
-    ...supplierFields,
-    created_by: (val) => val,
-  };
+  const newSupplier = await createEntity({
+    data,
+    entityName: "supplier",
+    token,
+    realm,
+    fieldMap: supplierFields,
+    createModel: supplierModel.createSupplier,
+    nameFields: { fullName: "name" },
+    roleName:'supplier'
+  });
 
-  let userId = null; // Track Keycloak user for rollback
-  let username = null; // Generated username
-  let rawPassword = null; // Raw password to return (once)
-
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-
-    if (process.env.KEYCLOAK_POWER === "on") {
-      // 1. Generate username
-      username = await helper.generateUsername("SUP", realm, token);
-      const newpassword ="1234" || helper.generateAlphanumericPassword();
-            rawPassword= helper.encrypt(newpassword)
-      const email =
-        data.email ||
-        `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
-
-      // 2. Extract firstName and lastName from name
-      const [firstName, ...rest] = data.name.trim().split(" ");
-      const lastName = rest.length > 0 ? rest.join(" ") : "-";
-
-      const userData = {
-        username,
-        email,
-        firstName,
-        lastName,
-        password: "1234"||rawPassword,
-        emailVerified: true, // Important: avoid email verification flow
-      };
-
-      // 3. Create Keycloak user
-      const isUserCreated = await addUser(token, realm, userData);
-      if (!isUserCreated) {
-        throw new CustomError("Keycloak user creation failed", 400);
-      }
-      console.log("✅ Keycloak user created:", username);
-
-      // 4. Get Keycloak user ID
-      userId = await getUserIdByUsername(token, realm, username);
-      if (!userId) {
-        throw new CustomError("Could not fetch Keycloak user ID", 400);
-      }
-      console.log("🆔 Keycloak user ID fetched:", userId);
-
-      // 5. Assign 'supplier' role
-      const roleAssigned = await assignRealmRoleToUser(
-        token,
-        realm,
-        userId,
-        "supplier"
-      );
-      if (!roleAssigned) {
-        throw new CustomError("Failed to assign 'supplier' role", 400);
-      }
-      console.log("🏷️ Role 'supplier' assigned");
-
-      // 6. Optional: Add to group (clinic-based)
-      if (data.clinic_id) {
-        const groupName = `dental-${data.tenant_id}-${data.clinic_id}`;
-        const groupAdded = await addUserToGroup(
-          token,
-          realm,
-          userId,
-          groupName
-        );
-        if (!groupAdded) {
-          console.warn(`⚠️ Failed to add supplier to group: ${groupName}`);
-        } else {
-          console.log(`👥 Added to group: ${groupName}`);
-        }
-      }
-
-      // Attach to DB data
-      data.keycloak_id = userId;
-      data.username = username;
-      data.password = encrypt(rawPassword).content;
-    }
-
-    // 7. Map fields and insert supplier
-    const { columns, values } = mapFields(data, fieldMap);
-    const supplierId = await supplierModel.createSupplier(
-      connection,
-      "supplier",
-      columns,
-      values
-    );
-
-    // 8. Commit transaction
-    await connection.commit();
-
-    // 9. Invalidate cache (after commit)
-    await invalidateCacheByPattern("supplier:*");
-    await invalidateCacheByPattern("supplier:clinic:*"); // Optional: granular
-
-    // 10. Return result
-    return {
-      supplierId,
-      username,
-      password: rawPassword, // Only returned once, on creation
-    };
-  } catch (error) {
-    // 🔴 Rollback DB transaction
-    await connection.rollback();
-
-    // 🔁 Rollback Keycloak user if created
-    if (process.env.KEYCLOAK_POWER === "on" && userId) {
-      try {
-        await rollbackKeycloakUser(token, realm, userId);
-        console.log(`♻️ Rolled back Keycloak user: ${userId}`);
-      } catch (rollbackErr) {
-        console.error("❌ Failed to rollback Keycloak user:", rollbackErr);
-      }
-    }
-
-    console.error("❌ Failed to create supplier:", error.message);
-    throw new CustomError(`Failed to create supplier: ${error.message}`, 500);
-  } finally {
-    connection.release(); // Always release connection
-  }
+  return newSupplier
 };
 
 // Get All Suppliers by Tenant ID with Caching
@@ -303,88 +192,17 @@ const getSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
 
 // Update Supplier
 const updateSupplier = async (supplierId, data, tenant_id, token, realm) => {
-  const fieldMap = {
-    ...supplierFields,
-    updated_by: (val) => val,
-  };
-
-  let userId = null;
-  const connection = await pool.getConnection();
-
-  try {
-    await connection.beginTransaction();
-
-    // 1. Get current supplier (to get keycloak_id)
-    const supplier = await supplierModel.getSupplierByTenantAndSupplierId(
-      tenant_id,
-      supplierId,
-      connection
-    );
-
-    if (!supplier) {
-      throw new CustomError("Supplier not found", 404);
-    }
-
-    userId = supplier.keycloak_id;
-
-    // 2. Prepare and update DB
-    const { columns, values } = mapFields(data, fieldMap);
-    const affectedRows = await supplierModel.updateSupplier(
-      connection,
-      supplierId,
-      columns,
-      values,
-      tenant_id
-    );
-
-    if (affectedRows === 0) {
-      await connection.commit();
-      return { affectedRows };
-    }
-
-    // 3. Sync to Keycloak (email, name)
-    if (process.env.KEYCLOAK_POWER === "on" && userId) {
-      const updatePayload = {};
-      if (data.email) updatePayload.email = data.email;
-
-      // Extract firstName and lastName from `name`
-      if (data.name) {
-        const [firstName, ...rest] = data.name.trim().split(" ");
-        updatePayload.firstName = firstName;
-        updatePayload.lastName = rest.length > 0 ? rest.join(" ") : "-";
-      }
-
-      if (Object.keys(updatePayload).length > 0) {
-        try {
-          await updateUserInKeycloak(token, realm, userId, updatePayload);
-          console.log(
-            `✅ Synced supplier ${supplierId} to Keycloak`,
-            updatePayload
-          );
-        } catch (kcError) {
-          console.warn(
-            `⚠️ Keycloak sync failed for supplier ${supplierId}. Continuing with DB update.`,
-            kcError.message
-          );
-          // 🟡 Do NOT rollback — DB is source of truth
-        }
-      }
-    }
-
-    // 4. Commit transaction
-    await connection.commit();
-
-    // 5. Invalidate cache
-    await invalidateCacheByPattern("supplier:*");
-
-    return { affectedRows };
-  } catch (error) {
-    await connection.rollback();
-    console.error("Update Supplier Error:", error.message);
-    throw new CustomError(`Failed to update supplier: ${error.message}`, 500);
-  } finally {
-    connection.release();
-  }
+  return await updateEntity({
+    entityId: supplierId,
+    entityName: "supplier",
+    tenantId:tenant_id,
+    data,
+    token,
+    realm,
+    fieldMap: supplierFields,
+    getModelById: supplierModel.getSupplierByTenantAndSupplierId,
+    updateModel: supplierModel.updateSupplier
+  });
 };
 
 // Delete Supplier

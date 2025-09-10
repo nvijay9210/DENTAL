@@ -249,6 +249,7 @@ function generateAlphanumericPassword(length = 6) {
 }
 
 const crypto = require("crypto");
+const { mapFields } = require("../query/Records");
 
 const algorithm = "aes-256-cbc";
 const key = crypto.scryptSync("dental@123", "salt", 32);
@@ -274,6 +275,22 @@ function decrypt(encrypted) {
   return decrypted;
 }
 
+function sanitizeFields(data) {
+  const sanitized = {};
+  for (const key in data) {
+    if (data[key] === undefined) {
+      sanitized[key] = null; // replace undefined with null
+    } else {
+      sanitized[key] = data[key];
+    }
+  }
+  return sanitized;
+}
+
+
+
+
+
 
 // -------------------- EXPORTS --------------------
 
@@ -295,5 +312,6 @@ module.exports = {
   generateAlphanumericPassword,
   generateUsername,
   encrypt,
-  decrypt
+  decrypt,
+  sanitizeFields
 };

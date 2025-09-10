@@ -46,7 +46,7 @@ const getDentistByTenantIdAndDentistId = async (
   }
 };
 
-const updateDentist = async (conn, dentist_id, columns, values, tenant_id) => {
+const updateDentist = async ( dentist_id, columns, values, tenant_id,conn=null) => {
   const conditionColumn = ["tenant_id", "dentist_id"];
   const conditionValue = [tenant_id, dentist_id];
 

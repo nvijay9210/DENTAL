@@ -211,7 +211,6 @@ const uploadFileMiddleware2 = (options) => {
   } = options;
 
   return async (req, res, next) => {
-
     try {
       const ensureFolderExists = (folderPath) => {
         if (!fs.existsSync(folderPath)) {
@@ -228,9 +227,6 @@ const uploadFileMiddleware2 = (options) => {
 
       const uploadedFiles = {};
       const tenant_id = req.body.tenant_id || req.params.tenant_id;
-      let id = 0;
-
-      // Map folderName to ID field
       const idMap = {
         Notification: "notification_id",
         Supplier_products: "supplier_product_id",
@@ -241,16 +237,14 @@ const uploadFileMiddleware2 = (options) => {
         Clinic: "clinic_id",
         Tenant: "tenant_id",
       };
-      id = req.params[idMap[folderName]];
+      const id = req.params[idMap[folderName]];
 
       // Run validation only if not in "settings" mode
       const settings = parseInt(req.query.settings || "0", 10);
       if (settings !== 1) {
         if (id) {
-          console.log("update");
           await updateValidationFn(id, req.body, tenant_id);
         } else {
-          console.log("create");
           await createValidationFn(req.body);
         }
       }
@@ -273,7 +267,7 @@ const uploadFileMiddleware2 = (options) => {
       ];
 
       // Delete old file from disk and DB
-      const deleteOldFiles = async (fieldName, req, id, folderName, tenant_id) => {
+      const deleteOldFiles = async (fieldName) => {
         try {
           const tableMap = {
             Dentist: { table: "dentist", idField: "dentist_id" },
@@ -287,10 +281,9 @@ const uploadFileMiddleware2 = (options) => {
             },
             Notification: { table: "notification", idField: "notification_id" },
           };
-      
           const config = tableMap[folderName];
           if (!config) return;
-      
+
           const data = await record.getRecordByIdAndTenantId(
             config.table,
             "tenant_id",
@@ -298,36 +291,22 @@ const uploadFileMiddleware2 = (options) => {
             config.idField,
             id
           );
-      
-          // ✅ Skip if no record or no old file
-          if (!data || !data[fieldName] || data[fieldName].length === 0) {
-            console.log(`No old files to delete for ${folderName}.${fieldName}`);
-            return; // <-- skip deletion
-          }
-      
+
+          if (!data || !data[fieldName] || data[fieldName].length === 0) return;
+
           await deleteUploadedFiles(data[fieldName]);
         } catch (err) {
-          console.warn(
-            `Failed to delete old file for ${folderName}.${fieldName}`,
-            err
-          );
+          console.warn(`Failed to delete old file for ${folderName}.${fieldName}`, err);
         }
       };
-      
 
       // Process file fields
       for (const fileField of fileFields) {
-        const {
-          fieldName,
-          maxSizeMB = 2,
-          multiple = false,
-          subFolder,
-        } = fileField;
+        const { fieldName, maxSizeMB = 2, multiple = false, subFolder } = fileField;
 
         const files = req.files?.filter((f) => f.fieldname === fieldName) || [];
         const hasNewFiles = files.length > 0;
 
-        // Get old URLs if updating
         let oldFileUrls = [];
         if (id) {
           const tableMap = {
@@ -344,39 +323,32 @@ const uploadFileMiddleware2 = (options) => {
           };
 
           const config = tableMap[folderName];
-          if (!config) {
-            console.warn(`No mapping found for folderName: ${folderName}`);
-            return;
-          }
-
-          try {
-            const oldDocs = await record.getRecordByIdAndTenantId(
-              config.table,
-              "tenant_id",
-              tenant_id,
-              config.idField,
-              id
-            );
-            oldFileUrls = oldDocs[fieldName];
-          } catch (err) {
-            console.warn(`Could not fetch old files for ${fieldName}`, err);
+          if (config) {
+            try {
+              const oldDocs = await record.getRecordByIdAndTenantId(
+                config.table,
+                "tenant_id",
+                tenant_id,
+                config.idField,
+                id
+              );
+              oldFileUrls = oldDocs[fieldName];
+            } catch (err) {
+              console.warn(`Could not fetch old files for ${fieldName}`, err);
+            }
           }
         }
 
         const savedPaths = [];
 
         if (hasNewFiles) {
-          // Only delete old if new files exist
-          await deleteOldFiles(fieldName, req);
+          await deleteOldFiles(fieldName);
 
           for (const file of files) {
             const maxSizeBytes = maxSizeMB * 1024 * 1024;
             if (file.size > maxSizeBytes) {
               return res.status(400).json({
-                message: `${fieldName.replace(
-                  /_/g,
-                  " "
-                )} must be less than ${maxSizeMB}MB`,
+                message: `${fieldName.replace(/_/g, " ")} must be less than ${maxSizeMB}MB`,
               });
             }
 
@@ -404,17 +376,17 @@ const uploadFileMiddleware2 = (options) => {
             }
 
             const dynamicSubFolder =
-              subFolder ||
-              (imageExtensions.includes(extension) ? "photo" : "document");
+              subFolder || (imageExtensions.includes(extension) ? "photo" : "document");
             const fieldPath = path.join(baseTenantPath, dynamicSubFolder);
 
             const bufferToSave = imageExtensions.includes(extension)
               ? await compressImage(file.buffer, 100)
               : file.buffer;
 
-            const fileName = `${
-              path.parse(file.originalname).name
-            }_${Date.now()}_${Math.floor(Math.random() * 10000)}${extension}`;
+            const fileName = `${path.parse(file.originalname).name}_${Date.now()}_${Math.floor(
+              Math.random() * 10000
+            )}${extension}`;
+
             const savedPath = await saveFile(bufferToSave, fieldPath, fileName);
             savedPaths.push(savedPath);
           }
@@ -422,12 +394,9 @@ const uploadFileMiddleware2 = (options) => {
           req.body[fieldName] = savedPaths;
           uploadedFiles[fieldName] = savedPaths;
         } else {
-          // No new file — keep old URLs as is
-
-          if (id && oldFileUrls.length > 0) {
-            req.body[fieldName] = oldFileUrls;
-            uploadedFiles[fieldName] = oldFileUrls[0];
-          }
+          // Assign null if no files exist
+          req.body[fieldName] = id && oldFileUrls?.length > 0 ? oldFileUrls : null;
+          uploadedFiles[fieldName] = req.body[fieldName];
         }
       }
 
@@ -438,6 +407,7 @@ const uploadFileMiddleware2 = (options) => {
     }
   };
 };
+
 
 const deleteFileIfExists = (fileUrl) => {
   try {

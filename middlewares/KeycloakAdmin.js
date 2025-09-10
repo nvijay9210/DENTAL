@@ -1,5 +1,7 @@
 const axios = require("axios");
 const { CustomError } = require("./CustomeError");
+const { updateDocumentsDiffBased } = require("../utils/UploadFiles");
+const pool = require("../config/db");
 
 const KEYCLOAK_BASE_URL = process.env.KEYCLOAK_BASE_URL;
 
@@ -441,6 +443,63 @@ const getGroupIdByName = async (token, realm, groupName) => {
   return group?.id || null;
 };
 
+
+async function getKeycloakUserIdByEmail(token, realm, email) {
+  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users`;
+
+  console.log(token,realm,email)
+  
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        email: email,
+        exact: true,  // Ensure exact match
+      },
+    });
+
+    const users = response.data;
+
+    if (users.length === 0) {
+      return null;  // No user found
+    }
+
+    return {id:users[0].id,username:users[0].username};  // Return first matching user ID
+  } catch (error) {
+    console.error('Error fetching Keycloak user by email:', error.response?.data || error.message);
+    throw new Error('Failed to fetch Keycloak user ID');
+  }
+}
+
+
+async function getUserGroups(token, realm, userId) {
+  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/groups`;
+
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Returns an array of groups (each group has `id`, `name`, `path`, etc.)
+    return response.data;
+  } catch (error) {
+    console.error(
+      `❌ Error fetching groups for user ${userId}:`,
+      error.response?.data || error.message
+    );
+    throw new Error('Failed to fetch Keycloak user groups');
+  }
+}
+
+
+
+
+
+
 //For Frontend new User created by old user and delete a old user
 
 //get UserId
@@ -466,4 +525,6 @@ module.exports = {
   updateGroupAttributes,
   deleteKeycloakGroup,
   getGroupIdByName,
+  getKeycloakUserIdByEmail,
+  getUserGroups
 };

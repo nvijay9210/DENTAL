@@ -12,7 +12,6 @@ exports.createPatient = async (req, res, next) => {
   const realm = req.realm;
   const group = req.user.groups[0]; // 'dental-1-5'
   const value = group.split("-")[2]; // '5'
-  console.log("dataIncontroller:", details);
   try {
     // Validate patient data
     await patientValidation.createPatientValidation(details);

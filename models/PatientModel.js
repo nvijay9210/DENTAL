@@ -608,6 +608,30 @@ const getAgeGenderByClinic = async (tenantId, clinicId) => {
   }
 };
 
+const getPatientByKeycloakId = async (keycloak_id, connection=null) => {
+  const query = `
+    SELECT
+      *
+    FROM
+      patient
+    WHERE
+      keycloak_id = ?
+    GROUP BY
+      patient_id
+  `;
+  const conn = connection || await pool.getConnection();
+  let patients;
+  try {
+    [patients] = await conn.query(query, [keycloak_id]);
+    return patients[0];
+  } catch (error) {
+    console.error("Error fetching patient by keycloakid:", error);
+    throw new Error(error.message);
+  } finally {
+    conn.release();
+  }
+};
+
 const getAllPatientsByTenantIdAndClinicId = async (
   tenantId,
   clinicId,
@@ -818,5 +842,5 @@ module.exports = {
   getAgeGenderByClinic,
   getAllPatientsByTenantIdAndClinicId,
   getAllPatientsByTenantIdAndClinicIdAndDentistId,
-  getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus,
+  getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus,getPatientByKeycloakId
 };

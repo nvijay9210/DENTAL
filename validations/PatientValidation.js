@@ -1,13 +1,16 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const patientService = require("../services/PatientService");
-const { checkIfExistsWithoutId, checkIfExists } = require("../models/checkIfExists");
+const {
+  checkIfExistsWithoutId,
+  checkIfExists,
+} = require("../models/checkIfExists");
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
 const { checkPhoneConflicts } = require("../utils/PhonenumbersValidation");
 const { checkEmailConflicts } = require("../utils/EmailValidation");
 
 const uniqueFields = [
-  "email",
+  // "email",
   "insurance_policy_number",
 ];
 
@@ -81,13 +84,13 @@ const patientColumnConfig = [
   {
     columnname: "smoking_status",
     type: "varchar",
-    size:100,
+    size: 100,
     null: false,
   },
   {
     columnname: "alcohol_consumption",
     type: "varchar",
-    size:100,
+    size: 100,
     null: false,
   },
   {
@@ -171,30 +174,56 @@ const createPatientValidation = async (details) => {
   await checkTenantExistsByTenantIdValidation(details.tenant_id);
   await checkPhoneConflicts(
     details.phone_number,
-    details.alternate_phone_number || null
+    details.tenant_id,
+    details.clinic_id,
+    details.alternate_phone_number || null,
+    "patient"
   );
-  await checkEmailConflicts(details.email);
+  await checkEmailConflicts(
+    details.email,
+    details.tenant_id,
+    details.clinic_id,
+    "patient"
+  );
   await validateUniqueFields(details);
 };
 
 // Update Patient Validation
 const updatePatientValidation = async (patientId, details, tenantId) => {
   validateInput(details, UpdateColumnConfig);
+  console.log('start validation')
 
-  const patient=await checkIfExists('patient','patient_id',patientId,tenantId)
-  if(!patient) throw new CustomError('PatientId not found',400)
+  const patient = await checkIfExists(
+    "patient",
+    "patient_id",
+    patientId,
+    tenantId
+  );
+  if (!patient) throw new CustomError("PatientId not found", 400);
   await checkTenantExistsByTenantIdValidation(tenantId);
 
+  console.log('step1 completed')
 
   await checkPhoneConflicts(
     details.phone_number,
+    details.tenant_id,
+    details.clinic_id,
     details.alternate_phone_number || null,
     "patient",
     patientId
   );
+  console.log('step2 completed')
 
-  await checkEmailConflicts(details.email, 'patient', patientId);
+  await checkEmailConflicts(
+    details.email,
+    details.tenant_id,
+    details.clinic_id,
+    "patient",
+    patientId
+  );
+  console.log('step3 completed')
   await validateUniqueFields(details, true, patientId);
+  console.log('validation Completed')
 };
 
 // Check if Patient exists by Patient ID

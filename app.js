@@ -6,8 +6,8 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
-require('./middlewares/Schedule') //appointment schedule
-const { logFilePath, logStream, logRequest } = require('./logs/logger'); //log file
+// require('./middlewares/Schedule') //appointment schedule
+// const { logFilePath, logStream, logRequest } = require('./logs/logger'); //log file
 
 const errorHandler = require('./middlewares/errorHandler');
 const createTable = require('./models/CreateModel');
@@ -146,13 +146,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads/", express.static(path.join(__dirname, "uploads")));
 app.use("/files", express.static("uploads/"));
 app.use(userActivityLogger);
-app.use(logRequest);
+// app.use(logRequest);
 
 
 
 // ✅ Morgan logging (system time)
-morgan.token('local-date', () => new Date().toLocaleString());
-app.use(morgan(':local-date :method :url :status', { stream: logStream }));
+// morgan.token('local-date', () => new Date().toLocaleString());
+// app.use(morgan(':local-date :method :url :status', { stream: logStream }));
 
 
 // Redis connection

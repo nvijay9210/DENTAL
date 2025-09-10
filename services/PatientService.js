@@ -17,13 +17,16 @@ const {
   assignRealmRoleToUser,
   addUserToGroup,
   updateUserInKeycloak,
+  getKeycloakUserIdByEmail,
+  getUserGroups,
 } = require("../middlewares/KeycloakAdmin");
 const { encrypt } = require("../middlewares/PasswordHash");
 const { buildCacheKey } = require("../utils/RedisCache");
 const { createPatientClinic } = require("./PatientClinicService");
 const { rollbackKeycloakUser } = require("../Keycloak/KeycloakService");
+const { updateEntity, createEntity } = require("../utils/Reusability");
 
-const patiendFields = {
+const patientFields = {
   tenant_id: (val) => val,
   keycloak_id: (val) => val,
   username: (val) => val,
@@ -59,7 +62,7 @@ const patientFieldsReverseMap = {
   tenant_id: (val) => val,
   keycloak_id: (val) => val,
   username: (val) => val,
-  password: (val) => val?String(val):null,
+  password: (val) => (val ? String(val) : null),
   first_name: (val) => val,
   last_name: (val) => val,
   email: (val) => val,
@@ -86,236 +89,24 @@ const patientFieldsReverseMap = {
   insurance_policy_number: (val) => val,
   insurance_policy_start_date: (val) => (val ? formatDateOnly(val) : null),
   insurance_policy_end_date: (val) => (val ? formatDateOnly(val) : null),
-  profile_picture: (val) => val,
+  profile_picture: (val) => val || null,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
   updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 
-// // Create patient
-// const createPatient = async (data, token, realm,user_clinic_id) => {
-//   const create = {
-//     ...patiendFields,
-//     created_by: (val) => val,
-//   };
-
-//   try {
-//     let userData;
-//     if (process.env.KEYCLOAK_POWER === "on") {
-//       // 1. Generate username/email
-//       const username =await helper.generateUsername(
-//              'PAT',realm,token
-//            );
-//       const email =
-//         data.email ||
-//         `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
-
-//       userData = {
-//         username,
-//         email,
-//         "emailVerified": true,
-//         firstName: data.first_name,
-//         lastName: data.last_name,
-//         password: "1234", // For demo; use generateAlphanumericPassword() in production
-//       };
-
-//       // 2. Create Keycloak User
-//       const isUserCreated = await addUser(token, realm, userData);
-//       if (!isUserCreated)
-//         throw new CustomError("Keycloak user not created", 400);
-
-//       console.log("✅ Keycloak user created:", userData.username);
-
-//       // 3. Get User ID from Keycloak
-//       const userId = await getUserIdByUsername(token, realm, userData.username);
-//       if (!userId)
-//         throw new CustomError("Could not fetch Keycloak user ID", 400);
-
-//       console.log("🆔 Keycloak user ID fetched:", userData);
-
-//       // 4. Assign Role: 'patient'
-//       const roleAssigned = await assignRealmRoleToUser(
-//         token,
-//         realm,
-//         userId,
-//         "patient"
-//       );
-//       if (!roleAssigned)
-//         throw new CustomError("Failed to assign 'patient' role", 400);
-
-//       console.log("🩺 Assigned 'patient' role");
-
-//       console.log('data:',data)
-
-//       // 5. Optional: Add to Group (e.g., based on clinicId)
-//       if (user_clinic_id) {
-//         const groupName = `dental-${data.tenant_id}-${user_clinic_id}`;
-//         const groupAdded = await addUserToGroup(
-//           token,
-//           realm,
-//           userId,
-//           groupName
-//         );
-
-//         if (!groupAdded) {
-//           console.warn(`⚠️ Failed to add user to group: ${groupName}`);
-//         } else {
-//           console.log(`👥 Added to group: ${groupName}`);
-//         }
-//       }
-
-//       (data.keycloak_id = userId),
-//         (data.username = username),
-//         (data.password = encrypt(userData.password).content);
-//     }
-
-//     const { columns, values } = mapFields(data, create);
-//     const patientId = await patientModel.createPatient(
-//       "patient",
-//       columns,
-//       values
-//     );
-//     await invalidateCacheByPattern("patient:*");
-//     await invalidateCacheByPattern("patient:*");
-//     await invalidateCacheByPattern("patient:mostvisited:*");
-
-//     const patientclinicId=await createPatientClinic({patient_id:patientId,clinic_id:data.clinic_id,created_by:data.created_by})
-//     if(!patientclinicId) throw new CustomError('patientclinic not added',404)
-
-//     return {
-//       patientId,
-//       username: userData.username,
-//       password: userData.password,
-//     };
-//   } catch (error) {
-//     console.trace(error);
-//     throw new CustomError(`Failed to create patient: ${error.message}`, 404);
-//   }
-// };
-
 const createPatient = async (data, token, realm, user_clinic_id) => {
-  const create = {
-    ...patiendFields,
-    created_by: (val) => val,
-  };
-
-  let userId = null; // Track Keycloak user for rollback
-  let username = null;
-  let rawPassword = null;
-
-  // DB connection
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-
-    if (process.env.KEYCLOAK_POWER === "on") {
-      // 1. Generate username/email
-      username = await helper.generateUsername("PAT", realm, token);
-      const newpassword ="1234" || helper.generateAlphanumericPassword();
-      rawPassword= helper.encrypt(newpassword)
-      const email =
-        data.email ||
-        `${username}${helper.generateAlphanumericPassword()}@gmail.com`;
-
-      
-      const userData = {
-        username,
-        email,
-        emailVerified: true,
-        firstName: data.first_name,
-        lastName: data.last_name,
-        password: "1234"||rawPassword,
-      };
-
-      // 2. Create Keycloak user
-      const isUserCreated = await addUser(token, realm, userData);
-      if (!isUserCreated)
-        throw new CustomError("Keycloak user not created", 400);
-
-      // 3. Get Keycloak user ID
-      userId = await getUserIdByUsername(token, realm, username);
-      if (!userId)
-        throw new CustomError("Could not fetch Keycloak user ID", 400);
-
-      // 4. Assign Role
-      const roleAssigned = await assignRealmRoleToUser(
-        token,
-        realm,
-        userId,
-        "patient"
-      );
-      if (!roleAssigned)
-        throw new CustomError("Failed to assign 'patient' role", 400);
-
-      // 5. Optional group assignment
-      if (user_clinic_id) {
-        const groupName = `dental-${data.tenant_id}-${user_clinic_id}`;
-        const groupAdded = await addUserToGroup(
-          token,
-          realm,
-          userId,
-          groupName
-        );
-        if (!groupAdded)
-          console.warn(`⚠️ Failed to add user to group: ${groupName}`);
-      }
-
-      // Add Keycloak info to DB data
-      data.keycloak_id = userId;
-      data.username = username;
-      data.password = encrypt(rawPassword).content;
-    }
-
-    // 6. Insert patient
-    const { columns, values } = mapFields(data, create);
-    const patientId = await patientModel.createPatient(
-      connection,
-      "patient",
-      columns,
-      values
-    );
-
-    // 7. Insert patient-clinic link
-    const patientClinicId = await createPatientClinic(
-      {
-        patient_id: patientId,
-        clinic_id: data.clinic_id,
-        created_by: data.created_by,
-      },
-      connection
-    );
-    if (!patientClinicId) throw new CustomError("patientclinic not added", 404);
-
-    // 8. Commit transaction
-    await connection.commit();
-
-    // 9. Invalidate cache (after commit only)
-    await invalidateCacheByPattern("patient:*");
-    await invalidateCacheByPattern("patient:mostvisited:*");
-
-    return {
-      patientId,
-      username,
-      password: rawPassword, // return raw password, not encrypted
-    };
-  } catch (error) {
-    await connection.rollback();
-
-    // Rollback Keycloak if user was already created
-    if (process.env.KEYCLOAK_POWER === "on" && userId) {
-      try {
-        await rollbackKeycloakUser(token, realm, userId);
-        console.log(`♻️ Rolled back Keycloak user: ${userId}`);
-      } catch (rollbackErr) {
-        console.error("❌ Failed to rollback Keycloak user:", rollbackErr);
-      }
-    }
-
-    throw new CustomError(`Failed to create patient: ${error.message}`, 400);
-  } finally {
-    connection.release();
-  }
+  await createEntity({
+    data,
+    entityName: "patient",
+    token,
+    realm,
+    fieldMap: patientFields,
+    createModel: patientModel.createPatient,
+    createPatientClinicFn: createPatientClinic,
+    roleName: "patient",
+  });
 };
 
 const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
@@ -929,7 +720,7 @@ const checkPatientExistsByTenantIdAndPatientId = async (
 // Update patient
 // const updatePatient = async (patientId, data, tenant_id) => {
 //   const update = {
-//     ...patiendFields,
+//     ...patientFields,
 //     updated_by: (val) => val,
 //   };
 //   try {
@@ -954,83 +745,18 @@ const checkPatientExistsByTenantIdAndPatientId = async (
 //   }
 // };
 
-const updatePatient = async (patientId, data, tenant_id, token, realm) => {
-  const { email, first_name, last_name } = data;
-  let userId = null;
-
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-
-    // 1. Get current patient
-    const patient = await patientModel.getPatientByTenantIdAndPatientId(
-      tenant_id,
-      patientId,
-      connection
-    );
-    if (!patient) throw new CustomError("Patient not found", 404);
-
-    userId = patient.keycloak_id;
-    originalEmail = patient.email;
-    originalFirstName = patient.first_name;
-    originalLastName = patient.last_name;
-
-    // 2. Update DB
-    const { columns, values } = mapFields(data, {
-      ...patiendFields,
-      updated_by: (val) => val,
-    });
-
-    const affectedRows = await patientModel.updatePatient(
-      patientId,
-      columns,
-      values,
-      tenant_id,
-      connection
-    );
-
-    if (affectedRows === 0) {
-      await connection.commit(); // nothing changed
-      return { affectedRows };
-    }
-
-    // 3. Try to sync to Keycloak
-    if (process.env.KEYCLOAK_POWER === "on" && userId) {
-      const updatePayload = {};
-      if (email) updatePayload.email = email;
-      if (first_name) updatePayload.firstName = first_name;
-      if (last_name) updatePayload.lastName = last_name;
-
-      if (Object.keys(updatePayload).length > 0) {
-        try {
-          await updateUserInKeycloak(token, realm, userId, updatePayload);
-          console.log(`✅ Synced to Keycloak: ${userId}`, updatePayload);
-        } catch (kcError) {
-          // 🔁 Rollback DB? Or keep?
-          console.error(`❌ Keycloak sync failed: ${userId}`, kcError.message);
-
-          // 🔽 Option A: Allow DB change, just warn
-          // This is usually best UX
-          console.warn(
-            `⚠️ Continuing with DB update even though Keycloak failed`
-          );
-        }
-      }
-    }
-
-    await connection.commit();
-    await invalidateCacheByPattern("patient:*");
-    return { affectedRows };
-  } catch (error) {
-    await connection.rollback();
-
-    // No Keycloak rollback needed — we didn’t change identity state
-    // But if you created a temp user or something, you’d clean it here
-
-    throw new CustomError("Failed to update patient", 500);
-  } finally {
-    connection.release();
-  }
+const updatePatient = async (patientId, data, tenantId, token, realm) => {
+  return updateEntity({
+    entityId: patientId,
+    entityName: "patient",
+    tenantId,
+    data,
+    token,
+    realm,
+    fieldMap: patientFields,
+    getModelById: patientModel.getPatientByTenantIdAndPatientId,
+    updateModel: patientModel.updatePatient
+  });
 };
 
 // Delete patient
@@ -1283,7 +1009,6 @@ const getAllPatientsByTenantIdAndClinicId = async (
   page = 1,
   limit = 10
 ) => {
- 
   try {
     const offset = (page - 1) * limit;
     const cacheKey = buildCacheKey("patient", "list", {
