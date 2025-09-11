@@ -198,6 +198,7 @@ const createTableQuery = {
   addPatient: `CREATE TABLE IF NOT EXISTS patient (
     patient_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     tenant_id BIGINT UNSIGNED NOT NULL,
+    patient_reference_id VARCHAR(30) DEFAULT NULL,
     keycloak_id CHAR(36) DEFAULT NULL,
     username VARCHAR(50) DEFAULT NULL,
     password VARBINARY(255) DEFAULT NULL,

@@ -28,6 +28,7 @@ const { updateEntity, createEntity } = require("../utils/Reusability");
 
 const patientFields = {
   tenant_id: (val) => val,
+  patient_reference_id: (val) => val,
   keycloak_id: (val) => val,
   username: (val) => val,
   password: (val) => val,
@@ -60,6 +61,7 @@ const patientFields = {
 const patientFieldsReverseMap = {
   patient_id: (val) => val,
   tenant_id: (val) => val,
+  patient_reference_id: (val) => val,
   keycloak_id: (val) => val,
   username: (val) => val,
   password: (val) => (val ? String(val) : null),

@@ -282,6 +282,7 @@ async function addProfilePictureInDentist(conn) {
     "Add new ProfilePicture field"
   );
 }
+
 async function removeExpenseDocumentField(conn) {
   await dropColumnIfExists(
     conn,
@@ -408,6 +409,16 @@ async function modifyPaymentReferenceToText(conn) {
   );
 }
 
+async function addPatientReferenceIdInDentist(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "patient",
+    "patient_reference_id",
+    "VARCHAR(30) NULL",
+    "Add patient previous clinic or reference id"
+  );
+}
+
 
 // Main migration runner
 (async () => {
@@ -426,6 +437,7 @@ async function modifyPaymentReferenceToText(conn) {
     await createFileFields(conn);
     await modifyPaymentReferenceToText(conn);
     await addFinalStatusInAppointment(conn);
+    await addPatientReferenceIdInDentist(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");
