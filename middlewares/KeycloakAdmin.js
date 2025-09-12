@@ -151,22 +151,45 @@ async function addUserToGroup(token, realm, userId, groupName) {
 
 require("dotenv").config();
 
-function getTenantIdByRealm(realm) {
+function getTenantIdByRealm(fullRealm) {
   const mapString = process.env.REALM_TENANT_MAP || "";
-  const map = Object.fromEntries(
+  const domainMapString = process.env.REALM_TENANT_DOMAIN_MAP || "";
+
+  const realmMap = Object.fromEntries(
     mapString.split(",").map((pair) => {
       const [k, v] = pair.split(":");
       return [k.trim(), v.trim()];
     })
   );
-  return map[realm] || realm;
-}
+
+  const domainMap = Object.fromEntries(
+    domainMapString.split(",").map((pair) => {
+      const [k, v] = pair.split(":");
+      return [k.trim(), v.trim()];
+    })
+  );
+
+  const parts = fullRealm.split(".");
+  const realmName = parts[0]; // e.g., 'mydentist'
+  const domain = "." + parts.slice(1).join("."); // e.g., '.in'
+
+  const realmTenantId = realmMap[realmName];
+  const domainTenantId = domainMap[domain];
+
+  if (realmTenantId && domainTenantId && realmTenantId === domainTenantId) {
+    return realmTenantId;  // Both match exactly
+  }
+
+  return null; // Mismatch or not found
+};
+
 
 function extractUserInfo(token) {
   const issuer = token.iss;
   const realm = issuer.split("/").pop();
+  const tenant=token.azp
 
-  const tenantId = getTenantIdByRealm(realm);
+  const tenantId = getTenantIdByRealm(tenant);
 
   const groups = token.groups || [];
   const clinicGroup = groups.find((g) => g.startsWith("dental-"));
@@ -180,7 +203,6 @@ function extractUserInfo(token) {
   }
 
   const globalRoles = token.realm_access?.roles || [];
-  console.log(globalRoles);
 
   const ROLE_PRIORITY = [
     "super-user",

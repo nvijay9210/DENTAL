@@ -1,6 +1,7 @@
-const logger = require("../logs/logger"); // your enhanced logger
+const logger = require("../logs/logger");
 const jwt = require("jsonwebtoken");
 const jwksClient = require("jwks-rsa");
+const { CustomError } = require("../middlewares/CustomeError");
 
 function getKeycloakClient(realm) {
   return jwksClient({
@@ -18,14 +19,7 @@ function getKey(realm, header, callback) {
 }
 
 function authenticateTenantClinicGroup(requiredRoles = []) {
-  const ROLE_PRIORITY = [
-    "tenant",
-    "super-user",
-    "dentist",
-    "receptionist",
-    "patient",
-    "guest",
-  ];
+  const ROLE_PRIORITY = ["tenant", "super-user", "dentist", "receptionist", "patient", "guest"];
 
   return async (req, res, next) => {
     try {
@@ -37,31 +31,17 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         };
         req.realm = req.headers["x-realm"] || "dev-realm";
         req.token = "dev-token";
+        req.role = ROLE_PRIORITY.find((r) => requiredRoles.includes(r)) || "guest";
 
-        // Assign role based on priority
-        req.role =
-          ROLE_PRIORITY.find((r) => requiredRoles.includes(r)) || "guest";
-
-        logger.writeLog(
-          "info",
-          `Dev mode login: ${req.user.username}`,
-          `${req.method} ${req.originalUrl}`
-        );
+        logger.writeLog("info", `Dev mode login: ${req.user.username}`, `${req.method} ${req.originalUrl}`);
         return next();
       }
 
       const token = req.headers.authorization?.split(" ")[1];
-      const realm = req.headers["x-realm"];
+      const realm = process.env.KEYCLOAK_REALM || req.headers["x-realm"];
 
       if (!token || !realm) {
-        logger.writeLog(
-          "warn",
-          "Missing token or realm in headers",
-          `${req.method} ${req.originalUrl}`
-        );
-        return res
-          .status(401)
-          .json({ message: "Missing token or realm in headers" });
+        throw new CustomError("Missing token or realm in headers", 401);
       }
 
       const decoded = await new Promise((resolve, reject) => {
@@ -78,31 +58,30 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
 
       const userRoles = decoded?.realm_access?.roles || [];
       const userGroups = decoded?.groups || [];
+      req.role = ROLE_PRIORITY.find((r) => userRoles.includes(r)) || "guest";
 
-      // Assign the highest priority role to req.role
-      const userPriorityRole =
-        ROLE_PRIORITY.find((r) => userRoles.includes(r)) || "guest";
-      req.role = userPriorityRole;
-
-      // Check required realm roles
       const hasRequiredRole =
-        requiredRoles.length === 0 ||
-        requiredRoles.some((role) => userRoles.includes(role));
+        requiredRoles.length === 0 || requiredRoles.some((role) => userRoles.includes(role));
 
       if (!hasRequiredRole) {
-        logger.writeLog(
-          "warn",
-          `Access denied: missing required role. Roles: ${userRoles.join(
-            ", "
-          )}`,
-          `${req.method} ${req.originalUrl}`
-        );
-        return res
-          .status(403)
-          .json({ message: "Access denied: missing required realm role" });
+        throw new CustomError("Access denied: missing required realm role", 403);
       }
 
-      // Auto-assign tenant/clinic for super-user
+      const SKIP_ROLES = ["tenant", "guest"];
+      const onlySkipRoles =
+        userRoles.length > 0 && userRoles.every((r) => SKIP_ROLES.includes(r));
+
+      if (onlySkipRoles) {
+        // Skip tenant/clinic isolation and group validation completely
+        req.token = token;
+        req.user = decoded;
+        req.realm = realm;
+
+        logger.writeLog("info", `Tenant/guest login as ${req.role} (skipped group validation)`, `${req.method} ${req.originalUrl}`);
+        return next();
+      }
+
+      // Proceed with group validation and tenant/clinic isolation
       const dentalGroup = userGroups.find((g) => g.startsWith("dental-"));
       let userTenantId = null;
       let userClinicId = null;
@@ -112,6 +91,7 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         if (match) {
           userTenantId = Number(match[1]);
           userClinicId = Number(match[2]);
+
           if (userRoles.includes("super-user")) {
             req.body = {
               ...req.body,
@@ -122,79 +102,21 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         }
       }
 
-      const SKIP_ROLES = ["tenant", "guest"];
-      const onlySkipRoles =
-        userRoles.length > 0 && userRoles.every((r) => SKIP_ROLES.includes(r));
+      const requestedTenantId = Number(req.params?.tenant_id || req.query?.tenant_id || req.body?.tenant_id);
+      const requestedClinicId = Number(req.params?.clinic_id || req.query?.clinic_id || req.body?.clinic_id);
 
-      if (
-        onlySkipRoles ||
-        (userRoles.includes("tenant") && userRoles.includes("guest"))
-      ) {
-        req.token = token;
-        req.user = decoded;
-        req.realm = realm;
-
-        logger.writeLog(
-          "info",
-          `Tenant/guest login as ${req.role}`,
-          `${req.method} ${req.originalUrl}`
-        );
-        return next();
+      if (requestedTenantId && userTenantId && requestedTenantId !== userTenantId) {
+        throw new CustomError("Access denied: cannot access another tenant's data", 403);
       }
 
-      // Tenant/Clinic isolation
-      const requestedTenantId = Number(
-        req.params?.tenant_id || req.query?.tenant_id || req.body?.tenant_id
-      );
-      const requestedClinicId = Number(
-        req.params?.clinic_id || req.query?.clinic_id || req.body?.clinic_id
-      );
-
-      if (
-        requestedTenantId &&
-        userTenantId &&
-        requestedTenantId !== userTenantId
-      ) {
-        logger.writeLog(
-          "warn",
-          "Access denied: cannot access another tenant's data",
-          `${req.method} ${req.originalUrl}`
-        );
-        return res
-          .status(403)
-          .json({
-            message: "Access denied: cannot access another tenant's data",
-          });
+      if (requestedClinicId && userClinicId && requestedClinicId !== userClinicId) {
+        throw new CustomError("Access denied: cannot access another clinic's data", 403);
       }
 
-      if (
-        requestedClinicId &&
-        userClinicId &&
-        requestedClinicId !== userClinicId
-      ) {
-        logger.writeLog(
-          "warn",
-          "Access denied: cannot access another clinic's data",
-          `${req.method} ${req.originalUrl}`
-        );
-        return res
-          .status(403)
-          .json({
-            message: "Access denied: cannot access another clinic's data",
-          });
-      }
-
-      if (requestedTenantId && requestedClinicId) {
+      if (requestedTenantId && requestedClinicId && !(userRoles.includes("tenant") || userRoles.includes("guest"))) {
         const groupName = `dental-${requestedTenantId}-${requestedClinicId}`;
         if (!userGroups.includes(groupName)) {
-          logger.writeLog(
-            "warn",
-            `Access denied: user not in group ${groupName}`,
-            `${req.method} ${req.originalUrl}`
-          );
-          return res
-            .status(403)
-            .json({ message: `Access denied: user not in group ${groupName}` });
+          throw new CustomError(`Access denied: user not in group ${groupName}`, 403);
         }
       }
 
@@ -202,13 +124,14 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
       req.user = decoded;
       req.realm = realm;
 
-      logger.writeLog(
-        "info",
-        `Authentication successful as ${req.role}`,
-        `${req.method} ${req.originalUrl}`
-      );
+      logger.writeLog("info", `Authentication successful as ${req.role}`, `${req.method} ${req.originalUrl}`);
       next();
     } catch (err) {
+      if (err instanceof CustomError) {
+        logger.writeLog("warn", err.message, `${req.method} ${req.originalUrl}`);
+        return res.status(err.statusCode).json({ message: err.message });
+      }
+
       logger.writeLog("error", err, `${req.method} ${req.originalUrl}`);
       return res.status(500).json({
         status: "error",
