@@ -48,6 +48,7 @@ const patientFields = {
   profession: (val) => val || null,
   referred_by: (val) => val || null,
   smoking_status: (val) => val,
+  pre_history: helper.safeStringify,
   alcohol_consumption: (val) => val,
   emergency_contact_name: (val) => val || null,
   emergency_contact_number: (val) => val || null,
