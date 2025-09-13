@@ -29,7 +29,7 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
           realm_access: { roles: requiredRoles },
           groups: ["dev-group"],
         };
-        req.realm = req.headers["x-realm"] || "dev-realm";
+        req.realm = process.env.KEYCLOAK_REALM || req.headers["x-realm"] || "dev-realm";
         req.token = "dev-token";
         req.role = ROLE_PRIORITY.find((r) => requiredRoles.includes(r)) || "guest";
 

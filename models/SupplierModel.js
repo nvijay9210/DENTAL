@@ -67,7 +67,7 @@ const getSupplierByTenantAndSupplierId = async (tenant_id, supplier_id,connectio
 };
 
 // Update supplier
-const updateSupplier = async (connection,supplier_id, columns, values, tenant_id) => {
+const updateSupplier = async (supplier_id, columns, values, tenant_id,connection) => {
   try {
     const conditionColumn = ["tenant_id", "supplier_id"];
     const conditionValue = [tenant_id, supplier_id];

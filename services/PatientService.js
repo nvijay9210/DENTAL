@@ -100,7 +100,7 @@ const patientFieldsReverseMap = {
 };
 
 const createPatient = async (data, token, realm, user_clinic_id) => {
-  await createEntity({
+  return await createEntity({
     data,
     entityName: "patient",
     token,

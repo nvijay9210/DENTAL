@@ -13,7 +13,7 @@ const { buildCacheKey } = require("../utils/RedisCache");
 
 const patient_clinicFields = {
   patient_id: (val) => val,
-  clinic_id: (val) => val,
+  clinic_id: (val) => val
 };
 const patient_clinicFieldsReverseMap = {
   patient_clinic_id: (val) => val,
@@ -31,6 +31,7 @@ const createPatientClinic = async (data,conn) => {
     created_by: (val) => val,
   };
   try {
+    console.log(data)
     const { columns, values } = mapFields(data, fieldMap);
     const patient_clinicId = await patient_clinicModel.createPatientClinic(
       "patient_clinic",

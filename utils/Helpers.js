@@ -223,6 +223,8 @@ async function generateUsername( roleShort, realm, token) {
     exists = await checkUsernameExists(username, keycloakUrl, realm, token);
   }
 
+
+  
   return username;
 }
 

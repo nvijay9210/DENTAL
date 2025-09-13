@@ -5,7 +5,7 @@ const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
 const reminderColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 6, null: false },
   { columnname: "clinic_id", type: "int", size: 11, null: false },
-  { columnname: "dentist_id", type: "int", size: 11, null: false },
+  { columnname: "dentist_id", type: "int", size: 11, null: true },
   { columnname: "title", type: "varchar", size: 255, null: false },
   { columnname: "description", type: "text", null: true },
   { columnname: "category", type: "varchar", size: 100, null: true },
@@ -47,7 +47,7 @@ const createReminderValidation = async (details) => {
   await Promise.all([
     checkIfIdExists("tenant", "tenant_id", details.tenant_id),
     checkIfIdExists("clinic", "clinic_id", details.clinic_id),
-    checkIfIdExists("dentist", "dentist_id", details.dentist_id),
+    details.dentist_id && checkIfIdExists("dentist", "dentist_id", details.dentist_id),
   ]);
 
   if(isNaN(details.repeat_interval) || details.repeat_interval==0) throw new CustomError('Repeat interval must greater than 0')

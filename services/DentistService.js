@@ -145,6 +145,7 @@ const dentistFieldReverseMap = {
 // -------------------- CREATE --------------------
 
 const createDentist = async (data, token, realm) => {
+  console.log(data,token,realm)
   const newDentist = await createEntity({
     data,
     entityName: "dentist",

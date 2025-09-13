@@ -145,7 +145,7 @@ const createAppointmentReschedules = async (details) => {
     const consultationFee = parseFloat(appointment.consultation_fee || 0);
     const extraCharge = parseFloat(details.charge_amount || 0);
 
-    const totalAmount = consultationFee + extraCharge;
+    const totalAmount = extraCharge;
     const finalAmount = totalAmount - minBookingFee;
 
     const paymentData = oldPayment
@@ -156,7 +156,7 @@ const createAppointmentReschedules = async (details) => {
           patient_id: oldPayment.patient_id,
           appointment_id: newAppointmentId,
           discount_applied: parseFloat(oldPayment.discount_applied || 0),
-          amount: minBookingFee,
+          amount: 0,
           total_amount: totalAmount,
           final_amount: finalAmount,
           payment_for: oldPayment.payment_for,

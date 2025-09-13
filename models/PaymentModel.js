@@ -125,6 +125,9 @@ const getallPaymentSummaryByAppointment = async (tenant_id, appointment_id,conne
       -- ✅ Treatment base cost
       COALESCE(MAX(t.cost), 0.00) AS total_base_amount,
 
+
+      COALESCE(SUM(p.total_amount), 0.00) AS total_amount,
+
       -- ✅ Payment metadata
       COUNT(*) AS payment_count,
       GROUP_CONCAT(DISTINCT p.mode_of_payment ORDER BY p.mode_of_payment) AS payment_modes,
@@ -181,28 +184,30 @@ const getallPaymentSummaryByAppointment = async (tenant_id, appointment_id,conne
     }
 
     // ✅ Parse values safely
-    const baseAmount = parseFloat(summary.total_base_amount) || 0.0;
+    const totalAmount = parseFloat(summary.total_amount) || 0.0;
+    console.log(totalAmount)
     const discount = parseFloat(summary.total_discount) || 0.0;
     const consultationFee = parseFloat(summary.consultation_fee) || 0.0;
     const minBookingFee = parseFloat(summary.min_booking_fee) || 0.0;
 
+     // ✅ Amount already paid
+     const totalPaid = (parseFloat(summary.total_paid) || 0.0) + discount;
+
     // ✅ Apply consultation_fee and min_booking_fee only once per appointment
     const totalPayable = Math.max(
       0,
-      baseAmount  + consultationFee
+      totalAmount-totalPaid
     );
 
-    // ✅ Amount already paid
-    const totalPaid = (parseFloat(summary.total_paid) || 0.0) + discount;
-
-    console.log(totalPayable,totalPaid)
+   
+    console.log(totalAmount,totalPaid,totalPayable)
 
     // ✅ Remaining balance
-    const balanceRemaining = Math.max(0, totalPayable - totalPaid);
+    const balanceRemaining = Math.max(0, totalPayable);
 
     return {
       ...summary,
-      total_base_amount: parseFloat(baseAmount.toFixed(2)),
+      total_base_amount: parseFloat(totalAmount.toFixed(2)),
       total_discount: parseFloat(discount.toFixed(2)),
       consultation_fee: parseFloat(consultationFee.toFixed(2)),
       min_booking_fee: parseFloat(minBookingFee.toFixed(2)),

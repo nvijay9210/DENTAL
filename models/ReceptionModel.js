@@ -48,7 +48,7 @@ const getReceptionByTenantAndReceptionId = async (tenant_id, reception_id,connec
 };
 
 // Update reception
-const updateReception = async (connection,reception_id, columns, values, tenant_id) => {
+const updateReception = async (reception_id, columns, values, tenant_id,connection) => {
   try {
     const conditionColumn = ["tenant_id", "reception_id"];
     const conditionValue = [tenant_id, reception_id];
