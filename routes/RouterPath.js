@@ -273,6 +273,10 @@ module.exports = {
   UPDATE_TOOTHDETAILS_TENANT: "/updatetoothdetails/:toothdetails_id/:tenant_id",
   DELETE_TOOTHDETAILS_TENANT: "/deletetoothdetails/:toothdetails_id/:tenant_id",
 
+
+  ADD_REFERENCE: "/addreference",
+
+
   //dashboard Routes
 
   //used

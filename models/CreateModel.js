@@ -716,6 +716,21 @@ const createDocumentJoinTable = async () => {
     conn.release();
   }
 };
+const createReferenceTable = async () => {
+  const query = createTableQuery.addReferenceTable;
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("Reference table created successfully.");
+  } catch (error) {
+    console.error("Error creating Reference table:", error);
+    throw new Error(
+      "Database error occurred while creating the Reference table."
+    );
+  } finally {
+    conn.release();
+  }
+};
 
 require("dotenv").config();
 
@@ -820,4 +835,5 @@ module.exports = {
   createDocumentJoinTable,
   addStatusTypeSubTableData,
   addStatusTypeTableData,
+  createReferenceTable
 };

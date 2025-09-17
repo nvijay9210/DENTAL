@@ -45,6 +45,8 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   if (process.env.KEYCLOAK_POWER === "on") {
     user = extractUserInfo(req.user);
 
+    console.log(user)
+
     if (user.role !== "tenant" && user.role !== "super-user" && user.role !== "guest") {
       const userdetails = await getUserIdUsingKeycloakId(
         user.role,

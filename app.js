@@ -42,6 +42,7 @@ const userActivityRouter = require('./routes/UserActivityRouter');
 const loginHistoryRouter = require('./routes/LoginHistoryRouter');
 const notificationRouter = require('./routes/NotificationRouter');
 const toothdetailsRouter = require('./routes/ToothDetailsRouter');
+const referenceRouter = require('./routes/ReferenceRouter');
 
 
 // const compressionMiddleware = require('./middlewares/CompressionMiddleware');
@@ -197,6 +198,7 @@ async function initializeTables() {
     await createTable.createToothDetailsTable();
     await createTable.createPatientClinicJoinTable();
     await createTable.createDocumentJoinTable();
+    await createTable.createReferenceTable();
 
     console.log('All tables created in order.');
   } catch (err) {
@@ -285,6 +287,7 @@ app.use('/v1/useractivity', userActivityRouter);
 app.use('/v1/loginhistory', loginHistoryRouter);
 app.use('/v1/notification', notificationRouter);
 app.use('/v1/toothdetails', toothdetailsRouter);
+app.use('/v1/reference', referenceRouter);
 
 // Error handler must be last
 app.use(errorHandler);
