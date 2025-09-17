@@ -811,7 +811,7 @@ const createTableQuery = {
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
    `,
 
-  addReferenceTable: `CREATE TABLE IF NOT EXISTS document (
+  addReferenceTable: `CREATE TABLE IF NOT EXISTS reference (
     referral_reference_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     tenant_id BIGINT UNSIGNED NOT NULL,
     clinic_id BIGINT UNSIGNED NOT NULL,
@@ -825,9 +825,12 @@ const createTableQuery = {
     created_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
     updated_by VARCHAR(30) DEFAULT NULL,
     updated_time TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(),
-    PRIMARY KEY (document_id),
-    KEY idx_table_reference (sender_keycloak_id, table_id, field_name)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;`,
+    PRIMARY KEY (referral_reference_id),
+    CONSTRAINT fk_reference_tenant FOREIGN KEY (tenant_id) REFERENCES tenant (tenant_id) ON UPDATE CASCADE,
+    CONSTRAINT fk_reference_clinic FOREIGN KEY (clinic_id) REFERENCES clinic (clinic_id) ON UPDATE CASCADE,
+    KEY idx_table_reference (sender_keycloak_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+`,
 };
 
 module.exports = { createTableQuery };

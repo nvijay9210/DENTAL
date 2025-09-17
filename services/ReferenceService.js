@@ -10,9 +10,7 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
-const {
-  createReferenceRecipient,
-} = require("./ReferenceRecipientsService");
+
 const { buildCacheKey } = require("../utils/RedisCache");
 const {
   saveDocuments,
@@ -70,164 +68,164 @@ const createReference = async (data) => {
 };
 
 // Get All References by Tenant ID with Caching
-const getAllReferencesByTenantId = async (
-  tenantId,
-  page = 1,
-  limit = 10
-) => {
-  const offset = (page - 1) * limit;
-  const cacheKey = buildCacheKey("reference", "list", {
-    tenant_id: tenantId,
-    page,
-    limit,
-  });
+// const getAllReferencesByTenantId = async (
+//   tenantId,
+//   page = 1,
+//   limit = 10
+// ) => {
+//   const offset = (page - 1) * limit;
+//   const cacheKey = buildCacheKey("reference", "list", {
+//     tenant_id: tenantId,
+//     page,
+//     limit,
+//   });
 
-  try {
-    const references = await getOrSetCache(cacheKey, async () => {
-      const result = await referenceModel.getAllReferencesByTenantId(
-        tenantId,
-        Number(limit),
-        offset
-      );
-      return result;
-    });
+//   try {
+//     const references = await getOrSetCache(cacheKey, async () => {
+//       const result = await referenceModel.getAllReferencesByTenantId(
+//         tenantId,
+//         Number(limit),
+//         offset
+//       );
+//       return result;
+//     });
 
-    const convertedRows = await Promise.all(
-      references.data.map(async (reference) => {
-        const formatted = helper.convertDbToFrontend(
-          reference,
-          referenceFieldsReverseMap
-        );
+//     const convertedRows = await Promise.all(
+//       references.data.map(async (reference) => {
+//         const formatted = helper.convertDbToFrontend(
+//           reference,
+//           referenceFieldsReverseMap
+//         );
 
-        return {
-          ...formatted
-        };
-      })
-    );
+//         return {
+//           ...formatted
+//         };
+//       })
+//     );
 
-    return { data: convertedRows, total: references.total };
-  } catch (err) {
-    console.error("Database error while fetching references:", err);
-    throw new CustomError(err, 500);
-  }
-};
+//     return { data: convertedRows, total: references.total };
+//   } catch (err) {
+//     console.error("Database error while fetching references:", err);
+//     throw new CustomError(err, 500);
+//   }
+// };
 
-const getReferencesForReceiver = async (
-  tenantId,
-  clinicId,
-  receiverId,
-  receiverRole
-) => {
-  const cacheKey = `reference:${tenantId}`;
+// const getReferencesForReceiver = async (
+//   tenantId,
+//   clinicId,
+//   receiverId,
+//   receiverRole
+// ) => {
+//   const cacheKey = `reference:${tenantId}`;
 
-  try {
-    let references = await getOrSetCache(cacheKey, async () => {
-      const result = await referenceModel.getReferencesForReceiver(
-        tenantId,
-        receiverId,
-        receiverRole,
-        clinicId
-      );
-      return result;
-    });
+//   try {
+//     let references = await getOrSetCache(cacheKey, async () => {
+//       const result = await referenceModel.getReferencesForReceiver(
+//         tenantId,
+//         receiverId,
+//         receiverRole,
+//         clinicId
+//       );
+//       return result;
+//     });
 
-    const convertedRows = await Promise.all(
-      references.map(async (reference) => {
-        const formatted = {
-          ...reference,
-          message: helper.safeJsonParse(reference.message),
-        };
+//     const convertedRows = await Promise.all(
+//       references.map(async (reference) => {
+//         const formatted = {
+//           ...reference,
+//           message: helper.safeJsonParse(reference.message),
+//         };
 
-        return {
-          ...formatted,
+//         return {
+//           ...formatted,
          
-        };
-      })
-    );
+//         };
+//       })
+//     );
 
-    return convertedRows;
-  } catch (err) {
-    console.error("Database error while fetching references:", err);
-    throw new CustomError(err, 500);
-  }
-};
+//     return convertedRows;
+//   } catch (err) {
+//     console.error("Database error while fetching references:", err);
+//     throw new CustomError(err, 500);
+//   }
+// };
 
-// Get Reference by ID & Tenant
-const getReferenceByTenantIdAndReferenceId = async (
-  tenantId,
-  reference_id
-) => {
-  try {
-    const reference =
-      await referenceModel.getReferenceByTenantAndReferenceId(
-        tenantId,
-        reference_id
-      );
+// // Get Reference by ID & Tenant
+// const getReferenceByTenantIdAndReferenceId = async (
+//   tenantId,
+//   reference_id
+// ) => {
+//   try {
+//     const reference =
+//       await referenceModel.getReferenceByTenantAndReferenceId(
+//         tenantId,
+//         reference_id
+//       );
 
-    const convertedRows = helper.convertDbToFrontend(
-      reference,
-      referenceFieldsReverseMap
-    );
+//     const convertedRows = helper.convertDbToFrontend(
+//       reference,
+//       referenceFieldsReverseMap
+//     );
 
-    return {
-      ...formatted
-    };
-  } catch (error) {
-    throw new CustomError(err, 500);
-  }
-};
+//     return {
+//       ...formatted
+//     };
+//   } catch (error) {
+//     throw new CustomError(err, 500);
+//   }
+// };
 
-// Update Reference
-const updateReference = async (reference_id, data, tenant_id) => {
-  const fieldMap = {
-    ...referenceFields,
-    updated_by: (val) => val,
-  };
-  try {
-    const { columns, values } = mapFields(data, fieldMap);
-    const affectedRows = await referenceModel.updateReference(
-      reference_id,
-      columns,
-      values,
-      tenant_id
-    )
+// // Update Reference
+// const updateReference = async (reference_id, data, tenant_id) => {
+//   const fieldMap = {
+//     ...referenceFields,
+//     updated_by: (val) => val,
+//   };
+//   try {
+//     const { columns, values } = mapFields(data, fieldMap);
+//     const affectedRows = await referenceModel.updateReference(
+//       reference_id,
+//       columns,
+//       values,
+//       tenant_id
+//     )
 
-    await invalidateCacheByPattern("reference:*");
-    return affectedRows;
-  } catch (error) {
-    console.error("Update Error:", error);
-    throw new CustomError(err, 500);
-  }
-};
+//     await invalidateCacheByPattern("reference:*");
+//     return affectedRows;
+//   } catch (error) {
+//     console.error("Update Error:", error);
+//     throw new CustomError(err, 500);
+//   }
+// };
 
-// Delete Reference
-const deleteReferenceByTenantIdAndReferenceId = async (
-  tenantId,
-  reference_id
-) => {
-  try {
-    await deleteDocumentsByTableAndId('reference',reference_id)
-    const affectedRows =
-      await referenceModel.deleteReferenceByTenantAndReferenceId(
-        tenantId,
-        reference_id
-      );
+// // Delete Reference
+// const deleteReferenceByTenantIdAndReferenceId = async (
+//   tenantId,
+//   reference_id
+// ) => {
+//   try {
+//     await deleteDocumentsByTableAndId('reference',reference_id)
+//     const affectedRows =
+//       await referenceModel.deleteReferenceByTenantAndReferenceId(
+//         tenantId,
+//         reference_id
+//       );
 
-    await invalidateCacheByPattern("reference:*");
-    return affectedRows;
-  } catch (error) {
-    throw new CustomError(
-      `Failed to delete reference: ${error.message}`,
-      404
-    );
-  }
-};
+//     await invalidateCacheByPattern("reference:*");
+//     return affectedRows;
+//   } catch (error) {
+//     throw new CustomError(
+//       `Failed to delete reference: ${error.message}`,
+//       404
+//     );
+//   }
+// };
 
 module.exports = {
   createReference,
-  getAllReferencesByTenantId,
-  getReferenceByTenantIdAndReferenceId,
-  updateReference,
-  deleteReferenceByTenantIdAndReferenceId,
-  getReferencesForReceiver,
+  // getAllReferencesByTenantId,
+  // getReferenceByTenantIdAndReferenceId,
+  // updateReference,
+  // deleteReferenceByTenantIdAndReferenceId,
+  // getReferencesForReceiver,
 };
