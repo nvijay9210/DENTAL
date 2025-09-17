@@ -25,6 +25,7 @@ const referenceFields = {
   clinic_id: (val) => val,
   sender_name: (val) => val,
   receiver_name: (val) => val,
+  receiver_phone: (val) => val,
   sender_keycloak_id: (val) => val,
   reference_message:helper.safeStringify,
   reference_image: (val) => val

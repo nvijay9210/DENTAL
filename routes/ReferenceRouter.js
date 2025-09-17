@@ -8,11 +8,30 @@ const {
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
+const { uploadFileMiddleware2 } = require("../utils/UploadFiles");
+const referenceValidation = require("../validations/ReferenceValidation");
+const multer = require("multer");
+
+const ReferenceFileMiddleware = uploadFileMiddleware2({
+  folderName: "ReferenceImage",
+  fileFields: [
+    {
+      fieldName: "reference_image",
+      maxSizeMB: 2,
+      multiple: false,
+    }
+  ],
+  createValidationFn: referenceValidation.createReferenceValidation,
+  updateValidationFn: referenceValidation.updateReferenceValidation,
+});
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Create Reference
 router.post(
   ADD_REFERENCE,
   authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+  upload.any(),
+  ReferenceFileMiddleware,
   referenceController.createReference
 );
 
