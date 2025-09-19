@@ -339,7 +339,7 @@ const createTableQuery = {
     treatment_status VARCHAR(100) NOT NULL,
     treatment_date DATE NOT NULL,
     cost DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    tax_percentage DECIMAL(3,2) NULL DEFAULT 0.00,
+    tax_percentage DECIMAL(5,2) NULL DEFAULT 0.00,
     tax_catalog VARCHAR(100) NULL,
     duration VARCHAR(50) NOT NULL,
     teeth_involved VARCHAR(255) NOT NULL,

@@ -432,7 +432,7 @@ async function addTaxPercentageInTreatment(conn) {
     conn,
     "treatment",
     "tax_percentage",
-    "DECIMAL(3,2) NULL",
+    "DECIMAL(5,2) NULL",
     "tax percentage"
   );
 }
