@@ -9,8 +9,7 @@ const referenceColumnConfig = [
     { columnname: "receiver_name", type: "varchar", size: 255, null: false },
     { columnname: "sender_keycloak_id", type: "varchar", size: 255, null: false },
     { columnname: "receiver_phone", type: "varchar", size: 30, null: false },
-    { columnname: "reference_message", type: "text", size: null, null: false },
-    { columnname: "reference_image", type: "varchar", size: 255, null: true }
+    { columnname: "reference_message", type: "text", size: null, null: false }
   ];
   
 // Reference Column Configuration for Validation

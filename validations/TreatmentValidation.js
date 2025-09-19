@@ -28,7 +28,7 @@ const treatmentColumnConfig = [
   { columnname: "treatment_date", type: "date", null: false },
   { columnname: "cost", type: "decimal", size: "12,2", null: false },
   { columnname: "duration", type: "time", size: 50, null: false },
-  { columnname: "teeth_involved", type: "varchar", size: 255, null: false },
+  { columnname: "teeth_involved", type: "varchar", size: 255, null: true },
   { columnname: "complications", type: "text", null: true },
   {
     columnname: "follow_up_required",

@@ -462,7 +462,8 @@ async function addStatusTypeTableData() {
       (16, 'purchase_order_status', 'ADMIN'),
       (17, 'reminder_status', 'ADMIN'),
       (18, 'expense_category', 'ADMIN'),
-      (19, 'pre_history', 'ADMIN');
+      (19, 'pre_history', 'ADMIN'),
+      (20, 'tax_catalog', 'ADMIN');
   `;
 
   try {

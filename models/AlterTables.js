@@ -418,6 +418,29 @@ async function addPatientReferenceIdInDentist(conn) {
     "Add patient previous clinic or reference id"
   );
 }
+async function addTaxCatalogInTreatment(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "treatment",
+    "tax_catalog",
+    "VARCHAR(100) NULL",
+    "tax catalog"
+  );
+}
+async function addTaxPercentageInTreatment(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "treatment",
+    "tax_percentage",
+    "DECIMAL(3,2) NULL",
+    "tax percentage"
+  );
+}
+
+async function removeTeethInvolvedInTreatment(conn){
+  await dropColumnIfExists(conn, "treatment", "teeth_involved");
+}
+
 
 
 // Main migration runner
@@ -438,6 +461,9 @@ async function addPatientReferenceIdInDentist(conn) {
     await modifyPaymentReferenceToText(conn);
     await addFinalStatusInAppointment(conn);
     await addPatientReferenceIdInDentist(conn);
+    await addTaxCatalogInTreatment(conn);
+    await addTaxPercentageInTreatment(conn);
+    await removeTeethInvolvedInTreatment(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");
