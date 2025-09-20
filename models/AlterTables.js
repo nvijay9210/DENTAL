@@ -458,6 +458,15 @@ async function addMedicalHistoryNotesInPatient(conn) {
     "previous history data"
   );
 }
+async function addGenderInSupplier(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "supplier",
+    "gender",
+    "VAR ENUM('M','F','TG') NOT NULL DEFAULT 'M' ",
+    "Gender"
+  );
+}
 
 
 // Main migration runner
@@ -483,6 +492,7 @@ async function addMedicalHistoryNotesInPatient(conn) {
     await removeTeethInvolvedInTreatment(conn);
     await modifyFrequencyInPrescription(conn);
     await addMedicalHistoryNotesInPatient(conn);
+    await addGenderInSupplier(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");

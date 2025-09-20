@@ -64,6 +64,7 @@ const supplierFieldsReverseMap = {
   username: (val) => val,
   password: (val) => val?String(val):null,
   name: (val) => val,
+  gender: (val) => val,
   category: (val) => val,
   status: (val) => Boolean(val),
   gender: (val) => val,
