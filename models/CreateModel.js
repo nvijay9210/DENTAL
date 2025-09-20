@@ -464,6 +464,9 @@ async function addStatusTypeTableData() {
       (18, 'expense_category', 'ADMIN'),
       (19, 'pre_history', 'ADMIN'),
       (20, 'tax_catalog', 'ADMIN');
+      (21, 'category', 'ADMIN');
+      (22, 'medication', 'ADMIN');
+      (23, 'frequency', 'ADMIN');
   `;
 
   try {

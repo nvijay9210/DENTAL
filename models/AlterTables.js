@@ -440,7 +440,24 @@ async function addTaxPercentageInTreatment(conn) {
 async function removeTeethInvolvedInTreatment(conn){
   await dropColumnIfExists(conn, "treatment", "teeth_involved");
 }
-
+async function modifyFrequencyInPrescription(conn) {
+  await modifyColumnTypeIfNotMatch(
+    conn,
+    "prescription",
+    "frequency",
+    "TEXT",
+    "Changed from VARCHAR to TEXT for longer reference values"
+  );
+}
+async function addMedicalHistoryNotesInPatient(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "patient",
+    "medical_history_notes",
+    "TEXT NULL",
+    "previous history data"
+  );
+}
 
 
 // Main migration runner
@@ -464,6 +481,8 @@ async function removeTeethInvolvedInTreatment(conn){
     await addTaxCatalogInTreatment(conn);
     await addTaxPercentageInTreatment(conn);
     await removeTeethInvolvedInTreatment(conn);
+    await modifyFrequencyInPrescription(conn);
+    await addMedicalHistoryNotesInPatient(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");
