@@ -466,7 +466,8 @@ async function addStatusTypeTableData() {
       (20, 'tax_catalog', 'ADMIN'),
       (21, 'category', 'ADMIN'),
       (22, 'medication', 'ADMIN'),
-      (23, 'frequency', 'ADMIN');
+      (23, 'frequency', 'ADMIN'),
+      (24, 'unit', 'ADMIN');
   `;
 
   try {

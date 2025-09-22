@@ -463,7 +463,7 @@ async function addGenderInSupplier(conn) {
     conn,
     "supplier",
     "gender",
-    "VAR ENUM('M','F','TG') NOT NULL DEFAULT 'M' ",
+    "ENUM('M','F','TG') NOT NULL DEFAULT 'M' ",
     "Gender"
   );
 }
