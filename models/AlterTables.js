@@ -458,6 +458,27 @@ async function addMedicalHistoryNotesInPatient(conn) {
     "previous history data"
   );
 }
+async function addFirstnameInSupplier(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "supplier",
+    "first_name",
+    "VARCHAR(100) NOT NULL",
+    ""
+  );
+}
+async function addLastnameInSupplier(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "supplier",
+    "last_name",
+    "VARCHAR(100) NOT NULL",
+    ""
+  );
+}
+async function removeFullnameInSupplier(conn){
+  await dropColumnIfExists(conn, "supplier", "name");
+}
 async function addGenderInSupplier(conn) {
   await addColumnIfNotExists(
     conn,
@@ -493,6 +514,8 @@ async function addGenderInSupplier(conn) {
     await modifyFrequencyInPrescription(conn);
     await addMedicalHistoryNotesInPatient(conn);
     await addGenderInSupplier(conn);
+    await addFirstnameInSupplier(conn);
+    await addLastnameInSupplier(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");

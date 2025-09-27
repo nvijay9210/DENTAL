@@ -6,6 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
+
 // require('./middlewares/Schedule') //appointment schedule
 // const { logFilePath, logStream, logRequest } = require('./logs/logger'); //log file
 
@@ -14,6 +15,8 @@ const createTable = require('./models/CreateModel');
 require('dotenv').config();
 const rateLimit = require('express-rate-limit');
 const userActivityLogger = require('./utils/UserActivityUtil');
+
+
 
 // Routers
 const userRouter = require('./routes/userRouter');
@@ -260,7 +263,6 @@ app.get("/get-token", (req, res) => {
 });
 
 app.listen(4000, () => console.log("Backend running on http://localhost:4000"));
-
 
 // API Routes
 app.use('/v1/tenant', tenantRouter);
