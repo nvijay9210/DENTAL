@@ -247,21 +247,25 @@ const groupToothProceduresByTimeRangeCumulative = async (
 ) => {
   const query = `
     SELECT
-      treatment_date AS date,
-      disease_type,
-      COUNT(*) AS count
+      td.treatment_date AS date,
+      td.disease_type,
+      CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
+      CONCAT(d.first_name, ' ', d.last_name) AS dentist_name
     FROM
-      toothdetails
+      toothdetails td
+    INNER JOIN patient p 
+      ON td.patient_id = p.patient_id 
+      AND td.tenant_id = p.tenant_id
+    INNER JOIN dentist d 
+      ON td.dentist_id = d.dentist_id 
+      AND td.tenant_id = d.tenant_id
     WHERE
-      tenant_id = ?
-      AND clinic_id = ?
-      AND treatment_date BETWEEN ? AND ?
-      ${dentistId ? "AND dentist_id = ?" : ""}
-    GROUP BY
-      treatment_date,
-      disease_type
+      td.tenant_id = ?
+      AND td.clinic_id = ?
+      AND td.treatment_date BETWEEN ? AND ?
+      ${dentistId ? "AND td.dentist_id = ?" : ""}
     ORDER BY
-      treatment_date;
+      td.treatment_date, td.disease_type;
   `;
 
   const params = dentistId
@@ -270,18 +274,37 @@ const groupToothProceduresByTimeRangeCumulative = async (
 
   const [rows] = await pool.query(query, params);
 
-  // Transforming result to grouped format
-  const resultMap = {};
-
+  // Group by date
+  const grouped = {};
   for (const row of rows) {
-    const { date, disease_type, count } = row;
-    if (!resultMap[date]) resultMap[date] = {};
-    resultMap[date][disease_type] = count;
+    const dateStr = row.date instanceof Date 
+      ? row.date.toISOString().split('T')[0] 
+      : String(row.date);
+
+    if (!grouped[dateStr]) {
+      grouped[dateStr] = {
+        procedures: [],
+        disease_counts: {}
+      };
+    }
+
+    // Add detailed record
+    grouped[dateStr].procedures.push({
+      disease_type: row.disease_type,
+      patient_name: (row.patient_name || '').trim() || 'Unknown Patient',
+      dentist_name: (row.dentist_name || '').trim() || 'Unknown Dentist'
+    });
+
+    // Update count
+    grouped[dateStr].disease_counts[row.disease_type] = 
+      (grouped[dateStr].disease_counts[row.disease_type] || 0) + 1;
   }
 
-  return Object.entries(resultMap).map(([date, procedures]) => ({
-    date: formatDateOnly(date),
+  // Convert to array
+  return Object.entries(grouped).map(([date, { procedures, disease_counts }]) => ({
+    date,
     procedures,
+    disease_counts
   }));
 };
 
@@ -407,6 +430,7 @@ async function getMostVisitedPatientsByClinicPeriods(
     a.appointment_date,
     p.patient_id,
     p.first_name AS name,
+    p.profile_picture,
     TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) AS age,
     CASE 
         WHEN p.gender = 'M' THEN 'Male'

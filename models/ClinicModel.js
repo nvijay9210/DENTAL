@@ -333,17 +333,23 @@ const updatePatientCount = async (tenantId, clinicId, assign = true) => {
 // }
 
 
+const moment = require('moment'); // Ensure you have this
+
 async function getFinanceSummary(tenant_id, clinic_id, startDate, endDate, dentist_id = null) {
   const conn = await pool.getConnection();
   try {
     const query = `
-      -- Collect all unique dates from income and expense sources
       SELECT
         d.date,
-        COALESCE(p_income.total_income, 0) 
-      + COALESCE(a_income.total_income, 0)
-      + COALESCE(t_income.total_income, 0) AS income,
-        COALESCE(e_expense.total_expense, 0) AS expense
+        -- Payment income
+        COALESCE(p_income.total, 0) AS payment_income,
+        -- Appointment income
+        COALESCE(a_income.total, 0) AS appointment_income,
+        -- Treatment income
+        COALESCE(t_income.total, 0) AS treatment_income,
+        -- Expense types
+        COALESCE(e_operational.total, 0) AS operational_expense,
+        COALESCE(e_supplier.total, 0) AS supplier_expense
       FROM (
         SELECT DATE(payment_date) AS date FROM payment
         WHERE tenant_id = ? AND clinic_id = ? AND (? IS NULL OR dentist_id = ?) AND payment_status = 'completed' AND DATE(payment_date) BETWEEN ? AND ?
@@ -360,88 +366,106 @@ async function getFinanceSummary(tenant_id, clinic_id, startDate, endDate, denti
         SELECT payment_date AS date FROM supplier_payments
         WHERE tenant_id = ? AND clinic_id = ? AND payment_date BETWEEN ? AND ?
       ) AS d
-      -- Payment income
       LEFT JOIN (
-        SELECT DATE(payment_date) AS date, SUM(final_amount) AS total_income
+        SELECT DATE(payment_date) AS date, SUM(final_amount) AS total
         FROM payment
         WHERE payment_status = 'completed' AND tenant_id = ? AND clinic_id = ? AND (? IS NULL OR dentist_id = ?) AND DATE(payment_date) BETWEEN ? AND ?
         GROUP BY DATE(payment_date)
       ) AS p_income ON d.date = p_income.date
-      -- Appointment income
       LEFT JOIN (
-        SELECT appointment_date AS date, SUM(consultation_fee - IFNULL(discount_applied,0)) AS total_income
+        SELECT appointment_date AS date, SUM(consultation_fee - IFNULL(discount_applied, 0)) AS total
         FROM appointment
         WHERE status = 'completed' AND tenant_id = ? AND clinic_id = ? AND (? IS NULL OR dentist_id = ?) AND appointment_date BETWEEN ? AND ?
         GROUP BY appointment_date
       ) AS a_income ON d.date = a_income.date
-      -- Treatment income
       LEFT JOIN (
-        SELECT treatment_date AS date, SUM(cost) AS total_income
+        SELECT treatment_date AS date, SUM(cost) AS total
         FROM treatment
         WHERE tenant_id = ? AND clinic_id = ? AND (? IS NULL OR dentist_id = ?) AND treatment_date BETWEEN ? AND ?
         GROUP BY treatment_date
       ) AS t_income ON d.date = t_income.date
-      -- Expenses
       LEFT JOIN (
-        SELECT date, SUM(expense) AS total_expense FROM (
-          SELECT expense_date AS date, expense_amount AS expense FROM expense
-          WHERE tenant_id = ? AND clinic_id = ? AND expense_date BETWEEN ? AND ?
-          UNION ALL
-          SELECT payment_date AS date, amount AS expense FROM supplier_payments
-          WHERE tenant_id = ? AND clinic_id = ? AND payment_date BETWEEN ? AND ?
-        ) AS all_expenses
-        GROUP BY date
-      ) AS e_expense ON d.date = e_expense.date
+        SELECT expense_date AS date, SUM(expense_amount) AS total
+        FROM expense
+        WHERE tenant_id = ? AND clinic_id = ? AND expense_date BETWEEN ? AND ?
+        GROUP BY expense_date
+      ) AS e_operational ON d.date = e_operational.date
+      LEFT JOIN (
+        SELECT payment_date AS date, SUM(amount) AS total
+        FROM supplier_payments
+        WHERE tenant_id = ? AND clinic_id = ? AND payment_date BETWEEN ? AND ?
+        GROUP BY payment_date
+      ) AS e_supplier ON d.date = e_supplier.date
       ORDER BY d.date;
     `;
 
-    // Convert IDs to numbers
     const numTenantId = Number(tenant_id);
     const numClinicId = Number(clinic_id);
     const numDentistId = dentist_id !== null ? Number(dentist_id) : null;
 
-    // Build params array
-    const params = [
-      // dates for all sources
-      numTenantId, numClinicId, numDentistId, numDentistId, startDate, endDate, // payment dates
-      numTenantId, numClinicId, numDentistId, numDentistId, startDate, endDate, // appointments
-      numTenantId, numClinicId, numDentistId, numDentistId, startDate, endDate, // treatments
-      numTenantId, numClinicId, startDate, endDate, // expense
-      numTenantId, numClinicId, startDate, endDate, // supplier_payments
+    // Helper to repeat params for each block
+    const dateParams = (withDentist = true) => 
+      withDentist 
+        ? [numTenantId, numClinicId, numDentistId, numDentistId, startDate, endDate]
+        : [numTenantId, numClinicId, startDate, endDate];
 
-      // Payment income join
-      numTenantId, numClinicId, numDentistId, numDentistId, startDate, endDate,
-      // Appointment income join
-      numTenantId, numClinicId, numDentistId, numDentistId, startDate, endDate,
-      // Treatment income join
-      numTenantId, numClinicId, numDentistId, numDentistId, startDate, endDate,
-      // Expense join
-      numTenantId, numClinicId, startDate, endDate,
-      numTenantId, numClinicId, startDate, endDate
+    const params = [
+      // Main date union sources
+      ...dateParams(true),  // payment
+      ...dateParams(true),  // appointment
+      ...dateParams(true),  // treatment
+      ...dateParams(false), // expense
+      ...dateParams(false), // supplier_payments
+
+      // Joins
+      ...dateParams(true),  // p_income
+      ...dateParams(true),  // a_income
+      ...dateParams(true),  // t_income
+      ...dateParams(false), // e_operational
+      ...dateParams(false)  // e_supplier
     ];
 
     const [rows] = await conn.query(query, params);
 
-    // Map results by date
+    // Build map with detailed breakdown
     const resultMap = {};
     rows.forEach(row => {
       const dateStr = moment(row.date).format("YYYY-MM-DD");
+      const pi = parseFloat(row.payment_income || 0);
+      const ai = parseFloat(row.appointment_income || 0);
+      const ti = parseFloat(row.treatment_income || 0);
+      const oe = parseFloat(row.operational_expense || 0);
+      const se = parseFloat(row.supplier_expense || 0);
+
       resultMap[dateStr] = {
-        income: parseFloat(row.income || 0),
-        expense: parseFloat(row.expense || 0)
+        income: {
+          payment: pi,
+          appointment: ai,
+          treatment: ti,
+          total: pi + ai + ti
+        },
+        expense: {
+          operational: oe,
+          supplier: se,
+          total: oe + se
+        }
       };
     });
 
-    // Fill missing dates
+    // Fill all dates in range
     const result = [];
     let current = moment(startDate);
     const last = moment(endDate);
     while (current <= last) {
       const dateStr = current.format("YYYY-MM-DD");
+      const entry = resultMap[dateStr] || {
+        income: { payment: 0, appointment: 0, treatment: 0, total: 0 },
+        expense: { operational: 0, supplier: 0, total: 0 }
+      };
       result.push({
         date: dateStr,
-        income: resultMap[dateStr]?.income ?? 0,
-        expense: resultMap[dateStr]?.expense ?? 0
+        income: entry.income,
+        expense: entry.expense
       });
       current.add(1, "day");
     }
@@ -454,8 +478,6 @@ async function getFinanceSummary(tenant_id, clinic_id, startDate, endDate, denti
     conn.release();
   }
 }
-
-
 
 
 const getFinanceSummarybyDentist = async (tenant_id, clinic_id, dentist_id) => {
