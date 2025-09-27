@@ -333,8 +333,6 @@ const updatePatientCount = async (tenantId, clinicId, assign = true) => {
 // }
 
 
-const moment = require('moment'); // Ensure you have this
-
 async function getFinanceSummary(tenant_id, clinic_id, startDate, endDate, dentist_id = null) {
   const conn = await pool.getConnection();
   try {
