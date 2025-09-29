@@ -104,7 +104,7 @@ const createSupplier = async (data, token, realm) => {
     realm,
     fieldMap: supplierFields,
     createModel: supplierModel.createSupplier,
-    nameFields: { fullName: "name" },
+    nameFields: { firstName: "first_name", lastName: "last_name" },
     roleName:'supplier'
   });
 

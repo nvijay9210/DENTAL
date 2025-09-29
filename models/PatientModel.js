@@ -250,7 +250,9 @@ const groupToothProceduresByTimeRangeCumulative = async (
       td.treatment_date AS date,
       td.disease_type,
       CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
-      CONCAT(d.first_name, ' ', d.last_name) AS dentist_name
+      CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,
+      p.profile_picture as patient_image,
+      d.profile_picture as dentist_image,
     FROM
       toothdetails td
     INNER JOIN patient p 
