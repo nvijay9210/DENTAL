@@ -1,6 +1,7 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists, checkIfIdExists } = require("../models/checkIfExists");
 const patientService = require("../services/PatientService");
+const { logUserViewActivity } = require("../utils/UserActivityUtil");
 const {
   validateTenantIdAndPageAndLimit,
 } = require("../validations/CommonValidations");
@@ -152,6 +153,7 @@ exports.getMostVisitedPatientsByClinicPeriods = async (req, res, next) => {
       endDate,
       dentist_id
     );
+    await logUserViewActivity(req,'/getallpatients/patientsummaryclinic/')
     res.status(200).json(patients);
   } catch (err) {
     next(err);
@@ -239,6 +241,7 @@ exports.groupToothProceduresByTimeRangeCumulative = async (req, res, next) => {
         startDate,
         endDate
       );
+      await logUserViewActivity(req,'/toothdetails/')
     res.status(200).json(patients);
   } catch (err) {
     next(err);

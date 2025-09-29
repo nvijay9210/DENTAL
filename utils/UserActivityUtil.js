@@ -55,4 +55,28 @@ const userActivityLogger = async (req, res, next) => {
   next();
 };
 
-module.exports = userActivityLogger;
+async function logUserViewActivity(req, description) {
+  if (!req.user) return; // skip if no user
+
+  const clientInfo = getClientInfo(req);
+  const tenant_id =
+    req.params?.tenant_id ||
+    req.body?.tenant_id ||
+    req.query?.tenant_id ||
+    null;
+
+  await createUserActivity(
+    {
+      tenant_id,
+      app_name: process.env.APP_NAME || "dental-app",
+      keycloak_user_id: req.user.sub || req.user.keycloak_id,
+      activity_type: "VIEW",
+      activity_desc: description,
+      ip_address: clientInfo.ip,
+      user_agent: JSON.stringify(clientInfo),
+    },
+    req
+  );
+}
+
+module.exports = {userActivityLogger,logUserViewActivity};

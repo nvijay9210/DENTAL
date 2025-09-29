@@ -11,7 +11,7 @@ const treatmentValidation = require("../validations/TreatmentValidation");
  */
 exports.createTreatment = async (req, res, next) => {
   const details = req.body;
-
+  console.log(details)
   try {
     // Validate treatment data
     await treatmentValidation.createTreatmentValidation(details);

@@ -499,6 +499,7 @@ function formatDailyPatientData(rows) {
       name: row.name,
       age: row.age,
       gender: row.gender,
+      profile_picture: row.profile_picture, // ✅ Include profile picture
     };
 
     if (isRepeat) {

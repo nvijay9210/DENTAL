@@ -617,6 +617,7 @@ const deleteTreatmentByTenantIdAndTreatmentId = async (
   try {
     await conn.beginTransaction();
     await deleteDocumentsByTableAndId(conn, "treatment", treatmentId);
+   
     const affectedRows =
       await treatmentModel.deleteTreatmentByTenantAndTreatmentId(
         conn,

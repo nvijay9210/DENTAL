@@ -488,6 +488,24 @@ async function addGenderInSupplier(conn) {
     "Gender"
   );
 }
+async function addReceiverEmailInReference(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "reference",
+    "receiver_email",
+    "VARCHAR(255) NULL",
+    ""
+  );
+}
+async function renameCurrencyToCurrencyCodeInSupplierProducts(conn) {
+  await renameColumnIfSafe(
+    conn,
+    "supplier_products",
+    "currency",
+    "currency_code",
+    "VARCHAR(10) NOT NULL" // 👈 adjust this if your actual definition differs
+  );
+}
 
 
 // Main migration runner
@@ -514,8 +532,11 @@ async function addGenderInSupplier(conn) {
     await modifyFrequencyInPrescription(conn);
     await addMedicalHistoryNotesInPatient(conn);
     await addGenderInSupplier(conn);
+    await removeFullnameInSupplier(conn);
     await addFirstnameInSupplier(conn);
     await addLastnameInSupplier(conn);
+    await addReceiverEmailInReference(conn);
+    await renameCurrencyToCurrencyCodeInSupplierProducts(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");

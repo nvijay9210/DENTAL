@@ -2,6 +2,7 @@ const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
 const appointmentService = require("../services/AppointmentService");
 const { dateToString } = require("../utils/DateUtils");
+const { logUserViewActivity } = require("../utils/UserActivityUtil");
 const appointmentValidation = require("../validations/AppointmentValidation");
 const {
   validateTenantIdAndPageAndLimit,
@@ -502,6 +503,7 @@ exports.getAppointmentSummary = async (req, res, next) => {
         parseInt(dentist_id)
         // period
       );
+      await logUserViewActivity(req,'/getallappointments/periodsummary/')
     res.status(200).json(appointments);
   } catch (err) {
     next(err);

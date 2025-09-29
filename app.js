@@ -14,7 +14,7 @@ const errorHandler = require('./middlewares/errorHandler');
 const createTable = require('./models/CreateModel');
 require('dotenv').config();
 const rateLimit = require('express-rate-limit');
-const userActivityLogger = require('./utils/UserActivityUtil');
+const {userActivityLogger} = require('./utils/UserActivityUtil');
 
 
 

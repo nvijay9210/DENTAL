@@ -634,3 +634,1698 @@ Error: Incorrect integer value: 'Reception AA' for column `dental`.`reception`.`
 [WARN] 2/9/2025, 6:58:10 pm   - ❌ Redis is not connected. Feature performance may be degraded.
 [INFO] 2/9/2025, 6:58:10 pm   - 💡 Tip: Run 'redis-server --requirepass <your-password>' if not running.
 [INFO] 2/9/2025, 6:58:10 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 11:49:13 am   - Environment: development
+[INFO] 29/9/2025, 11:49:14 am   - Using DB Host: localhost
+[INFO] 29/9/2025, 11:49:14 am   - Server listening on port: 8004
+[INFO] 29/9/2025, 11:49:14 am   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 11:49:14 am   - ✅ Server running on localhost port 8004
+[ERROR] 29/9/2025, 11:49:14 am   - ❌ MySQL connection failed: connect ETIMEDOUT
+[WARN] 29/9/2025, 11:49:14 am   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 11:49:14 am   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 11:56:00 am   - Environment: development
+[INFO] 29/9/2025, 11:56:00 am   - Using DB Host: localhost
+[INFO] 29/9/2025, 11:56:00 am   - Server listening on port: 8004
+[INFO] 29/9/2025, 11:56:00 am   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 11:56:00 am   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 11:56:01 am   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 11:56:01 am   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 11:56:01 am   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 11:56:14 am   - Environment: development
+[INFO] 29/9/2025, 11:56:14 am   - Using DB Host: localhost
+[INFO] 29/9/2025, 11:56:14 am   - Server listening on port: 8004
+[INFO] 29/9/2025, 11:56:14 am   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 11:56:14 am   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 11:56:14 am   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 11:56:15 am   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 11:56:15 am   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 11:56:33 am   - Environment: development
+[INFO] 29/9/2025, 11:56:33 am   - Using DB Host: localhost
+[INFO] 29/9/2025, 11:56:33 am   - Server listening on port: 8004
+[INFO] 29/9/2025, 11:56:33 am   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 11:56:33 am   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 11:56:33 am   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 11:56:33 am   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 11:56:33 am   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 11:57:32 am   - Environment: development
+[INFO] 29/9/2025, 11:57:32 am   - Using DB Host: localhost
+[INFO] 29/9/2025, 11:57:32 am   - Server listening on port: 8004
+[INFO] 29/9/2025, 11:57:32 am   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 11:57:32 am   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 11:57:32 am   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 11:57:32 am   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 11:57:32 am   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 11:57:56 am   - Environment: development
+[INFO] 29/9/2025, 11:57:56 am   - Using DB Host: localhost
+[INFO] 29/9/2025, 11:57:56 am   - Server listening on port: 8004
+[INFO] 29/9/2025, 11:57:56 am   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 11:57:56 am   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 11:57:56 am   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 11:57:56 am   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 11:57:57 am   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 11:57:57 am   - 🔌 Connected to database. Starting migration...
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Index `idx_tenant_date_time_status` already exists on `appointment`. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `description` already exists in `document`. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `profile_picture` already exists in `dentist`. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `profile_picture` already exists in `dentist`. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `profile_picture` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `clinic_logo` already exists in `clinic`. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `profile_picture` already exists in `reception`. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `logo_url` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `image_url` already exists in `supplier_products`. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `clinic_id` already exists in `notifications`. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `file_url` already exists in `notifications`. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `supplier_payment_type` already exists in `supplier_payments`. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `total_amount` already exists in `payment`. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `payment_for` already exists in `payment`. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `payment_reference` in `payment` already matches type: TEXT. Skipping.
+[INFO] 29/9/2025, 11:57:57 am   - ℹ️ Column `appointment_final_status` already exists in `appointment`. Skipping.
+[INFO] 29/9/2025, 11:57:58 am   - ℹ️ Column `patient_reference_id` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 11:57:58 am   - ℹ️ Column `tax_catalog` already exists in `treatment`. Skipping.
+[INFO] 29/9/2025, 11:57:58 am   - ℹ️ Column `tax_percentage` already exists in `treatment`. Skipping.
+[INFO] 29/9/2025, 11:57:58 am   - ℹ️ Column `teeth_involved` does not exist in `treatment`. Skipping.
+[INFO] 29/9/2025, 11:57:58 am   - ℹ️ Column `frequency` in `prescription` already matches type: TEXT. Skipping.
+[INFO] 29/9/2025, 11:57:58 am   - ℹ️ Column `medical_history_notes` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 11:57:58 am   - ℹ️ Column `gender` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 11:57:58 am   - ℹ️ Column `first_name` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 11:57:58 am   - ℹ️ Column `last_name` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 11:57:58 am   - ✅ Added column `receiver_email` to `reference`
+[INFO] 29/9/2025, 11:57:58 am   - 🎉 Migration completed successfully.
+[INFO] 29/9/2025, 11:58:08 am   - Environment: development
+[INFO] 29/9/2025, 11:58:08 am   - Using DB Host: localhost
+[INFO] 29/9/2025, 11:58:08 am   - Server listening on port: 8004
+[INFO] 29/9/2025, 11:58:08 am   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 11:58:08 am   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 11:58:08 am   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 11:58:08 am   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 11:58:08 am   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 11:59:03 am   - Environment: development
+[INFO] 29/9/2025, 11:59:03 am   - Using DB Host: localhost
+[INFO] 29/9/2025, 11:59:03 am   - Server listening on port: 8004
+[INFO] 29/9/2025, 11:59:03 am   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 11:59:03 am   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 11:59:03 am   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 11:59:03 am   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 11:59:04 am   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 11:59:17 am   - Environment: development
+[INFO] 29/9/2025, 11:59:17 am   - Using DB Host: localhost
+[INFO] 29/9/2025, 11:59:17 am   - Server listening on port: 8004
+[INFO] 29/9/2025, 11:59:17 am   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 11:59:17 am   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 11:59:17 am   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 11:59:17 am   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 11:59:17 am   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:00:10 pm   - Environment: development
+[INFO] 29/9/2025, 12:00:10 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:00:10 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:00:10 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:00:11 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:00:11 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:00:11 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:00:11 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:00:15 pm   - Environment: development
+[INFO] 29/9/2025, 12:00:15 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:00:15 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:00:15 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:00:15 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:00:15 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:00:15 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:00:15 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:01:27 pm   - Environment: development
+[INFO] 29/9/2025, 12:01:27 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:01:27 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:01:27 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:01:27 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:01:27 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:01:27 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:01:27 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:03:55 pm   - Environment: development
+[INFO] 29/9/2025, 12:03:55 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:03:55 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:03:55 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:03:55 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:03:55 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:03:55 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:03:55 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:03:55 pm   - 🔌 Connected to database. Starting migration...
+[INFO] 29/9/2025, 12:03:55 pm   - ℹ️ Index `idx_tenant_date_time_status` already exists on `appointment`. Skipping.
+[INFO] 29/9/2025, 12:03:55 pm   - ℹ️ Column `description` already exists in `document`. Skipping.
+[INFO] 29/9/2025, 12:03:55 pm   - ℹ️ Column `profile_picture` already exists in `dentist`. Skipping.
+[INFO] 29/9/2025, 12:03:55 pm   - ℹ️ Column `profile_picture` already exists in `dentist`. Skipping.
+[INFO] 29/9/2025, 12:03:55 pm   - ℹ️ Column `profile_picture` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 12:03:55 pm   - ℹ️ Column `clinic_logo` already exists in `clinic`. Skipping.
+[INFO] 29/9/2025, 12:03:55 pm   - ℹ️ Column `profile_picture` already exists in `reception`. Skipping.
+[INFO] 29/9/2025, 12:03:55 pm   - ℹ️ Column `logo_url` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:03:55 pm   - ℹ️ Column `image_url` already exists in `supplier_products`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `clinic_id` already exists in `notifications`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `file_url` already exists in `notifications`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `supplier_payment_type` already exists in `supplier_payments`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `total_amount` already exists in `payment`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `payment_for` already exists in `payment`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `payment_reference` in `payment` already matches type: TEXT. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `appointment_final_status` already exists in `appointment`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `patient_reference_id` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `tax_catalog` already exists in `treatment`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `tax_percentage` already exists in `treatment`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `teeth_involved` does not exist in `treatment`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `frequency` in `prescription` already matches type: TEXT. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `medical_history_notes` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `gender` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `first_name` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `last_name` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:03:56 pm   - ℹ️ Column `receiver_email` already exists in `reference`. Skipping.
+[ERROR] 29/9/2025, 12:03:56 pm   - ❌ Error renaming column `currency` in `supplier_products`: Data truncated for column 'currency_code' at row 1
+[ERROR] 29/9/2025, 12:03:56 pm   - 💥 Migration failed: Data truncated for column 'currency_code' at row 1
+[INFO] 29/9/2025, 12:05:05 pm   - Environment: development
+[INFO] 29/9/2025, 12:05:05 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:05:05 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:05:05 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:05:05 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:05:05 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:05:05 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:05:05 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:05:05 pm   - 🔌 Connected to database. Starting migration...
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Index `idx_tenant_date_time_status` already exists on `appointment`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `description` already exists in `document`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `profile_picture` already exists in `dentist`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `profile_picture` already exists in `dentist`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `profile_picture` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `clinic_logo` already exists in `clinic`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `profile_picture` already exists in `reception`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `logo_url` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `image_url` already exists in `supplier_products`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `clinic_id` already exists in `notifications`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `file_url` already exists in `notifications`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `supplier_payment_type` already exists in `supplier_payments`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `total_amount` already exists in `payment`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `payment_for` already exists in `payment`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `payment_reference` in `payment` already matches type: TEXT. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `appointment_final_status` already exists in `appointment`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `patient_reference_id` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `tax_catalog` already exists in `treatment`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `tax_percentage` already exists in `treatment`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `teeth_involved` does not exist in `treatment`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `frequency` in `prescription` already matches type: TEXT. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `medical_history_notes` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `gender` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `first_name` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `last_name` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:05:05 pm   - ℹ️ Column `receiver_email` already exists in `reference`. Skipping.
+[ERROR] 29/9/2025, 12:05:06 pm   - ❌ Error renaming column `currency` in `supplier_products`: Data truncated for column 'currency_code' at row 1
+[ERROR] 29/9/2025, 12:05:06 pm   - 💥 Migration failed: Data truncated for column 'currency_code' at row 1
+[INFO] 29/9/2025, 12:08:27 pm   - Environment: development
+[INFO] 29/9/2025, 12:08:27 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:08:27 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:08:27 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:08:27 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:08:27 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:08:27 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:08:27 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:08:27 pm   - 🔌 Connected to database. Starting migration...
+[INFO] 29/9/2025, 12:08:27 pm   - ℹ️ Index `idx_tenant_date_time_status` already exists on `appointment`. Skipping.
+[INFO] 29/9/2025, 12:08:27 pm   - ℹ️ Column `description` already exists in `document`. Skipping.
+[INFO] 29/9/2025, 12:08:27 pm   - ℹ️ Column `profile_picture` already exists in `dentist`. Skipping.
+[INFO] 29/9/2025, 12:08:27 pm   - ℹ️ Column `profile_picture` already exists in `dentist`. Skipping.
+[INFO] 29/9/2025, 12:08:27 pm   - ℹ️ Column `profile_picture` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 12:08:27 pm   - ℹ️ Column `clinic_logo` already exists in `clinic`. Skipping.
+[INFO] 29/9/2025, 12:08:27 pm   - ℹ️ Column `profile_picture` already exists in `reception`. Skipping.
+[INFO] 29/9/2025, 12:08:27 pm   - ℹ️ Column `logo_url` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:08:27 pm   - ℹ️ Column `image_url` already exists in `supplier_products`. Skipping.
+[INFO] 29/9/2025, 12:08:27 pm   - ℹ️ Column `clinic_id` already exists in `notifications`. Skipping.
+[INFO] 29/9/2025, 12:08:27 pm   - ℹ️ Column `file_url` already exists in `notifications`. Skipping.
+[INFO] 29/9/2025, 12:08:27 pm   - ℹ️ Column `supplier_payment_type` already exists in `supplier_payments`. Skipping.
+[INFO] 29/9/2025, 12:08:27 pm   - ℹ️ Column `total_amount` already exists in `payment`. Skipping.
+[INFO] 29/9/2025, 12:08:27 pm   - ℹ️ Column `payment_for` already exists in `payment`. Skipping.
+[INFO] 29/9/2025, 12:08:28 pm   - ℹ️ Column `payment_reference` in `payment` already matches type: TEXT. Skipping.
+[INFO] 29/9/2025, 12:08:28 pm   - ℹ️ Column `appointment_final_status` already exists in `appointment`. Skipping.
+[INFO] 29/9/2025, 12:08:28 pm   - ℹ️ Column `patient_reference_id` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 12:08:28 pm   - ℹ️ Column `tax_catalog` already exists in `treatment`. Skipping.
+[INFO] 29/9/2025, 12:08:28 pm   - ℹ️ Column `tax_percentage` already exists in `treatment`. Skipping.
+[INFO] 29/9/2025, 12:08:28 pm   - ℹ️ Column `teeth_involved` does not exist in `treatment`. Skipping.
+[INFO] 29/9/2025, 12:08:28 pm   - ℹ️ Column `frequency` in `prescription` already matches type: TEXT. Skipping.
+[INFO] 29/9/2025, 12:08:28 pm   - ℹ️ Column `medical_history_notes` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 12:08:28 pm   - ℹ️ Column `gender` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:08:28 pm   - ✅ Dropped column `name` from `supplier`
+[INFO] 29/9/2025, 12:08:28 pm   - ℹ️ Column `first_name` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:08:28 pm   - ℹ️ Column `last_name` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:08:28 pm   - ℹ️ Column `receiver_email` already exists in `reference`. Skipping.
+[INFO] 29/9/2025, 12:08:28 pm   - ✅ Renamed column from `currency` to `currency_code` in `supplier_products`
+[INFO] 29/9/2025, 12:08:28 pm   - 🎉 Migration completed successfully.
+[INFO] 29/9/2025, 12:13:17 pm   - Environment: development
+[INFO] 29/9/2025, 12:13:17 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:13:17 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:13:17 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:13:17 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:13:17 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:13:17 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:13:17 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:13:17 pm   - 🔌 Connected to database. Starting migration...
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Index `idx_tenant_date_time_status` already exists on `appointment`. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `description` already exists in `document`. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `profile_picture` already exists in `dentist`. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `profile_picture` already exists in `dentist`. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `profile_picture` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `clinic_logo` already exists in `clinic`. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `profile_picture` already exists in `reception`. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `logo_url` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `image_url` already exists in `supplier_products`. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `clinic_id` already exists in `notifications`. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `file_url` already exists in `notifications`. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `supplier_payment_type` already exists in `supplier_payments`. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `total_amount` already exists in `payment`. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `payment_for` already exists in `payment`. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `payment_reference` in `payment` already matches type: TEXT. Skipping.
+[INFO] 29/9/2025, 12:13:17 pm   - ℹ️ Column `appointment_final_status` already exists in `appointment`. Skipping.
+[INFO] 29/9/2025, 12:13:18 pm   - ℹ️ Column `patient_reference_id` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 12:13:18 pm   - ℹ️ Column `tax_catalog` already exists in `treatment`. Skipping.
+[INFO] 29/9/2025, 12:13:18 pm   - ℹ️ Column `tax_percentage` already exists in `treatment`. Skipping.
+[INFO] 29/9/2025, 12:13:18 pm   - ℹ️ Column `teeth_involved` does not exist in `treatment`. Skipping.
+[INFO] 29/9/2025, 12:13:18 pm   - ℹ️ Column `frequency` in `prescription` already matches type: TEXT. Skipping.
+[INFO] 29/9/2025, 12:13:18 pm   - ℹ️ Column `medical_history_notes` already exists in `patient`. Skipping.
+[INFO] 29/9/2025, 12:13:18 pm   - ℹ️ Column `gender` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:13:18 pm   - ℹ️ Column `name` does not exist in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:13:18 pm   - ℹ️ Column `first_name` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:13:18 pm   - ℹ️ Column `last_name` already exists in `supplier`. Skipping.
+[INFO] 29/9/2025, 12:13:18 pm   - ℹ️ Column `receiver_email` already exists in `reference`. Skipping.
+[INFO] 29/9/2025, 12:13:18 pm   - ℹ️ Column `currency_code` already exists in `supplier_products`. Skipping rename.
+[INFO] 29/9/2025, 12:13:18 pm   - 🎉 Migration completed successfully.
+[INFO] 29/9/2025, 12:13:40 pm   - Environment: development
+[INFO] 29/9/2025, 12:13:40 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:13:40 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:13:40 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:13:40 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:13:40 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:13:40 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:13:40 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:28:21 pm   - Environment: development
+[INFO] 29/9/2025, 12:28:22 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:28:22 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:28:22 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:28:22 pm   - ✅ Server running on localhost port 8004
+[INFO] 29/9/2025, 12:29:10 pm   - Environment: development
+[INFO] 29/9/2025, 12:29:10 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:29:10 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:29:10 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:29:10 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:29:10 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:29:10 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:29:11 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:30:59 pm   - Environment: development
+[INFO] 29/9/2025, 12:30:59 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:30:59 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:30:59 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:30:59 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:30:59 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:30:59 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:31:00 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:31:19 pm   - Environment: development
+[INFO] 29/9/2025, 12:31:19 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:31:19 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:31:19 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:31:19 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:31:19 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:31:19 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:31:19 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:33:04 pm   - Environment: development
+[INFO] 29/9/2025, 12:33:04 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:33:04 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:33:04 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:33:04 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:33:04 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:33:04 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[ERROR] 29/9/2025, 12:33:04 pm   - ❌ MySQL connection failed: connect ETIMEDOUT
+[INFO] 29/9/2025, 12:33:19 pm   - Environment: development
+[INFO] 29/9/2025, 12:33:19 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:33:19 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:33:19 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:33:19 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:33:19 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:33:19 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:33:19 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:34:53 pm   - Environment: development
+[INFO] 29/9/2025, 12:34:53 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:34:53 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:34:53 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:34:53 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:34:54 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:34:54 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:34:54 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:35:21 pm   - Environment: development
+[INFO] 29/9/2025, 12:35:21 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:35:21 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:35:21 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:35:21 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:35:21 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:35:21 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:35:21 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:36:23 pm   - Environment: development
+[INFO] 29/9/2025, 12:36:23 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:36:23 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:36:23 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:36:23 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:36:23 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:36:23 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:36:23 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:36:53 pm   - Environment: development
+[INFO] 29/9/2025, 12:36:53 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:36:53 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:36:53 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:36:53 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:36:53 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:36:53 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:36:53 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:40:24 pm   - Environment: development
+[INFO] 29/9/2025, 12:40:24 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:40:24 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:40:24 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:40:24 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:40:24 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:40:24 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:40:24 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:40:43 pm   - Environment: development
+[INFO] 29/9/2025, 12:40:43 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:40:43 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:40:43 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:40:43 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:40:43 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:40:43 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:40:44 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:41:15 pm   - Environment: development
+[INFO] 29/9/2025, 12:41:15 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 12:41:15 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 12:41:15 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 12:41:15 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 12:41:16 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 12:41:16 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 12:41:16 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 12:49:58 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:49:58 pm   - super-user is logged in
+[INFO] 29/9/2025, 12:49:58 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[INFO] 29/9/2025, 12:50:37 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:50:37 pm   - super-user is logged in
+[INFO] 29/9/2025, 12:50:37 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[INFO] 29/9/2025, 12:50:41 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:50:41 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:50:41 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 29/9/2025, 12:50:42 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:50:42 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:50:42 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:50:42 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 12:50:42 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:50:42 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:50:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:50:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:50:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:50:50 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:50:50 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:51:43 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:51:43 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:51:44 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:51:44 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:51:44 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:51:44 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:51:51 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:51:51 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:51:51 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:51:51 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:51:51 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:51:51 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:51:53 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:51:53 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:51:54 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:51:55 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:05 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:54:05 pm   - super-user is logged in
+[INFO] 29/9/2025, 12:54:05 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[WARN] 29/9/2025, 12:54:10 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 12:54:10 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 29/9/2025, 12:54:11 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:11 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:11 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:54:11 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:11 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:54:11 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:11 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:11 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:11 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:54:11 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:11 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:11 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:11 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:54:11 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:11 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:12 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:23 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:54:23 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:54:23 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:54:23 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:23 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:54:23 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:23 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:54:23 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:24 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:54:24 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:54:24 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:54:24 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:24 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:24 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:24 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:24 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:34 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:54:34 pm   - super-user is logged in
+[INFO] 29/9/2025, 12:54:34 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[INFO] 29/9/2025, 12:54:34 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:34 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:35 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:35 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:35 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:36 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:54:36 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 29/9/2025, 12:54:36 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:36 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:54:36 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 29/9/2025, 12:54:36 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:36 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:36 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:36 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:37 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:37 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:54:37 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:54:37 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:55:06 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:55:06 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:55:06 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:55:06 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:55:06 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:55:06 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:55:09 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:55:09 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:55:10 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:55:10 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:55:16 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:55:16 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:55:16 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:55:16 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:55:16 pm   - [
+  {
+    "payment_id": 30,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "200.00",
+    "discount_applied": "0.00",
+    "total_amount": "300.00",
+    "payment_for": "booking",
+    "final_amount": "100.00",
+    "mode_of_payment": "Cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": 0,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-22T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:37:55.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 31,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "0.00",
+    "discount_applied": "0.00",
+    "total_amount": "100.00",
+    "payment_for": "booking",
+    "final_amount": "-100.00",
+    "mode_of_payment": "Cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": 0,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-22T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:37:57.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 32,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "2000.00",
+    "discount_applied": "800.00",
+    "total_amount": "8000.00",
+    "payment_for": "treatment",
+    "final_amount": "7920.00",
+    "mode_of_payment": "cash",
+    "payment_source": "offline",
+    "payment_reference": "\"[object Object]\"",
+    "payment_status": "paid",
+    "payment_verified": null,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-19T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:49:23.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 33,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "2000.00",
+    "discount_applied": "0.00",
+    "total_amount": "0.00",
+    "payment_for": "late",
+    "final_amount": "5400.00",
+    "mode_of_payment": "cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": null,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-19T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:56:03.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 34,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "3400.00",
+    "discount_applied": "0.00",
+    "total_amount": "0.00",
+    "payment_for": "late",
+    "final_amount": "3400.00",
+    "mode_of_payment": "cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": null,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-19T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:56:46.000Z",
+    "updated_by": null,
+    "updated_time": null
+  }
+]
+[INFO] 29/9/2025, 12:55:17 pm   - 8400
+[INFO] 29/9/2025, 12:55:17 pm   - 8400 8400 0
+[INFO] 29/9/2025, 12:55:17 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:55:18 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:55:18 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:55:18 pm   - [
+  {
+    "payment_id": 30,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "200.00",
+    "discount_applied": "0.00",
+    "total_amount": "300.00",
+    "payment_for": "booking",
+    "final_amount": "100.00",
+    "mode_of_payment": "Cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": 0,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-22T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:37:55.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 31,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "0.00",
+    "discount_applied": "0.00",
+    "total_amount": "100.00",
+    "payment_for": "booking",
+    "final_amount": "-100.00",
+    "mode_of_payment": "Cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": 0,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-22T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:37:57.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 32,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "2000.00",
+    "discount_applied": "800.00",
+    "total_amount": "8000.00",
+    "payment_for": "treatment",
+    "final_amount": "7920.00",
+    "mode_of_payment": "cash",
+    "payment_source": "offline",
+    "payment_reference": "\"[object Object]\"",
+    "payment_status": "paid",
+    "payment_verified": null,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-19T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:49:23.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 33,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "2000.00",
+    "discount_applied": "0.00",
+    "total_amount": "0.00",
+    "payment_for": "late",
+    "final_amount": "5400.00",
+    "mode_of_payment": "cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": null,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-19T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:56:03.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 34,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "3400.00",
+    "discount_applied": "0.00",
+    "total_amount": "0.00",
+    "payment_for": "late",
+    "final_amount": "3400.00",
+    "mode_of_payment": "cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": null,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-19T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:56:46.000Z",
+    "updated_by": null,
+    "updated_time": null
+  }
+]
+[WARN] 29/9/2025, 12:55:20 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:55:26 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:55:27 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:55:27 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:55:27 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:55:27 pm   - [
+  {
+    "payment_id": 30,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "200.00",
+    "discount_applied": "0.00",
+    "total_amount": "300.00",
+    "payment_for": "booking",
+    "final_amount": "100.00",
+    "mode_of_payment": "Cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": 0,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-22T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:37:55.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 31,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "0.00",
+    "discount_applied": "0.00",
+    "total_amount": "100.00",
+    "payment_for": "booking",
+    "final_amount": "-100.00",
+    "mode_of_payment": "Cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": 0,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-22T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:37:57.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 32,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "2000.00",
+    "discount_applied": "800.00",
+    "total_amount": "8000.00",
+    "payment_for": "treatment",
+    "final_amount": "7920.00",
+    "mode_of_payment": "cash",
+    "payment_source": "offline",
+    "payment_reference": "\"[object Object]\"",
+    "payment_status": "paid",
+    "payment_verified": null,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-19T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:49:23.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 33,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "2000.00",
+    "discount_applied": "0.00",
+    "total_amount": "0.00",
+    "payment_for": "late",
+    "final_amount": "5400.00",
+    "mode_of_payment": "cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": null,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-19T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:56:03.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 34,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "3400.00",
+    "discount_applied": "0.00",
+    "total_amount": "0.00",
+    "payment_for": "late",
+    "final_amount": "3400.00",
+    "mode_of_payment": "cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": null,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-19T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:56:46.000Z",
+    "updated_by": null,
+    "updated_time": null
+  }
+]
+[INFO] 29/9/2025, 12:55:28 pm   - 8400
+[INFO] 29/9/2025, 12:55:28 pm   - 8400 8400 0
+[INFO] 29/9/2025, 12:55:29 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:55:29 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:55:29 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:55:29 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:55:29 pm   - [
+  {
+    "payment_id": 30,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "200.00",
+    "discount_applied": "0.00",
+    "total_amount": "300.00",
+    "payment_for": "booking",
+    "final_amount": "100.00",
+    "mode_of_payment": "Cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": 0,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-22T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:37:55.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 31,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "0.00",
+    "discount_applied": "0.00",
+    "total_amount": "100.00",
+    "payment_for": "booking",
+    "final_amount": "-100.00",
+    "mode_of_payment": "Cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": 0,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-22T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:37:57.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 32,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "2000.00",
+    "discount_applied": "800.00",
+    "total_amount": "8000.00",
+    "payment_for": "treatment",
+    "final_amount": "7920.00",
+    "mode_of_payment": "cash",
+    "payment_source": "offline",
+    "payment_reference": "\"[object Object]\"",
+    "payment_status": "paid",
+    "payment_verified": null,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-19T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:49:23.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 33,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "2000.00",
+    "discount_applied": "0.00",
+    "total_amount": "0.00",
+    "payment_for": "late",
+    "final_amount": "5400.00",
+    "mode_of_payment": "cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": null,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-19T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:56:03.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 34,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 11,
+    "amount": "3400.00",
+    "discount_applied": "0.00",
+    "total_amount": "0.00",
+    "payment_for": "late",
+    "final_amount": "3400.00",
+    "mode_of_payment": "cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": null,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-19T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-19T15:56:46.000Z",
+    "updated_by": null,
+    "updated_time": null
+  }
+]
+[INFO] 29/9/2025, 12:55:42 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:55:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:55:43 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:55:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:55:47 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:55:48 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 12:55:48 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 12:55:48 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 12:55:48 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 12:55:48 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 29/9/2025, 12:55:51 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:55:51 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:56:16 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:56:17 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:56:17 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:56:18 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:57:01 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:57:02 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 12:57:02 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 12:57:02 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 12:57:02 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 12:57:02 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 29/9/2025, 12:57:03 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:57:04 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:57:06 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 12:57:07 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:57:07 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:57:07 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:57:07 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:57:08 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:57:09 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:57:10 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:57:10 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 12:57:10 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:57:49 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:57:49 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 12:57:50 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 29/9/2025, 12:57:51 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:57:51 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 12:58:25 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:58:25 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 12:58:25 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 29/9/2025, 12:58:27 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 12:58:27 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:06:42 pm   - Environment: development
+[INFO] 29/9/2025, 1:06:42 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 1:06:42 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 1:06:42 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 1:06:42 pm   - ✅ Server running on localhost port 8004
+[ERROR] 29/9/2025, 1:06:42 pm   - ❌ MySQL connection failed: connect ETIMEDOUT
+[WARN] 29/9/2025, 1:06:42 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 1:06:42 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 1:08:36 pm   - Environment: development
+[INFO] 29/9/2025, 1:08:36 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 1:08:36 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 1:08:37 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 1:08:37 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 1:08:37 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 1:08:37 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[ERROR] 29/9/2025, 1:08:37 pm   - ❌ MySQL connection failed: connect ETIMEDOUT
+[INFO] 29/9/2025, 1:09:35 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 1:09:35 pm   - create
+[INFO] 29/9/2025, 1:09:36 pm   - {
+  "dentist_id": "4",
+  "appointment_id": "5",
+  "patient_id": "7",
+  "tenant_id": "2",
+  "clinic_id": "1",
+  "diagnosis": "Cavity Problem",
+  "treatment_type": "General",
+  "treatment_date": "2025-09-29",
+  "treatment_status": "Planned",
+  "tax_catalog": "[object Object]",
+  "payment_source": "offline",
+  "mode_of_payment": "cash",
+  "payment_status": "paid",
+  "cost": "1000",
+  "discount_percentage": "25",
+  "discount_applied": "250",
+  "final_amount": "900",
+  "amount": "300",
+  "duration": "1",
+  "complications": "null",
+  "follow_up_required": "false",
+  "follow_up_date": "2025-09-29",
+  "follow_up_notes": "null",
+  "anesthesia_used": "false",
+  "payment_reference": "[object Object]",
+  "anesthesia_type": "General",
+  "technician_assisted": "null",
+  "notes": "null",
+  "created_by": "VIJAY N",
+  "updated_time": "null",
+  "upi_transaction_id": "Vijay@123.kc",
+  "treatment_procedure": "[{\"procedure_name\":\"Tooth Extraction\",\"teeth_involved\":\"1\",\"treatment_cost\":\"1000\"}]",
+  "tax_percentage": "20",
+  "treatment_images": []
+}
+[INFO] 29/9/2025, 1:09:36 pm   - {
+  "dentist_id": "4",
+  "appointment_id": "5",
+  "patient_id": "7",
+  "tenant_id": "2",
+  "clinic_id": "1",
+  "diagnosis": "Cavity Problem",
+  "treatment_type": "General",
+  "treatment_date": "2025-09-29",
+  "treatment_status": "Planned",
+  "tax_catalog": "[object Object]",
+  "payment_source": "offline",
+  "mode_of_payment": "cash",
+  "payment_status": "paid",
+  "cost": "1000",
+  "discount_percentage": "25",
+  "discount_applied": "250",
+  "final_amount": "900",
+  "amount": "300",
+  "duration": "1",
+  "complications": "null",
+  "follow_up_required": "false",
+  "follow_up_date": "2025-09-29",
+  "follow_up_notes": "null",
+  "anesthesia_used": "false",
+  "payment_reference": "[object Object]",
+  "anesthesia_type": "General",
+  "technician_assisted": "null",
+  "notes": "null",
+  "created_by": "VIJAY N",
+  "updated_time": "null",
+  "upi_transaction_id": "Vijay@123.kc",
+  "treatment_procedure": "[{\"procedure_name\":\"Tooth Extraction\",\"teeth_involved\":\"1\",\"treatment_cost\":\"1000\"}]",
+  "tax_percentage": "20",
+  "treatment_images": []
+}
+[INFO] 29/9/2025, 1:09:37 pm   - data: {
+  "tenant_id": "2",
+  "clinic_id": "1",
+  "dentist_id": "4",
+  "patient_id": "7",
+  "appointment_id": "5",
+  "amount": 300,
+  "discount_applied": 250,
+  "final_amount": 900,
+  "total_amount": 1000,
+  "payment_for": "treatment",
+  "mode_of_payment": "cash",
+  "payment_source": "offline",
+  "payment_reference": "[object Object]",
+  "payment_date": "2025-09-29",
+  "payment_status": "paid",
+  "created_by": "VIJAY N"
+}
+[WARN] 29/9/2025, 1:09:37 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 1:09:37 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 29/9/2025, 1:09:37 pm   - 1300
+[INFO] 29/9/2025, 1:09:37 pm   - 1300 750 550
+[INFO] 29/9/2025, 1:09:37 pm   - {
+  "appointment_id": 5,
+  "patient_id": 7,
+  "dentist_id": 4,
+  "tenant_id": 2,
+  "clinic_id": 1,
+  "consultation_fee": 300,
+  "min_booking_fee": 200,
+  "total_paid": 750,
+  "total_discount": 250,
+  "total_base_amount": 1300,
+  "total_amount": "1300.00",
+  "payment_count": 2,
+  "payment_modes": "Cash",
+  "payment_statuses": "paid",
+  "first_payment_date": "2025-09-17T00:00:00.000Z",
+  "last_payment_date": "2025-09-29T00:00:00.000Z",
+  "receipt_numbers": null,
+  "any_payment_verified": 0,
+  "payment_sources": "offline",
+  "total_payable": 550,
+  "balance_remaining": 550
+}
+[INFO] 29/9/2025, 1:09:37 pm   - 5 2 1 pending_payment
+[WARN] 29/9/2025, 1:09:37 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 1:09:37 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 1:09:37 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 1:09:37 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 29/9/2025, 1:09:40 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:09:40 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:09:42 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:09:42 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:10:29 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:10:29 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:10:29 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 1:10:29 pm   - [
+  {
+    "payment_id": 10,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 5,
+    "amount": "200.00",
+    "discount_applied": "0.00",
+    "total_amount": "300.00",
+    "payment_for": "booking",
+    "final_amount": "100.00",
+    "mode_of_payment": "Cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": 0,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-17T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-13T08:14:22.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 35,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 5,
+    "amount": "300.00",
+    "discount_applied": "250.00",
+    "total_amount": "1000.00",
+    "payment_for": "treatment",
+    "final_amount": "900.00",
+    "mode_of_payment": "cash",
+    "payment_source": "offline",
+    "payment_reference": "\"[object Object]\"",
+    "payment_status": "paid",
+    "payment_verified": null,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-29T00:00:00.000Z",
+    "created_by": "VIJAY N",
+    "created_time": "2025-09-29T07:39:37.000Z",
+    "updated_by": null,
+    "updated_time": null
+  }
+]
+[INFO] 29/9/2025, 1:10:30 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:10:30 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 1:10:36 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:10:37 pm   - 1300
+[INFO] 29/9/2025, 1:10:38 pm   - 1300 750 550
+[INFO] 29/9/2025, 1:10:52 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 1:10:52 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 1:10:52 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:10:52 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 1:10:52 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 1:10:52 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:10:52 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:10:52 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:14:10 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:14:11 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:14:12 pm   - [
+  {
+    "payment_id": 10,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 5,
+    "amount": "200.00",
+    "discount_applied": "0.00",
+    "total_amount": "300.00",
+    "payment_for": "booking",
+    "final_amount": "100.00",
+    "mode_of_payment": "Cash",
+    "payment_source": "offline",
+    "payment_reference": "{}",
+    "payment_status": "paid",
+    "payment_verified": 0,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-17T00:00:00.000Z",
+    "created_by": "SuperUser A",
+    "created_time": "2025-09-13T08:14:22.000Z",
+    "updated_by": null,
+    "updated_time": null
+  },
+  {
+    "payment_id": 35,
+    "tenant_id": 2,
+    "clinic_id": 1,
+    "patient_id": 7,
+    "dentist_id": 4,
+    "appointment_id": 5,
+    "amount": "300.00",
+    "discount_applied": "250.00",
+    "total_amount": "1000.00",
+    "payment_for": "treatment",
+    "final_amount": "900.00",
+    "mode_of_payment": "cash",
+    "payment_source": "offline",
+    "payment_reference": "\"[object Object]\"",
+    "payment_status": "paid",
+    "payment_verified": null,
+    "receipt_number": null,
+    "insurance_number": null,
+    "payment_date": "2025-09-29T00:00:00.000Z",
+    "created_by": "VIJAY N",
+    "created_time": "2025-09-29T07:39:37.000Z",
+    "updated_by": null,
+    "updated_time": null
+  }
+]
+[INFO] 29/9/2025, 1:15:11 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:15:11 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:15:48 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:15:49 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:15:52 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:15:52 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:16:02 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:16:07 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:16:07 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:16:07 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:16:12 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:16:12 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:16:12 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:16:12 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:16:38 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:16:38 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:16:39 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:16:39 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:16:39 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:16:39 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:16:41 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 1:16:41 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 1:16:41 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:16:41 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 1:16:42 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 1:16:42 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:17:08 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 1:17:08 pm   - create
+[INFO] 29/9/2025, 1:17:09 pm   - {
+  "dentist_id": "4",
+  "appointment_id": "5",
+  "patient_id": "7",
+  "tenant_id": "2",
+  "clinic_id": "1",
+  "diagnosis": "null",
+  "treatment_type": "General",
+  "treatment_date": "2025-09-29",
+  "treatment_status": "Planned",
+  "tax_catalog": "[object Object]",
+  "payment_source": "offline",
+  "mode_of_payment": "cash",
+  "payment_status": "paid",
+  "cost": "1000",
+  "discount_percentage": "25",
+  "discount_applied": "250",
+  "final_amount": "900",
+  "amount": "500",
+  "duration": "2",
+  "complications": "null",
+  "follow_up_required": "false",
+  "follow_up_date": "2025-09-29",
+  "follow_up_notes": "null",
+  "anesthesia_used": "false",
+  "payment_reference": "[object Object]",
+  "anesthesia_type": "General",
+  "technician_assisted": "null",
+  "notes": "null",
+  "created_by": "VIJAY N",
+  "updated_time": "null",
+  "treatment_procedure": "[{\"procedure_name\":\"Teeth Whitening\",\"teeth_involved\":\"1\",\"treatment_cost\":\"1000\"}]",
+  "tax_percentage": "20",
+  "treatment_images": []
+}
+[INFO] 29/9/2025, 1:17:09 pm   - {
+  "dentist_id": "4",
+  "appointment_id": "5",
+  "patient_id": "7",
+  "tenant_id": "2",
+  "clinic_id": "1",
+  "diagnosis": "null",
+  "treatment_type": "General",
+  "treatment_date": "2025-09-29",
+  "treatment_status": "Planned",
+  "tax_catalog": "[object Object]",
+  "payment_source": "offline",
+  "mode_of_payment": "cash",
+  "payment_status": "paid",
+  "cost": "1000",
+  "discount_percentage": "25",
+  "discount_applied": "250",
+  "final_amount": "900",
+  "amount": "500",
+  "duration": "2",
+  "complications": "null",
+  "follow_up_required": "false",
+  "follow_up_date": "2025-09-29",
+  "follow_up_notes": "null",
+  "anesthesia_used": "false",
+  "payment_reference": "[object Object]",
+  "anesthesia_type": "General",
+  "technician_assisted": "null",
+  "notes": "null",
+  "created_by": "VIJAY N",
+  "updated_time": "null",
+  "treatment_procedure": "[{\"procedure_name\":\"Teeth Whitening\",\"teeth_involved\":\"1\",\"treatment_cost\":\"1000\"}]",
+  "tax_percentage": "20",
+  "treatment_images": []
+}
+[INFO] 29/9/2025, 1:17:09 pm   - data: {
+  "tenant_id": "2",
+  "clinic_id": "1",
+  "dentist_id": "4",
+  "patient_id": "7",
+  "appointment_id": "5",
+  "amount": 500,
+  "discount_applied": 250,
+  "final_amount": 900,
+  "total_amount": 1000,
+  "payment_for": "treatment",
+  "mode_of_payment": "cash",
+  "payment_source": "offline",
+  "payment_reference": "[object Object]",
+  "payment_date": "2025-09-29",
+  "payment_status": "paid",
+  "created_by": "VIJAY N"
+}
+[WARN] 29/9/2025, 1:17:09 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 1:17:09 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 29/9/2025, 1:17:09 pm   - 1300
+[INFO] 29/9/2025, 1:17:09 pm   - 1300 950 350
+[INFO] 29/9/2025, 1:17:09 pm   - {
+  "appointment_id": 5,
+  "patient_id": 7,
+  "dentist_id": 4,
+  "tenant_id": 2,
+  "clinic_id": 1,
+  "consultation_fee": 300,
+  "min_booking_fee": 200,
+  "total_paid": 950,
+  "total_discount": 250,
+  "total_base_amount": 1300,
+  "total_amount": "1300.00",
+  "payment_count": 2,
+  "payment_modes": "Cash",
+  "payment_statuses": "paid",
+  "first_payment_date": "2025-09-17T00:00:00.000Z",
+  "last_payment_date": "2025-09-29T00:00:00.000Z",
+  "receipt_numbers": null,
+  "any_payment_verified": 0,
+  "payment_sources": "offline",
+  "total_payable": 350,
+  "balance_remaining": 350
+}
+[INFO] 29/9/2025, 1:17:09 pm   - 5 2 1 pending_payment
+[WARN] 29/9/2025, 1:17:09 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 1:17:09 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 1:17:09 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 1:17:10 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 29/9/2025, 1:17:11 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:17:11 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:17:12 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:17:12 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:18:55 pm   - Environment: development
+[INFO] 29/9/2025, 1:18:55 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 1:18:55 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 1:18:55 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 1:18:56 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 1:18:56 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 1:18:56 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 1:18:56 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 1:19:17 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:19:18 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:19:19 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:19:19 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:19:19 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 1:19:19 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:19:19 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:19:19 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:19:21 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:19:22 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:19:22 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 29/9/2025, 1:19:23 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:19:54 pm   - Authentication successful as super-user
+[INFO] 29/9/2025, 1:19:54 pm   - create
+[INFO] 29/9/2025, 1:19:54 pm   - {
+  "dentist_id": "4",
+  "appointment_id": "5",
+  "patient_id": "7",
+  "tenant_id": "2",
+  "clinic_id": "1",
+  "diagnosis": "null",
+  "treatment_type": "General",
+  "treatment_date": "2025-09-29",
+  "treatment_status": "Planned",
+  "tax_catalog": "[object Object]",
+  "payment_source": "offline",
+  "mode_of_payment": "cash",
+  "payment_status": "paid",
+  "cost": "5000",
+  "discount_percentage": "0",
+  "discount_applied": "0",
+  "final_amount": "5000",
+  "amount": "1000",
+  "duration": "1",
+  "complications": "null",
+  "follow_up_required": "false",
+  "follow_up_date": "2025-09-29",
+  "follow_up_notes": "null",
+  "anesthesia_used": "false",
+  "payment_reference": "[object Object]",
+  "anesthesia_type": "General",
+  "technician_assisted": "null",
+  "notes": "null",
+  "created_by": "VIJAY N",
+  "updated_time": "null",
+  "treatment_procedure": "[{\"procedure_name\":\"Gum Surgery\",\"teeth_involved\":\"2\",\"treatment_cost\":\"5000\"}]",
+  "tax_percentage": "20",
+  "treatment_images": []
+}
+[INFO] 29/9/2025, 1:19:54 pm   - {
+  "dentist_id": "4",
+  "appointment_id": "5",
+  "patient_id": "7",
+  "tenant_id": "2",
+  "clinic_id": "1",
+  "diagnosis": "null",
+  "treatment_type": "General",
+  "treatment_date": "2025-09-29",
+  "treatment_status": "Planned",
+  "tax_catalog": "[object Object]",
+  "payment_source": "offline",
+  "mode_of_payment": "cash",
+  "payment_status": "paid",
+  "cost": "5000",
+  "discount_percentage": "0",
+  "discount_applied": "0",
+  "final_amount": "5000",
+  "amount": "1000",
+  "duration": "1",
+  "complications": "null",
+  "follow_up_required": "false",
+  "follow_up_date": "2025-09-29",
+  "follow_up_notes": "null",
+  "anesthesia_used": "false",
+  "payment_reference": "[object Object]",
+  "anesthesia_type": "General",
+  "technician_assisted": "null",
+  "notes": "null",
+  "created_by": "VIJAY N",
+  "updated_time": "null",
+  "treatment_procedure": "[{\"procedure_name\":\"Gum Surgery\",\"teeth_involved\":\"2\",\"treatment_cost\":\"5000\"}]",
+  "tax_percentage": "20",
+  "treatment_images": []
+}
+[INFO] 29/9/2025, 1:19:54 pm   - data: {
+  "tenant_id": "2",
+  "clinic_id": "1",
+  "dentist_id": "4",
+  "patient_id": "7",
+  "appointment_id": "5",
+  "amount": 1000,
+  "discount_applied": 0,
+  "final_amount": 5000,
+  "total_amount": 5000,
+  "payment_for": "treatment",
+  "mode_of_payment": "cash",
+  "payment_source": "offline",
+  "payment_reference": "[object Object]",
+  "payment_date": "2025-09-29",
+  "payment_status": "paid",
+  "created_by": "VIJAY N"
+}
+[WARN] 29/9/2025, 1:19:54 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 1:19:54 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 29/9/2025, 1:19:54 pm   - 5300
+[INFO] 29/9/2025, 1:19:54 pm   - 5300 1200 4100
+[INFO] 29/9/2025, 1:19:54 pm   - {
+  "appointment_id": 5,
+  "patient_id": 7,
+  "dentist_id": 4,
+  "tenant_id": 2,
+  "clinic_id": 1,
+  "consultation_fee": 300,
+  "min_booking_fee": 200,
+  "total_paid": 1200,
+  "total_discount": 0,
+  "total_base_amount": 5300,
+  "total_amount": "5300.00",
+  "payment_count": 2,
+  "payment_modes": "Cash",
+  "payment_statuses": "paid",
+  "first_payment_date": "2025-09-17T00:00:00.000Z",
+  "last_payment_date": "2025-09-29T00:00:00.000Z",
+  "receipt_numbers": null,
+  "any_payment_verified": 0,
+  "payment_sources": "offline",
+  "total_payable": 4100,
+  "balance_remaining": 4100
+}
+[INFO] 29/9/2025, 1:19:54 pm   - 5 2 1 pending_payment
+[WARN] 29/9/2025, 1:19:54 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 1:19:54 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 1:19:54 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 29/9/2025, 1:19:55 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 29/9/2025, 1:19:56 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:19:56 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:19:56 pm   - Authentication successful as super-user
+[WARN] 29/9/2025, 1:19:57 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 29/9/2025, 1:21:04 pm   - Environment: development
+[INFO] 29/9/2025, 1:21:04 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 1:21:04 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 1:21:04 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 1:21:04 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 1:21:04 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 1:21:04 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 1:21:04 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 1:26:03 pm   - Environment: development
+[INFO] 29/9/2025, 1:26:03 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 1:26:03 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 1:26:03 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 1:26:03 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 1:26:03 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 1:26:03 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 1:26:03 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 1:27:06 pm   - Environment: development
+[INFO] 29/9/2025, 1:27:06 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 1:27:06 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 1:27:06 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 1:27:06 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 1:27:06 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 1:27:06 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 1:27:06 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 1:27:42 pm   - Environment: development
+[INFO] 29/9/2025, 1:27:42 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 1:27:42 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 1:27:42 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 1:27:42 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 1:27:42 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 1:27:42 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 1:27:42 pm   - ✅ MySQL connection established.
+[INFO] 29/9/2025, 1:28:18 pm   - Environment: development
+[INFO] 29/9/2025, 1:28:18 pm   - Using DB Host: localhost
+[INFO] 29/9/2025, 1:28:18 pm   - Server listening on port: 8004
+[INFO] 29/9/2025, 1:28:18 pm   - Backend running on http://localhost:4000
+[INFO] 29/9/2025, 1:28:18 pm   - ✅ Server running on localhost port 8004
+[WARN] 29/9/2025, 1:28:18 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 29/9/2025, 1:28:18 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 29/9/2025, 1:28:18 pm   - ✅ MySQL connection established.

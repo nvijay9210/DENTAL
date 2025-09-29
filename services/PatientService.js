@@ -382,7 +382,7 @@ const getMostVisitedPatientsByClinicPeriods = async (
         endDate,
         dentist_id
       );
-
+      
       console.log("✅ Serving patients from DB and caching result");
       return patient;
     });

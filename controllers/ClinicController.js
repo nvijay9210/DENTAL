@@ -1,6 +1,7 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists, checkIfIdExists } = require("../models/checkIfExists");
 const clinicService = require("../services/ClinicService");
+const { logUserViewActivity } = require("../utils/UserActivityUtil");
 const clinicValidation = require("../validations/ClinicValidation");
 const {
   validateTenantIdAndPageAndLimit,
@@ -45,6 +46,7 @@ exports.getFinanceSummary = async (req, res, next) => {
   await checkIfIdExists("clinic", "clinic_id", clinic_id);
   try {
     const clinics = await clinicService.getFinanceSummary(tenant_id, clinic_id,dentist_id,startDate,endDate);
+    await logUserViewActivity(req,'/getallclinics/financesummary/')
     res.status(200).json(clinics);
   } catch (err) {
     next(err);
