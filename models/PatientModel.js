@@ -294,7 +294,9 @@ const groupToothProceduresByTimeRangeCumulative = async (
     grouped[dateStr].procedures.push({
       disease_type: row.disease_type,
       patient_name: (row.patient_name || '').trim() || 'Unknown Patient',
-      dentist_name: (row.dentist_name || '').trim() || 'Unknown Dentist'
+      dentist_name: (row.dentist_name || '').trim() || 'Unknown Dentist',
+      dentist_image:(row.dentist_image)||null,
+      patient_image:(row.patient_image)||null,
     });
 
     // Update count
