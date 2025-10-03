@@ -1,0 +1,155 @@
+require("dotenv").config();
+const nodemailer = require("nodemailer");
+const twilio = require("twilio");
+
+// ======================
+// EMAIL TRANSPORTER
+// ======================
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// ======================
+// TWILIO CLIENT
+// ======================
+const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+// ======================
+// OTP STORE (in-memory)
+// ======================
+const otpStore = {}; // key = email or phone
+
+// ======================
+// SEND EMAIL
+// ======================
+async function sendEmail({ to, subject, text, html }) {
+  try {
+    const recipients = Array.isArray(to) ? to.join(",") : to;
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: recipients,
+      subject,
+      text,
+      html,
+    });
+    return { success: true, messageId: info.messageId };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+// ======================
+// SEND EMAIL WITH ATTACHMENT
+// ======================
+async function sendEmailWithAttachment({ to, subject, text, html, attachments = [] }) {
+  try {
+    const recipients = Array.isArray(to) ? to.join(",") : to;
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: recipients,
+      subject,
+      text,
+      html,
+      attachments,
+    });
+    return { success: true, messageId: info.messageId };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+// ======================
+// SEND SMS
+// ======================
+async function sendSMS({ to, body }) {
+  try {
+    const numbers = Array.isArray(to) ? to : [to];
+    const results = [];
+    for (const number of numbers) {
+      const message = await twilioClient.messages.create({
+        body,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: number,
+      });
+      results.push({ number, sid: message.sid });
+    }
+    return { success: true, results };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+// ======================
+// GENERATE OTP
+// ======================
+function generateOTP(length = 6) {
+  const min = Math.pow(10, length - 1);
+  const max = Math.pow(10, length) - 1;
+  return Math.floor(min + Math.random() * (max - min + 1)).toString();
+}
+
+// ======================
+// SEND OTP (email or SMS)
+// ======================
+async function sendOTP({ to, via = "sms", subject, message, length = 6, expiryMinutes = 10 }) {
+  const otp = generateOTP(length);
+  const expiry = new Date(Date.now() + expiryMinutes * 60 * 1000);
+  const fullMessage = message ? `${message}: ${otp}` : `Your OTP is ${otp}`;
+  let result = {};
+
+  // Save OTP in otpStore
+  const key = Array.isArray(to) ? to[0] : to;
+  otpStore[key] = { otp, expiry };
+
+  if (via === "sms") {
+    result = await sendSMS({ to, body: fullMessage });
+  } else if (via === "email") {
+    result = await sendEmail({
+      to,
+      subject: subject || "Your OTP Code",
+      text: fullMessage,
+      html: `<p>${fullMessage}</p>`,
+    });
+  } else {
+    throw new Error("Invalid 'via' option. Use 'sms' or 'email'");
+  }
+
+  return { otp, expiry, result };
+}
+
+// ======================
+// VERIFY OTP
+// ======================
+function verifyOTP({ to, otp }) {
+  const key = Array.isArray(to) ? to[0] : to;
+  const record = otpStore[key];
+
+  if (!record) {
+    return { success: false, message: "No OTP sent to this user" };
+  }
+
+  const now = new Date();
+  if (now > record.expiry) {
+    delete otpStore[key];
+    return { success: false, message: "OTP expired" };
+  }
+
+  if (record.otp !== otp) {
+    return { success: false, message: "Invalid OTP" };
+  }
+
+  // OTP verified successfully
+  delete otpStore[key]; // remove after verification
+  return { success: true, message: "OTP verified successfully" };
+}
+
+// ======================
+// EXPORT
+// ======================
+module.exports = { sendEmail, sendEmailWithAttachment, sendSMS, sendOTP, verifyOTP };
