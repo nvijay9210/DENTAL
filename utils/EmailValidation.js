@@ -1,73 +1,51 @@
-const pool = require('../config/db');
+// utils/checkEmailConflicts.js
+const pool = require("../config/db");
+const { CustomError } = require("../middlewares/CustomeError");
 
-/**
- * Checks if the given email exists in any table, excluding one specific record.
- *
- * @param {string} email - Email to check
- * @param {string|null} tableName - Table to exclude from check (e.g., 'dentist')
- * @param {number|null} recordId - ID in that table to exclude
- */
-async function checkEmailConflicts(email, tenant_id, clinic_id, tableName = null, recordId = null) {
-  const tables = ['clinic', 'dentist', 'patient', 'supplier', 'reception'];
-  const queries = [];
+
+async function checkEmailConflicts(email, tenant_id, clinic_id, currentTable = null, currentId = null) {
+  const tables = ["clinic", "dentist", "patient", "supplier", "reception"];
 
   for (const table of tables) {
-    let query = '';
-    const params = [email, tenant_id];
+    const idField = `${table}_id`;
+    let query;
+    const values = [email, tenant_id];
 
-    if (table === 'patient') {
-      // patient joins patient_clinic to filter by clinic_id
+    if (table === "patient") {
       query = `
-        SELECT 'patient' AS source, p.patient_id AS id
+        SELECT p.patient_id AS id
         FROM patient p
         JOIN patient_clinic pc ON p.patient_id = pc.patient_id
         WHERE p.email = ? AND p.tenant_id = ? AND pc.clinic_id = ?
       `;
-      params.push(clinic_id);
-
-      if (tableName === 'patient' && recordId !== null) {
-        query += ` AND p.patient_id != ?`;
-        params.push(recordId);
-      }
+      values.push(clinic_id);
+    } else if (["clinic", "dentist"].includes(table)) {
+      query = `
+        SELECT ${idField} AS id
+        FROM ${table}
+        WHERE email = ? AND tenant_id = ? AND clinic_id = ?
+      `;
+      values.push(clinic_id);
     } else {
-      const idField = `${table}_id`;
-
-      // Only include clinic_id filter if table has it (clinic, dentist)
-      if (['clinic', 'dentist'].includes(table)) {
-        query = `
-          SELECT '${table}' AS source, ${idField} AS id
-          FROM ${table}
-          WHERE email = ? AND tenant_id = ? AND clinic_id = ?
-        `;
-        params.push(clinic_id);
-      } else {
-        query = `
-          SELECT '${table}' AS source, ${idField} AS id
-          FROM ${table}
-          WHERE email = ? AND tenant_id = ?
-        `;
-      }
-
-      if (table === tableName && recordId !== null) {
-        query += ` AND ${idField} != ?`;
-        params.push(recordId);
-      }
+      query = `
+        SELECT ${idField} AS id
+        FROM ${table}
+        WHERE email = ? AND tenant_id = ?
+      `;
     }
 
-    queries.push(pool.query(query, params));
-  }
+    if (currentTable === table && currentId) {
+      query += table === "patient" ? ` AND p.${idField} != ?` : ` AND ${idField} != ?`;
+      values.push(currentId);
+    }
 
-  const results = await Promise.all(queries);
-  const conflicts = results.flatMap(r => r[0]);
-
-  if (conflicts.length > 0) {
-    const sources = [...new Set(conflicts.map(c => c.source))].join(', ');
-    throw new Error(`Email conflict detected in: ${sources}`);
+    const [rows] = await pool.query(query, values);
+    if (rows.length > 0) {
+      const err = new CustomError(`Email conflict detected in table: ${table}`, 409);
+      console.log("Throwing CustomError:", err); // debug
+      throw err;
+    }
   }
 }
 
-
-
-module.exports = {
-  checkEmailConflicts,
-};
+module.exports = { checkEmailConflicts };

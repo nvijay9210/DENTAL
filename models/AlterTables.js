@@ -488,6 +488,30 @@ async function addGenderInSupplier(conn) {
     "Gender"
   );
 }
+
+async function addFirstnameInReception(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "reception",
+    "first_name",
+    "VARCHAR(100) NOT NULL",
+    ""
+  );
+}
+async function addLastnameInReception(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "reception",
+    "last_name",
+    "VARCHAR(100) NOT NULL",
+    ""
+  );
+}
+async function removeFullnameInReception(conn){
+  await dropColumnIfExists(conn, "reception", "full_name");
+}
+
+
 async function addReceiverEmailInReference(conn) {
   await addColumnIfNotExists(
     conn,
@@ -537,6 +561,9 @@ async function renameCurrencyToCurrencyCodeInSupplierProducts(conn) {
     await addLastnameInSupplier(conn);
     await addReceiverEmailInReference(conn);
     await renameCurrencyToCurrencyCodeInSupplierProducts(conn);
+    await removeFullnameInReception(conn);
+    await addFirstnameInReception(conn);
+    await addLastnameInReception(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");

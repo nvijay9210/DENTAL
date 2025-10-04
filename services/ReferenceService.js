@@ -17,6 +17,7 @@ const {
   updateDocumentsDiffBased,
 } = require("../utils/UploadFiles");
 const { getDocumentsByField, deleteDocumentsByTableAndId } = require("../models/documentModel");
+const { default: axios } = require("axios");
 
 // Field mapping for references (similar to treatment)
 
@@ -54,6 +55,7 @@ const createReference = async (data) => {
   };
   try {
     const { columns, values } = mapFields(data, fieldMap);
+  
     const referenceId = await referenceModel.createReference(
       "reference",
       columns,

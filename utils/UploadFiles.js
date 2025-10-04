@@ -49,8 +49,9 @@ const uploadFileMiddleware = (options) => {
       const ensureFolderExists = async (folderPath) => {
         try {
           await fsp.mkdir(folderPath, { recursive: true });
-        } catch (err) {
-          throw new Error("Failed to create directory");
+        } catch (error) {
+          console.error("Error uploading files:", error.message);
+          next(error); // ✅ Pass original error to Express middleware
         }
       };
 
@@ -85,7 +86,10 @@ const uploadFileMiddleware = (options) => {
       }
 
       const settings = parseInt(req.query.settings || "0");
-      if (settings !== 1) {
+      const otpVerified = !!req.body.otpVerified;
+
+      // Only validate if settings is not 1 AND otpVerified is false
+      if (!(settings === 1 || otpVerified)) {
         if (id) {
           console.log("update");
           await updateValidationFn(id, req.body, tenant_id);
@@ -195,9 +199,9 @@ const uploadFileMiddleware = (options) => {
       next();
     } catch (error) {
       console.error("Error uploading files:", error.message);
-      return res
-        .status(500)
-        .json({ message: "Internal Server Error during file upload" });
+
+      // Pass the original error to Express middleware
+      next(error);
     }
   };
 };
@@ -240,11 +244,16 @@ const uploadFileMiddleware2 = (options) => {
       const id = req.params[idMap[folderName]];
 
       // Run validation only if not in "settings" mode
-      const settings = parseInt(req.query.settings || "0", 10);
-      if (settings !== 1) {
+      const settings = parseInt(req.query.settings || "0");
+      const otpVerified = !!req.body.otpVerified;
+
+      // Only validate if settings is not 1 AND otpVerified is false
+      if (!(settings === 1 || otpVerified)) {
         if (id) {
+          console.log("update");
           await updateValidationFn(id, req.body, tenant_id);
         } else {
+          console.log("create");
           await createValidationFn(req.body);
         }
       }
@@ -296,13 +305,21 @@ const uploadFileMiddleware2 = (options) => {
 
           await deleteUploadedFiles(data[fieldName]);
         } catch (err) {
-          console.warn(`Failed to delete old file for ${folderName}.${fieldName}`, err);
+          console.warn(
+            `Failed to delete old file for ${folderName}.${fieldName}`,
+            err
+          );
         }
       };
 
       // Process file fields
       for (const fileField of fileFields) {
-        const { fieldName, maxSizeMB = 2, multiple = false, subFolder } = fileField;
+        const {
+          fieldName,
+          maxSizeMB = 2,
+          multiple = false,
+          subFolder,
+        } = fileField;
 
         const files = req.files?.filter((f) => f.fieldname === fieldName) || [];
         const hasNewFiles = files.length > 0;
@@ -348,7 +365,10 @@ const uploadFileMiddleware2 = (options) => {
             const maxSizeBytes = maxSizeMB * 1024 * 1024;
             if (file.size > maxSizeBytes) {
               return res.status(400).json({
-                message: `${fieldName.replace(/_/g, " ")} must be less than ${maxSizeMB}MB`,
+                message: `${fieldName.replace(
+                  /_/g,
+                  " "
+                )} must be less than ${maxSizeMB}MB`,
               });
             }
 
@@ -376,16 +396,17 @@ const uploadFileMiddleware2 = (options) => {
             }
 
             const dynamicSubFolder =
-              subFolder || (imageExtensions.includes(extension) ? "photo" : "document");
+              subFolder ||
+              (imageExtensions.includes(extension) ? "photo" : "document");
             const fieldPath = path.join(baseTenantPath, dynamicSubFolder);
 
             const bufferToSave = imageExtensions.includes(extension)
               ? await compressImage(file.buffer, 100)
               : file.buffer;
 
-            const fileName = `${path.parse(file.originalname).name}_${Date.now()}_${Math.floor(
-              Math.random() * 10000
-            )}${extension}`;
+            const fileName = `${
+              path.parse(file.originalname).name
+            }_${Date.now()}_${Math.floor(Math.random() * 10000)}${extension}`;
 
             const savedPath = await saveFile(bufferToSave, fieldPath, fileName);
             savedPaths.push(savedPath);
@@ -395,7 +416,8 @@ const uploadFileMiddleware2 = (options) => {
           uploadedFiles[fieldName] = savedPaths;
         } else {
           // Assign null if no files exist
-          req.body[fieldName] = id && oldFileUrls?.length > 0 ? oldFileUrls : null;
+          req.body[fieldName] =
+            id && oldFileUrls?.length > 0 ? oldFileUrls : null;
           uploadedFiles[fieldName] = req.body[fieldName];
         }
       }
@@ -403,11 +425,10 @@ const uploadFileMiddleware2 = (options) => {
       next();
     } catch (error) {
       console.error("Error uploading files:", error.message);
-      return res.status(500).json({ message: error.message });
+      next(error); // ✅ Pass original error to Express middleware
     }
   };
 };
-
 
 const deleteFileIfExists = (fileUrl) => {
   try {
@@ -430,6 +451,7 @@ const deleteFileIfExists = (fileUrl) => {
     }
   } catch (err) {
     console.error(`Error deleting file ${fileUrl}:`, err);
+    next(err);
   }
 };
 
@@ -476,6 +498,7 @@ const deleteUploadedFiles = async (filePaths) => {
       }
     } catch (err) {
       console.error("❌ Failed to delete:", filePath, err.message);
+      next(err);
     }
   };
 
@@ -504,7 +527,6 @@ const updateDocumentsDiffBased = async ({
   updated_by,
   descriptions = [], // Can be for both new & existing
 }) => {
-
   if (!Array.isArray(newFiles)) newFiles = [];
 
   const existingDocs = await getDocumentsByField(
@@ -607,8 +629,8 @@ const updateSingleDocument2 = async ({
 
     return { success: true, message: "Document updated successfully" };
   } catch (error) {
-    console.error("Error in updateDiff:", error);
-    throw error;
+    console.error("Error update diff:", error.message);
+    next(error); // ✅ Pass original error to Express middleware
   }
 };
 

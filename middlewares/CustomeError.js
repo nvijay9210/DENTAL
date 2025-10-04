@@ -1,6 +1,7 @@
 // utils/CustomError.js
 class CustomError extends Error {
     constructor(message, statusCode) {
+      console.log(message,statusCode)
       super(message);
       this.statusCode = statusCode||500;
       this.message = message || 'Something went wrong';

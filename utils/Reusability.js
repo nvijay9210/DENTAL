@@ -16,6 +16,7 @@ const { updateDocumentsDiffBased, saveDocuments } = require("./UploadFiles");
 const helper = require("../utils/Helpers");
 const { createPatientClinic } = require("../services/PatientClinicService");
 const { getPatientByKeycloakId } = require("../models/PatientModel");
+const { generateCode } = require("./CodeGenerator");
 
 /**
  * Sanitize object by removing undefined fields
@@ -65,7 +66,7 @@ const createEntity = async ({
   let username = null;
   let rawPassword = null;
   let entityId = null;
-  userClinicId=data.clinic_id
+  userClinicId = data.clinic_id;
 
   const connection = await connectionPool.getConnection();
   try {
@@ -118,7 +119,7 @@ const createEntity = async ({
           token
         );
 
-        rawPassword ='1234' || helper.generateAlphanumericPassword(12);
+        rawPassword = 1234 || helper.generateAlphanumericPassword(12);
         const encryptedPassword = helper.encrypt(rawPassword).content;
 
         const email =
@@ -152,10 +153,7 @@ const createEntity = async ({
             roleName
           );
           if (!roleAssigned)
-            throw new CustomError(
-              `Failed to assign '${roleName}' role`,
-              400
-            );
+            throw new CustomError(`Failed to assign '${roleName}' role`, 400);
         }
 
         if (userClinicId) {
@@ -172,9 +170,21 @@ const createEntity = async ({
     if (!entityId) {
       const { columns, values } = mapFields(data, create);
       entityId = await createModel(connection, entityName, columns, values);
+      // ✅ Generate unique code (e.g., APODEN1)
+      const tenantName = data.tenant_name || data.tenant_id; // depends on what you store
+      const code = generateCode(tenantName, entityName, entityId);
+
+      // Update the entity with generated code
+      const codeColumn = `${entityName}_code`;
+
+      await connection.query(
+        `UPDATE ${entityName} SET ${codeColumn} = ? WHERE ${entityName}_id = ?`,
+        [code, entityId]
+      );
+      
     }
 
-    console.log(entityName,userClinicId)
+    console.log(entityName, userClinicId);
 
     if (entityName === "patient" && userClinicId) {
       await createPatientClinicFn(
@@ -208,18 +218,14 @@ const createEntity = async ({
 
     return {
       entityId,
+      code: data.code,
       username: username || data.username || null,
-      password:
-        rawPassword || "Existing user – password not returned",
+      password: rawPassword || "Existing user – password not returned",
     };
   } catch (error) {
     await connection.rollback();
 
-    if (
-      process.env.KEYCLOAK_POWER === "on" &&
-      userId &&
-      !data.keycloak_id
-    ) {
+    if (process.env.KEYCLOAK_POWER === "on" && userId && !data.keycloak_id) {
       try {
         await rollbackKeycloakUser(token, realm, userId);
         console.log(`♻️ Rolled back Keycloak user: ${userId}`);
@@ -237,149 +243,140 @@ const createEntity = async ({
   }
 };
 
+const updateEntity = async ({
+  entityId,
+  entityName, // 'reception', 'supplier', 'patient', etc.
+  tenantId,
+  data,
+  token,
+  realm,
+  fieldMap,
+  getModelById,
+  updateModel,
+  fileFields = [],
+  connectionPool = pool,
+}) => {
+  const sanitizedData = sanitizeFields(data);
+  const connection = await connectionPool.getConnection();
+  let userId = null;
 
-  const updateEntity = async ({
-    entityId,
-    entityName, // 'reception', 'supplier', 'patient', etc.
-    tenantId,
-    data,
-    token,
-    realm,
-    fieldMap,
-    getModelById,
-    updateModel,
-    fileFields = [],
-    connectionPool = pool,
-  }) => {
-    const sanitizedData = sanitizeFields(data);
-    const connection = await connectionPool.getConnection();
-    let userId = null;
-  
-    try {
-      await connection.beginTransaction();
-  
-      const entity = await getModelById(tenantId, entityId, connection);
-      if (!entity) throw new CustomError(`${entityName} not found`, 404);
-  
-      userId = entity.keycloak_id;
-  
-      const { columns: rawColumns, values: rawValues } = mapFields(
-        sanitizedData,
-        { ...fieldMap, updated_by: (val) => val }
+  try {
+    await connection.beginTransaction();
+
+    const entity = await getModelById(tenantId, entityId, connection);
+    if (!entity) throw new CustomError(`${entityName} not found`, 404);
+
+    userId = entity.keycloak_id;
+
+    const { columns: rawColumns, values: rawValues } = mapFields(
+      sanitizedData,
+      { ...fieldMap, updated_by: (val) => val }
+    );
+
+    const columns = [];
+    const values = [];
+    rawColumns.forEach((col, idx) => {
+      if (rawValues[idx] !== undefined) {
+        columns.push(col);
+        values.push(rawValues[idx]);
+      }
+    });
+
+    let affectedRows = 0;
+
+    if (columns.length > 0) {
+      affectedRows = await updateModel(
+        entityId,
+        columns,
+        values,
+        tenantId,
+        connection
       );
-  
-      const columns = [];
-      const values = [];
-      rawColumns.forEach((col, idx) => {
-        if (rawValues[idx] !== undefined) {
-          columns.push(col);
-          values.push(rawValues[idx]);
-        }
-      });
-  
-      let affectedRows = 0;
-  
-      if (columns.length > 0) {
-        affectedRows = await updateModel(
-          entityId,
-          columns,
-          values,
-          tenantId,
-          connection
-        );
-  
-        if (process.env.KEYCLOAK_POWER === "on" && userId) {
-          await syncToKeycloak({
-            token,
-            realm,
-            userId,
-            entityName,
-            data: sanitizedData,
+
+      if (process.env.KEYCLOAK_POWER === "on" && userId) {
+        await syncToKeycloak({
+          token,
+          realm,
+          userId,
+          entityName,
+          data: sanitizedData,
+        });
+      }
+
+      for (const field of fileFields) {
+        const newFiles = Array.isArray(sanitizedData[field])
+          ? sanitizedData[field]
+          : [];
+        const deletedFileIds = Array.isArray(sanitizedData.deletedFileIds)
+          ? sanitizedData.deletedFileIds
+          : [];
+
+        if (newFiles.length || deletedFileIds.length) {
+          await updateDocumentsDiffBased({
+            table_name: entityName,
+            table_id: entityId,
+            field_name: field,
+            newFiles,
+            deletedFileIds,
+            created_by: sanitizedData.created_by,
+            updated_by: sanitizedData.updated_by,
+            descriptions: sanitizedData.descriptions,
           });
         }
-  
-        for (const field of fileFields) {
-          const newFiles = Array.isArray(sanitizedData[field])
-            ? sanitizedData[field]
-            : [];
-          const deletedFileIds = Array.isArray(sanitizedData.deletedFileIds)
-            ? sanitizedData.deletedFileIds
-            : [];
-  
-          if (newFiles.length || deletedFileIds.length) {
-            await updateDocumentsDiffBased({
-              table_name: entityName,
-              table_id: entityId,
-              field_name: field,
-              newFiles,
-              deletedFileIds,
-              created_by: sanitizedData.created_by,
-              updated_by: sanitizedData.updated_by,
-              descriptions: sanitizedData.descriptions,
-            });
-          }
-        }
       }
-  
-      await connection.commit();
-      await invalidateCacheByPattern(`${entityName}:*`);
-      if (["dentist", "patient"].includes(entityName)) {
-        await invalidateCacheByPattern(`${entityName}:clinic:*`);
-      }
-  
-      return { affectedRows };
-    } catch (error) {
-      await connection.rollback();
-      console.error(`❌ Update ${entityName} failed:`, error.message);
-      throw new CustomError(
-        `Failed to update ${entityName}: ${error.message}`,
-        500
-      );
-    } finally {
-      connection.release();
     }
-  };
-  
 
-  const syncToKeycloak = async ({
-    token,
-    realm,
-    userId,
-    entityName,
-    data,
-  }) => {
-    const payload = {};
-  
-    if (data.email) {
-      payload.email = data.email;
-      payload.emailVerified = true;
+    await connection.commit();
+    await invalidateCacheByPattern(`${entityName}:*`);
+    if (["dentist", "patient"].includes(entityName)) {
+      await invalidateCacheByPattern(`${entityName}:clinic:*`);
     }
-  
-    if (entityName === "reception" && data.full_name) {
-      const [firstName, ...rest] = data.full_name.trim().split(" ");
-      payload.firstName = firstName;
-      payload.lastName = rest.length > 0 ? rest.join(" ") : "-";
-    }
-  
-    if (entityName === "supplier" && data.name) {
-      const [firstName, ...rest] = data.name.trim().split(" ");
-      payload.firstName = firstName;
-      payload.lastName = rest.length > 0 ? rest.join(" ") : "-";
-    }
-  
-    if (Object.keys(payload).length === 0) return;
-  
-    try {
-      await updateUserInKeycloak(token, realm, userId, payload);
-      console.log(`✅ Synced ${entityName} keycloakId ${userId}`, payload);
-    } catch (kcError) {
-      console.warn(
-        `⚠️ Keycloak sync failed for ${entityName} keycloakId ${userId}:`,
-        kcError.message
-      );
-      // Do not rollback DB
-    }
-  };
-  
+
+    return { affectedRows };
+  } catch (error) {
+    await connection.rollback();
+    console.error(`❌ Update ${entityName} failed:`, error.message);
+    throw new CustomError(
+      `Failed to update ${entityName}: ${error.message}`,
+      500
+    );
+  } finally {
+    connection.release();
+  }
+};
+
+const syncToKeycloak = async ({ token, realm, userId, entityName, data }) => {
+  const payload = {};
+
+  if (data.email) {
+    payload.email = data.email;
+    payload.emailVerified = true;
+  }
+
+  if (entityName === "reception" && data.full_name) {
+    const [firstName, ...rest] = data.full_name.trim().split(" ");
+    payload.firstName = firstName;
+    payload.lastName = rest.length > 0 ? rest.join(" ") : "-";
+  }
+
+  if (entityName === "supplier" && data.name) {
+    const [firstName, ...rest] = data.name.trim().split(" ");
+    payload.firstName = firstName;
+    payload.lastName = rest.length > 0 ? rest.join(" ") : "-";
+  }
+
+  if (Object.keys(payload).length === 0) return;
+
+  try {
+    await updateUserInKeycloak(token, realm, userId, payload);
+    console.log(`✅ Synced ${entityName} keycloakId ${userId}`, payload);
+  } catch (kcError) {
+    console.warn(
+      `⚠️ Keycloak sync failed for ${entityName} keycloakId ${userId}:`,
+      kcError.message
+    );
+    // Do not rollback DB
+  }
+};
 
 module.exports = { updateEntity, createEntity };

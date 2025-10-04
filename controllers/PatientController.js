@@ -15,7 +15,7 @@ exports.createPatient = async (req, res, next) => {
   const value = group.split("-")[2]; // '5'
   try {
     // Validate patient data
-    await patientValidation.createPatientValidation(details);
+    // await patientValidation.createPatientValidation(details);
 
     // Create a new patient
     const id = await patientService.createPatient(details, token, realm, value);
@@ -24,8 +24,10 @@ exports.createPatient = async (req, res, next) => {
 
     res.status(200).json({ message: "Patient created", id });
   } catch (err) {
+    console.log("Caught in controller:", err);
     next(err);
   }
+  
 };
 
 exports.getAllPatientsByTenantId = async (req, res, next) => {

@@ -1,0 +1,33 @@
+// utils/codeGenerator.js
+const tenantCodes = {
+    apollo: process.env.APOLLO || "APO",
+    mydentist: process.env.MYDENTIST || "MYD",
+  };
+  
+  // Define module codes
+  const moduleCodes = {
+    dentist: "DEN",
+    patient: "PAT",
+    reception: "REC",
+    supplier: "SUP",
+  };
+  
+  /**
+   * Generate unique code for entities
+   * @param {string} tenant - tenant name (e.g., "apollo", "mydentist")
+   * @param {string} module - module name (dentist, patient, reception, supplier)
+   * @param {number} seq - sequence number from DB
+   * @returns {string} - generated code like APODEN1
+   */
+  function generateCode(tenant, module, seq) {
+    const tenantCode = tenantCodes[tenant];
+    const moduleCode = moduleCodes[module];
+  
+    if (!tenantCode) throw new Error("Invalid tenant name");
+    if (!moduleCode) throw new Error("Invalid module name");
+  
+    return `${tenantCode}${moduleCode}${seq}`;
+  }
+  
+  module.exports = { generateCode };
+  

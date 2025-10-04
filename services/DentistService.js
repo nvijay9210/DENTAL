@@ -159,7 +159,6 @@ const createDentist = async (data, token, realm) => {
   });
 
   return newDentist
-  
 };
 
 // -------------------- UPDATE --------------------

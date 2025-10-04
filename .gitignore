@@ -3,3 +3,4 @@ uploads/
 .env/
 logs/dev.log
 .env*
+dev.*
