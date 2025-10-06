@@ -202,26 +202,26 @@ const updatePatientValidation = async (patientId, details, tenantId) => {
   if (!patient) throw new CustomError("PatientId not found", 400);
   await checkTenantExistsByTenantIdValidation(tenantId);
 
-  console.log('step1 completed')
 
-  await checkPhoneConflicts(
-    details.phone_number,
-    details.tenant_id,
-    details.clinic_id,
-    details.alternate_phone_number || null,
-    "patient",
-    patientId
-  );
-  console.log('step2 completed')
 
-  await checkEmailConflicts(
-    details.email,
-    details.tenant_id,
-    details.clinic_id,
-    "patient",
-    patientId
-  );
-  console.log('step3 completed')
+  // await checkPhoneConflicts(
+  //   details.phone_number,
+  //   details.tenant_id,
+  //   details.clinic_id,
+  //   details.alternate_phone_number || null,
+  //   "patient",
+  //   patientId
+  // );
+
+
+  // await checkEmailConflicts(
+  //   details.email,
+  //   details.tenant_id,
+  //   details.clinic_id,
+  //   "patient",
+  //   patientId
+  // );
+
   await validateUniqueFields(details, true, patientId);
   console.log('validation Completed')
 };

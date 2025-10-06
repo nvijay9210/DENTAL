@@ -3,13 +3,20 @@ const pool = require("../config/db");
 const { CustomError } = require("../middlewares/CustomeError");
 
 
-async function checkPhoneConflicts(phone, tenant_id, clinic_id, alternatePhone = null, currentTable = null, currentId = null) {
+async function checkPhoneConflicts(
+  phone,
+  tenant_id,
+  clinic_id,
+  alternatePhone = null,
+  currentTable = null,
+  currentId = null
+) {
   const tables = ["clinic", "dentist", "patient", "supplier", "reception"];
 
   for (const table of tables) {
     const idField = `${table}_id`;
     let query;
-    const values = [phone, alternatePhone ?? phone, tenant_id];
+    let values;
 
     if (table === "patient") {
       query = `
@@ -20,7 +27,7 @@ async function checkPhoneConflicts(phone, tenant_id, clinic_id, alternatePhone =
           AND p.tenant_id = ?
           AND pc.clinic_id = ?
       `;
-      values.push(phone, clinic_id);
+      values = [phone, alternatePhone ?? phone, phone, tenant_id, clinic_id];
     } else if (["clinic", "dentist"].includes(table)) {
       query = `
         SELECT ${idField} AS id
@@ -28,7 +35,7 @@ async function checkPhoneConflicts(phone, tenant_id, clinic_id, alternatePhone =
         WHERE (phone_number = ? OR alternate_phone_number = ?)
           AND tenant_id = ? AND clinic_id = ?
       `;
-      values.push(clinic_id);
+      values = [phone, alternatePhone ?? phone, tenant_id, clinic_id];
     } else {
       query = `
         SELECT ${idField} AS id
@@ -36,8 +43,10 @@ async function checkPhoneConflicts(phone, tenant_id, clinic_id, alternatePhone =
         WHERE (phone_number = ? OR alternate_phone_number = ?)
           AND tenant_id = ?
       `;
+      values = [phone, alternatePhone ?? phone, tenant_id];
     }
 
+    // Exclude self during update
     if (currentTable === table && currentId) {
       query += table === "patient" ? ` AND p.${idField} != ?` : ` AND ${idField} != ?`;
       values.push(currentId);
@@ -49,5 +58,6 @@ async function checkPhoneConflicts(phone, tenant_id, clinic_id, alternatePhone =
     }
   }
 }
+
 
 module.exports = { checkPhoneConflicts };

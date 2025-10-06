@@ -2329,3 +2329,2224 @@ Error: Incorrect integer value: 'Reception AA' for column `dental`.`reception`.`
 [WARN] 29/9/2025, 1:28:18 pm   - ❌ Redis is not connected. Feature performance may be degraded.
 [INFO] 29/9/2025, 1:28:18 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
 [INFO] 29/9/2025, 1:28:18 pm   - ✅ MySQL connection established.
+[INFO] 4/10/2025, 12:22:37 pm   - Environment: development
+[INFO] 4/10/2025, 12:22:37 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 12:22:37 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 12:22:37 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 12:22:37 pm   - ✅ Server running on localhost port 8004
+[WARN] 4/10/2025, 12:22:37 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 12:22:37 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[ERROR] 4/10/2025, 12:22:37 pm   - ❌ MySQL connection failed: connect ETIMEDOUT
+[INFO] 4/10/2025, 12:22:55 pm   - Environment: development
+[INFO] 4/10/2025, 12:22:55 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 12:22:55 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 12:22:55 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 12:22:55 pm   - ✅ Server running on localhost port 8004
+[WARN] 4/10/2025, 12:22:55 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 12:22:55 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 4/10/2025, 12:22:56 pm   - ✅ MySQL connection established.
+[INFO] 4/10/2025, 1:20:00 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 1:20:00 pm   - super-user is logged in
+[INFO] 4/10/2025, 1:20:00 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[WARN] 4/10/2025, 1:20:01 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 1:20:01 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 1:20:02 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 1:20:02 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 1:20:02 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 1:20:02 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 1:20:02 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 1:20:02 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 1:20:02 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 1:20:02 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 1:20:02 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 1:20:02 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 1:23:57 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 1:23:57 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 1:23:57 pm   - ✅ Serving patients from DB and caching result
+[INFO] 4/10/2025, 1:24:00 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 1:24:00 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 1:24:00 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 1:24:01 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 1:24:01 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 1:24:01 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 1:24:01 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 1:24:01 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 1:33:59 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 1:34:00 pm   - Failed to create patient: The "data" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received type number (1234) 500
+[INFO] 4/10/2025, 1:34:00 pm   - Caught in controller: Failed to create patient: The "data" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received type number (1234)
+Error: Failed to create patient: The "data" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received type number (1234)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:237:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:105:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 4/10/2025, 1:47:01 pm   - Environment: development
+[INFO] 4/10/2025, 1:47:01 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 1:47:01 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 1:47:01 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 1:47:01 pm   - ✅ Server running on localhost port 8004
+[WARN] 4/10/2025, 1:47:01 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 1:47:01 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 4/10/2025, 1:47:01 pm   - ✅ MySQL connection established.
+[INFO] 4/10/2025, 1:47:05 pm   - Authentication successful as super-user
+[ERROR] 4/10/2025, 1:47:06 pm   - ❌ No user found with username: dentalhub-pat-1851
+[INFO] 4/10/2025, 1:47:09 pm   - ✅ User created: dentalhub-pat-1851
+[INFO] 4/10/2025, 1:47:10 pm   - ✅ Assigned role "patient" to user c5c396d8-e140-43db-9f7e-94179f0523c8
+[INFO] 4/10/2025, 1:47:12 pm   - 👥 Added user c5c396d8-e140-43db-9f7e-94179f0523c8 to group "dental-2-1"
+[INFO] 4/10/2025, 1:47:14 pm   - Failed to create patient: Invalid tenant name 500
+[INFO] 4/10/2025, 1:47:14 pm   - Caught in controller: Failed to create patient: Invalid tenant name
+Error: Failed to create patient: Invalid tenant name
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:237:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:105:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 4/10/2025, 1:49:26 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 1:49:26 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 1:49:35 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 1:49:36 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 1:52:54 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 1:52:54 pm   - ℹ️ Keycloak user already exists: patientab@gmail.com
+[INFO] 4/10/2025, 1:52:54 pm   - ✅ Assigned role "patient" to user c5c396d8-e140-43db-9f7e-94179f0523c8
+[INFO] 4/10/2025, 1:52:54 pm   - Failed to create patient: Invalid tenant name 500
+[INFO] 4/10/2025, 1:52:54 pm   - Caught in controller: Failed to create patient: Invalid tenant name
+Error: Failed to create patient: Invalid tenant name
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:237:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:105:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 4/10/2025, 1:56:17 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 1:56:18 pm   - ℹ️ Keycloak user already exists: patientab@gmail.com
+[INFO] 4/10/2025, 1:56:18 pm   - ✅ Assigned role "patient" to user c5c396d8-e140-43db-9f7e-94179f0523c8
+[INFO] 4/10/2025, 1:56:18 pm   - Failed to create patient: Invalid tenant name 500
+[INFO] 4/10/2025, 1:56:18 pm   - Caught in controller: Failed to create patient: Invalid tenant name
+Error: Failed to create patient: Invalid tenant name
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:237:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:105:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 4/10/2025, 3:13:40 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:13:40 pm   - super-user is logged in
+[INFO] 4/10/2025, 3:13:40 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[INFO] 4/10/2025, 3:13:42 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:13:42 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:13:42 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:13:42 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:13:42 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:13:42 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:13:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 3:13:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 3:13:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 3:13:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 3:13:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 3:13:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 3:13:43 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 3:13:44 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 3:13:44 pm   - ✅ Serving patients from DB and caching result
+[INFO] 4/10/2025, 3:13:47 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:13:47 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:13:47 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:13:47 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:13:48 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:13:48 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 3:13:48 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 3:13:48 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:15:01 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:15:01 pm   - create
+[ERROR] 4/10/2025, 3:15:01 pm   - ❌ No user found with username: dentalhub-pat-3207
+[INFO] 4/10/2025, 3:15:02 pm   - ✅ User created: dentalhub-pat-3207
+[INFO] 4/10/2025, 3:15:02 pm   - ✅ Assigned role "patient" to user f091fbaa-08cb-48aa-87c5-a613706fd8b6
+[INFO] 4/10/2025, 3:15:02 pm   - 👥 Added user f091fbaa-08cb-48aa-87c5-a613706fd8b6 to group "dental-2-1"
+[INFO] 4/10/2025, 3:15:02 pm   - Failed to create patient: Invalid tenant name 500
+[INFO] 4/10/2025, 3:15:02 pm   - Caught in controller: Failed to create patient: Invalid tenant name
+Error: Failed to create patient: Invalid tenant name
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:237:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:105:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 4/10/2025, 3:16:32 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:16:32 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:16:32 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:16:32 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:16:32 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:16:32 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:16:32 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:16:33 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:17:02 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:17:02 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:17:02 pm   - ✅ Serving patients from DB and caching result
+[INFO] 4/10/2025, 3:18:01 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:18:01 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:18:01 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 3:18:01 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:18:01 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:18:01 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:18:02 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:18:02 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:18:44 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:18:44 pm   - create
+[INFO] 4/10/2025, 3:18:44 pm   - Email conflict detected in table: patient 409
+[INFO] 4/10/2025, 3:18:44 pm   - Throwing CustomError: Email conflict detected in table: patient
+Error: Email conflict detected in table: patient
+    at checkEmailConflicts (D:\DENTAL\DT-BACKEND\utils\EmailValidation.js:44:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPatientValidation (D:\DENTAL\DT-BACKEND\validations\PatientValidation.js:182:3)
+    at async D:\DENTAL\DT-BACKEND\utils\UploadFiles.js:257:11
+[ERROR] 4/10/2025, 3:18:44 pm   - Error uploading files: Email conflict detected in table: patient
+[INFO] 4/10/2025, 3:19:13 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:19:13 pm   - create
+[ERROR] 4/10/2025, 3:19:13 pm   - ❌ No user found with username: dentalhub-pat-4601
+[INFO] 4/10/2025, 3:19:14 pm   - ✅ User created: dentalhub-pat-4601
+[INFO] 4/10/2025, 3:19:14 pm   - ✅ Assigned role "patient" to user 430fad60-6316-4835-8c4f-80630c8e6918
+[INFO] 4/10/2025, 3:19:14 pm   - 👥 Added user 430fad60-6316-4835-8c4f-80630c8e6918 to group "dental-2-1"
+[INFO] 4/10/2025, 3:19:14 pm   - Failed to create patient: Unknown column 'patient_code' in 'SET' 500
+[INFO] 4/10/2025, 3:19:14 pm   - Caught in controller: Failed to create patient: Unknown column 'patient_code' in 'SET'
+Error: Failed to create patient: Unknown column 'patient_code' in 'SET'
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:237:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:105:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 4/10/2025, 3:23:55 pm   - Environment: development
+[INFO] 4/10/2025, 3:23:56 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 3:23:56 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 3:23:56 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 3:23:56 pm   - ✅ Server running on localhost port 8004
+[WARN] 4/10/2025, 3:23:56 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 3:23:56 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 4/10/2025, 3:23:56 pm   - ✅ MySQL connection established.
+[INFO] 4/10/2025, 3:24:12 pm   - Environment: development
+[INFO] 4/10/2025, 3:24:12 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 3:24:12 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 3:24:12 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 3:24:12 pm   - ✅ Server running on localhost port 8004
+[WARN] 4/10/2025, 3:24:12 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 3:24:12 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 4/10/2025, 3:24:12 pm   - ✅ MySQL connection established.
+[INFO] 4/10/2025, 3:24:52 pm   - Environment: development
+[INFO] 4/10/2025, 3:24:52 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 3:24:52 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 3:24:52 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 3:24:52 pm   - ✅ Server running on localhost port 8004
+[WARN] 4/10/2025, 3:24:52 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 3:24:52 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 4/10/2025, 3:24:52 pm   - ✅ MySQL connection established.
+[INFO] 4/10/2025, 3:24:52 pm   - 🔌 Connected to database. Starting migration...
+[INFO] 4/10/2025, 3:24:52 pm   - ℹ️ Index `idx_tenant_date_time_status` already exists on `appointment`. Skipping.
+[INFO] 4/10/2025, 3:24:52 pm   - ℹ️ Column `description` already exists in `document`. Skipping.
+[INFO] 4/10/2025, 3:24:52 pm   - ℹ️ Column `profile_picture` already exists in `dentist`. Skipping.
+[INFO] 4/10/2025, 3:24:52 pm   - ℹ️ Column `profile_picture` already exists in `dentist`. Skipping.
+[INFO] 4/10/2025, 3:24:52 pm   - ℹ️ Column `profile_picture` already exists in `patient`. Skipping.
+[INFO] 4/10/2025, 3:24:52 pm   - ℹ️ Column `clinic_logo` already exists in `clinic`. Skipping.
+[INFO] 4/10/2025, 3:24:52 pm   - ℹ️ Column `profile_picture` already exists in `reception`. Skipping.
+[INFO] 4/10/2025, 3:24:52 pm   - ℹ️ Column `logo_url` already exists in `supplier`. Skipping.
+[INFO] 4/10/2025, 3:24:52 pm   - ℹ️ Column `image_url` already exists in `supplier_products`. Skipping.
+[INFO] 4/10/2025, 3:24:52 pm   - ℹ️ Column `clinic_id` already exists in `notifications`. Skipping.
+[INFO] 4/10/2025, 3:24:52 pm   - ℹ️ Column `file_url` already exists in `notifications`. Skipping.
+[INFO] 4/10/2025, 3:24:52 pm   - ℹ️ Column `supplier_payment_type` already exists in `supplier_payments`. Skipping.
+[INFO] 4/10/2025, 3:24:52 pm   - ℹ️ Column `total_amount` already exists in `payment`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `payment_for` already exists in `payment`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `payment_reference` in `payment` already matches type: TEXT. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `appointment_final_status` already exists in `appointment`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `patient_reference_id` already exists in `patient`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `tax_catalog` already exists in `treatment`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `tax_percentage` already exists in `treatment`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `teeth_involved` does not exist in `treatment`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `frequency` in `prescription` already matches type: TEXT. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `medical_history_notes` already exists in `patient`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `gender` already exists in `supplier`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `name` does not exist in `supplier`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `first_name` already exists in `supplier`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `last_name` already exists in `supplier`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `receiver_email` already exists in `reference`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `currency_code` already exists in `supplier_products`. Skipping rename.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `full_name` does not exist in `reception`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `first_name` already exists in `reception`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `last_name` already exists in `reception`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - ✅ Added column `patient_code` to `patient`
+[INFO] 4/10/2025, 3:24:53 pm   - ✅ Added column `dentist_code` to `dentist`
+[INFO] 4/10/2025, 3:24:53 pm   - ✅ Added column `reception_code` to `reception`
+[INFO] 4/10/2025, 3:24:53 pm   - ℹ️ Column `supplier_code` already exists in `supplier`. Skipping.
+[INFO] 4/10/2025, 3:24:53 pm   - 🎉 Migration completed successfully.
+[INFO] 4/10/2025, 3:25:05 pm   - Environment: development
+[INFO] 4/10/2025, 3:25:05 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 3:25:05 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 3:25:05 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 3:25:05 pm   - ✅ Server running on localhost port 8004
+[WARN] 4/10/2025, 3:25:05 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 3:25:05 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 4/10/2025, 3:25:05 pm   - ✅ MySQL connection established.
+[INFO] 4/10/2025, 3:27:34 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:27:34 pm   - create
+[INFO] 4/10/2025, 3:27:35 pm   - ℹ️ Keycloak user already exists: patientac@gmail.com
+[INFO] 4/10/2025, 3:27:35 pm   - ✅ Assigned role "patient" to user 430fad60-6316-4835-8c4f-80630c8e6918
+[INFO] 4/10/2025, 3:27:35 pm   - patient 1
+[INFO] 4/10/2025, 3:27:35 pm   - {
+  "patient_id": 15,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[WARN] 4/10/2025, 3:27:35 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 3:27:35 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 3:27:35 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 3:27:50 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:27:50 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:27:50 pm   - ✅ Serving patients from DB and caching result
+[INFO] 4/10/2025, 3:33:41 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:33:41 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:33:42 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:33:42 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:33:43 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:33:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 3:33:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 3:33:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:34:31 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:34:31 pm   - create
+[ERROR] 4/10/2025, 3:34:32 pm   - ❌ No user found with username: dentalhub-pat-5864
+[INFO] 4/10/2025, 3:34:32 pm   - ✅ User created: dentalhub-pat-5864
+[INFO] 4/10/2025, 3:34:32 pm   - ✅ Assigned role "patient" to user 70c7ccad-d1ab-4a52-bf2b-d95838a3a294
+[INFO] 4/10/2025, 3:34:32 pm   - 👥 Added user 70c7ccad-d1ab-4a52-bf2b-d95838a3a294 to group "dental-2-1"
+[INFO] 4/10/2025, 3:34:32 pm   - patient 1
+[INFO] 4/10/2025, 3:34:32 pm   - {
+  "patient_id": 16,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[WARN] 4/10/2025, 3:34:33 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 3:34:33 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 3:34:33 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 3:35:07 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:35:07 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:35:07 pm   - ✅ Serving patients from DB and caching result
+[INFO] 4/10/2025, 3:35:10 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:35:10 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:35:12 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:35:14 pm   - ✅ Keycloak user 70c7ccad-d1ab-4a52-bf2b-d95838a3a294 deleted (rollback)
+[INFO] 4/10/2025, 3:35:14 pm   - ✅ Keycloak user 70c7ccad-d1ab-4a52-bf2b-d95838a3a294 deleted
+[WARN] 4/10/2025, 3:35:14 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 3:35:14 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 3:35:14 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 3:35:16 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:35:16 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:35:16 pm   - ✅ Serving patients from DB and caching result
+[INFO] 4/10/2025, 3:35:20 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:35:21 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:35:21 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 3:35:21 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:35:21 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:35:21 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:35:21 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:35:21 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:36:17 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:36:17 pm   - create
+[ERROR] 4/10/2025, 3:36:18 pm   - ❌ No user found with username: dentalhub-pat-9624
+[INFO] 4/10/2025, 3:36:18 pm   - ✅ User created: dentalhub-pat-9624
+[INFO] 4/10/2025, 3:36:18 pm   - ✅ Assigned role "patient" to user 10ee69e7-2196-4b3a-85b1-f8e56b0c8954
+[INFO] 4/10/2025, 3:36:19 pm   - 👥 Added user 10ee69e7-2196-4b3a-85b1-f8e56b0c8954 to group "dental-2-1"
+[INFO] 4/10/2025, 3:36:19 pm   - patient 1
+[INFO] 4/10/2025, 3:36:19 pm   - {
+  "patient_id": 17,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[WARN] 4/10/2025, 3:36:19 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 3:36:19 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 3:36:19 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 3:36:23 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:36:23 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:36:23 pm   - ✅ Serving patients from DB and caching result
+[INFO] 4/10/2025, 3:42:06 pm   - Environment: development
+[INFO] 4/10/2025, 3:42:07 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 3:42:07 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 3:42:07 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 3:42:07 pm   - ✅ Server running on localhost port 8004
+[ERROR] 4/10/2025, 3:42:07 pm   - ❌ MySQL connection failed: connect ETIMEDOUT
+[WARN] 4/10/2025, 3:42:07 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 3:42:07 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 4/10/2025, 3:42:18 pm   - Environment: development
+[INFO] 4/10/2025, 3:42:18 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 3:42:18 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 3:42:18 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 3:42:18 pm   - ✅ Server running on localhost port 8004
+[WARN] 4/10/2025, 3:42:18 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 3:42:18 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 4/10/2025, 3:42:19 pm   - ✅ MySQL connection established.
+[INFO] 4/10/2025, 3:42:22 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:42:22 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:42:24 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:42:24 pm   - ✅ Keycloak user 10ee69e7-2196-4b3a-85b1-f8e56b0c8954 deleted (rollback)
+[INFO] 4/10/2025, 3:42:24 pm   - ✅ Keycloak user 10ee69e7-2196-4b3a-85b1-f8e56b0c8954 deleted
+[WARN] 4/10/2025, 3:42:25 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 3:42:25 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 3:42:25 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 3:42:26 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:42:26 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:42:26 pm   - ✅ Serving patients from DB and caching result
+[INFO] 4/10/2025, 3:42:27 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:42:28 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:42:29 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:42:30 pm   - ✅ Keycloak user 430fad60-6316-4835-8c4f-80630c8e6918 deleted (rollback)
+[INFO] 4/10/2025, 3:42:30 pm   - ✅ Keycloak user 430fad60-6316-4835-8c4f-80630c8e6918 deleted
+[WARN] 4/10/2025, 3:42:30 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 3:42:30 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 3:42:30 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 3:42:32 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:42:32 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:42:32 pm   - ✅ Serving patients from DB and caching result
+[INFO] 4/10/2025, 3:42:33 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:42:33 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:42:37 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:42:37 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:42:37 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:42:37 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:42:37 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:42:37 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:42:37 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 3:42:38 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 3:45:53 pm   - Environment: development
+[INFO] 4/10/2025, 3:45:53 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 3:45:53 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 3:45:53 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 3:45:53 pm   - ✅ Server running on localhost port 8004
+[WARN] 4/10/2025, 3:45:53 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 3:45:53 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 4/10/2025, 3:45:53 pm   - ✅ MySQL connection established.
+[INFO] 4/10/2025, 3:45:57 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:45:57 pm   - create
+[INFO] 4/10/2025, 3:45:57 pm   - rows: []
+[INFO] 4/10/2025, 3:45:57 pm   - rows: []
+[INFO] 4/10/2025, 3:45:57 pm   - rows: []
+[INFO] 4/10/2025, 3:45:57 pm   - rows: []
+[INFO] 4/10/2025, 3:45:57 pm   - rows: []
+[INFO] 4/10/2025, 3:45:57 pm   - Email conflict detected in table: clinic 409
+[INFO] 4/10/2025, 3:45:57 pm   - Throwing CustomError: Email conflict detected in table: clinic
+Error: Email conflict detected in table: clinic
+    at checkEmailConflicts (D:\DENTAL\DT-BACKEND\utils\EmailValidation.js:44:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPatientValidation (D:\DENTAL\DT-BACKEND\validations\PatientValidation.js:182:3)
+    at async D:\DENTAL\DT-BACKEND\utils\UploadFiles.js:257:11
+[ERROR] 4/10/2025, 3:45:57 pm   - Error uploading files: Email conflict detected in table: clinic
+[INFO] 4/10/2025, 3:46:31 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:46:31 pm   - create
+[INFO] 4/10/2025, 3:46:31 pm   - rows: []
+[INFO] 4/10/2025, 3:46:31 pm   - rows: []
+[INFO] 4/10/2025, 3:46:31 pm   - rows: []
+[INFO] 4/10/2025, 3:46:31 pm   - rows: []
+[INFO] 4/10/2025, 3:46:31 pm   - rows: []
+[INFO] 4/10/2025, 3:48:30 pm   - Environment: development
+[INFO] 4/10/2025, 3:48:30 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 3:48:30 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 3:48:30 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 3:48:30 pm   - ✅ Server running on localhost port 8004
+[WARN] 4/10/2025, 3:48:30 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 3:48:30 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 4/10/2025, 3:48:30 pm   - ✅ MySQL connection established.
+[INFO] 4/10/2025, 3:48:31 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:48:31 pm   - create
+[ERROR] 4/10/2025, 3:48:31 pm   - Error uploading files: pool is not defined
+[INFO] 4/10/2025, 3:49:01 pm   - Environment: development
+[INFO] 4/10/2025, 3:49:01 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 3:49:01 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 3:49:01 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 3:49:01 pm   - ✅ Server running on localhost port 8004
+[WARN] 4/10/2025, 3:49:01 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 3:49:01 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 4/10/2025, 3:49:01 pm   - ✅ MySQL connection established.
+[INFO] 4/10/2025, 3:49:04 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:49:04 pm   - create
+[INFO] 4/10/2025, 3:49:04 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 4/10/2025, 3:49:04 pm   - Error uploading files: Phone number conflict detected in table: patient
+[WARN] 4/10/2025, 3:49:13 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 3:50:12 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:50:12 pm   - create
+[INFO] 4/10/2025, 3:50:12 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 4/10/2025, 3:50:12 pm   - Error uploading files: Phone number conflict detected in table: patient
+[WARN] 4/10/2025, 3:50:13 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 3:51:04 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:51:04 pm   - create
+[INFO] 4/10/2025, 3:51:04 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 4/10/2025, 3:51:04 pm   - Error uploading files: Phone number conflict detected in table: patient
+[WARN] 4/10/2025, 3:51:07 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 3:52:44 pm   - Environment: development
+[INFO] 4/10/2025, 3:52:44 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 3:52:44 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 3:52:44 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 3:52:44 pm   - ✅ Server running on localhost port 8004
+[WARN] 4/10/2025, 3:52:44 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 3:52:44 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 4/10/2025, 3:52:45 pm   - ✅ MySQL connection established.
+[INFO] 4/10/2025, 3:53:42 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:53:42 pm   - create
+[INFO] 4/10/2025, 3:53:42 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 4/10/2025, 3:53:42 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 4/10/2025, 3:53:44 pm   - otp: 441423
+[WARN] 4/10/2025, 3:53:45 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 3:54:02 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:54:03 pm   - create
+[WARN] 4/10/2025, 3:54:03 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 3:54:03 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 4/10/2025, 3:54:03 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 4/10/2025, 3:59:42 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:59:43 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:59:44 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:59:45 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 3:59:56 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 4:00:21 pm   - Environment: development
+[INFO] 4/10/2025, 4:00:21 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 4:00:21 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 4:00:21 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 4:00:21 pm   - ✅ Server running on localhost port 8004
+[WARN] 4/10/2025, 4:00:21 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 4:00:21 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 4/10/2025, 4:00:21 pm   - ✅ MySQL connection established.
+[INFO] 4/10/2025, 4:00:32 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 4:01:22 pm   - Environment: development
+[INFO] 4/10/2025, 4:01:22 pm   - Using DB Host: localhost
+[INFO] 4/10/2025, 4:01:22 pm   - Server listening on port: 8004
+[INFO] 4/10/2025, 4:01:22 pm   - Backend running on http://localhost:4000
+[INFO] 4/10/2025, 4:01:22 pm   - ✅ Server running on localhost port 8004
+[WARN] 4/10/2025, 4:01:22 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 4/10/2025, 4:01:22 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 4/10/2025, 4:01:22 pm   - ✅ MySQL connection established.
+[INFO] 4/10/2025, 4:02:08 pm   - Authentication successful as super-user
+[ERROR] 4/10/2025, 4:02:09 pm   - ❌ No user found with username: dentalhub-pat-9684
+[INFO] 4/10/2025, 4:02:10 pm   - ✅ User created: dentalhub-pat-9684
+[INFO] 4/10/2025, 4:02:11 pm   - ✅ Assigned role "patient" to user 4c33bae7-641e-4da0-82d7-50ba73e776c2
+[INFO] 4/10/2025, 4:02:11 pm   - 👥 Added user 4c33bae7-641e-4da0-82d7-50ba73e776c2 to group "dental-2-1"
+[INFO] 4/10/2025, 4:02:11 pm   - patient 1
+[INFO] 4/10/2025, 4:02:11 pm   - {
+  "patient_id": 18,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[WARN] 4/10/2025, 4:02:11 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 4:02:11 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 4:02:12 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 4:02:16 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 4:02:16 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 4:02:16 pm   - ✅ Serving patients from DB and caching result
+[WARN] 4/10/2025, 4:12:44 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 4:12:44 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 5:12:40 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 5:12:40 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 6:11:44 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 6:11:44 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 6:56:02 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 6:56:02 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 6:56:03 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 6:56:03 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 6:56:03 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 6:56:04 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 6:56:04 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 6:56:04 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 6:56:04 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 6:56:04 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 6:56:12 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 6:56:12 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 6:56:12 pm   - ✅ Serving patients from DB and caching result
+[INFO] 4/10/2025, 6:56:27 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 6:56:28 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 6:56:28 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 6:56:28 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 6:56:29 pm   - Authentication successful as super-user
+[WARN] 4/10/2025, 6:56:29 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 4/10/2025, 6:56:29 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 4/10/2025, 6:56:29 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 7:02:33 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 7:02:33 pm   - create
+[INFO] 4/10/2025, 7:02:34 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 4/10/2025, 7:02:34 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 4/10/2025, 7:02:35 pm   - otp: 182910
+[WARN] 4/10/2025, 7:02:40 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 7:02:43 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 4/10/2025, 7:02:43 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 7:02:43 pm   - create
+[INFO] 4/10/2025, 7:02:43 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 4/10/2025, 7:02:43 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 4/10/2025, 7:06:27 pm   - Authentication successful as super-user
+[INFO] 4/10/2025, 7:06:28 pm   - ℹ️ Keycloak user already exists: ajaymca2024@gmail.com
+[INFO] 4/10/2025, 7:06:28 pm   - ✅ Assigned role "patient" to user 3b15fe45-e198-4af4-a1d7-6c0f1d478e37
+[INFO] 4/10/2025, 7:06:28 pm   - patient 1
+[INFO] 4/10/2025, 7:06:28 pm   - {
+  "patient_id": 9,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[ERROR] 4/10/2025, 7:06:28 pm   - Error creating patient_clinic: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:105:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[ERROR] 4/10/2025, 7:06:28 pm   - Failed to create patient_clinic: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:105:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 4/10/2025, 7:06:28 pm   - Failed to create patient: err is not defined 500
+[INFO] 4/10/2025, 7:06:28 pm   - Caught in controller: Failed to create patient: err is not defined
+Error: Failed to create patient: err is not defined
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:237:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:105:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[WARN] 4/10/2025, 7:11:40 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 7:11:40 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 10:19:20 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 4/10/2025, 10:19:21 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 12:27:16 pm   - Environment: development
+[INFO] 6/10/2025, 12:27:17 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 12:27:17 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 12:27:17 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 12:27:18 pm   - ✅ Server running on localhost port 8004
+[ERROR] 6/10/2025, 12:27:18 pm   - ❌ MySQL connection failed: connect ETIMEDOUT
+[WARN] 6/10/2025, 12:27:19 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 12:27:19 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 12:27:41 pm   - Environment: development
+[INFO] 6/10/2025, 12:27:41 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 12:27:41 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 12:27:41 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 12:27:41 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 12:27:41 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 12:27:41 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 12:27:42 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 12:32:47 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 12:32:47 pm   - super-user is logged in
+[INFO] 6/10/2025, 12:32:47 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[INFO] 6/10/2025, 12:32:50 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 12:32:50 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 12:32:51 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 12:32:51 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 12:32:51 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 12:32:51 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 12:32:51 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 12:32:51 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 12:32:51 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 12:32:51 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 12:32:51 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 12:32:51 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 12:33:18 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 12:33:19 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:13:12 pm   - Environment: development
+[INFO] 6/10/2025, 1:13:12 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 1:13:13 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 1:13:13 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 1:13:13 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 1:13:13 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 1:13:13 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 1:13:13 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 1:13:43 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:13:43 pm   - super-user is logged in
+[INFO] 6/10/2025, 1:13:43 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[WARN] 6/10/2025, 1:13:44 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 1:13:44 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:13:44 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 1:13:45 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:13:45 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:13:45 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:13:46 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:13:46 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:13:47 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:13:47 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:13:48 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:13:48 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:13:48 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:13:48 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:13:51 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:13:51 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:13:52 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:13:52 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:13:52 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:13:52 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:13:52 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:13:53 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:13:53 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:13:53 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:13:56 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:13:57 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:13:57 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 1:13:59 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:13:59 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:14:02 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:14:02 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:14:02 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:14:02 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:14:03 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:14:03 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:14:03 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:14:03 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:14:08 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:14:08 pm   - update
+[INFO] 6/10/2025, 1:14:08 pm   - start validation
+[INFO] 6/10/2025, 1:14:08 pm   - step1 completed
+[INFO] 6/10/2025, 1:14:08 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 1:14:08 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 1:14:11 pm   - otp: 297972
+[WARN] 6/10/2025, 1:14:13 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 1:32:55 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:32:55 pm   - super-user is logged in
+[INFO] 6/10/2025, 1:32:55 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[WARN] 6/10/2025, 1:32:56 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 1:32:56 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:32:56 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:32:56 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 1:32:56 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:32:56 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:32:56 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:32:56 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:32:56 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:32:56 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:32:56 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:32:56 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:32:56 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:32:56 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:32:57 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 1:33:00 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:33:00 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:33:02 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:33:03 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:33:03 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:33:03 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:33:03 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:33:03 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:33:04 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:33:04 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:33:08 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:33:08 pm   - update
+[INFO] 6/10/2025, 1:33:08 pm   - start validation
+[INFO] 6/10/2025, 1:33:08 pm   - step1 completed
+[INFO] 6/10/2025, 1:33:08 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 1:33:08 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 1:33:30 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:33:30 pm   - super-user is logged in
+[INFO] 6/10/2025, 1:33:30 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[INFO] 6/10/2025, 1:33:33 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:33:33 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:33:33 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:33:33 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:33:33 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:33:33 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:33:33 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:33:33 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:33:34 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:33:34 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:33:34 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:33:34 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:33:35 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:33:35 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:33:36 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 1:33:36 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:33:36 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:33:36 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:33:37 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:33:37 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 1:33:47 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:33:47 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:33:47 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 1:33:51 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:33:51 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:33:57 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:33:57 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:33:59 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:33:59 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:33:59 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:33:59 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:34:00 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:34:00 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:34:00 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:34:00 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:34:05 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:34:05 pm   - update
+[INFO] 6/10/2025, 1:34:06 pm   - start validation
+[INFO] 6/10/2025, 1:34:06 pm   - step1 completed
+[INFO] 6/10/2025, 1:34:06 pm   - step2 completed
+[INFO] 6/10/2025, 1:34:06 pm   - step3 completed
+[INFO] 6/10/2025, 1:34:06 pm   - validation Completed
+[INFO] 6/10/2025, 1:34:06 pm   - start validation
+[INFO] 6/10/2025, 1:34:06 pm   - step1 completed
+[INFO] 6/10/2025, 1:34:06 pm   - step2 completed
+[INFO] 6/10/2025, 1:34:06 pm   - step3 completed
+[INFO] 6/10/2025, 1:34:06 pm   - validation Completed
+[INFO] 6/10/2025, 1:34:09 pm   - ✅ Synced patient keycloakId 3b15fe45-e198-4af4-a1d7-6c0f1d478e37 {
+  "email": "ajaymca2024@gmail.com",
+  "emailVerified": true
+}
+[WARN] 6/10/2025, 1:34:09 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 1:34:09 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 1:34:09 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 1:34:12 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:34:12 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:34:12 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 1:34:16 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:34:17 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:34:20 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:34:20 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:34:20 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:34:20 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:34:21 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:34:21 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:34:21 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:34:21 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:34:48 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:34:48 pm   - update
+[INFO] 6/10/2025, 1:34:48 pm   - start validation
+[INFO] 6/10/2025, 1:34:48 pm   - step1 completed
+[INFO] 6/10/2025, 1:34:48 pm   - step2 completed
+[INFO] 6/10/2025, 1:34:48 pm   - Email conflict detected in table: dentist 409
+[INFO] 6/10/2025, 1:34:48 pm   - Throwing CustomError: Email conflict detected in table: dentist
+Error: Email conflict detected in table: dentist
+    at checkEmailConflicts (D:\DENTAL\DT-BACKEND\utils\EmailValidation.js:44:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async updatePatientValidation (D:\DENTAL\DT-BACKEND\validations\PatientValidation.js:217:3)
+    at async D:\DENTAL\DT-BACKEND\utils\UploadFiles.js:254:11
+[ERROR] 6/10/2025, 1:34:48 pm   - Error uploading files: Email conflict detected in table: dentist
+[INFO] 6/10/2025, 1:34:48 pm   - otp: 673695
+[WARN] 6/10/2025, 1:34:53 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 1:35:24 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 1:35:25 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:35:25 pm   - update
+[INFO] 6/10/2025, 1:35:25 pm   - start validation
+[INFO] 6/10/2025, 1:35:25 pm   - step1 completed
+[INFO] 6/10/2025, 1:35:25 pm   - step2 completed
+[INFO] 6/10/2025, 1:35:25 pm   - Email conflict detected in table: dentist 409
+[INFO] 6/10/2025, 1:35:25 pm   - Throwing CustomError: Email conflict detected in table: dentist
+Error: Email conflict detected in table: dentist
+    at checkEmailConflicts (D:\DENTAL\DT-BACKEND\utils\EmailValidation.js:44:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async updatePatientValidation (D:\DENTAL\DT-BACKEND\validations\PatientValidation.js:217:3)
+    at async D:\DENTAL\DT-BACKEND\utils\UploadFiles.js:254:11
+[ERROR] 6/10/2025, 1:35:25 pm   - Error uploading files: Email conflict detected in table: dentist
+[INFO] 6/10/2025, 1:37:40 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:37:40 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:37:55 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:37:55 pm   - start validation
+[INFO] 6/10/2025, 1:37:55 pm   - step1 completed
+[INFO] 6/10/2025, 1:37:55 pm   - step2 completed
+[INFO] 6/10/2025, 1:37:55 pm   - Email conflict detected in table: dentist 409
+[INFO] 6/10/2025, 1:37:55 pm   - Throwing CustomError: Email conflict detected in table: dentist
+Error: Email conflict detected in table: dentist
+    at checkEmailConflicts (D:\DENTAL\DT-BACKEND\utils\EmailValidation.js:44:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.updatePatientValidation (D:\DENTAL\DT-BACKEND\validations\PatientValidation.js:217:3)
+    at async exports.updatePatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:307:5)
+[INFO] 6/10/2025, 1:37:55 pm   - otp: 598061
+[WARN] 6/10/2025, 1:37:59 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 1:38:09 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:38:10 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 1:38:10 pm   - start validation
+[INFO] 6/10/2025, 1:38:10 pm   - step1 completed
+[INFO] 6/10/2025, 1:38:10 pm   - step2 completed
+[INFO] 6/10/2025, 1:38:10 pm   - Email conflict detected in table: dentist 409
+[INFO] 6/10/2025, 1:38:10 pm   - Throwing CustomError: Email conflict detected in table: dentist
+Error: Email conflict detected in table: dentist
+    at checkEmailConflicts (D:\DENTAL\DT-BACKEND\utils\EmailValidation.js:44:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.updatePatientValidation (D:\DENTAL\DT-BACKEND\validations\PatientValidation.js:217:3)
+    at async exports.updatePatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:307:5)
+[INFO] 6/10/2025, 1:49:21 pm   - Environment: development
+[INFO] 6/10/2025, 1:49:21 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 1:49:21 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 1:49:21 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 1:49:21 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 1:49:21 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 1:49:21 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 1:49:21 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 1:49:28 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:49:29 pm   - ⚠️ Keycloak sync failed for patient keycloakId 3b15fe45-e198-4af4-a1d7-6c0f1d478e37: HTTP 409: {"errorMessage":"User exists with same email"}
+[WARN] 6/10/2025, 1:49:29 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 1:49:29 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 1:49:29 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 1:49:34 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:49:34 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:49:34 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 1:49:39 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:49:39 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:49:42 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:49:45 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:49:45 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:49:45 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:49:45 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:49:45 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:49:45 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:49:45 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:49:52 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:49:52 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:49:52 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 1:49:55 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:49:55 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:50:03 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:50:03 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:50:03 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:50:03 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:50:03 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:50:03 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:50:03 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:50:03 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:50:09 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:50:10 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:50:10 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 1:50:24 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:50:24 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:50:27 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:50:27 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:50:27 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:50:27 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:50:27 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 1:50:27 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 1:50:27 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 1:50:27 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:50:36 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:50:36 pm   - update
+[INFO] 6/10/2025, 1:50:36 pm   - start validation
+[INFO] 6/10/2025, 1:50:36 pm   - step1 completed
+[INFO] 6/10/2025, 1:50:36 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 1:50:36 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 1:50:36 pm   - otp: 143643
+[WARN] 6/10/2025, 1:50:38 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 1:50:54 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 1:50:55 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:50:55 pm   - update
+[INFO] 6/10/2025, 1:50:55 pm   - start validation
+[INFO] 6/10/2025, 1:50:55 pm   - step1 completed
+[INFO] 6/10/2025, 1:50:55 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 1:50:55 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 1:55:59 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:55:59 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:59:06 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:59:06 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:59:33 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 1:59:33 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:00:28 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:00:28 pm   - super-user is logged in
+[INFO] 6/10/2025, 2:00:28 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[INFO] 6/10/2025, 2:00:29 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:00:29 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:00:29 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:00:29 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:00:29 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:00:29 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:00:29 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:00:29 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:00:30 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:00:30 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:00:30 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:00:30 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:00:30 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:00:30 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:00:30 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 2:00:36 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:00:36 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:00:39 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:00:39 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:00:40 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:00:40 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:00:41 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:00:41 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:00:41 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:00:42 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:03:29 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:03:29 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:03:29 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:03:29 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:03:29 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:03:29 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:03:29 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:03:30 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:03:44 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:03:44 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:03:44 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:03:44 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:03:44 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:03:44 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:03:44 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:03:44 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:05:08 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:05:08 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:06:22 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:06:22 pm   - super-user is logged in
+[INFO] 6/10/2025, 2:06:22 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[INFO] 6/10/2025, 2:06:23 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:06:24 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:06:24 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:06:24 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:06:24 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:06:25 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:06:25 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:06:25 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:06:25 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:06:25 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:06:25 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:06:25 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:06:25 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:06:25 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:06:25 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 2:07:13 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:07:14 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:07:15 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:07:15 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:07:15 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:07:16 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:07:16 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:07:16 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:07:17 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:07:17 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:10:00 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:10:01 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:11:15 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:11:15 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:12:09 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:12:09 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:16:42 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:16:42 pm   - update
+[INFO] 6/10/2025, 2:16:42 pm   - start validation
+[INFO] 6/10/2025, 2:16:42 pm   - step1 completed
+[INFO] 6/10/2025, 2:16:42 pm   - step2 completed
+[INFO] 6/10/2025, 2:16:42 pm   - Email conflict detected in table: dentist 409
+[INFO] 6/10/2025, 2:16:42 pm   - Throwing CustomError: Email conflict detected in table: dentist
+Error: Email conflict detected in table: dentist
+    at checkEmailConflicts (D:\DENTAL\DT-BACKEND\utils\EmailValidation.js:44:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async updatePatientValidation (D:\DENTAL\DT-BACKEND\validations\PatientValidation.js:217:3)
+    at async D:\DENTAL\DT-BACKEND\utils\UploadFiles.js:254:11
+[ERROR] 6/10/2025, 2:16:42 pm   - Error uploading files: Email conflict detected in table: dentist
+[INFO] 6/10/2025, 2:17:15 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:17:15 pm   - update
+[INFO] 6/10/2025, 2:17:15 pm   - start validation
+[INFO] 6/10/2025, 2:17:15 pm   - step1 completed
+[INFO] 6/10/2025, 2:17:15 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 2:17:15 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 2:17:15 pm   - otp: 475052
+[WARN] 6/10/2025, 2:17:16 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:17:27 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:17:28 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:17:28 pm   - ⚠️ Keycloak sync failed for patient keycloakId 3b15fe45-e198-4af4-a1d7-6c0f1d478e37: HTTP 409: {"errorMessage":"User exists with same email"}
+[WARN] 6/10/2025, 2:17:28 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:17:28 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:17:28 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:17:31 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:17:31 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:17:31 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 2:17:35 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:17:35 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:17:38 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:17:38 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:17:38 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:17:39 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:17:39 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:17:39 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:17:39 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:17:39 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:17:59 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:17:59 pm   - update
+[INFO] 6/10/2025, 2:17:59 pm   - start validation
+[INFO] 6/10/2025, 2:17:59 pm   - step1 completed
+[INFO] 6/10/2025, 2:18:00 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 2:18:00 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 2:18:09 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:18:09 pm   - update
+[INFO] 6/10/2025, 2:18:09 pm   - start validation
+[INFO] 6/10/2025, 2:18:09 pm   - step1 completed
+[INFO] 6/10/2025, 2:18:09 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 2:18:09 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 2:22:56 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:22:56 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:22:56 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:22:56 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:22:56 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:22:56 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:22:56 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:22:56 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:28:29 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:28:29 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:28:30 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:28:30 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:28:30 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:28:30 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:28:30 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:28:30 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:29:45 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:29:45 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:30:16 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:30:16 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:31:06 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:31:06 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:37:40 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:37:40 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:37:40 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:37:40 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:37:40 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:37:40 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:37:40 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:37:41 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:38:16 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:38:16 pm   - update
+[INFO] 6/10/2025, 2:38:16 pm   - start validation
+[INFO] 6/10/2025, 2:38:16 pm   - step1 completed
+[INFO] 6/10/2025, 2:38:16 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 2:38:16 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 2:42:10 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:42:10 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:42:11 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:42:11 pm   - update
+[INFO] 6/10/2025, 2:42:11 pm   - start validation
+[INFO] 6/10/2025, 2:42:11 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:42:12 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:42:12 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:42:12 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:42:12 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:42:12 pm   - step1 completed
+[WARN] 6/10/2025, 2:42:13 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:42:14 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 2:42:15 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 2:42:20 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:42:20 pm   - update
+[INFO] 6/10/2025, 2:42:21 pm   - start validation
+[INFO] 6/10/2025, 2:42:21 pm   - step1 completed
+[INFO] 6/10/2025, 2:42:21 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 2:42:21 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 2:42:37 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:42:37 pm   - update
+[INFO] 6/10/2025, 2:42:37 pm   - start validation
+[INFO] 6/10/2025, 2:42:37 pm   - step1 completed
+[INFO] 6/10/2025, 2:42:38 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 2:42:38 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 2:42:39 pm   - otp: 869462
+[WARN] 6/10/2025, 2:42:41 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:42:49 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:42:50 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:42:50 pm   - update
+[INFO] 6/10/2025, 2:42:50 pm   - start validation
+[INFO] 6/10/2025, 2:42:50 pm   - step1 completed
+[INFO] 6/10/2025, 2:42:50 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 2:42:50 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 2:46:08 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:46:08 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:46:08 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 2:46:12 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:46:13 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:46:13 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:46:13 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:46:13 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:46:13 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:46:13 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:46:13 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:47:07 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:47:07 pm   - create
+[ERROR] 6/10/2025, 2:47:09 pm   - ❌ No user found with username: dentalhub-pat-6827
+[INFO] 6/10/2025, 2:47:11 pm   - ✅ User created: dentalhub-pat-6827
+[INFO] 6/10/2025, 2:47:13 pm   - ✅ Assigned role "patient" to user cb35f4cc-d7e2-49a0-9ef6-06e51523ad38
+[INFO] 6/10/2025, 2:47:14 pm   - 👥 Added user cb35f4cc-d7e2-49a0-9ef6-06e51523ad38 to group "dental-2-1"
+[INFO] 6/10/2025, 2:47:14 pm   - patient 1
+[INFO] 6/10/2025, 2:47:14 pm   - {
+  "patient_id": 19,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[WARN] 6/10/2025, 2:47:15 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:47:15 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:47:15 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:47:53 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:47:53 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:47:53 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 2:47:57 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:47:57 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:47:59 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:48:00 pm   - ✅ Keycloak user cb35f4cc-d7e2-49a0-9ef6-06e51523ad38 deleted (rollback)
+[INFO] 6/10/2025, 2:48:00 pm   - ✅ Keycloak user cb35f4cc-d7e2-49a0-9ef6-06e51523ad38 deleted
+[WARN] 6/10/2025, 2:48:00 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:48:00 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:48:00 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:48:08 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:48:08 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:48:08 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 2:48:13 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:48:13 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:48:13 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:48:13 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:48:13 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:48:13 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:48:13 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:48:13 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:48:57 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:48:57 pm   - create
+[INFO] 6/10/2025, 2:48:57 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 2:48:57 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 2:49:00 pm   - otp: 380599
+[WARN] 6/10/2025, 2:49:02 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:49:11 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:49:11 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:49:11 pm   - create
+[INFO] 6/10/2025, 2:49:11 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 2:49:11 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 2:50:51 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:50:51 pm   - super-user is logged in
+[INFO] 6/10/2025, 2:50:51 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[WARN] 6/10/2025, 2:50:53 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:50:53 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:50:53 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:50:54 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:50:54 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:50:54 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:50:54 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:50:54 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:50:54 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:50:54 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:50:54 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:50:54 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:50:54 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:50:54 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:50:54 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:50:54 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:50:54 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:50:54 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:50:55 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:50:55 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:51:16 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:51:16 pm   - super-user is logged in
+[INFO] 6/10/2025, 2:51:16 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[INFO] 6/10/2025, 2:51:18 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:51:18 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:51:18 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:51:18 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:51:18 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:51:18 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:51:18 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:51:18 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:51:18 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:51:18 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:51:18 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:51:18 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:51:18 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:51:19 pm   - ✅ Serving patients from DB and caching result
+[WARN] 6/10/2025, 2:51:19 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:51:22 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:51:22 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:51:25 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:51:25 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:51:25 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:51:25 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:51:25 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:51:26 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:51:26 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:51:26 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:51:48 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:51:48 pm   - update
+[INFO] 6/10/2025, 2:51:48 pm   - start validation
+[INFO] 6/10/2025, 2:51:48 pm   - step1 completed
+[INFO] 6/10/2025, 2:51:48 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 2:51:48 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 2:52:05 pm   - otp: 175925
+[WARN] 6/10/2025, 2:52:06 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:52:15 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:52:16 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:52:16 pm   - update
+[INFO] 6/10/2025, 2:52:16 pm   - start validation
+[INFO] 6/10/2025, 2:52:16 pm   - step1 completed
+[INFO] 6/10/2025, 2:52:16 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 2:52:16 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 2:55:22 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:55:22 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:55:56 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:55:56 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:55:57 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:55:57 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:55:58 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:55:58 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:56:00 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:56:00 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:56:02 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:56:03 pm   - ✅ Synced patient keycloakId 4c33bae7-641e-4da0-82d7-50ba73e776c2 {
+  "email": "patientac@gmail.com",
+  "emailVerified": true
+}
+[WARN] 6/10/2025, 2:56:03 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:56:03 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:56:03 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:56:09 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:56:09 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:56:09 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 2:56:12 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:56:12 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:56:15 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:56:15 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:56:15 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:56:16 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:56:16 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:56:16 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 2:56:16 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 2:56:16 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 2:56:32 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:56:32 pm   - update
+[INFO] 6/10/2025, 2:56:32 pm   - start validation
+[INFO] 6/10/2025, 2:56:32 pm   - step1 completed
+[INFO] 6/10/2025, 2:56:32 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 2:56:32 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 2:56:33 pm   - otp: 751618
+[WARN] 6/10/2025, 2:56:34 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 2:56:42 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 2:56:42 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:56:42 pm   - update
+[INFO] 6/10/2025, 2:56:42 pm   - start validation
+[INFO] 6/10/2025, 2:56:42 pm   - step1 completed
+[INFO] 6/10/2025, 2:56:42 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 2:56:42 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 2:57:41 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 2:57:41 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:03:09 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:03:09 pm   - super-user is logged in
+[INFO] 6/10/2025, 3:03:09 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[INFO] 6/10/2025, 3:03:12 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:03:12 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:03:12 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:03:12 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:03:12 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:03:12 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:03:12 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:03:12 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:03:12 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:03:12 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:03:12 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:03:12 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:03:13 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 3:03:13 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:03:13 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:03:13 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:03:13 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:03:13 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:03:13 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 3:03:13 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 3:04:41 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:04:41 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:07:59 pm   - Environment: development
+[INFO] 6/10/2025, 3:07:59 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 3:07:59 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 3:07:59 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 3:07:59 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 3:08:00 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 3:08:00 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 3:08:00 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 3:09:25 pm   - Environment: development
+[INFO] 6/10/2025, 3:09:25 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 3:09:25 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 3:09:26 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 3:09:26 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 3:09:26 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 3:09:26 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 3:09:26 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 3:10:13 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:10:13 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:10:52 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:10:53 pm   - create
+[ERROR] 6/10/2025, 3:10:53 pm   - ❌ No user found with username: dentalhub-rec-8962
+[INFO] 6/10/2025, 3:10:54 pm   - ✅ User created: dentalhub-rec-8962
+[INFO] 6/10/2025, 3:10:56 pm   - ✅ Assigned role "receptionist" to user 3863d6f0-f4f7-41eb-8a22-1c36cc8cf509
+[INFO] 6/10/2025, 3:10:56 pm   - 👥 Added user 3863d6f0-f4f7-41eb-8a22-1c36cc8cf509 to group "dental-2-1"
+[INFO] 6/10/2025, 3:10:56 pm   - Failed to create reception: Invalid tenant name 500
+[INFO] 6/10/2025, 3:17:30 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:17:30 pm   - create
+[INFO] 6/10/2025, 3:17:32 pm   - ℹ️ Keycloak user already exists: receiptionaa@gmail.com
+[INFO] 6/10/2025, 3:17:33 pm   - ✅ Assigned role "receptionist" to user 3863d6f0-f4f7-41eb-8a22-1c36cc8cf509
+[INFO] 6/10/2025, 3:17:33 pm   - reception 1
+[WARN] 6/10/2025, 3:17:33 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 3:17:33 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 3:17:34 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 3:17:40 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:17:41 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:18:50 pm   - Environment: development
+[INFO] 6/10/2025, 3:18:50 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 3:18:50 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 3:18:50 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 3:18:50 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 3:18:50 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 3:18:50 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 3:18:50 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 3:23:50 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:23:50 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:23:50 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 3:23:52 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:23:52 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:23:54 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:23:54 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:23:54 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:23:55 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:23:55 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 3:23:55 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:23:55 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:23:55 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:23:59 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:23:59 pm   - update
+[INFO] 6/10/2025, 3:23:59 pm   - start validation
+[INFO] 6/10/2025, 3:23:59 pm   - step1 completed
+[INFO] 6/10/2025, 3:23:59 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 3:23:59 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 3:24:09 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:24:09 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:24:09 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 3:24:11 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:24:11 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:24:11 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:24:11 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:24:11 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:24:11 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:24:11 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 3:24:11 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:24:43 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:24:43 pm   - create
+[INFO] 6/10/2025, 3:24:43 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 3:24:43 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 3:25:23 pm   - otp: 951168
+[WARN] 6/10/2025, 3:25:24 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 3:25:32 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 3:25:32 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:25:32 pm   - create
+[INFO] 6/10/2025, 3:25:33 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 3:25:33 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 3:26:45 pm   - Environment: development
+[INFO] 6/10/2025, 3:26:45 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 3:26:45 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 3:26:45 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 3:26:45 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 3:26:45 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 3:26:45 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 3:26:45 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 3:26:49 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:26:49 pm   - ℹ️ Keycloak user already exists: ajaymca2024@gmail.com
+[INFO] 6/10/2025, 3:26:49 pm   - ✅ Assigned role "patient" to user 3b15fe45-e198-4af4-a1d7-6c0f1d478e37
+[INFO] 6/10/2025, 3:26:49 pm   - patient 1
+[INFO] 6/10/2025, 3:26:49 pm   - {
+  "patient_id": 9,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[ERROR] 6/10/2025, 3:26:49 pm   - Error creating patient_clinic: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[ERROR] 6/10/2025, 3:26:49 pm   - Failed to create patient_clinic: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 6/10/2025, 3:26:50 pm   - Failed to create patient: err is not defined 500
+[INFO] 6/10/2025, 3:26:50 pm   - Caught in controller: Failed to create patient: err is not defined
+Error: Failed to create patient: err is not defined
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:237:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 6/10/2025, 3:27:57 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:27:57 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:27:57 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 3:28:00 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:28:00 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:28:00 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:28:00 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:28:00 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:28:00 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 3:28:00 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:28:01 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:28:22 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:28:22 pm   - create
+[INFO] 6/10/2025, 3:28:22 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 3:28:22 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 3:28:23 pm   - otp: 869982
+[WARN] 6/10/2025, 3:28:25 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 3:28:33 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:28:33 pm   - create
+[WARN] 6/10/2025, 3:28:33 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 3:28:33 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 3:28:33 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 3:30:22 pm   - Environment: development
+[INFO] 6/10/2025, 3:30:22 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 3:30:22 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 3:30:22 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 3:30:22 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 3:30:22 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 3:30:22 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 3:30:22 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 3:30:34 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:30:34 pm   - req.body.otpVerified: true
+[INFO] 6/10/2025, 3:30:34 pm   - ℹ️ Keycloak user already exists: ajaymca2024@gmail.com
+[INFO] 6/10/2025, 3:30:34 pm   - ✅ Assigned role "patient" to user 3b15fe45-e198-4af4-a1d7-6c0f1d478e37
+[INFO] 6/10/2025, 3:30:34 pm   - patient 1
+[INFO] 6/10/2025, 3:30:34 pm   - {
+  "patient_id": 9,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[ERROR] 6/10/2025, 3:30:34 pm   - Error creating patient_clinic: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[ERROR] 6/10/2025, 3:30:34 pm   - Failed to create patient_clinic: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 6/10/2025, 3:30:34 pm   - Failed to create patient: err is not defined 500
+[INFO] 6/10/2025, 3:30:34 pm   - Caught in controller: Failed to create patient: err is not defined
+Error: Failed to create patient: err is not defined
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:237:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 6/10/2025, 3:30:41 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:30:41 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:30:41 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 3:30:44 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:30:44 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:30:44 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:30:44 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:30:44 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:30:45 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:30:45 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:30:45 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:31:07 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:31:07 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 3:31:07 pm   - create
+[INFO] 6/10/2025, 3:31:07 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 3:31:07 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 3:31:08 pm   - otp: 464143
+[WARN] 6/10/2025, 3:31:09 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 3:31:15 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 3:31:15 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:31:15 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 3:31:15 pm   - create
+[INFO] 6/10/2025, 3:31:15 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 3:31:15 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 3:31:43 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:31:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:31:43 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 3:31:46 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:31:46 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:31:46 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 3:31:46 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:31:46 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:31:46 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:31:46 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:31:47 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:32:23 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:32:24 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 3:32:24 pm   - create
+[INFO] 6/10/2025, 3:32:24 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 3:32:24 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 3:32:25 pm   - otp: 157515
+[WARN] 6/10/2025, 3:32:26 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 3:32:31 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 3:32:31 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:32:31 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 3:32:31 pm   - create
+[INFO] 6/10/2025, 3:32:32 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 3:32:32 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 3:32:56 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:32:56 pm   - req.body.otpVerified: true
+[INFO] 6/10/2025, 3:32:56 pm   - ℹ️ Keycloak user already exists: ajaymca2024@gmail.com
+[INFO] 6/10/2025, 3:32:56 pm   - ✅ Assigned role "patient" to user 3b15fe45-e198-4af4-a1d7-6c0f1d478e37
+[INFO] 6/10/2025, 3:32:56 pm   - patient 1
+[INFO] 6/10/2025, 3:32:56 pm   - {
+  "patient_id": 9,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[ERROR] 6/10/2025, 3:32:56 pm   - Error creating patient_clinic: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[ERROR] 6/10/2025, 3:32:56 pm   - Failed to create patient_clinic: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 6/10/2025, 3:32:56 pm   - Failed to create patient: err is not defined 500
+[INFO] 6/10/2025, 3:32:56 pm   - Caught in controller: Failed to create patient: err is not defined
+Error: Failed to create patient: err is not defined
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:237:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 6/10/2025, 3:36:11 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:36:11 pm   - super-user is logged in
+[INFO] 6/10/2025, 3:36:11 pm   - {
+  "username": "clinica@gmail.com",
+  "userId": "c42f3caa-97c8-4b2a-ba7a-f9f0ffdafec5",
+  "displayName": "VIJAY N",
+  "tenantId": "2",
+  "clinicId": "1",
+  "role": "super-user",
+  "preferred_username": "superuser-a"
+}
+[WARN] 6/10/2025, 3:36:13 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 3:36:14 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:36:14 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 3:36:14 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:36:14 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:36:14 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:36:15 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:36:15 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 3:36:15 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:36:15 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:36:15 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:36:15 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:36:15 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 3:36:15 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 3:36:15 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:36:16 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:36:17 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:36:17 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 3:36:17 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:37:02 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:37:03 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 3:37:03 pm   - create
+[INFO] 6/10/2025, 3:37:03 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 3:37:03 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 3:37:04 pm   - otp: 203979
+[WARN] 6/10/2025, 3:37:06 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 3:37:11 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 3:37:12 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:37:12 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 3:37:12 pm   - create
+[INFO] 6/10/2025, 3:37:12 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 3:37:12 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 3:48:01 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:48:24 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:48:39 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:48:52 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:49:03 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:49:03 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:49:03 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 3:49:07 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:49:08 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:49:08 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:49:08 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:49:08 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:49:08 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:49:08 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:49:36 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:49:36 pm   - req.body.otpVerified: true
+[INFO] 6/10/2025, 3:49:37 pm   - ℹ️ Keycloak user already exists: ajaymca2024@gmail.com
+[INFO] 6/10/2025, 3:49:37 pm   - ✅ Assigned role "patient" to user 3b15fe45-e198-4af4-a1d7-6c0f1d478e37
+[INFO] 6/10/2025, 3:49:37 pm   - patient 1
+[INFO] 6/10/2025, 3:49:37 pm   - {
+  "patient_id": 9,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[ERROR] 6/10/2025, 3:49:37 pm   - Error creating patient_clinic: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[ERROR] 6/10/2025, 3:49:37 pm   - Failed to create patient_clinic: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 6/10/2025, 3:49:37 pm   - Failed to create patient: err is not defined 500
+[INFO] 6/10/2025, 3:49:37 pm   - Caught in controller: Failed to create patient: err is not defined
+Error: Failed to create patient: err is not defined
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:237:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 6/10/2025, 3:52:41 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:52:58 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:53:23 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:53:29 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:53:34 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:53:34 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:53:34 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 3:53:38 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:53:38 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:53:38 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:53:38 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:53:38 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:53:38 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 3:53:38 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 3:54:14 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:54:14 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 3:54:14 pm   - create
+[INFO] 6/10/2025, 3:54:14 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 3:54:14 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 3:54:15 pm   - otp: 906655
+[WARN] 6/10/2025, 3:54:16 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 3:54:23 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:54:23 pm   - req.body.otpVerified: true
+[WARN] 6/10/2025, 3:54:23 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 3:54:23 pm   - ℹ️ Keycloak user already exists: ajaymca2024@gmail.com
+[INFO] 6/10/2025, 3:54:24 pm   - ✅ Assigned role "patient" to user 3b15fe45-e198-4af4-a1d7-6c0f1d478e37
+[INFO] 6/10/2025, 3:54:24 pm   - patient 1
+[INFO] 6/10/2025, 3:54:24 pm   - {
+  "patient_id": 9,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[ERROR] 6/10/2025, 3:54:24 pm   - Error creating patient_clinic: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[ERROR] 6/10/2025, 3:54:24 pm   - Failed to create patient_clinic: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 6/10/2025, 3:54:24 pm   - Failed to create patient: err is not defined 500
+[INFO] 6/10/2025, 3:54:24 pm   - Caught in controller: Failed to create patient: err is not defined
+Error: Failed to create patient: err is not defined
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:237:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 6/10/2025, 3:56:34 pm   - Environment: development
+[INFO] 6/10/2025, 3:56:34 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 3:56:34 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 3:56:34 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 3:56:34 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 3:56:34 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 3:56:34 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 3:56:34 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 3:56:38 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:56:38 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 3:56:38 pm   - create
+[INFO] 6/10/2025, 3:56:38 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 3:56:38 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 3:56:41 pm   - otp: 325845
+[WARN] 6/10/2025, 3:56:43 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 3:56:50 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 3:56:50 pm   - req.body.otpVerified: true
+[WARN] 6/10/2025, 3:56:51 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 3:56:51 pm   - ℹ️ Keycloak user already exists: ajaymca2024@gmail.com
+[INFO] 6/10/2025, 3:56:51 pm   - ✅ Assigned role "patient" to user 3b15fe45-e198-4af4-a1d7-6c0f1d478e37
+[INFO] 6/10/2025, 3:56:51 pm   - patient 1
+[INFO] 6/10/2025, 3:56:51 pm   - {
+  "patient_id": 9,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[ERROR] 6/10/2025, 3:56:51 pm   - Error creating patient_clinic: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[ERROR] 6/10/2025, 3:56:51 pm   - Failed to create patient_clinic: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 6/10/2025, 3:56:51 pm   - Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at PromisePoolConnection.query (D:\DENTAL\DT-BACKEND\node_modules\mysql2\lib\promise\connection.js:29:22)
+    at Object.createRecord (D:\DENTAL\DT-BACKEND\query\Records.js:14:36)
+    at Object.createPatientClinic (D:\DENTAL\DT-BACKEND\models\PatientClinicModel.js:10:41)
+    at createPatientClinic (D:\DENTAL\DT-BACKEND\services\PatientClinicService.js:36:56)
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:190:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16) 500
+[INFO] 6/10/2025, 3:56:52 pm   - Failed to create patient: Error: Duplicate entry '9-1' for key 'uk_patient_clinic' 500
+[INFO] 6/10/2025, 3:56:52 pm   - Caught in controller: Failed to create patient: Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+Error: Failed to create patient: Error: Duplicate entry '9-1' for key 'uk_patient_clinic'
+    at createEntity (D:\DENTAL\DT-BACKEND\utils\Reusability.js:237:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.createPatient (D:\DENTAL\DT-BACKEND\services\PatientService.js:107:10)
+    at async exports.createPatient (D:\DENTAL\DT-BACKEND\controllers\PatientController.js:21:16)
+[INFO] 6/10/2025, 4:02:28 pm   - Environment: development
+[INFO] 6/10/2025, 4:02:28 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 4:02:28 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 4:02:28 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 4:02:28 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 4:02:28 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 4:02:28 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 4:02:28 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 4:02:36 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:02:36 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 4:02:36 pm   - create
+[INFO] 6/10/2025, 4:02:36 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 4:02:36 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 4:02:37 pm   - otp: 263366
+[WARN] 6/10/2025, 4:02:40 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:02:47 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:02:48 pm   - req.body.otpVerified: true
+[WARN] 6/10/2025, 4:02:48 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:02:48 pm   - ℹ️ Keycloak user already exists: ajaymca2024@gmail.com
+[INFO] 6/10/2025, 4:02:48 pm   - ✅ Assigned role "patient" to user 3b15fe45-e198-4af4-a1d7-6c0f1d478e37
+[INFO] 6/10/2025, 4:02:49 pm   - patient 1
+[INFO] 6/10/2025, 4:02:49 pm   - {
+  "patient_id": 20,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[WARN] 6/10/2025, 4:02:49 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:02:49 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:02:49 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:02:52 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:02:52 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:02:53 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 4:11:19 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:11:19 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:11:21 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:11:21 pm   - ✅ Keycloak user 3b15fe45-e198-4af4-a1d7-6c0f1d478e37 deleted (rollback)
+[INFO] 6/10/2025, 4:11:21 pm   - ✅ Keycloak user 3b15fe45-e198-4af4-a1d7-6c0f1d478e37 deleted
+[WARN] 6/10/2025, 4:11:21 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:11:21 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:11:22 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:11:23 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:11:23 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:11:23 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 4:11:27 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:11:27 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:11:27 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:11:27 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 4:11:27 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:11:27 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:11:28 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:11:58 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:11:59 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 4:11:59 pm   - create
+[INFO] 6/10/2025, 4:11:59 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 4:11:59 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 4:12:00 pm   - otp: 505659
+[WARN] 6/10/2025, 4:12:02 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:12:10 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:12:10 pm   - req.body.otpVerified: true
+[WARN] 6/10/2025, 4:12:11 pm   - 🚫 Redis disconnected – skip invalidation
+[ERROR] 6/10/2025, 4:12:11 pm   - ❌ No user found with username: dentalhub-pat-3231
+[INFO] 6/10/2025, 4:12:12 pm   - ✅ User created: dentalhub-pat-3231
+[INFO] 6/10/2025, 4:12:12 pm   - ✅ Assigned role "patient" to user 8e0c1f3b-fd0e-434f-8d11-1ba314494f0d
+[INFO] 6/10/2025, 4:12:12 pm   - 👥 Added user 8e0c1f3b-fd0e-434f-8d11-1ba314494f0d to group "dental-2-1"
+[INFO] 6/10/2025, 4:12:12 pm   - patient 1
+[INFO] 6/10/2025, 4:12:12 pm   - {
+  "patient_id": 21,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[WARN] 6/10/2025, 4:12:12 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:12:12 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:12:13 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:12:16 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:12:17 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:12:17 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 4:12:57 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:12:58 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:12:58 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:12:58 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:12:58 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:12:58 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:12:58 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:13:31 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:13:31 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 4:13:31 pm   - create
+[INFO] 6/10/2025, 4:13:31 pm   - Email conflict detected in table: patient 409
+[INFO] 6/10/2025, 4:13:31 pm   - Throwing CustomError: Email conflict detected in table: patient
+Error: Email conflict detected in table: patient
+    at checkEmailConflicts (D:\DENTAL\DT-BACKEND\utils\EmailValidation.js:44:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPatientValidation (D:\DENTAL\DT-BACKEND\validations\PatientValidation.js:182:3)
+    at async D:\DENTAL\DT-BACKEND\utils\UploadFiles.js:259:11
+[ERROR] 6/10/2025, 4:13:31 pm   - Error uploading files: Email conflict detected in table: patient
+[INFO] 6/10/2025, 4:13:32 pm   - otp: 793976
+[WARN] 6/10/2025, 4:13:33 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:13:44 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:13:44 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:13:44 pm   - req.body.otpVerified: true
+[INFO] 6/10/2025, 4:13:44 pm   - ℹ️ Keycloak user already exists: ajaymca2024@gmail.com
+[INFO] 6/10/2025, 4:13:44 pm   - ✅ Assigned role "patient" to user 8e0c1f3b-fd0e-434f-8d11-1ba314494f0d
+[INFO] 6/10/2025, 4:13:44 pm   - patient 1
+[INFO] 6/10/2025, 4:13:44 pm   - {
+  "patient_id": 22,
+  "clinic_id": "1",
+  "created_by": "VIJAY N"
+}
+[WARN] 6/10/2025, 4:13:44 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:13:44 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:13:44 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:13:48 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:13:49 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:13:49 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 4:15:35 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:15:35 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:15:37 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:15:37 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:15:37 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:15:37 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 4:15:38 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 4:15:38 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:15:38 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:18:03 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:18:13 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:18:13 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 4:18:13 pm   - update
+[INFO] 6/10/2025, 4:18:13 pm   - start validation
+[INFO] 6/10/2025, 4:18:13 pm   - step1 completed
+[INFO] 6/10/2025, 4:18:13 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 4:18:13 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 4:34:27 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:35:11 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:35:16 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:35:17 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:35:35 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:35:59 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:36:10 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:36:32 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:36:41 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:38:28 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:39:31 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:40:01 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:40:19 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:40:19 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 4:40:19 pm   - update
+[INFO] 6/10/2025, 4:40:19 pm   - start validation
+[INFO] 6/10/2025, 4:40:19 pm   - step1 completed
+[INFO] 6/10/2025, 4:40:19 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 4:40:19 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 4:40:34 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:40:34 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:40:35 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:40:35 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:40:35 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 4:40:43 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:40:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:40:47 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:40:47 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:40:47 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:40:47 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:40:47 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:40:48 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:40:48 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:40:57 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:40:57 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 4:40:57 pm   - update
+[INFO] 6/10/2025, 4:40:57 pm   - start validation
+[INFO] 6/10/2025, 4:40:57 pm   - step1 completed
+[INFO] 6/10/2025, 4:40:57 pm   - Phone number conflict detected in table: patient 409
+[ERROR] 6/10/2025, 4:40:57 pm   - Error uploading files: Phone number conflict detected in table: patient
+[INFO] 6/10/2025, 4:44:32 pm   - Environment: development
+[INFO] 6/10/2025, 4:44:33 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 4:44:33 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 4:44:33 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 4:44:33 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 4:44:33 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 4:44:33 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[ERROR] 6/10/2025, 4:44:33 pm   - ❌ MySQL connection failed: connect ETIMEDOUT
+[INFO] 6/10/2025, 4:44:47 pm   - Environment: development
+[INFO] 6/10/2025, 4:44:47 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 4:44:47 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 4:44:47 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 4:44:47 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 4:44:47 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 4:44:47 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 4:44:47 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 4:44:56 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:44:56 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 4:44:56 pm   - update
+[INFO] 6/10/2025, 4:44:56 pm   - start validation
+[INFO] 6/10/2025, 4:44:56 pm   - validation Completed
+[INFO] 6/10/2025, 4:44:57 pm   - ✅ Synced patient keycloakId 8e0c1f3b-fd0e-434f-8d11-1ba314494f0d {
+  "email": "ajaymca2024@gmail.com",
+  "emailVerified": true
+}
+[WARN] 6/10/2025, 4:44:57 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:44:57 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:44:58 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:45:00 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:45:00 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:45:00 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 4:45:15 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:45:15 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:45:17 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:45:18 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:45:18 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:45:19 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:45:19 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:45:19 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 4:45:19 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:47:56 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:48:04 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:48:05 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 4:48:05 pm   - update
+[INFO] 6/10/2025, 4:48:05 pm   - start validation
+[INFO] 6/10/2025, 4:48:05 pm   - validation Completed
+[INFO] 6/10/2025, 4:48:05 pm   - ✅ Synced patient keycloakId 4c33bae7-641e-4da0-82d7-50ba73e776c2 {
+  "email": "patientac@gmail.com",
+  "emailVerified": true
+}
+[WARN] 6/10/2025, 4:48:05 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:48:05 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:48:05 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:48:07 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:48:07 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:48:07 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 4:48:11 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:48:11 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:48:13 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:48:13 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:48:13 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 4:48:13 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:48:13 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:48:13 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:48:14 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:48:23 pm   - otp: 976811
+[WARN] 6/10/2025, 4:48:26 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:48:34 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:48:35 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:48:35 pm   - req.body.otpVerified: true
+[INFO] 6/10/2025, 4:48:36 pm   - ✅ Synced patient keycloakId 4c33bae7-641e-4da0-82d7-50ba73e776c2 {
+  "email": "patientaaa@gmail.com",
+  "emailVerified": true
+}
+[WARN] 6/10/2025, 4:48:36 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:48:36 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:48:36 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:48:39 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:48:39 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:48:39 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 4:50:20 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:50:20 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:50:24 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:50:24 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:50:24 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:50:25 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:50:25 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:50:25 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 6/10/2025, 4:50:25 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:50:41 pm   - otp: 778264
+[WARN] 6/10/2025, 4:50:42 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:50:51 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:50:52 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 4:50:52 pm   - req.body.otpVerified: true
+[INFO] 6/10/2025, 4:50:52 pm   - ✅ Synced patient keycloakId 4c33bae7-641e-4da0-82d7-50ba73e776c2 {
+  "email": "patientaaa@gmail.com",
+  "emailVerified": true
+}
+[WARN] 6/10/2025, 4:50:52 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:50:52 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 4:50:52 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 4:50:55 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:50:55 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:50:55 pm   - ✅ Serving patients from DB and caching result
+[INFO] 6/10/2025, 4:50:58 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 4:50:58 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 4:56:08 pm   - Environment: development
+[INFO] 6/10/2025, 4:56:08 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 4:56:08 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 4:56:08 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 4:56:08 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 4:56:08 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 4:56:08 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 4:56:08 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 4:56:41 pm   - Environment: development
+[INFO] 6/10/2025, 4:56:41 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 4:56:41 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 4:56:41 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 4:56:41 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 4:56:41 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 4:56:41 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 4:56:41 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 4:57:56 pm   - Environment: development
+[INFO] 6/10/2025, 4:57:56 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 4:57:56 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 4:57:56 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 4:57:56 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 4:57:57 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 4:57:57 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 4:57:57 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 4:59:41 pm   - Environment: development
+[INFO] 6/10/2025, 4:59:41 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 4:59:41 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 4:59:41 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 4:59:41 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 4:59:41 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 4:59:41 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 4:59:41 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 5:02:23 pm   - Environment: development
+[INFO] 6/10/2025, 5:02:23 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 5:02:23 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 5:02:23 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 5:02:23 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 5:02:23 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 5:02:23 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 5:02:23 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 5:03:37 pm   - Environment: development
+[INFO] 6/10/2025, 5:03:37 pm   - Using DB Host: localhost
+[INFO] 6/10/2025, 5:03:37 pm   - Server listening on port: 8004
+[INFO] 6/10/2025, 5:03:37 pm   - Backend running on http://localhost:4000
+[INFO] 6/10/2025, 5:03:37 pm   - ✅ Server running on localhost port 8004
+[WARN] 6/10/2025, 5:03:37 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 6/10/2025, 5:03:37 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 6/10/2025, 5:03:37 pm   - ✅ MySQL connection established.
+[INFO] 6/10/2025, 5:04:04 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 5:04:04 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 5:04:04 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 5:04:04 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 5:04:05 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 5:04:06 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 5:04:06 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 5:04:10 pm   - Authentication successful as super-user
+[INFO] 6/10/2025, 5:04:10 pm   - req.body.otpVerified: 
+[INFO] 6/10/2025, 5:04:10 pm   - update
+[INFO] 6/10/2025, 5:04:10 pm   - start validation
+[INFO] 6/10/2025, 5:04:10 pm   - validation Completed
+[INFO] 6/10/2025, 5:04:11 pm   - ✅ Updated phoneNumber for Keycloak user 4c33bae7-641e-4da0-82d7-50ba73e776c2
+[WARN] 6/10/2025, 5:04:11 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 5:04:11 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 6/10/2025, 5:04:11 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 6/10/2025, 5:04:12 pm   - Authentication successful as super-user
+[WARN] 6/10/2025, 5:04:13 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 6/10/2025, 5:04:13 pm   - ✅ Serving patients from DB and caching result

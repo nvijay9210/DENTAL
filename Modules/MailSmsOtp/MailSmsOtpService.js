@@ -99,6 +99,7 @@ function generateOTP(length = 6) {
 // ======================
 async function sendOTP({ to, via = "sms", subject, message, length = 6, expiryMinutes = 10 }) {
   const otp = generateOTP(length);
+  console.log('otp:',otp)
   const expiry = new Date(Date.now() + expiryMinutes * 60 * 1000);
   const fullMessage = message ? `${message}: ${otp}` : `Your OTP is ${otp}`;
   let result = {};

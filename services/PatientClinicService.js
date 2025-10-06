@@ -42,7 +42,7 @@ const createPatientClinic = async (data,conn) => {
     return patient_clinicId;
   } catch (error) {
     console.error("Failed to create patient_clinic:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -63,9 +63,9 @@ const getAllPatientClinicsByTenantId = async (tenantId, page = 1, limit = 10) =>
     );
 
     return { data: convertedRows, total: result.total };
-  } catch (err) {
-    console.error("Database error while fetching patient_clinics:", err);
-    throw new CustomError(err, 500);
+  } catch (error) {
+    console.error("Database error while fetching patient_clinics:", error);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -84,7 +84,7 @@ const getPatientClinicByTenantIdAndPatientClinicId = async (tenantId, patient_cl
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -111,7 +111,7 @@ const updatePatientClinic = async (patient_clinicId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -133,7 +133,7 @@ const deletePatientClinicByTenantIdAndPatientClinicId = async (
     await invalidateCacheByPattern("patient_clinic:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(err, 500);
+    throw new CustomError(error, 500);
   }
 };
 
@@ -158,9 +158,9 @@ const getAllPatientClinicsByTenantIdAndClinicId = async (
     );
 
     return { data: convertedRows, total: result.total };
-  } catch (err) {
-    console.error("Database error while fetching patient_clinics:", err);
-    throw new CustomError(err, 500);
+  } catch (error) {
+    console.error("Database error while fetching patient_clinics:", error);
+    throw new CustomError(error, 500);
   }
 };
 

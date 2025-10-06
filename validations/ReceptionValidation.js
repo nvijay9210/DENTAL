@@ -11,7 +11,8 @@ const receptionColumnConfig = [
   { columnname: "keycloak_id", type: "char", size: 36, null: true },
   { columnname: "username", type: "varchar", size: 100, null: true },
   { columnname: "password", type: "varchar", size: 255, null: true },
-  { columnname: "full_name", type: "varchar", size: 100, null: false },
+  { columnname: "first_name", type: "varchar", size: 100, null: false },
+  { columnname: "last_name", type: "varchar", size: 100, null: false },
   { columnname: "email", type: "varchar", size: 255, null: true },
   {
     columnname: "phone_number",

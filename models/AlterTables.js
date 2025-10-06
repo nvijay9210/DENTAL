@@ -531,6 +531,47 @@ async function renameCurrencyToCurrencyCodeInSupplierProducts(conn) {
   );
 }
 
+async function addPatientCode(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "patient",
+    "patient_code",
+    "VARCHAR(15) NULL",
+    "Unique patient code"
+  );
+}
+
+async function addDentistCode(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "dentist",
+    "dentist_code",
+    "VARCHAR(15) NULL",
+    "Unique dentist code"
+  );
+}
+
+async function addReceptionCode(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "reception",
+    "reception_code",
+    "VARCHAR(15) NULL",
+    "Unique reception code"
+  );
+}
+
+async function addSupplierCode(conn) {
+  await addColumnIfNotExists(
+    conn,
+    "supplier",
+    "supplier_code",
+    "VARCHAR(15) NULL",
+    "Unique supplier code"
+  );
+}
+
+
 
 // Main migration runner
 (async () => {
@@ -564,6 +605,10 @@ async function renameCurrencyToCurrencyCodeInSupplierProducts(conn) {
     await removeFullnameInReception(conn);
     await addFirstnameInReception(conn);
     await addLastnameInReception(conn);
+    await addPatientCode(conn);
+    await addDentistCode(conn);
+    await addReceptionCode(conn);
+    await addSupplierCode(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");

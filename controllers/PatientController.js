@@ -304,11 +304,11 @@ exports.updatePatient = async (req, res, next) => {
 
   try {
     // Validate update input
-    await patientValidation.updatePatientValidation(
-      patient_id,
-      details,
-      tenant_id
-    );
+    // await patientValidation.updatePatientValidation(
+    //   patient_id,
+    //   details,
+    //   tenant_id
+    // );
 
     // Update patient
     await patientService.updatePatient(

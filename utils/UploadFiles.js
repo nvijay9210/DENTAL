@@ -86,6 +86,7 @@ const uploadFileMiddleware = (options) => {
       }
 
       const settings = parseInt(req.query.settings || "0");
+      console.log('req.body.otpVerified:',req.body.otpVerified)
       const otpVerified = !!req.body.otpVerified;
 
       // Only validate if settings is not 1 AND otpVerified is false
@@ -245,6 +246,7 @@ const uploadFileMiddleware2 = (options) => {
 
       // Run validation only if not in "settings" mode
       const settings = parseInt(req.query.settings || "0");
+      console.log('req.body.otpVerified:',req.body.otpVerified)
       const otpVerified = !!req.body.otpVerified;
 
       // Only validate if settings is not 1 AND otpVerified is false

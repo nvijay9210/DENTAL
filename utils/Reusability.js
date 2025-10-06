@@ -12,7 +12,7 @@ const {
   getUserIdByUsername,
 } = require("../middlewares/KeycloakAdmin");
 const { mapFields } = require("../query/Records");
-const { updateDocumentsDiffBased, saveDocuments } = require("./UploadFiles");
+const { updateDocumentsDiffBased } = require("./UploadFiles");
 const helper = require("../utils/Helpers");
 const { createPatientClinic } = require("../services/PatientClinicService");
 const { getPatientByKeycloakId } = require("../models/PatientModel");
@@ -31,24 +31,8 @@ const sanitizeFields = (data) => {
   return sanitized;
 };
 
-const splitName = (name) => {
-  if (typeof name !== "string" || !name.trim()) {
-    return { firstName: null, lastName: null };
-  }
-
-  const parts = name.trim().split(/\s+/);
-  return {
-    firstName: parts.shift(),
-    lastName: parts.join(" "),
-  };
-};
-
-/**
- * Reusable entity creation function
- * @param {Object} options
- */
 const createEntity = async ({
-  entityName, // Expected to be 'patient'
+  entityName,
   data,
   token,
   realm,
@@ -60,11 +44,10 @@ const createEntity = async ({
   fileFields = [],
   connectionPool = pool,
 }) => {
-  const create = { ...fieldMap, created_by: (val) => val };
-
+  const create = { ...fieldMap, created_by: (val) => val }; // DB mapping (no phone_number)
   let userId = null;
   let username = null;
-  let rawPassword = null;
+  let rawPassword = "1234";
   let entityId = null;
   userClinicId = data.clinic_id;
 
@@ -73,29 +56,21 @@ const createEntity = async ({
     await connection.beginTransaction();
 
     if (process.env.KEYCLOAK_POWER === "on") {
-      const { firstName, lastName } = {
-        firstName: data.first_name,
-        lastName: data.last_name,
-      };
+      const { first_name, last_name, email, phone_number } = data;
 
-      const user = await getKeycloakUserIdByEmail(token, realm, data.email);
+      // Check if Keycloak user exists by email
+      const user = await getKeycloakUserIdByEmail(token, realm, email);
       userId = user?.id;
 
       if (userId) {
-        console.log(`ℹ️ Keycloak user already exists: ${data.email}`);
+        console.log(`ℹ️ Keycloak user already exists: ${email}`);
 
-        if (roleName) {
-          await assignRealmRoleToUser(token, realm, userId, roleName);
-        }
+        if (roleName) await assignRealmRoleToUser(token, realm, userId, roleName);
 
         if (userClinicId) {
           const groupName = `dental-${data.tenant_id}-${userClinicId}`;
           const userGroups = await getUserGroups(token, realm, userId);
-          const groupExists = userGroups.some(
-            (grp) => grp.path === `/${groupName}`
-          );
-
-          if (!groupExists) {
+          if (!userGroups.some((grp) => grp.path === `/${groupName}`)) {
             await addUserToGroup(token, realm, userId, groupName);
           }
         }
@@ -103,55 +78,45 @@ const createEntity = async ({
         data.keycloak_id = userId;
         data.username = user.username || user.email;
 
-        // For patient: check if patient exists in DB
-        const existingPatient = await getPatientByKeycloakId(
-          data.keycloak_id,
-          connection
-        );
+        const existingPatient = await getPatientByKeycloakId(userId, connection);
+        if (existingPatient) entityId = existingPatient.patient_id;
 
-        if (existingPatient) {
-          entityId = existingPatient.patient_id;
+        // Sync Keycloak fields
+        const payload = {};
+        if (email) { payload.email = email; payload.emailVerified = true; }
+        if (first_name) payload.firstName = first_name;
+        if (last_name) payload.lastName = last_name;
+        if (phone_number) payload.attributes = { phoneNumber: phone_number };
+
+        if (Object.keys(payload).length > 0) {
+          await updateUserInKeycloak(token, realm, userId, payload);
+          console.log(`✅ Updated Keycloak user ${userId} with new info`);
         }
       } else {
-        username = await helper.generateUsername(
-          entityName.slice(0, 3).toUpperCase(),
-          realm,
-          token
-        );
+        // Create new Keycloak user
+        username = await helper.generateUsername(entityName.slice(0, 3).toUpperCase(), realm, token);
+        rawPassword = rawPassword || helper.generateAlphanumericPassword(12);
 
-        rawPassword = 1234 || helper.generateAlphanumericPassword(12);
-        const encryptedPassword = helper.encrypt(rawPassword).content;
-
-        const email =
-          data.email ||
-          `${username}${helper.generateAlphanumericPassword(6)}@example.com`;
+        const userEmail = email || `${username}${helper.generateAlphanumericPassword(6)}@example.com`;
 
         const userData = {
           username,
-          email,
+          email: userEmail,
           emailVerified: true,
-          firstName,
-          lastName,
-          credentials: [
-            { type: "password", value: rawPassword, temporary: false },
-          ],
+          firstName: first_name,
+          lastName: last_name,
+          attributes: { phoneNumber: phone_number || "" },
+          credentials: [{ type: "password", value: rawPassword, temporary: false }],
         };
 
         const isUserCreated = await addUser(token, realm, userData);
-        if (!isUserCreated)
-          throw new CustomError("Keycloak user creation failed", 400);
+        if (!isUserCreated) throw new CustomError("Keycloak user creation failed", 400);
 
         userId = await getUserIdByUsername(token, realm, username);
-        if (!userId)
-          throw new CustomError("Could not fetch Keycloak user ID", 400);
+        if (!userId) throw new CustomError("Could not fetch Keycloak user ID", 400);
 
         if (roleName) {
-          const roleAssigned = await assignRealmRoleToUser(
-            token,
-            realm,
-            userId,
-            roleName
-          );
+          const roleAssigned = await assignRealmRoleToUser(token, realm, userId, roleName);
           if (!roleAssigned)
             throw new CustomError(`Failed to assign '${roleName}' role`, 400);
         }
@@ -167,32 +132,22 @@ const createEntity = async ({
       }
     }
 
-    if (!entityId) {
-      const { columns, values } = mapFields(data, create);
-      entityId = await createModel(connection, entityName, columns, values);
-      // ✅ Generate unique code (e.g., APODEN1)
-      const tenantName = data.tenant_name || data.tenant_id; // depends on what you store
-      const code = generateCode(tenantName, entityName, entityId);
+    // Insert entity in DB
+    const { columns, values } = mapFields(data, create);
+    entityId = await createModel(connection, entityName, columns, values);
 
-      // Update the entity with generated code
-      const codeColumn = `${entityName}_code`;
-
-      await connection.query(
-        `UPDATE ${entityName} SET ${codeColumn} = ? WHERE ${entityName}_id = ?`,
-        [code, entityId]
-      );
-      
-    }
-
-    console.log(entityName, userClinicId);
+    // Generate unique code
+    const tenantName = data.tenant_name || data.tenant_id;
+    const code = generateCode(tenantName, entityName, entityId);
+    const codeColumn = `${entityName}_code`;
+    await connection.query(
+      `UPDATE ${entityName} SET ${codeColumn} = ? WHERE ${entityName}_id = ?`,
+      [code, entityId]
+    );
 
     if (entityName === "patient" && userClinicId) {
       await createPatientClinicFn(
-        {
-          patient_id: entityId,
-          clinic_id: userClinicId,
-          created_by: data.created_by,
-        },
+        { patient_id: entityId, clinic_id: userClinicId, created_by: data.created_by },
         connection
       );
     }
@@ -224,7 +179,6 @@ const createEntity = async ({
     };
   } catch (error) {
     await connection.rollback();
-
     if (process.env.KEYCLOAK_POWER === "on" && userId && !data.keycloak_id) {
       try {
         await rollbackKeycloakUser(token, realm, userId);
@@ -233,11 +187,7 @@ const createEntity = async ({
         console.error("❌ Failed to rollback Keycloak user:", rollbackErr);
       }
     }
-
-    throw new CustomError(
-      `Failed to create ${entityName}: ${error.message}`,
-      500
-    );
+    throw new CustomError(`Failed to create ${entityName}: ${error.message}`, 500);
   } finally {
     connection.release();
   }
@@ -245,7 +195,7 @@ const createEntity = async ({
 
 const updateEntity = async ({
   entityId,
-  entityName, // 'reception', 'supplier', 'patient', etc.
+  entityName,
   tenantId,
   data,
   token,
@@ -268,49 +218,34 @@ const updateEntity = async ({
 
     userId = entity.keycloak_id;
 
-    const { columns: rawColumns, values: rawValues } = mapFields(
-      sanitizedData,
-      { ...fieldMap, updated_by: (val) => val }
-    );
-
-    const columns = [];
-    const values = [];
-    rawColumns.forEach((col, idx) => {
-      if (rawValues[idx] !== undefined) {
-        columns.push(col);
-        values.push(rawValues[idx]);
-      }
+    const { columns, values } = mapFields(sanitizedData, {
+      ...fieldMap,
+      updated_by: (val) => val,
     });
 
     let affectedRows = 0;
-
     if (columns.length > 0) {
-      affectedRows = await updateModel(
-        entityId,
-        columns,
-        values,
-        tenantId,
-        connection
-      );
+      affectedRows = await updateModel(entityId, columns, values, tenantId, connection);
 
+      // Sync email, names, phoneNumber to Keycloak
       if (process.env.KEYCLOAK_POWER === "on" && userId) {
-        await syncToKeycloak({
-          token,
-          realm,
-          userId,
-          entityName,
-          data: sanitizedData,
-        });
+        const payload = {};
+        if (sanitizedData.email) { payload.email = sanitizedData.email; payload.emailVerified = true; }
+        if (sanitizedData.first_name) payload.firstName = sanitizedData.first_name;
+        if (sanitizedData.last_name) payload.lastName = sanitizedData.last_name;
+        if (data.phone_number) payload.attributes = { phoneNumber: data.phone_number };
+
+        if (Object.keys(payload).length > 0) {
+          await updateUserInKeycloak(token, realm, userId, payload);
+          console.log(`✅ Synced Keycloak user ${userId} with email, names, phoneNumber`);
+        }
       }
 
       for (const field of fileFields) {
-        const newFiles = Array.isArray(sanitizedData[field])
-          ? sanitizedData[field]
-          : [];
+        const newFiles = Array.isArray(sanitizedData[field]) ? sanitizedData[field] : [];
         const deletedFileIds = Array.isArray(sanitizedData.deletedFileIds)
           ? sanitizedData.deletedFileIds
           : [];
-
         if (newFiles.length || deletedFileIds.length) {
           await updateDocumentsDiffBased({
             table_name: entityName,
@@ -336,46 +271,9 @@ const updateEntity = async ({
   } catch (error) {
     await connection.rollback();
     console.error(`❌ Update ${entityName} failed:`, error.message);
-    throw new CustomError(
-      `Failed to update ${entityName}: ${error.message}`,
-      500
-    );
+    throw new CustomError(`Failed to update ${entityName}: ${error.message}`, 500);
   } finally {
     connection.release();
-  }
-};
-
-const syncToKeycloak = async ({ token, realm, userId, entityName, data }) => {
-  const payload = {};
-
-  if (data.email) {
-    payload.email = data.email;
-    payload.emailVerified = true;
-  }
-
-  if (entityName === "reception" && data.full_name) {
-    const [firstName, ...rest] = data.full_name.trim().split(" ");
-    payload.firstName = firstName;
-    payload.lastName = rest.length > 0 ? rest.join(" ") : "-";
-  }
-
-  if (entityName === "supplier" && data.name) {
-    const [firstName, ...rest] = data.name.trim().split(" ");
-    payload.firstName = firstName;
-    payload.lastName = rest.length > 0 ? rest.join(" ") : "-";
-  }
-
-  if (Object.keys(payload).length === 0) return;
-
-  try {
-    await updateUserInKeycloak(token, realm, userId, payload);
-    console.log(`✅ Synced ${entityName} keycloakId ${userId}`, payload);
-  } catch (kcError) {
-    console.warn(
-      `⚠️ Keycloak sync failed for ${entityName} keycloakId ${userId}:`,
-      kcError.message
-    );
-    // Do not rollback DB
   }
 };
 
