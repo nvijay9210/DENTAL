@@ -26,7 +26,7 @@ router.get(
   GETALL_PRESCRIPTION_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "patient",
@@ -38,7 +38,7 @@ router.get(
   GETALL_PRESCRIPTION_TENANT_CLINIC_TREATMENT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "patient",
@@ -50,7 +50,7 @@ router.get(
   GETALL_PRESCRIPTION_TENANT_CLINIC_APPOINTMENT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "patient",
@@ -61,7 +61,7 @@ router.get(
   GETALL_PRESCRIPTION_TENANT_DENTIST,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "patient",
@@ -72,7 +72,7 @@ router.get(
   GETALL_PRESCRIPTION_TENANT_PATIENT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "patient",
@@ -85,7 +85,7 @@ router.get(
   GET_PRESCRIPTION_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "patient",
@@ -98,7 +98,7 @@ router.put(
   UPDATE_PRESCRIPTION_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "patient",
@@ -111,7 +111,7 @@ router.delete(
   DELETE_PRESCRIPTION_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "patient",

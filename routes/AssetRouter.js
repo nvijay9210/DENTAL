@@ -36,7 +36,7 @@ const assetFileMiddleware = uploadFileMiddleware({
 // Create Asset
 router.post(
   ADD_ASSET,
-  authenticateTenantClinicGroup(["tenant", "dentist", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "superuser"]),
   upload.any(),
   assetFileMiddleware,
   assetController.createAsset
@@ -45,33 +45,33 @@ router.post(
 // Get All Assets by Tenant ID with Pagination
 router.get(
   GETALL_ASSET_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist", "super-user","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "superuser","receptionist"]),
   assetController.getAllAssetsByTenantId
 );
 
 router.get(
   GETALL_ASSET_TENANT_CLINIC,
-  authenticateTenantClinicGroup(["tenant", "dentist", "super-user","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "superuser","receptionist"]),
   assetController.getAllAssetsByTenantIdAndClinicId
 );
 
 router.get(
   GETALL_ASSET_REPORT_TENANT_CLINIC,
-  authenticateTenantClinicGroup(["tenant", "dentist", "super-user","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "superuser","receptionist"]),
   assetController.getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate
 );
 
 // Get Single Asset by Tenant ID & Asset ID
 router.get(
   GET_ASSET_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist", "super-user","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "superuser","receptionist"]),
   assetController.getAssetByTenantIdAndAssetId
 );
 
 // Update Asset
 router.put(
   UPDATE_ASSET_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist", "super-user","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "superuser","receptionist"]),
   upload.any(),
   assetFileMiddleware,
   assetController.updateAsset
@@ -80,7 +80,7 @@ router.put(
 // Delete Asset
 router.delete(
   DELETE_ASSET_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist", "super-user","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "dentist", "superuser","receptionist"]),
   assetController.deleteAssetByTenantIdAndAssetId
 );
 

@@ -52,7 +52,7 @@ router.post(
 // Get All Clinics by Tenant
 router.get(
   routerPath.GETALL_CLINIC_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user","guest"]),
+  authenticateTenantClinicGroup(["tenant", "superuser","guest"]),
   //  multiTenantAuthMiddleware,
   clinicController.getAllClinicByTenantId
 );
@@ -60,14 +60,14 @@ router.get(
 // Get Clinic by Tenant & Clinic ID
 router.get(
   routerPath.GET_CLINIC_TENANT,
-  authenticateTenantClinicGroup(["tenant","super-user","dentist","receptionist","patient"]),
+  authenticateTenantClinicGroup(["tenant","superuser","dentist","receptionist","patient"]),
   clinicController.getClinicByTenantIdAndClinicId
 );
 
 // Update Clinic
 router.put(
   routerPath.UPDATE_CLINIC_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "superuser"]),
   // clinicUploadFields,
   upload.any(),
   clinicFileMiddleware,
@@ -78,7 +78,7 @@ router.put(
 // Update Clinic
 router.put(
   routerPath.UPDATE_CLINIC_SETTINGS,
-  authenticateTenantClinicGroup(["tenant","super-user"]),
+  authenticateTenantClinicGroup(["tenant","superuser"]),
   // clinicUploadFields,
   upload.any(),
   clinicFileMiddleware,
@@ -87,14 +87,14 @@ router.put(
 
 router.put(
   routerPath.HANDLE_CLINIC_ASSIGNMENT,
-  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "superuser"]),
   clinicController.handleClinicAssignment
 );
 
 // Delete Clinic
 router.delete(
   routerPath.DELETE_CLINIC_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "superuser"]),
   clinicController.deleteClinicByTenantIdAndClinicId
 );
 

@@ -41,7 +41,7 @@ const patientFileMiddleware = uploadFileMiddleware2({
 // Create Patient
 router.post(
   routerPath.ADD_PATIENT,
-  authenticateTenantClinicGroup(["tenant","super-user","dentist","guest"]),
+  authenticateTenantClinicGroup(["tenant","superuser","dentist","guest"]),
   upload.any(),
   patientFileMiddleware,
   patientController.createPatient
@@ -52,7 +52,7 @@ router.get(
   routerPath.GETALL_PATIENT_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist"
   ]),
@@ -63,7 +63,7 @@ router.get(
   routerPath.GETALL_PATIENT_TENANT_CLINIC,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist"
   ]),
@@ -73,7 +73,7 @@ router.get(
   routerPath.GETALL_PATIENT_TENANT_CLINIC_DENTIST,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist"
   ]),
@@ -85,7 +85,7 @@ router.get(
   routerPath.GET_PATIENT_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "patient"
@@ -96,7 +96,7 @@ router.get(
 // Update Patient
 router.put(
   routerPath.UPDATE_PATIENT_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient"]),
   // patientUploadFields,
   upload.any(),
   patientFileMiddleware,
@@ -108,7 +108,7 @@ router.delete(
   routerPath.DELETE_PATIENT_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
   ]),

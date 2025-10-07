@@ -22,7 +22,7 @@ router.post(
   ADD_PURCHASE_ORDER,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "supplier",
@@ -35,7 +35,7 @@ router.get(
   GETALL_PURCHASE_ORDER_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "supplier",
@@ -46,7 +46,7 @@ router.get(
   GETALL_PURCHASE_ORDER_TENANT_SUPPLIER,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "supplier",
@@ -57,7 +57,7 @@ router.get(
   GETALL_PURCHASE_ORDER_TENANT_CLINIC,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "clinic",
@@ -70,7 +70,7 @@ router.get(
   GET_PURCHASE_ORDER_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "supplier",
@@ -83,7 +83,7 @@ router.put(
   UPDATE_PURCHASE_ORDER_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "supplier",
@@ -94,7 +94,7 @@ router.put(
   UPDATE_PURCHASE_ORDER_STATUS_CLINIC,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "supplier",
@@ -107,7 +107,7 @@ router.delete(
   DELETE_PURCHASE_ORDER_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "receptionist",
     "supplier",

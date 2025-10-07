@@ -40,7 +40,7 @@ router.post(
   ADD_EXPENSE,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist"
   ]),
   upload.any(),
@@ -53,7 +53,7 @@ router.get(
   GETALL_EXPENSE_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist"
   ]),
   expenseController.getAllExpensesByTenantId
@@ -62,7 +62,7 @@ router.get(
   GETALL_EXPENSE_TENANT_CLINIC,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist"
   ]),
   expenseController.getAllExpensesByTenantIdAndClinicId
@@ -72,7 +72,7 @@ router.get(
   GETALL_EXPENSE_REPORT_TENANT_CLINIC,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist"
   ]),
   expenseController.getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate
@@ -83,7 +83,7 @@ router.get(
   GET_EXPENSE_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist"
   ]),
   expenseController.getExpenseByTenantIdAndExpenseId
@@ -94,7 +94,7 @@ router.put(
   UPDATE_EXPENSE_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist"
   ]),
   upload.any(),
@@ -107,7 +107,7 @@ router.delete(
   DELETE_EXPENSE_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist"
   ]),
   expenseController.deleteExpenseByTenantIdAndExpenseId

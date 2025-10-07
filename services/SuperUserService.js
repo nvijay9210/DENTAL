@@ -1,5 +1,5 @@
 const { CustomError } = require("../middlewares/CustomeError");
-const receptionModel = require("../models/ReceptionModel");
+const superuserModel = require("../models/SuperUserModel");
 const pool = require("../config/db");
 const {
   getOrSetCache,
@@ -20,13 +20,13 @@ const { buildCacheKey } = require("../utils/RedisCache");
 const { rollbackKeycloakUser } = require("../Keycloak/KeycloakService");
 const { createEntity, updateEntity } = require("../utils/Reusability");
 
-// Field mapping for receptions (similar to treatment)
+// Field mapping for superusers (similar to treatment)
 
-const receptionFields = {
+const superuserFields = {
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   keycloak_id: (val) => val,
-  reception_code: (val) => val,
+  superuser_code: (val) => val,
   username: (val) => val,
   password: (val) => val,
   first_name: (val) => val,
@@ -45,12 +45,12 @@ const receptionFields = {
   pincode: (val) => val,
   last_login: (val) => val,
 };
-const receptionFieldsReverseMap = {
-  reception_id: (val) => val,
+const superuserFieldsReverseMap = {
+  superuser_id: (val) => val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   keycloak_id: (val) => val,
-  reception_code: (val) => val,
+  superuser_code: (val) => val,
   username: (val) => val,
   password: (val) => (val ? String(val) : null),
   first_name: (val) => val,
@@ -73,34 +73,34 @@ const receptionFieldsReverseMap = {
   updated_by: (val) => val,
   updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
-// Create Reception
-const createReception = async (data, token, realm) => {
-  const newReception = await createEntity({
+// Create SuperUser
+const createSuperUser = async (data, token, realm) => {
+  const newSuperUser = await createEntity({
     data,
-    entityName: "reception",
+    entityName: "superuser",
     token,
     realm,
-    fieldMap: receptionFields,
-    createModel: receptionModel.createReception,
+    fieldMap: superuserFields,
+    createModel: superuserModel.createSuperUser,
     nameFields: { firstName: "first_name", lastName: "last_name" },
-    roleName: "receptionist",
+    roleName: "superuser",
   });
 
-  return newReception;
+  return newSuperUser;
 };
 
-// Get All Receptions by Tenant ID with Caching
-const getAllReceptionsByTenantId = async (tenantId, page = 1, limit = 10) => {
+// Get All SuperUsers by Tenant ID with Caching
+const getAllSuperUsersByTenantId = async (tenantId, page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
-  const cacheKey = buildCacheKey("reception", "list", {
+  const cacheKey = buildCacheKey("superuser", "list", {
     tenant_id: tenantId,
     page,
     limit,
   });
 
   try {
-    const receptions = await getOrSetCache(cacheKey, async () => {
-      const result = await receptionModel.getAllReceptionsByTenantId(
+    const superusers = await getOrSetCache(cacheKey, async () => {
+      const result = await superuserModel.getAllSuperUsersByTenantId(
         tenantId,
         Number(limit),
         offset
@@ -108,56 +108,56 @@ const getAllReceptionsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return result;
     });
 
-    const convertedRows = receptions.data.map((reception) =>
-      helper.convertDbToFrontend(reception, receptionFieldsReverseMap)
+    const convertedRows = superusers.data.map((superuser) =>
+      helper.convertDbToFrontend(superuser, superuserFieldsReverseMap)
     );
 
-    return { data: convertedRows, total: receptions.total };
+    return { data: convertedRows, total: superusers.total };
   } catch (err) {
-    console.error("Database error while fetching receptions:", err);
-    throw new CustomError("Failed to fetch receptions", 404);
+    console.error("Database error while fetching superusers:", err);
+    throw new CustomError("Failed to fetch superusers", 404);
   }
 };
 
-// Get Reception by ID & Tenant
-const getReceptionByTenantIdAndReceptionId = async (tenantId, receptionId) => {
+// Get SuperUser by ID & Tenant
+const getSuperUserByTenantIdAndSuperUserId = async (tenantId, superuserId) => {
   try {
-    const reception = await receptionModel.getReceptionByTenantAndReceptionId(
+    const superuser = await superuserModel.getSuperUserByTenantAndSuperUserId(
       tenantId,
-      receptionId
+      superuserId
     );
 
     const convertedRows = helper.convertDbToFrontend(
-      reception,
-      receptionFieldsReverseMap
+      superuser,
+      superuserFieldsReverseMap
     );
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get reception: " + error.message, 404);
+    throw new CustomError("Failed to get superuser: " + error.message, 404);
   }
 };
 
-// Update Reception
-const updateReception = async (receptionId, data, tenant_id, token, realm) => {
+// Update SuperUser
+const updateSuperUser = async (superuserId, data, tenant_id, token, realm) => {
   return await updateEntity({
-    entityId: receptionId,
-    entityName: "reception",
+    entityId: superuserId,
+    entityName: "superuser",
     tenantId:tenant_id,
     data,
     token,
     realm,
-    fieldMap: receptionFields,
-    getModelById: receptionModel.getReceptionByTenantAndReceptionId,
-    updateModel: receptionModel.updateReception,
+    fieldMap: superuserFields,
+    getModelById: superuserModel.getSuperUserByTenantAndSuperUserId,
+    updateModel: superuserModel.updateSuperUser,
     fileFields: ["profile_picture"],
   });
 };
 
-// Delete Reception
-const deleteReceptionByTenantIdAndReceptionId = async (
+// Delete SuperUser
+const deleteSuperUserByTenantIdAndSuperUserId = async (
   tenantId,
-  receptionId,
+  superuserId,
   token,
   realm
 ) => {
@@ -167,29 +167,29 @@ const deleteReceptionByTenantIdAndReceptionId = async (
   try {
     await connection.beginTransaction();
 
-    // 1. Get receptionist from DB
-    const reception = await receptionModel.getReceptionByTenantAndReceptionId(
+    // 1. Get superuser from DB
+    const superuser = await superuserModel.getSuperUserByTenantAndSuperUserId(
       tenantId,
-      receptionId,
+      superuserId,
       connection
     );
 
-    if (!reception) {
-      throw new CustomError("Reception not found.", 404);
+    if (!superuser) {
+      throw new CustomError("SuperUser not found.", 404);
     }
 
-    userId = reception.keycloak_id;
+    userId = superuser.keycloak_id;
 
     // 2. Delete from DB
     const affectedRows =
-      await receptionModel.deleteReceptionByTenantAndReceptionId(
+      await superuserModel.deleteSuperUserByTenantAndSuperUserId(
         connection,
         tenantId,
-        receptionId
+        superuserId
       );
 
     if (affectedRows === 0) {
-      throw new CustomError("Failed to delete reception from database.", 500);
+      throw new CustomError("Failed to delete superuser from database.", 500);
     }
 
     // 3. Delete from Keycloak
@@ -199,16 +199,16 @@ const deleteReceptionByTenantIdAndReceptionId = async (
         if (!success) {
           throw new CustomError("Failed to delete user from Keycloak", 500);
         }
-        console.log(`✅ Keycloak user ${userId} deleted (receptionist)`);
+        console.log(`✅ Keycloak user ${userId} deleted (superuser)`);
       } catch (kcError) {
         console.error(
-          `❌ Keycloak deletion failed for receptionist ${userId}:`,
+          `❌ Keycloak deletion failed for superuser ${userId}:`,
           kcError.message
         );
         // 🔁 Rollback DB delete
         await connection.rollback();
         throw new CustomError(
-          "Failed to delete receptionist in Keycloak. Aborting delete.",
+          "Failed to delete superuser in Keycloak. Aborting delete.",
           500
         );
       }
@@ -218,25 +218,25 @@ const deleteReceptionByTenantIdAndReceptionId = async (
     await connection.commit();
 
     // 5. Invalidate cache
-    await invalidateCacheByPattern("reception:*");
+    await invalidateCacheByPattern("superuser:*");
 
     return { affectedRows };
   } catch (error) {
-    console.error("Delete Reception Error:", error.message);
-    throw new CustomError(`Failed to delete reception: ${error.message}`, 400);
+    console.error("Delete SuperUser Error:", error.message);
+    throw new CustomError(`Failed to delete superuser: ${error.message}`, 400);
   } finally {
     connection.release();
   }
 };
 
-const getAllReceptionsByTenantIdAndClinicId = async (
+const getAllSuperUsersByTenantIdAndClinicId = async (
   tenantId,
   clinic_id,
   page = 1,
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
-  const cacheKey = buildCacheKey("reception", "list", {
+  const cacheKey = buildCacheKey("superuser", "list", {
     tenant_id: tenantId,
     clinic_id,
     page,
@@ -244,8 +244,8 @@ const getAllReceptionsByTenantIdAndClinicId = async (
   });
 
   try {
-    const receptions = await getOrSetCache(cacheKey, async () => {
-      const result = await receptionModel.getAllReceptionsByTenantIdAndClinicId(
+    const superusers = await getOrSetCache(cacheKey, async () => {
+      const result = await superuserModel.getAllSuperUsersByTenantIdAndClinicId(
         tenantId,
         clinic_id,
         Number(limit),
@@ -254,22 +254,22 @@ const getAllReceptionsByTenantIdAndClinicId = async (
       return result;
     });
 
-    const convertedRows = receptions.data.map((reception) =>
-      helper.convertDbToFrontend(reception, receptionFieldsReverseMap)
+    const convertedRows = superusers.data.map((superuser) =>
+      helper.convertDbToFrontend(superuser, superuserFieldsReverseMap)
     );
 
-    return { data: convertedRows, total: receptions.total };
+    return { data: convertedRows, total: superusers.total };
   } catch (err) {
-    console.error("Database error while fetching receptions:", err);
-    throw new CustomError("Failed to fetch receptions", 404);
+    console.error("Database error while fetching superusers:", err);
+    throw new CustomError("Failed to fetch superusers", 404);
   }
 };
 
 module.exports = {
-  createReception,
-  getAllReceptionsByTenantId,
-  getReceptionByTenantIdAndReceptionId,
-  updateReception,
-  deleteReceptionByTenantIdAndReceptionId,
-  getAllReceptionsByTenantIdAndClinicId,
+  createSuperUser,
+  getAllSuperUsersByTenantId,
+  getSuperUserByTenantIdAndSuperUserId,
+  updateSuperUser,
+  deleteSuperUserByTenantIdAndSuperUserId,
+  getAllSuperUsersByTenantIdAndClinicId,
 };

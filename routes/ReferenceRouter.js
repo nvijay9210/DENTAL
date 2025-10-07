@@ -29,7 +29,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Create Reference
 router.post(
   ADD_REFERENCE,
-  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "superuser","patient"]),
   upload.any(),
   ReferenceFileMiddleware,
   referenceController.createReference
@@ -38,38 +38,38 @@ router.post(
 // // Get All References by Tenant ID with Pagination
 // router.get(
 //   GETALL_REFERENCE_TENANT,
-//   authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+//   authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "superuser","patient"]),
 //   referenceController.getAllReferencesByTenantId
 // );
 // router.get(
 //   GETALL_REFERENCE_TENANT_CLINIC_DENTIST_PATIENT,
-//   authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+//   authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "superuser","patient"]),
 //   referenceController.getAllReferenceByTenantAndClinicAndDentistAndPatientId
 // );
 // router.get(
 //   GETALL_REFERENCE_TENANT_CLINIC_PATIENT,
-//   authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+//   authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "superuser","patient"]),
 //   referenceController.getAllReferenceByTenantAndClinicAndPatientId
 // );
 
 // // Get Single Reference by Tenant ID & Reference ID
 // router.get(
 //   GET_REFERENCE_TENANT,
-//   authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+//   authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "superuser","patient"]),
 //   referenceController.getReferenceByTenantIdAndReferenceId
 // );
 
 // // Update Reference
 // router.put(
 //   UPDATE_REFERENCE_TENANT,
-//   authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+//   authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "superuser","patient"]),
 //   referenceController.updateReference
 // );
 
 // // Delete Reference
 // router.delete(
 //   DELETE_REFERENCE_TENANT,
-//   authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+//   authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "superuser","patient"]),
 //   referenceController.deleteReferenceByTenantIdAndReferenceId
 // );
 

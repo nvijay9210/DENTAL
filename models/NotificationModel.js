@@ -31,9 +31,9 @@ const getAllNotificationsByTenantId = async (tenantId, limit, offset) => {
 
 
 /**
- * Fetch notifications for a receiver, with special tenant+clinic-only logic for super-user and receptionist.
+ * Fetch notifications for a receiver, with special tenant+clinic-only logic for superuser and receptionist.
  * @param {number} tenantId
- * @param {number|null} receiverId  // Not required for super-user or receptionist
+ * @param {number|null} receiverId  // Not required for superuser or receptionist
  * @param {string} receiverRole
  * @param {number} clinicId
  */
@@ -66,23 +66,23 @@ async function getNotificationsForReceiver(tenantId, receiverId, receiverRole, c
       CASE
         WHEN r.receiver_role = 'patient' THEN CONCAT(p.first_name, ' ', p.last_name)
         WHEN r.receiver_role = 'dentist' THEN CONCAT(d.first_name, ' ', d.last_name)
-        WHEN r.receiver_role IN ('super-user', 'receptionist') THEN c.clinic_name
+        WHEN r.receiver_role IN ('superuser', 'receptionist') THEN c.clinic_name
         ELSE NULL
       END AS receiver_name,
       CASE
         WHEN n.sender_role = 'patient' THEN CONCAT(sp.first_name, ' ', sp.last_name)
         WHEN n.sender_role = 'dentist' THEN CONCAT(sd.first_name, ' ', sd.last_name)
-        WHEN n.sender_role IN ('super-user', 'receptionist') THEN sc.clinic_name
+        WHEN n.sender_role IN ('superuser', 'receptionist') THEN sc.clinic_name
         ELSE NULL
       END AS sender_name
     FROM notifications n
       JOIN notificationrecipients r ON n.notification_id = r.notification_id
       LEFT JOIN patient p  ON r.receiver_role = 'patient' AND r.receiver_id = p.patient_id
       LEFT JOIN dentist d  ON r.receiver_role = 'dentist' AND r.receiver_id = d.dentist_id
-      LEFT JOIN clinic c   ON (r.receiver_role = 'super-user' OR r.receiver_role = 'receptionist') AND r.receiver_id = c.clinic_id
+      LEFT JOIN clinic c   ON (r.receiver_role = 'superuser' OR r.receiver_role = 'receptionist') AND r.receiver_id = c.clinic_id
       LEFT JOIN patient sp ON n.sender_role = 'patient' AND n.sender_id = sp.patient_id
       LEFT JOIN dentist sd ON n.sender_role = 'dentist' AND n.sender_id = sd.dentist_id
-      LEFT JOIN clinic sc  ON (n.sender_role = 'super-user' OR n.sender_role = 'receptionist') AND n.sender_id = sc.clinic_id
+      LEFT JOIN clinic sc  ON (n.sender_role = 'superuser' OR n.sender_role = 'receptionist') AND n.sender_id = sc.clinic_id
     WHERE r.status != 'archived'
       AND n.tenant_id = ?
       AND n.clinic_id = ?
@@ -97,7 +97,7 @@ async function getNotificationsForReceiver(tenantId, receiverId, receiverRole, c
     `;
     params.push(receiverRole, receiverId);
   }
-  // else for super-user/receptionist: do NOT filter by receiver_role or receiver_id
+  // else for superuser/receptionist: do NOT filter by receiver_role or receiver_id
 
   query += ` ORDER BY n.created_time DESC`;
 

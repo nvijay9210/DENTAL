@@ -49,40 +49,40 @@ router.post(
 // Get All Payments by Tenant ID with Pagination
 router.get(
   GETALL_PAYMENT_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient"]),
   paymentController.getAllPaymentsByTenantId
 );
 
 // Get Single Payment by Tenant ID & Payment ID
 router.get(
   GET_PAYMENT_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient"]),
   paymentController.getPaymentByTenantIdAndPaymentId
 );
 
 router.get(
   GET_PAYEMENT_TENANT_APPOINTMENT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient"]),
   paymentController.getPaymentByTenantAndAppointmentId
 );
 
 router.get(
   GETALL_PAYEMENT_TENANT_APPOINTMENT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient"]),
   paymentController.getallPaymentSummaryByAppointment
 );
 
 // Update Payment
 router.put(
   UPDATE_PAYMENT_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient"]),
   paymentController.updatePayment
 );
 
 // Delete Payment
 router.delete(
   DELETE_PAYMENT_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient"]),
+  authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient"]),
   paymentController.deletePaymentByTenantIdAndPaymentId
 );
 

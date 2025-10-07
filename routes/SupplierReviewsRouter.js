@@ -20,7 +20,7 @@ router.post(
   ADD_SUPPLIER_REVIEWS,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
   ]),
@@ -32,7 +32,7 @@ router.get(
   GETALL_SUPPLIER_REVIEWS_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
   ]),
@@ -42,7 +42,7 @@ router.get(
   GETALL_SUPPLIER_REVIEWS_TENANT_SUPPLIER,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
   ]),
@@ -54,7 +54,7 @@ router.get(
   GET_SUPPLIER_REVIEWS_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
   ]),
@@ -66,7 +66,7 @@ router.put(
   UPDATE_SUPPLIER_REVIEWS_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
   ]),
@@ -78,7 +78,7 @@ router.delete(
   DELETE_SUPPLIER_REVIEWS_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
   ]),

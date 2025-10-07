@@ -297,6 +297,21 @@ const createReception = async () => {
     conn.release();
   }
 };
+const createSuperuUser = async () => {
+  const query = createTableQuery.addSuperUser;
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(query);
+    console.log("Superuser table created successfully.");
+  } catch (error) {
+    console.error("Error creating Superuser table:", error);
+    throw new Error(
+      "Database error occurred while creating the Superuser table."
+    );
+  } finally {
+    conn.release();
+  }
+};
 
 const createPaymentTable = async () => {
   const query = createTableQuery.addPayment;
@@ -830,6 +845,7 @@ module.exports = {
   createPaymentTable,
   createAppointmentReschedulesTable,
   createReception,
+  createSuperuUser,
   createUserActivityTable,
   creatLoginHistoryTable,
   creatNotificationTable,

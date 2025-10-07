@@ -230,7 +230,7 @@ exports.getTodayFollowUps = async (req, res, next) => {
   const { tenant_id, clinic_id } = req.params;
   const { role, user_id } = req.query;
 
-  if (role!=='super-user' && !role || !user_id) throw new CustomError("Role and userid required", 400);
+  if (role!=='superuser' && !role || !user_id) throw new CustomError("Role and userid required", 400);
 
   await checkIfIdExists("tenant", "tenant_id", tenant_id);
   await checkIfIdExists("clinic", "clinic_id", clinic_id);

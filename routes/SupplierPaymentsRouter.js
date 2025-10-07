@@ -42,7 +42,7 @@ router.post(
   ADD_SUPPLIER_PAYMENTS,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
   ]),
@@ -55,7 +55,7 @@ router.post(
   ADD_SUPPLIER_FULL_PAYMENTS,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
     "receptionist",
@@ -70,7 +70,7 @@ router.get(
   GETALL_SUPPLIER_PAYMENTS_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
     "receptionist",
@@ -82,7 +82,7 @@ router.get(
   GETALL_SUPPLIER_PAYMENTS_TENANT_SUPPLIER,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
     "receptionist",
@@ -95,7 +95,7 @@ router.get(
   GET_SUPPLIER_PAYMENTS_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
     "receptionist",
@@ -106,7 +106,7 @@ router.get(
   GET_SUPPLIER_PAYMENTS_TENANT_PURCHASEORDER,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
     "receptionist",
@@ -119,7 +119,7 @@ router.put(
   UPDATE_SUPPLIER_PAYMENTS_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
     "receptionist",
@@ -132,7 +132,7 @@ router.put(
   UPDATE_SUPPLIER_FULL_PAYMENT_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
     "receptionist",
@@ -147,7 +147,7 @@ router.delete(
   DELETE_SUPPLIER_PAYMENTS_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "supplier",
     "receptionist",

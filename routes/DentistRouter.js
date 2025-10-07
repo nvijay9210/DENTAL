@@ -51,7 +51,7 @@ const dentistFileMiddleware = uploadFileMiddleware({
 // Add Dentist
 router.post(
   routerPath.ADD_DENTIST,
-  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "superuser"]),
   upload.any(),
   dentistImageFileleMiddleware, // For profile picture
   dentistFileMiddleware,
@@ -61,7 +61,7 @@ router.post(
 // Get All Dentists by Tenant ID
 router.get(
   routerPath.GETALL_DENTIST_TENANT,
-  authenticateTenantClinicGroup(["tenant","super-user","patient","receptionist","guest"]),
+  authenticateTenantClinicGroup(["tenant","superuser","patient","receptionist","guest"]),
   dentistController.getAllDentistsByTenantId
 );
 
@@ -71,7 +71,7 @@ router.get(
   authenticateTenantClinicGroup([
     "guest",
     "tenant",
-    "super-user",
+    "superuser",
     "receptionist",
     "patient",
     "dentist"
@@ -83,7 +83,7 @@ router.get(
   routerPath.GET_DENTIST_TENANT_CLINIC,
   authenticateTenantClinicGroup([
     "guest",
-    "super-user",
+    "superuser",
     "dentist",
     "tenant",
     "receptionist",
@@ -97,7 +97,7 @@ router.put(
   routerPath.UPDATE_DENTIST_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist"
   ]),
   // dentistUploadFields,
@@ -112,7 +112,7 @@ router.delete(
   routerPath.DELETE_DENTIST_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user"
+    "superuser"
   ]),
   dentistController.deleteDentistByTenantIdAndDentistId
 );

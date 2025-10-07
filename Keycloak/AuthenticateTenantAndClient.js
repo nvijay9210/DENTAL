@@ -19,7 +19,7 @@ function getKey(realm, header, callback) {
 }
 
 function authenticateTenantClinicGroup(requiredRoles = []) {
-  const ROLE_PRIORITY = ["tenant", "super-user", "dentist", "receptionist", "patient", "guest"];
+  const ROLE_PRIORITY = ["tenant", "superuser", "dentist", "receptionist", "patient", "guest"];
 
   return async (req, res, next) => {
     try {
@@ -92,7 +92,7 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
           userTenantId = Number(match[1]);
           userClinicId = Number(match[2]);
 
-          if (userRoles.includes("super-user")) {
+          if (userRoles.includes("superuser")) {
             req.body = {
               ...req.body,
               tenant_id: userTenantId,

@@ -30,26 +30,26 @@ const TenantFileMiddleware = uploadFileMiddleware2({
 
 router.post(
   routerPath.ADD_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "superuser"]),
   upload.any(),
   TenantFileMiddleware,
   tenantController.addTenant
 );
 router.get(
   routerPath.GETALL_TENTANT,
-  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "superuser"]),
   tenantController.getAllTenant
 );
 router.get(
   routerPath.GET_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "superuser"]),
   tenantController.getTenantByTenantId
 );
 router.get(
   routerPath.GET_TENANT_NAME_DOMAIN,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "patient",
     "receptionist",
@@ -60,14 +60,14 @@ router.get(
 );
 router.put(
   routerPath.UPDATE_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "superuser"]),
   upload.any(),
   TenantFileMiddleware,
   tenantController.updateTenant
 );
 router.delete(
   routerPath.DELETE_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "superuser"]),
   tenantController.deleteTenant
 );
 

@@ -205,7 +205,7 @@ function extractUserInfo(token) {
   const globalRoles = token.realm_access?.roles || [];
 
   const ROLE_PRIORITY = [
-    "super-user",
+    "superuser",
     "dentist",
     "patient",
     "receptionist",

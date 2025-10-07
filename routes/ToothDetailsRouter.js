@@ -18,45 +18,45 @@ const {
 // Create ToothDetails
 router.post(
   ADD_TOOTHDETAILS,
-  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "superuser","patient"]),
   toothdetailsController.createToothDetails
 );
 
 // Get All ToothDetailss by Tenant ID with Pagination
 router.get(
   GETALL_TOOTHDETAILS_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "superuser","patient"]),
   toothdetailsController.getAllToothDetailssByTenantId
 );
 router.get(
   GETALL_TOOTHDETAILS_TENANT_CLINIC_DENTIST_PATIENT,
-  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "superuser","patient"]),
   toothdetailsController.getAllToothDetailsByTenantAndClinicAndDentistAndPatientId
 );
 router.get(
   GETALL_TOOTHDETAILS_TENANT_CLINIC_PATIENT,
-  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "superuser","patient"]),
   toothdetailsController.getAllToothDetailsByTenantAndClinicAndPatientId
 );
 
 // Get Single ToothDetails by Tenant ID & ToothDetails ID
 router.get(
   GET_TOOTHDETAILS_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "superuser","patient"]),
   toothdetailsController.getToothDetailsByTenantIdAndToothDetailsId
 );
 
 // Update ToothDetails
 router.put(
   UPDATE_TOOTHDETAILS_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "superuser","patient"]),
   toothdetailsController.updateToothDetails
 );
 
 // Delete ToothDetails
 router.delete(
   DELETE_TOOTHDETAILS_TENANT,
-  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "super-user","patient"]),
+  authenticateTenantClinicGroup(["tenant", "dentist","receptionist", "superuser","patient"]),
   toothdetailsController.deleteToothDetailsByTenantIdAndToothDetailsId
 );
 

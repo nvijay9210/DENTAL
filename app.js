@@ -203,6 +203,7 @@ async function initializeTables() {
     await createTable.createPatientClinicJoinTable();
     await createTable.createDocumentJoinTable();
     await createTable.createReferenceTable();
+    await createTable.createSuperuUser();
 
     console.log('All tables created in order.');
   } catch (err) {

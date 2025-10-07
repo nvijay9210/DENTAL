@@ -34,7 +34,7 @@ const createNotificationValidation = async (details) => {
   let table=details.sender_role==='receptionist' ? 'reception' : details.sender_role
 
   // Check if referenced records exist within the same tenant
-  if (table==='super-user') table='clinic'
+  if (table==='superuser') table='clinic'
   if (table==='receptionist') table='reception'
   await Promise.all([
     checkIfIdExists("tenant", "tenant_id", details.tenant_id),

@@ -47,7 +47,7 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
 
     console.log(user)
 
-    if (user.role !== "tenant" && user.role !== "super-user" && user.role !== "guest") {
+    if (user.role !== "tenant" && user.role !== "superuser" && user.role !== "guest") {
       const userdetails = await getUserIdUsingKeycloakId(
         user.role,
         user.userId,

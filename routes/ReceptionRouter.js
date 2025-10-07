@@ -39,7 +39,7 @@ const receptionFileMiddleware = uploadFileMiddleware2({
 // Create Reception
 router.post(
   ADD_RECEPTION,
-  authenticateTenantClinicGroup(["tenant", "super-user"]),
+  authenticateTenantClinicGroup(["tenant", "superuser"]),
   upload.any(),
   receptionFileMiddleware,
   receptionController.createReception
@@ -50,7 +50,7 @@ router.get(
   GETALL_RECEPTION_TENANT,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "patient",
     "receptionist",
@@ -61,7 +61,7 @@ router.get(
   GETALL_RECEPTION_TENANT_CLINIC,
   authenticateTenantClinicGroup([
     "tenant",
-    "super-user",
+    "superuser",
     "dentist",
     "patient",
     "receptionist",
@@ -72,14 +72,14 @@ router.get(
 // Get Single Reception by Tenant ID & Reception ID
 router.get(
   GET_RECEPTION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient","receptionist"]),
   receptionController.getReceptionByTenantIdAndReceptionId
 );
 
 // Update Reception
 router.put(
   UPDATE_RECEPTION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient","receptionist"]),
   upload.any(),
   receptionFileMiddleware,
   receptionController.updateReception
@@ -88,7 +88,7 @@ router.put(
 // Delete Reception
 router.delete(
   DELETE_RECEPTION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "super-user", "dentist", "patient","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient","receptionist"]),
   receptionController.deleteReceptionByTenantIdAndReceptionId
 );
 
