@@ -41,12 +41,15 @@ const paymentRouter = require('./routes/PaymentRouter');
 const dashboardRouter = require('./routes/DashboardRouter');
 const appointment_reschedules = require('./routes/AppointmentReschedulesRouter');
 const receptionRouter = require('./routes/ReceptionRouter');
+const superuserRouter = require('./routes/SuperUserRouter');
 const userActivityRouter = require('./routes/UserActivityRouter');
 const loginHistoryRouter = require('./routes/LoginHistoryRouter');
 const notificationRouter = require('./routes/NotificationRouter');
 const toothdetailsRouter = require('./routes/ToothDetailsRouter');
 const referenceRouter = require('./routes/ReferenceRouter');
 const otpRouter = require("./Modules/MailSmsOtp/MailSmsOtpRouter");
+
+const keycloakrouter=require('./Keycloak/KeycloakAuth')
 
 
 // const compressionMiddleware = require('./middlewares/CompressionMiddleware');
@@ -288,12 +291,14 @@ app.use('/v1/payment', paymentRouter);
 app.use('/v1/dashboard', dashboardRouter);
 app.use('/v1/appointment_reschedules', appointment_reschedules);
 app.use('/v1/reception', receptionRouter);
+app.use('/v1/superuser', superuserRouter);
 app.use('/v1/useractivity', userActivityRouter);
 app.use('/v1/loginhistory', loginHistoryRouter);
 app.use('/v1/notification', notificationRouter);
 app.use('/v1/toothdetails', toothdetailsRouter);
 app.use('/v1/reference', referenceRouter);
 app.use("/v1/messaging", otpRouter);
+app.use("/v1/keycloak", keycloakrouter);
 
 // Error handler must be last
 app.use(errorHandler);
