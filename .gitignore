@@ -1,6 +1,5 @@
 node_modules/
 uploads/
 .env/
-logs/dev.log
 .env*
-dev.log
+logs/dev.log
