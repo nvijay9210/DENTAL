@@ -10,7 +10,7 @@ const {
   addUserToGroup,
   addUser,
   getUserIdByUsername,
-} = require("../middlewares/KeycloakAdmin");
+} = require("../Keycloak/KeycloakAdmin");
 const { mapFields } = require("../query/Records");
 const { updateDocumentsDiffBased } = require("./UploadFiles");
 const helper = require("../utils/Helpers");

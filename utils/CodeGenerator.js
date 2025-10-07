@@ -6,10 +6,11 @@ const tenantCodes = {
   
   // Define module codes
   const moduleCodes = {
+    superuser:"SUP",
     dentist: "DEN",
     patient: "PAT",
     reception: "REC",
-    supplier: "SUP",
+    supplier: "SPL",
   };
   
   /**

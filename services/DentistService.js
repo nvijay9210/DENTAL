@@ -16,7 +16,7 @@ const {
   updateUserInKeycloak,
   getKeycloakUserIdByEmail,
   getUserGroups
-} = require("../middlewares/KeycloakAdmin");
+} = require("../Keycloak/KeycloakAdmin");
 const { mapFields } = require("../query/Records");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 

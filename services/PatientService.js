@@ -19,7 +19,7 @@ const {
   updateUserInKeycloak,
   getKeycloakUserIdByEmail,
   getUserGroups,
-} = require("../middlewares/KeycloakAdmin");
+} = require("../Keycloak/KeycloakAdmin");
 const { encrypt } = require("../middlewares/PasswordHash");
 const { buildCacheKey } = require("../utils/RedisCache");
 const { createPatientClinic } = require("./PatientClinicService");

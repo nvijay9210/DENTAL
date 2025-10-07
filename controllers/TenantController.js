@@ -1,5 +1,5 @@
 const { CustomError } = require("../middlewares/CustomeError");
-const { extractUserInfo } = require("../middlewares/KeycloakAdmin");
+const { extractUserInfo } = require("../Keycloak/KeycloakAdmin");
 const { getUserIdUsingKeycloakId } = require("../models/TenantModel");
 const tenantService = require("../services/TenantService");
 const tenantValidation = require("../validations/TenantValidation");

@@ -15,7 +15,7 @@ const {
   assignRealmRoleToUser,
   addUserToGroup,
   updateUserInKeycloak,
-} = require("../middlewares/KeycloakAdmin");
+} = require("../Keycloak/KeycloakAdmin");
 const { buildCacheKey } = require("../utils/RedisCache");
 const { rollbackKeycloakUser } = require("../Keycloak/KeycloakService");
 const { createEntity, updateEntity } = require("../utils/Reusability");

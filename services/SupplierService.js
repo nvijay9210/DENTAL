@@ -15,7 +15,7 @@ const {
   assignRealmRoleToUser,
   addUserToGroup,
   updateUserInKeycloak,
-} = require("../middlewares/KeycloakAdmin");
+} = require("../Keycloak/KeycloakAdmin");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { buildCacheKey } = require("../utils/RedisCache");

@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { CustomError } = require("./CustomeError");
+const { CustomError } = require("../middlewares/CustomeError");
 const { updateDocumentsDiffBased } = require("../utils/UploadFiles");
 const pool = require("../config/db");
 
@@ -515,6 +515,36 @@ async function getUserGroups(token, realm, userId) {
   }
 }
 
+async function getKeycloakToken({ method, username, password }) {
+  const tokenUrl = `${KEYCLOAK_BASE_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token`;
+
+  let data;
+  if (method === "password") {
+    if (!username || !password) throw new Error("Username and password required");
+    data = {
+      grant_type: "password",
+      client_id: process.env.CLIENT_ID,
+      client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
+      username,
+      password,
+    };
+  } else if (method === "client_credentials") {
+    data = {
+      grant_type: "client_credentials",
+      client_id: process.env.CLIENT_ID,
+      client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
+    };
+  } else {
+    throw new Error("Invalid login method");
+  }
+
+  const response = await axios.post(tokenUrl, qs.stringify(data), {
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  });
+
+  return response.data;
+}
+
 
 
 
@@ -546,5 +576,6 @@ module.exports = {
   deleteKeycloakGroup,
   getGroupIdByName,
   getKeycloakUserIdByEmail,
-  getUserGroups
+  getUserGroups,
+  getKeycloakToken
 };

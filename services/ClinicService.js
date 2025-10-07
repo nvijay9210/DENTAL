@@ -15,7 +15,7 @@ const {
 
 const message = require("../middlewares/ErrorMessages");
 const { convertUTCToLocal } = require("../utils/DateUtils");
-const { createGroup, deleteKeycloakGroup, updateGroupAttributes, getGroupIdByName } = require("../middlewares/KeycloakAdmin");
+const { createGroup, deleteKeycloakGroup, updateGroupAttributes, getGroupIdByName } = require("../Keycloak/KeycloakAdmin");
 const { buildCacheKey } = require("../utils/RedisCache");
 const {
   saveDocuments,
