@@ -146,8 +146,7 @@ const dentistFieldReverseMap = {
 
 // -------------------- CREATE --------------------
 
-const createDentist = async (data, token, realm) => {
-  console.log(data,token,realm)
+const createDentist = async (data, token, realm,clientId) => {
   const newDentist = await createEntity({
     data,
     entityName: "dentist",
@@ -157,7 +156,8 @@ const createDentist = async (data, token, realm) => {
     createModel: dentistModel.createDentist,
     fileFields: ["awards_certifications"],
     nameFields: { firstName: "first_name", lastName: "last_name" },
-    roleName:'dentist'
+    roleName:'dentist',
+    clientId
   });
 
   return newDentist

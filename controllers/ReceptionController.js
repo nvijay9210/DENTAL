@@ -1,5 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
+const { bulkInsert } = require("../Modules/BulkInsert");
 const receptionService = require("../services/ReceptionService");
 const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 const receptionValidation = require("../validations/ReceptionValidation");
@@ -8,17 +9,18 @@ const receptionValidation = require("../validations/ReceptionValidation");
  * Create a new reception
  */
 exports.createReception = async (req, res, next) => {
-  const details = req.body;
-  const token=req.token;
-  const realm=req.realm;
+  const token = req.token;
+  const realm = req.realm;
 
   try {
-    // Validate reception data
-    await receptionValidation.createReceptionValidation(details);
-
-    // Create the reception
-    const id = await receptionService.createReception(details,token,realm);
-    res.status(201).json({ message: "Reception created", id });
+    const response = await bulkInsert(
+      req.body,
+      receptionValidation.createReceptionValidation,
+      receptionService.createReception,
+      token,
+      realm
+    );
+    res.status(201).json(response);
   } catch (err) {
     next(err);
   }

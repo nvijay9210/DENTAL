@@ -7,20 +7,18 @@ const appointmentValidation = require("../validations/AppointmentValidation");
 const {
   validateTenantIdAndPageAndLimit,
 } = require("../validations/CommonValidations");
-
+const { bulkInsert } = require("../Modules/BulkInsert");
 /**
  * Create a new appointment
  */
 exports.createAppointment = async (req, res, next) => {
-  const details = req.body;
-
   try {
-    // Validate appointment data
-    await appointmentValidation.createAppointmentValidation(details);
-
-    // Create the appointment
-    const id = await appointmentService.createAppointment(details);
-    res.status(201).json({ message: "Appointment created", id });
+    const response = await bulkInsert(
+      req.body,
+      appointmentValidation.createAppointmentValidation,
+      appointmentService.createAppointment
+    );
+    res.status(201).json(response);
   } catch (err) {
     next(err);
   }

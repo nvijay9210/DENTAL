@@ -10,6 +10,7 @@ const {
 const { checkTenantExistsByTenantIdValidation } = require("./TenantValidation");
 const { validateInput } = require("./InputValidation");
 const { checkPreviousDatetimeOrNot } = require("../utils/DateUtils");
+const { truncate } = require("fs");
 
 const appoinmentColumnConfig = [
   { columnname: "patient_id", type: "int", size: 11, null: false },
@@ -29,7 +30,7 @@ const appoinmentColumnConfig = [
     columnname: "appointment_type",
     type: "enum",
     enum_values: ['video','audio'],
-    null: false,
+    null: true,
   },
   { columnname: "consultation_fee", type: "decimal", size: "12,2", null: true },
   {
@@ -43,7 +44,7 @@ const appoinmentColumnConfig = [
     columnname: "payment_status",
     type: "varchar",
     size:100,
-    null: false,
+    null: true,
   },
   {
     columnname: "min_booking_fee",
@@ -61,7 +62,7 @@ const appoinmentColumnConfig = [
     columnname: "mode_of_payment",
     type: "varchar",
     size:100,
-    null: false,
+    null: true,
   },
   { columnname: "visit_reason", type: "text", null: true },
   { columnname: "feedback", type: "text", null: true },
@@ -75,8 +76,8 @@ const appoinmentColumnConfig = [
   {
     columnname: "follow_up_needed",
     type: "boolean",
-    null: false,
-    default: false,
+    null: true,
+    default: 0,
   },
   {
     columnname: "reminder_method",

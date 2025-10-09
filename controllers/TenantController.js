@@ -6,13 +6,16 @@ const tenantValidation = require("../validations/TenantValidation");
 const {
   getClinicSettingsByTenantIdAndClinicId,
 } = require("../services/ClinicService");
+const { bulkInsert } = require("../Modules/BulkInsert");
 
 exports.addTenant = async (req, res, next) => {
   try {
-    await tenantValidation.createTenantValidation(req.body);
-    // Create a new tenant
-    const id = await tenantService.createTenant(req.body);
-    res.status(201).json({ message: "Tenant created", id });
+    const response = await bulkInsert(
+      req.body,
+      tenantValidation.createTenantValidation,
+      tenantService.createTenant
+    );
+    res.status(201).json(response);
   } catch (err) {
     next(err);
   }

@@ -104,6 +104,8 @@ const getTenantByTenantId = async (tenantId) => {
       tenantFieldsReverseMap
     );
 
+    console.log(convertedRows)
+
     const documents = await getDocumentsByField(
       "tenant",
       tenantId,

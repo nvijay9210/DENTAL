@@ -43,7 +43,9 @@ const createEntity = async ({
   createPatientClinicFn = null,
   fileFields = [],
   connectionPool = pool,
+  clientId
 }) => {
+
   const create = { ...fieldMap, created_by: (val) => val }; // DB mapping (no phone_number)
   let userId = null;
   let username = null;
@@ -59,40 +61,40 @@ const createEntity = async ({
       const { first_name, last_name, email, phone_number } = data;
 
       // Check if Keycloak user exists by email
-      const user = await getKeycloakUserIdByEmail(token, realm, email);
-      userId = user?.id;
+      // const user = await getKeycloakUserIdByEmail(token, realm, email);
+      // userId = user?.id;
 
-      if (userId) {
-        console.log(`ℹ️ Keycloak user already exists: ${email}`);
+      // if (userId) {
+      //   console.log(`ℹ️ Keycloak user already exists: ${email}`);
 
-        if (roleName) await assignRealmRoleToUser(token, realm, userId, roleName);
+      //   if (roleName) await assignRealmRoleToUser(token, realm, userId, roleName);
 
-        if (userClinicId) {
-          const groupName = `dental-${data.tenant_id}-${userClinicId}`;
-          const userGroups = await getUserGroups(token, realm, userId);
-          if (!userGroups.some((grp) => grp.path === `/${groupName}`)) {
-            await addUserToGroup(token, realm, userId, groupName);
-          }
-        }
+      //   if (userClinicId) {
+      //     const groupName = `dental-${data.tenant_id}-${userClinicId}`;
+      //     const userGroups = await getUserGroups(token, realm, userId);
+      //     if (!userGroups.some((grp) => grp.path === `/${groupName}`)) {
+      //       await addUserToGroup(token, realm, userId, groupName);
+      //     }
+      //   }
 
-        data.keycloak_id = userId;
-        data.username = user.username || user.email;
+      //   data.keycloak_id = userId;
+      //   data.username = user.username || user.email;
 
-        const existingPatient = await getPatientByKeycloakId(userId, connection);
-        if (existingPatient) entityId = existingPatient.patient_id;
+      //   const existingPatient = await getPatientByKeycloakId(userId, connection);
+      //   if (existingPatient) entityId = existingPatient.patient_id;
 
-        // Sync Keycloak fields
-        const payload = {};
-        if (email) { payload.email = email; payload.emailVerified = true; }
-        if (first_name) payload.firstName = first_name;
-        if (last_name) payload.lastName = last_name;
-        if (phone_number) payload.attributes = { phoneNumber: phone_number };
+      //   // Sync Keycloak fields
+      //   const payload = {};
+      //   if (email) { payload.email = email; payload.emailVerified = true; }
+      //   if (first_name) payload.firstName = first_name;
+      //   if (last_name) payload.lastName = last_name;
+      //   if (phone_number) payload.attributes = { phoneNumber: phone_number };
 
-        if (Object.keys(payload).length > 0) {
-          await updateUserInKeycloak(token, realm, userId, payload);
-          console.log(`✅ Updated Keycloak user ${userId} with new info`);
-        }
-      } else {
+      //   if (Object.keys(payload).length > 0) {
+      //     await updateUserInKeycloak(token, realm, userId, payload);
+      //     console.log(`✅ Updated Keycloak user ${userId} with new info`);
+      //   }
+      // } else {
         // Create new Keycloak user
         username = await helper.generateUsername(entityName.slice(0, 3).toUpperCase(), realm, token);
         rawPassword = rawPassword || helper.generateAlphanumericPassword(12);
@@ -129,7 +131,7 @@ const createEntity = async ({
         data.keycloak_id = userId;
         data.username = username;
         data.password = rawPassword;
-      }
+      // }
     }
 
     // Insert entity in DB
@@ -137,7 +139,7 @@ const createEntity = async ({
     entityId = await createModel(connection, entityName, columns, values);
 
     // Generate unique code
-    const tenantName = data.tenant_name || data.tenant_id;
+    const tenantName = clientId || data.tenant_name;
     const code = generateCode(tenantName, entityName, entityId);
     const codeColumn = `${entityName}_code`;
     await connection.query(

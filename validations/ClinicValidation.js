@@ -149,7 +149,7 @@ const clinicColumnConfig = [
   {
     columnname: "available_services",
     type: "longtext",
-    null: false,
+    null: true,
     data_type: "json",
   },
   {
@@ -161,7 +161,7 @@ const clinicColumnConfig = [
   {
     columnname: "insurance_supported",
     type: "tinyint",
-    null: false,
+    null: true,
     is_boolean: true,
   },
   { columnname: "ratings", type: "decimal", size: "3,2", null: true },
@@ -169,23 +169,23 @@ const clinicColumnConfig = [
   {
     columnname: "emergency_support",
     type: "tinyint",
-    null: false,
+    null: true,
     is_boolean: true,
   },
   {
     columnname: "teleconsultation_supported",
     type: "tinyint",
-    null: false,
+    null: true,
     is_boolean: true,
   },
   {
     columnname: "parking_availability",
     type: "tinyint",
-    null: false,
+    null: true,
     is_boolean: true,
   },
   { columnname: "pharmacy", type: "tinyint", null: true, is_boolean: true },
-  { columnname: "wifi", type: "tinyint", null: false, is_boolean: true },
+  { columnname: "wifi", type: "tinyint", null: true, is_boolean: true },
   { columnname: "clinic_app_font", type: "varchar", size: 100, null: true },
   { columnname: "clinic_app_themes", type: "varchar", size: 50, null: true },
 ];

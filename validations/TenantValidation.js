@@ -21,6 +21,7 @@ const updateColumnConfig = [
 ];
 
 const createTenantValidation = async (details) => {
+  console.log('details:',details)
   validateInput(details, createColumnConfig);
   const tenant = await tenantModel.checkTenantExistsByTenantnameAndTenantdomain(
     details.tenant_name,

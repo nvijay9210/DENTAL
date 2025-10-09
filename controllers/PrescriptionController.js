@@ -8,15 +8,13 @@ const prescriptionValidation = require("../validations/PrescriptionValidation");
  * Create a new prescription
  */
 exports.createPrescription = async (req, res, next) => {
-  const details = req.body;
-
   try {
-    // Validate prescription data
-    await prescriptionValidation.createPrescriptionValidation(details);
-
-    // Create the prescription
-    const id = await prescriptionService.createPrescription(details);
-    res.status(201).json({ message: "Prescription created", id });
+    const response = await bulkInsert(
+      req.body,
+      prescriptionValidation.createPrescriptionValidation,
+      prescriptionService.createPrescription
+    );
+    res.status(201).json(response);
   } catch (err) {
     next(err);
   }

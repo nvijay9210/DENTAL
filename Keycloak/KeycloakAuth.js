@@ -1,78 +1,46 @@
+// ssoAuth.js
 const express = require("express");
-const axios = require("axios");
+const cookieParser = require("cookie-parser");
 const qs = require("querystring");
+const axios = require("axios");
 const { CustomError } = require("../middlewares/CustomeError");
-require("dotenv").config();
+const {
+  getKeycloakToken,
+  decodeToken,
+  extractUserInfo,
+} = require("./KeycloakAdmin");
+const { getTenantByTenantId } = require("../services/TenantService");
+const { getClinicByTenantIdAndClinicId } = require("../services/ClinicService");
+const { buildUserContext } = require("../utils/BuildUserContext");
 
 const router = express.Router();
+router.use(cookieParser());
 
-// ----- CONFIG -----
-const KEYCLOAK_BASE_URL = process.env.KEYCLOAK_BASE_URL || "http://localhost:8080";
-const KEYCLOAK_REALM = process.env.KEYCLOAK_REALM || "myrealm";
-const CLIENT_ID = process.env.KEYCLOAK_CLIENT_ID || "backend-service";
-const CLIENT_SECRET = process.env.KEYCLOAK_CLIENT_SECRET || "super_secret_key";
-
-// ----- ROUTER -----
 router.post("/login", async (req, res, next) => {
-  const { method = "password", username, password } = req.body;
-
   try {
-    // Step 1: Get token from Keycloak
-    const tokenData = await getKeycloakToken({ method, username, password });
-    const accessToken = tokenData.access_token;
+    // Inside login route
+    const { accessToken, refreshToken } = req.body;
+    const userContext = await buildUserContext(accessToken);
 
-    // Step 2: Get user info (to extract userId)
-    const userInfo = await getUserInfo(accessToken);
-    const userId = userInfo.sub;
+    // Set cookies
+    const isProduction = process.env.NODE_ENV === "production";
 
-    // Step 3: Get groups of this user
-    const adminTokenResponse = await getKeycloakToken({ method: "client_credentials" });
-    const adminAccessToken = adminTokenResponse.access_token;
-    const groups = await getUserGroups(adminAccessToken, userId);
-
-    // Step 4: Extract tenant_id and clinic_id from group names
-    // Example group names: "/tenant_101/clinic_55"
-    let tenant_id = null;
-    let clinic_id = null;
-
-    for (const group of groups) {
-      if (group.path.includes("tenant_")) {
-        const match = group.path.match(/tenant_(\d+)/);
-        if (match) tenant_id = match[1];
-      }
-      if (group.path.includes("clinic_")) {
-        const match = group.path.match(/clinic_(\d+)/);
-        if (match) clinic_id = match[1];
-      }
-    }
-
-    // Step 5: Store tokens in HttpOnly cookies
     res.cookie("access_token", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-      maxAge: tokenData.expires_in * 1000,
+      secure: isProduction, // true only for HTTPS
+      sameSite: isProduction ? "None" : "Lax", // "None" allows cross-site cookies for HTTPS
+      maxAge: 60 * 60 * 1000, // 1 hour
     });
 
-    res.cookie("refresh_token", tokenData.refresh_token, {
+    res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // Step 6: Send final response
-    res.status(200).json({
-      message: "Login successful",
-      user: {
-        username: userInfo.preferred_username,
-        email: userInfo.email,
-        name: userInfo.name,
-      },
-      tenant_id,
-      clinic_id,
-      groups: groups.map((g) => g.path),
-    });
+    // Send context
+    res.status(200).json(userContext);
   } catch (err) {
     console.error("Login error:", err.response?.data || err.message);
     next(
@@ -84,5 +52,85 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-// ----- EXPORT ROUTER -----
+// ---------- REFRESH TOKEN ----------
+router.post("/refresh-token", async (req, res, next) => {
+  const refreshToken = req.cookies.refresh_token;
+  const realm = req.headers["x-realm"];
+  const clientid = req.headers["x-clientid"];
+
+  if (!refreshToken)
+    return next(new CustomError("No refresh token found", 401));
+
+  try {
+    const tokenUrl = `${process.env.KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/token`;
+    const data = {
+      grant_type: "refresh_token",
+      client_id: clientid,
+      client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
+      refresh_token: refreshToken,
+    };
+
+    const response = await axios.post(tokenUrl, qs.stringify(data), {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+
+    const tokenData = response.data;
+    const decodedToken = decodeToken(tokenData.access_token);
+    const userInfo = extractUserInfo(decodedToken);
+
+    const tenant = await getTenantByTenantId(userInfo.tenantId);
+    let clinic = null;
+    if (userInfo.role !== "tenant" && userInfo.clinicId) {
+      clinic = await getClinicByTenantIdAndClinicId(
+        userInfo.tenantId,
+        userInfo.clinicId
+      );
+    }
+
+    // Update cookies
+    res.cookie("access_token", tokenData.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // HTTPS only in prod
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: tokenData.expires_in * 1000,
+    });
+
+    res.cookie("refresh_token", tokenData.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    const responseData = {
+      tenant_name: tenant?.tenant_name,
+      tenant_domain: tenant?.tenant_domain,
+      tenant_app_logo: tenant?.tenant_app_logo || [],
+      tenant_app_themes: tenant?.tenant_app_themes || null,
+      tenant_app_font: tenant?.tenant_app_font || null,
+      username: userInfo.preferred_username,
+      userId: userInfo.userId,
+      displayName: userInfo.displayName,
+      tenantId: userInfo.tenantId,
+      clinicId: userInfo.clinicId,
+      role: userInfo.role,
+      preferred_username: userInfo.preferred_username,
+    };
+
+    if (clinic) {
+      responseData.clinic_name = clinic.clinic_name;
+      responseData.clinic_app_themes = clinic.clinic_app_themes;
+      responseData.clinic_app_font = clinic.clinic_app_font;
+      responseData.clinic_logo = clinic.clinic_logo;
+    }
+
+    res.status(200).json(responseData);
+  } catch (err) {
+    console.error("Refresh token error:", err.response?.data || err.message);
+    next(
+      new CustomError(err.response?.data?.error_description || err.message, 401)
+    );
+  }
+});
+
 module.exports = router;

@@ -1,5 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists, checkIfIdExists } = require("../models/checkIfExists");
+const { bulkInsert } = require("../Modules/BulkInsert");
 const clinicService = require("../services/ClinicService");
 const { logUserViewActivity } = require("../utils/UserActivityUtil");
 const clinicValidation = require("../validations/ClinicValidation");
@@ -8,15 +9,18 @@ const {
 } = require("../validations/CommonValidations");
 
 exports.createClinic = async (req, res, next) => {
-  const details = req.body;
   const token = req.token;
   const realm = req.realm;
 
   try {
-    await clinicValidation.createClinicValidation(details);
-    // Create a new clinic
-    const id = await clinicService.createClinic(details, token, realm);
-    res.status(200).json({ message: "Clinic created", id });
+    const response = await bulkInsert(
+      req.body,
+      clinicValidation.createClinicValidation,
+      clinicService.createClinic,
+      token,
+      realm
+    );
+    res.status(200).json(response);
   } catch (err) {
     next(err);
   }

@@ -23,6 +23,7 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
 
   return async (req, res, next) => {
     try {
+      // ===== Dev mode shortcut =====
       if (process.env.KEYCLOAK_POWER === "off") {
         req.user = {
           username: "dev-user",
@@ -37,13 +38,18 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         return next();
       }
 
-      const token = req.headers.authorization?.split(" ")[1];
+      // ===== Read token from HttpOnly cookies =====
+      const token = req.cookies?.access_token || req.headers["access_token"];
+      
       const realm = process.env.KEYCLOAK_REALM || req.headers["x-realm"];
 
+      const clientId =req.headers["x-clientid"];
+
       if (!token || !realm) {
-        throw new CustomError("Missing token or realm in headers", 401);
+        throw new CustomError("Missing token in cookies or realm in headers", 401);
       }
 
+      // ===== Decode and verify token using JWKS public key =====
       const decoded = await new Promise((resolve, reject) => {
         jwt.verify(
           token,
@@ -81,7 +87,7 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         return next();
       }
 
-      // Proceed with group validation and tenant/clinic isolation
+      // ===== Tenant/Clinic isolation =====
       const dentalGroup = userGroups.find((g) => g.startsWith("dental-"));
       let userTenantId = null;
       let userClinicId = null;
@@ -122,7 +128,9 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
 
       req.token = token;
       req.user = decoded;
-      req.realm = realm;
+      req.realm = realm;      
+      req.clientId = clientId;      
+
 
       logger.writeLog("info", `Authentication successful as ${req.role}`, `${req.method} ${req.originalUrl}`);
       next();

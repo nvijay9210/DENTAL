@@ -1,5 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists, checkIfIdExists } = require("../models/checkIfExists");
+const { bulkInsert } = require("../Modules/BulkInsert");
 const patientService = require("../services/PatientService");
 const { logUserViewActivity } = require("../utils/UserActivityUtil");
 const {
@@ -7,28 +8,55 @@ const {
 } = require("../validations/CommonValidations");
 const patientValidation = require("../validations/PatientValidation");
 
+// exports.createPatient = async (req, res, next) => {
+//   const details = req.body;
+//   const token = req.token;
+//   const realm = req.realm;
+//   const group = req.user.groups[0]; // 'dental-1-5'
+//   const value = group.split("-")[2]; // '5'
+//   try {
+//     // Validate patient data
+//     // await patientValidation.createPatientValidation(details);
+
+//     // Create a new patient
+//     const id = await patientService.createPatient(details, token, realm, value);
+
+//     // const id=await manageUser("create", "patient", req.body, token, realm, req.body.clinic_id);
+
+//     res.status(200).json({ message: "Patient created", id });
+//   } catch (err) {
+//     console.log("Caught in controller:", err);
+//     next(err);
+//   }
+  
+// };
+
+
 exports.createPatient = async (req, res, next) => {
-  const details = req.body;
   const token = req.token;
   const realm = req.realm;
-  const group = req.user.groups[0]; // 'dental-1-5'
-  const value = group.split("-")[2]; // '5'
+  const clientId = req.clientId;
+  const group = req.user.groups[0];
+  const value = group.split("-")[2];
+
+  console.log('con-clientId',clientId)
+
   try {
-    // Validate patient data
-    // await patientValidation.createPatientValidation(details);
+    const response = await bulkInsert(
+      req.body,
+      null, // or patientValidation.createPatientValidation,
+      patientService.createPatient,
+      token,
+      realm,
+      clientId
+    );
 
-    // Create a new patient
-    const id = await patientService.createPatient(details, token, realm, value);
-
-    // const id=await manageUser("create", "patient", req.body, token, realm, req.body.clinic_id);
-
-    res.status(200).json({ message: "Patient created", id });
+    res.status(200).json(response);
   } catch (err) {
-    console.log("Caught in controller:", err);
     next(err);
   }
-  
 };
+
 
 exports.getAllPatientsByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;

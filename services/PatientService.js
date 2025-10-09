@@ -103,7 +103,8 @@ patient_code: (val) => val,
   updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 
-const createPatient = async (data, token, realm, user_clinic_id) => {
+const createPatient = async (data, token, realm,clientId) => {
+  console.log('ser-clientId:',clientId)
   return await createEntity({
     data,
     entityName: "patient",
@@ -113,6 +114,7 @@ const createPatient = async (data, token, realm, user_clinic_id) => {
     createModel: patientModel.createPatient,
     createPatientClinicFn: createPatientClinic,
     roleName: "patient",
+    clientId
   });
 };
 

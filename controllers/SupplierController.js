@@ -8,17 +8,18 @@ const supplierValidation = require("../validations/SupplierValidation");
  * Create a new supplier
  */
 exports.createSupplier = async (req, res, next) => {
-  const details = req.body;
-  const token=req.token;
-  const realm=req.realm;
+  const token = req.token;
+  const realm = req.realm;
 
   try {
-    // Validate supplier data
-    await supplierValidation.createSupplierValidation(details);
-
-    // Create the supplier
-    const id = await supplierService.createSupplier(details,token,realm);
-    res.status(201).json({ message: "Supplier created", id });
+    const response = await bulkInsert(
+      req.body,
+      supplierValidation.createSupplierValidation,
+      supplierService.createSupplier,
+      token,
+      realm
+    );
+    res.status(201).json(response);
   } catch (err) {
     next(err);
   }

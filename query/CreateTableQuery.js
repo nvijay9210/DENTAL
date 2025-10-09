@@ -703,7 +703,7 @@ const createTableQuery = {
     keycloak_id CHAR(36) DEFAULT NULL,
     username VARCHAR(50) DEFAULT NULL,
     password VARBINARY(255) DEFAULT NULL,
-    superuser_code VARCHAR(15) NOT NULL,
+    superuser_code VARCHAR(15) NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     email VARCHAR(255) DEFAULT NULL,

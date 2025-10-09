@@ -40,6 +40,30 @@ const uploadFileMiddleware = (options) => {
 
   return async (req, res, next) => {
     try {
+      let inputData = req.body;
+
+      // Convert numeric-key objects to array (Excel JSON style)
+      if (!Array.isArray(inputData)) {
+        const numericKeys = Object.keys(inputData).filter((k) => !isNaN(k));
+        if (numericKeys.length > 0) {
+          inputData = numericKeys.map((k) => inputData[k]);
+        } else {
+          inputData = [inputData]; // single record
+        }
+      }
+
+      req.body = inputData; // replace original body
+
+      // =========================
+      // 2️⃣ Bulk vs single
+      // =========================
+      if (inputData.length > 1) {
+        console.log(
+          "⏩ Bulk data detected, skipping file upload & single-record validation"
+        );
+        return next(); // skip file upload and single validation
+      }
+
       if (!folderName || !Array.isArray(fileFields)) {
         return res
           .status(400)
@@ -86,7 +110,7 @@ const uploadFileMiddleware = (options) => {
       }
 
       const settings = parseInt(req.query.settings || "0");
-      console.log('req.body.otpVerified:',req.body.otpVerified)
+      console.log("req.body.otpVerified:", req.body.otpVerified);
       const otpVerified = !!req.body.otpVerified;
 
       // Only validate if settings is not 1 AND otpVerified is false
@@ -216,7 +240,30 @@ const uploadFileMiddleware2 = (options) => {
   } = options;
 
   return async (req, res, next) => {
+    console.log(req.body);
     try {
+      let inputData = req.body;
+
+      // Convert numeric-key objects to array (Excel JSON style)
+      if (!Array.isArray(inputData)) {
+        const numericKeys = Object.keys(inputData).filter((k) => !isNaN(k));
+        if (numericKeys.length > 0) {
+          inputData = numericKeys.map((k) => inputData[k]);
+        }
+      }
+
+      req.body = inputData; // replace original body
+
+      // =========================
+      // 2️⃣ Bulk vs single
+      // =========================
+      if (inputData.length > 1) {
+        console.log(
+          "⏩ Bulk data detected, skipping file upload & single-record validation"
+        );
+        return next(); // skip file upload and single validation
+      }
+
       const ensureFolderExists = (folderPath) => {
         if (!fs.existsSync(folderPath)) {
           fs.mkdirSync(folderPath, { recursive: true });
@@ -246,7 +293,7 @@ const uploadFileMiddleware2 = (options) => {
 
       // Run validation only if not in "settings" mode
       const settings = parseInt(req.query.settings || "0");
-      console.log('req.body.otpVerified:',req.body.otpVerified)
+      console.log("req.body.otpVerified:", req.body.otpVerified);
       const otpVerified = !!req.body.otpVerified;
 
       // Only validate if settings is not 1 AND otpVerified is false

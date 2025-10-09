@@ -1,26 +1,31 @@
 // src/controllers/DentistController.js
+const { bulkInsert } = require("../Modules/BulkInsert");
 const dentistService = require("../services/DentistService");
 const {
   validateTenantIdAndPageAndLimit,
 } = require("../validations/CommonValidations");
 const dentistValidation = require("../validations/DentistValidation");
 
+
 exports.createDentist = async (req, res, next) => {
-  const details = req.body;
-  const token=req.token;
-  const realm=req.realm;
+  const token = req.token;
+  const realm = req.realm;
 
   try {
-    await dentistValidation.createDentistValidation(details);
-    
+    const response = await bulkInsert(
+      req.body,
+      dentistValidation.createDentistValidation,
+      dentistService.createDentist,
+      token,
+      realm
+    );
 
-    // Create a new dentist
-    const id = await dentistService.createDentist(details,token,realm);
-    res.status(200).json({ message: "Dentist created", id });
+    res.status(200).json(response);
   } catch (err) {
     next(err);
   }
 };
+
 
 exports.getAllDentistsByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;

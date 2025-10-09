@@ -6,6 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
+const { excelToJsonAllSheets } = require('./utils/ExcelToJson');
 
 // require('./middlewares/Schedule') //appointment schedule
 // const { logFilePath, logStream, logRequest } = require('./logs/logger'); //log file
@@ -77,10 +78,30 @@ const server = http.createServer(app);
 
 // Socket.IO setup
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://192.168.1.17:5173',
-  'https://yourfrontend.com', 
+  "http://localhost:5173",
+  "http://192.168.1.17:5173",
+  "https://yourfrontend.com",
 ];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow Postman or curl
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS not allowed for origin: ${origin}`));
+    }
+  },
+  credentials: true, // ✅ allow cookies
+}));
+
+
+app.get("/check-cookie", (req, res) => {
+  console.log(req.cookies); // all cookies sent by the client
+  res.json({ cookies: req.cookies });
+});
+
 
 const cloudflareRegex = /\.trycloudflare\.com$/;
 
@@ -146,7 +167,7 @@ io.on('connection', (socket) => {
 });
 
 // Middleware setup
-app.use(cors());
+// app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser());
@@ -240,6 +261,13 @@ async function initializeTables() {
 app.get('/test', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Successfully Running' });
 });
+
+// try {
+//   const data = excelToJsonAllSheets("dental_sample_with_codes.xlsx","./output.json"); // Path to your Excel file
+//   // console.log("JSON Data:", data);
+// } catch (err) {
+//   console.error(err.message);
+// }
 
 
 const bodyParser = require("body-parser");

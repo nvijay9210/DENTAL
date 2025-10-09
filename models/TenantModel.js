@@ -36,6 +36,7 @@ const getTenantByTenantId = async (tenant_id) => {
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query, [tenant_id]);
+    console.log(tenant_id,rows)
     return rows[0];
   } catch (error) {
     throw error

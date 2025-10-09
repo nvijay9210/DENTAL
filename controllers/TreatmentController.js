@@ -1,5 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
+const { bulkInsert } = require("../Modules/BulkInsert");
 const treatmentService = require("../services/TreatmentService");
 const {
   validateTenantIdAndPageAndLimit,
@@ -10,15 +11,13 @@ const treatmentValidation = require("../validations/TreatmentValidation");
  * Create a new treatment
  */
 exports.createTreatment = async (req, res, next) => {
-  const details = req.body;
-  console.log(details)
   try {
-    // Validate treatment data
-    await treatmentValidation.createTreatmentValidation(details);
-
-    // Create the treatment
-    const id = await treatmentService.createTreatment(details);
-    res.status(201).json({ message: "Treatment created", id });
+    const response = await bulkInsert(
+      req.body,
+      treatmentValidation.createTreatmentValidation,
+      treatmentService.createTreatment
+    );
+    res.status(201).json(response);
   } catch (err) {
     next(err);
   }

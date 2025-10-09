@@ -195,7 +195,8 @@ function generatePatternUsername(tenant, roleShort) {
 }
 
 // 🔹 Function to check if username exists in Keycloak
-async function checkUsernameExists(username, keycloakUrl, realm, token) {
+async function checkUsernameExists(username, keycloakUrl, realm, token)
+ {
   try {
     const response = await axios.get(
       `${keycloakUrl}/admin/realms/${realm}/users`,
