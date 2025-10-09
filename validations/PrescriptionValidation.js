@@ -11,7 +11,7 @@ const prescriptionColumnConfig = [
   { columnname: "generic_name", type: "varchar", size: 255, null: true },
   { columnname: "brand_name", type: "varchar", size: 255, null: true },
   { columnname: "dosage", type: "int", null: true },
-  { columnname: "frequency", type: "varchar", size: 50, null: true },
+  { columnname: "frequency", type: "text", null: true },
   { columnname: "quantity", type: "int", null: true },
   {
     columnname: "refill_allowed",

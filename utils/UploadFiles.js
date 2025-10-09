@@ -288,6 +288,7 @@ const uploadFileMiddleware2 = (options) => {
         Dentist: "dentist_id",
         Clinic: "clinic_id",
         Tenant: "tenant_id",
+        Superuser: "super_user",
       };
       const id = req.params[idMap[folderName]];
 
@@ -329,6 +330,7 @@ const uploadFileMiddleware2 = (options) => {
         try {
           const tableMap = {
             Dentist: { table: "dentist", idField: "dentist_id" },
+            Superuser: { table: "superuser", idField: "superuser_id" },
             Patient: { table: "patient", idField: "patient_id" },
             Clinic: { table: "clinic", idField: "clinic_id" },
             Reception: { table: "reception", idField: "reception_id" },

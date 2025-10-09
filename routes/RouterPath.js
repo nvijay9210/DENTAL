@@ -210,9 +210,9 @@ module.exports = {
   ADD_SUPERUSER: "/addsuperuser",
   GETALL_SUPERUSER_TENANT: "/getallsuperusers/:tenant_id",
   GETALL_SUPERUSER_TENANT_CLINIC: "/getallsuperusers/:tenant_id/:clinic_id",
-  GET_SUPERUSER_TENANT: "/getsuperuser/:reception_id/:tenant_id",
-  UPDATE_SUPERUSER_TENANT: "/updatesuperuser/:reception_id/:tenant_id",
-  DELETE_SUPERUSER_TENANT: "/deletesuperuser/:reception_id/:tenant_id",
+  GET_SUPERUSER_TENANT: "/getsuperuser/:superuser_id/:tenant_id",
+  UPDATE_SUPERUSER_TENANT: "/updatesuperuser/:superuser_id/:tenant_id",
+  DELETE_SUPERUSER_TENANT: "/deletesuperuser/:superuser_id/:tenant_id",
 
   ADD_REMINDER: "/addreminder",
   GETALL_REMINDER_TENANT: "/getallreminders/:tenant_id",

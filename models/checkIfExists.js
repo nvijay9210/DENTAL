@@ -121,6 +121,7 @@ const checkIfExists = async (table, field, value, tenantId) => {
       "asset",
       "expense",
       "supplier",
+      "superuser",
       "purchase_orders",
       "supplier_products",
       "supplier_payments",
