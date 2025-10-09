@@ -6,7 +6,6 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
-const { excelToJsonAllSheets } = require('./utils/ExcelToJson');
 
 // require('./middlewares/Schedule') //appointment schedule
 // const { logFilePath, logStream, logRequest } = require('./logs/logger'); //log file
@@ -262,12 +261,6 @@ app.get('/test', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Successfully Running' });
 });
 
-// try {
-//   const data = excelToJsonAllSheets("dental_sample_with_codes.xlsx","./output.json"); // Path to your Excel file
-//   // console.log("JSON Data:", data);
-// } catch (err) {
-//   console.error(err.message);
-// }
 
 
 const bodyParser = require("body-parser");
