@@ -4570,3 +4570,155 @@ Error: Email conflict detected in table: patient
 [INFO] 10/10/2025, 1:57:53 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
 [INFO] 10/10/2025, 1:57:53 pm   - ✅ MySQL connection established.
 [INFO] 10/10/2025, 1:57:59 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[INFO] 10/10/2025, 1:59:26 pm   - Environment: development
+[INFO] 10/10/2025, 1:59:26 pm   - Using DB Host: localhost
+[INFO] 10/10/2025, 1:59:26 pm   - Server listening on port: 8004
+[INFO] 10/10/2025, 1:59:26 pm   - Backend running on http://localhost:4000
+[INFO] 10/10/2025, 1:59:26 pm   - ✅ Server running on localhost port 8004
+[WARN] 10/10/2025, 1:59:26 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 10/10/2025, 1:59:26 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 10/10/2025, 1:59:26 pm   - ✅ MySQL connection established.
+[INFO] 10/10/2025, 1:59:31 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[INFO] 10/10/2025, 1:59:31 pm   - req.body.otpVerified: 
+[INFO] 10/10/2025, 1:59:31 pm   - create
+[INFO] 10/10/2025, 1:59:31 pm   - [
+  "4",
+  "5"
+]
+[INFO] 10/10/2025, 1:59:31 pm   - Saving recipient for receiver_id: 4
+[WARN] 10/10/2025, 1:59:31 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 10/10/2025, 1:59:31 pm   - Saving recipient for receiver_id: 5
+[WARN] 10/10/2025, 1:59:31 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 10/10/2025, 1:59:31 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 10/10/2025, 1:59:31 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 10/10/2025, 1:59:32 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[WARN] 10/10/2025, 1:59:32 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 10/10/2025, 1:59:32 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[WARN] 10/10/2025, 1:59:32 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 10/10/2025, 1:59:32 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[WARN] 10/10/2025, 1:59:32 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 10/10/2025, 1:59:32 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[INFO] 10/10/2025, 1:59:32 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[WARN] 10/10/2025, 1:59:32 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 10/10/2025, 1:59:32 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 10/10/2025, 2:00:43 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[WARN] 10/10/2025, 2:00:43 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 10/10/2025, 2:00:47 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[INFO] 10/10/2025, 2:00:47 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[WARN] 10/10/2025, 2:00:48 pm   - ⚠️ Redis unavailable – fetching directly from source
+[WARN] 10/10/2025, 2:00:48 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 10/10/2025, 2:00:48 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[INFO] 10/10/2025, 2:00:48 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[WARN] 10/10/2025, 2:00:48 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 10/10/2025, 2:00:48 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[INFO] 10/10/2025, 2:00:48 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[WARN] 10/10/2025, 2:00:48 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 10/10/2025, 2:01:15 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[INFO] 10/10/2025, 2:01:15 pm   - {
+  "tenant_name": "mydentist",
+  "tenant_id": "2",
+  "clinic_id": "1",
+  "first_name": "AJAY",
+  "last_name": "N",
+  "phone_number": "911111111113",
+  "email": "vijaybeeee2020@gmail.com",
+  "city": "Theni",
+  "state": "Tamil Nadu",
+  "country": "India",
+  "currency_code": "INR",
+  "pin_code": "625531",
+  "duration": "15",
+  "designation": "BDS",
+  "specialisation": "Dentalist",
+  "experience_years": "5",
+  "languages_spoken": [
+    "English"
+  ],
+  "date_of_birth": "1999-07-01",
+  "consultation_fee": "300",
+  "min_booking_fee": "200",
+  "gender": "M",
+  "license_number": "DE1234AA57",
+  "teleconsultation_supported": "false",
+  "created_by": "dentalhub-sup-8308",
+  "working_hours": {
+    "monday": {
+      "active": "true",
+      "timeSlots": [
+        {
+          "start": "09:00",
+          "end": "12:00"
+        }
+      ]
+    },
+    "tuesday": {
+      "active": "true",
+      "timeSlots": [
+        {
+          "start": "08:30",
+          "end": "11:30"
+        }
+      ]
+    },
+    "wednesday": {
+      "active": "true",
+      "timeSlots": [
+        {
+          "start": "15:00",
+          "end": "19:00"
+        }
+      ]
+    },
+    "thursday": {
+      "active": "true",
+      "timeSlots": [
+        {
+          "start": "14:00",
+          "end": "17:00"
+        }
+      ]
+    },
+    "friday": {
+      "active": "true",
+      "timeSlots": [
+        {
+          "start": "09:30",
+          "end": "12:30"
+        },
+        {
+          "start": "13:30",
+          "end": "16:30"
+        }
+      ]
+    },
+    "saturday": {
+      "active": "false"
+    },
+    "sunday": {
+      "active": "false"
+    }
+  },
+  "dentist_id": "5",
+  "keycloak_id": "55d29e9d-3aec-40b4-9a4f-b63058fc274c",
+  "username": "dentalhub-den-5169",
+  "password": "1234",
+  "updated_by": "dentalhub-sup-8308",
+  "descriptions": [
+    "p1",
+    "d1",
+    "d2"
+  ]
+}
+[INFO] 10/10/2025, 2:01:16 pm   - req.body.otpVerified: 
+[INFO] 10/10/2025, 2:01:16 pm   - update
+[INFO] 10/10/2025, 2:01:16 pm   - req.body.otpVerified: 
+[INFO] 10/10/2025, 2:01:16 pm   - update
+[WARN] 10/10/2025, 2:01:16 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 10/10/2025, 2:01:16 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 10/10/2025, 2:01:16 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 10/10/2025, 2:01:22 pm   - ✅ Synced Keycloak user 55d29e9d-3aec-40b4-9a4f-b63058fc274c with email, names, phoneNumber
+[WARN] 10/10/2025, 2:01:22 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 10/10/2025, 2:01:22 pm   - 🚫 Redis disconnected – skip invalidation
+[WARN] 10/10/2025, 2:01:23 pm   - 🚫 Redis disconnected – skip invalidation
+[INFO] 10/10/2025, 2:01:26 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[WARN] 10/10/2025, 2:01:26 pm   - ⚠️ Redis unavailable – fetching directly from source
