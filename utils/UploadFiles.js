@@ -47,8 +47,6 @@ const uploadFileMiddleware = (options) => {
         const numericKeys = Object.keys(inputData).filter((k) => !isNaN(k));
         if (numericKeys.length > 0) {
           inputData = numericKeys.map((k) => inputData[k]);
-        } else {
-          inputData = [inputData]; // single record
         }
       }
 

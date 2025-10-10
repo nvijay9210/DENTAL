@@ -4550,3 +4550,23 @@ Error: Email conflict detected in table: patient
 [INFO] 6/10/2025, 5:04:12 pm   - Authentication successful as super-user
 [WARN] 6/10/2025, 5:04:13 pm   - ⚠️ Redis unavailable – fetching directly from source
 [INFO] 6/10/2025, 5:04:13 pm   - ✅ Serving patients from DB and caching result
+[INFO] 10/10/2025, 1:56:46 pm   - Environment: development
+[INFO] 10/10/2025, 1:56:47 pm   - Using DB Host: localhost
+[INFO] 10/10/2025, 1:56:47 pm   - Server listening on port: 8004
+[INFO] 10/10/2025, 1:56:47 pm   - Backend running on http://localhost:4000
+[INFO] 10/10/2025, 1:56:47 pm   - ✅ Server running on localhost port 8004
+[WARN] 10/10/2025, 1:56:47 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 10/10/2025, 1:56:47 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[ERROR] 10/10/2025, 1:56:47 pm   - ❌ MySQL connection failed: connect ETIMEDOUT
+[INFO] 10/10/2025, 1:56:54 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[WARN] 10/10/2025, 1:56:54 pm   - ⚠️ Redis unavailable – fetching directly from source
+[INFO] 10/10/2025, 1:57:26 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
+[INFO] 10/10/2025, 1:57:53 pm   - Environment: development
+[INFO] 10/10/2025, 1:57:53 pm   - Using DB Host: localhost
+[INFO] 10/10/2025, 1:57:53 pm   - Server listening on port: 8004
+[INFO] 10/10/2025, 1:57:53 pm   - Backend running on http://localhost:4000
+[INFO] 10/10/2025, 1:57:53 pm   - ✅ Server running on localhost port 8004
+[WARN] 10/10/2025, 1:57:53 pm   - ❌ Redis is not connected. Feature performance may be degraded.
+[INFO] 10/10/2025, 1:57:53 pm   - 💡 Tip: Run 'npm run start-redis-dental' if not running.
+[INFO] 10/10/2025, 1:57:53 pm   - ✅ MySQL connection established.
+[INFO] 10/10/2025, 1:57:59 pm   - ✅ Authenticated dentalhub-sup-8308 (superuser)
