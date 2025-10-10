@@ -33,7 +33,7 @@ router.post(
     try {
       // Inside login route
       const { accessToken, refreshToken } = req.body;
-      const userContext = await buildUserContext(accessToken);
+      const userContext = await buildUserContext(accessToken,req.dbUser);
 
       // Set cookies
       const isProduction = process.env.NODE_ENV === "production";

@@ -311,6 +311,7 @@ const getUserByTenantClinicAndKeycloakId = async (tableName, tenantId, clinicId,
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query, [tableName, tenantId, clinicId, keycloakUserId]);
+    console.log(tableName, tenantId, clinicId, keycloakUserId,rows)
     return rows[0] || null; // Return single object or null
   } catch (error) {
     console.error(`Error fetching user from ${tableName}:`, error);

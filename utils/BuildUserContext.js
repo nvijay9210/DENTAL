@@ -8,11 +8,11 @@ const { decodeToken, extractUserInfo } = require("../Keycloak/KeycloakAdmin");
  * @param {string} accessToken - JWT access token from Keycloak
  * @returns {Promise<Object>} User context object for frontend
  */
-async function buildUserContext(accessToken) {
+async function buildUserContext(accessToken, dbUser) {
   // 1. Decode token and extract basic info
   const decodedToken = decodeToken(accessToken);
   const userInfo = extractUserInfo(decodedToken);
-  console.log(userInfo)
+  console.log(userInfo);
 
   // 2. Fetch tenant
   const tenant = await getTenantByTenantId(userInfo.tenantId);
@@ -26,7 +26,7 @@ async function buildUserContext(accessToken) {
     );
   }
 
-  // 4. Build response
+  // 4. Base context
   const context = {
     tenant_name: tenant?.tenant_name,
     tenant_domain: tenant?.tenant_domain,
@@ -42,6 +42,30 @@ async function buildUserContext(accessToken) {
     preferred_username: userInfo.preferred_username,
   };
 
+  // ✅ Add role-specific ID from dbUser
+  if (dbUser) {
+    switch (userInfo.role) {
+      case "patient":
+        context.patient_id = dbUser.patient_id || null;
+        break;
+      case "dentist":
+        context.dentist_id = dbUser.dentist_id || null;
+        break;
+      case "supplier":
+        context.supplier_id = dbUser.supplier_id || null;
+        break;
+      case "receptionist":
+        context.reception_id = dbUser.reception_id || null;
+        break;
+      case "staff":
+        context.staff_id = dbUser.staff_id || null;
+        break;
+      default:
+        context.user_table_id = dbUser.id || null; // fallback
+    }
+  }
+
+  // ✅ Add clinic-specific data
   if (clinic) {
     context.clinic_name = clinic.clinic_name;
     context.clinic_app_themes = clinic.clinic_app_themes;
