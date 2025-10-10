@@ -279,4 +279,45 @@ const updateEntity = async ({
   }
 };
 
-module.exports = { updateEntity, createEntity };
+/**
+ * Fetch a user from a specified table by tenant_id, clinic_id, and keycloak_user_id
+ * @param {string} tableName - e.g., 'superuser', 'dentist', 'patient'
+ * @param {number} tenantId
+ * @param {number} clinicId
+ * @param {string} keycloakUserId
+ * @returns {Promise<Object|null>} User object or null if not found
+ */
+const getUserByTenantClinicAndKeycloakId = async (tableName, tenantId, clinicId, keycloakUserId) => {
+  if (!tableName || !tenantId || !keycloakUserId) {
+    throw new Error("Missing required parameters");
+  }
+
+  // Optional: whitelist allowed tables to prevent SQL injection
+  const allowedTables = ['superuser', 'dentist', 'patient', 'receptionist', 'supplier'];
+  if (!allowedTables.includes(tableName)) {
+    throw new Error(`Invalid table name: ${tableName}`);
+  }
+
+  if (tableName==='receptionist')  tableName='reception'
+
+  const query = `
+    SELECT * FROM ?? 
+    WHERE tenant_id = ? 
+      AND clinic_id = ? 
+      AND keycloak_id = ?
+    LIMIT 1
+  `;
+
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [tableName, tenantId, clinicId, keycloakUserId]);
+    return rows[0] || null; // Return single object or null
+  } catch (error) {
+    console.error(`Error fetching user from ${tableName}:`, error);
+    throw new Error("Database operation failed");
+  } finally {
+    conn.release();
+  }
+};
+
+module.exports = { updateEntity, createEntity,getUserByTenantClinicAndKeycloakId };

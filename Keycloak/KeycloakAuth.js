@@ -12,45 +12,57 @@ const {
 const { getTenantByTenantId } = require("../services/TenantService");
 const { getClinicByTenantIdAndClinicId } = require("../services/ClinicService");
 const { buildUserContext } = require("../utils/BuildUserContext");
+const {
+  authenticateTenantClinicGroup,
+} = require("./AuthenticateTenantAndClient");
 
 const router = express.Router();
 router.use(cookieParser());
 
-router.post("/login", async (req, res, next) => {
-  try {
-    // Inside login route
-    const { accessToken, refreshToken } = req.body;
-    const userContext = await buildUserContext(accessToken);
+router.post(
+  "/login",
+  authenticateTenantClinicGroup([
+    "tenant",
+    "superuser",
+    "dentist",
+    "patient",
+    "supplier",
+    "receptionist",
+  ]),
+  async (req, res, next) => {
+    try {
+      // Inside login route
+      const { accessToken, refreshToken } = req.body;
+      const userContext = await buildUserContext(accessToken);
 
-    // Set cookies
-    const isProduction = process.env.NODE_ENV === "production";
+      // Set cookies
+      const isProduction = process.env.NODE_ENV === "production";
 
-    res.cookie("access_token", accessToken, {
-      httpOnly: true,
-      secure: isProduction, // true only for HTTPS
-      sameSite: isProduction ? "None" : "Lax", // "None" allows cross-site cookies for HTTPS
-      maxAge: 60 * 60 * 1000, // 1 hour
-    });
+      res.cookie("access_token", accessToken, {
+        httpOnly: true,
+        secure: isProduction, // true only for HTTPS
+        sameSite: isProduction ? "None" : "Lax", // "None" allows cross-site cookies for HTTPS
+        maxAge: 60 * 60 * 1000, // 1 hour
+      });
 
-    res.cookie("refresh_token", refreshToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "None" : "Lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+      res.cookie("refresh_token", refreshToken, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "None" : "Lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
 
-    // Send context
-    res.status(200).json(userContext);
-  } catch (err) {
-    console.error("Login error:", err.response?.data || err.message);
-    next(
-      new CustomError(
+      // Send context
+      res.status(200).json(userContext);
+    } catch (err) {
+      console.error("Login error:", err.response?.data || err.message);
+      throw new CustomError(
         err.response?.data?.error_description || err.message,
         err.response?.status || 401
-      )
-    );
+      );
+    }
   }
-});
+);
 
 // ---------- REFRESH TOKEN ----------
 router.post("/refresh-token", async (req, res, next) => {

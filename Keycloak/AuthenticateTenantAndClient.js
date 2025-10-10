@@ -1,21 +1,20 @@
 const logger = require("../logs/logger");
 const jwt = require("jsonwebtoken");
-const jwksClient = require("jwks-rsa");
+const axios = require("axios");
 const { CustomError } = require("../middlewares/CustomeError");
+const { getUserByTenantClinicAndKeycloakId } = require("../utils/Reusability");
 
-function getKeycloakClient(realm) {
-  return jwksClient({
-    jwksUri: `${process.env.KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/certs`,
-  });
-}
-
-function getKey(realm, header, callback) {
-  const client = getKeycloakClient(realm);
-  client.getSigningKey(header.kid, (err, key) => {
-    if (err) return callback(err);
-    const signingKey = key.getPublicKey();
-    callback(null, signingKey);
-  });
+async function checkUserInKeycloak(token, realm, userId) {
+  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}`;
+  try {
+    const response = await axios.get(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (err) {
+    if (err.response?.status === 404) return null;
+    throw new CustomError("Failed to verify user in Keycloak", 500);
+  }
 }
 
 function authenticateTenantClinicGroup(requiredRoles = []) {
@@ -23,116 +22,88 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
 
   return async (req, res, next) => {
     try {
-      // ===== Dev mode shortcut =====
+      // ====== DEV MODE SHORTCUT ======
       if (process.env.KEYCLOAK_POWER === "off") {
         req.user = {
           username: "dev-user",
           realm_access: { roles: requiredRoles },
-          groups: ["dev-group"],
+          groups: ["dental-1-1"],
         };
-        req.realm = process.env.KEYCLOAK_REALM || req.headers["x-realm"] || "dev-realm";
+        req.realm = process.env.KEYCLOAK_REALM;
         req.token = "dev-token";
         req.role = ROLE_PRIORITY.find((r) => requiredRoles.includes(r)) || "guest";
-
-        logger.writeLog("info", `Dev mode login: ${req.user.username}`, `${req.method} ${req.originalUrl}`);
         return next();
       }
 
-      // ===== Read token from HttpOnly cookies =====
-      const token = req.cookies?.access_token || req.headers["access_token"];
-      
-      const realm = process.env.KEYCLOAK_REALM || req.headers["x-realm"];
+      // ====== READ TOKEN & REALM ======
+      const token = req.cookies?.access_token|| req.body.accessToken || req.headers["access_token"] ;
+      const realm = process.env.KEYCLOAK_REALM || req.headers["x-realm"] || process.env.KEYCLOAK_REALM;
+      const clientId = req.headers["x-clientid"];
 
-      const clientId =req.headers["x-clientid"];
+      if (!token || !realm) throw new CustomError("Missing token or realm", 401);
 
-      if (!token || !realm) {
-        throw new CustomError("Missing token in cookies or realm in headers", 401);
-      }
+      // ====== VERIFY USING REALM PUBLIC KEY ======
+      const pubKey = `-----BEGIN PUBLIC KEY-----\n${process.env.KEYCLOAK_REALM_PUBLIC_KEY}\n-----END PUBLIC KEY-----`;
 
-      // ===== Decode and verify token using JWKS public key =====
-      const decoded = await new Promise((resolve, reject) => {
-        jwt.verify(
-          token,
-          (header, callback) => getKey(realm, header, callback),
-          { algorithms: ["RS256"] },
-          (err, decodedToken) => {
-            if (err) return reject(err);
-            resolve(decodedToken);
-          }
-        );
-      });
+      const decoded = jwt.verify(token, pubKey, { algorithms: ["RS256"] });
 
+      const userId = decoded.sub;
       const userRoles = decoded?.realm_access?.roles || [];
       const userGroups = decoded?.groups || [];
-      req.role = ROLE_PRIORITY.find((r) => userRoles.includes(r)) || "guest";
+      const username = decoded?.preferred_username;
+      const userRole = ROLE_PRIORITY.find((r) => userRoles.includes(r)) || "guest";
 
-      const hasRequiredRole =
-        requiredRoles.length === 0 || requiredRoles.some((role) => userRoles.includes(role));
-
-      if (!hasRequiredRole) {
-        throw new CustomError("Access denied: missing required realm role", 403);
-      }
-
-      const SKIP_ROLES = ["tenant", "guest"];
-      const onlySkipRoles =
-        userRoles.length > 0 && userRoles.every((r) => SKIP_ROLES.includes(r));
-
-      if (onlySkipRoles) {
-        // Skip tenant/clinic isolation and group validation completely
-        req.token = token;
+      // ====== TENANT ROLE SKIP ======
+      if (userRole === "tenant") {
         req.user = decoded;
+        req.role = userRole;
         req.realm = realm;
-
-        logger.writeLog("info", `Tenant/guest login as ${req.role} (skipped group validation)`, `${req.method} ${req.originalUrl}`);
+        req.clientId = clientId;
+        req.token = token;
         return next();
       }
 
-      // ===== Tenant/Clinic isolation =====
+      // ====== CHECK USER IN KEYCLOAK ======
+      const kcUser = await checkUserInKeycloak(token, realm, userId);
+      if (!kcUser) throw new CustomError("User not found in Keycloak", 404);
+
+      // ====== PARSE TENANT / CLINIC FROM GROUPS ======
       const dentalGroup = userGroups.find((g) => g.startsWith("dental-"));
-      let userTenantId = null;
-      let userClinicId = null;
+      let tenantId = null;
+      let clinicId = null;
 
       if (dentalGroup) {
         const match = dentalGroup.match(/dental-(\d+)-(\d+)/);
         if (match) {
-          userTenantId = Number(match[1]);
-          userClinicId = Number(match[2]);
-
-          if (userRoles.includes("superuser")) {
-            req.body = {
-              ...req.body,
-              tenant_id: userTenantId,
-              clinic_id: userClinicId,
-            };
-          }
+          tenantId = Number(match[1]);
+          clinicId = Number(match[2]);
         }
       }
 
-      const requestedTenantId = Number(req.params?.tenant_id || req.query?.tenant_id || req.body?.tenant_id);
-      const requestedClinicId = Number(req.params?.clinic_id || req.query?.clinic_id || req.body?.clinic_id);
+      if (!tenantId) throw new CustomError("Missing tenant_id in group", 400);
+      if (!clinicId) throw new CustomError("Missing clinic_id in group", 400);
 
-      if (requestedTenantId && userTenantId && requestedTenantId !== userTenantId) {
-        throw new CustomError("Access denied: cannot access another tenant's data", 403);
-      }
+      // ====== CHECK USER IN DATABASE ======
+      const dbUser = await getUserByTenantClinicAndKeycloakId(userRole, tenantId, clinicId, userId);
+      if (!dbUser)
+        throw new CustomError(`User not found in database (${userRole} table)`, 404);
 
-      if (requestedClinicId && userClinicId && requestedClinicId !== userClinicId) {
-        throw new CustomError("Access denied: cannot access another clinic's data", 403);
-      }
-
-      if (requestedTenantId && requestedClinicId && !(userRoles.includes("tenant") || userRoles.includes("guest"))) {
-        const groupName = `dental-${requestedTenantId}-${requestedClinicId}`;
-        if (!userGroups.includes(groupName)) {
-          throw new CustomError(`Access denied: user not in group ${groupName}`, 403);
-        }
-      }
-
-      req.token = token;
+      // ====== SET CONTEXT ======
       req.user = decoded;
-      req.realm = realm;      
-      req.clientId = clientId;      
+      req.role = userRole;
+      req.realm = realm;
+      req.clientId = clientId;
+      req.token = token;
+      req.tenant_id = tenantId;
+      req.clinic_id = clinicId;
+      req.dbUser = dbUser;
 
+      logger.writeLog(
+        "info",
+        `✅ Authenticated ${username} (${userRole})`,
+        `${req.method} ${req.originalUrl}`
+      );
 
-      logger.writeLog("info", `Authentication successful as ${req.role}`, `${req.method} ${req.originalUrl}`);
       next();
     } catch (err) {
       if (err instanceof CustomError) {

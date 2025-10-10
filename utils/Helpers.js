@@ -221,6 +221,7 @@ async function generateUsername( roleShort, realm, token) {
 
   while (exists) {
     username = generatePatternUsername(tenant, roleShort);
+    console.log(username, keycloakUrl, realm, token)
     exists = await checkUsernameExists(username, keycloakUrl, realm, token);
   }
 

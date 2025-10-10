@@ -95,19 +95,17 @@ const getAllSuperUsersByTenantIdAndClinicId = async (tenantId,clinicId, limit, o
   }
 };
 
-const getSuperUserByKeycloakId = async (tenantId,clinicId, limit, offset) => {
-  const query1 = `SELECT * FROM superuser  WHERE tenant_id = ? AND clinic_id = ? limit ? offset ?`;
-  const query2 = `SELECT count(*) as total FROM superuser  WHERE tenant_id = ? AND clinic_id = ?`;
+const getUserByTenantAndClinicAndKeycloakUserId = async (tenantId,clinicId, keycloakuserid) => {
+  const query1 = `SELECT * FROM superuser  WHERE tenant_id = ? AND clinic_id = ? AND keycloak_user_id=?`;
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query1, [
       tenantId,
       clinicId,
-      limit,
-      offset,
+      keycloakuserid
     ]);
-    const [counts] = await conn.query(query2, [tenantId, clinicId]);
-    return { data: rows, total: counts[0].total };
+   
+    return rows
   } catch (error) {
     console.error(error);
     throw new Error("Database Operation Failed");
