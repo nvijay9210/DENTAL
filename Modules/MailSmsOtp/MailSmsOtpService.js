@@ -117,8 +117,10 @@ async function sendOTP({ to, via = "sms", subject, message, length = 6, expiryMi
       text: fullMessage,
       html: `<p>${fullMessage}</p>`,
     });
-  } else {
-    throw new Error("Invalid 'via' option. Use 'sms' or 'email'");
+  }else if (via === "whatsapp") {
+    result = await sendWhatsApp({ to, body: fullMessage });
+  }  else {
+    throw new Error("Invalid 'via' option. Use 'sms' or 'email' or 'whatsapp'");
   }
 
   return { otp, expiry, result };
@@ -151,6 +153,54 @@ function verifyOTP({ to, otp }) {
 }
 
 // ======================
+// SEND WHATSAPP MESSAGE
+// ======================
+async function sendWhatsApp({ to, body }) {
+  try {
+    const numbers = Array.isArray(to) ? to : [to];
+    const results = [];
+
+    for (const number of numbers) {
+      const message = await twilioClient.messages.create({
+        from: process.env.TWILIO_WHATSAPP_NUMBER,
+        to: `whatsapp:${number.replace(/^(\+)?/, "+")}`,
+        body,
+      });
+      results.push({ number, sid: message.sid });
+    }
+
+    return { success: true, results };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+// ======================
+// SEND WHATSAPP WITH ATTACHMENT
+// ======================
+async function sendWhatsAppWithAttachment({ to, body, mediaUrl }) {
+  try {
+    const numbers = Array.isArray(to) ? to : [to];
+    const results = [];
+
+    for (const number of numbers) {
+      const message = await twilioClient.messages.create({
+        from: process.env.TWILIO_WHATSAPP_NUMBER,
+        to: `whatsapp:${number.replace(/^(\+)?/, "+")}`,
+        body,
+        mediaUrl: Array.isArray(mediaUrl) ? mediaUrl : [mediaUrl], // must be public URLs
+      });
+      results.push({ number, sid: message.sid });
+    }
+
+    return { success: true, results };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+
+// ======================
 // EXPORT
 // ======================
-module.exports = { sendEmail, sendEmailWithAttachment, sendSMS, sendOTP, verifyOTP };
+module.exports = { sendEmail, sendEmailWithAttachment, sendSMS, sendOTP, verifyOTP,sendWhatsApp,sendWhatsAppWithAttachment };
