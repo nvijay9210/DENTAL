@@ -145,4 +145,56 @@ router.post("/refresh-token", async (req, res, next) => {
   }
 });
 
+// ---------- LOGOUT ----------
+router.post("/logout", async (req, res, next) => {
+  try {
+    const refreshToken = req.cookies.refresh_token;
+    const realm = req.headers["x-realm"];
+    const clientid = req.headers["x-clientid"];
+
+    // ✅ Step 1: Revoke refresh token in Keycloak (optional but recommended)
+    if (refreshToken && realm && clientid) {
+      try {
+        const tokenUrl = `${process.env.KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/logout`;
+        
+        await axios.post(
+          tokenUrl,
+          qs.stringify({
+            client_id: clientid,
+            client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
+            refresh_token: refreshToken,
+          }),
+          { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+        );
+      } catch (err) {
+        console.warn("Keycloak logout warn:", err.response?.data || err.message);
+      }
+    }
+
+    // ✅ Step 2: Clear cookies
+    const isProduction = process.env.NODE_ENV === "production";
+
+    res.clearCookie("access_token", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+    });
+
+    res.clearCookie("refresh_token", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+    });
+
+    // ✅ Step 3: Send response
+    return res.status(200).json({
+      message: "Logged out successfully",
+    });
+  } catch (err) {
+    console.error("Logout error:", err);
+    next(new CustomError("Logout failed", 500));
+  }
+});
+
+
 module.exports = router;

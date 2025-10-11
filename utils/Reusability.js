@@ -108,7 +108,7 @@ const createEntity = async ({
           firstName: first_name,
           lastName: last_name,
           attributes: { phoneNumber: phone_number || "" },
-          credentials: [{ type: "password", value: rawPassword, temporary: false }],
+          password: rawPassword,
         };
 
         const isUserCreated = await addUser(token, realm, userData);
@@ -292,27 +292,47 @@ const getUserByTenantClinicAndKeycloakId = async (tableName, tenantId, clinicId,
     throw new Error("Missing required parameters");
   }
 
-  // Optional: whitelist allowed tables to prevent SQL injection
+  // ✅ Whitelist to prevent SQL injection
   const allowedTables = ['superuser', 'dentist', 'patient', 'receptionist', 'supplier'];
   if (!allowedTables.includes(tableName)) {
     throw new Error(`Invalid table name: ${tableName}`);
   }
 
-  if (tableName==='receptionist')  tableName='reception'
-
-  const query = `
-    SELECT * FROM ?? 
-    WHERE tenant_id = ? 
-      AND clinic_id = ? 
-      AND keycloak_id = ?
-    LIMIT 1
-  `;
+  // ✅ receptionist table naming fix
+  if (tableName === 'receptionist') tableName = 'reception';
 
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.query(query, [tableName, tenantId, clinicId, keycloakUserId]);
-    console.log(tableName, tenantId, clinicId, keycloakUserId,rows)
-    return rows[0] || null; // Return single object or null
+    let query;
+    let params;
+
+    if (tableName === 'patient') {
+      // ✅ Special case: check patient_clinic table for clinic filter
+      query = `
+        SELECT p.*
+        FROM patient p
+        JOIN patient_clinic pc ON pc.patient_id = p.patient_id
+        WHERE p.tenant_id = ?
+          AND pc.clinic_id = ?
+          AND p.keycloak_id = ?
+        LIMIT 1
+      `;
+      params = [tenantId, clinicId, keycloakUserId];
+    } else {
+      // ✅ Default logic for all other tables
+      query = `
+        SELECT * FROM ??
+        WHERE tenant_id = ?
+          AND clinic_id = ?
+          AND keycloak_id = ?
+        LIMIT 1
+      `;
+      params = [tableName, tenantId, clinicId, keycloakUserId];
+    }
+
+    const [rows] = await conn.query(query, params);
+    return rows[0] || null;
+
   } catch (error) {
     console.error(`Error fetching user from ${tableName}:`, error);
     throw new Error("Database operation failed");
@@ -320,5 +340,6 @@ const getUserByTenantClinicAndKeycloakId = async (tableName, tenantId, clinicId,
     conn.release();
   }
 };
+
 
 module.exports = { updateEntity, createEntity,getUserByTenantClinicAndKeycloakId };

@@ -624,6 +624,8 @@ const getAppointmentsWithDetailsByPatient = async (
       d.dentist_id,
       d.working_hours,
       d.duration,
+      d.consultation_fee,
+      d.min_booking_fee,
       app.visit_reason,
       app.appointment_id,
       app.appointment_date,

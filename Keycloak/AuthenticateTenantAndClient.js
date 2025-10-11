@@ -13,12 +13,12 @@ async function checkUserInKeycloak(token, realm, userId) {
     return response.data;
   } catch (err) {
     if (err.response?.status === 404) return null;
-    throw new CustomError("Failed to verify user in Keycloak", 500);
+    throw new CustomError("Failed to verify user in Keycloak", 404);
   }
 }
 
 function authenticateTenantClinicGroup(requiredRoles = []) {
-  const ROLE_PRIORITY = ["tenant", "superuser", "dentist", "receptionist", "patient", "guest"];
+  const ROLE_PRIORITY = ["tenant", "superuser", "dentist", "receptionist", "patient","supplier", "guest"];
 
   return async (req, res, next) => {
     try {
@@ -62,7 +62,6 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         req.token = token;
         return next();
       }
-
       // ====== CHECK USER IN KEYCLOAK ======
       const kcUser = await checkUserInKeycloak(token, realm, userId);
       if (!kcUser) throw new CustomError("User not found in Keycloak", 404);
