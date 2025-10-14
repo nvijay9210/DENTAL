@@ -65,7 +65,7 @@ const supplierFieldsReverseMap = {
   keycloak_id: (val) => val,
   supplier_code: (val) => val,
   username: (val) => val,
-  password: (val) => val?String(val):null,
+  password: (val) => (val ? String(val) : null),
   first_name: (val) => val,
   last_name: (val) => val,
   gender: (val) => val,
@@ -99,7 +99,7 @@ const supplierFieldsReverseMap = {
 };
 // Create Supplier
 const createSupplier = async (data, token, realm) => {
-  const newSupplier = await createEntity({
+  return await createEntity({
     data,
     entityName: "supplier",
     token,
@@ -107,10 +107,8 @@ const createSupplier = async (data, token, realm) => {
     fieldMap: supplierFields,
     createModel: supplierModel.createSupplier,
     nameFields: { firstName: "first_name", lastName: "last_name" },
-    roleName:'supplier'
+    roleName: "supplier",
   });
-
-  return newSupplier
 };
 
 // Get All Suppliers by Tenant ID with Caching
@@ -202,13 +200,13 @@ const updateSupplier = async (supplierId, data, tenant_id, token, realm) => {
   return await updateEntity({
     entityId: supplierId,
     entityName: "supplier",
-    tenantId:tenant_id,
+    tenantId: tenant_id,
     data,
     token,
     realm,
     fieldMap: supplierFields,
     getModelById: supplierModel.getSupplierByTenantAndSupplierId,
-    updateModel: supplierModel.updateSupplier
+    updateModel: supplierModel.updateSupplier,
   });
 };
 

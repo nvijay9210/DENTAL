@@ -29,6 +29,8 @@ const {
 
 const clinicFieldMap = {
   tenant_id: (val) => val,
+  otp: helper.parseBoolean,
+  otp_type: (val) => val,
   clinic_name: (val) => val,
   email: (val) => val || null,
   phone_number: (val) => val,
@@ -65,6 +67,8 @@ const clinicFieldMap = {
 
 const clinicFieldReverseMap = {
   clinic_id: (val) => val,
+  otp: helper.parseBoolean,
+  otp_type: (val) => val,
   tenant_id: (val) => val,
   clinic_name: (val) => val,
   email: (val) => val,

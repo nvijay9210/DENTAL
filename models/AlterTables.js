@@ -571,6 +571,26 @@ async function addSupplierCode(conn) {
   );
 }
 
+async function addOtpInClinic(conn){
+  await addColumnIfNotExists(
+    conn,
+    "clinic",
+    "otp",
+    "TINYINT(1) NOT NULL DEFAULT 0",
+    "Add new otp field"
+  )
+}
+
+async function addOtpTypeInClinic(conn){
+  await addColumnIfNotExists(
+    conn,
+    "clinic",
+    "otp_type",
+    "ENUM('whatsapp','email') DEFAULT 'whatsapp'",
+    "Add new otp_type field"
+  )
+}
+
 
 
 // Main migration runner
@@ -609,6 +629,8 @@ async function addSupplierCode(conn) {
     await addDentistCode(conn);
     await addReceptionCode(conn);
     await addSupplierCode(conn);
+    await addOtpInClinic(conn);
+    await addOtpTypeInClinic(conn);
 
     await conn.commit();
     console.log("🎉 Migration completed successfully.");

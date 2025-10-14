@@ -5,7 +5,7 @@ const { isEarlier } = require("../utils/DateUtils");
 
 const loginhistoryColumnConfig = [
   { columnname: "tenant_id", type: "int", size: 11, null: false },
-  { columnname: "clinic_id", type: "int", size: 11, null: false },
+  { columnname: "clinic_id", type: "int", size: 11, null: true },
   { columnname: "keycloak_user_id", type: "varchar", size: 36, null: false },
   { columnname: "session_id", type: "varchar", size: 50, null: false },
   { columnname: "ip_address", type: "varchar", size: 45, null: true },

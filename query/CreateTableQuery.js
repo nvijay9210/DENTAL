@@ -121,6 +121,8 @@ const createTableQuery = {
     insurance_supported TINYINT(1) NOT NULL DEFAULT 0,
     ratings DECIMAL(3,2) DEFAULT 0.00,
     reviews_count INT DEFAULT 0,
+    otp TINYINT(1) NOT NULL DEFAULT 0,
+    otp_type ENUM('whatsapp','email') DEFAULT 'whatsapp',
     emergency_support TINYINT(1) NOT NULL DEFAULT 0,
     teleconsultation_supported TINYINT(1) NOT NULL DEFAULT 0,
     parking_availability TINYINT(1) NOT NULL DEFAULT 0,

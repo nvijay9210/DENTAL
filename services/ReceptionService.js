@@ -75,7 +75,7 @@ const receptionFieldsReverseMap = {
 };
 // Create Reception
 const createReception = async (data, token, realm) => {
-  const newReception = await createEntity({
+  return await createEntity({
     data,
     entityName: "reception",
     token,
@@ -85,8 +85,6 @@ const createReception = async (data, token, realm) => {
     nameFields: { firstName: "first_name", lastName: "last_name" },
     roleName: "receptionist",
   });
-
-  return newReception;
 };
 
 // Get All Receptions by Tenant ID with Caching

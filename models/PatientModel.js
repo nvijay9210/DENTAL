@@ -252,7 +252,8 @@ const groupToothProceduresByTimeRangeCumulative = async (
       CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
       CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,
       p.profile_picture as patient_image,
-      d.profile_picture as dentist_image
+      d.profile_picture as dentist_image,
+      d.dentist_id
     FROM
       toothdetails td
     INNER JOIN patient p 
@@ -296,6 +297,7 @@ const groupToothProceduresByTimeRangeCumulative = async (
       patient_name: (row.patient_name || '').trim() || 'Unknown Patient',
       dentist_name: (row.dentist_name || '').trim() || 'Unknown Dentist',
       dentist_image:(row.dentist_image)||null,
+      dentist_id:(row.dentist_id),
       patient_image:(row.patient_image)||null,
     });
 

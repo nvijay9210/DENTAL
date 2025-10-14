@@ -3,7 +3,6 @@ const { CustomError } = require("../middlewares/CustomeError");
 const qs = require("querystring");
 
 // ----- CONFIG -----
-const CLIENT_SECRET = process.env.KEYCLOAK_CLIENT_SECRET || "super_secret_key";
 const KEYCLOAK_BASE_URL = process.env.KEYCLOAK_BASE_URL;
 
 // ✅ 1. Add User
@@ -72,6 +71,30 @@ async function getUserIdByUsername(token, realm, username) {
     }
 
     return response.data[0].id;
+  } catch (error) {
+    console.error(
+      "❌ Failed to get user ID:",
+      error.response?.data || error.message
+    );
+    return null;
+  }
+}
+async function getUserByUsername(token, realm, username) {
+  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users?username=${username}`;
+
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.data.length === 0) {
+      console.error("❌ No user found with username:", username);
+      return null;
+    }
+
+    return response.data[0];
   } catch (error) {
     console.error(
       "❌ Failed to get user ID:",
@@ -525,7 +548,7 @@ async function getKeycloakToken({ method, username, password,KEYCLOAK_REALM='den
     data = {
       grant_type: "password",
       client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
+      client_secret: getClientCredential(CLIENT_ID),
       username,
       password,
     };
@@ -533,7 +556,7 @@ async function getKeycloakToken({ method, username, password,KEYCLOAK_REALM='den
     data = {
       grant_type: "client_credentials",
       client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
+      client_secret: getClientCredential(CLIENT_ID),
     };
   } else {
     throw new Error("Invalid login method");
@@ -567,16 +590,99 @@ function decodeToken(token) {
   }
 }
 
+const keycloakLogin = async (username, password,realm,clientId) => {
+  console.log(username, password,realm,clientId)
+  try {
+    const response = await axios.post(
+      `${process.env.KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/token`,
+      new URLSearchParams({
+        client_id: clientId,
+        // client_secret: process.env.KEYCLOAK_CLIENT_SECRET, // only if confidential client
+        grant_type: "password",
+        username,
+        password,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
 
-//For Frontend new User created by old user and delete a old user
+    return response.data; // access_token, refresh_token, etc.
+  } catch (error) {
+    throw {
+      status: error.response?.status || 500,
+      message: error.response?.data?.error_description || "Login failed",
+    };
+  }
+};
 
-//get UserId
-// GET {KEYCLOAK_BASE_URL}/admin/realms/{realm}/users?username={username}
-// Authorization: Bearer {access_token}
+async function resetKeycloakPassword({ userId, realm, newPassword, token }) {
+  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/reset-password`;
 
-//delete userId
-// DELETE {KEYCLOAK_BASE_URL}/admin/realms/{realm}/users/{userId}
-// Authorization: Bearer {access_token}
+  await axios.put(
+    url,
+    {
+      type: "password",
+      value: newPassword,
+      temporary: false
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    }
+  );
+}
+
+async function getClientToken(client_id,client_credentials) {
+  try {
+    const response = await axios.post(
+      "http://localhost:8080/realms/dentalhub/protocol/openid-connect/token",
+      new URLSearchParams({
+        grant_type: "client_credentials",
+        client_id: client_id,
+        client_secret: client_credentials,
+      }),
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      }
+    );
+    console.log("Access Token:", response.data.access_token);
+    return response.data.access_token;
+  } catch (err) {
+    console.error("Error getting token:", err.response?.data || err.message);
+  }
+}
+
+
+// getClientCredential.js
+
+function getClientCredential(clientId) {
+  if (!clientId) {
+    throw new Error("clientId is required");
+  }
+
+  // Parse the JSON from .env
+  let credentials = {};
+  try {
+    credentials = JSON.parse(process.env.CLIENT_CREDENTIALS || "{}");
+  } catch (err) {
+    throw new Error("Invalid CLIENT_CREDENTIALS format in .env");
+  }
+
+  const secret = credentials[clientId];
+
+  if (!secret) {
+    throw new Error(`No client credential found for clientId: ${clientId}`);
+  }
+
+  return secret;
+}
+
+
 
 // ✅ Export all functions
 module.exports = {
@@ -596,5 +702,10 @@ module.exports = {
   getKeycloakUserIdByEmail,
   getUserGroups,
   getKeycloakToken,
-  decodeToken
+  decodeToken,
+  keycloakLogin,
+  getUserByUsername,
+  resetKeycloakPassword,
+  getClientToken,
+  getClientCredential
 };
