@@ -71,7 +71,7 @@ const loginWithOptionalOtp = async (req, res) => {
       dbUser.dbUser.clinic_id
     );
 
-    if (!clinic || clinic.otp === false) {
+    if (!clinic || clinic.otp === 0) {
       req.tokens = tokens;
       req.dbUser = dbUser;
       return finalizeLogin(req, res);
@@ -289,9 +289,7 @@ router.post("/logout", async (req, res, next) => {
 
 router.post("/forgettenpassword", async (req, res, next) => {
   try {
-    const { username } = req.body;
-    const realm = req.headers["x-realm"];
-    const clientid = req.headers["x-clientid"];
+    const { username,realm,clientid } = req.body;
 
     const access_token = await getClientCredential(clientid);
 
