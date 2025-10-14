@@ -407,7 +407,6 @@ const createTableQuery = {
     password VARBINARY(255) DEFAULT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
-    supplier_code VARCHAR(15) NOT NULL,
     category VARCHAR(100) DEFAULT NULL,
     status TINYINT(1) DEFAULT 1,
     email VARCHAR(255) DEFAULT NULL,
