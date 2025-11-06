@@ -1,3 +1,4 @@
+const { verifyUserTokenInDB } = require("../Keycloak/AuthenticateTenantAndClient");
 const { getDocumentsByField, deleteDocumentsByTableAndId } = require("../models/documentModel");
 const tenantModel = require("../models/TenantModel");
 const { mapFields } = require("../query/Records");
@@ -154,10 +155,12 @@ const getTenantByTenantNameAndTenantDomain = async (
       file_url: doc.file_url,
     }));
 
+
+
     // Attach to the response
     return {
       ...convertedRows,
-      tenant_app_logo,
+      tenant_app_logo
     };
   } catch (error) {
     console.error(error)

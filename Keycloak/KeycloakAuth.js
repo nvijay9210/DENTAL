@@ -9,154 +9,343 @@ const {
   decodeToken,
   extractUserInfo,
   keycloakLogin,
-  getClientToken,
   getClientCredential,
+  getUserByUsername,
 } = require("./KeycloakAdmin");
 const { getTenantByTenantId } = require("../services/TenantService");
 const { getClinicByTenantIdAndClinicId } = require("../services/ClinicService");
 const { buildUserContext } = require("../utils/BuildUserContext");
+const { verifyUserTokenInDB } = require("./AuthenticateTenantAndClient");
 const {
-  authenticateTenantClinicGroup,
-  verifyUserTokenInDB,
-} = require("./AuthenticateTenantAndClient");
-const { sendOTP, verifyOTP } = require("../Modules/MailSmsOtp/MailSmsOtpService");
+  sendOTP,
+  verifyOTP,
+} = require("../Modules/MailSmsOtp/MailSmsOtpService");
 const { getUserByTenantClinicAndKeycloakId } = require("../utils/Reusability");
+const { generateOTP, sendWhatsAppOTP } = require("../utils/Helpers");
 
 const router = express.Router();
 router.use(cookieParser());
 
-const tempLoginStore = {}; // key: user phone/email, value: { tokens, dbUser }
+const tempLoginStore = {};
 
-const loginWithOptionalOtp = async (req, res) => {
-  try {
-    const { username, password, realm, clientid, otp, to } = req.body;
-
-    // ✅ Step 1: OTP Verification Flow
-    if (otp) {
-      const record = tempLoginStore[to];
-      if (!record) return res.status(400).json({ message: "No login found" });
-
-      const otpResult = verifyOTP({ to, otp });
-      if (!otpResult.success) {
-        return res.status(400).json({ message: otpResult.message });
-      }
-
-      // ✅ If OTP success → use stored data
-      req.tokens = record.tokens;
-      req.dbUser = record.dbUser;
-      delete tempLoginStore[to];
-      return finalizeLogin(req, res);
-    }
-
-    // ✅ Step 2: First-time Login (username & password)
-    if (!username || !password) {
-      return res
-        .status(400)
-        .json({ message: "Username and password required" });
-    }
-
-    const tokens = await keycloakLogin(username, password, realm, clientid);
-    const dbUser = await verifyUserTokenInDB(tokens.access_token);
-
-    // ✅ ✅ 100% Skip all checks for TENANT users!
-    if (dbUser.role === "tenant") {
-      req.tokens = tokens;
-      req.dbUser = dbUser;
-      return finalizeLogin(req, res);
-    }
-
-    // ✅ Step 3: Check Clinic OTP Settings for NON-TENANTS
-    const clinic = await getClinicByTenantIdAndClinicId(
-      dbUser.dbUser.tenant_id,
-      dbUser.dbUser.clinic_id
-    );
-
-    if (!clinic || clinic.otp === 0) {
-      req.tokens = tokens;
-      req.dbUser = dbUser;
-      return finalizeLogin(req, res);
-    }
-
-    // ✅ Step 4: Send OTP for non-tenant roles
-    const user2 = await getUserByTenantClinicAndKeycloakId(
-      dbUser.role,
-      dbUser.dbUser.tenant_id,
-      dbUser.dbUser.clinic_id,
-      dbUser.dbUser.keycloak_id
-    );
-
-    const payload = {
-      email: user2.email,
-      phone: user2.phoneNumber,
-      via: clinic.otp_type,
-      message: "Your Verification OTP",
-      subject: "OTP Verification",
-    };
-
-    const otps = await sendOTP(payload);
-
-    // ✅ Save to temp store for OTP verification
-    const key = payload.via === "email" ? user2.email : user2.phoneNumber;
-    tempLoginStore[key] = { tokens, dbUser };
-
-    return res.status(200).json({
-      message: "OTP sent",
-      to: key,
-      otpDetails: otps,
-    });
-  } catch (err) {
-    console.error("Login error:", err);
-    return res
-      .status(401)
-      .json({ message: err.message || "Invalid credentials" });
-  }
+// === DEBUG LOG HELPER ===
+const log = (label, message, data = null) => {
+  console.log(
+    `[KeycloakAuth] ${label}:`,
+    message,
+    data ? `\nData: ${JSON.stringify(data, null, 2)}` : ""
+  );
 };
 
 const finalizeLogin = async (req, res) => {
+  log("FINALIZE_LOGIN", "Building user context and setting cookies");
   try {
     const { access_token, refresh_token } = req.tokens;
     const dbUser = req.dbUser;
     const userContext = await buildUserContext(access_token, dbUser);
 
     const isProduction = process.env.NODE_ENV === "production";
+    const cookieOptions = {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+    };
 
     res.cookie("access_token", access_token, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "None" : "Lax",
+      ...cookieOptions,
       maxAge: 60 * 60 * 1000,
     });
-
     res.cookie("refresh_token", refresh_token, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "None" : "Lax",
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    res.cookie("clientId", req.body.clientid, {
+      ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json(userContext);
+    log("FINALIZE_LOGIN", "✅ Login complete — responding with context");
+    return res.status(200).json(userContext);
   } catch (err) {
-    console.error("Finalize login error:", err);
-    throw new CustomError(
-      err.response?.data?.error_description || err.message,
-      err.response?.status || 401
-    );
+    log("FINALIZE_LOGIN", "💥 Finalize failed", { error: err.message });
+    throw new CustomError(err.message || "Login finalization failed", 401);
   }
 };
 
+// router.get('/hi',(req,res)=>{
+//  res.status(200).json('hello')
+  
+// })
+
+router.post("/tokensave", (req, res) => {
+  try {
+    const {
+      access_token,
+      refresh_token,
+      access_expires_in,   // in seconds (optional)
+      refresh_expires_in,  // in seconds (optional)
+    } = req.body;
+
+    if (!access_token || !refresh_token) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing tokens in request body" });
+    }
+
+    const isProduction = process.env.NODE_ENV === "production";
+
+    const baseOptions = {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+      path: "/",
+    };
+
+    // Access token expiry time — default 15 minutes if not provided
+    const accessExpiry = (access_expires_in || 15 * 60) * 1000; // convert sec → ms
+
+    // Refresh token expiry time — default 7 days if not provided
+    const refreshExpiry = (refresh_expires_in || 7 * 24 * 60 * 60) * 1000;
+
+    // Set cookies
+    res.cookie("access_token", access_token, {
+      ...baseOptions,
+      maxAge: accessExpiry,
+    });
+
+    res.cookie("refresh_token", refresh_token, {
+      ...baseOptions,
+      maxAge: refreshExpiry,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Tokens saved in cookies successfully",
+      expires_in: {
+        access: access_expires_in || 900,
+        refresh: refresh_expires_in || 604800,
+      },
+    });
+  } catch (error) {
+    console.error("Error saving tokens:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// =========================
+// WhatsApp OTP Login Route
+// =========================
+
+const otpStore = {};
+router.post("/login-otp", async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+    if (!phoneNumber)
+      return res.status(400).json({ message: "phoneNumber is required" });
+
+    // Generate OTP
+    const otp = generateOTP();
+    otpStore[phoneNumber] = { otp, expires: Date.now() + 5 * 60 * 1000 }; // 5 mins
+
+    // Send OTP via WhatsApp
+    await sendWhatsAppOTP(phoneNumber, otp);
+
+    return res.status(200).json({
+      message: "OTP sent to WhatsApp",
+      phoneNumber,
+      otp: process.env.NODE_ENV === "development" ? otp : undefined,
+    });
+  } catch (err) {
+    log("LOGIN_OTP", "Error sending OTP", err.message);
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+// =========================
+// Verify WhatsApp OTP
+// =========================
+router.post("/verify-otp", async (req, res) => {
+  try {
+    const { phoneNumber, otp } = req.body;
+    if (!phoneNumber || !otp)
+      return res.status(400).json({ message: "phoneNumber and OTP required" });
+
+    const record = otpStore[phoneNumber];
+    if (!record)
+      return res.status(400).json({ message: "No OTP requested for this number" });
+
+    if (record.expires < Date.now())
+      return res.status(400).json({ message: "OTP expired" });
+
+    if (record.otp != otp)
+      return res.status(400).json({ message: "Invalid OTP" });
+
+    // OTP valid — fetch user from DB by phoneNumber
+    const dbUser = await getUserByTenantClinicAndKeycloakId(
+      "user", // role
+      null,
+      null,
+      phoneNumber // assuming you store phoneNumber as keycloak_id or attribute
+    );
+
+    if (!dbUser)
+      return res.status(404).json({ message: "User not found" });
+
+    // Generate Keycloak-style tokens (or reuse existing token logic)
+    const tokens = {
+      access_token: jwt.sign(
+        { sub: dbUser.id, username: dbUser.username },
+        process.env.KEYCLOAK_REALM_PUBLIC_KEY,
+        { expiresIn: "1h" }
+      ),
+      refresh_token: jwt.sign(
+        { sub: dbUser.id, username: dbUser.username },
+        process.env.KEYCLOAK_REALM_PUBLIC_KEY,
+        { expiresIn: "7d" }
+      ),
+    };
+
+    // Attach to request and finalize login
+    req.tokens = tokens;
+    req.dbUser = dbUser;
+    delete otpStore[phoneNumber];
+
+    return finalizeLogin(req, res);
+  } catch (err) {
+    log("VERIFY_OTP", "Error verifying OTP", err.message);
+    return res.status(500).json({ message: err.message });
+  }
+});
 
 
-router.post("/login", loginWithOptionalOtp);
 
-// ---------- REFRESH TOKEN ----------
+// Routes
+router.post("/login2", async (req, res) => {
+  log("LOGIN_FLOW", "🚀 Starting login flow", { body: req.body });
+  try {
+    const { username, password, realm, clientid, otp, to } = req.body;
 
+    // OTP verification step
+    // if (otp) {
+    //   log("OTP_VERIFY", "Verifying OTP", { to, otp });
+    //   const record = tempLoginStore[to];
+    //   if (!record) {
+    //     log("OTP_VERIFY", "❌ No pending login session");
+    //     return res.status(400).json({ message: "No login found" });
+    //   }
+
+    //   const otpResult = verifyOTP({ to, otp });
+    //   if (!otpResult.success) {
+    //     log("OTP_VERIFY", "❌ Invalid OTP", { reason: otpResult.message });
+    //     return res.status(400).json({ message: otpResult.message });
+    //   }
+
+    //   log("OTP_VERIFY", "✅ OTP valid — using stored session");
+    //   req.tokens = record.tokens;
+    //   req.dbUser = record.dbUser;
+    //   delete tempLoginStore[to];
+    //   return finalizeLogin(req, res);
+    // }
+
+    // Initial credentials check
+    // if (!username || !password) {
+    //   log("LOGIN_FLOW", "❌ Missing username or password");
+    //   return res
+    //     .status(400)
+    //     .json({ message: "Username and password required" });
+    // }
+
+    // Keycloak authentication
+    // log("KEYCLOAK_AUTH", "Authenticating with Keycloak", {
+    //   username,
+    //   realm,
+    //   clientid,
+    // });
+
+    // const tokens = await keycloakLogin(username, password, realm, clientid);
+
+    const tokens = req.body.tokens
+    log("KEYCLOAK_AUTH", "✅ Keycloak auth successful");
+
+
+    // Verify in DB
+    log("DB_VERIFY", "Verifying user in application DB");
+    const dbUser = await verifyUserTokenInDB(tokens.access_token);
+    log("DB_VERIFY", "✅ DB verification complete", { role: dbUser.role });
+
+    // Skip OTP for tenant
+    if (dbUser.role === "tenant") {
+      log("TENANT_BYPASS", "Tenant user — skipping OTP");
+      req.tokens = tokens;
+      req.dbUser = dbUser;
+      return finalizeLogin(req, res);
+    }
+
+    // Check clinic OTP setting
+    log("CLINIC_OTP_CHECK", "Fetching clinic settings");
+    const clinic = await getClinicByTenantIdAndClinicId(
+      dbUser.dbUser.tenant_id,
+      dbUser.dbUser.clinic_id
+    );
+
+    if (!clinic || clinic.otp === 0) {
+      log("CLINIC_OTP_CHECK", "✅ OTP disabled — proceeding to login");
+      req.tokens = tokens;
+      req.dbUser = dbUser;
+      return finalizeLogin(req, res);
+    }
+
+    // Fetch user contact for OTP
+    // log("OTP_SEND", "OTP required — fetching user contact info");
+    // const user2 = await getUserByTenantClinicAndKeycloakId(
+    //   dbUser.role,
+    //   dbUser.dbUser.tenant_id,
+    //   dbUser.dbUser.clinic_id,
+    //   dbUser.dbUser.keycloak_id
+    // );
+
+    // const via = clinic.otp_type;
+    // const key = via === "email" ? user2.email : user2.phoneNumber;
+    // const payload = {
+    //   email: user2.email,
+    //   phone: user2.phoneNumber,
+    //   via,
+    //   message: "Your Verification OTP",
+    //   subject: "OTP Verification",
+    // };
+
+    // log("OTP_SEND", "Sending OTP", { to: key, via });
+    // const otps = await sendOTP(payload);
+    // tempLoginStore[key] = { tokens, dbUser };
+    // log("OTP_SEND", "✅ OTP sent and session stored");
+
+    // return res.status(200).json({
+    //   message: "OTP sent",
+    //   to: key,
+    //   otpDetails: process.env.NODE_ENV === "development" ? otps : undefined,
+    // });
+  } catch (err) {
+    log("LOGIN_FLOW", "💥 Login failed", {
+      message: err.message,
+      stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    });
+    return res
+      .status(401)
+      .json({ message: err.message || "Invalid credentials" });
+  }
+});
+
+// Refresh Token
 router.post("/refresh-token", async (req, res, next) => {
+  log("REFRESH_TOKEN", "Refreshing access token");
   const refreshToken = req.cookies.refresh_token;
   const realm = req.headers["x-realm"];
   const clientid = req.headers["x-clientid"];
 
-  if (!refreshToken)
+  if (!refreshToken) {
+    log("REFRESH_TOKEN", "❌ No refresh token in cookies");
     return next(new CustomError("No refresh token found", 401));
+  }
 
   try {
     const tokenUrl = `${process.env.KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/token`;
@@ -184,18 +373,17 @@ router.post("/refresh-token", async (req, res, next) => {
       );
     }
 
-    // Update cookies
+    const isProduction = process.env.NODE_ENV === "production";
     res.cookie("access_token", tokenData.access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // HTTPS only in prod
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       maxAge: tokenData.expires_in * 1000,
     });
-
     res.cookie("refresh_token", tokenData.refresh_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -221,54 +409,85 @@ router.post("/refresh-token", async (req, res, next) => {
       responseData.clinic_logo = clinic.clinic_logo;
     }
 
+    log("REFRESH_TOKEN", "✅ Token refreshed successfully");
     res.status(200).json(responseData);
   } catch (err) {
-    console.error("Refresh token error:", err.response?.data || err.message);
+    log("REFRESH_TOKEN", "💥 Refresh failed", {
+      error: err.response?.data || err.message,
+    });
     next(
       new CustomError(err.response?.data?.error_description || err.message, 401)
     );
   }
 });
 
-// ---------- LOGOUT ----------
-router.post("/logout", async (req, res, next) => {
+// Logout
+// router.post("/logout", async (req, res, next) => {
+//   log("LOGOUT", "Initiating logout");
+//   try {
+//     const refreshToken = req.cookies?.refresh_token;
+//     const realm = req.headers["x-realm"];
+//     const clientid = req.headers["x-clientid"];
+
+//     if (refreshToken && realm && clientid) {
+//       try {
+//         const tokenUrl = `${process.env.KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/logout`;
+//         await axios.post(
+//           tokenUrl,
+//           qs.stringify({
+//             client_id: clientid,
+//             client_secret: getClientCredential(clientid),
+//             refresh_token: refreshToken,
+//           }),
+//           { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+//         );
+//         log("LOGOUT", "✅ Keycloak session revoked");
+//       } catch (err) {
+//         log("LOGOUT", "⚠️ Keycloak logout warning", { error: err.message });
+//       }
+//     }
+
+//     const isProduction = process.env.NODE_ENV === "production";
+//     res.clearCookie("access_token", {
+//       httpOnly: true,
+//       secure: isProduction,
+//       sameSite: isProduction ? "None" : "Lax",
+//       path: "/",
+//     });
+//     res.clearCookie("refresh_token", {
+//       httpOnly: true,
+//       secure: isProduction,
+//       sameSite: isProduction ? "None" : "Lax",
+//       path: "/",
+//     });
+//     res.clearCookie("client_id", {
+//       httpOnly: true,
+//       secure: isProduction,
+//       sameSite: isProduction ? "None" : "Lax",
+//       path: "/",
+//     });
+
+//     log("LOGOUT", "✅ Cookies cleared — logout complete");
+//     return res
+//       .status(200)
+//       .json({ success: true, message: "Logged out successfully" });
+//   } catch (err) {
+//     log("LOGOUT", "💥 Logout failed", { error: err });
+//     next(new CustomError("Logout failed", 500));
+//   }
+// });
+
+router.post("/logout", (req, res) => {
   try {
-    const refreshToken = req.cookies?.refresh_token;
-    const realm = req.headers["x-realm"];
-    const clientid = req.headers["x-clientid"];
-
-    // ✅ Step 1: Revoke refresh token in Keycloak (if provided)
-    if (refreshToken && realm && clientid) {
-      try {
-        const tokenUrl = `${process.env.KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/logout`;
-
-        await axios.post(
-          tokenUrl,
-          qs.stringify({
-            client_id: clientid,
-            client_secret: getClientCredential(clientid),
-            refresh_token: refreshToken,
-          }),
-          { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-        );
-      } catch (err) {
-        console.warn(
-          "Keycloak logout warning:",
-          err.response?.data || err.message
-        );
-      }
-    }
-
-    // ✅ Step 2: Clear cookies safely
     const isProduction = process.env.NODE_ENV === "production";
 
+    // Clear cookies
     res.clearCookie("access_token", {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? "None" : "Lax",
       path: "/",
     });
-
     res.clearCookie("refresh_token", {
       httpOnly: true,
       secure: isProduction,
@@ -276,30 +495,54 @@ router.post("/logout", async (req, res, next) => {
       path: "/",
     });
 
-    // ✅ Step 3: Respond to frontend
+    console.log("✅ Token cookies removed successfully");
+
     return res.status(200).json({
       success: true,
-      message: "Logged out successfully",
+      message: "Tokens cleared from cookies",
     });
   } catch (err) {
-    console.error("Logout error:", err);
-    next(new CustomError("Logout failed", 500));
+    console.error("💥 Failed to clear cookies:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Error clearing cookies",
+    });
   }
 });
 
+
+
+// Forgot Password
 router.post("/forgettenpassword", async (req, res, next) => {
+  log("FORGOT_PASSWORD", "Forgot password request", req.body);
   try {
-    const { username,realm,clientid } = req.body;
+    const { username, realm, clientid } = req.body;
 
-    const access_token = await getClientCredential(clientid);
+    const clientSecret = getClientCredential(clientid);
+    const tokenUrl = `${process.env.KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/token`;
+    const tokenRes = await axios.post(
+      tokenUrl,
+      qs.stringify({
+        grant_type: "client_credentials",
+        client_id: clientid,
+        client_secret: clientSecret,
+      }),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
 
-    const user = await getUserByUsername(access_token, realm, username);
+    const adminToken = tokenRes.data.access_token;
+    const user = await getUserByUsername(adminToken, realm, username);
 
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      log("FORGOT_PASSWORD", "❌ User not found");
+      return res.status(404).json({ message: "User not found" });
+    }
 
     const phoneNumber = user.attributes?.phoneNumber?.[0];
-    if (!phoneNumber)
+    if (!phoneNumber) {
+      log("FORGOT_PASSWORD", "❌ No phone number on user");
       return res.status(400).json({ message: "No phone number for user" });
+    }
 
     const otpResponse = await sendOTP({
       to: phoneNumber,
@@ -309,19 +552,21 @@ router.post("/forgettenpassword", async (req, res, next) => {
       expiryMinutes: 10,
     });
 
+    log("FORGOT_PASSWORD", "✅ OTP sent for password reset");
     return res.status(200).json({
       message: "OTP sent successfully",
       phone: phoneNumber,
       otp: process.env.NODE_ENV === "development" ? otpResponse.otp : undefined,
     });
   } catch (err) {
-    console.error("Forgot password error:", err);
+    log("FORGOT_PASSWORD", "💥 Error", { error: err });
     next(new CustomError(err.message || "Failed to send OTP", 500));
   }
 });
 
-// ---------- RESET PASSWORD ----------
+// Reset Password
 router.post("/reset-password", async (req, res, next) => {
+  log("RESET_PASSWORD_ROUTE", "Password reset request", req.body);
   try {
     const { username, newPassword } = req.body;
     const realm = req.headers["x-realm"];
@@ -333,10 +578,7 @@ router.post("/reset-password", async (req, res, next) => {
         .json({ message: "Username and newPassword are required" });
     }
 
-    // 1️⃣ Get client secret from .env
     const clientSecret = getClientCredential(clientid);
-
-    // 2️⃣ Get access token using client credentials
     const tokenUrl = `${process.env.KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/token`;
     const tokenResponse = await axios.post(
       tokenUrl,
@@ -350,24 +592,21 @@ router.post("/reset-password", async (req, res, next) => {
 
     const adminToken = tokenResponse.data.access_token;
 
-    // 3️⃣ Fetch user by username to get userId
     const userResponse = await axios.get(
       `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users?username=${username}`,
       { headers: { Authorization: `Bearer ${adminToken}` } }
     );
 
     const user = userResponse.data[0];
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      log("RESET_PASSWORD_ROUTE", "❌ User not found");
+      return res.status(404).json({ message: "User not found" });
+    }
 
-    // 4️⃣ Reset password
     const resetUrl = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${user.id}/reset-password`;
     await axios.put(
       resetUrl,
-      {
-        type: "password",
-        value: newPassword,
-        temporary: false, // true = force user to change on next login
-      },
+      { type: "password", value: newPassword, temporary: false },
       {
         headers: {
           Authorization: `Bearer ${adminToken}`,
@@ -376,9 +615,12 @@ router.post("/reset-password", async (req, res, next) => {
       }
     );
 
+    log("RESET_PASSWORD_ROUTE", "✅ Password reset successful");
     return res.status(200).json({ message: "Password updated successfully" });
   } catch (err) {
-    console.error("Reset password error:", err.response?.data || err.message);
+    log("RESET_PASSWORD_ROUTE", "💥 Error", {
+      error: err.response?.data || err.message,
+    });
     next(new CustomError(err.response?.data?.error || err.message, 500));
   }
 });

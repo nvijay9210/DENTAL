@@ -76,11 +76,9 @@ const app = express();
 const server = http.createServer(app);
 
 // Socket.IO setup
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://192.168.1.17:5173",
-  "https://yourfrontend.com",
-];
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+  : [];
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -186,10 +184,10 @@ app.use(userActivityLogger);
 // Redis connection
 // redisconnect();
 
-redisConnect().catch((err) => console.warn("Redis failed:", err.message));
+// redisConnect().catch((err) => console.warn("Redis failed:", err.message));
 
-process.on("SIGINT", async () => { await closeRedis(); process.exit(0); });
-process.on("SIGTERM", async () => { await closeRedis(); process.exit(0); });
+// process.on("SIGINT", async () => { await closeRedis(); process.exit(0); });
+// process.on("SIGTERM", async () => { await closeRedis(); process.exit(0); });
 
 
 // Initialize tables
@@ -240,6 +238,8 @@ async function initializeTables() {
 // require('./models/AlterTables')
 
 
+
+
 // ✅ Log viewer route
 // app.get('/logs', (req, res) => {
 //   if (!fs.existsSync(logFilePath)) {
@@ -264,6 +264,7 @@ app.get('/test', (req, res) => {
 
 
 const bodyParser = require("body-parser");
+const { authenticateTenantClinicGroup } = require('./Keycloak/AuthenticateTenantAndClient');
 
 app.use(bodyParser.json())
 
@@ -272,11 +273,11 @@ let sharedToken = null;
 
 // Store token (called by Dental app)
 app.post("/store-token", (req, res) => {
-  const { token } = req.body;
-  if (!token) {
+  const { access_token } = req.body;
+  if (!access_token) {
     return res.status(400).json({ message: "Token is required" });
   }
-  sharedToken = token;
+  sharedToken = access_token;
   return res.json({ message: "Token stored successfully" });
 });
 
@@ -288,7 +289,11 @@ app.get("/get-token", (req, res) => {
   return res.json({ token: sharedToken });
 });
 
-app.listen(4000, () => console.log("Backend running on http://localhost:4000"));
+app.get("/sayhello",authenticateTenantClinicGroup('tenant'), (req, res) => {
+  return res.status(200).json({ message: "Hello Buddy" });
+});
+
+// app.listen(4000, () => console.log("Backend running on http://localhost:4000"));
 
 // API Routes
 app.use('/v1/tenant', tenantRouter);

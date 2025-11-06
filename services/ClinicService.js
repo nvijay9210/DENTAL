@@ -386,7 +386,7 @@ const deleteClinicByTenantIdAndClinicId = async (
     }
 
     // 2. Delete documents
-    await deleteDocumentsByTableAndId(connection, "clinic", clinicId);
+    await deleteDocumentsByTableAndId("clinic", clinicId,connection);
 
     // 3. Delete from DB
     const affectedRows = await clinicModel.deleteClinicByTenantIdAndClinicId(

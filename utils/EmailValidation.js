@@ -4,7 +4,8 @@ const { CustomError } = require("../middlewares/CustomeError");
 
 
 async function checkEmailConflicts(email, tenant_id, clinic_id, currentTable = null, currentId = null) {
-  const tables = ["clinic", "dentist", "patient", "supplier", "reception"];
+  return
+  const tables = ["superuser","clinic", "dentist", "patient", "supplier", "reception"];
 
   for (const table of tables) {
     const idField = `${table}_id`;

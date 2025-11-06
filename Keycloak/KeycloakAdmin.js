@@ -1,14 +1,28 @@
+// KeycloakAdmin.js
 const axios = require("axios");
 const { CustomError } = require("../middlewares/CustomeError");
 const qs = require("querystring");
+require("dotenv").config();
+
+const KEYCLOAK_BASE_URL = process.env.KEYCLOAK_BASE_URL;
+
+// === DEBUG LOG HELPER ===
+const log = (label, message, data = null) => {
+    console.log(
+      `[KeycloakAdmin] ${label}:`,
+      message,
+      data ? `\nData:, JSON.stringify(data, null, 2)` : ""
+    );
+};
 
 // ----- CONFIG -----
-const KEYCLOAK_BASE_URL = process.env.KEYCLOAK_BASE_URL;
+log("INIT", "Keycloak Base URL", { KEYCLOAK_BASE_URL });
 
 // ✅ 1. Add User
 async function addUser(token, realm, userData) {
+  log("ADD_USER", "Starting", { realm, username: userData.username });
   const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users`;
-  console.log(userData)
+
   const payload = {
     username: userData.username,
     email: userData.email || `${userData.username}@gmail.com`,
@@ -26,15 +40,18 @@ async function addUser(token, realm, userData) {
   };
 
   try {
+    log("ADD_USER", "Checking if user exists", { username: payload.username });
     const existingUser = await getUserIdByUsername(
       token,
       realm,
       payload.username
     );
-    if (existingUser) throw new CustomError("Username already exists", 409);
+    if (existingUser) {
+      log("ADD_USER", "❌ User already exists");
+      throw new CustomError("Username already exists", 409);
+    }
 
-    // console.log("user start to add",token,payload)
-
+    log("ADD_USER", "Creating user in Keycloak", { payload });
     const response = await axios.post(url, payload, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -43,79 +60,78 @@ async function addUser(token, realm, userData) {
       },
     });
 
-    console.log("✅ User created:", payload.username);
+    log("ADD_USER", "✅ User created successfully", {
+      username: payload.username,
+    });
     return true;
   } catch (error) {
-    console.error(
-      "❌ Error creating user:",
-      error.response?.data || error.message
-    );
+    log("ADD_USER", "❌ Error creating user", {
+      message: error.response?.data || error.message,
+      status: error.response?.status,
+    });
     return false;
   }
 }
 
 // ✅ 2. Get User ID by Username
 async function getUserIdByUsername(token, realm, username) {
+  log("GET_USER_ID", "Fetching user ID", { realm, username });
   const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users?username=${username}`;
 
   try {
     const response = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (response.data.length === 0) {
-      console.error("❌ No user found with username:", username);
+      log("GET_USER_ID", "❌ No user found");
       return null;
     }
 
-    return response.data[0].id;
+    const userId = response.data[0].id;
+    log("GET_USER_ID", "✅ Found user ID", { userId });
+    return userId;
   } catch (error) {
-    console.error(
-      "❌ Failed to get user ID:",
-      error.response?.data || error.message
-    );
+    log("GET_USER_ID", "❌ Failed to get user ID", {
+      error: error.response?.data || error.message,
+    });
     return null;
   }
 }
+
+// ✅ Get Full User by Username
 async function getUserByUsername(token, realm, username) {
+  log("GET_USER", "Fetching full user", { realm, username });
   const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users?username=${username}`;
 
   try {
     const response = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (response.data.length === 0) {
-      console.error("❌ No user found with username:", username);
+      log("GET_USER", "❌ User not found");
       return null;
     }
 
+    log("GET_USER", "✅ User found", { user: response.data[0] });
     return response.data[0];
   } catch (error) {
-    console.error(
-      "❌ Failed to get user ID:",
-      error.response?.data || error.message
-    );
+    log("GET_USER", "❌ Failed", { error: error.message });
     return null;
   }
 }
 
 // ✅ 3. Assign Realm Role to User
 async function assignRealmRoleToUser(token, realm, userId, roleName) {
+  log("ASSIGN_ROLE", "Assigning role", { userId, roleName });
   const roleUrl = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/roles/${roleName}`;
   const assignUrl = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/role-mappings/realm`;
 
   try {
     const roleRes = await axios.get(roleUrl, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
-
     const role = roleRes.data;
 
     await axios.post(assignUrl, [role], {
@@ -125,92 +141,509 @@ async function assignRealmRoleToUser(token, realm, userId, roleName) {
       },
     });
 
-    console.log(`✅ Assigned role "${roleName}" to user ${userId}`);
+    log("ASSIGN_ROLE", `✅ Assigned role "${roleName}" to user`);
     return true;
   } catch (error) {
-    console.error(
-      `❌ Failed to assign role "${roleName}":`,
-      error.response?.data || error.message
-    );
+    log("ASSIGN_ROLE", `❌ Failed to assign role "${roleName}"`, {
+      error: error.response?.data || error.message,
+    });
     return false;
   }
 }
 
 // ✅ 4. Add User to Group
 async function addUserToGroup(token, realm, userId, groupName) {
+  log("ADD_TO_GROUP", "Adding user to group", { userId, groupName });
   const searchUrl = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups?search=${groupName}`;
   const addUrl = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/groups`;
 
   try {
-    // Search for group by name
     const groupRes = await axios.get(searchUrl, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
-
     const group = groupRes.data.find((g) => g.name === groupName);
+
     if (!group) {
-      console.error(`❌ Group "${groupName}" not found in search results`);
+      log("ADD_TO_GROUP", `❌ Group "${groupName}" not found`);
       return false;
     }
 
-    // Add user to group
     await axios.put(`${addUrl}/${group.id}`, null, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
-    console.log(`👥 Added user ${userId} to group "${groupName}"`);
+    log("ADD_TO_GROUP", `✅ Added user to group "${groupName}"`);
     return true;
   } catch (error) {
-    console.error(
-      `❌ Failed to add user to group "${groupName}":`,
-      error.response?.data || error.message
-    );
+    log("ADD_TO_GROUP", `❌ Failed to add to group "${groupName}"`, {
+      error: error.response?.data || error.message,
+    });
     return false;
   }
 }
 
-require("dotenv").config();
+// ✅ 5. Reset User Password
+async function resetUserPassword(
+  token,
+  realm,
+  userId,
+  newPassword,
+  temporary = false
+) {
+  log("RESET_PASSWORD", "Resetting password", { userId, temporary });
+  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/reset-password`;
 
-function getTenantIdByRealm(fullRealm) {
-  const mapString = process.env.REALM_TENANT_MAP || "";
-  const domainMapString = process.env.REALM_TENANT_DOMAIN_MAP || "";
+  try {
+    await axios.put(
+      url,
+      { type: "password", value: newPassword, temporary },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-  const realmMap = Object.fromEntries(
-    mapString.split(",").map((pair) => {
-      const [k, v] = pair.split(":");
-      return [k.trim(), v.trim()];
-    })
-  );
-
-  const domainMap = Object.fromEntries(
-    domainMapString.split(",").map((pair) => {
-      const [k, v] = pair.split(":");
-      return [k.trim(), v.trim()];
-    })
-  );
-
-  const parts = fullRealm.split(".");
-  const realmName = parts[0]; // e.g., 'mydentist'
-  const domain = "." + parts.slice(1).join("."); // e.g., '.in'
-
-  const realmTenantId = realmMap[realmName];
-  const domainTenantId = domainMap[domain];
-
-  if (realmTenantId && domainTenantId && realmTenantId === domainTenantId) {
-    return realmTenantId; // Both match exactly
+    log("RESET_PASSWORD", "✅ Password reset successful");
+    return true;
+  } catch (error) {
+    log("RESET_PASSWORD", "❌ Failed to reset password", {
+      error: error.response?.data || error.message,
+    });
+    return false;
   }
-
-  return null; // Mismatch or not found
 }
 
+// ✅ 6. Create Group in Realm
+async function createGroup(token, realm, groupName, attributes = {}) {
+  log("CREATE_GROUP", "Creating group", { groupName, attributes });
+  const endpoint = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups`;
+  const payload = { name: groupName, attributes };
+
+  try {
+    const response = await axios.post(endpoint, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const location = response.headers.location;
+    if (!location) throw new CustomError("Location header missing", 400);
+
+    const url = new URL(location);
+    const pathParts = url.pathname.split("/");
+    const groupId = pathParts[pathParts.length - 1];
+
+    log("CREATE_GROUP", "✅ Group created", { groupId });
+    return { groupId };
+  } catch (error) {
+    if (error.response?.status === 409) {
+      log("CREATE_GROUP", "⚠️ Group already exists");
+      return false;
+    }
+
+    log("CREATE_GROUP", "❌ Failed to create group", {
+      error: error.response?.data || error.message,
+    });
+    return false;
+  }
+}
+
+// ✅ 7. Delete User by Username
+async function deleteUserByUsername(token, realm, username) {
+  log("DELETE_USER_BY_USERNAME", "Deleting user", { username });
+  try {
+    const userId = await getUserIdByUsername(token, realm, username);
+    if (!userId) {
+      log("DELETE_USER_BY_USERNAME", "❌ User not found");
+      return false;
+    }
+
+    const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}`;
+    await axios.delete(url, { headers: { Authorization: `Bearer ${token}` } });
+
+    log("DELETE_USER_BY_USERNAME", "✅ User deleted", { username, userId });
+    return true;
+  } catch (error) {
+    log("DELETE_USER_BY_USERNAME", "❌ Failed to delete user", {
+      error: error.response?.data || error.message,
+    });
+    return false;
+  }
+}
+
+// ✅ Delete User by ID
+const deleteUser = async (token, realm, userId) => {
+  log("DELETE_USER_BY_ID", "Deleting user by ID", { userId });
+  if (!token) throw new CustomError("Authorization token is required", 400);
+  if (!realm) throw new CustomError("Realm is required", 400);
+  if (!userId) throw new CustomError("User ID is required", 400);
+
+  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}`;
+
+  try {
+    const response = await axios.delete(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status === 204) {
+      log("DELETE_USER_BY_ID", "✅ User deleted by ID");
+      return true;
+    } else {
+      log("DELETE_USER_BY_ID", "⚠️ Unexpected status", {
+        status: response.status,
+      });
+      return false;
+    }
+  } catch (error) {
+    if (error.response) {
+      const { status, data } = error.response;
+      if (status === 404) {
+        log("DELETE_USER_BY_ID", "⚠️ User not found (already deleted?)");
+        return false;
+      }
+      if (status === 403) {
+        log("DELETE_USER_BY_ID", "❌ Permission denied");
+        throw new CustomError("Insufficient permissions to delete user", 403);
+      }
+      log("DELETE_USER_BY_ID", "❌ Keycloak error", { status, data });
+    } else {
+      log("DELETE_USER_BY_ID", "❌ Network error", { message: error.message });
+    }
+    throw new CustomError("Failed to delete user from Keycloak", 500);
+  }
+};
+
+// ✅ Update User
+const updateUserInKeycloak = async (token, realm, userId, userData) => {
+  console.log(token,realm,userId,userData)
+  log("UPDATE_USER", "Updating user", { userId, userData });
+  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}`;
+
+  try {
+    const response = await axios.put(url, userData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const success = response.status === 204 || response.status === 200;
+    log("UPDATE_USER", success ? "✅ Updated" : "⚠️ Unexpected status", {
+      status: response.status,
+    });
+    return success;
+  } catch (error) {
+    log("UPDATE_USER", "❌ Failed", {
+      error: error.response?.data || error.message,
+    });
+    if (error.response) {
+      throw new CustomError(
+        `HTTP ${error.response.status}: ${JSON.stringify(error.response.data)}`,
+        404
+      );
+    }
+  }
+};
+
+// ✅ Update Group Attributes
+const updateGroupAttributes = async (token, realm, groupId, attributes) => {
+  log("UPDATE_GROUP_ATTR", "Updating group attributes", {
+    groupId,
+    attributes,
+  });
+  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups/${groupId}`;
+  await axios.put(
+    url,
+    { attributes },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  log("UPDATE_GROUP_ATTR", "✅ Updated");
+};
+
+// ✅ Delete Group
+const deleteKeycloakGroup = async (token, realm, groupId) => {
+  log("DELETE_GROUP", "Deleting group", { groupId });
+  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups/${groupId}`;
+  const response = await axios.delete(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const success = response.status === 204;
+  log("DELETE_GROUP", success ? "✅ Deleted" : "❌ Failed");
+  return success;
+};
+
+// ✅ Get Group ID by Name
+const getGroupIdByName = async (token, realm, groupName) => {
+  log("GET_GROUP_ID", "Searching group", { groupName });
+  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups`;
+  const response = await axios.get(url, {
+    params: { search: groupName },
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const group = response.data.find((g) => g.name === groupName);
+  const id = group?.id || null;
+  log("GET_GROUP_ID", id ? "✅ Found" : "❌ Not found", { id });
+  return id;
+};
+
+// ✅ Get User by Email
+async function getKeycloakUserIdByEmail(token, realm, email) {
+  log("GET_USER_BY_EMAIL", "Fetching user by email", { email });
+  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users`;
+
+  try {
+    const response = await axios.get(url, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { email, exact: true },
+    });
+
+    const users = response.data;
+    if (users.length === 0) {
+      log("GET_USER_BY_EMAIL", "❌ No user found");
+      return null;
+    }
+
+    const result = { id: users[0].id, username: users[0].username };
+    log("GET_USER_BY_EMAIL", "✅ Found", result);
+    return result;
+  } catch (error) {
+    log("GET_USER_BY_EMAIL", "❌ Error", { error: error.message });
+    throw new CustomError("Failed to fetch Keycloak user ID", 400);
+  }
+}
+
+// ✅ Get User Groups
+async function getUserGroups(token, realm, userId) {
+  log("GET_USER_GROUPS", "Fetching groups", { userId });
+  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/groups`;
+
+  try {
+    const response = await axios.get(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    log("GET_USER_GROUPS", "✅ Groups fetched", {
+      count: response.data.length,
+    });
+    return response.data;
+  } catch (error) {
+    log("GET_USER_GROUPS", "❌ Failed", { error: error.message });
+    throw new CustomError("Failed to fetch Keycloak user groups", 400);
+  }
+}
+
+// ✅ Get Keycloak Token (password or client)
+async function getKeycloakToken({
+  method,
+  username,
+  password,
+  KEYCLOAK_REALM = "dentalhub",
+  CLIENT_ID = "mydentist.in",
+}) {
+  log("GET_KEYCLOAK_TOKEN", "Requesting token", {
+    method,
+    KEYCLOAK_REALM,
+    CLIENT_ID,
+  });
+  const tokenUrl = `${KEYCLOAK_BASE_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token`;
+
+  let data;
+  if (method === "password") {
+    if (!username || !password)
+      throw new CustomError("Username and password required", 400);
+    data = {
+      grant_type: "password",
+      client_id: CLIENT_ID,
+      // client_secret: getClientCredential(CLIENT_ID),
+      username,
+      password,
+    };
+  } else if (method === "client_credentials") {
+    data = {
+      grant_type: "client_credentials",
+      client_id: CLIENT_ID,
+      client_secret: getClientCredential(CLIENT_ID),
+    };
+  } else {
+    throw new CustomError("Invalid login method", 400);
+  }
+
+  const response = await axios.post(tokenUrl, qs.stringify(data), {
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  });
+
+  log("GET_KEYCLOAK_TOKEN", "✅ Token received (partial)", {
+    access_token: response.data.access_token.substring(0, 20) + "...",
+    expires_in: response.data.expires_in,
+  });
+  return response.data;
+}
+
+// ✅ Decode JWT (unsafe, for dev only)
+function decodeToken(token) {
+  if (!token) return null;
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) throw new CustomError("Invalid JWT", 400);
+    const payload = parts[1];
+    const decoded = Buffer.from(payload, "base64").toString("utf8");
+    const parsed = JSON.parse(decoded);
+    log("DECODE_TOKEN", "✅ Decoded token", {
+      sub: parsed.sub,
+      email: parsed.email,
+      roles: parsed.realm_access?.roles,
+    });
+    return parsed;
+  } catch (err) {
+    log("DECODE_TOKEN", "❌ Failed to decode", { error: err.message });
+    return null;
+  }
+}
+
+// ✅ Keycloak Login (password grant)
+const keycloakLogin = async (username, password, realm, clientId) => {
+  log("KEYCLOAK_LOGIN", "Logging in", { username, realm, clientId });
+  try {
+    const response = await axios.post(
+      `${KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/token`,
+      new URLSearchParams({
+        client_id: clientId,
+        grant_type: "password",
+        username,
+        password,
+      }),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
+    log("KEYCLOAK_LOGIN", "✅ Login successful");
+    return response.data;
+  } catch (error) {
+    log("KEYCLOAK_LOGIN", "❌ Login failed", {
+      status: error.response?.status,
+      error: error.response?.data,
+    });
+    throw new CustomError(
+      error.response?.data?.error_description || "Login failed",
+      error.response?.status || 500
+    );
+  }
+};
+
+// ✅ Reset Password (admin)
+async function resetKeycloakPassword({ userId, realm, newPassword, token }) {
+  log("RESET_KEYCLOAK_PASSWORD", "Admin password reset", { userId });
+  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/reset-password`;
+
+  await axios.put(
+    url,
+    { type: "password", value: newPassword, temporary: false },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  log("RESET_KEYCLOAK_PASSWORD", "✅ Password reset by admin");
+}
+
+// ✅ Get Client Token (for testing)
+async function getClientToken(client_id, client_credentials) {
+  log("GET_CLIENT_TOKEN", "Getting client token", { client_id });
+  try {
+    const response = await axios.post(
+      `${KEYCLOAK_BASE_URL}/realms/dentalhub/protocol/openid-connect/token`,
+      new URLSearchParams({
+        grant_type: "client_credentials",
+        client_id: client_id,
+        client_secret: client_credentials,
+      }),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
+    log("GET_CLIENT_TOKEN", "✅ Client token received");
+    return response.data.access_token;
+  } catch (err) {
+    log("GET_CLIENT_TOKEN", "❌ Error", {
+      error: err.response?.data || err.message,
+    });
+  }
+}
+
+// ✅ Get Client Secret
+function getClientCredential(clientId) {
+  log("GET_CLIENT_CREDENTIAL", "Looking up secret for", { clientId });
+  if (!clientId) throw new CustomError("clientId is required", 400);
+
+  let credentials = {};
+  try {
+    credentials = JSON.parse(process.env.CLIENT_CREDENTIALS || "{}");
+  } catch (err) {
+    throw new CustomError("Invalid CLIENT_CREDENTIALS format in .env", 400);
+  }
+
+  const secret = credentials[clientId];
+  if (!secret) {
+    log("GET_CLIENT_CREDENTIAL", "❌ Secret not found");
+    throw new CustomError(
+      `No client credential found for clientId: ${clientId}`,
+      400
+    );
+  }
+
+  log("GET_CLIENT_CREDENTIAL", "✅ Secret found (masked)", {
+    clientId,
+    secret: "****",
+  });
+  return secret;
+}
+
+// ✅ Extract User Info from Token
 function extractUserInfo(token) {
+  log("EXTRACT_USER_INFO", "Parsing token claims");
   const issuer = token.iss;
   const realm = issuer.split("/").pop();
   const tenant = token.azp;
+
+  const getTenantIdByRealm = (fullRealm) => {
+    const mapString = process.env.REALM_TENANT_MAP || "";
+    const domainMapString = process.env.REALM_TENANT_DOMAIN_MAP || "";
+
+    const realmMap = Object.fromEntries(
+      mapString.split(",").map((pair) => {
+        const [k, v] = pair.split(":");
+        return [k.trim(), v.trim()];
+      })
+    );
+
+    const domainMap = Object.fromEntries(
+      domainMapString.split(",").map((pair) => {
+        const [k, v] = pair.split(":");
+        return [k.trim(), v.trim()];
+      })
+    );
+
+    const parts = fullRealm.split(".");
+    const realmName = parts[0];
+    const domain = "." + parts.slice(1).join(".");
+
+    const realmTenantId = realmMap[realmName];
+    const domainTenantId = domainMap[domain];
+
+    if (realmTenantId && domainTenantId && realmTenantId === domainTenantId) {
+      return realmTenantId;
+    }
+    return null;
+  };
 
   const tenantId = getTenantIdByRealm(tenant);
 
@@ -226,7 +659,6 @@ function extractUserInfo(token) {
   }
 
   const globalRoles = token.realm_access?.roles || [];
-
   const ROLE_PRIORITY = [
     "superuser",
     "dentist",
@@ -236,10 +668,9 @@ function extractUserInfo(token) {
     "dev",
     "tenant",
   ];
-
   const role = ROLE_PRIORITY.find((r) => globalRoles.includes(r)) || "guest";
 
-  console.log(role, "is logged in");
+  log("EXTRACT_USER_INFO", "✅ Parsed user info", { role, tenantId, clinicId });
 
   return {
     username: token.email,
@@ -252,439 +683,36 @@ function extractUserInfo(token) {
   };
 }
 
-// ✅ 5. Reset User Password
-async function resetUserPassword(
-  token,
-  realm,
-  userId,
-  newPassword,
-  temporary = false
-) {
-  const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/reset-password`;
+async function refreshAccessToken({
+  keycloakBaseUrl, // e.g. https://keycloak.example.com
+  realm,           // e.g. 'myrealm'
+  clientId,
+  clientSecret,    // optional for public clients
+  refreshToken
+}) {
+  const url = `${keycloakBaseUrl.replace(/\/$/, '')}/realms/${realm}/protocol/openid-connect/token`;
 
-  try {
-    const response = await axios.put(
-      url,
-      {
-        type: "password",
-        value: newPassword,
-        temporary: temporary,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    console.log(`✅ Password reset for user ${userId}`);
-    return true;
-  } catch (error) {
-    console.error(
-      "❌ Failed to reset password:",
-      error.response?.data || error.message
-    );
-    return false;
-  }
-}
-
-// ✅ 6. Create Group in Realm
-async function createGroup(token, realm, groupName, attributes = {}) {
-  const endpoint = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups`;
-
-  const payload = {
-    name: groupName,
-    attributes,
+  const data = {
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken,
+    client_id: clientId
   };
 
-  try {
-    const response = await axios.post(endpoint, payload, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+  // if confidential client, include client_secret (or use Basic auth)
+  if (clientSecret) data.client_secret = clientSecret;
 
-    console.log(`✅ Group "${groupName}" created`);
-
-    // Extract groupId from Location header
-    const location = response.headers.location;
-    if (!location) {
-      throw new Error("Location header missing in response");
-    }
-
-    const url = new URL(location);
-    const pathParts = url.pathname.split("/");
-    const groupId = pathParts[pathParts.length - 1];
-
-    console.log(`✅ Group ID: ${groupId}`);
-    return { groupId };
-  } catch (error) {
-    if (error.response?.status === 409) {
-      console.warn(`⚠️ Group "${groupName}" already exists`);
-      return false;
-    }
-
-    console.error(
-      `❌ Failed to create group "${groupName}":`,
-      error.response?.data || error.message
-    );
-    return false;
-  }
-}
-
-// ✅ 7. Delete User by Username
-async function deleteUserByUsername(token, realm, username) {
-  try {
-    // Get user ID from username
-    const userId = await getUserIdByUsername(token, realm, username);
-
-    if (!userId) {
-      console.error(`❌ Cannot delete user: username "${username}" not found`);
-      return false;
-    }
-
-    const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}`;
-
-    await axios.delete(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log(`🗑️ User deleted: ${username} (ID: ${userId})`);
-    return true;
-  } catch (error) {
-    console.error(
-      `❌ Failed to delete user "${username}":`,
-      error.response?.data || error.message
-    );
-    return false;
-  }
-}
-
-/**
- * Delete a Keycloak user by user ID
- * @param {string} token - Admin bearer token
- * @param {string} realm - Keycloak realm
- * @param {string} userId - User ID in Keycloak
- * @returns {Promise<boolean>} - true if deleted, false if not found or already deleted
- */
-const deleteUser = async (token, realm, userId) => {
-  // Input validation
-  if (!token) throw new CustomError("Authorization token is required", 400);
-  if (!realm) throw new CustomError("Realm is required", 400);
-  if (!userId) throw new CustomError("User ID is required", 400);
-
-  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}`;
-
-  try {
-    const response = await axios.delete(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (response.status === 204) {
-      console.log(`🗑️ User deleted: ID=${userId}`);
-      return true;
-    } else {
-      console.warn(`⚠️ Unexpected status code: ${response.status}`);
-      return false;
-    }
-  } catch (error) {
-    // Handle specific HTTP errors
-    if (error.response) {
-      const { status, data } = error.response;
-
-      if (status === 404) {
-        console.warn(
-          `⚠️ User not found (ID: ${userId}) - may already be deleted`
-        );
-        return false;
-      }
-
-      if (status === 403) {
-        console.error(
-          "❌ Permission denied: Check admin token has 'manage-users' role"
-        );
-        throw new CustomError("Insufficient permissions to delete user", 403);
-      }
-
-      console.error(`❌ Keycloak error [${status}]:`, data);
-    } else {
-      console.error("❌ Network or internal error:", error.message);
-    }
-
-    throw new CustomError("Failed to delete user from Keycloak", 500);
-  }
-};
-
-const updateUserInKeycloak = async (token, realm, userId, userData) => {
-  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}`;
-
-  try {
-    const response = await axios.put(
-      url,
-      {
-        ...userData,
-        // Important: preserve existing attributes you don't want to clear
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    if (response.status === 204 || response.status === 200) {
-      return true;
-    }
-    return false;
-  } catch (error) {
-    if (error.response) {
-      throw new Error(
-        `HTTP ${error.response.status}: ${JSON.stringify(error.response.data)}`
-      );
-    }
-    throw error;
-  }
-};
-
-const updateGroupAttributes = async (token, realm, groupId, attributes) => {
-  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups/${groupId}`;
-  await axios.put(
-    url,
-    { attributes },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
-};
-
-const deleteKeycloakGroup = async (token, realm, groupId) => {
-  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups/${groupId}`;
-  const response = await axios.delete(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.status === 204;
-};
-
-const getGroupIdByName = async (token, realm, groupName) => {
-  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/groups`;
-  const response = await axios.get(url, {
-    params: { search: groupName },
-    headers: { Authorization: `Bearer ${token}` },
+  const resp = await axios.post(url, qs.stringify(data), {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
   });
 
-  const group = response.data.find((g) => g.name === groupName);
-  return group?.id || null;
-};
-
-async function getKeycloakUserIdByEmail(token, realm, email) {
-  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users`;
-
-  try {
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      params: {
-        email: email,
-        exact: true, // Ensure exact match
-      },
-    });
-
-    const users = response.data;
-
-    if (users.length === 0) {
-      return null; // No user found
-    }
-
-    return { id: users[0].id, username: users[0].username }; // Return first matching user ID
-  } catch (error) {
-    console.error(
-      "Error fetching Keycloak user by email:",
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to fetch Keycloak user ID");
-  }
+  return resp.data; // contains access_token, refresh_token, expires_in, token_type
 }
 
-async function getUserGroups(token, realm, userId) {
-  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/groups`;
-
-  try {
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    // Returns an array of groups (each group has `id`, `name`, `path`, etc.)
-    return response.data;
-  } catch (error) {
-    console.error(
-      `❌ Error fetching groups for user ${userId}:`,
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to fetch Keycloak user groups");
-  }
-}
-
-async function getKeycloakToken({ method, username, password,KEYCLOAK_REALM='dentalhub',CLIENT_ID='mydentist.in' }) {
-  const tokenUrl = `${KEYCLOAK_BASE_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token`;
-
-  let data;
-  if (method === "password") {
-    if (!username || !password)
-      throw new Error("Username and password required");
-    data = {
-      grant_type: "password",
-      client_id: CLIENT_ID,
-      client_secret: getClientCredential(CLIENT_ID),
-      username,
-      password,
-    };
-  } else if (method === "client_credentials") {
-    data = {
-      grant_type: "client_credentials",
-      client_id: CLIENT_ID,
-      client_secret: getClientCredential(CLIENT_ID),
-    };
-  } else {
-    throw new Error("Invalid login method");
-  }
-
-  const response = await axios.post(tokenUrl, qs.stringify(data), {
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  });
-
-  return response.data;
-}
-
-/**
- * Decode JWT token payload (without verifying)
- * @param {string} token - JWT token
- * @returns {object} decoded payload
- */
-function decodeToken(token) {
-  if (!token) return null;
-
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) throw new Error("Invalid JWT token");
-
-    const payload = parts[1]; // middle part
-    const decoded = Buffer.from(payload, "base64").toString("utf8");
-    return JSON.parse(decoded);
-  } catch (err) {
-    console.error("Failed to decode token:", err.message);
-    return null;
-  }
-}
-
-const keycloakLogin = async (username, password,realm,clientId) => {
-  console.log(username, password,realm,clientId)
-  try {
-    const response = await axios.post(
-      `${process.env.KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/token`,
-      new URLSearchParams({
-        client_id: clientId,
-        // client_secret: process.env.KEYCLOAK_CLIENT_SECRET, // only if confidential client
-        grant_type: "password",
-        username,
-        password,
-      }),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-
-    return response.data; // access_token, refresh_token, etc.
-  } catch (error) {
-    throw {
-      status: error.response?.status || 500,
-      message: error.response?.data?.error_description || "Login failed",
-    };
-  }
-};
-
-async function resetKeycloakPassword({ userId, realm, newPassword, token }) {
-  const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/reset-password`;
-
-  await axios.put(
-    url,
-    {
-      type: "password",
-      value: newPassword,
-      temporary: false
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    }
-  );
-}
-
-async function getClientToken(client_id,client_credentials) {
-  try {
-    const response = await axios.post(
-      "http://localhost:8080/realms/dentalhub/protocol/openid-connect/token",
-      new URLSearchParams({
-        grant_type: "client_credentials",
-        client_id: client_id,
-        client_secret: client_credentials,
-      }),
-      {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      }
-    );
-    console.log("Access Token:", response.data.access_token);
-    return response.data.access_token;
-  } catch (err) {
-    console.error("Error getting token:", err.response?.data || err.message);
-  }
-}
+// usage
+// refreshAccessToken({keycloakBaseUrl:'https://keycloak.example.com', realm:'myrealm', clientId:'app', clientSecret:'s3cret', refreshToken:'...' })
 
 
-// getClientCredential.js
-
-function getClientCredential(clientId) {
-  if (!clientId) {
-    throw new Error("clientId is required");
-  }
-
-  // Parse the JSON from .env
-  let credentials = {};
-  try {
-    credentials = JSON.parse(process.env.CLIENT_CREDENTIALS || "{}");
-  } catch (err) {
-    throw new Error("Invalid CLIENT_CREDENTIALS format in .env");
-  }
-
-  const secret = credentials[clientId];
-
-  if (!secret) {
-    throw new Error(`No client credential found for clientId: ${clientId}`);
-  }
-
-  return secret;
-}
-
-
-
-// ✅ Export all functions
+// ✅ Export All
 module.exports = {
   addUser,
   getUserIdByUsername,
@@ -707,5 +735,6 @@ module.exports = {
   getUserByUsername,
   resetKeycloakPassword,
   getClientToken,
-  getClientCredential
+  getClientCredential,
+  refreshAccessToken
 };

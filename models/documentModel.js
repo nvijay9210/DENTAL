@@ -112,7 +112,7 @@ const updateDocumentDescription = async (document_id, description) => {
 };
 
 // Delete all documents for a record
-const deleteDocumentsByTableAndId = async (connection,table_name, table_id) => {
+const deleteDocumentsByTableAndId = async ({table_name, table_id,connection=null}) => {
   const conn = connection || await pool.getConnection();
   const cacheKey = buildCacheKey("document", table_name, table_id);
 

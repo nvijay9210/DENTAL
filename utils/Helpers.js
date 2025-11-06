@@ -188,9 +188,10 @@ const axios = require("axios");
 
 // 🔹 Function to generate random username
 function generatePatternUsername(tenant, roleShort) {
-  const safeTenant = tenant.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const safeRole = roleShort.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const randomId = Math.floor(1000 + Math.random() * 9000); // 4-digit random
+  const safeTenant = tenant.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const safeRole = roleShort.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const randomId = Math.floor(1000 + Math.random() * 9000);
+  // console.log(tenant, roleShort, safeTenant, safeRole, randomId);
   return `${safeTenant}-${safeRole}-${randomId}`;
 }
 
@@ -291,6 +292,26 @@ function sanitizeFields(data) {
   return sanitized;
 }
 
+// Generate 6-digit OTP
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000);
+
+// Send OTP via WhatsApp
+const sendWhatsAppOTP = async (phoneNumber, otp) => {
+  try {
+    const message = await twilioClient.messages.create({
+      from: TWILIO_FROM,
+      to: `whatsapp:${phoneNumber}`,
+      body: `Your OTP is ${otp}`,
+    });
+    log("OTP_SEND", "OTP sent via WhatsApp", { phoneNumber, otp });
+    return true;
+  } catch (err) {
+    log("OTP_SEND", "Failed to send OTP", { phoneNumber, error: err.message });
+    throw new Error("Failed to send OTP");
+  }
+};
+
+
 
 
 
@@ -299,6 +320,8 @@ function sanitizeFields(data) {
 // -------------------- EXPORTS --------------------
 
 module.exports = {
+  generateOTP,
+  sendWhatsAppOTP,
   getJsonValue,
   toBooleanNumber,
   decodeJsonFields,

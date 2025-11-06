@@ -27,7 +27,7 @@ const loginhistoryFields = {
     return JSON.stringify(combined);
   },
   login_time: (val) => val,
-  logout_time: (val) => val,
+  logout_time: (val) => val?formatDateTime(val):null,
   // created_time is auto-generated, skip
 };
 
@@ -136,6 +136,7 @@ const getLoginHistoryByTenantAndKeycloakUserId = async (
         tenantId,
         keycloak_user_id
       );
+ 
 
     const convertedRows = helper.convertDbToFrontend(
       login_history,
@@ -151,6 +152,7 @@ const getLoginHistoryByTenantAndKeycloakUserId = async (
 
 // Update LoginHistory
 const updateLoginHistory = async (loginhistoryId, data, tenant_id) => {
+  // console.log(data)
   try {
     const { columns, values } = mapFields(data, loginhistoryFields);
     const affectedRows = await loginhistoryModel.updateLoginHistory(

@@ -92,7 +92,7 @@ const getUserIdUsingKeycloakId = async (table, keycloakId, tenantId, clinicId = 
   let selectColumn = 'username';
 
   // Always return "profile_picture" (alias if needed)
-  if (['patient', 'dentist', 'reception'].includes(table)) {
+  if (['patient', 'dentist', 'reception','superuser'].includes(table)) {
     selectColumn += ', profile_picture';
   } else if (table === 'supplier') {
     selectColumn += ', logo_url AS profile_picture';

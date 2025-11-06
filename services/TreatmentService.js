@@ -616,7 +616,7 @@ const deleteTreatmentByTenantIdAndTreatmentId = async (
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    await deleteDocumentsByTableAndId(conn, "treatment", treatmentId);
+    await deleteDocumentsByTableAndId("treatment", treatmentId,conn);
    
     const affectedRows =
       await treatmentModel.deleteTreatmentByTenantAndTreatmentId(

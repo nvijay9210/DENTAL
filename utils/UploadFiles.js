@@ -286,7 +286,7 @@ const uploadFileMiddleware2 = (options) => {
         Dentist: "dentist_id",
         Clinic: "clinic_id",
         Tenant: "tenant_id",
-        Superuser: "super_user",
+        Superuser: "superuser_id",
       };
       const id = req.params[idMap[folderName]];
 
@@ -658,7 +658,7 @@ const updateSingleDocument2 = async ({
   try {
     if (deleteOld) {
       // Delete old record from DB
-      await deleteDocumentsByTableAndId(table_name, table_id, field_name);
+      await deleteDocumentsByTableAndId({table_name, table_id, field_name});
 
       // Optionally delete old file from disk
       // const oldDocs = await getDocumentsByTableAndId(table_name, table_id);

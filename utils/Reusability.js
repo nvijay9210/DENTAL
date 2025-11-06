@@ -96,7 +96,20 @@ const createEntity = async ({
       //   }
       // } else {
         // Create new Keycloak user
-        username = await helper.generateUsername(entityName.slice(0, 3).toUpperCase(), realm, token);
+        let code;
+        switch(entityName){
+          case 'superuser':
+            code='SUP'
+          case 'dentist':
+            code='DEN'
+          case 'patient':
+            code='PAT'
+          case 'receptionist':
+            code='REC'
+          case 'supplier':
+            code='SPL'
+        }
+        username = await helper.generateUsername(code, realm, token);
         rawPassword = rawPassword || helper.generateAlphanumericPassword(12);
 
         const userEmail = email || `${username}${helper.generateAlphanumericPassword(6)}@example.com`;
@@ -226,23 +239,42 @@ const updateEntity = async ({
     });
 
     let affectedRows = 0;
+
     if (columns.length > 0) {
       affectedRows = await updateModel(entityId, columns, values, tenantId, connection);
 
-      // Sync email, names, phoneNumber to Keycloak
-      if (process.env.KEYCLOAK_POWER === "on" && userId) {
+      // ✅ Check for Keycloak field changes
+      const keycloakFieldsChanged =
+        (sanitizedData.email && sanitizedData.email !== entity.email) ||
+        (sanitizedData.phone_number && sanitizedData.phone_number !== entity.phone_number) ||
+        (sanitizedData.first_name && sanitizedData.first_name !== entity.first_name) ||
+        (sanitizedData.last_name && sanitizedData.last_name !== entity.last_name);
+
+      if (process.env.KEYCLOAK_POWER === "on" && userId && keycloakFieldsChanged) {
         const payload = {};
-        if (sanitizedData.email) { payload.email = sanitizedData.email; payload.emailVerified = true; }
-        if (sanitizedData.first_name) payload.firstName = sanitizedData.first_name;
-        if (sanitizedData.last_name) payload.lastName = sanitizedData.last_name;
-        if (data.phone_number) payload.attributes = { phoneNumber: data.phone_number };
+
+        if (sanitizedData.email && sanitizedData.email !== entity.email) {
+          payload.email = sanitizedData.email;
+          payload.emailVerified = true;
+        }
+        if (sanitizedData.first_name && sanitizedData.first_name !== entity.first_name) {
+          payload.firstName = sanitizedData.first_name;
+        }
+        if (sanitizedData.last_name && sanitizedData.last_name !== entity.last_name) {
+          payload.lastName = sanitizedData.last_name;
+        }
+        if (sanitizedData.phone_number && sanitizedData.phone_number !== entity.phone_number) {
+          payload.attributes = { phoneNumber: sanitizedData.phone_number };
+        }
 
         if (Object.keys(payload).length > 0) {
+          console.log('🔁 Updating user in Keycloak due to changed fields...');
           await updateUserInKeycloak(token, realm, userId, payload);
-          console.log(`✅ Synced Keycloak user ${userId} with email, names, phoneNumber`);
+          console.log(`✅ Synced Keycloak user ${userId} with updated fields`);
         }
       }
 
+      // 🔄 Handle file updates (unchanged)
       for (const field of fileFields) {
         const newFiles = Array.isArray(sanitizedData[field]) ? sanitizedData[field] : [];
         const deletedFileIds = Array.isArray(sanitizedData.deletedFileIds)
@@ -264,6 +296,8 @@ const updateEntity = async ({
     }
 
     await connection.commit();
+
+    // 🧹 Invalidate caches
     await invalidateCacheByPattern(`${entityName}:*`);
     if (["dentist", "patient"].includes(entityName)) {
       await invalidateCacheByPattern(`${entityName}:clinic:*`);
@@ -278,6 +312,7 @@ const updateEntity = async ({
     connection.release();
   }
 };
+
 
 /**
  * Fetch a user from a specified table by tenant_id, clinic_id, and keycloak_user_id

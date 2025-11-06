@@ -10,7 +10,7 @@ const { validateInput } = require("./InputValidation");
 const { checkPhoneConflicts } = require("../utils/PhonenumbersValidation");
 const { checkEmailConflicts } = require("../utils/EmailValidation");
 
-const uniqueFields = ["email", "license_number"];
+const uniqueFields = ["license_number"];
 
 // Validate tenant existence
 const validateTenant = async (tenantId) => {

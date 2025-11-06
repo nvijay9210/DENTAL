@@ -48,9 +48,10 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   if (process.env.KEYCLOAK_POWER === "on") {
     user = extractUserInfo(req.user);
 
-    console.log(user)
-
-    if (user.role !== "tenant" && user.role !== "superuser" && user.role !== "guest") {
+    if (
+      user.role !== "tenant" &&
+      user.role !== "guest"
+    ) {
       const userdetails = await getUserIdUsingKeycloakId(
         user.role,
         user.userId,
@@ -62,6 +63,7 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
         throw new CustomError("User not found or inactive", 404);
       }
 
+      user.keycloak_user_id = user.userId || null;
       user.userId = userdetails.userid || null;
       user.username = userdetails.username || null;
       user.profile_picture = userdetails.profile_picture || null;
@@ -79,8 +81,15 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   try {
     let settings;
 
-    if (process.env.KEYCLOAK_POWER === "on" && user.role !== "tenant" && user.role !== "guest") {
-      settings = await getClinicSettingsByTenantIdAndClinicId(user.tenantId, user.clinicId);
+    if (
+      process.env.KEYCLOAK_POWER === "on" &&
+      user.role !== "tenant" &&
+      user.role !== "guest"
+    ) {
+      settings = await getClinicSettingsByTenantIdAndClinicId(
+        user.tenantId,
+        user.clinicId
+      );
     } else {
       if (!tenant_name || !tenant_domain) {
         throw new CustomError("Tenant name and domain are required", 400);
@@ -99,7 +108,6 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
     next(err);
   }
 };
-
 
 exports.updateTenant = async (req, res, next) => {
   const tenantId = req.params.tenant_id;

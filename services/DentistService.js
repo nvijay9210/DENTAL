@@ -317,7 +317,7 @@ const deleteDentistByTenantIdAndDentistId = async (
     userId = dentist.keycloak_id;
 
     // 2. Delete documents (files metadata)
-    await deleteDocumentsByTableAndId(connection, "dentist", dentistId);
+    await deleteDocumentsByTableAndId( "dentist", dentistId,connection);
 
     // 3. Delete from DB
     const affectedRows = await dentistModel.deleteDentistByTenantIdAndDentistId(

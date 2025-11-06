@@ -25,6 +25,8 @@ exports.createLoginHistory = async (req, res, next) => {
     // Build login history data
     const loginHistoryData = {
       ...details,
+      login_time:new Date(),
+      app_name: 'dental',
       ip_address: clientInfo.ip,
       device_info: clientInfo.device,
       browser_info: clientInfo.browser
@@ -92,6 +94,8 @@ exports.getLoginHistoryByTenantIdAndLoginHistoryId = async (req, res, next) => {
 
 exports.getLoginHistoryByTenantAndKeycloakUserId = async (req, res, next) => {
   const { keycloak_user_id, tenant_id } = req.params;
+
+  console.log('getloginController:',tenant_id,keycloak_user_id)
 
   try {
 
