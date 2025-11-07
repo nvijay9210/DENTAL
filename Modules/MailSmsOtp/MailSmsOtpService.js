@@ -101,7 +101,7 @@ async function sendOTP({ to, via = "sms", subject, message, length = 6, expiryMi
   const otp = generateOTP(length);
   console.log('otp:',otp)
   const expiry = new Date(Date.now() + expiryMinutes * 60 * 1000);
-  const fullMessage = message ? `${message}: ${otp}` : `Your OTP is ${otp}`;
+  const fullMessage = message ? `${message}: ${otp}` : `Your OTP code is ${otp}. Please enter it to continue.`;
   let result = {};
 
   // Save OTP in otpStore
@@ -123,13 +123,14 @@ async function sendOTP({ to, via = "sms", subject, message, length = 6, expiryMi
     throw new Error("Invalid 'via' option. Use 'sms' or 'email' or 'whatsapp'");
   }
 
-  return { otp, expiry, result };
+  return { otp, expiry, result,via };
 }
 
 // ======================
 // VERIFY OTP
 // ======================
 function verifyOTP({ to, otp }) {
+  console.log(otpStore)
   const key = Array.isArray(to) ? to[0] : to;
   const record = otpStore[key];
 

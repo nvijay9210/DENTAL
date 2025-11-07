@@ -7,6 +7,7 @@ const qs = require("querystring");
 
 async function checkUserInKeycloak(token, realm, userId) {
   const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}`;
+  console.log(url)
   try {
     const response = await axios.get(url, {
       headers: { Authorization: `Bearer ${token}` },
@@ -138,6 +139,8 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
       const userId = decoded.sub;
       const userGroups = decoded?.groups || [];
       const username = decoded?.preferred_username;
+
+      console.log(token,realm,userId)
 
       // ✅ Verify user in Keycloak
       const kcUser = await checkUserInKeycloak(token, realm, userId);

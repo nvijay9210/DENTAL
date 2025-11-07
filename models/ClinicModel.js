@@ -526,7 +526,7 @@ const getFinanceSummarybyDentist = async (tenant_id, clinic_id, dentist_id) => {
 };
 
 const getClinicSettingsByTenantIdAndClinicId = async (tenantId, clinicId) => {
-  const query = `select t.tenant_name,t.tenant_domain, c.clinic_name,c.clinic_app_themes,c.clinic_app_font,c.clinic_logo from clinic c inner join tenant t on t.tenant_id=c.tenant_id  where c.tenant_id=? and c.clinic_id=?`;
+  const query = `select t.tenant_name,t.tenant_domain,c.otp,c.otp_type, c.clinic_name,c.clinic_app_themes,c.clinic_app_font,c.clinic_logo from clinic c inner join tenant t on t.tenant_id=c.tenant_id  where c.tenant_id=? and c.clinic_id=?`;
   const conn = await pool.getConnection();
   try {
     const rows = await conn.query(query, [tenantId, clinicId]);

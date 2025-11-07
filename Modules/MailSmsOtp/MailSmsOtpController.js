@@ -178,7 +178,7 @@ exports.sendOTPController = async (req, res) => {
 
     if (via.includes("sms") && phone)
       result.sms = await sendOTP({
-        to: phone,
+        to: `+${phone}`,
         via: "sms",
         message,
         length: otpLength,
@@ -215,11 +215,11 @@ exports.sendOTPController = async (req, res) => {
 // 7️⃣ Verify OTP
 // ===================================
 exports.verifyOTPController = (req, res) => {
-  const { email, phone, otp } = req.body;
+  const { email, phone, otp,via } = req.body;
   if (!otp || (!email && !phone))
     return res.status(400).json({ message: "OTP and email or phone are required" });
 
-  const to = email || phone;
+  const to = via==='sms' ? `+${phone}` : email;
   const result = verifyOTP({ to, otp });
 
   if (result.success) res.status(200).json(result);

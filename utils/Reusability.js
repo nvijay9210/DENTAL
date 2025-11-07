@@ -43,9 +43,8 @@ const createEntity = async ({
   createPatientClinicFn = null,
   fileFields = [],
   connectionPool = pool,
-  clientId
+  clientId,
 }) => {
-
   const create = { ...fieldMap, created_by: (val) => val }; // DB mapping (no phone_number)
   let userId = null;
   let username = null;
@@ -95,55 +94,68 @@ const createEntity = async ({
       //     console.log(`✅ Updated Keycloak user ${userId} with new info`);
       //   }
       // } else {
-        // Create new Keycloak user
-        let code;
-        switch(entityName){
-          case 'superuser':
-            code='SUP'
-          case 'dentist':
-            code='DEN'
-          case 'patient':
-            code='PAT'
-          case 'receptionist':
-            code='REC'
-          case 'supplier':
-            code='SPL'
-        }
-        username = await helper.generateUsername(code, realm, token);
-        rawPassword = rawPassword || helper.generateAlphanumericPassword(12);
+      // Create new Keycloak user
+      let code;
+      switch (entityName) {
+        case "superuser":
+          code = "SUP";
+        case "dentist":
+          code = "DEN";
+        case "patient":
+          code = "PAT";
+        case "receptionist":
+          code = "REC";
+        case "supplier":
+          code = "SPL";
+      }
+      username = await helper.generateUsername(code, realm, token);
+      rawPassword = rawPassword || helper.generateAlphanumericPassword(12);
 
-        const userEmail = email || `${username}${helper.generateAlphanumericPassword(6)}@example.com`;
+      const userEmail =
+        email ||
+        `${username}${helper.generateAlphanumericPassword(6)}@example.com`;
 
-        const userData = {
-          username,
-          email: userEmail,
-          emailVerified: true,
-          firstName: first_name,
-          lastName: last_name,
-          attributes: { phoneNumber: phone_number || "" },
-          password: rawPassword,
-        };
+      const userData = {
+        username,
+        email: userEmail || "",
+        emailVerified: true,
+        firstName: first_name,
+        lastName: last_name,
+        attributes: {
+          phoneNumber: phone_number || "",
+          tenant_id: data.tenant_id || "",
+          clinic_id: data.clinic_id || "",
+        },
+        password: rawPassword,
+      };
 
-        const isUserCreated = await addUser(token, realm, userData);
-        if (!isUserCreated) throw new CustomError("Keycloak user creation failed", 400);
+      const isUserCreated = await addUser(token, realm, userData);
+      if (!isUserCreated)
+        throw new CustomError("Keycloak user creation failed", 400);
 
-        userId = await getUserIdByUsername(token, realm, username);
-        if (!userId) throw new CustomError("Could not fetch Keycloak user ID", 400);
+      userId = await getUserIdByUsername(token, realm, username);
+      if (!userId)
+        throw new CustomError("Could not fetch Keycloak user ID", 400);
 
-        if (roleName) {
-          const roleAssigned = await assignRealmRoleToUser(token, realm, userId, roleName);
-          if (!roleAssigned)
-            throw new CustomError(`Failed to assign '${roleName}' role`, 400);
-        }
+      if (roleName) {
+        const roleAssigned = await assignRealmRoleToUser(
+          token,
+          realm,
+          userId,
+          roleName
+        );
+        if (!roleAssigned)
+          throw new CustomError(`Failed to assign '${roleName}' role`, 400);
+      }
 
-        if (userClinicId) {
-          const groupName = `dental-${data.tenant_id}-${userClinicId}`;
-          await addUserToGroup(token, realm, userId, groupName);
-        }
+      if (userClinicId) {
+        const groupName = `dental-${data.tenant_id}-${userClinicId}`;
+        await addUserToGroup(token, realm, userId, groupName);
+      }
 
-        data.keycloak_id = userId;
-        data.username = username;
-        data.password = rawPassword;
+      data.keycloak_id = userId;
+      data.username = username;
+      data.password = rawPassword;
       // }
     }
 
@@ -162,7 +174,11 @@ const createEntity = async ({
 
     if (entityName === "patient" && userClinicId) {
       await createPatientClinicFn(
-        { patient_id: entityId, clinic_id: userClinicId, created_by: data.created_by },
+        {
+          patient_id: entityId,
+          clinic_id: userClinicId,
+          created_by: data.created_by,
+        },
         connection
       );
     }
@@ -202,7 +218,10 @@ const createEntity = async ({
         console.error("❌ Failed to rollback Keycloak user:", rollbackErr);
       }
     }
-    throw new CustomError(`Failed to create ${entityName}: ${error.message}`, 500);
+    throw new CustomError(
+      `Failed to create ${entityName}: ${error.message}`,
+      500
+    );
   } finally {
     connection.release();
   }
@@ -241,34 +260,56 @@ const updateEntity = async ({
     let affectedRows = 0;
 
     if (columns.length > 0) {
-      affectedRows = await updateModel(entityId, columns, values, tenantId, connection);
+      affectedRows = await updateModel(
+        entityId,
+        columns,
+        values,
+        tenantId,
+        connection
+      );
 
       // ✅ Check for Keycloak field changes
       const keycloakFieldsChanged =
         (sanitizedData.email && sanitizedData.email !== entity.email) ||
-        (sanitizedData.phone_number && sanitizedData.phone_number !== entity.phone_number) ||
-        (sanitizedData.first_name && sanitizedData.first_name !== entity.first_name) ||
-        (sanitizedData.last_name && sanitizedData.last_name !== entity.last_name);
+        (sanitizedData.phone_number &&
+          sanitizedData.phone_number !== entity.phone_number) ||
+        (sanitizedData.first_name &&
+          sanitizedData.first_name !== entity.first_name) ||
+        (sanitizedData.last_name &&
+          sanitizedData.last_name !== entity.last_name);
 
-      if (process.env.KEYCLOAK_POWER === "on" && userId && keycloakFieldsChanged) {
+      if (
+        process.env.KEYCLOAK_POWER === "on" &&
+        userId &&
+        keycloakFieldsChanged
+      ) {
         const payload = {};
 
         if (sanitizedData.email && sanitizedData.email !== entity.email) {
           payload.email = sanitizedData.email;
           payload.emailVerified = true;
         }
-        if (sanitizedData.first_name && sanitizedData.first_name !== entity.first_name) {
+        if (
+          sanitizedData.first_name &&
+          sanitizedData.first_name !== entity.first_name
+        ) {
           payload.firstName = sanitizedData.first_name;
         }
-        if (sanitizedData.last_name && sanitizedData.last_name !== entity.last_name) {
+        if (
+          sanitizedData.last_name &&
+          sanitizedData.last_name !== entity.last_name
+        ) {
           payload.lastName = sanitizedData.last_name;
         }
-        if (sanitizedData.phone_number && sanitizedData.phone_number !== entity.phone_number) {
+        if (
+          sanitizedData.phone_number &&
+          sanitizedData.phone_number !== entity.phone_number
+        ) {
           payload.attributes = { phoneNumber: sanitizedData.phone_number };
         }
 
         if (Object.keys(payload).length > 0) {
-          console.log('🔁 Updating user in Keycloak due to changed fields...');
+          console.log("🔁 Updating user in Keycloak due to changed fields...");
           await updateUserInKeycloak(token, realm, userId, payload);
           console.log(`✅ Synced Keycloak user ${userId} with updated fields`);
         }
@@ -276,7 +317,9 @@ const updateEntity = async ({
 
       // 🔄 Handle file updates (unchanged)
       for (const field of fileFields) {
-        const newFiles = Array.isArray(sanitizedData[field]) ? sanitizedData[field] : [];
+        const newFiles = Array.isArray(sanitizedData[field])
+          ? sanitizedData[field]
+          : [];
         const deletedFileIds = Array.isArray(sanitizedData.deletedFileIds)
           ? sanitizedData.deletedFileIds
           : [];
@@ -307,12 +350,14 @@ const updateEntity = async ({
   } catch (error) {
     await connection.rollback();
     console.error(`❌ Update ${entityName} failed:`, error.message);
-    throw new CustomError(`Failed to update ${entityName}: ${error.message}`, 500);
+    throw new CustomError(
+      `Failed to update ${entityName}: ${error.message}`,
+      500
+    );
   } finally {
     connection.release();
   }
 };
-
 
 /**
  * Fetch a user from a specified table by tenant_id, clinic_id, and keycloak_user_id
@@ -322,26 +367,37 @@ const updateEntity = async ({
  * @param {string} keycloakUserId
  * @returns {Promise<Object|null>} User object or null if not found
  */
-const getUserByTenantClinicAndKeycloakId = async (tableName, tenantId, clinicId, keycloakUserId) => {
+const getUserByTenantClinicAndKeycloakId = async (
+  tableName,
+  tenantId,
+  clinicId,
+  keycloakUserId
+) => {
   if (!tableName || !tenantId || !keycloakUserId) {
     throw new Error("Missing required parameters");
   }
 
   // ✅ Whitelist to prevent SQL injection
-  const allowedTables = ['superuser', 'dentist', 'patient', 'receptionist', 'supplier'];
+  const allowedTables = [
+    "superuser",
+    "dentist",
+    "patient",
+    "receptionist",
+    "supplier",
+  ];
   if (!allowedTables.includes(tableName)) {
     throw new Error(`Invalid table name: ${tableName}`);
   }
 
   // ✅ receptionist table naming fix
-  if (tableName === 'receptionist') tableName = 'reception';
+  if (tableName === "receptionist") tableName = "reception";
 
   const conn = await pool.getConnection();
   try {
     let query;
     let params;
 
-    if (tableName === 'patient') {
+    if (tableName === "patient") {
       // ✅ Special case: check patient_clinic table for clinic filter
       query = `
         SELECT p.*
@@ -367,7 +423,6 @@ const getUserByTenantClinicAndKeycloakId = async (tableName, tenantId, clinicId,
 
     const [rows] = await conn.query(query, params);
     return rows[0] || null;
-
   } catch (error) {
     console.error(`Error fetching user from ${tableName}:`, error);
     throw new Error("Database operation failed");
@@ -376,5 +431,8 @@ const getUserByTenantClinicAndKeycloakId = async (tableName, tenantId, clinicId,
   }
 };
 
-
-module.exports = { updateEntity, createEntity,getUserByTenantClinicAndKeycloakId };
+module.exports = {
+  updateEntity,
+  createEntity,
+  getUserByTenantClinicAndKeycloakId,
+};
