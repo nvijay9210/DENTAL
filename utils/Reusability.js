@@ -99,14 +99,19 @@ const createEntity = async ({
       switch (entityName) {
         case "superuser":
           code = "SUP";
+          break;
         case "dentist":
           code = "DEN";
+          break;
         case "patient":
           code = "PAT";
+          break;
         case "receptionist":
           code = "REC";
+          break;
         case "supplier":
           code = "SPL";
+          break;
       }
       username = await helper.generateUsername(code, realm, token);
       rawPassword = rawPassword || helper.generateAlphanumericPassword(12);

@@ -11,6 +11,8 @@ const {
   keycloakLogin,
   getClientCredential,
   getUserByUsername,
+  addUser,
+  getUserIdByUsername,
 } = require("./KeycloakAdmin");
 const { getTenantByTenantId } = require("../services/TenantService");
 const { getClinicByTenantIdAndClinicId } = require("../services/ClinicService");
@@ -21,7 +23,7 @@ const {
   verifyOTP,
 } = require("../Modules/MailSmsOtp/MailSmsOtpService");
 const { getUserByTenantClinicAndKeycloakId } = require("../utils/Reusability");
-const { generateOTP, sendWhatsAppOTP } = require("../utils/Helpers");
+const { generateOTP, sendWhatsAppOTP, generateUsername, generateAlphanumericPassword } = require("../utils/Helpers");
 
 const router = express.Router();
 router.use(cookieParser());
@@ -37,8 +39,27 @@ const log = (label, message, data = null) => {
   );
 };
 
+const sendOtpToRedis = async (phoneNumber, otp, ttlSeconds = 300) => {
+  try {
+    const key = `otp:${phoneNumber}`; // namespace your OTP key
+    await setCache(key, { otp }, ttlSeconds); // store OTP object
+    console.log(`OTP cached for ${phoneNumber}, expires in ${ttlSeconds}s`);
+  } catch (err) {
+    console.error("Failed to store OTP in cache:", err);
+  }
+};
+
 const finalizeLogin = async (req, res) => {
   log("FINALIZE_LOGIN", "Building user context and setting cookies");
+
+  const {host} = req.body;
+  const HOST_REALM_CLIENT = JSON.parse(process.env.HOST_REALM_CLIENT);
+  const tenantConfig = HOST_REALM_CLIENT[host];
+  if (!tenantConfig) return res.status(400).json({ error: "Invalid host" });
+
+  const { realm, clientId } = tenantConfig;
+  console.log(clientId)
+
   try {
     const { access_token, refresh_token } = req.tokens;
     const dbUser = req.dbUser;
@@ -51,6 +72,8 @@ const finalizeLogin = async (req, res) => {
       sameSite: isProduction ? "None" : "Lax",
     };
 
+    log("TOKEN_SAVE", "✅ token save prcess — responding with cookie");
+
     res.cookie("access_token", access_token, {
       ...cookieOptions,
       maxAge: 60 * 60 * 1000,
@@ -59,7 +82,7 @@ const finalizeLogin = async (req, res) => {
       ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    res.cookie("clientId", req.body.clientid, {
+    res.cookie("clientId", clientId, {
       ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -74,7 +97,7 @@ const finalizeLogin = async (req, res) => {
 
 // router.get('/hi',(req,res)=>{
 //  res.status(200).json('hello')
-  
+
 // })
 
 router.post("/tokensave", (req, res) => {
@@ -82,8 +105,8 @@ router.post("/tokensave", (req, res) => {
     const {
       access_token,
       refresh_token,
-      access_expires_in,   // in seconds (optional)
-      refresh_expires_in,  // in seconds (optional)
+      access_expires_in, // in seconds (optional)
+      refresh_expires_in, // in seconds (optional)
     } = req.body;
 
     if (!access_token || !refresh_token) {
@@ -137,42 +160,47 @@ router.post("/tokensave", (req, res) => {
 // =========================
 
 const otpStore = {};
-router.post("/login-otp", async (req, res) => {
-  try {
-    const { phoneNumber } = req.body;
-    if (!phoneNumber)
-      return res.status(400).json({ message: "phoneNumber is required" });
 
-    // Generate OTP
-    const otp = generateOTP();
-    otpStore[phoneNumber] = { otp, expires: Date.now() + 5 * 60 * 1000 }; // 5 mins
+// router.post("/login-otp", async (req, res) => {
+//   try {
+//     const { phoneNumber } = req.body;
+//     if (!phoneNumber)
+//       return res.status(400).json({ message: "phoneNumber is required" });
 
-    // Send OTP via WhatsApp
-    await sendWhatsAppOTP(phoneNumber, otp);
+//     // Generate OTP
+//     const otp = generateOTP();
+//     otpStore[phoneNumber] = { otp, expires: Date.now() + 5 * 60 * 1000 }; // 5 mins
 
-    return res.status(200).json({
-      message: "OTP sent to WhatsApp",
-      phoneNumber,
-      otp: process.env.NODE_ENV === "development" ? otp : undefined,
-    });
-  } catch (err) {
-    log("LOGIN_OTP", "Error sending OTP", err.message);
-    return res.status(500).json({ message: err.message });
-  }
-});
+//     // Send OTP via WhatsApp
+//     await sendWhatsAppOTP(phoneNumber, otp);
+
+//     return res.status(200).json({
+//       message: "OTP sent to WhatsApp",
+//       phoneNumber,
+//       otp: process.env.NODE_ENV === "development" ? otp : undefined,
+//     });
+//   } catch (err) {
+//     log("LOGIN_OTP", "Error sending OTP", err.message);
+//     return res.status(500).json({ message: err.message });
+//   }
+// });
 
 // =========================
 // Verify WhatsApp OTP
 // =========================
 router.post("/verify-otp", async (req, res) => {
   try {
-    const { phoneNumber, otp } = req.body;
-    if (!phoneNumber || !otp)
-      return res.status(400).json({ message: "phoneNumber and OTP required" });
+    const { username, otp } = req.body;
+    if (!username || !otp)
+      return res.status(400).json({ message: "username and OTP required" });
 
-    const record = otpStore[phoneNumber];
+    console.log(otpStore);
+
+    const record = otpStore[username];
     if (!record)
-      return res.status(400).json({ message: "No OTP requested for this number" });
+      return res
+        .status(400)
+        .json({ message: "No OTP requested for this number" });
 
     if (record.expires < Date.now())
       return res.status(400).json({ message: "OTP expired" });
@@ -188,8 +216,7 @@ router.post("/verify-otp", async (req, res) => {
       phoneNumber // assuming you store phoneNumber as keycloak_id or attribute
     );
 
-    if (!dbUser)
-      return res.status(404).json({ message: "User not found" });
+    if (!dbUser) return res.status(404).json({ message: "User not found" });
 
     // Generate Keycloak-style tokens (or reuse existing token logic)
     const tokens = {
@@ -217,56 +244,63 @@ router.post("/verify-otp", async (req, res) => {
   }
 });
 
-
-
 // Routes
-router.post("/login2", async (req, res) => {
+router.post("/login", async (req, res) => {
   log("LOGIN_FLOW", "🚀 Starting login flow", { body: req.body });
   try {
-    const { username, password, realm, clientid, otp, to } = req.body;
+    const { username, password, host, otp, to } = req.body;
+    const HOST_REALM_CLIENT = JSON.parse(process.env.HOST_REALM_CLIENT);
+    const tenantConfig = HOST_REALM_CLIENT[host];
+    if (!tenantConfig) return res.status(400).json({ error: "Invalid host" });
+
+    const { realm, clientId } = tenantConfig;
 
     // OTP verification step
-    // if (otp) {
-    //   log("OTP_VERIFY", "Verifying OTP", { to, otp });
-    //   const record = tempLoginStore[to];
-    //   if (!record) {
-    //     log("OTP_VERIFY", "❌ No pending login session");
-    //     return res.status(400).json({ message: "No login found" });
-    //   }
+    if (otp) {
+      log("OTP_VERIFY", "Verifying OTP", { username, otp });
+      const record = tempLoginStore[username];
+      if (!record) {
+        log("OTP_VERIFY", "❌ No pending login session");
+        return res.status(400).json({ message: "No login found" });
+      }
 
-    //   const otpResult = verifyOTP({ to, otp });
-    //   if (!otpResult.success) {
-    //     log("OTP_VERIFY", "❌ Invalid OTP", { reason: otpResult.message });
-    //     return res.status(400).json({ message: otpResult.message });
-    //   }
+      const verifyOtpData={
+        to:username,
+        otp,
+        username
+      }
 
-    //   log("OTP_VERIFY", "✅ OTP valid — using stored session");
-    //   req.tokens = record.tokens;
-    //   req.dbUser = record.dbUser;
-    //   delete tempLoginStore[to];
-    //   return finalizeLogin(req, res);
-    // }
+      const otpResult =verifyOTP(verifyOtpData)
+      if (!otpResult.success) {
+        log("OTP_VERIFY", "❌ Invalid OTP", { reason: otpResult.message });
+        return res.status(400).json({ message: otpResult.message });
+      }
+
+      log("OTP_VERIFY", "✅ OTP valid — using stored session");
+      req.tokens = record.tokens;
+      req.dbUser = record.dbUser;
+      delete tempLoginStore[username];
+      return finalizeLogin(req, res);
+    }
 
     // Initial credentials check
-    // if (!username || !password) {
-    //   log("LOGIN_FLOW", "❌ Missing username or password");
-    //   return res
-    //     .status(400)
-    //     .json({ message: "Username and password required" });
-    // }
+    if (!username || !password) {
+      log("LOGIN_FLOW", "❌ Missing username or password");
+      return res
+        .status(400)
+        .json({ message: "Username and password required" });
+    }
 
     // Keycloak authentication
-    // log("KEYCLOAK_AUTH", "Authenticating with Keycloak", {
-    //   username,
-    //   realm,
-    //   clientid,
-    // });
+    log("KEYCLOAK_AUTH", "Authenticating with Keycloak", {
+      username,
+      realm,
+      clientId,
+    });
 
-    // const tokens = await keycloakLogin(username, password, realm, clientid);
+    const tokens = await keycloakLogin(username, password, realm, clientId);
 
-    const tokens = req.body.tokens
     log("KEYCLOAK_AUTH", "✅ Keycloak auth successful");
-
 
     // Verify in DB
     log("DB_VERIFY", "Verifying user in application DB");
@@ -274,7 +308,7 @@ router.post("/login2", async (req, res) => {
     log("DB_VERIFY", "✅ DB verification complete", { role: dbUser.role });
 
     // Skip OTP for tenant
-    if (dbUser.role === "tenant") {
+    if (dbUser.role === "tenant" || dbUser.role==='guest') {
       log("TENANT_BYPASS", "Tenant user — skipping OTP");
       req.tokens = tokens;
       req.dbUser = dbUser;
@@ -296,34 +330,35 @@ router.post("/login2", async (req, res) => {
     }
 
     // Fetch user contact for OTP
-    // log("OTP_SEND", "OTP required — fetching user contact info");
-    // const user2 = await getUserByTenantClinicAndKeycloakId(
-    //   dbUser.role,
-    //   dbUser.dbUser.tenant_id,
-    //   dbUser.dbUser.clinic_id,
-    //   dbUser.dbUser.keycloak_id
-    // );
+    log("OTP_SEND", "OTP required — fetching user contact info");
+    const user2 = await getUserByTenantClinicAndKeycloakId(
+      dbUser.role,
+      dbUser.dbUser.tenant_id,
+      dbUser.dbUser.clinic_id,
+      dbUser.dbUser.keycloak_id
+    );
 
-    // const via = clinic.otp_type;
-    // const key = via === "email" ? user2.email : user2.phoneNumber;
-    // const payload = {
-    //   email: user2.email,
-    //   phone: user2.phoneNumber,
-    //   via,
-    //   message: "Your Verification OTP",
-    //   subject: "OTP Verification",
-    // };
+    const via = clinic.otp_type;
+    const key = (via === "email") ? user2.email : `+${user2.phone_number}`;
+    const payload = {
+      to:key,
+      via,
+      message: "Your Verification OTP",
+      subject: "OTP Verification",
+      username
+    };
 
-    // log("OTP_SEND", "Sending OTP", { to: key, via });
-    // const otps = await sendOTP(payload);
-    // tempLoginStore[key] = { tokens, dbUser };
-    // log("OTP_SEND", "✅ OTP sent and session stored");
+    log("OTP_SEND", "Sending OTP", { to: key, via });
+    const otps = await sendOTP(payload);
+    tempLoginStore[user2?.username] = { tokens, dbUser };
+    log("OTP_SEND", "✅ OTP sent and session stored");
 
-    // return res.status(200).json({
-    //   message: "OTP sent",
-    //   to: key,
-    //   otpDetails: process.env.NODE_ENV === "development" ? otps : undefined,
-    // });
+    return res.status(200).json({
+      message: "OTP sent",
+      step: "otp",
+      to: key,
+      otpDetails: process.env.NODE_ENV === "development" ? otps : undefined,
+    });
   } catch (err) {
     log("LOGIN_FLOW", "💥 Login failed", {
       message: err.message,
@@ -334,6 +369,34 @@ router.post("/login2", async (req, res) => {
       .json({ message: err.message || "Invalid credentials" });
   }
 });
+
+// POST /login
+// router.post("/login", async (req, res) => {
+//   try {
+//     const { username, password, host } = req.body;
+
+//     const tenantConfig = process.env.HOST_REALM_CLIENT[host];
+//     if (!tenantConfig) return res.status(400).json({ error: "Invalid host" });
+
+//     const { realm, clientId } = tenantConfig;
+
+//     const data = new URLSearchParams();
+//     data.append("client_id", clientId);
+//     data.append("grant_type", "password");
+//     data.append("username", username);
+//     data.append("password", password);
+
+//     const response = await axios.post(
+//       `${KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/token`,
+//       data,
+//       { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+//     );
+
+//     res.json(response.data); // access_token, refresh_token, etc.
+//   } catch (err) {
+//     res.status(err.response?.status || 500).json(err.response?.data || err.message);
+//   }
+// });
 
 // Refresh Token
 router.post("/refresh-token", async (req, res, next) => {
@@ -366,7 +429,7 @@ router.post("/refresh-token", async (req, res, next) => {
 
     const tenant = await getTenantByTenantId(userInfo.tenantId);
     let clinic = null;
-    if (userInfo.role !== "tenant" && userInfo.clinicId) {
+    if (userInfo.role !== "tenant" && userInfo.role !== "guest" && userInfo.clinicId) {
       clinic = await getClinicByTenantIdAndClinicId(
         userInfo.tenantId,
         userInfo.clinicId
@@ -510,27 +573,25 @@ router.post("/logout", (req, res) => {
   }
 });
 
-
-
 // Forgot Password
 router.post("/forgettenpassword", async (req, res, next) => {
   log("FORGOT_PASSWORD", "Forgot password request", req.body);
   try {
-    const { username, realm, clientid } = req.body;
+    const { username, host } = req.body;
 
-    const clientSecret = getClientCredential(clientid);
-    const tokenUrl = `${process.env.KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/token`;
-    const tokenRes = await axios.post(
-      tokenUrl,
-      qs.stringify({
-        grant_type: "client_credentials",
-        client_id: clientid,
-        client_secret: clientSecret,
-      }),
-      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    const HOST_REALM_CLIENT = JSON.parse(process.env.HOST_REALM_CLIENT);
+    const tenantConfig = HOST_REALM_CLIENT[host];
+    if (!tenantConfig) return res.status(400).json({ error: "Invalid host" });
+    const { realm, clientId } = tenantConfig;
+
+    const tokenRes = await keycloakLogin(
+      process.env.VIEW_USER_USERNAME,
+      process.env.VIEW_USER_PASS,
+      realm,
+      clientId
     );
 
-    const adminToken = tokenRes.data.access_token;
+    const adminToken = tokenRes.access_token;
     const user = await getUserByUsername(adminToken, realm, username);
 
     if (!user) {
@@ -538,26 +599,49 @@ router.post("/forgettenpassword", async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const phoneNumber = user.attributes?.phoneNumber?.[0];
-    if (!phoneNumber) {
-      log("FORGOT_PASSWORD", "❌ No phone number on user");
-      return res.status(400).json({ message: "No phone number for user" });
+    const clinic = await getClinicByTenantIdAndClinicId(
+      user?.attributes?.tenant_id[0],
+      user?.attributes?.clinic_id[0]
+    );
+
+    if (!clinic) {
+      log("FORGOT_PASSWORD", "❌ Clinic not found");
+      return res.status(404).json({ message: "Clinic not found" });
     }
 
-    const otpResponse = await sendOTP({
-      to: phoneNumber,
-      via: "sms",
-      message: "Your password reset OTP",
-      length: 6,
-      expiryMinutes: 10,
-    });
+    if (clinic.otp) {
+      const sendValue =
+        clinic?.otp_type === "sms"
+          ? user.attributes?.phoneNumber?.[0]
+          : clinic?.otp - type === "email"
+          ? user.attributes?.email?.[0]
+          : user.attributes?.whatsappNumber?.[0];
+      if (!sendValue) {
+        log("FORGOT_PASSWORD", "❌ No Send value on user");
+        return res.status(400).json({ message: "No Send value for user" });
+      }
 
-    log("FORGOT_PASSWORD", "✅ OTP sent for password reset");
-    return res.status(200).json({
-      message: "OTP sent successfully",
-      phone: phoneNumber,
-      otp: process.env.NODE_ENV === "development" ? otpResponse.otp : undefined,
-    });
+      const otpResponse = await sendOTP({
+        to: sendValue,
+        username,
+        via: clinic?.otp_type,
+        message: "Your password reset OTP",
+        length: 6,
+        expiryMinutes: 10,
+      });
+
+      log("FORGOT_PASSWORD", "✅ OTP sent for password reset");
+      return res.status(200).json({
+        message: "OTP sent successfully",
+        otpResponse,
+        to: username,
+        otp:
+          process.env.NODE_ENV === "development" ? otpResponse.otp : undefined,
+      });
+    } else {
+      log("FORGOT_PASSWORD", "💥 Otp option is not enable");
+      throw new CustomError("Otp option not enable", 400);
+    }
   } catch (err) {
     log("FORGOT_PASSWORD", "💥 Error", { error: err });
     next(new CustomError(err.message || "Failed to send OTP", 500));
@@ -568,9 +652,11 @@ router.post("/forgettenpassword", async (req, res, next) => {
 router.post("/reset-password", async (req, res, next) => {
   log("RESET_PASSWORD_ROUTE", "Password reset request", req.body);
   try {
-    const { username, newPassword } = req.body;
-    const realm = req.headers["x-realm"];
-    const clientid = req.headers["x-clientid"];
+    const { username, newPassword, host } = req.body;
+    const HOST_REALM_CLIENT = JSON.parse(process.env.HOST_REALM_CLIENT);
+    const tenantConfig = HOST_REALM_CLIENT[host];
+    if (!tenantConfig) return res.status(400).json({ error: "Invalid host" });
+    const { realm, clientId } = tenantConfig;
 
     if (!username || !newPassword) {
       return res
@@ -578,19 +664,13 @@ router.post("/reset-password", async (req, res, next) => {
         .json({ message: "Username and newPassword are required" });
     }
 
-    const clientSecret = getClientCredential(clientid);
-    const tokenUrl = `${process.env.KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/token`;
-    const tokenResponse = await axios.post(
-      tokenUrl,
-      qs.stringify({
-        grant_type: "client_credentials",
-        client_id: clientid,
-        client_secret: clientSecret,
-      }),
-      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    const tokenResponse = await keycloakLogin(
+      process.env.VIEW_USER_USERNAME,
+      process.env.VIEW_USER_PASS,
+      realm,
+      clientId
     );
-
-    const adminToken = tokenResponse.data.access_token;
+    const adminToken = tokenResponse.access_token;
 
     const userResponse = await axios.get(
       `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users?username=${username}`,
@@ -619,6 +699,66 @@ router.post("/reset-password", async (req, res, next) => {
     return res.status(200).json({ message: "Password updated successfully" });
   } catch (err) {
     log("RESET_PASSWORD_ROUTE", "💥 Error", {
+      error: err.response?.data || err.message,
+    });
+    next(new CustomError(err.response?.data?.error || err.message, 500));
+  }
+});
+
+router.post("/register", async (req, res, next) => {
+  log("USER_REGISTER_IN_KEYCLOAK", "user register process", req.body);
+  try {
+    const { email,firstname,lastname,phone, host } = req.body;
+    const HOST_REALM_CLIENT = JSON.parse(process.env.HOST_REALM_CLIENT);
+    const tenantConfig = HOST_REALM_CLIENT[host];
+    if (!tenantConfig) return res.status(400).json({ error: "Invalid host" });
+    const { realm, clientId } = tenantConfig;
+
+    if (!firstname || !lastname || !phone) {
+      return res
+        .status(400)
+        .json({ message: "Firstname lasname phonenumber are required" });
+    }
+      
+
+    const tokenResponse = await keycloakLogin(
+      process.env.VIEW_USER_USERNAME,
+      process.env.VIEW_USER_PASS,
+      realm,
+      clientId
+    );
+    const adminToken = tokenResponse.access_token;
+
+    const username = await generateUsername('GST', realm, adminToken);
+
+    const password = '1234' ||generateAlphanumericPassword(12);
+
+    const userEmail =
+      email ||
+      `${username}${generateAlphanumericPassword(6)}@example.com`;
+
+    const userData = {
+      username,
+      email: userEmail || "",
+      emailVerified: true,
+      firstName: firstname,
+      lastName: lastname,
+      attributes: {
+        phoneNumber: phone || "",
+        tenant_id: tokenResponse?.tenant_id || "",
+        clinic_id: tokenResponse?.clinic_id || "",
+      },
+      password: password,
+    };
+
+    const isUserCreated = await addUser(adminToken, realm, userData);
+    if (!isUserCreated)
+      throw new CustomError("Keycloak user creation failed", 400);
+
+    log("USER_CREATED", "✅ User Created successfully");
+    return res.status(200).json({ message: "User Created successfully" });
+  } catch (err) {
+    log("USER_CREATED", "💥 Error", {
       error: err.response?.data || err.message,
     });
     next(new CustomError(err.response?.data?.error || err.message, 500));

@@ -16,7 +16,7 @@ exports.sendEmailOrOtp = async (req, res) => {
     const {
       email,
       phone,
-      sendVia = ["email", "sms","whatsapp"],
+      sendVia = ["email", "sms", "whatsapp"],
       otp = true,
       otpLength = 6,
       otpExpiryMinutes = 10,
@@ -73,10 +73,15 @@ exports.sendEmailOrOtp = async (req, res) => {
             length: otpLength,
             expiryMinutes: otpExpiryMinutes,
           })
-        : await sendWhatsApp({ to: phone, body: message || "Hello from WhatsApp!" });
+        : await sendWhatsApp({
+            to: phone,
+            body: message || "Hello from WhatsApp!",
+          });
     }
 
-    res.status(200).json({ message: "Notifications sent successfully", data: result });
+    res
+      .status(200)
+      .json({ message: "Notifications sent successfully", data: result });
   } catch (err) {
     console.error("❌ Notification failed:", err.message);
     res.status(500).json({ message: err.message });
@@ -96,8 +101,16 @@ exports.sendEmailWithAttachmentController = async (req, res) => {
       path: file.path,
     }));
 
-    const result = await sendEmailWithAttachment({ to: email, subject, text, html, attachments });
-    res.status(200).json({ message: "Email with attachment sent", data: result });
+    const result = await sendEmailWithAttachment({
+      to: email,
+      subject,
+      text,
+      html,
+      attachments,
+    });
+    res
+      .status(200)
+      .json({ message: "Email with attachment sent", data: result });
   } catch (err) {
     console.error("❌ Email with attachment failed:", err.message);
     res.status(500).json({ message: err.message });
@@ -111,7 +124,9 @@ exports.sendSMSController = async (req, res) => {
   try {
     const { phone, message } = req.body;
     if (!phone || !message)
-      return res.status(400).json({ message: "Phone number and message are required" });
+      return res
+        .status(400)
+        .json({ message: "Phone number and message are required" });
 
     const result = await sendSMS({ to: phone, body: message });
     res.status(200).json({ message: "SMS sent successfully", data: result });
@@ -128,10 +143,14 @@ exports.sendWhatsAppController = async (req, res) => {
   try {
     const { phone, message } = req.body;
     if (!phone || !message)
-      return res.status(400).json({ message: "Phone number and message are required" });
+      return res
+        .status(400)
+        .json({ message: "Phone number and message are required" });
 
     const result = await sendWhatsApp({ to: phone, body: message });
-    res.status(200).json({ message: "WhatsApp message sent successfully", data: result });
+    res
+      .status(200)
+      .json({ message: "WhatsApp message sent successfully", data: result });
   } catch (err) {
     console.error("❌ WhatsApp failed:", err.message);
     res.status(500).json({ message: err.message });
@@ -145,10 +164,18 @@ exports.sendWhatsAppWithAttachmentController = async (req, res) => {
   try {
     const { phone, body, mediaUrl } = req.body;
     if (!phone || !mediaUrl)
-      return res.status(400).json({ message: "Phone and mediaUrl are required" });
+      return res
+        .status(400)
+        .json({ message: "Phone and mediaUrl are required" });
 
-    const result = await sendWhatsAppWithAttachment({ to: phone, body, mediaUrl });
-    res.status(200).json({ message: "WhatsApp attachment sent successfully", data: result });
+    const result = await sendWhatsAppWithAttachment({
+      to: phone,
+      body,
+      mediaUrl,
+    });
+    res
+      .status(200)
+      .json({ message: "WhatsApp attachment sent successfully", data: result });
   } catch (err) {
     console.error("❌ WhatsApp attachment failed:", err.message);
     res.status(500).json({ message: err.message });
@@ -163,7 +190,7 @@ exports.sendOTPController = async (req, res) => {
     const {
       email,
       phone,
-      sendVia = ["email", "sms","whatsapp"],
+      sendVia = ["email", "sms", "whatsapp"],
       otpLength = 6,
       otpExpiryMinutes = 10,
       message,
@@ -215,12 +242,19 @@ exports.sendOTPController = async (req, res) => {
 // 7️⃣ Verify OTP
 // ===================================
 exports.verifyOTPController = (req, res) => {
-  const { email, phone, otp,via } = req.body;
-  if (!otp || (!email && !phone))
-    return res.status(400).json({ message: "OTP and email or phone are required" });
+  const { email, phone, otp, via, username } = req.body;
+  if (!otp || (!email && !phone && !username))
+    return res
+      .status(400)
+      .json({ message: "OTP and email or phone or username are required" });
 
-  const to = via==='sms' ? `+${phone}` : email;
-  const result = verifyOTP({ to, otp });
+      const to = username 
+      ? username 
+      : via === "sms" 
+        ? `+${phone}` 
+        : email;
+  
+  const result = verifyOTP({to, otp});
 
   if (result.success) res.status(200).json(result);
   else res.status(400).json(result);

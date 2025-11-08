@@ -11,7 +11,7 @@ const log = (label, message, data = null) => {
     console.log(
       `[KeycloakAdmin] ${label}:`,
       message,
-      data ? `\nData:, JSON.stringify(data, null, 2)` : ""
+      data ? data : ""
     );
 };
 
@@ -25,11 +25,16 @@ async function addUser(token, realm, userData) {
 
   const payload = {
     username: userData.username,
-    email: userData.email || `${userData.username}@gmail.com`,
+    email: userData.email || '',
     firstName: userData.firstName || "",
     lastName: userData.lastName || "",
     enabled: true,
     emailVerified: true,
+    attributes:{
+      tenant_id: userData?.attributes?.tenant_id || '',
+      client_id: userData?.attributes?.client_id || '',
+      phoneNumber: userData?.attributes?.phoneNumber,
+    },
     credentials: [
       {
         type: "password",

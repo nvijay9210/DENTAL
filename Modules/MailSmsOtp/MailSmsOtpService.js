@@ -97,16 +97,14 @@ function generateOTP(length = 6) {
 // ======================
 // SEND OTP (email or SMS)
 // ======================
-async function sendOTP({ to, via = "sms", subject, message, length = 6, expiryMinutes = 10 }) {
+async function sendOTP({ to, via = "sms", subject, message, length = 6, expiryMinutes = 10,username }) {
   const otp = generateOTP(length);
   console.log('otp:',otp)
   const expiry = new Date(Date.now() + expiryMinutes * 60 * 1000);
   const fullMessage = message ? `${message}: ${otp}` : `Your OTP code is ${otp}. Please enter it to continue.`;
   let result = {};
 
-  // Save OTP in otpStore
-  const key = Array.isArray(to) ? to[0] : to;
-  otpStore[key] = { otp, expiry };
+  otpStore[username] = { otp, expiry };
 
   if (via === "sms") {
     result = await sendSMS({ to, body: fullMessage });
@@ -130,10 +128,10 @@ async function sendOTP({ to, via = "sms", subject, message, length = 6, expiryMi
 // VERIFY OTP
 // ======================
 function verifyOTP({ to, otp }) {
-  console.log(otpStore)
+ 
   const key = Array.isArray(to) ? to[0] : to;
   const record = otpStore[key];
-
+  console.log(otpStore,to,key,record)
   if (!record) {
     return { success: false, message: "No OTP sent to this user" };
   }

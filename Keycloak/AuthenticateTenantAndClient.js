@@ -7,7 +7,7 @@ const qs = require("querystring");
 
 async function checkUserInKeycloak(token, realm, userId) {
   const url = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}`;
-  console.log(url)
+
   try {
     const response = await axios.get(url, {
       headers: { Authorization: `Bearer ${token}` },
@@ -55,7 +55,9 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         // req.body.refreshToken ||
         req.headers["refresh_token"];
       const realm = process.env.KEYCLOAK_REALM || req.headers["x-realm"];
-      const clientId =req.cookies?.clientId || req.headers["x-clientid"];
+      const clientId = req.cookies?.clientId || req.headers["x-clientid"];
+
+      console.log('CLIENTID:',clientId)
 
       if (!token || !realm)
         throw new CustomError("Missing token or realm", 401);
@@ -126,7 +128,7 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         ROLE_PRIORITY.find((r) => userRoles.includes(r)) || "guest";
 
       // ✅ Skip DB checks for tenant
-      if (userRole === "tenant") {
+      if (userRole === "tenant"  || userRole === "guest") {
         req.user = decoded;
         req.role = userRole;
         req.realm = realm;
@@ -139,8 +141,6 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
       const userId = decoded.sub;
       const userGroups = decoded?.groups || [];
       const username = decoded?.preferred_username;
-
-      console.log(token,realm,userId)
 
       // ✅ Verify user in Keycloak
       const kcUser = await checkUserInKeycloak(token, realm, userId);
@@ -220,10 +220,10 @@ async function verifyUserTokenInDB(token) {
       ROLE_PRIORITY.find((r) => userRoles.includes(r)) || "guest";
 
     // ✅ ✅ Tenant → SKIP ALL checks and return immediately
-    if (userRole === "tenant") {
+    if (userRole === "tenant" || userRole === "guest") {
       return {
-        dbUser: { userId, username, role: "tenant" },
-        role: "tenant",
+        dbUser: { userId, username, role:userRole === "tenant" ? "tenant" : "guest" },
+        role: userRole === "tenant" ? "tenant" : "guest",
       };
     }
 
