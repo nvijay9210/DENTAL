@@ -2,6 +2,7 @@
 const tenantCodes = {
   "apollo": process.env.APOLLO || "APO",
   "mydentist.in": process.env.MYDENTIST || "MYD",
+  "mydentist": process.env.MYDENTIST || "MYD",
 };
 
 // Define module codes
