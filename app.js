@@ -266,6 +266,7 @@ app.get('/test', (req, res) => {
 const bodyParser = require("body-parser");
 const { authenticateTenantClinicGroup } = require('./Keycloak/AuthenticateTenantAndClient');
 const { generateAppBAccessToken } = require('./utils/CodeGenerator');
+const session = require('express-session');
 
 app.use(bodyParser.json())
 
@@ -289,6 +290,19 @@ app.get("/v1/get-token", (req, res) => {
   // }
   return res.json({ token: req.cookies.access_token });
 });
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || "a-very-strong-secret",
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: process.env.NODE_ENV === "production", // only true in prod
+    maxAge: 10 * 60 * 1000, // optional: 10 min
+    sameSite: "lax",
+  }
+}));
+
+
 
 // app.listen(4000, () => console.log("Backend running on http://localhost:4000"));
 

@@ -97,13 +97,21 @@ function generateOTP(length = 6) {
 // ======================
 // SEND OTP (email or SMS)
 // ======================
-async function sendOTP({ to, via = "sms", subject, message, length = 6, expiryMinutes = 10,username }) {
+async function sendOTP({ to, via = "sms", subject, message, length = 6, expiryMinutes = 10, username, session }) {
   const otp = generateOTP(length);
-  console.log('otp:',otp)
+  console.log("otp:", otp);
   const expiry = new Date(Date.now() + expiryMinutes * 60 * 1000);
   const fullMessage = message ? `${message}: ${otp}` : `Your OTP code is ${otp}. Please enter it to continue.`;
   let result = {};
 
+  // Save OTP in session if provided
+  if (session) {
+    if (!session.otps) session.otps = {};
+  }
+
+  session.otps[username] = { otp, expiry };
+
+  // fallback in-memory store (optional)
   otpStore[username] = { otp, expiry };
 
   if (via === "sms") {
@@ -115,41 +123,40 @@ async function sendOTP({ to, via = "sms", subject, message, length = 6, expiryMi
       text: fullMessage,
       html: `<p>${fullMessage}</p>`,
     });
-  }else if (via === "whatsapp") {
+  } else if (via === "whatsapp") {
     result = await sendWhatsApp({ to, body: fullMessage });
-  }  else {
-    throw new Error("Invalid 'via' option. Use 'sms' or 'email' or 'whatsapp'");
+  } else {
+    throw new Error("Invalid 'via' option. Use 'sms', 'email', or 'whatsapp'");
   }
 
-  return { otp, expiry, result,via };
+  return { otp, expiry, result, via };
 }
+
 
 // ======================
 // VERIFY OTP
 // ======================
-function verifyOTP({ to, otp }) {
- 
-  const key = Array.isArray(to) ? to[0] : to;
-  const record = otpStore[key];
-  console.log(otpStore,to,key,record)
-  if (!record) {
-    return { success: false, message: "No OTP sent to this user" };
-  }
+function verifyOTP({ to, otp, username, session }) {
+  const key = username || to;
+  const record = (session?.otps && session.otps[key]) || otpStore[key];
 
-  const now = new Date();
-  if (now > record.expiry) {
+  if (!record) return { success: false, message: "No OTP sent to this user" };
+
+  if (new Date() > record.expiry) {
+    if (session?.otps) delete session.otps[key];
     delete otpStore[key];
     return { success: false, message: "OTP expired" };
   }
 
-  if (record.otp !== otp) {
-    return { success: false, message: "Invalid OTP" };
-  }
+  if (record.otp !== otp) return { success: false, message: "Invalid OTP" };
 
-  // OTP verified successfully
-  delete otpStore[key]; // remove after verification
+  // OTP verified successfully, remove it
+  if (session?.otps) delete session.otps[key];
+  delete otpStore[key];
+
   return { success: true, message: "OTP verified successfully" };
 }
+
 
 // ======================
 // SEND WHATSAPP MESSAGE
