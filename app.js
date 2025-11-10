@@ -282,11 +282,11 @@ app.post("/store-token", (req, res) => {
 });
 
 // Get token (called by Asset app)
-app.get("/get-token", (req, res) => {
-  if (!sharedToken) {
-    return res.status(404).json({ message: "No token available" });
-  }
-  return res.json({ token: sharedToken });
+app.get("/v1/get-token", (req, res) => {
+  // if (!sharedToken) {
+  //   return res.status(404).json({ message: "No token available" });
+  // }
+  return res.json({ token: req.cookies.access_token });
 });
 
 app.get("/sayhello",authenticateTenantClinicGroup('tenant'), (req, res) => {
