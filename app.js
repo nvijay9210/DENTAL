@@ -265,6 +265,7 @@ app.get('/test', (req, res) => {
 
 const bodyParser = require("body-parser");
 const { authenticateTenantClinicGroup } = require('./Keycloak/AuthenticateTenantAndClient');
+const { generateAppBAccessToken } = require('./utils/CodeGenerator');
 
 app.use(bodyParser.json())
 
@@ -287,10 +288,6 @@ app.get("/v1/get-token", (req, res) => {
   //   return res.status(404).json({ message: "No token available" });
   // }
   return res.json({ token: req.cookies.access_token });
-});
-
-app.get("/sayhello",authenticateTenantClinicGroup('tenant'), (req, res) => {
-  return res.status(200).json({ message: "Hello Buddy" });
 });
 
 // app.listen(4000, () => console.log("Backend running on http://localhost:4000"));

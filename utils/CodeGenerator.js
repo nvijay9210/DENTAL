@@ -32,4 +32,19 @@ function generateCode(tenant, module, seq) {
   return `${tenantCode}${moduleCode}${seq}`;
 }
 
-module.exports = { generateCode };
+
+const jwt = require("jsonwebtoken");
+
+async function generateAppBAccessToken(userInfo) {
+  return jwt.sign(
+    {
+     userInfo
+    },
+    process.env.JWT_SECRET
+  );
+}
+
+
+
+
+module.exports = { generateCode,generateAppBAccessToken };

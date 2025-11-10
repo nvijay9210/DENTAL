@@ -24,6 +24,8 @@ const {
 } = require("../Modules/MailSmsOtp/MailSmsOtpService");
 const { getUserByTenantClinicAndKeycloakId } = require("../utils/Reusability");
 const { generateOTP, sendWhatsAppOTP, generateUsername, generateAlphanumericPassword } = require("../utils/Helpers");
+const { decode } = require("jsonwebtoken");
+const { generateAppBAccessToken } = require("../utils/CodeGenerator");
 
 const router = express.Router();
 router.use(cookieParser());
@@ -94,6 +96,32 @@ const finalizeLogin = async (req, res) => {
     throw new CustomError(err.message || "Login finalization failed", 401);
   }
 };
+
+router.get("/assets", async (req, res) => {
+  const userToken = req.cookies.access_token;
+
+  const decodedToken=decode(userToken)
+
+  if (!userToken) return ;
+
+ const clinic=await getClinicByTenantIdAndClinicId(decodedToken.tenant_id,decodedToken.clinic_id)
+
+//  console.log('assets:',clinic)
+
+ const dbUser=await verifyUserTokenInDB(userToken)
+
+//  console.log("dbuser:",dbUser)
+
+ const jwtData={
+  token:userToken,
+  clinic,
+  dbUser
+ }
+  const ssoToken = await generateAppBAccessToken(jwtData);
+
+  res.status(200).send({data:ssoToken}) 
+});
+
 
 // router.get('/hi',(req,res)=>{
 //  res.status(200).json('hello')
@@ -188,6 +216,7 @@ const otpStore = {};
 // =========================
 // Verify WhatsApp OTP
 // =========================
+
 router.post("/verify-otp", async (req, res) => {
   try {
     const { username, otp } = req.body;
