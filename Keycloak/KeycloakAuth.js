@@ -63,7 +63,7 @@ const finalizeLogin = async (req, res) => {
   if (!tenantConfig) return res.status(400).json({ error: "Invalid host" });
 
   const { realm, clientId } = tenantConfig;
-  console.log(clientId);
+  // console.log(clientId);
 
   try {
     const { access_token, refresh_token } = req.tokens;
@@ -81,7 +81,7 @@ const finalizeLogin = async (req, res) => {
 
     res.cookie("access_token", access_token, {
       ...cookieOptions,
-      maxAge: 60 * 60 * 1000,
+      maxAge: 2 * 60 * 60 * 1000,
     });
     res.cookie("refresh_token", refresh_token, {
       ...cookieOptions,
@@ -100,30 +100,13 @@ const finalizeLogin = async (req, res) => {
   }
 };
 
-router.get("/assets", async (req, res) => {
+router.post("/assets", async (req, res) => {
   const userToken = req.cookies.access_token;
+  const {user}=req.body
 
-  const decodedToken = decode(userToken);
+  const ssoToken = await generateAppBAccessToken({user,token:userToken});
 
-  if (!userToken) return;
-
-  const clinic = await getClinicByTenantIdAndClinicId(
-    decodedToken.tenant_id,
-    decodedToken.clinic_id
-  );
-
-  //  console.log('assets:',clinic)
-
-  const dbUser = await verifyUserTokenInDB(userToken);
-
-  //  console.log("dbuser:",dbUser)
-
-  const jwtData = {
-    token: userToken,
-    clinic,
-    dbUser,
-  };
-  const ssoToken = await generateAppBAccessToken(jwtData);
+  // console.log(user,userToken,ssoToken)
 
   res.status(200).send({ data: ssoToken });
 });
@@ -344,7 +327,6 @@ router.post("/login", async (req, res) => {
       .json({ message: err.message || "Invalid credentials" });
   }
 });
-
 
 // POST /login
 // router.post("/login", async (req, res) => {
@@ -607,11 +589,14 @@ router.post("/forgettenpassword", async (req, res, next) => {
     const via = clinic?.otp_type;
     if (via === "sms") sendValue = user.attributes?.phoneNumber?.[0];
     else if (via === "email") sendValue = user.attributes?.email?.[0];
-    else if (via === "whatsapp") sendValue = user.attributes?.whatsappNumber?.[0];
+    else if (via === "whatsapp")
+      sendValue = user.attributes?.whatsappNumber?.[0];
 
     if (!sendValue) {
       log("FORGOT_PASSWORD", "❌ No contact value found for OTP");
-      return res.status(400).json({ message: "No contact value found for OTP" });
+      return res
+        .status(400)
+        .json({ message: "No contact value found for OTP" });
     }
 
     // Send OTP and store in session

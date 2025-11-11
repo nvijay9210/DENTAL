@@ -95,7 +95,7 @@ app.use(cors({
 
 
 app.get("/check-cookie", (req, res) => {
-  console.log(req.cookies); // all cookies sent by the client
+  // console.log(req.cookies); // all cookies sent by the client
   res.json({ cookies: req.cookies });
 });
 

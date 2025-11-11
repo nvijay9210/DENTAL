@@ -326,7 +326,7 @@ const deleteUser = async (token, realm, userId) => {
 
 // ✅ Update User
 const updateUserInKeycloak = async (token, realm, userId, userData) => {
-  console.log(token,realm,userId,userData)
+  // console.log(token,realm,userId,userData)
   log("UPDATE_USER", "Updating user", { userId, userData });
   const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}`;
 

@@ -25,7 +25,7 @@ function generateCode(tenant, module, seq) {
   const tenantCode = tenantCodes[tenant];
   const moduleCode = moduleCodes[module];
 
-  console.log(tenant, module, seq, tenantCode, moduleCode);
+  // console.log(tenant, module, seq, tenantCode, moduleCode);
 
   if (!tenantCode) throw new Error("Invalid tenant name");
   if (!moduleCode) throw new Error("Invalid module name");
