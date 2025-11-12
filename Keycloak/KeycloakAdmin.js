@@ -32,7 +32,7 @@ async function addUser(token, realm, userData) {
     emailVerified: true,
     attributes:{
       tenant_id: userData?.attributes?.tenant_id || '',
-      client_id: userData?.attributes?.client_id || '',
+      clinic_id: userData?.attributes?.clinic_id || '',
       phoneNumber: userData?.attributes?.phoneNumber,
     },
     credentials: [
