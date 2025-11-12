@@ -220,6 +220,41 @@ WHERE
   }
 };
 
+const getAllRoomIdByTenantIdAndClinicId = async (
+  tenantId,
+  clinicId
+) => {
+  const query = `SELECT
+  CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
+      CONCAT(d.first_name, ' ', d.last_name) AS dentist_name,
+      app.*
+    FROM 
+      appointment AS app
+      JOIN patient p on p.patient_id=app.patient_id
+      JOIN dentist d on d.dentist_id=app.dentist_id
+WHERE 
+    app.tenant_id = ? 
+    AND app.clinic_id = ?
+    AND app.room_id!=?
+    AND app.status=?
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query, [
+      tenantId,
+      clinicId,
+      "00000000-0000-0000-0000-000000000000",
+      "confirmed",
+    ]);
+    return rows;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
 const getAllRoomIdByTenantIdAndPatientId = async (tenantId, patient_id) => {
   const query = `SELECT
   CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
@@ -1297,4 +1332,5 @@ module.exports = {
   getAppointmentsWithDetailsByClinic,
   updateAppoinmentStatusCompleted,
   updateAppoinmentFinalStatus,
+  getAllRoomIdByTenantIdAndClinicId
 };

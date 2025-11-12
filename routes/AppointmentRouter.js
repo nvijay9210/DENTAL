@@ -219,7 +219,7 @@ router.get(
 router.get(
   GETALL_APPOINTMENT_ROOMID_DENTIST,
   authenticateTenantClinicGroup(["tenant", "patient", "dentist", "superuser"]),
-  appointmentController.getAllRoomIdByTenantIdAndClinicIdAndDentistId
+  appointmentController.getAllRoomIdByTenantIdAndClinicId
 );
 router.get(
   GETALL_APPOINTMENT_ROOMID_PATIENT,

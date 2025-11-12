@@ -73,6 +73,8 @@ module.exports = {
     "/getallroomidpatient/:tenant_id/:patient_id",
   GETALL_APPOINTMENT_ROOMID_DENTIST:
     "/getallroomiddentist/:tenant_id/:clinic_id/:dentist_id",
+  GETALL_APPOINTMENT_ROOMID_CLINIC:
+    "/getallroomid/:tenant_id/:clinic_id",
   GET_ROOMID_APPOINTMENTID: "/getroomidappointment/:tenant_id/:appointment_id",
 
   ADD_TREATMENT: "/addtreatment",

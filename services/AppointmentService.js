@@ -381,6 +381,22 @@ const getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
+const getAllRoomIdByTenantIdAndClinicId = async (
+  tenantId,
+  clinic_id
+) => {
+  try {
+    const result =
+      await appointmentModel.getAllRoomIdByTenantIdAndClinicId(
+        tenantId,
+        clinic_id
+      );
+    return result;
+  } catch (error) {
+    console.error("Database error while fetching appointment roomid:", error);
+    throw new CustomError("Failed to fetch appointment", 404);
+  }
+};
 
 const getAllRoomIdByTenantIdAndPatientId = async (tenantId, patient_id) => {
   try {
@@ -1608,4 +1624,5 @@ module.exports = {
   updateAppoinmentFeedbackDisplay,
   getAppointmentMonthlySummaryClinic,
   getAppointmentsWithDetailsByClinic,
+  getAllRoomIdByTenantIdAndClinicId
 };

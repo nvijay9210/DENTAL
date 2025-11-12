@@ -123,6 +123,25 @@ exports.getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (
     next(err);
   }
 };
+exports.getAllRoomIdByTenantIdAndClinicId = async (
+  req,
+  res,
+  next
+) => {
+  const { tenant_id, clinic_id, dentist_id } = req.params;
+  await checkIfIdExists("tenant", "tenant_id", tenant_id);
+  await checkIfIdExists("clinic", "clinic_id", clinic_id);
+  try {
+    const appointments =
+      await appointmentService.getAllRoomIdByTenantIdAndClinicId(
+        tenant_id,
+        clinic_id
+      );
+    res.status(200).json(appointments);
+  } catch (err) {
+    next(err);
+  }
+};
 
 exports.getAllRoomIdByTenantIdAndPatientId = async (req, res, next) => {
   const { tenant_id, patient_id } = req.params;
