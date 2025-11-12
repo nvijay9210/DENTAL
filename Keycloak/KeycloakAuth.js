@@ -91,6 +91,10 @@ const finalizeLogin = async (req, res) => {
       ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+    res.cookie("realm", realm, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     log("FINALIZE_LOGIN", "✅ Login complete — responding with context");
     return res.status(200).json(userContext);
@@ -102,9 +106,14 @@ const finalizeLogin = async (req, res) => {
 
 router.post("/assets", async (req, res) => {
   const userToken = req.cookies.access_token;
-  const {user}=req.body
+  const { user } = req.body;
 
-  const ssoToken = await generateAppBAccessToken({user,token:userToken});
+  const ssoToken = await generateAppBAccessToken({
+    user,
+    token: userToken,
+    realm: req.cookies.realm,
+    clientid: req.cookies.clientId,
+  });
 
   // console.log(user,userToken,ssoToken)
 
