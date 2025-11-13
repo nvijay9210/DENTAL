@@ -68,7 +68,7 @@ const finalizeLogin = async (req, res) => {
   try {
     const { access_token, refresh_token } = req.tokens;
     const dbUser = req.dbUser;
-    console.log('dbuser:',dbUser)
+    // console.log('dbuser:',dbUser)
     const userContext = await buildUserContext(access_token, dbUser);
 
     const isProduction = process.env.NODE_ENV === "production";

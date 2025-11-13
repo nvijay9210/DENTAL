@@ -12,7 +12,7 @@ async function buildUserContext(accessToken, dbUser) {
   // 1. Decode token and extract basic info
   const decodedToken = decodeToken(accessToken);
   const userInfo = extractUserInfo(decodedToken);
-  console.log(userInfo);
+  console.log('buildUserContext:',userInfo,dbUser);
 
   // 2. Fetch tenant
   const tenant = await getTenantByTenantId(userInfo.tenantId);
@@ -40,26 +40,26 @@ async function buildUserContext(accessToken, dbUser) {
     clinic_id: userInfo.clinicId,
     role: userInfo.role,
     preferred_username: userInfo.preferred_username,
-    profile_picture:dbUser?.profile_picture
+    profile_picture:dbUser?.dbUser?.profile_picture
   };
 
   // ✅ Add role-specific ID from dbUser
   if (dbUser) {
     switch (userInfo.role) {
       case "patient":
-        context.patient_id = dbUser.patient_id || null;
+        context.patient_id = dbUser?.dbUser?.patient_id || null;
         break;
       case "dentist":
-        context.dentist_id = dbUser.dentist_id || null;
+        context.dentist_id = dbUser?.dbUser?.dentist_id || null;
         break;
       case "supplier":
-        context.supplier_id = dbUser.supplier_id || null;
+        context.supplier_id = dbUser?.dbUser?.supplier_id || null;
         break;
       case "receptionist":
-        context.reception_id = dbUser.reception_id || null;
+        context.reception_id = dbUser?.dbUser?.reception_id || null;
         break;
-      case "staff":
-        context.staff_id = dbUser.staff_id || null;
+      case "superuser":
+        context.superuser_id = dbUser?.dbUser?.superuser_id || null;
         break;
       default:
         context.user_table_id = dbUser.id || null; // fallback

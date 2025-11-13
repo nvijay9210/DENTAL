@@ -127,6 +127,8 @@ const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
           "expense_documents"
         );
 
+        console.log('docs:',docs)
+
         // Extract only file_url
         const fileInfos = docs.map((doc) => ({
           document_id: doc.document_id,
@@ -184,6 +186,8 @@ const getAllExpensesByTenantIdAndClinicId = async (
           expense.expense_id,
           "expense_documents"
         );
+
+        console.log('docs:',docs)
 
         // Extract only file_url
         const fileInfos = docs.map((doc) => ({

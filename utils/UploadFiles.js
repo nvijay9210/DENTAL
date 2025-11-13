@@ -196,6 +196,8 @@ const uploadFileMiddleware = (options) => {
           }
         }
 
+        console.log("savedPaths:",savedPaths)
+
         req.body[fileField.fieldName] = fileField.multiple
           ? savedPaths
           : savedPaths[0];
