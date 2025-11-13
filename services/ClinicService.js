@@ -210,6 +210,12 @@ const updateClinic = async (clinicId, data, tenant_id, token, realm) => {
       throw new CustomError("Clinic not found", 404);
     }
 
+    data.otp=data?.otp?data?.otp:clinic.otp
+    data.otp_type=data?.otp_type?data?.otp_type:clinic.otp_type
+    data.clinic_app_themes=data?.clinic_app_themes?data?.clinic_app_themes:clinic.clinic_app_themes
+    data.clinic_logo=data?.clinic_logo?data?.clinic_logo:clinic.clinic_logo
+    data.clinic_app_font=data?.clinic_app_font?data?.clinic_app_font:clinic.clinic_app_font
+
     // 2. Update DB
     const { columns, values } = mapFields(data, updateClinicFieldMap);
     const affectedRows = await clinicModel.updateClinic(

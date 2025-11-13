@@ -40,6 +40,7 @@ async function buildUserContext(accessToken, dbUser) {
     clinic_id: userInfo.clinicId,
     role: userInfo.role,
     preferred_username: userInfo.preferred_username,
+    profile_picture:dbUser?.profile_picture
   };
 
   // ✅ Add role-specific ID from dbUser
