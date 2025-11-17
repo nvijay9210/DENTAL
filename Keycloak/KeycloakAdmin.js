@@ -15,8 +15,6 @@ const log = (label, message, data = null) => {
     );
 };
 
-// ----- CONFIG -----
-log("INIT", "Keycloak Base URL", { KEYCLOAK_BASE_URL });
 
 // ✅ 1. Add User
 async function addUser(token, realm, userData) {

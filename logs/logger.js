@@ -45,20 +45,20 @@ const writeLog = (level, message, req = null) => {
 };
 
 // Override global console
-['log', 'info', 'warn', 'error'].forEach((method) => {
-  const original = console[method];
-  console[method] = function (...args) {
-    const message = args.map(formatArg).join(' ');
+// ['log', 'info', 'warn', 'error'].forEach((method) => {
+//   const original = console[method];
+//   console[method] = function (...args) {
+//     const message = args.map(formatArg).join(' ');
 
-    // Try to detect HTTP request from first argument
-    const req = args.find(a => a && a.method && a.url);
+//     // Try to detect HTTP request from first argument
+//     const req = args.find(a => a && a.method && a.url);
 
-    let level = method === 'log' ? 'info' : method;
-    writeLog(level, message, req);
+//     let level = method === 'log' ? 'info' : method;
+//     writeLog(level, message, req);
 
-    original.apply(console, args);
-  };
-});
+//     original.apply(console, args);
+//   };
+// });
 
 // Express middleware for request context
 const logRequest = (req, res, next) => {
