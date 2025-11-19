@@ -63,47 +63,67 @@ const finalizeLogin = async (req, res) => {
   if (!tenantConfig) return res.status(400).json({ error: "Invalid host" });
 
   const { realm, clientId } = tenantConfig;
-  // console.log(clientId);
+
+  console.log(req.tokens)
 
   try {
-    const { access_token, refresh_token } = req.tokens;
+    const {
+      access_token,
+      refresh_token,
+      expires_in,
+      refresh_expires_in,
+    } = req.tokens;
+
     const dbUser = req.dbUser;
-    // console.log('dbuser:',dbUser)
+
     const userContext = await buildUserContext(access_token, dbUser);
 
     const isProduction = process.env.NODE_ENV === "production";
     const cookieOptions = {
-      httpOnly: true,
+      httpOnly: isProduction,
       secure: isProduction,
       sameSite: isProduction ? "None" : "Lax",
     };
 
-    log("TOKEN_SAVE", "✅ token save prcess — responding with cookie");
+    // Convert Keycloak token expiry → milliseconds
+    const accessCookieLife = parseInt(process.env.ACCESS_COOKIE_EXPIRE_TIME) * 1000;
+    const refreshCookieLife = parseInt(process.env.REFRESH_COOKIE_EXPIRE_TIME) * 1000;
 
+    log("TOKEN_SAVE", "Saving tokens with dynamic expiry");
+
+    // ACCESS TOKEN
     res.cookie("access_token", access_token, {
       ...cookieOptions,
-      maxAge: 2 * 60 * 60 * 1000,
-    });
-    res.cookie("refresh_token", refresh_token, {
-      ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    res.cookie("clientId", clientId, {
-      ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    res.cookie("realm", realm, {
-      ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: accessCookieLife,
     });
 
-    log("FINALIZE_LOGIN", "✅ Login complete — responding with context");
+    // REFRESH TOKEN
+    res.cookie("refresh_token", refresh_token, {
+      ...cookieOptions,
+      maxAge: refreshCookieLife,
+    });
+
+    // Client ID
+    res.cookie("clientId", clientId, {
+      ...cookieOptions,
+      maxAge: refreshCookieLife,
+    });
+
+    // Realm
+    res.cookie("realm", realm, {
+      ...cookieOptions,
+      maxAge: refreshCookieLife,
+    });
+
+    log("FINALIZE_LOGIN", "Login complete — sending user context");
+
     return res.status(200).json(userContext);
   } catch (err) {
-    log("FINALIZE_LOGIN", "💥 Finalize failed", { error: err.message });
+    log("FINALIZE_LOGIN", "Finalize failed", { error: err.message });
     throw new CustomError(err.message || "Login finalization failed", 401);
   }
 };
+
 
 router.post("/assets", async (req, res) => {
   const userToken = req.cookies.access_token;
@@ -196,7 +216,6 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Username is required" });
     }
 
-    // Initialize temploginstore in session
     if (!req.session.temploginstore) req.session.temploginstore = {};
 
     const HOST_REALM_CLIENT = JSON.parse(process.env.HOST_REALM_CLIENT);
@@ -235,14 +254,13 @@ router.post("/login", async (req, res) => {
       req.tokens = record.tokens;
       req.dbUser = record.dbUser;
 
-      // Remove temp login session for this user
       delete req.session.temploginstore[username];
 
       return finalizeLogin(req, res);
     }
 
     // =========================
-    // Initial credentials check
+    // Initial credential check
     // =========================
     if (!password) {
       log("LOGIN_FLOW", "❌ Missing password");
@@ -261,15 +279,16 @@ router.post("/login", async (req, res) => {
     });
 
     const tokens = await keycloakLogin(username, password, realm, clientId);
-    log("KEYCLOAK_AUTH", "✅ Keycloak auth successful");
+
+    log("KEYCLOAK_AUTH", "✅ Keycloak authentication successful");
 
     // =========================
     // Verify in DB
     // =========================
     const dbUser = await verifyUserTokenInDB(tokens.access_token);
-    log("DB_VERIFY", "✅ DB verification complete", { role: dbUser.role });
+    log("DB_VERIFY", "Database verification completed", { role: dbUser.role });
 
-    // Skip OTP for tenant or guest
+    // Bypass OTP for tenant or guest
     if (dbUser.role === "tenant" || dbUser.role === "guest") {
       log("TENANT_BYPASS", "Tenant user — skipping OTP");
       req.tokens = tokens;
@@ -278,7 +297,7 @@ router.post("/login", async (req, res) => {
     }
 
     // =========================
-    // Check clinic OTP setting
+    // Check clinic OTP settings
     // =========================
     const clinic = await getClinicByTenantIdAndClinicId(
       dbUser.dbUser.tenant_id,
@@ -286,14 +305,14 @@ router.post("/login", async (req, res) => {
     );
 
     if (!clinic || clinic.otp === 0) {
-      log("CLINIC_OTP_CHECK", "✅ OTP disabled — proceeding to login");
+      log("CLINIC_OTP_CHECK", "OTP disabled — completing login");
       req.tokens = tokens;
       req.dbUser = dbUser;
       return finalizeLogin(req, res);
     }
 
     // =========================
-    // Send OTP to user
+    // Send OTP
     // =========================
     const user2 = await getUserByTenantClinicAndKeycloakId(
       dbUser.role,
@@ -311,15 +330,12 @@ router.post("/login", async (req, res) => {
       message: "Your Verification OTP",
       subject: "OTP Verification",
       username,
-      session: req.session, // important for session-based OTP
+      session: req.session,
     };
 
-    log("OTP_SEND", "Sending OTP", { to: key, via });
     const otps = await sendOTP(payload);
 
-    // Save tokens and DB user in session under actual username
     req.session.temploginstore[username] = { tokens, dbUser };
-    log("OTP_SEND", "✅ OTP sent and session stored");
 
     return res.status(200).json({
       message: "OTP sent",
@@ -328,15 +344,17 @@ router.post("/login", async (req, res) => {
       otpDetails: process.env.NODE_ENV === "development" ? otps : undefined,
     });
   } catch (err) {
-    log("LOGIN_FLOW", "💥 Login failed", {
+    log("LOGIN_FLOW", "Login failed", {
       message: err.message,
       stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
     });
+
     return res
       .status(401)
       .json({ message: err.message || "Invalid credentials" });
   }
 });
+
 
 // POST /login
 // router.post("/login", async (req, res) => {

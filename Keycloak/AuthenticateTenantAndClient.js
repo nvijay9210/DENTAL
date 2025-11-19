@@ -32,7 +32,7 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
 
   return async (req, res, next) => {
     try {
-      // ✅ DEV MODE SHORTCUT
+      // ===== DEV MODE =====
       if (process.env.KEYCLOAK_POWER === "off") {
         req.user = {
           username: "dev-user",
@@ -45,39 +45,31 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         return next();
       }
 
-      // ✅ Read tokens & headers
-      let token =
-        req.cookies?.access_token || req.headers["access_token"];
+      // ===== Read tokens & headers =====
+      let token = req.cookies?.access_token || req.headers["access_token"];
       let refreshToken =
         req.cookies?.refresh_token || req.headers["refresh_token"];
       const realm = process.env.KEYCLOAK_REALM || req.headers["x-realm"];
       const clientId = req.cookies?.clientId || req.headers["x-clientid"];
 
-      console.log('HEADERS:',token,realm,clientId)
-
-      if (!token || !realm)
+      if (!token || !realm) {
         throw new CustomError("Missing token or realm", 401);
+      }
 
-      // ✅ Public key for token verification
       const pubKey = `-----BEGIN PUBLIC KEY-----\n${process.env.KEYCLOAK_REALM_PUBLIC_KEY}\n-----END PUBLIC KEY-----`;
-
       let decoded;
 
+      // ===== Verify token =====
       try {
-        // 🔐 Verify token validity
         decoded = jwt.verify(token, pubKey, { algorithms: ["RS256"] });
       } catch (err) {
-        // 🚨 Token expired → try refreshing
+        // ===== Token expired: refresh it =====
         if (err.name === "TokenExpiredError" && refreshToken) {
-          console.log("Access token expired — refreshing...");
-
           const tokenUrl = `${process.env.KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/token`;
-
           const data = qs.stringify({
             grant_type: "refresh_token",
             refresh_token: refreshToken,
-            client_id: clientId,
-            client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
+            client_id: clientId, // public client → no client_secret
           });
 
           try {
@@ -85,46 +77,52 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
               headers: { "Content-Type": "application/x-www-form-urlencoded" },
             });
 
-            // 🔁 Replace old tokens with new ones
-            const newAccessToken = response.data.access_token;
-            const newRefreshToken = response.data.refresh_token;
+            token = response.data.access_token;
+            refreshToken = response.data.refresh_token;
 
-            // Update cookies
-            res.cookie("access_token", newAccessToken, {
+            const isProduction = process.env.NODE_ENV === "production";
+            const cookieOptions = {
               httpOnly: true,
-              secure: false,
+              secure: isProduction,
+              sameSite: isProduction ? "None" : "Lax",
+            };
+
+            // Set cookies with Keycloak expiry
+            res.cookie("access_token", token, {
+              ...cookieOptions,
+              // maxAge: response.data.expires_in * 1000,
             });
-            res.cookie("refresh_token", newRefreshToken, {
-              httpOnly: true,
-              secure: false,
+            res.cookie("refresh_token", refreshToken, {
+              ...cookieOptions,
+              maxAge: response.data.refresh_expires_in * 1000,
+            });
+            res.cookie("clientId", clientId, {
+              ...cookieOptions,
+              maxAge: response.data.refresh_expires_in * 1000,
+            });
+            res.cookie("realm", realm, {
+              ...cookieOptions,
+              maxAge: response.data.refresh_expires_in * 1000,
             });
 
-            // Update local variables
-            token = newAccessToken;
-            refreshToken = newRefreshToken;
-
-            // Decode the new token
             decoded = jwt.verify(token, pubKey, { algorithms: ["RS256"] });
-            console.log("✅ Token refreshed successfully");
+            console.log("✔ Token refreshed successfully");
           } catch (refreshErr) {
-            console.error(
-              "❌ Token refresh failed:",
-              refreshErr.response?.data || refreshErr.message
-            );
+            console.error("❌ Token refresh failed:", refreshErr.message);
             throw new CustomError("Token expired and refresh failed", 401);
           }
         } else {
-          throw err;
+          throw new CustomError("Invalid token", 401);
         }
       }
 
-      // ✅ Extract user role
+      // ===== Extract role =====
       const userRoles = decoded?.realm_access?.roles || [];
       const userRole =
         ROLE_PRIORITY.find((r) => userRoles.includes(r)) || "guest";
 
-      // ✅ Skip DB checks for tenant
-      if (userRole === "tenant"  || userRole === "guest") {
+      // Tenant & guest → skip DB
+      if (userRole === "tenant" || userRole === "guest") {
         req.user = decoded;
         req.role = userRole;
         req.realm = realm;
@@ -133,20 +131,18 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         return next();
       }
 
-      // ✅ Continue normal flow for other roles
+      // ===== For other roles =====
       const userId = decoded.sub;
       const userGroups = decoded?.groups || [];
-      const username = decoded?.preferred_username;
 
-      // ✅ Verify user in Keycloak
+      // Verify user exists in Keycloak
       const kcUser = await checkUserInKeycloak(token, realm, userId);
       if (!kcUser) throw new CustomError("User not found in Keycloak", 404);
 
-      // ✅ Extract tenant/clinic IDs from group
+      // Extract tenant & clinic IDs
       const dentalGroup = userGroups.find((g) => g.startsWith("dental-"));
       let tenantId = null;
       let clinicId = null;
-
       if (dentalGroup) {
         const match = dentalGroup.match(/dental-(\d+)-(\d+)/);
         if (match) {
@@ -154,11 +150,10 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
           clinicId = Number(match[2]);
         }
       }
-
       if (!tenantId || !clinicId)
         throw new CustomError("Missing tenant or clinic in group", 400);
 
-      // ✅ Find user in DB
+      // DB lookup
       const dbUser = await getUserByTenantClinicAndKeycloakId(
         userRole,
         tenantId,
@@ -166,7 +161,7 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
         userId
       );
 
-      // ✅ Attach user context to request
+      // Attach request context
       req.user = decoded;
       req.role = userRole;
       req.realm = realm;
@@ -178,15 +173,16 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
 
       return next();
     } catch (err) {
-      console.log("err:", err);
-      if (err instanceof CustomError) {
+      console.error("err:", err);
+      if (err instanceof CustomError)
         return res.status(err.statusCode).json({ message: err.message });
-      }
-      return res.status(500).json({
-        status: "error",
-        message: "Authentication failed",
-        error: err.message,
-      });
+      return res
+        .status(500)
+        .json({
+          status: "error",
+          message: "Authentication failed",
+          error: err.message,
+        });
     }
   };
 }
@@ -218,7 +214,11 @@ async function verifyUserTokenInDB(token) {
     // ✅ ✅ Tenant → SKIP ALL checks and return immediately
     if (userRole === "tenant" || userRole === "guest") {
       return {
-        dbUser: { userId, username, role:userRole === "tenant" ? "tenant" : "guest" },
+        dbUser: {
+          userId,
+          username,
+          role: userRole === "tenant" ? "tenant" : "guest",
+        },
         role: userRole === "tenant" ? "tenant" : "guest",
       };
     }
