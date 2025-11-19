@@ -47,17 +47,13 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
 
       // ✅ Read tokens & headers
       let token =
-        req.cookies?.access_token ||
-        // req.headers.accessToken ||
-        req.headers["access_token"];
+        req.cookies?.access_token || req.headers["access_token"];
       let refreshToken =
-        req.cookies?.refresh_token ||
-        // req.body.refreshToken ||
-        req.headers["refresh_token"];
+        req.cookies?.refresh_token || req.headers["refresh_token"];
       const realm = process.env.KEYCLOAK_REALM || req.headers["x-realm"];
       const clientId = req.cookies?.clientId || req.headers["x-clientid"];
 
-      console.log('CLIENTID:',clientId)
+      console.log('HEADERS:',token,realm,clientId)
 
       if (!token || !realm)
         throw new CustomError("Missing token or realm", 401);
