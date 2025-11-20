@@ -90,19 +90,19 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
             // Set cookies with Keycloak expiry
             res.cookie("access_token", token, {
               ...cookieOptions,
-              // maxAge: response.data.expires_in * 1000,
+              maxAge: process.env.ACCESS_COOKIE_EXPIRE_TIME * 1000,
             });
             res.cookie("refresh_token", refreshToken, {
               ...cookieOptions,
-              maxAge: response.data.refresh_expires_in * 1000,
+              maxAge: process.env.REFRESH_COOKIE_EXPIRE_TIME * 1000,
             });
             res.cookie("clientId", clientId, {
               ...cookieOptions,
-              maxAge: response.data.refresh_expires_in * 1000,
+              maxAge: process.env.REFRESH_COOKIE_EXPIRE_TIME * 1000,
             });
             res.cookie("realm", realm, {
               ...cookieOptions,
-              maxAge: response.data.refresh_expires_in * 1000,
+              maxAge: process.env.REFRESH_COOKIE_EXPIRE_TIME * 1000,
             });
 
             decoded = jwt.verify(token, pubKey, { algorithms: ["RS256"] });

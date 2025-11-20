@@ -64,14 +64,12 @@ const finalizeLogin = async (req, res) => {
 
   const { realm, clientId } = tenantConfig;
 
-  console.log(req.tokens)
+  // console.log(req.tokens)
 
   try {
     const {
       access_token,
-      refresh_token,
-      expires_in,
-      refresh_expires_in,
+      refresh_token
     } = req.tokens;
 
     const dbUser = req.dbUser;
@@ -210,7 +208,9 @@ const otpStore = {};
 router.post("/login", async (req, res) => {
   log("LOGIN_FLOW", "🚀 Starting login flow", { body: req.body });
   try {
-    const { username, password, host, otp } = req.body;
+    let { username, password, host, otp } = req.body;
+
+    username=username.toLowerCase()
 
     if (!username) {
       return res.status(400).json({ message: "Username is required" });
@@ -228,7 +228,7 @@ router.post("/login", async (req, res) => {
     // OTP verification step
     // =========================
     if (otp) {
-      log("OTP_VERIFY", "Verifying OTP", { username, otp });
+      // log("OTP_VERIFY", "Verifying OTP", { username, otp });
 
       const record = req.session.temploginstore[username];
       if (!record) {
@@ -272,11 +272,11 @@ router.post("/login", async (req, res) => {
     // =========================
     // Keycloak authentication
     // =========================
-    log("KEYCLOAK_AUTH", "Authenticating with Keycloak", {
-      username,
-      realm,
-      clientId,
-    });
+    // log("KEYCLOAK_AUTH", "Authenticating with Keycloak", {
+    //   username,
+    //   realm,
+    //   clientId,
+    // });
 
     const tokens = await keycloakLogin(username, password, realm, clientId);
 
@@ -286,7 +286,7 @@ router.post("/login", async (req, res) => {
     // Verify in DB
     // =========================
     const dbUser = await verifyUserTokenInDB(tokens.access_token);
-    log("DB_VERIFY", "Database verification completed", { role: dbUser.role });
+    // log("DB_VERIFY", "Database verification completed", { role: dbUser.role });
 
     // Bypass OTP for tenant or guest
     if (dbUser.role === "tenant" || dbUser.role === "guest") {
@@ -565,7 +565,7 @@ router.post("/logout", (req, res) => {
 
 // Forgot Password
 router.post("/forgettenpassword", async (req, res, next) => {
-  log("FORGOT_PASSWORD", "Forgot password request", req.body);
+  // log("FORGOT_PASSWORD", "Forgot password request", req.body);
 
   try {
     const { username, host } = req.body;
@@ -644,7 +644,7 @@ router.post("/forgettenpassword", async (req, res, next) => {
       expiry: otpResponse.expiry,
     };
 
-    log("FORGOT_PASSWORD", "✅ OTP sent for password reset", { to: sendValue });
+    // log("FORGOT_PASSWORD", "✅ OTP sent for password reset", { to: sendValue });
 
     return res.status(200).json({
       message: "OTP sent successfully",
@@ -716,7 +716,7 @@ router.post("/reset-password", async (req, res, next) => {
 });
 
 router.post("/register", async (req, res, next) => {
-  log("USER_REGISTER_IN_KEYCLOAK", "user register process", req.body);
+  // log("USER_REGISTER_IN_KEYCLOAK", "user register process", req.body);
   try {
     const { email, firstname, lastname, phone, host } = req.body;
     const HOST_REALM_CLIENT = JSON.parse(process.env.HOST_REALM_CLIENT);
