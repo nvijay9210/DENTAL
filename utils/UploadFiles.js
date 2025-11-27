@@ -240,7 +240,7 @@ const uploadFileMiddleware2 = (options) => {
   } = options;
 
   return async (req, res, next) => {
-    console.log(req.body);
+    // console.log(req.body);
     try {
       let inputData = req.body;
 

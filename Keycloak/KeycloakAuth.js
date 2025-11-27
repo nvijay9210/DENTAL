@@ -136,13 +136,13 @@ router.post("/assets", async (req, res) => {
     clientid: req.cookies.clientId,
   });
 
-  console.log({
-    user,
-    token: userToken,
-    refreshToken: userRefreshToken,
-    realm: req.cookies.realm,
-    clientid: req.cookies.clientId,
-  })
+  // console.log({
+  //   user,
+  //   token: userToken,
+  //   refreshToken: userRefreshToken,
+  //   realm: req.cookies.realm,
+  //   clientid: req.cookies.clientId,
+  // })
 
   res.status(200).send({ data: ssoToken });
 });

@@ -12,7 +12,7 @@ async function buildUserContext(accessToken, dbUser) {
   // 1. Decode token and extract basic info
   const decodedToken = decodeToken(accessToken);
   const userInfo = extractUserInfo(decodedToken);
-  console.log('buildUserContext:',userInfo,dbUser);
+  // console.log('buildUserContext:',userInfo,dbUser);
 
   // 2. Fetch tenant
   const tenant = await getTenantByTenantId(userInfo.tenantId);
