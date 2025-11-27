@@ -125,16 +125,24 @@ const finalizeLogin = async (req, res) => {
 
 router.post("/assets", async (req, res) => {
   const userToken = req.cookies.access_token;
+  const userRefreshToken = req.cookies.refresh_token;
   const { user } = req.body;
 
   const ssoToken = await generateAppBAccessToken({
     user,
     token: userToken,
+    refreshToken: userRefreshToken,
     realm: req.cookies.realm,
     clientid: req.cookies.clientId,
   });
 
-  // console.log(user,userToken,ssoToken)
+  console.log({
+    user,
+    token: userToken,
+    refreshToken: userRefreshToken,
+    realm: req.cookies.realm,
+    clientid: req.cookies.clientId,
+  })
 
   res.status(200).send({ data: ssoToken });
 });
