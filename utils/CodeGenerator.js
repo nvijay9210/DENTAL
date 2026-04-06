@@ -1,6 +1,6 @@
 // utils/codeGenerator.js
 const tenantCodes = {
-  "apollo": process.env.APOLLO || "APO",
+  "Apollo": process.env.APOLLO || "APO",
   "mydentist.in": process.env.MYDENTIST || "MYD",
   "mydentist": process.env.MYDENTIST || "MYD",
 };

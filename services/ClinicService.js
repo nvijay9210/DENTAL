@@ -338,6 +338,54 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
     throw new CustomError(error, 500);
   }
 };
+const getAllClinics = async (tenantId, page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+  const cacheKey = buildCacheKey("clinics", "list", {
+    page,
+    limit,
+  });
+
+  try {
+    const clinics = await getOrSetCache(cacheKey, async () => {
+      const result = await clinicModel.getAllClinics(
+        Number(limit),
+        offset
+      );
+      return result;
+    });
+
+    const convertedRows = await Promise.all(
+      clinics.map(async (clinic) => {
+        const formatted = helper.convertDbToFrontend(
+          clinic,
+          clinicFieldReverseMap
+        );
+        const images = await getDocumentsByField(
+          "clinic",
+          clinic.clinic_id,
+          "clinic_images"
+        );
+        const clinic_images = images.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+          description:doc.description
+        }));
+        return {
+          ...formatted,
+          clinic_images
+        };
+      })
+    );
+
+    return {
+      data: convertedRows,
+      total: clinics.total,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new CustomError(error, 500);
+  }
+};
 
 // -------------------- GET SINGLE --------------------
 const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
@@ -346,6 +394,8 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
       tenantId,
       clinicId
     );
+
+    console.log(clinic)
 
     const formatted = helper.convertDbToFrontend(clinic, clinicFieldReverseMap);
     const images = await getDocumentsByField(
@@ -851,4 +901,5 @@ module.exports = {
   getFinanceSummarybyDentist,
   getClinicSettingsByTenantIdAndClinicId,
   updateClinicSettings,
+  getAllClinics
 };

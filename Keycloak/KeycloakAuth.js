@@ -294,7 +294,7 @@ router.post("/login", async (req, res) => {
     // Verify in DB
     // =========================
     const dbUser = await verifyUserTokenInDB(tokens.access_token);
-    // log("DB_VERIFY", "Database verification completed", { role: dbUser.role });
+    log("DB_VERIFY", "Database verification completed", { dbUser: dbUser.role });
 
     // Bypass OTP for tenant or guest
     if (dbUser.role === "tenant" || dbUser.role === "guest") {
@@ -307,6 +307,8 @@ router.post("/login", async (req, res) => {
     // =========================
     // Check clinic OTP settings
     // =========================
+    console.log('dbUser-tennat-clinic:',dbUser.dbUser.tenant_id,
+      dbUser.dbUser.clinic_id,dbUser)
     const clinic = await getClinicByTenantIdAndClinicId(
       dbUser.dbUser.tenant_id,
       dbUser.dbUser.clinic_id

@@ -41,6 +41,18 @@ exports.getAllClinicByTenantId = async (req, res, next) => {
     next(err);
   }
 };
+exports.getAllClinics = async (req, res, next) => {
+  const { page, limit } = req.query;
+  try {
+    const clinics = await clinicService.getAllClinics(
+      page,
+      limit
+    );
+    res.status(200).json(clinics.data);
+  } catch (err) {
+    next(err);
+  }
+};
 
 exports.getFinanceSummary = async (req, res, next) => {
   const { tenant_id, clinic_id } = req.params;

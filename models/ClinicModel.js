@@ -33,6 +33,21 @@ const getAllClinicsByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
+const getAllClinics = async (tenantId, clinicId) => {
+  const query = `select * from clinic`;
+  const conn = await pool.getConnection();
+  try {
+    const rows = await conn.query(query);
+    // console.log('rows:',rows)
+    return rows[0];
+  } catch (error) {
+    console.error(error);
+    throw error
+  } finally {
+    conn.release();
+  }
+};
+
 // Get Clinic by Tenant ID and Clinic ID
 const getClinicByTenantIdAndClinicId = async (tenant_id, clinic_id,conn) => {
   try {
@@ -44,7 +59,7 @@ const getClinicByTenantIdAndClinicId = async (tenant_id, clinic_id,conn) => {
       clinic_id,
       conn
     );
-    // console.log(rows);
+    console.log('rows',rows,tenant_id,clinic_id);
     return rows || null;
   } catch (error) {
     console.error("Error executing query:", error);
@@ -579,4 +594,5 @@ module.exports = {
   getFinanceSummarybyDentist,
   getClinicSettingsByTenantIdAndClinicId,
   updateClinicSettings,
+  getAllClinics
 };

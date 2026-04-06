@@ -57,6 +57,14 @@ router.get(
   clinicController.getAllClinicByTenantId
 );
 
+// Get All Clinics by Tenant
+router.get(
+  routerPath.GETALL_CLINIC,
+  authenticateTenantClinicGroup(["tenant", "superuser","guest"]),
+  //  multiTenantAuthMiddleware,
+  clinicController.getAllClinics
+);
+
 // Get Clinic by Tenant & Clinic ID
 router.get(
   routerPath.GET_CLINIC_TENANT,

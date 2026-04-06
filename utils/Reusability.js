@@ -401,8 +401,9 @@ const getUserByTenantClinicAndKeycloakId = async (
       params = [tableName, tenantId, clinicId, keycloakUserId];
     }
 
-    const [rows] = await conn.query(query, params);
-    return rows[0] || null;
+    const rows = await conn.query(query, params);
+    // console.log('DBUSERCHECK:',rows[0],query,params)
+    return rows[0][0] || null;
   } catch (error) {
     console.error(`Error fetching user from ${tableName}:`, error);
     throw new Error("Database operation failed");
