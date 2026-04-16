@@ -28,6 +28,22 @@ const getAllDentistsByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
+const getAllPublicDentistByTenantId = async (
+  tenant_id,limit,offset
+) => {
+  const query = `select tenant_id,clinic_id,dentist_id,keycloak_id,first_name,last_name,gender,phone_number,specialisation,experience_years,city,state,country,pin_code as pincode,ratings from dentist where tenant_id=? limit ? offset ?`;
+  const conn =  await pool.getConnection();
+  try {
+    const rows = await conn.query(query, [tenant_id,Number(limit),offset]);
+    // console.log(rows[0]);
+    return rows[0];
+  } catch (error) {
+    console.error(error);
+    throw error;
+  } finally {
+    conn.release();
+  }
+};
 const getDentistByTenantIdAndDentistId = async (
   tenant_id,
   dentist_id,
@@ -292,4 +308,5 @@ module.exports = {
   checkDentistExistsUsingTenantIdAndClinicIdAnddentistId,
   updateDentistAppointmentCount,
   updateDentistRatingAndReviewCount,
+  getAllPublicDentistByTenantId
 };

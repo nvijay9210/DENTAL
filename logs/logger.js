@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 
-dotenv.config({ path: path.join(__dirname, '../env.development') });
+dotenv.config({ path: path.join(__dirname, '../.env.development') });
 
 if (!process.env.PHOTO_URL) {
   throw new Error('PHOTO_URL not defined in .env.development file');

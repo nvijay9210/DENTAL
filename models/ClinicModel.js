@@ -33,11 +33,11 @@ const getAllClinicsByTenantId = async (tenantId, limit, offset) => {
   }
 };
 
-const getAllClinics = async (tenantId, clinicId) => {
-  const query = `select * from clinic`;
+const getAllClinics = async (limit,offset) => {
+  const query = `select clinic_id,tenant_id,clinic_name,phone_number,address,city,state,country,landmark,clinic_logo,email,available_services,operating_hours from clinic LIMIT ? OFFSET ?`;
   const conn = await pool.getConnection();
   try {
-    const rows = await conn.query(query);
+    const rows = await conn.query(query,[limit,offset]);
     // console.log('rows:',rows)
     return rows[0];
   } catch (error) {

@@ -58,7 +58,7 @@ const createRedisClient = () => {
 
 // Lazy connect
 const connect = async () => {
-  if (!REDIS_ENABLED) return;
+  if (REDIS_ENABLED) return;
   if (redisConnected) return;
 
   if (!redisClient) {

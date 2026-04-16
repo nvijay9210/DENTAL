@@ -289,6 +289,48 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId, conn) => {
     throw new CustomError(error, 500);
   }
 };
+const getAllPublicDentistByTenantId = async (tenantId, limit, page) => {
+ const offset = (page - 1) * limit;
+  try {
+    const dentists = await dentistModel.getAllPublicDentistByTenantId(
+      tenantId,
+      limit,
+      offset
+    );
+
+    if (!dentists) {
+      throw new CustomError("Dentist not found", 404);
+    }
+
+      const convertedRows = await Promise.all(
+      dentists.map(async (dentist) => {
+        const formatted = helper.convertDbToFrontend(
+          dentist,
+          dentistFieldReverseMap
+        );
+
+        const awards = await getDocumentsByField(
+          "dentist",
+          dentist.dentist_id,
+          "awards_certifications"
+        );
+        const awards_certifications = awards.map((doc) => ({
+          document_id: doc.document_id,
+          file_url: doc.file_url,
+          description: doc.description,
+        }));
+
+        return {
+          ...formatted,
+          awards_certifications,
+        };
+      })
+    );
+   return { data: convertedRows, total: dentists.total };
+  } catch (error) {
+    throw new CustomError(error, 500);
+  }
+};
 
 // -------------------- DELETE --------------------
 const deleteDentistByTenantIdAndDentistId = async (
@@ -487,4 +529,5 @@ module.exports = {
   getAllDentistsByTenantIdAndClinicId,
   updateClinicIdAndNameAndAddress,
   updateNullClinicInfoWithJoin,
+  getAllPublicDentistByTenantId
 };

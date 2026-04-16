@@ -60,6 +60,11 @@ router.post(
 
 // Get All Dentists by Tenant ID
 router.get(
+  routerPath.GETALL_PUBLIC_DENTIST_TENANT,
+  // authenticateTenantClinicGroup(["tenant","superuser","patient","receptionist","guest"]),
+  dentistController.getAllPublicDentistByTenantId
+);
+router.get(
   routerPath.GETALL_DENTIST_TENANT,
   authenticateTenantClinicGroup(["tenant","superuser","patient","receptionist","guest"]),
   dentistController.getAllDentistsByTenantId

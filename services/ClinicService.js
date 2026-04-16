@@ -338,7 +338,7 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
     throw new CustomError(error, 500);
   }
 };
-const getAllClinics = async (tenantId, page = 1, limit = 10) => {
+const getAllClinics = async (page = 1, limit = 10) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("clinics", "list", {
     page,

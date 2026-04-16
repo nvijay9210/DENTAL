@@ -9,7 +9,7 @@ module.exports = {
   DELETE_TENANT: "/deletetenant/:tenant_id",
 
   ADD_CLINIC: "/addclinic",
-  GETALL_CLINIC: "/getallclinics",
+  GETALL_CLINIC: "/public/getallclinics",
   GETALL_CLINIC_TENANT: "/getallclinics/:tenant_id",
   GET_CLINIC_TENANT: "/getclinic/:clinic_id/:tenant_id",
   UPDATE_CLINIC_TENANT: "/updateclinic/:clinic_id/:tenant_id",
@@ -19,6 +19,7 @@ module.exports = {
 
   ADD_DENTIST: "/adddentist",
   GETALL_DENTIST_TENANT: "/getalldentists/:tenant_id",
+  GETALL_PUBLIC_DENTIST_TENANT: "/public/getalldentists/:tenant_id",
   GET_DENTIST_TENANT: "/getdentist_tenant/:dentist_id/:tenant_id",
   GET_DENTIST_TENANT_CLINIC:
     "/getalldentist_tenant_clinic/:tenant_id/:clinic_id",
