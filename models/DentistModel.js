@@ -135,8 +135,8 @@ const getAllPublicDentistByTenantIdClinicId = async (
     const [rows] = await conn.query(query1, [
       tenantId,
       clinicId,
-      limit,
-      offset,
+      Number(limit),
+      Number(offset),
     ]);
     const [counts] = await conn.query(query2, [tenantId, clinicId]);
     return { data: rows, total: counts[0].total };

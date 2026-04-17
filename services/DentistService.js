@@ -304,7 +304,7 @@ const getAllPublicDentistByTenantIdClinicId = async (tenantId,clinicId, limit, p
     }
 
       const convertedRows = await Promise.all(
-      dentists.map(async (dentist) => {
+      dentists.data.map(async (dentist) => {
         const formatted = helper.convertDbToFrontend(
           dentist,
           dentistFieldReverseMap
