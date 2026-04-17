@@ -289,11 +289,12 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId, conn) => {
     throw new CustomError(error, 500);
   }
 };
-const getAllPublicDentistByTenantId = async (tenantId, limit, page) => {
+const getAllPublicDentistByTenantIdClinicId = async (tenantId,clinicId, limit, page) => {
  const offset = (page - 1) * limit;
   try {
-    const dentists = await dentistModel.getAllPublicDentistByTenantId(
+    const dentists = await dentistModel.getAllPublicDentistByTenantIdClinicId(
       tenantId,
+      clinicId,
       limit,
       offset
     );
@@ -529,5 +530,5 @@ module.exports = {
   getAllDentistsByTenantIdAndClinicId,
   updateClinicIdAndNameAndAddress,
   updateNullClinicInfoWithJoin,
-  getAllPublicDentistByTenantId
+  getAllPublicDentistByTenantIdClinicId
 };

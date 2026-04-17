@@ -42,13 +42,14 @@ exports.getAllDentistsByTenantId = async (req, res, next) => {
     next(err);
   }
 };
-exports.getAllPublicDentistByTenantId = async (req, res, next) => {
-  const { tenant_id } = req.params;
+exports.getAllPublicDentistByTenantIdClinicId = async (req, res, next) => {
+  const { tenant_id,clinic_id } = req.params;
   const { page, limit } = req.query;
   await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
-    const dentists = await dentistService.getAllPublicDentistByTenantId(
+    const dentists = await dentistService.getAllPublicDentistByTenantIdClinicId(
       tenant_id,
+      clinic_id,
       limit,
       page
     );

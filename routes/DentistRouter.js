@@ -62,7 +62,7 @@ router.post(
 router.get(
   routerPath.GETALL_PUBLIC_DENTIST_TENANT,
   // authenticateTenantClinicGroup(["tenant","superuser","patient","receptionist","guest"]),
-  dentistController.getAllPublicDentistByTenantId
+  dentistController.getAllPublicDentistByTenantIdClinicId
 );
 router.get(
   routerPath.GETALL_DENTIST_TENANT,

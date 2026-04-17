@@ -19,7 +19,7 @@ module.exports = {
 
   ADD_DENTIST: "/adddentist",
   GETALL_DENTIST_TENANT: "/getalldentists/:tenant_id",
-  GETALL_PUBLIC_DENTIST_TENANT: "/public/getalldentists/:tenant_id",
+  GETALL_PUBLIC_DENTIST_TENANT: "/public/getalldentists/:tenant_id/:clinic_id",
   GET_DENTIST_TENANT: "/getdentist_tenant/:dentist_id/:tenant_id",
   GET_DENTIST_TENANT_CLINIC:
     "/getalldentist_tenant_clinic/:tenant_id/:clinic_id",
