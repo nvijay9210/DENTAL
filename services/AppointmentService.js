@@ -101,7 +101,8 @@ const appointmentFieldsReverseMap = {
   updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 
-// Create Appointment
+// Create Appointment'
+
 const createAppointment = async (data, connection = null) => {
   // console.log("[Appointment] Creating new appointment:", {
   //   tenant_id: data.tenant_id,

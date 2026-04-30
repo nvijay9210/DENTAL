@@ -35,6 +35,7 @@ module.exports = {
   UPDATE_PATIENT_TENANT: "/updatepatient/:patient_id/:tenant_id",
   DELETE_PATIENT_TENANT: "/deletepatient/:patient_id/:tenant_id",
 
+  ADD_APPOINTMENT_WEBSITE: "/addappointmentwebsite",
   ADD_APPOINTMENT: "/addappointment",
   GETALL_APPOINTMENT_TENANT: "/getallappointments/:tenant_id",
   GETALL_APPOINTMENT_TENANT_CLINIC: "/getallappointments/:tenant_id/:clinic_id",

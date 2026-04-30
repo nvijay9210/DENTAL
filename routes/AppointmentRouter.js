@@ -27,14 +27,36 @@ const {
   GET_APPOINTMENT_MONTHLY_SUMMARY_CLINIC,
   GETALL_APPOINTMENT_WITHDETAILS_TENANT_CLINIC,
   GETALL_APPOINTMENT_ROOMID_CLINIC,
+  ADD_APPOINTMENT_WEBSITE,
 } = require("./RouterPath");
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
+const patientValidation = require("../validations/PatientValidation");
+const { uploadFileMiddleware2 } = require("../utils/UploadFiles");
+const multer = require("multer");
 
 // File upload middleware can be added here if needed (e.g. reports, prescriptions)
-
+const patientFileMiddleware = uploadFileMiddleware2({
+  folderName: "Patient",
+  fileFields: [
+    {
+      fieldName: "profile_picture",
+      maxSizeMB: 2,
+      multiple: false,
+    }
+  ],
+  createValidationFn: patientValidation.createPatientValidation,
+  updateValidationFn: patientValidation.updatePatientValidation,
+});
+const upload = multer({ storage: multer.memoryStorage() });
 // Create Appointment
+router.post(
+  ADD_APPOINTMENT_WEBSITE,
+  // upload.any(),
+  // patientFileMiddleware,
+  appointmentController.createPatientAndBookAppointment
+);
 router.post(
   ADD_APPOINTMENT,
   authenticateTenantClinicGroup([
@@ -70,14 +92,14 @@ router.get(
 );
 router.get(
   GETALL_APPOINTMENTS_TENANT_CLINIC_DENTIST,
-  authenticateTenantClinicGroup([
-    "tenant",
-    "receptionist",
-    "patient",
-    "dentist",
-    "superuser",
-    "receptionist",
-  ]),
+  // authenticateTenantClinicGroup([
+  //   "tenant",
+  //   "receptionist",
+  //   "patient",
+  //   "dentist",
+  //   "superuser",
+  //   "receptionist",
+  // ]),
   appointmentController.getAllAppointmentsByTenantIdAndClinicIdByDentist
 );
 

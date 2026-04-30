@@ -45,7 +45,7 @@ exports.getAllDentistsByTenantId = async (req, res, next) => {
 exports.getAllPublicDentistByTenantIdClinicId = async (req, res, next) => {
   const { tenant_id,clinic_id } = req.params;
   const { page, limit } = req.query;
-  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  // await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
     const dentists = await dentistService.getAllPublicDentistByTenantIdClinicId(
       tenant_id,
@@ -65,7 +65,7 @@ exports.getDentistByTenantIdAndDentistId = async (req, res, next) => {
     await dentistValidation.checkDentistExistsByDentistIdValidation(
       tenant_id,
       dentist_id
-    );
+    );        
 
     const dentist = await dentistService.getDentistByTenantIdAndDentistId(
       tenant_id,

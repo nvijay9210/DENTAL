@@ -8,9 +8,197 @@ const {
   validateTenantIdAndPageAndLimit,
 } = require("../validations/CommonValidations");
 const { bulkInsert } = require("../Modules/BulkInsert");
+const  pool  = require("../config/db");
+const { uploadFileMiddleware2 } = require("../utils/UploadFiles");
 /**
  * Create a new appointment
  */
+
+
+// controllers/appointmentController.js
+
+exports.createPatientAndBookAppointment = async (req, res) => {
+  console.log('🎯 Controller hit - createPatientAndBookAppointment');
+  
+  // 1️⃣ Extract & Validate Payload
+  const {
+    tenant_id = 1,
+    first_name,
+    last_name,
+    email,
+    phone_number,
+    date_of_birth,
+    gender = "M",
+    blood_group,
+    address,
+    city,
+    state,
+    country,
+    pin_code,
+    smoking_status,
+    alcohol_consumption,
+    emergency_contact_name,
+    emergency_contact_number,
+    clinic_id,
+    dentist_id,
+    appointment_date,
+    start_time,
+    end_time,
+    mode_of_payment = "Cash",
+    visit_reason,
+    consultation_fee = 300.0,
+    min_booking_fee = 200.0,
+    created_by = "WebPortal",
+    appointment_type = "video"
+  } = req.body;
+
+  console.log('📥 Received payload:', req.body);
+
+  // Basic validation
+  const requiredFields = { first_name, last_name, phone_number, clinic_id, dentist_id, appointment_date, start_time, end_time };
+  const missing = Object.entries(requiredFields).filter(([_, val]) => !val).map(([key]) => key);
+  
+  if (missing.length > 0) {
+    return res.status(400).json({ 
+      success: false, 
+      message: `Missing required fields: ${missing.join(', ')}` 
+    });
+  }
+
+  let connection;
+  
+  try {
+    // ✅ Get connection using promise-based pool
+    connection = await pool.getConnection();
+    console.log('🔗 Database connection acquired');
+    
+    // Start transaction
+    await connection.beginTransaction();
+    console.log('🔄 Transaction started');
+
+    // Generate unique patient code
+    const patient_code = `MYDPAT${Date.now().toString().slice(-6)}`;
+
+    // 2️⃣ INSERT Patient
+    const [patientRes] = await connection.query(`
+      INSERT INTO patient (
+        tenant_id, patient_code, first_name, last_name, email, phone_number, 
+        date_of_birth, gender, blood_group, address, city, state, country, 
+        pin_code, smoking_status, alcohol_consumption, emergency_contact_name, 
+        emergency_contact_number, created_by, created_time
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+    `, [
+      tenant_id, patient_code, first_name, last_name, email || null, phone_number,
+      date_of_birth, gender, blood_group || null, address, city, state, country,
+      pin_code, smoking_status, alcohol_consumption, emergency_contact_name,
+      emergency_contact_number, created_by
+    ]);
+    
+    const patient_id = patientRes.insertId;
+    console.log('👤 Patient created:', { patient_id, patient_code });
+
+    // 3️⃣ INSERT Patient-Clinic Link (ignore duplicate if exists)
+    await connection.query(`
+      INSERT IGNORE INTO patient_clinic (patient_id, clinic_id, created_by, created_time)
+      VALUES (?, ?, ?, NOW())
+    `, [patient_id, clinic_id, created_by]);
+    console.log('🔗 Patient linked to clinic');
+
+    // 4️⃣ INSERT Appointment
+    const [apptRes] = await connection.query(`
+      INSERT INTO appointment (
+        tenant_id, patient_id, dentist_id, clinic_id, room_id, appointment_date, 
+        start_time, end_time, status, appointment_final_status, appointment_type,
+        visit_reason, mode_of_payment, consultation_fee, min_booking_fee, 
+        payment_status, created_by, created_time
+      ) VALUES (?, ?, ?, ?, '00000000-0000-0000-0000-000000000000', ?, ?, ?, 'pending', 'pending', ?, ?, ?, ?, ?, 'pending', ?, NOW())
+    `, [
+      tenant_id, patient_id, dentist_id, clinic_id, 
+      appointment_date, start_time, end_time, 
+      appointment_type,
+      visit_reason || null, mode_of_payment, consultation_fee, 
+      min_booking_fee, created_by
+    ]);
+    
+    const appointment_id = apptRes.insertId;
+    console.log('📅 Appointment created:', { appointment_id });
+
+    // 5️⃣ UPDATE/UPSERT Appointment Stats
+    await connection.query(`
+      INSERT INTO appointment_stats (tenant_id, clinic_id, dentist_id, stat_date, confirmed, created_by, created_time)
+      VALUES (?, ?, ?, DATE(?), 1, ?, NOW())
+      ON DUPLICATE KEY UPDATE confirmed = confirmed + 1
+    `, [tenant_id, clinic_id, dentist_id, appointment_date, created_by]);
+    console.log('📊 Stats updated');
+
+    // ✅ COMMIT Transaction
+    await connection.commit();
+    console.log('✅ Transaction committed successfully');
+
+    // 🟢 Success Response
+    return res.status(201).json({
+      success: true,
+      message: "Patient registered and appointment booked successfully.",
+      data: {
+        patient_id,
+        patient_code,
+        appointment_id,
+        clinic_id,
+        dentist_id,
+        appointment_date,
+        start_time,
+        end_time,
+        consultation_fee,
+        min_booking_fee
+      }
+    });
+
+  } catch (error) {
+    // 🔄 ROLLBACK on error
+    if (connection) {
+      try {
+        await connection.rollback();
+        console.log('🔄 Transaction rolled back');
+      } catch (rollbackErr) {
+        console.error('❌ Rollback failed:', rollbackErr);
+      }
+    }
+    
+    console.error("❌ Booking Transaction Failed:", error);
+    
+    // Handle specific MySQL errors
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({
+        success: false,
+        message: "Conflict: A record with this unique identifier already exists.",
+        error: process.env.NODE_ENV === 'development' ? error.sqlMessage : null
+      });
+    }
+    
+    if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid reference: Clinic or Dentist ID does not exist.",
+        error: process.env.NODE_ENV === 'development' ? error.sqlMessage : null
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error during booking.",
+      error: process.env.NODE_ENV === 'development' ? error.message : null,
+      code: error.code
+    });
+    
+  } finally {
+    // 🔓 Always release connection
+    if (connection) {
+      connection.release();
+      console.log('🔓 Connection released to pool');
+    }
+  }
+};
+
 exports.createAppointment = async (req, res, next) => {
   try {
     const response = await bulkInsert(

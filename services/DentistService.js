@@ -289,7 +289,7 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId, conn) => {
     throw new CustomError(error, 500);
   }
 };
-const getAllPublicDentistByTenantIdClinicId = async (tenantId,clinicId, limit, page) => {
+const getAllPublicDentistByTenantIdClinicId = async (tenantId,clinicId, limit=1000, page=1) => {
  const offset = (page - 1) * limit;
   try {
     const dentists = await dentistModel.getAllPublicDentistByTenantIdClinicId(
