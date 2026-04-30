@@ -42,6 +42,7 @@ exports.getAllClinicByTenantId = async (req, res, next) => {
   }
 };
 exports.getAllClinics = async (req, res, next) => {
+  console.log('ClinicPublic Controller')
   const { page, limit } = req.query;
   try {
     const clinics = await clinicService.getAllClinics(

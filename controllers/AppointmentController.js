@@ -8,18 +8,20 @@ const {
   validateTenantIdAndPageAndLimit,
 } = require("../validations/CommonValidations");
 const { bulkInsert } = require("../Modules/BulkInsert");
-const  pool  = require("../config/db");
+const pool = require("../config/db");
 const { uploadFileMiddleware2 } = require("../utils/UploadFiles");
+const { getClinicByTenantIdAndClinicId } = require("../services/ClinicService");
+const sendNotification = require("../utils/SendNotification");
+const { getTenantByTenantId } = require("../services/TenantService");
 /**
  * Create a new appointment
  */
 
-
 // controllers/appointmentController.js
 
 exports.createPatientAndBookAppointment = async (req, res) => {
-  console.log('🎯 Controller hit - createPatientAndBookAppointment');
-  
+  console.log("🎯 Controller hit - createPatientAndBookAppointment");
+
   // 1️⃣ Extract & Validate Payload
   const {
     tenant_id = 1,
@@ -49,91 +51,180 @@ exports.createPatientAndBookAppointment = async (req, res) => {
     consultation_fee = 300.0,
     min_booking_fee = 200.0,
     created_by = "WebPortal",
-    appointment_type = "video"
+    appointment_type = "video",
   } = req.body;
 
-  console.log('📥 Received payload:', req.body);
+  console.log("📥 Received payload:", req.body);
 
   // Basic validation
-  const requiredFields = { first_name, last_name, phone_number, clinic_id, dentist_id, appointment_date, start_time, end_time };
-  const missing = Object.entries(requiredFields).filter(([_, val]) => !val).map(([key]) => key);
-  
+  const requiredFields = {
+    first_name,
+    last_name,
+    phone_number,
+    clinic_id,
+    dentist_id,
+    appointment_date,
+    start_time,
+    end_time,
+  };
+  const missing = Object.entries(requiredFields)
+    .filter(([_, val]) => !val)
+    .map(([key]) => key);
+
   if (missing.length > 0) {
-    return res.status(400).json({ 
-      success: false, 
-      message: `Missing required fields: ${missing.join(', ')}` 
+    return res.status(400).json({
+      success: false,
+      message: `Missing required fields: ${missing.join(", ")}`,
     });
   }
 
   let connection;
-  
+
   try {
     // ✅ Get connection using promise-based pool
     connection = await pool.getConnection();
-    console.log('🔗 Database connection acquired');
-    
+    console.log("🔗 Database connection acquired");
+
     // Start transaction
     await connection.beginTransaction();
-    console.log('🔄 Transaction started');
+    console.log("🔄 Transaction started");
 
     // Generate unique patient code
     const patient_code = `MYDPAT${Date.now().toString().slice(-6)}`;
 
     // 2️⃣ INSERT Patient
-    const [patientRes] = await connection.query(`
+    const [patientRes] = await connection.query(
+      `
       INSERT INTO patient (
         tenant_id, patient_code, first_name, last_name, email, phone_number, 
         date_of_birth, gender, blood_group, address, city, state, country, 
         pin_code, smoking_status, alcohol_consumption, emergency_contact_name, 
         emergency_contact_number, created_by, created_time
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-    `, [
-      tenant_id, patient_code, first_name, last_name, email || null, phone_number,
-      date_of_birth, gender, blood_group || null, address, city, state, country,
-      pin_code, smoking_status, alcohol_consumption, emergency_contact_name,
-      emergency_contact_number, created_by
-    ]);
-    
+    `,
+      [
+        tenant_id,
+        patient_code,
+        first_name,
+        last_name,
+        email || null,
+        phone_number,
+        date_of_birth,
+        gender,
+        blood_group || null,
+        address,
+        city,
+        state,
+        country,
+        pin_code,
+        smoking_status,
+        alcohol_consumption,
+        emergency_contact_name,
+        emergency_contact_number,
+        created_by,
+      ],
+    );
+
     const patient_id = patientRes.insertId;
-    console.log('👤 Patient created:', { patient_id, patient_code });
+    console.log("👤 Patient created:", { patient_id, patient_code });
 
     // 3️⃣ INSERT Patient-Clinic Link (ignore duplicate if exists)
-    await connection.query(`
+    await connection.query(
+      `
       INSERT IGNORE INTO patient_clinic (patient_id, clinic_id, created_by, created_time)
       VALUES (?, ?, ?, NOW())
-    `, [patient_id, clinic_id, created_by]);
-    console.log('🔗 Patient linked to clinic');
+    `,
+      [patient_id, clinic_id, created_by],
+    );
+    console.log("🔗 Patient linked to clinic");
 
     // 4️⃣ INSERT Appointment
-    const [apptRes] = await connection.query(`
+    const [apptRes] = await connection.query(
+      `
       INSERT INTO appointment (
         tenant_id, patient_id, dentist_id, clinic_id, room_id, appointment_date, 
         start_time, end_time, status, appointment_final_status, appointment_type,
         visit_reason, mode_of_payment, consultation_fee, min_booking_fee, 
         payment_status, created_by, created_time
       ) VALUES (?, ?, ?, ?, '00000000-0000-0000-0000-000000000000', ?, ?, ?, 'pending', 'pending', ?, ?, ?, ?, ?, 'pending', ?, NOW())
-    `, [
-      tenant_id, patient_id, dentist_id, clinic_id, 
-      appointment_date, start_time, end_time, 
-      appointment_type,
-      visit_reason || null, mode_of_payment, consultation_fee, 
-      min_booking_fee, created_by
-    ]);
-    
+    `,
+      [
+        tenant_id,
+        patient_id,
+        dentist_id,
+        clinic_id,
+        appointment_date,
+        start_time,
+        end_time,
+        appointment_type,
+        visit_reason || null,
+        mode_of_payment,
+        consultation_fee,
+        min_booking_fee,
+        created_by,
+      ],
+    );
+
     const appointment_id = apptRes.insertId;
-    console.log('📅 Appointment created:', { appointment_id });
+    console.log("📅 Appointment created:", { appointment_id });
 
     // 5️⃣ UPDATE/UPSERT Appointment Stats
-    await connection.query(`
+    await connection.query(
+      `
       INSERT INTO appointment_stats (tenant_id, clinic_id, dentist_id, stat_date, confirmed, created_by, created_time)
       VALUES (?, ?, ?, DATE(?), 1, ?, NOW())
       ON DUPLICATE KEY UPDATE confirmed = confirmed + 1
-    `, [tenant_id, clinic_id, dentist_id, appointment_date, created_by]);
-    console.log('📊 Stats updated');
+    `,
+      [tenant_id, clinic_id, dentist_id, appointment_date, created_by],
+    );
+    console.log("📊 Stats updated");
 
     // ✅ COMMIT Transaction
     await connection.commit();
-    console.log('✅ Transaction committed successfully');
+    console.log("✅ Transaction committed successfully");
+
+    const clinic = await getClinicByTenantIdAndClinicId(tenant_id,clinic_id);
+    const tenant = await getTenantByTenantId(tenant_id);
+    // 📩 Dynamic Notification based on clinic config
+    try {
+      if (clinic?.otp) {
+        const message = `Hello ${first_name}, your appointment is confirmed ✅
+
+Hospital Name: ${tenant.tenant_name}
+Branch Name: ${clinic?.clinic_name}
+Date: ${appointment_date}
+Time: ${start_time} - ${end_time}
+
+Thank you!`;
+
+        // Normalize type
+        const type = (clinic.otp_type || "").toLowerCase();
+
+        let payload = {
+          type,
+          message,
+        };
+
+        // Set recipient based on type
+        if (type === "sms" || type === "whatsapp") {
+          payload.to = `+91${phone_number}`;
+        } else if (type === "email") {
+          payload.to = email;
+        }
+
+        // Validate before sending
+        if (payload.to && ["sms", "whatsapp", "email"].includes(type)) {
+          await sendNotification(payload);
+          console.log(`📩 ${type.toUpperCase()} sent successfully`);
+        } else {
+          console.warn("⚠️ Invalid notification config:", clinic.otp_type);
+        }
+      } else {
+        console.log("🔕 OTP disabled for this clinic");
+      }
+    } catch (err) {
+      console.error("⚠️ Notification failed:", err.message);
+    }
 
     // 🟢 Success Response
     return res.status(201).json({
@@ -149,52 +240,51 @@ exports.createPatientAndBookAppointment = async (req, res) => {
         start_time,
         end_time,
         consultation_fee,
-        min_booking_fee
-      }
+        min_booking_fee,
+      },
     });
-
   } catch (error) {
     // 🔄 ROLLBACK on error
     if (connection) {
       try {
         await connection.rollback();
-        console.log('🔄 Transaction rolled back');
+        console.log("🔄 Transaction rolled back");
       } catch (rollbackErr) {
-        console.error('❌ Rollback failed:', rollbackErr);
+        console.error("❌ Rollback failed:", rollbackErr);
       }
     }
-    
+
     console.error("❌ Booking Transaction Failed:", error);
-    
+
     // Handle specific MySQL errors
-    if (error.code === 'ER_DUP_ENTRY') {
+    if (error.code === "ER_DUP_ENTRY") {
       return res.status(409).json({
         success: false,
-        message: "Conflict: A record with this unique identifier already exists.",
-        error: process.env.NODE_ENV === 'development' ? error.sqlMessage : null
+        message:
+          "Conflict: A record with this unique identifier already exists.",
+        error: process.env.NODE_ENV === "development" ? error.sqlMessage : null,
       });
     }
-    
-    if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+
+    if (error.code === "ER_NO_REFERENCED_ROW_2") {
       return res.status(400).json({
         success: false,
         message: "Invalid reference: Clinic or Dentist ID does not exist.",
-        error: process.env.NODE_ENV === 'development' ? error.sqlMessage : null
+        error: process.env.NODE_ENV === "development" ? error.sqlMessage : null,
       });
     }
 
     return res.status(500).json({
       success: false,
       message: "Internal server error during booking.",
-      error: process.env.NODE_ENV === 'development' ? error.message : null,
-      code: error.code
+      error: process.env.NODE_ENV === "development" ? error.message : null,
+      code: error.code,
     });
-    
   } finally {
     // 🔓 Always release connection
     if (connection) {
       connection.release();
-      console.log('🔓 Connection released to pool');
+      console.log("🔓 Connection released to pool");
     }
   }
 };
@@ -204,7 +294,7 @@ exports.createAppointment = async (req, res, next) => {
     const response = await bulkInsert(
       req.body,
       appointmentValidation.createAppointmentValidation,
-      appointmentService.createAppointment
+      appointmentService.createAppointment,
     );
     res.status(201).json(response);
   } catch (err) {
@@ -223,7 +313,7 @@ exports.getAllAppointmentsByTenantId = async (req, res, next) => {
     const appointments = await appointmentService.getAllAppointmentsByTenantId(
       tenant_id,
       page,
-      limit
+      limit,
     );
     res.status(200).json(appointments);
   } catch (err) {
@@ -238,7 +328,7 @@ exports.getRoomIdByTenantIdAndAppointmentId = async (req, res, next) => {
     const appointments =
       await appointmentService.getRoomIdByTenantIdAndAppointmentId(
         tenant_id,
-        appointment_id
+        appointment_id,
       );
     res.status(200).json(appointments);
   } catch (err) {
@@ -256,7 +346,7 @@ exports.getAllAppointmentsByTenantIdAndClinicId = async (req, res, next) => {
         tenant_id,
         clinic_id,
         page,
-        limit
+        limit,
       );
     res.status(200).json(appointments);
   } catch (err) {
@@ -267,7 +357,7 @@ exports.getAllAppointmentsByTenantIdAndClinicId = async (req, res, next) => {
 exports.getAllAppointmentsByTenantIdAndClinicIdByDentist = async (
   req,
   res,
-  next
+  next,
 ) => {
   const { tenant_id, clinic_id, dentist_id } = req.params;
   const { page, limit } = req.query;
@@ -282,7 +372,7 @@ exports.getAllAppointmentsByTenantIdAndClinicIdByDentist = async (
         clinic_id,
         dentist_id,
         page,
-        limit
+        limit,
       );
     res.status(200).json(appointments);
   } catch (err) {
@@ -293,7 +383,7 @@ exports.getAllAppointmentsByTenantIdAndClinicIdByDentist = async (
 exports.getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (
   req,
   res,
-  next
+  next,
 ) => {
   const { tenant_id, clinic_id, dentist_id } = req.params;
   await checkIfIdExists("tenant", "tenant_id", tenant_id);
@@ -304,18 +394,14 @@ exports.getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (
       await appointmentService.getAllRoomIdByTenantIdAndClinicIdAndDentistId(
         tenant_id,
         clinic_id,
-        dentist_id
+        dentist_id,
       );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
   }
 };
-exports.getAllRoomIdByTenantIdAndClinicId = async (
-  req,
-  res,
-  next
-) => {
+exports.getAllRoomIdByTenantIdAndClinicId = async (req, res, next) => {
   const { tenant_id, clinic_id, dentist_id } = req.params;
   await checkIfIdExists("tenant", "tenant_id", tenant_id);
   await checkIfIdExists("clinic", "clinic_id", clinic_id);
@@ -323,7 +409,7 @@ exports.getAllRoomIdByTenantIdAndClinicId = async (
     const appointments =
       await appointmentService.getAllRoomIdByTenantIdAndClinicId(
         tenant_id,
-        clinic_id
+        clinic_id,
       );
     res.status(200).json(appointments);
   } catch (err) {
@@ -339,7 +425,7 @@ exports.getAllRoomIdByTenantIdAndPatientId = async (req, res, next) => {
     const appointments =
       await appointmentService.getAllRoomIdByTenantIdAndPatientId(
         tenant_id,
-        patient_id
+        patient_id,
       );
     res.status(200).json(appointments);
   } catch (err) {
@@ -359,13 +445,13 @@ exports.getAllAppointmentsByTenantIdAndDentistId = async (req, res, next) => {
         tenant_id,
         dentist_id,
         page,
-        limit
+        limit,
       );
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
   }
-}; 
+};
 
 exports.getAllAppointmentsByTenantIdAndPatientId = async (req, res, next) => {
   const { tenant_id, patient_id } = req.params;
@@ -380,7 +466,7 @@ exports.getAllAppointmentsByTenantIdAndPatientId = async (req, res, next) => {
         patient_id,
         status,
         page,
-        limit
+        limit,
       );
     res.status(200).json(appointments);
   } catch (err) {
@@ -399,7 +485,7 @@ exports.getAppointmentByTenantIdAndAppointmentId = async (req, res, next) => {
       "appointment",
       "appointment_id",
       appointment_id,
-      tenant_id
+      tenant_id,
     );
 
     if (!appointment1) throw new CustomError("Appointment not found", 404);
@@ -408,7 +494,7 @@ exports.getAppointmentByTenantIdAndAppointmentId = async (req, res, next) => {
     const appointment =
       await appointmentService.getAppointmentByTenantIdAndAppointmentId(
         tenant_id,
-        appointment_id
+        appointment_id,
       );
     res.status(200).json(appointment);
   } catch (err) {
@@ -429,7 +515,7 @@ exports.updateAppointment = async (req, res, next) => {
       "appointment",
       "appointment_id",
       appointment_id,
-      tenant_id
+      tenant_id,
     );
 
     if (!appointment1) throw new CustomError("Appointment not found", 404);
@@ -438,7 +524,7 @@ exports.updateAppointment = async (req, res, next) => {
     await appointmentValidation.updateAppointmentValidation(
       appointment_id,
       details,
-      tenant_id
+      tenant_id,
     );
 
     // Check for overlapping appointments (skipping current one)
@@ -452,12 +538,12 @@ exports.updateAppointment = async (req, res, next) => {
         start_time: details.start_time,
         end_time: details.end_time,
       },
-      appointment_id
+      appointment_id,
     );
 
     if (isOverlapping) {
       throw new Error(
-        "Updated appointment overlaps with another existing appointment."
+        "Updated appointment overlaps with another existing appointment.",
       );
     }
 
@@ -465,7 +551,7 @@ exports.updateAppointment = async (req, res, next) => {
     await appointmentService.updateAppointment(
       appointment_id,
       details,
-      tenant_id
+      tenant_id,
     );
     res.status(200).json({ message: "Appointment updated successfully" });
   } catch (err) {
@@ -482,7 +568,7 @@ exports.updateAppoinmentStatus = async (req, res, next) => {
       "appointment",
       "appointment_id",
       appointment_id,
-      tenant_id
+      tenant_id,
     );
 
     if (!appointment1) throw new CustomError("Appointment not found", 404);
@@ -492,7 +578,7 @@ exports.updateAppoinmentStatus = async (req, res, next) => {
       appointment_id,
       tenant_id,
       clinic_id,
-      details
+      details,
     );
     res
       .status(200)
@@ -512,7 +598,7 @@ exports.updateAppoinmentFeedback = async (req, res, next) => {
       "appointment",
       "appointment_id",
       appointment_id,
-      tenant_id
+      tenant_id,
     );
 
     if (!appointment1) throw new CustomError("Appointment not found", 404);
@@ -521,7 +607,7 @@ exports.updateAppoinmentFeedback = async (req, res, next) => {
     await appointmentService.updateAppoinmentFeedback(
       appointment_id,
       tenant_id,
-      details
+      details,
     );
     res.status(200).json({
       message: "Appointment and Dentist Feedback updated successfully",
@@ -540,7 +626,7 @@ exports.updateAppoinmentFeedbackDisplay = async (req, res, next) => {
       "appointment",
       "appointment_id",
       appointment_id,
-      tenant_id
+      tenant_id,
     );
 
     if (!appointment1) throw new CustomError("Appointment not found", 404);
@@ -550,7 +636,7 @@ exports.updateAppoinmentFeedbackDisplay = async (req, res, next) => {
       appointment_id,
       tenant_id,
       status,
-      feedback_display
+      feedback_display,
     );
     res.status(200).json({
       message: "Appointment and Dentist Feedback updated successfully",
@@ -566,7 +652,7 @@ exports.updateAppoinmentFeedbackDisplay = async (req, res, next) => {
 exports.deleteAppointmentByTenantIdAndAppointmentId = async (
   req,
   res,
-  next
+  next,
 ) => {
   const { appointment_id, tenant_id } = req.params;
 
@@ -576,14 +662,14 @@ exports.deleteAppointmentByTenantIdAndAppointmentId = async (
       "appointment",
       "appointment_id",
       appointment_id,
-      tenant_id
+      tenant_id,
     );
 
     if (!appointment1) throw new CustomError("Appointment not found", 404);
     // Delete the appointment
     await appointmentService.deleteAppointmentByTenantIdAndAppointmentId(
       tenant_id,
-      appointment_id
+      appointment_id,
     );
     res.status(200).json({ message: "Appointment deleted successfully" });
   } catch (err) {
@@ -593,7 +679,7 @@ exports.deleteAppointmentByTenantIdAndAppointmentId = async (
 
 exports.getAppointmentsWithDetails = async (req, res, next) => {
   const { tenant_id, clinic_id, dentist_id } = req.params;
-  const {  page, limit } = req.query;
+  const { page, limit } = req.query;
   try {
     await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
     await checkIfIdExists("tenant", "tenant_id", tenant_id);
@@ -604,7 +690,7 @@ exports.getAppointmentsWithDetails = async (req, res, next) => {
       clinic_id,
       dentist_id,
       page,
-      limit
+      limit,
     );
     res.status(200).json(appointments);
   } catch (err) {
@@ -613,7 +699,7 @@ exports.getAppointmentsWithDetails = async (req, res, next) => {
 };
 exports.getAppointmentsWithDetailsByClinic = async (req, res, next) => {
   const { tenant_id, clinic_id } = req.params;
-  const {  page, limit } = req.query;
+  const { page, limit } = req.query;
   try {
     await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
     await checkIfIdExists("tenant", "tenant_id", tenant_id);
@@ -622,9 +708,9 @@ exports.getAppointmentsWithDetailsByClinic = async (req, res, next) => {
       await appointmentService.getAppointmentsWithDetailsByClinic(
         tenant_id,
         clinic_id,
-        
+
         page,
-        limit
+        limit,
       );
     res.status(200).json(appointments);
   } catch (err) {
@@ -646,7 +732,7 @@ exports.getAppointmentsWithDetailsByPatient = async (req, res, next) => {
         patient_id,
         status,
         page,
-        limit
+        limit,
       );
     res.status(200).json(appointments);
   } catch (err) {
@@ -663,7 +749,7 @@ exports.getAppointmentMonthlySummary = async (req, res, next) => {
     const appointments = await appointmentService.getAppointmentMonthlySummary(
       tenant_id,
       clinic_id,
-      dentist_id
+      dentist_id,
     );
     res.status(200).json(appointments);
   } catch (err) {
@@ -679,7 +765,7 @@ exports.getAppointmentMonthlySummaryClinic = async (req, res, next) => {
     const appointments =
       await appointmentService.getAppointmentMonthlySummaryClinic(
         tenant_id,
-        clinic_id
+        clinic_id,
       );
     res.status(200).json(appointments);
   } catch (err) {
@@ -705,10 +791,10 @@ exports.getAppointmentSummary = async (req, res, next) => {
         dateToString(startDate),
         dateToString(endDate),
         parseInt(clinic_id),
-        parseInt(dentist_id)
+        parseInt(dentist_id),
         // period
       );
-      await logUserViewActivity(req,'/getallappointments/periodsummary/')
+    await logUserViewActivity(req, "/getallappointments/periodsummary/");
     res.status(200).json(appointments);
   } catch (err) {
     next(err);
@@ -729,7 +815,7 @@ exports.getAppointmentSummaryByDentist = async (req, res, next) => {
         tenant_id,
         clinic_id,
         dentist_id,
-        period
+        period,
       );
     res.status(200).json(appointments);
   } catch (err) {
@@ -747,7 +833,7 @@ exports.getAppointmentSummaryChartByClinic = async (req, res, next) => {
     const appointments =
       await appointmentService.getAppointmentSummaryChartByClinic(
         tenant_id,
-        clinic_id
+        clinic_id,
       );
     res.status(200).json(appointments);
   } catch (err) {
@@ -766,7 +852,7 @@ exports.getAppointmentSummaryChartByDentist = async (req, res, next) => {
       await appointmentService.getAppointmentSummaryChartByDentist(
         tenant_id,
         clinic_id,
-        dentist_id
+        dentist_id,
       );
     res.status(200).json(appointments);
   } catch (err) {
@@ -777,7 +863,7 @@ exports.getAppointmentSummaryChartByDentist = async (req, res, next) => {
 exports.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
   req,
   res,
-  next
+  next,
 ) => {
   const { tenant_id, clinic_id, patient_id } = req.params;
   const { limit, page } = req.query;
@@ -793,7 +879,7 @@ exports.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
         clinic_id,
         patient_id,
         page,
-        limit
+        limit,
       );
     res.status(200).json(appointments);
   } catch (err) {

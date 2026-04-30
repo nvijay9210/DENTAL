@@ -117,7 +117,7 @@ const setOtpCooldown = async ({ username, tenant_id }, seconds = 30) => {
   try {
     const cooldownKey = getCooldownKey(tenant_id, username);
     // Use raw redisClient for setex since helper uses seconds
-    const { redisClient } = require("../Config/redis");
+    const { redisClient } = require("../config/redis");
     await redisClient.setex(cooldownKey, seconds, "1");
   } catch (err) {
     console.error("❌ setOtpCooldown error:", err);
