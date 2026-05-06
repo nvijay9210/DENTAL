@@ -3,6 +3,7 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const qs = require("querystring");
 const axios = require("axios");
+const { v4: uuidv4 } = require('uuid');
 const { CustomError } = require("../middlewares/CustomeError");
 const {
   getKeycloakToken,
@@ -31,6 +32,8 @@ const {
 } = require("../utils/Helpers");
 const { decode } = require("jsonwebtoken");
 const { generateAppBAccessToken } = require("../utils/CodeGenerator");
+const { getClientInfo } = require("../utils/LoginHistoryInfo");
+const loginHistoryService=require('../services/LoginHistoryService')
 
 const router = express.Router();
 router.use(cookieParser());
@@ -114,6 +117,22 @@ const finalizeLogin = async (req, res) => {
     });
 
     log("FINALIZE_LOGIN", "Login complete — sending user context");
+
+    console.log('USERCONTEXT:',userContext)
+    const clientInfo = await getClientInfo(req);
+
+    const data = {
+      tenant_id: userContext.tenant_id,
+      app_name: 'DENTAL',
+      keycloak_user_id: userContext.keycloak_user_id,
+      session_id: uuidv4(),
+      login_time:new Date(),
+      ip_address: clientInfo.ip,
+      device_info: clientInfo.device,
+      browser_info: clientInfo.browser
+    };
+
+    await loginHistoryService.createLoginHistory(data)
 
     return res.status(200).json(userContext);
   } catch (err) {

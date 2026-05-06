@@ -7,7 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
 
-// require('./middlewares/Schedule') //appointment schedule
+require('./middlewares/Schedule') //appointment schedule
 // const { logFilePath, logStream, logRequest } = require('./logs/logger'); //log file
 
 const errorHandler = require('./middlewares/errorHandler');

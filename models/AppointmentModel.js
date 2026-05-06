@@ -235,7 +235,7 @@ const getAllRoomIdByTenantIdAndClinicId = async (
 WHERE 
     app.tenant_id = ? 
     AND app.clinic_id = ?
-    AND app.room_id!=?
+    AND app.room_id<>?
     AND app.status=?
 `;
   const conn = await pool.getConnection();
