@@ -12,6 +12,7 @@ module.exports = {
   GETALL_CLINIC: "/public/getallclinics",
   GETALL_CLINIC_TENANT: "/getallclinics/:tenant_id",
   GET_CLINIC_TENANT: "/getclinic/:clinic_id/:tenant_id",
+  GET_CLINIC_TENANT_MICROSERVICE: "/getclinic_microservice/:clinic_id/:tenant_id",
   UPDATE_CLINIC_TENANT: "/updateclinic/:clinic_id/:tenant_id",
   UPDATE_CLINIC_SETTINGS: "/updateclinic_settings/:tenant_id/:clinic_id", //settings:1 in query
   HANDLE_CLINIC_ASSIGNMENT: "/handleClinicassignment/:tenant_id/:clinic_id",

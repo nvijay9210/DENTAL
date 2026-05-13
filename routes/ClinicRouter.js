@@ -71,6 +71,11 @@ router.get(
   authenticateTenantClinicGroup(["tenant","superuser","dentist","receptionist","patient"]),
   clinicController.getClinicByTenantIdAndClinicId
 );
+router.get(
+  routerPath.GET_CLINIC_TENANT_MICROSERVICE,
+  // authenticateTenantClinicGroup(["tenant","superuser","dentist","receptionist","patient"]),
+  clinicController.getClinicByTenantIdAndClinicId
+);
 
 // Update Clinic
 router.put(
