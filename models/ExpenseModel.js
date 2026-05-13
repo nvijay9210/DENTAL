@@ -47,9 +47,36 @@ const getAllExpensesByTenantIdAndClinicId = async (
   limit,
   offset
 ) => {
-  const query1 = `SELECT * FROM expense  WHERE tenant_id = ? AND clinic_id = ? limit ? offset ?`;
-  const query2 = `SELECT count(*) as total FROM expense  WHERE tenant_id = ? AND clinic_id = ?`;
+  const query1 = `
+    SELECT 
+      e.*,
+      c.clinic_name,
+      c.email,
+      c.phone_number,
+      c.address,
+      c.website,
+      c.city,
+      c.state,
+      c.country,
+      c.pin_code,
+      c.clinic_logo
+    FROM expense e
+    LEFT JOIN clinic c 
+      ON e.clinic_id = c.clinic_id
+    WHERE e.tenant_id = ?
+      AND e.clinic_id = ?
+    LIMIT ? OFFSET ?
+  `;
+
+  const query2 = `
+    SELECT count(*) as total
+    FROM expense
+    WHERE tenant_id = ?
+      AND clinic_id = ?
+  `;
+
   const conn = await pool.getConnection();
+
   try {
     const [rows] = await conn.query(query1, [
       tenantId,
@@ -57,8 +84,16 @@ const getAllExpensesByTenantIdAndClinicId = async (
       limit,
       offset,
     ]);
-    const [counts] = await conn.query(query2, [tenantId, clinicId]);
-    return { data: rows, total: counts[0].total };
+
+    const [counts] = await conn.query(query2, [
+      tenantId,
+      clinicId,
+    ]);
+
+    return {
+      data: rows,
+      total: counts[0].total,
+    };
   } catch (error) {
     console.error(error);
     throw error;
@@ -129,7 +164,7 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   limit,
   offset
 ) => {
-  const query1 = `SELECT * FROM expense WHERE tenant_id = ? AND clinic_id = ? AND expense_date between ? AND ? limit ? offset ?`;
+  const query1 = `SELECT e.*,c.clinic_name,c.email,c.phone_number,c.address,c.website,c.city,c.state,c.country,c.pin_code,c.clinic_logo FROM expense e left join clinic c on e.clinic_id = c.clinic_id WHERE e.tenant_id = ? AND e.clinic_id = ? AND expense_date between ? AND ? limit ? offset ?`;
   const query2 = `SELECT count(*) as total FROM expense d WHERE tenant_id = ? AND clinic_id = ? AND expense_date between ? AND ?`;
   const conn = await pool.getConnection();
   try {

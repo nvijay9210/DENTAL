@@ -156,6 +156,7 @@ const getAllExpensesByTenantIdAndClinicId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
+
   const cacheKey = buildCacheKey("expense", "list", {
     tenant_id: tenantId,
     clinic_id,
@@ -171,8 +172,32 @@ const getAllExpensesByTenantIdAndClinicId = async (
         Number(limit),
         offset
       );
+
       return result;
     });
+
+    // Get clinic details from first expense row
+    const firstExpense = expenses.data[0];
+
+   const clinic = firstExpense
+  ? {
+      clinic_id: firstExpense.clinic_id,
+      clinic_name: firstExpense.clinic_name,
+      email: firstExpense.email,
+      phone_number: firstExpense.phone_number,
+
+      address: firstExpense.address
+        ? JSON.parse(firstExpense.address)
+        : null,
+
+      website: firstExpense.website,
+      city: firstExpense.city,
+      state: firstExpense.state,
+      country: firstExpense.country,
+      pincode: firstExpense.pincode,
+      clinic_logo: firstExpense.clinic_logo,
+    }
+  : null;
 
     const convertedRows = await Promise.all(
       expenses.data.map(async (expense) => {
@@ -187,9 +212,8 @@ const getAllExpensesByTenantIdAndClinicId = async (
           "expense_documents"
         );
 
-        console.log('docs:',docs)
+        console.log("docs:", docs);
 
-        // Extract only file_url
         const fileInfos = docs.map((doc) => ({
           document_id: doc.document_id,
           file_url: doc.file_url,
@@ -202,7 +226,11 @@ const getAllExpensesByTenantIdAndClinicId = async (
       })
     );
 
-    return { data: convertedRows, total: expenses.total };
+    return {
+      clinic,
+      data: convertedRows,
+      total: expenses.total,
+    };
   } catch (err) {
     console.error("Database error while fetching expenses:", err);
     throw new CustomError(err, 500);
@@ -225,22 +253,52 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
     page,
     limit,
   });
+
   const offset = (page - 1) * limit;
+
   try {
     const expenses = await getOrSetCache(cacheKey, async () => {
-      const startDateStr = new Date(startDate).toISOString().split("T")[0];
-      const endDateStr = new Date(endDate).toISOString().split("T")[0];
-      const result =
-        await expenseModel.getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate(
-          tenantId,
-          clinicId,
-          startDateStr,
-          endDateStr,
-          parseInt(limit),
-          parseInt(offset)
-        );
-      return result;
+      const startDateStr = new Date(startDate)
+        .toISOString()
+        .split("T")[0];
+
+      const endDateStr = new Date(endDate)
+        .toISOString()
+        .split("T")[0];
+
+      return await expenseModel.getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate(
+        tenantId,
+        clinicId,
+        startDateStr,
+        endDateStr,
+        parseInt(limit),
+        parseInt(offset)
+      );
     });
+
+    // Get clinic data from first row
+    const firstExpense = expenses.data[0];
+
+ const clinic = firstExpense
+  ? {
+      clinic_id: firstExpense.clinic_id,
+      clinic_name: firstExpense.clinic_name,
+      email: firstExpense.email,
+      phone_number: firstExpense.phone_number,
+
+      address: firstExpense.address
+        ? JSON.parse(firstExpense.address)
+        : null,
+
+      website: firstExpense.website,
+      city: firstExpense.city,
+      state: firstExpense.state,
+      country: firstExpense.country,
+      pincode: firstExpense.pincode,
+      clinic_logo: firstExpense.clinic_logo,
+    }
+  : null;
+
     const convertedRows = await Promise.all(
       expenses.data.map(async (expense) => {
         const formatted = helper.convertDbToFrontend(
@@ -254,7 +312,6 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
           "expense_documents"
         );
 
-        // Extract only file_url
         const fileInfos = docs.map((doc) => ({
           document_id: doc.document_id,
           file_url: doc.file_url,
@@ -267,7 +324,11 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
       })
     );
 
-    return { data: convertedRows, total: expenses.total };
+    return {
+      clinic,
+      data: convertedRows,
+      total: expenses.total,
+    };
   } catch (err) {
     console.error("Database error while fetching expenses:", err);
     throw new CustomError(err, 500);

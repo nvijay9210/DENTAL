@@ -158,26 +158,54 @@ const getAllPrescriptionsByTenantAndClinicIdAndAppointmentId = async (
   limit,
   offset
 ) => {
-  const query1 = `SELECT *
-FROM 
-    prescription p
-  JOIN treatment t on t.treatment_id=p.treatment_id
-WHERE 
-    p.tenant_id = ? AND 
-    p.clinic_id = ? AND 
-    t. appointment_id=?
-    limit ? offset ? 
-`;
-  const query2 = `SELECT COUNT(*) AS total
-FROM 
-    prescription p
-  JOIN treatment t on t.treatment_id=p.treatment_id
-WHERE 
-    p.tenant_id = ? AND 
-    p.clinic_id = ? AND 
-    t. appointment_id=?
-`;
+  const query1 = `
+    SELECT 
+      p.*,
+      t.*,
+
+      c.clinic_name,
+      c.email,
+      c.phone_number,
+      c.address,
+      c.website,
+      c.city,
+      c.state,
+      c.country,
+      c.pin_code,
+      c.clinic_logo
+
+    FROM prescription p
+
+    JOIN treatment t
+      ON t.treatment_id = p.treatment_id
+
+    LEFT JOIN clinic c
+      ON c.clinic_id = p.clinic_id
+
+    WHERE 
+      p.tenant_id = ? 
+      AND p.clinic_id = ? 
+      AND t.appointment_id = ?
+
+    LIMIT ? OFFSET ?
+  `;
+
+  const query2 = `
+    SELECT COUNT(*) AS total
+
+    FROM prescription p
+
+    JOIN treatment t
+      ON t.treatment_id = p.treatment_id
+
+    WHERE 
+      p.tenant_id = ? 
+      AND p.clinic_id = ? 
+      AND t.appointment_id = ?
+  `;
+
   const conn = await pool.getConnection();
+
   try {
     const [rows] = await conn.query(query1, [
       tenantId,
@@ -186,12 +214,17 @@ WHERE
       limit,
       offset,
     ]);
+
     const [counts] = await conn.query(query2, [
       tenantId,
       clinic_id,
-      appointment_id
+      appointment_id,
     ]);
-    return { data: rows, total: counts[0].total };
+
+    return {
+      data: rows,
+      total: counts[0].total,
+    };
   } catch (error) {
     console.log(error);
     throw new Error("Database Operation Failed");

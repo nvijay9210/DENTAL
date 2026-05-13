@@ -170,6 +170,7 @@ const getAllPrescriptionsByTenantAndClinicIdAndAppointmentId = async (
   limit = 10
 ) => {
   const offset = (page - 1) * limit;
+
   const cacheKey = buildCacheKey("treatment", "list", {
     tenant_id: tenantId,
     clinic_id,
@@ -178,27 +179,58 @@ const getAllPrescriptionsByTenantAndClinicIdAndAppointmentId = async (
     limit,
   });
 
-
   try {
     const prescriptions = await getOrSetCache(cacheKey, async () => {
-      const result =
-        await prescriptionModel.getAllPrescriptionsByTenantAndClinicIdAndAppointmentId(
-          tenantId,
-          clinic_id,
-          appointment_id,
-          Number(limit),
-          offset
-        );
-      return result;
+      return await prescriptionModel.getAllPrescriptionsByTenantAndClinicIdAndAppointmentId(
+        tenantId,
+        clinic_id,
+        appointment_id,
+        Number(limit),
+        offset
+      );
     });
 
+    // Common clinic data
+    const firstPrescription = prescriptions.data[0];
+
+    const clinic = firstPrescription
+      ? {
+          clinic_id: firstPrescription.clinic_id,
+          clinic_name: firstPrescription.clinic_name,
+          email: firstPrescription.email,
+          phone_number: firstPrescription.phone_number,
+
+          address: firstPrescription.address
+            ? JSON.parse(firstPrescription.address)
+            : null,
+
+          website: firstPrescription.website,
+          city: firstPrescription.city,
+          state: firstPrescription.state,
+          country: firstPrescription.country,
+          pin_code: firstPrescription.pin_code,
+          clinic_logo: firstPrescription.clinic_logo,
+        }
+      : null;
+
     const convertedRows = prescriptions.data.map((prescription) =>
-          helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
-        );
-    
-        return {data:convertedRows,total:prescriptions.total};;
+      helper.convertDbToFrontend(
+        prescription,
+        prescriptionFieldsReversMap
+      )
+    );
+
+    return {
+      clinic,
+      data: convertedRows,
+      total: prescriptions.total,
+    };
   } catch (err) {
-    console.error("Database error while fetching prescriptions:", err);
+    console.error(
+      "Database error while fetching prescriptions:",
+      err
+    );
+
     throw new CustomError(err, 500);
   }
 };
