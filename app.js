@@ -56,7 +56,7 @@ const ssoRouter=require('./Keycloak/SSOAuth')
 // const compressionMiddleware = require('./middlewares/CompressionMiddleware');
 
 
-const { connect: redisConnect, closeRedis } = require('./config/redisConfig');
+const { connect: redisConnect, closeRedis } = require('./config/redis');
 
 // Initialize Express
 const app = express();
@@ -268,6 +268,8 @@ const bodyParser = require("body-parser");
 const { authenticateTenantClinicGroup } = require('./Keycloak/AuthenticateTenantAndClient');
 const { generateAppBAccessToken } = require('./utils/CodeGenerator');
 const session = require('express-session');
+const  pool  = require('./config/db');
+const { addUserClinicMapping } = require('./utils/Helpers');
 
 app.use(bodyParser.json())
 
@@ -283,6 +285,237 @@ app.post("/store-token", (req, res) => {
   sharedToken = access_token;
   return res.json({ message: "Token stored successfully" });
 });
+
+app.post("/v1/add", async (req, res) => {
+
+  console.log("========== USER CLINIC ADD API ==========");
+  console.log("Request Body:", req.body);
+
+  const conn = await pool.getConnection();
+
+  console.log("✅ DB Connection Created");
+
+  try {
+
+    const {
+      user_id,
+      user_name,
+      role,
+      keycloak_id,
+      clinic_ids,
+      created_by,
+    } = req.body;
+
+    console.log("Extracted Values:");
+    console.log({
+      user_id,
+      user_name,
+      role,
+      keycloak_id,
+      clinic_ids,
+      created_by,
+    });
+
+    // ✅ Validation
+    if (
+      !user_id ||
+      !user_name ||
+      !role ||
+      !Array.isArray(clinic_ids) ||
+      clinic_ids.length === 0
+    ) {
+
+      console.log("❌ Validation Failed");
+
+      return res.status(400).json({
+        success: false,
+        message: "Required fields missing",
+      });
+    }
+
+    console.log("✅ Validation Passed");
+
+    await conn.beginTransaction();
+
+    console.log("✅ Transaction Started");
+
+    const insertedClinicIds = [];
+
+    // ✅ Loop all clinics
+    for (const clinicId of clinic_ids) {
+
+      console.log("Checking Clinic:", clinicId);
+
+      // ✅ Duplicate Check
+      const [existing] = await conn.query(
+        `
+        SELECT user_clinic_id
+        FROM user_clinic
+        WHERE user_id = ?
+        AND clinic_id = ?
+        `,
+        [user_id, clinicId]
+      );
+
+      console.log("Existing Result:", existing);
+
+      // Skip duplicates
+      if (existing.length > 0) {
+
+        console.log(
+          `⚠️ User already assigned to clinic ${clinicId}`
+        );
+
+        continue;
+      }
+
+      console.log(
+        `✅ Assigning user to clinic ${clinicId}`
+      );
+
+      // ✅ Insert Mapping
+      const insertId = await addUserClinicMapping(
+        conn,
+        {
+          userId: user_id,
+          userName: user_name,
+          role,
+          keycloakId: keycloak_id,
+          clinicId,
+          createdBy: created_by || "SYSTEM",
+        }
+      );
+
+      insertedClinicIds.push({
+        clinic_id: clinicId,
+        insert_id: insertId,
+      });
+
+      console.log(
+        `✅ Inserted for clinic ${clinicId}`
+      );
+    }
+
+    await conn.commit();
+
+    console.log("✅ Transaction Committed");
+
+    console.log("========== API SUCCESS ==========");
+
+    return res.status(201).json({
+      success: true,
+      message: "User assigned successfully",
+      data: insertedClinicIds,
+    });
+
+  } catch (error) {
+
+    console.log("❌ ERROR OCCURRED");
+    console.log(error);
+
+    try {
+      await conn.rollback();
+      console.log("↩️ Transaction Rolled Back");
+    } catch (rollbackError) {
+      console.log("Rollback Error:", rollbackError);
+    }
+
+    return res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Failed to assign user",
+    });
+
+  } finally {
+
+    if (conn) {
+      conn.release();
+      console.log("✅ DB Connection Released");
+    }
+
+    console.log("========== END API ==========");
+  }
+});
+
+// Get Clinics By Superuser ID
+
+app.get(
+  "/v1/userclinic/getclinicsbysuperuser/:keycloak_id",
+  async (req, res) => {
+
+    console.log("========== GET CLINICS BY SUPERUSER ==========");
+
+    const conn = await pool.getConnection();
+
+    try {
+
+      const { keycloak_id } = req.params;
+
+      console.log("Superuser ID:", keycloak_id);
+
+      if (!keycloak_id) {
+        return res.status(400).json({
+          success: false,
+          message: "keycloak_id is required",
+        });
+      }
+
+      // Fetch Assigned Clinics
+      const [rows] = await conn.query(
+        `
+        SELECT
+          uc.user_clinic_id,
+          uc.user_id,
+          uc.role,
+
+          c.clinic_id,
+          c.clinic_name,
+          c.clinic_logo,
+          c.city,
+          c.state,
+          c.country,
+          c.phone_number,
+          c.email
+
+        FROM user_clinic uc
+
+        INNER JOIN clinic c
+          ON c.clinic_id = uc.clinic_id
+
+        WHERE uc.keycloak_id = ?
+        `,
+        [keycloak_id]
+      );
+
+      // console.log("Fetched Clinics:", rows.length);
+
+      return res.status(200).json({
+        success: true,
+        data: rows,
+        total: rows.length,
+      });
+
+    } catch (error) {
+
+      console.log("❌ ERROR:", error);
+
+      return res.status(500).json({
+        success: false,
+        message:
+          error.message ||
+          "Failed to fetch clinics",
+      });
+
+    } finally {
+
+      conn.release();
+
+      console.log("✅ DB Connection Released");
+      console.log("========== END API ==========");
+    }
+  }
+);
 
 // Get token (called by Asset app)
 app.get("/v1/get-token", (req, res) => {

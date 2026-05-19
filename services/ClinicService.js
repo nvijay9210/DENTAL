@@ -218,6 +218,7 @@ const updateClinic = async (clinicId, data, tenant_id, token, realm) => {
 
     // 2. Update DB
     const { columns, values } = mapFields(data, updateClinicFieldMap);
+    console.log("Update Clinic Data:", { columns, values });
     const affectedRows = await clinicModel.updateClinic(
       connection,
       clinicId,
@@ -395,7 +396,7 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
       clinicId
     );
 
-    console.log(clinic)
+    // console.log(clinic)
 
     const formatted = helper.convertDbToFrontend(clinic, clinicFieldReverseMap);
     const images = await getDocumentsByField(

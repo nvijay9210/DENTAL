@@ -72,7 +72,7 @@ const createPurchaseOrder = async (data) => {
       data.supplier_product_id
     );
 
-    console.log(product);
+    // console.log(product);
 
     const count = product.moq - data.quantity;
 
@@ -277,14 +277,14 @@ const updatePurchaseOrderStatus = async (
         purchase_orderId
       );
 
-      console.log(purchase_order);
+      // console.log(purchase_order);
 
       const product = await getSupplierProductsByTenantAndSupplierProductsId(
         tenant_id,
         purchase_order.supplier_product_id
       );
 
-      console.log(product);
+      // console.log(product);
 
       const count = product.moq + purchase_order.quantity;
 

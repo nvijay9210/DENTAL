@@ -310,6 +310,189 @@ const sendWhatsAppOTP = async (phoneNumber, otp) => {
   }
 };
 
+const record = require("../query/Records");
+const addUserClinicMapping = async (
+  conn,
+  { userId, userName, role, keycloakId, clinicId, createdBy = "SYSTEM" },
+) => {
+  try {
+    const result = await record.createRecord(
+      "user_clinic",
+      [
+        "user_id",
+        "user_name",
+        "role",
+        "keycloak_id",
+        "clinic_id",
+        "created_by",
+      ],
+      [userId, userName, role, keycloakId, clinicId, createdBy],
+      conn,
+    );
+
+    return result.insertId;
+  } catch (error) {
+    console.error("Error adding user clinic mapping:", error);
+    throw error;
+  }
+};
+
+const syncUserClinicMappings = async ({
+  conn,
+  userId,
+  role,
+  clinicIds = [],
+  userName,
+  keycloakId,
+  createdBy = "SYSTEM",
+}) => {
+
+  try {
+
+    console.log("========== SYNC USER CLINIC ==========");
+
+    /**
+     * Normalize clinic ids
+     */
+
+    const normalizedClinicIds =
+      clinicIds.map((id) => Number(id));
+
+    console.log(
+      "Normalized Clinic IDs:",
+      normalizedClinicIds
+    );
+
+    /**
+     * Get Existing Mappings
+     */
+
+    const [existingMappings] =
+      await conn.query(
+        `
+        SELECT clinic_id
+        FROM user_clinic
+        WHERE user_id = ?
+        AND role = ?
+        `,
+        [userId, role]
+      );
+
+    const existingClinicIds =
+      existingMappings.map(
+        (item) => Number(item.clinic_id)
+      );
+
+    console.log(
+      "Existing Clinic IDs:",
+      existingClinicIds
+    );
+
+    /**
+     * Find Added Clinics
+     */
+
+    const addedClinicIds =
+      normalizedClinicIds.filter(
+        (id) =>
+          !existingClinicIds.includes(id)
+      );
+
+    /**
+     * Find Removed Clinics
+     */
+
+    const removedClinicIds =
+      existingClinicIds.filter(
+        (id) =>
+          !normalizedClinicIds.includes(id)
+      );
+
+    console.log({
+      addedClinicIds,
+      removedClinicIds,
+    });
+
+    /**
+     * ADD NEW CLINICS
+     */
+
+    for (const clinicId of addedClinicIds) {
+
+      console.log(
+        `➕ Adding Clinic: ${clinicId}`
+      );
+
+      await addUserClinicMapping(
+        conn,
+        {
+          userId,
+          userName,
+          role,
+          keycloakId,
+          clinicId,
+          createdBy,
+        }
+      );
+    }
+
+    /**
+     * REMOVE CLINICS
+     */
+
+    for (const clinicId of removedClinicIds) {
+
+      console.log(
+        `❌ Removing Clinic: ${clinicId}`
+      );
+
+      await record.deleteRecord(
+        "user_clinic",
+        ["user_id", "role", "clinic_id"],
+        [userId, role, clinicId],
+        conn
+      );
+    }
+
+    /**
+     * UPDATE COMMON FIELDS
+     */
+
+    await record.updateRecord(
+      "user_clinic",
+      [
+        "user_name",
+        "keycloak_id",
+      ],
+      [
+        userName,
+        keycloakId,
+      ],
+      ["user_id", "role"],
+      [userId, role],
+      conn
+    );
+
+    console.log(
+      "✅ Common fields updated"
+    );
+
+    console.log(
+      "========== END SYNC =========="
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Sync User Clinic Error:",
+      error
+    );
+
+    throw error;
+  }
+};
+
+
 
 
 
@@ -339,5 +522,7 @@ module.exports = {
   generateUsername,
   encrypt,
   decrypt,
-  sanitizeFields
+  sanitizeFields,
+  addUserClinicMapping,
+  syncUserClinicMappings
 };

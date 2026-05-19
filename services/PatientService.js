@@ -104,7 +104,7 @@ patient_code: (val) => val,
 };
 
 const createPatient = async (data, token, realm,clientId) => {
-  console.log('ser-clientId:',clientId)
+  // console.log('ser-clientId:',clientId)
   return await createEntity({
     data,
     entityName: "patient",

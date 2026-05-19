@@ -839,7 +839,7 @@ const getAppointmentSummary = async (
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(query, [tenantId, clinic_id]);
-    console.log(`Appointments (${period} summary):`, rows);
+    // console.log(`Appointments (${period} summary):`, rows);
     return rows[0]; // Return the first row since it's an aggregate result
   } catch (error) {
     console.error("Database Operation Failed:", error);
@@ -1094,7 +1094,7 @@ const updateAppoinmentFinalStatus = async (
   status,
   connection=null
 ) => {
-  console.log(appointment_id, tenantId, clinicId, status);
+  // console.log(appointment_id, tenantId, clinicId, status);
 
   let query = `
     UPDATE appointment 
@@ -1218,9 +1218,9 @@ const updateAppoinmentStatusCompleted = async (tenant_id, appointment_id) => {
         AND tenant_id=? AND appointment_id=?
     `;
     const [result] = await conn.query(query, tenant_id, appointment_id);
-    console.log(
-      `✅ Completed ${result.affectedRows} appointments before ${userTime}`
-    );
+    // console.log(
+    //   `✅ Completed ${result.affectedRows} appointments before ${userTime}`
+    // );
     return result.affectedRows;
   } catch (err) {
     console.error("❌ Error updating completed appointments:", err);

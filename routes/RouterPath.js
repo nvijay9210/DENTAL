@@ -12,7 +12,8 @@ module.exports = {
   GETALL_CLINIC: "/public/getallclinics",
   GETALL_CLINIC_TENANT: "/getallclinics/:tenant_id",
   GET_CLINIC_TENANT: "/getclinic/:clinic_id/:tenant_id",
-  GET_CLINIC_TENANT_MICROSERVICE: "/getclinic_microservice/:clinic_id/:tenant_id",
+  GET_CLINIC_TENANT_MICROSERVICE:
+    "/getclinic_microservice/:clinic_id/:tenant_id",
   UPDATE_CLINIC_TENANT: "/updateclinic/:clinic_id/:tenant_id",
   UPDATE_CLINIC_SETTINGS: "/updateclinic_settings/:tenant_id/:clinic_id", //settings:1 in query
   HANDLE_CLINIC_ASSIGNMENT: "/handleClinicassignment/:tenant_id/:clinic_id",
@@ -77,8 +78,7 @@ module.exports = {
     "/getallroomidpatient/:tenant_id/:patient_id",
   GETALL_APPOINTMENT_ROOMID_DENTIST:
     "/getallroomiddentist/:tenant_id/:clinic_id/:dentist_id",
-  GETALL_APPOINTMENT_ROOMID_CLINIC:
-    "/getallroomid/:tenant_id/:clinic_id",
+  GETALL_APPOINTMENT_ROOMID_CLINIC: "/getallroomid/:tenant_id/:clinic_id",
   GET_ROOMID_APPOINTMENTID: "/getroomidappointment/:tenant_id/:appointment_id",
 
   ADD_TREATMENT: "/addtreatment",
@@ -136,13 +136,15 @@ module.exports = {
   GET_ASSET_TENANT: "/getasset/:asset_id/:tenant_id",
   UPDATE_ASSET_TENANT: "/updateasset/:asset_id/:tenant_id",
   DELETE_ASSET_TENANT: "/deleteasset/:asset_id/:tenant_id",
-  GETALL_ASSET_REPORT_TENANT_CLINIC: "/getallassetsreport/:tenant_id/:clinic_id",
+  GETALL_ASSET_REPORT_TENANT_CLINIC:
+    "/getallassetsreport/:tenant_id/:clinic_id",
   GET_EXPENSE: "/getexpense/:expense_id",
 
   ADD_EXPENSE: "/addexpense",
   GETALL_EXPENSE_TENANT: "/getallexpenses/:tenant_id",
   GETALL_EXPENSE_TENANT_CLINIC: "/getallexpenses/:tenant_id/:clinic_id",
-  GETALL_EXPENSE_REPORT_TENANT_CLINIC: "/getallexpensesreport/:tenant_id/:clinic_id",
+  GETALL_EXPENSE_REPORT_TENANT_CLINIC:
+    "/getallexpensesreport/:tenant_id/:clinic_id",
   GET_EXPENSE_TENANT: "/getexpense/:expense_id/:tenant_id",
   UPDATE_EXPENSE_TENANT: "/updateexpense/:expense_id/:tenant_id",
   DELETE_EXPENSE_TENANT: "/deleteexpense/:expense_id/:tenant_id",
@@ -246,7 +248,8 @@ module.exports = {
 
   ADD_PAYMENT: "/addpayment",
   GETALL_PAYMENT_TENANT: "/getallpayments/:tenant_id",
-  GETALL_PAYEMENT_TENANT_APPOINTMENT: "/getallpaymentsummary/:tenant_id/:appointment_id",
+  GETALL_PAYEMENT_TENANT_APPOINTMENT:
+    "/getallpaymentsummary/:tenant_id/:appointment_id",
   GET_PAYEMENT_TENANT_APPOINTMENT: "/getpayment/:tenant_id/:appointment_id",
   GET_PAYMENT: "/getpayment/:payment_id",
   UPDATE_PAYMENT_TENANT: "/updatepayment/:payment_id/:tenant_id",
@@ -286,9 +289,7 @@ module.exports = {
   UPDATE_TOOTHDETAILS_TENANT: "/updatetoothdetails/:toothdetails_id/:tenant_id",
   DELETE_TOOTHDETAILS_TENANT: "/deletetoothdetails/:toothdetails_id/:tenant_id",
 
-
   ADD_REFERENCE: "/addreference",
-
 
   //dashboard Routes
 
@@ -341,7 +342,8 @@ module.exports = {
 
   ADD_LOGIN_HISTORY_LOGIN: "/addloginhistory",
   GETALL_LOGIN_HISTORY: "/getallloginhistories/:tenant_id",
-  GET_LOGIN_HISTORY_KEYCLOAK_USER_ID: "/getloginhistory/:tenant_id/:keycloak_user_id",
+  GET_LOGIN_HISTORY_KEYCLOAK_USER_ID:
+    "/getloginhistory/:tenant_id/:keycloak_user_id",
   ADD_LOGIN_HISTORY_LOGOUT: "/updateloginhistory/:login_history_id/:tenant_id",
 };
 

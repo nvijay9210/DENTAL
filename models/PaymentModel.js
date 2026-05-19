@@ -185,7 +185,7 @@ const getallPaymentSummaryByAppointment = async (tenant_id, appointment_id,conne
 
     // ✅ Parse values safely
     const totalAmount = parseFloat(summary.total_amount) || 0.0;
-    console.log(totalAmount)
+    // console.log(totalAmount)
     const discount = parseFloat(summary.total_discount) || 0.0;
     const consultationFee = parseFloat(summary.consultation_fee) || 0.0;
     const minBookingFee = parseFloat(summary.min_booking_fee) || 0.0;
@@ -200,7 +200,7 @@ const getallPaymentSummaryByAppointment = async (tenant_id, appointment_id,conne
     );
 
    
-    console.log(totalAmount,totalPaid,totalPayable)
+    // console.log(totalAmount,totalPaid,totalPayable)
 
     // ✅ Remaining balance
     const balanceRemaining = Math.max(0, totalPayable);

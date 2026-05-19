@@ -4,10 +4,42 @@ const record = require("../query/Records");
 
 const createDentist = async (conn, table, columns, values) => {
   try {
+    // ✅ Create Dentist
     const dentist = await record.createRecord(table, columns, values, conn);
-    return dentist.insertId;
+
+    const dentistId = dentist.insertId;
+
+    // console.log("✅ Dentist Created:", dentistId);
+
+    /**
+     * values index example
+     *
+     * 0  tenant_id
+     * 1  clinic_id
+     * 2  keycloak_id
+     * 3  dentist_code
+     * 4  username
+     * ...
+     */
+
+    // ✅ Add user_clinic mapping
+   await helper.syncUserClinicMappings({
+  conn,
+  userId: dentistId,
+  role: "DENTIST",
+  clinicIds: values[2],
+  userName: values[5],
+  keycloakId: values[3],
+  createdBy:
+    values[values.length - 1],
+});
+
+    console.log("✅ Dentist User Clinic Mapping Added");
+
+    return dentistId;
   } catch (error) {
-    console.error("Error executing query:", error);
+    console.error("Error creating dentist:", error);
+
     throw error;
   }
 };
@@ -19,7 +51,7 @@ const getAllDentistsByTenantId = async (tenantId, limit, offset) => {
       "tenant_id",
       tenantId,
       limit,
-      offset
+      offset,
     );
     return dentists;
   } catch (error) {
@@ -31,7 +63,7 @@ const getAllDentistsByTenantId = async (tenantId, limit, offset) => {
 const getDentistByTenantIdAndDentistId = async (
   tenant_id,
   dentist_id,
-  connection
+  connection,
 ) => {
   const query = `select * from dentist where tenant_id=? and dentist_id=?`;
   const conn = connection || (await pool.getConnection());
@@ -46,27 +78,209 @@ const getDentistByTenantIdAndDentistId = async (
   }
 };
 
-const updateDentist = async ( dentist_id, columns, values, tenant_id,conn=null) => {
-  const conditionColumn = ["tenant_id", "dentist_id"];
-  const conditionValue = [tenant_id, dentist_id];
+const updateDentist = async (
+  dentist_id,
+  columns,
+  values,
+  tenant_id,
+  conn = null,
+) => {
+
+  // console.log("========== UPDATE DENTIST ==========");
+  // console.log("Values:", values);
+  // console.log("Columns:", columns);
+
+  const conditionColumn = [
+    "tenant_id",
+    "dentist_id",
+  ];
+
+  const conditionValue = [
+    tenant_id,
+    dentist_id,
+  ];
 
   try {
-    const result = await record.updateRecord(
-      "dentist",
-      columns,
-      values,
-      conditionColumn,
-      conditionValue,
-      conn
+
+    /**
+     * ✅ Get Existing Dentist
+     */
+
+    const existingDentist =
+      await record.getRecordByIdAndTenantId(
+        "dentist",
+        "tenant_id",
+        tenant_id,
+        "dentist_id",
+        dentist_id,
+        conn,
+      );
+
+    // console.log(
+    //   "✅ Existing Dentist Data:",
+    //   existingDentist
+    // );
+
+    const dentistData =
+      existingDentist?.[0];
+
+    if (!dentistData) {
+      throw new Error(
+        "Dentist not found"
+      );
+    }
+
+    /**
+     * ✅ Remove clinic_ids
+     * before SQL update
+     */
+
+    const filteredColumns = [];
+    const filteredValues = [];
+
+    columns.forEach(
+      (col, index) => {
+
+        if (col !== "clinic_ids") {
+
+          filteredColumns.push(col);
+
+          filteredValues.push(
+            values[index]
+          );
+        }
+      }
     );
+
+    // console.log(
+    //   "✅ Filtered Columns:",
+    //   filteredColumns
+    // );
+
+    // console.log(
+    //   "✅ Filtered Values:",
+    //   filteredValues
+    // );
+
+    /**
+     * ✅ Update Dentist Table
+     */
+
+    const result =
+      await record.updateRecord(
+        "dentist",
+        filteredColumns,
+        filteredValues,
+        conditionColumn,
+        conditionValue,
+        conn,
+      );
+
+    console.log(
+      "✅ Dentist Updated"
+    );
+
+    /**
+     * clinic_ids support
+     */
+
+    const clinicIdsIndex =
+      columns.indexOf(
+        "clinic_ids"
+      );
+
+    const usernameIndex =
+      columns.indexOf(
+        "username"
+      );
+
+    const keycloakIndex =
+      columns.indexOf(
+        "keycloak_id"
+      );
+
+    /**
+     * ✅ New clinic ids
+     */
+
+    const newClinicIds =
+      clinicIdsIndex !== -1
+        ? values[
+            clinicIdsIndex
+          ].map((id) =>
+            Number(id)
+          )
+        : [];
+
+    const newUsername =
+      usernameIndex !== -1
+        ? values[
+            usernameIndex
+          ]
+        : dentistData.username;
+
+    const newKeycloakId =
+      keycloakIndex !== -1
+        ? values[
+            keycloakIndex
+          ]
+        : dentistData.keycloak_id;
+
+    // console.log(
+    //   "✅ New Clinic IDs:",
+    //   newClinicIds
+    // );
+
+    /**
+     * ✅ Sync User Clinic
+     */
+
+    await helper.syncUserClinicMappings({
+      conn,
+
+      userId: dentist_id,
+
+      role: "DENTIST",
+
+      clinicIds: newClinicIds,
+
+      userName: newUsername,
+
+      keycloakId:
+        newKeycloakId,
+
+      createdBy:
+        values[
+          values.length - 1
+        ] || "SYSTEM",
+    });
+
+    console.log(
+      "✅ user_clinic synced"
+    );
+
+    console.log(
+      "========== UPDATE SUCCESS =========="
+    );
+
     return result.affectedRows;
+
   } catch (error) {
-    console.error("Error executing query:", error);
+
+    console.error(
+      "❌ Error executing query:",
+      error
+    );
+
     throw error;
   }
 };
 
-const deleteDentistByTenantIdAndDentistId = async (connection,tenant_id, dentist_id) => {
+const deleteDentistByTenantIdAndDentistId = async (
+  connection,
+  tenant_id,
+  dentist_id,
+) => {
   const conditionColumn = ["tenant_id", "dentist_id"];
   const conditionValue = [tenant_id, dentist_id];
   try {
@@ -75,7 +289,7 @@ const deleteDentistByTenantIdAndDentistId = async (connection,tenant_id, dentist
       "dentist",
       conditionColumn,
       conditionValue,
-      connection
+      connection,
     );
     return result.affectedRows;
   } catch (error) {
@@ -86,7 +300,7 @@ const deleteDentistByTenantIdAndDentistId = async (connection,tenant_id, dentist
 
 const checkDentistExistsByTenantIdAndDentistId = async (
   tenantId,
-  dentistId
+  dentistId,
 ) => {
   const columns = { tenant_id: tenantId, dentist_id: dentistId };
   try {
@@ -101,7 +315,7 @@ const getAllDentistsByTenantIdAndClinicId = async (
   tenantId,
   clinicId,
   limit,
-  offset
+  offset,
 ) => {
   const query1 = `SELECT * FROM dentist d  WHERE d.tenant_id = ? AND d.clinic_id = ? limit ? offset ?`;
   const query2 = `SELECT count(*) as total FROM dentist d WHERE d.tenant_id = ? AND d.clinic_id = ?`;
@@ -126,7 +340,7 @@ const getAllPublicDentistByTenantIdClinicId = async (
   tenantId,
   clinicId,
   limit,
-  offset
+  offset,
 ) => {
   const query1 = `SELECT * FROM dentist d  WHERE d.tenant_id = ? AND d.clinic_id = ? limit ? offset ?`;
   const query2 = `SELECT count(*) as total FROM dentist d WHERE d.tenant_id = ? AND d.clinic_id = ?`;
@@ -167,7 +381,7 @@ const updateClinicIdAndNameAndAddress = async (
   clinicId,
   clinic_name,
   clinic_addrss,
-  dentist_id
+  dentist_id,
 ) => {
   const query = `update dentist set clinic_id=?, clinic_name=?, clinic_address=? where tenant_id=? and dentist_id=?`;
   const conn = await pool.getConnection();
@@ -192,7 +406,7 @@ const updateDentistRatingAndReviewCount = async (
   tenantId,
   dentist_id,
   newRating,
-  newReviewCount
+  newReviewCount,
 ) => {
   const query = `update dentist set ratings=?, reviews_count=?  where tenant_id=? and dentist_id=?`;
   const conn = await pool.getConnection();
@@ -241,7 +455,7 @@ const updateNullClinicInfoWithJoin = async (tenantId, clinicId, dentistId) => {
 const checkDentistExistsUsingTenantIdAndClinicIdAnddentistId = async (
   dentistId,
   tenantId,
-  clinicId
+  clinicId,
 ) => {
   const query = `
     SELECT 1
@@ -257,7 +471,7 @@ const checkDentistExistsUsingTenantIdAndClinicIdAnddentistId = async (
   } catch (error) {
     console.error(
       "Error in checkDentistExistsUsingTenantIdAndClinicIdAnddentistId:",
-      error
+      error,
     );
     throw error;
   } finally {
@@ -269,7 +483,7 @@ const updateDentistAppointmentCount = async (
   tenantId,
   clinicId,
   dentistId,
-  assign = true
+  assign = true,
 ) => {
   const modifier = assign ? 1 : -1;
 
@@ -293,10 +507,10 @@ const updateDentistAppointmentCount = async (
       `Error ${
         assign ? "incrementing" : "decrementing"
       } dentist appointment count:`,
-      error
+      error,
     );
     throw new Error(
-      `Database Operation Failed while updating dentist appointment count`
+      `Database Operation Failed while updating dentist appointment count`,
     );
   } finally {
     conn.release();
@@ -317,5 +531,5 @@ module.exports = {
   checkDentistExistsUsingTenantIdAndClinicIdAnddentistId,
   updateDentistAppointmentCount,
   updateDentistRatingAndReviewCount,
-  getAllPublicDentistByTenantIdClinicId
+  getAllPublicDentistByTenantIdClinicId,
 };

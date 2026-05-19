@@ -1,218 +1,348 @@
 // redisClient.js
 const { createClient } = require("redis");
-const {  writeLog } = require("../logs/logger");
+const { writeLog } = require("../logs/logger");
 require("dotenv").config();
 
-// 🔐 Config
-const REDIS_ENABLED = process.env.REDIS_ENABLED === "true"; // ✅ Control flag
+// ================= CONFIG =================
+const REDIS_ENABLED = process.env.REDIS_ENABLED === "true";
+
 const REDIS_HOST = process.env.REDIS_HOST || "127.0.0.1";
-const REDIS_PORT = parseInt(process.env.REDIS_PORT) || 6379;
-const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
-const REDIS_EXPIRE_TIME = parseInt(process.env.REDIS_EXPIRE_TIME, 10) || 3600;
+const REDIS_PORT = parseInt(process.env.REDIS_PORT, 10) || 6379;
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD || undefined;
+const REDIS_EXPIRE_TIME =
+  parseInt(process.env.REDIS_EXPIRE_TIME, 10) || 3600;
 
 let redisClient = null;
 let redisConnected = false;
+let isConnecting = false;
 let hasLoggedError = false;
 
-// Create Redis client
+// ================= CREATE CLIENT =================
 const createRedisClient = () => {
   const client = createClient({
     socket: {
       host: REDIS_HOST,
       port: REDIS_PORT,
-      tls: process.env.REDIS_TLS === "true" ? {} : undefined,
+      reconnectStrategy: (retries) => {
+        return Math.min(retries * 100, 3000);
+      },
     },
-    password: REDIS_PASSWORD,
+
+    password: REDIS_PASSWORD || undefined,
   });
 
+  // ================= EVENTS =================
+
   client.on("connect", () => {
+    writeLog("info", "🔄 Connecting to Redis...");
+  });
+
+  client.on("ready", () => {
     redisConnected = true;
+    isConnecting = false;
     hasLoggedError = false;
-    writeLog("info", "✅ Connected to Redis");
+
+    writeLog(
+      "info",
+      `✅ Redis connected successfully (${REDIS_HOST}:${REDIS_PORT})`,
+    );
   });
 
   client.on("error", (err) => {
     redisConnected = false;
+    isConnecting = false;
+
     if (!hasLoggedError) {
-      writeLog("warn", "❌ Redis is not connected. Feature performance may be degraded.");
-      // writeLog("info", "💡 Tip: Run 'redis-server --requirepass <your-password>' if not running.");
-      writeLog("info", "💡 Tip: Run 'npm run start-redis-dental' if not running.");
       hasLoggedError = true;
+
+      writeLog(
+        "warn",
+        `❌ Redis error: ${err.message}`,
+      );
+
+      writeLog(
+        "info",
+        "💡 Tip: Make sure Redis server is running",
+      );
     }
   });
 
   client.on("reconnecting", () => {
-    if (!hasLoggedError) {
-      writeLog("warn", "🔄 Redis is reconnecting...");
-      hasLoggedError = true;
-    }
+    redisConnected = false;
+
+    writeLog("warn", "🔄 Redis reconnecting...");
   });
 
   client.on("end", () => {
     redisConnected = false;
-    writeLog("warn", "🔌 Redis connection ended");
+
+    writeLog("warn", "🔌 Redis connection closed");
   });
 
   return client;
 };
 
-// Lazy connect
+// ================= CONNECT =================
 const connect = async () => {
-  if (REDIS_ENABLED) return;
-  if (redisConnected) return;
-
-  if (!redisClient) {
-    redisClient = createRedisClient();
-  }
-
-  if (!redisClient.isOpen) {
-    try {
-      await redisClient.connect();
-    } catch (err) {
-      writeLog("error", "❌ Redis connection failed:", err.message);
+  try {
+    // Redis disabled
+    if (!REDIS_ENABLED) {
+      writeLog("warn", "⚠️ Redis disabled from .env");
+      return;
     }
+
+    // Already connected
+    if (redisConnected && redisClient?.isOpen) {
+      return;
+    }
+
+    // Prevent multiple simultaneous connects
+    if (isConnecting) {
+      return;
+    }
+
+    isConnecting = true;
+
+    // Create client
+    if (!redisClient) {
+      redisClient = createRedisClient();
+    }
+
+    // Connect
+    if (!redisClient.isOpen) {
+      await redisClient.connect();
+    }
+  } catch (err) {
+    redisConnected = false;
+    isConnecting = false;
+
+    writeLog(
+      "error",
+      `❌ Redis connection failed: ${err.message}`,
+    );
   }
 };
 
-// ✅ Get or Set Cache
-const getOrSetCache = async (cacheKey, fetchFunction, ttlSeconds = REDIS_EXPIRE_TIME) => {
-  try {
-    if (!REDIS_ENABLED) {
-      return await fetchFunction(); // Just fetch directly from DB
-    }
-    
-    if (!redisConnected) await connect();
-    
+// ================= GET RAW CLIENT =================
+const getRedisClient = () => redisClient;
 
-    if (!redisConnected || !redisClient?.isOpen) {
-      writeLog("warn", "⚠️ Redis unavailable – fetching directly from source");
+// ================= GET OR SET CACHE =================
+const getOrSetCache = async (
+  cacheKey,
+  fetchFunction,
+  ttlSeconds = REDIS_EXPIRE_TIME,
+) => {
+  try {
+    // Redis disabled
+    if (!REDIS_ENABLED) {
       return await fetchFunction();
     }
 
-    const cached = await redisClient.get(cacheKey);
-    if (cached) {
-      writeLog("info", `⏪ Cache HIT: ${cacheKey}`);
-      return JSON.parse(cached);
+    // Connect if needed
+    if (!redisConnected || !redisClient?.isOpen) {
+      await connect();
     }
 
+    // Still unavailable
+    if (!redisConnected || !redisClient?.isOpen) {
+      writeLog(
+        "warn",
+        "⚠️ Redis unavailable – fetching directly from DB",
+      );
+
+      return await fetchFunction();
+    }
+
+    // Try cache
+    const cachedData = await redisClient.get(cacheKey);
+
+    if (cachedData) {
+      writeLog("info", `⏪ Cache HIT: ${cacheKey}`);
+
+      try {
+        return JSON.parse(cachedData);
+      } catch {
+        return cachedData;
+      }
+    }
+
+    // Fetch fresh data
     const freshData = await fetchFunction();
-    if (freshData && (Array.isArray(freshData) || Object.keys(freshData).length > 0)) {
-      await redisClient.set(cacheKey, JSON.stringify(freshData), { EX: ttlSeconds });
-      writeLog("info", `✅ Cached: ${cacheKey} (TTL: ${ttlSeconds}s)`);
+
+    // Save cache only if valid
+    if (
+      freshData !== null &&
+      freshData !== undefined
+    ) {
+      await redisClient.set(
+        cacheKey,
+        JSON.stringify(freshData),
+        {
+          EX: ttlSeconds,
+        },
+      );
+
+      writeLog(
+        "info",
+        `✅ Cached: ${cacheKey} (TTL: ${ttlSeconds}s)`,
+      );
     }
 
     return freshData;
   } catch (err) {
-    writeLog("warn", `⚠️ Redis GET/SET failed for ${cacheKey}: ${err.message}`);
-    return await fetchFunction(); // Fallback
+    writeLog(
+      "warn",
+      `⚠️ Redis GET/SET failed for ${cacheKey}: ${err.message}`,
+    );
+
+    return await fetchFunction();
   }
 };
 
-// ✅ Scan keys matching a pattern
+// ================= SCAN KEYS =================
 const scanKeys = async (pattern, count = 100) => {
-  if (!redisClient?.isOpen || !redisConnected) {
-    writeLog("warn", "🚫 Redis not connected – skipping scan");
-    return [];
-  }
-
-  if (!REDIS_ENABLED) {
-    return await fetchFunction(); // Just fetch directly from DB
-  }
-  
-
-  const keys = [];
-  let cursor = '0';
-  let iterations = 0;
-  const MAX_ITERATIONS = 200;
-
   try {
+    if (!REDIS_ENABLED) return [];
+
+    if (!redisConnected || !redisClient?.isOpen) {
+      writeLog(
+        "warn",
+        "🚫 Redis not connected – skipping scan",
+      );
+
+      return [];
+    }
+
+    let cursor = "0";
+    let keys = [];
+
     do {
-      if (iterations >= MAX_ITERATIONS) {
-        writeLog("warn", "⚠️ Max scan iterations reached – breaking loop");
-        break;
-      }
+      const result = await redisClient.scan(cursor, {
+        MATCH: pattern,
+        COUNT: count,
+      });
 
-      const reply = await redisClient.scan(cursor, { MATCH: pattern, COUNT: count });
-      const [nextCursor, foundKeys] = Array.isArray(reply) ? reply : [reply.cursor, reply.keys || []];
+      cursor = result.cursor;
+      keys.push(...result.keys);
+    } while (cursor !== "0");
 
-      if (foundKeys?.length) keys.push(...foundKeys);
-      cursor = nextCursor;
-      iterations++;
-    } while (cursor !== '0');
+    writeLog(
+      "info",
+      `🔍 Found ${keys.length} keys for pattern: ${pattern}`,
+    );
+
+    return keys;
   } catch (err) {
-    writeLog("error", "❌ Redis SCAN error:", err.message);
+    writeLog(
+      "error",
+      `❌ Redis scan error: ${err.message}`,
+    );
+
     return [];
   }
-
-  writeLog("info", `🔍 Found ${keys.length} keys matching "${pattern}"`);
-  return keys;
 };
 
-// ✅ Invalidate cache by pattern
+// ================= INVALIDATE CACHE =================
 const invalidateCacheByPattern = async (pattern) => {
-  if (!redisClient?.isOpen || !redisConnected) {
-    writeLog("warn", "🚫 Redis disconnected – skip invalidation");
-    return;
-  }
-
   try {
+    if (!REDIS_ENABLED) return;
+
     const keys = await scanKeys(pattern);
+
     if (keys.length > 0) {
-      await redisClient.del(...keys);
-      writeLog("info", `🗑️ Deleted ${keys.length} keys matching "${pattern}"`);
-    } else {
-      writeLog("info", `ℹ️ No keys found for pattern: "${pattern}"`);
+      await redisClient.del(keys);
+
+      writeLog(
+        "info",
+        `🗑️ Deleted ${keys.length} cache keys`,
+      );
     }
   } catch (err) {
-    writeLog("error", "❌ Cache invalidation failed:", err.message);
+    writeLog(
+      "error",
+      `❌ Cache invalidation failed: ${err.message}`,
+    );
   }
 };
 
-// ✅ Invalidate cache by tenant
-const invalidateCacheByTenant = async (tableName, tenantId) => {
+// ================= INVALIDATE TENANT CACHE =================
+const invalidateCacheByTenant = async (
+  tableName,
+  tenantId,
+) => {
   if (!tenantId) {
-    writeLog("warn", "⚠️ Missing tenantId in invalidateCacheByTenant");
+    writeLog(
+      "warn",
+      "⚠️ Missing tenantId for cache invalidation",
+    );
+
     return;
   }
+
   const pattern = `${tableName}:${tenantId}:*`;
+
   await invalidateCacheByPattern(pattern);
 };
 
-// ✅ Clear all Redis cache (Dev only)
+// ================= CLEAR ALL CACHE =================
 const clearAllCache = async () => {
-  const env = process.env.NODE_ENV;
-
-  if (env === "production") {
-    writeLog("warn", "🚨 clearAllCache is DISABLED in production for safety!");
-    return;
-  }
-
-  if (!redisClient?.isOpen) {
-    writeLog("warn", "🚫 Redis not connected – cannot clear cache");
-    return;
-  }
-
   try {
+    if (process.env.NODE_ENV === "production") {
+      writeLog(
+        "warn",
+        "🚨 clearAllCache disabled in production",
+      );
+
+      return;
+    }
+
+    if (!redisConnected || !redisClient?.isOpen) {
+      writeLog(
+        "warn",
+        "🚫 Redis not connected",
+      );
+
+      return;
+    }
+
     await redisClient.flushDb();
-    writeLog("info", `🧹 Redis DB cleared [${env}]`);
+
+    writeLog("info", "🧹 Redis cache cleared");
   } catch (err) {
-    writeLog("error", "❌ Failed to clear Redis:", err.message);
+    writeLog(
+      "error",
+      `❌ Failed to clear Redis: ${err.message}`,
+    );
   }
 };
 
-// ✅ Graceful shutdown
+// ================= CLOSE REDIS =================
 const closeRedis = async () => {
-  if (redisClient?.isOpen) {
-    writeLog("info", "🔌 Closing Redis connection...");
-    await redisClient.quit();
+  try {
+    if (redisClient?.isOpen) {
+      await redisClient.quit();
+
+      redisConnected = false;
+
+      writeLog(
+        "info",
+        "🔌 Redis connection closed gracefully",
+      );
+    }
+  } catch (err) {
+    writeLog(
+      "error",
+      `❌ Redis shutdown error: ${err.message}`,
+    );
   }
 };
 
-// Auto-connect on load
+// ================= AUTO CONNECT =================
 connect().catch(() => {});
 
+// ================= EXPORTS =================
 module.exports = {
-  redisClient: () => redisClient,
+  redisClient: getRedisClient,
   connect,
   getOrSetCache,
   scanKeys,

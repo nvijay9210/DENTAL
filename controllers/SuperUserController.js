@@ -30,7 +30,7 @@ exports.createSuperUser = async (req, res, next) => {
 exports.getAllSuperUsersByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
   const { page, limit } = req.query;
-  await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
+  // await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
     const superusers = await superuserService.getAllSuperUsersByTenantId(
       tenant_id,

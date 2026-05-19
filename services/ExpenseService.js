@@ -75,7 +75,7 @@ const createExpense = async (data) => {
       values
     );
 
-    console.log("expenseId:", data.expense_documents);
+    // console.log("expenseId:", data.expense_documents);
 
     // Handle single or multiple file upload
     await saveDocuments({
@@ -127,7 +127,7 @@ const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
           "expense_documents"
         );
 
-        console.log('docs:',docs)
+        // console.log('docs:',docs)
 
         // Extract only file_url
         const fileInfos = docs.map((doc) => ({
@@ -212,7 +212,7 @@ const getAllExpensesByTenantIdAndClinicId = async (
           "expense_documents"
         );
 
-        console.log("docs:", docs);
+        // console.log("docs:", docs);
 
         const fileInfos = docs.map((doc) => ({
           document_id: doc.document_id,

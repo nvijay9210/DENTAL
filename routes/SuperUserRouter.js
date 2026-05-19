@@ -48,9 +48,9 @@ router.post(
 // Get All SuperUsers by Tenant ID with Pagination
 router.get(
   GETALL_SUPERUSER_TENANT,
-  authenticateTenantClinicGroup([
-    "tenant",
-  ]),
+  // authenticateTenantClinicGroup([
+  //   "tenant",
+  // ]),
   superuserController.getAllSuperUsersByTenantId
 );
 router.get(

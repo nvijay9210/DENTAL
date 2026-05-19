@@ -41,6 +41,7 @@ const { updateEntity, createEntity } = require("../utils/Reusability");
 const dentistFieldMap = {
   tenant_id: (val) => val,
   clinic_id: (val) => val,
+  clinic_ids: (val) => val,
   keycloak_id: (val) => val,
   dentist_code: (val) => val,
   username: (val) => val,
@@ -92,6 +93,7 @@ const dentistFieldReverseMap = {
   dentist_id: (val) => val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
+  clinic_ids: (val) => helper.safeJsonParse(val),
   keycloak_id: (val) => val,
   dentist_code: (val) => val,
   username: (val) => val,
@@ -434,53 +436,125 @@ const getAllDentistsByTenantIdAndClinicId = async (
   page = 1,
   limit = 10
 ) => {
+
   const offset = (page - 1) * limit;
-  const cacheKey = buildCacheKey("dentist", "list", {
-    tenant_id: tenantId,
-    clinic_id: clinicId,
-    page,
-    limit,
-  });
+
+  const cacheKey = buildCacheKey(
+    "dentist",
+    "list",
+    {
+      tenant_id: tenantId,
+      clinic_id: clinicId,
+      page,
+      limit,
+    }
+  );
 
   try {
-    const dentists = await getOrSetCache(cacheKey, async () => {
-      return await dentistModel.getAllDentistsByTenantIdAndClinicId(
-        tenantId,
-        clinicId,
-        Number(limit),
-        offset
+
+    const dentists =
+      await getOrSetCache(
+        cacheKey,
+        async () => {
+
+          return await dentistModel
+            .getAllDentistsByTenantIdAndClinicId(
+              tenantId,
+              clinicId,
+              Number(limit),
+              offset
+            );
+
+        }
       );
-    });
 
-    const convertedRows = await Promise.all(
-      dentists.data.map(async (dentist) => {
-        const formatted = helper.convertDbToFrontend(
-          dentist,
-          dentistFieldReverseMap
-        );
+    const convertedRows =
+      await Promise.all(
 
-        const awards = await getDocumentsByField(
-          "dentist",
-          dentist.dentist_id,
-          "awards_certifications"
-        );
-        const awards_certifications = awards.map((doc) => ({
-          document_id: doc.document_id,
-          awards_certifications: doc.file_url,
-          description: doc.description,
-        }));
+        dentists.data.map(
+          async (dentist) => {
 
-        return {
-          ...formatted,
-          awards_certifications,
-        };
-      })
-    );
+            const formatted =
+              helper.convertDbToFrontend(
+                dentist,
+                dentistFieldReverseMap
+              );
 
-    return { data: convertedRows, total: dentists.total };
+            /**
+             * ✅ Fetch Awards
+             */
+
+            const awards =
+              await getDocumentsByField(
+                "dentist",
+                dentist.dentist_id,
+                "awards_certifications"
+              );
+
+            const awards_certifications =
+              awards.map((doc) => ({
+                document_id: doc.document_id,
+                awards_certifications:
+                  doc.file_url,
+                description:
+                  doc.description,
+              }));
+
+            /**
+             * ✅ Fetch clinic_ids
+             * from user_clinic
+             */
+
+            const [clinicMappings] =
+              await pool.query(
+                `
+                SELECT clinic_id
+                FROM user_clinic
+                WHERE user_id = ?
+                AND role = 'DENTIST'
+                `,
+                [dentist.dentist_id]
+              );
+
+            // console.log(
+            //   "✅ Clinic Mappings:",
+            //   clinicMappings
+            // );
+
+            const clinic_ids =
+              clinicMappings.map(
+                (item) => item.clinic_id
+              );
+
+            /**
+             * ✅ Final Response
+             */
+
+            return {
+              ...formatted,
+
+              clinic_ids,
+
+              awards_certifications,
+            };
+
+          }
+        )
+      );
+
+    return {
+      data: convertedRows,
+      total: dentists.total,
+    };
+
   } catch (error) {
+
     console.log(error);
-    throw new CustomError(error, 500);
+
+    throw new CustomError(
+      error,
+      500
+    );
   }
 };
 

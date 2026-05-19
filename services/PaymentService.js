@@ -73,7 +73,7 @@ const createPayment = async (data,conn) => {
   };
   try {
     await createPaymentValidation(data)
-    console.log('data:',data)
+    // console.log('data:',data)
     const { columns, values } = mapFields(data, fieldMap);
     const paymentId = await paymentModel.createPayment(
       conn,
@@ -175,7 +175,7 @@ const getPaymentByTenantAndAppointmentId = async (
         );
       return result;
     });
-    console.log(payments)
+    // console.log(payments)
     const convertedRows = payments.map((payment) =>
       helper.convertDbToFrontend(payment, paymentFieldsReverseMap
       )

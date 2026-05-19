@@ -86,7 +86,7 @@ const createTreatment = async (data) => {
     ...treatmentFields,
     created_by: (val) => val,
   };
-  console.log(data);
+  // console.log(data);
 
   const conn = await pool.getConnection();
 
@@ -138,7 +138,7 @@ const createTreatment = async (data) => {
       data.appointment_id,conn
     );
 
-    console.log(payment);
+    // console.log(payment);
 
     if (payment.balance_remaining === 0) {
       await updateAppoinmentFinalStatus(

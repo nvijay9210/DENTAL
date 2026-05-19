@@ -1,7 +1,6 @@
 // ============================================================================
-// ssoAuth.js - Consolidated Keycloak Authentication Module
-// With Network Data & Location Details for user_activity tracking
-// FIXED: Single Redis client from config/redis.js
+// ssoAuth.js - Dental Application Authentication Module
+// Keycloak + Multi-Role User Tables + Clinic-based Architecture
 // ============================================================================
 const express = require("express");
 const cookieParser = require("cookie-parser");
@@ -14,13 +13,11 @@ const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
 const { getTenantByTenantId } = require("../services/TenantService");
 const { createDebugLogger } = require("../utils/Debugger");
-// const { updateUserPassword } = require("../Service/UserService");
 const { sendOTP, canSendOTP, setOtpCooldown, verifyOTP } = require("../utils/Otp");
 const passwordHash = require("../utils/PasswordHash");
-// ✅ Import centralized Redis client & helpers
 const {
-  redisClient,        // Raw ioredis instance
-  setEx, get, del, exists, ttl, incrWithExpiry, // Helper functions
+  redisClient,
+  setEx, get, del, exists, ttl, incrWithExpiry,
   checkRedisHealth,
   gracefulShutdown: redisGracefulShutdown
 } = require("../config/redis");
@@ -37,7 +34,10 @@ const debug = createDebugLogger("SsoAuth", "DEBUG_AUTH");
 // 1. CONFIGURATION & CONSTANTS
 // ============================================================================
 const isProduction = process.env.NODE_ENV === "production";
-const ROLE_PRIORITY = ["ADMIN", "MANAGER", "OPERATOR"];
+
+// ✅ Dental App Role Priority (order matters for matching)
+const ROLE_PRIORITY = ["tenant", "superuser", "dentist", "receptionist", "patient", "supplier", "guest"];
+
 const CONFIG = {
   KEYCLOAK: {
     BASE_URL: process.env.KEYCLOAK_BASE_URL,
@@ -55,13 +55,14 @@ ${process.env.KEYCLOAK_REALM_PUBLIC_KEY}
       path: "/",
     },
     EXPIRY: {
-      ACCESS: Number(process.env.ACCESS_COOKIE_EXPIRE_TIME) * 1000,
-      REFRESH: Number(process.env.REFRESH_COOKIE_EXPIRE_TIME) * 1000,
+      ACCESS: Number(process.env.ACCESS_COOKIE_EXPIRE_TIME || 900) * 1000,
+      REFRESH: Number(process.env.REFRESH_COOKIE_EXPIRE_TIME || 86400) * 1000,
     },
   },
   HOST_REALM_CLIENT: JSON.parse(process.env.HOST_REALM_CLIENT || "{}"),
   CLIENT_CREDENTIALS: JSON.parse(process.env.CLIENT_CREDENTIALS || "{}"),
 };
+
 const MESSAGES = {
   UNAUTHORIZED: "Session expired. Please login again.",
   INVALID_HOST: "Invalid host",
@@ -71,274 +72,226 @@ const MESSAGES = {
 };
 
 // ============================================================================
-// 🗄️ INLINE SERVICE FUNCTIONS (Embedded for code reusability)
+// 🗄️ DENTAL-SPECIFIC USER LOOKUP FUNCTIONS
 // ============================================================================
-async function getUserByKeycloakId(keycloakId) {
+
+// ✅ Map role to table name
+const ROLE_TABLE_MAP = {
+  dentist: "dentist",
+  patient: "patient",
+  receptionist: "reception",
+  superuser: "superuser",
+  supplier: "supplier",
+  // tenant & guest don't have DB records
+};
+
+// ✅ Get user by Keycloak ID from appropriate table based on role
+async function getUserByKeycloakIdAndRole(keycloakId, role) {
+  const tableName = ROLE_TABLE_MAP[role];
+  if (!tableName) return null; // tenant/guest don't have DB records
+
   const conn = await pool.getConnection();
-  debug.log("UserService", "Fetching user by Keycloak ID", { keycloakId });
+  debug.log("UserService", `Fetching ${role} by Keycloak ID`, { keycloakId, table: tableName });
+  
   try {
+    // ✅ Dental schema: bigint IDs, keycloak_id as char(36)
     const rows = await conn.query(
       `
       SELECT
-        u.user_id,
-        u.keycloak_id,
-        u.username,
-        u.role,
-        u.status,
-        u.failed_attempt_count,
-        u.account_locked,
-        u.tenant_id
-      FROM user u
-      WHERE u.keycloak_id = ?
+        ${tableName}_id as user_id,
+        keycloak_id,
+        username,
+        first_name,
+        last_name,
+        email,
+        phone_number,
+        tenant_id,
+        clinic_id,
+        status,
+        last_login,
+        created_time,
+        profile_picture
+      FROM ${tableName}
+      WHERE keycloak_id = ?
       LIMIT 1
       `,
       [keycloakId],
     );
+    
     debug.log("UserService", "Query result", {
       found: rows?.[0] ? true : false,
       userId: rows?.[0]?.user_id,
+      role,
     });
-    return rows;
-  } catch (error) {
-    debug.error("UserService", "Failed to fetch user", error);
-    throw new Error(`Failed to fetch user: ${error.message}`);
-  } finally {
-    if (conn) conn.release();
-  }
-}
-
-const updateUserPassword = async (password, username) => {
-  let conn;
-  try {
-    conn = await pool.getConnection();
-
-    const result = await conn.query(
-      `UPDATE user SET 
-          password_hash=?
-       WHERE username=?`,
-      [password, username],
-    );
-
-    if (result.affectedRows === 0) throw new AppError("Query error", 500);
-
-    return result.affectedRows;
-  } catch (err) {
-    throw err;
-  } finally {
-    if (conn) conn.release();
-  }
-};
-
-async function getUserByKeycloakIdWithTenant(keycloakId, tenantId, branchId) {
-  debug.log("UserService", "Fetching user by Keycloak ID with tenant/branch", {
-    keycloakId,
-    tenantId,
-    branchId,
-  });
-  let conn;
-  try {
-    conn = await pool.getConnection();
-    const rows = await conn.query(
-      `
-      SELECT
-        u.user_id,
-        u.keycloak_id,
-        u.username,
-        u.role,
-        u.status,
-        u.failed_attempt_count,
-        u.account_locked,
-        u.tenant_id
-      FROM user 
-      WHERE u.keycloak_id = ?
-      AND u.tenant_id = ?
-      AND u.status = 'A'
-      LIMIT 1
-      `,
-      [keycloakId, tenantId],
-    );
-    debug.log("UserService", "User fetch with tenant/branch result", {
-      found: rows?.[0] ? true : false,
-      userId: rows?.[0]?.user_id,
-      role: rows?.[0]?.role,
-    });
+    
     return rows?.[0] || null;
   } catch (error) {
-    debug.error(
-      "UserService",
-      "Failed to fetch user with tenant/branch",
-      error,
-    );
-    throw new Error(`Failed to fetch user: ${error.message}`);
+    debug.error("UserService", `Failed to fetch ${role}`, error);
+    throw new Error(`Failed to fetch ${role}: ${error.message}`);
   } finally {
     if (conn) conn.release();
   }
 }
 
-async function getBranchByTenantIdAndUserId(tenantId, userId, conn) {
-  debug.log("BranchService", "Fetching user branches", { tenantId, userId });
+// ✅ Get user with tenant/clinic validation
+async function getUserByKeycloakIdWithTenantClinic(keycloakId, tenantId, clinicId, role) {
+  const tableName = ROLE_TABLE_MAP[role];
+  if (!tableName) return null;
+
+  debug.log("UserService", `Fetching ${role} with tenant/clinic`, {
+    keycloakId, tenantId, clinicId, table: tableName,
+  });
+  
+  let conn;
   try {
+    conn = await pool.getConnection();
     const rows = await conn.query(
       `
       SELECT
-        b.clinic_id,
-        b.branch_name,
-        b.branch_code,
-        b.tenant_id,
-        b.address,
-        b.city,
-        b.state,
-        b.pincode,
-        b.created_at
-      FROM branch b
-      INNER JOIN user_branch ub ON ub.clinic_id = b.clinic_id
-      WHERE b.tenant_id = ?
-      AND ub.user_id = ?
-      ORDER BY b.clinic_id ASC
+        ${tableName}_id as user_id,
+        keycloak_id,
+        username,
+        first_name,
+        last_name,
+        email,
+        phone_number,
+        tenant_id,
+        clinic_id,
+        status,
+        last_login
+      FROM ${tableName}
+      WHERE keycloak_id = ?
+      AND tenant_id = ?
+      AND clinic_id = ?
+      AND status = 1
+      LIMIT 1
       `,
-      [tenantId, userId],
+      [keycloakId, tenantId, clinicId],
     );
-    debug.log("BranchService", "Branches found", { count: rows?.length || 0 });
-    return rows;
+    
+    debug.log("UserService", "User fetch result", {
+      found: rows?.[0] ? true : false,
+      userId: rows?.[0]?.user_id,
+      role,
+    });
+    
+    return rows?.[0] || null;
   } catch (error) {
-    debug.error("BranchService", "Failed to fetch branches", error);
-    throw new Error(`Failed to fetch branches: ${error.message}`);
+    debug.error("UserService", `Failed to fetch ${role} with tenant/clinic`, error);
+    throw new Error(`Failed to fetch ${role}: ${error.message}`);
+  } finally {
+    if (conn) conn.release();
   }
 }
 
-async function getAllBranchByTenantId(tenantId, conn) {
-  debug.log("BranchService", "Fetching all tenant branches", { tenantId });
+// ✅ Get clinics for a user (for dropdowns)
+async function getClinicsByTenantIdAndUserId(tenantId, userId, role, conn) {
+  // For dentist/reception: they're assigned to specific clinics
+  // For superuser/tenant: they can access all clinics in tenant
+  const isAdminRole = ["tenant", "superuser"].includes(role);
+  
   try {
-    const rows = await conn.query(
-      `
-      SELECT
-        clinic_id,
-        branch_name,
-        branch_code,
-        tenant_id,
-        address,
-        city,
-        state,
-        pincode,
-        created_at
-      FROM branch
-      WHERE tenant_id = ?
-      ORDER BY clinic_id ASC
-      `,
-      [tenantId],
-    );
-    debug.log("BranchService", "All branches found", {
-      count: rows?.length || 0,
-    });
-    return rows;
+    if (isAdminRole) {
+      const rows = await conn.query(
+        `
+        SELECT
+          clinic_id,
+          clinic_name,
+          address,
+          city,
+          state,
+          pin_code,
+          phone_number,
+          email
+        FROM clinic
+        WHERE tenant_id = ?
+        ORDER BY clinic_id ASC
+        `,
+        [tenantId],
+      );
+      return rows;
+    } else {
+      // For dentist/reception: return their assigned clinic only
+      const rows = await conn.query(
+        `
+        SELECT
+          c.clinic_id,
+          c.clinic_name,
+          c.address,
+          c.city,
+          c.state,
+          c.pin_code,
+          c.phone_number,
+          c.email
+        FROM clinic c
+        WHERE c.tenant_id = ?
+        AND c.clinic_id = (
+          SELECT clinic_id FROM ${ROLE_TABLE_MAP[role]} 
+          WHERE ${role}_id = ? AND tenant_id = ?
+        )
+        `,
+        [tenantId, userId, tenantId],
+      );
+      return rows;
+    }
   } catch (error) {
-    debug.error("BranchService", "Failed to fetch all branches", error);
-    throw new Error(`Failed to fetch tenant branches: ${error.message}`);
+    debug.error("ClinicService", "Failed to fetch clinics", error);
+    throw new Error(`Failed to fetch clinics: ${error.message}`);
   }
 }
 
 // ============================================================================
-// 🗄️ REDIS UTILS (Using centralized client)
+// 🗄️ UTILS (IP, Geo, User-Agent)
 // ============================================================================
 const getIp = (req) => {
-  let ip =
-    req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
-    req.socket?.remoteAddress ||
-    null;
-  const normalized = ip === "::1" ? "127.0.0.1" : ip;
-  debug.log("Utils", "Extracted IP", { raw: ip, normalized });
-  return normalized;
+  let ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || 
+           req.socket?.remoteAddress || null;
+  return ip === "::1" ? "127.0.0.1" : ip;
 };
 
 const getUserAgentInfo = (req) => {
   const ua = new UAParser(req.headers["user-agent"] || "").getResult();
-  const info = {
-    browser:
-      ua.browser.name && ua.browser.version
-        ? `${ua.browser.name} ${ua.browser.version}`
-        : "Unknown",
-    device: ua.device.type
-      ? ua.device.type.charAt(0).toUpperCase() + ua.device.type.slice(1)
+  return {
+    browser: ua.browser.name && ua.browser.version 
+      ? `${ua.browser.name} ${ua.browser.version}` 
+      : "Unknown",
+    device: ua.device.type 
+      ? ua.device.type.charAt(0).toUpperCase() + ua.device.type.slice(1) 
       : "Desktop",
   };
-  debug.log("Utils", "Parsed User-Agent", info);
-  return info;
 };
 
 const getGeoInfo = async (ip) => {
-  debug.log("GeoService", "Looking up geo info", { ip });
-  const isLocal =
-    ip === "127.0.0.1" ||
-    ip === "::1" ||
-    ip.startsWith("192.168.") ||
-    ip.startsWith("10.");
+  const isLocal = ip === "127.0.0.1" || ip === "::1" || 
+                  ip?.startsWith("192.168.") || ip?.startsWith("10.");
   if (isLocal) {
-    debug.log("GeoService", "Local IP detected, returning mock geo");
-    return {
-      country: "Local",
-      state: "Local",
-      city: "Local",
-      isp: "Local Network",
-    };
+    return { country: "Local", state: "Local", city: "Local", isp: "Local Network" };
   }
   try {
-    const { data } = await axios.get(`https://ipapi.co/${ip}/json/`);
-    const geo = {
+    const { data } = await axios.get(`https://ipapi.co/${ip}/json/`, { timeout: 5000 });
+    return {
       country: data.country_name,
       state: data.region,
       city: data.city,
       isp: data.org,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      country_code: data.country_code,
+      timezone: data.timezone,
     };
-    debug.log("GeoService", "Geo lookup success", geo);
-    return geo;
   } catch (err) {
-    debug.error("GeoService", "Geo lookup failed", err);
+    debug.warn("GeoService", "Geo lookup failed", err.message);
     return { country: null, state: null, city: null, isp: null };
   }
 };
 
-// --- Cache helper using centralized Redis ---
-const setCache = async (key, value, ttlSeconds) => {
-  try {
-    return await setEx(key, ttlSeconds, value);
-  } catch (err) {
-    debug.error("Redis", "Cache set failed", { key, error: err.message });
-    throw err;
-  }
-};
-
-const getCache = async (key) => {
-  try {
-    return await get(key);
-  } catch (err) {
-    debug.error("Redis", "Cache get failed", { key, error: err.message });
-    throw err;
-  }
-};
-
-// --- Keycloak Helpers ---
-const getKeycloakUrl = (realm, path) =>
+// ============================================================================
+// 🔐 KEYCLOAK HELPERS
+// ============================================================================
+const getKeycloakUrl = (realm, path) => 
   `${CONFIG.KEYCLOAK.BASE_URL}/realms/${realm}${path}`;
 
-const getClientCredential = (clientId) => {
-  debug.log("Keycloak", "Looking up client credential", { clientId });
-  const secret = CONFIG.CLIENT_CREDENTIALS[clientId];
-  if (!secret) {
-    debug.error("Keycloak", "Client credential not found", { clientId });
-    throw new CustomError(
-      `No client credential found for clientId: ${clientId}`,
-      400,
-    );
-  }
-  debug.log("Keycloak", "Client credential found (masked)", {
-    clientId,
-    secret: "****",
-  });
-  return secret;
-};
-
 const keycloakLogin = async (username, password, realm, clientId) => {
-  debug.log("Keycloak", "Attempting login", { username, realm, clientId });
   const url = getKeycloakUrl(realm, "/protocol/openid-connect/token");
   try {
     const response = await axios.post(
@@ -353,7 +306,6 @@ const keycloakLogin = async (username, password, realm, clientId) => {
     );
     debug.log("Keycloak", "✅ Login successful", {
       hasAccessToken: !!response.data.access_token,
-      hasRefreshToken: !!response.data.refresh_token,
       expiresIn: response.data.expires_in,
     });
     return response.data;
@@ -370,11 +322,6 @@ const keycloakLogin = async (username, password, realm, clientId) => {
 };
 
 const keycloakRefresh = async (refreshToken, realm, clientId) => {
-  debug.log("Keycloak", "Refreshing token", {
-    realm,
-    clientId,
-    refreshToken: refreshToken?.substring(0, 20) + "...",
-  });
   const url = getKeycloakUrl(realm, "/protocol/openid-connect/token");
   try {
     const response = await axios.post(
@@ -388,13 +335,11 @@ const keycloakRefresh = async (refreshToken, realm, clientId) => {
     );
     debug.log("Keycloak", "✅ Token refreshed", {
       newExpiresIn: response.data.expires_in,
-      hasNewRefreshToken: !!response.data.refresh_token,
     });
     return response.data;
   } catch (error) {
     debug.error("Keycloak", "❌ Refresh failed", {
       status: error.response?.status,
-      error: error.response?.data,
     });
     throw error;
   }
@@ -405,14 +350,7 @@ const decodeToken = (token) => {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) throw new Error("Invalid JWT");
-    const payload = JSON.parse(
-      Buffer.from(parts[1], "base64").toString("utf8"),
-    );
-    debug.log("Token", "Decoded JWT payload (partial)", {
-      sub: payload?.sub?.substring(0, 10) + "...",
-      preferred_username: payload?.preferred_username,
-      exp: payload?.exp ? new Date(payload.exp * 1000).toISOString() : null,
-    });
+    const payload = JSON.parse(Buffer.from(parts[1], "base64").toString("utf8"));
     return payload;
   } catch (err) {
     debug.error("Token", "Failed to decode JWT", err);
@@ -422,26 +360,25 @@ const decodeToken = (token) => {
 
 const extractUserInfo = (token) => {
   const globalRoles = token.realm_access?.roles || [];
-  const role =
-    ROLE_PRIORITY.find((r) =>
-      globalRoles.some((gr) => gr.toLowerCase() === r.toLowerCase()),
-    ) || "G";
-  const info = {
+  const role = ROLE_PRIORITY.find((r) => 
+    globalRoles.some((gr) => gr.toLowerCase() === r.toLowerCase())
+  ) || "guest";
+  
+  return {
     username: token?.preferred_username,
     userId: token.sub,
     displayName: token.name,
     role,
+    email: token.email,
   };
-  debug.log("Token", "Extracted user info", { role, username: info.username });
-  return info;
 };
 
 // ============================================================================
-// 3. SERVICES (Business Logic)
+// 🗄️ SERVICES (Business Logic)
 // ============================================================================
 const UserService = {
-  verifyTokenInDB: async (token, conn) => {
-    debug.log("UserService", "Verifying token in DB");
+  verifyTokenInDB: async (token, role) => {
+    debug.log("UserService", "Verifying token in DB", { role });
     try {
       const decoded = jwt.verify(token, CONFIG.KEYCLOAK.PUBLIC_KEY, {
         algorithms: ["RS256"],
@@ -449,149 +386,285 @@ const UserService = {
       debug.log("UserService", "JWT verified", {
         sub: decoded.sub?.substring(0, 10) + "...",
       });
-      const user = await getUserByKeycloakId(decoded.sub);
-      if (!user || !user[0]) {
+      
+      let user = await getUserByKeycloakIdAndRole(decoded.sub, role);
+      user=user[0];
+      console.log("UserService", "DB lookup result", user);
+      if (!user) {
         debug.error("UserService", "User not found in DB", {
           keycloakId: decoded.sub,
+          role,
         });
         throw new CustomError(MESSAGES.USER_NOT_FOUND, 404);
       }
+      
       debug.log("UserService", "✅ User verified", {
-        userId: user[0].user_id,
-        role: user[0].role,
+        userId: user.user_id,
+        role,
+        clinicId: user.clinic_id,
       });
-      return user[0];
+      return user;
     } catch (error) {
       debug.error("UserService", "Token verification failed", error);
       throw error;
     }
   },
-  updateFailedAttempts: async (username, increment = true, conn) => {
-    debug.log(
-      "UserService",
-      `Updating failed attempts (${increment ? "increment" : "reset"})`,
-      { username },
-    );
+};
+
+// ✅ Dental Schema: login_history & user_activity adapted
+const AuditService = {
+  logLogin: async (userContext, req, geo, ua, dbUser, networkDetails) => {
+    debug.log("AuditService", "Logging login activity", {
+      userId: userContext.user_id,
+      sessionId: userContext.session_id,
+      role: userContext.role,
+    });
+
+    const ip = getIp(req);
+    const session_id = userContext.session_id;
+    let conn;
+    
     try {
-      if (increment) {
-        const result = await conn.query(
-          `UPDATE user SET failed_attempt_count = failed_attempt_count + 1 WHERE LOWER(username) = ?`,
-          [username.toLowerCase()],
-        );
-        debug.log("UserService", "Failed attempt incremented", {
-          affectedRows: result.affectedRows,
-        });
-      }
-    } catch (e) {
-      debug.error("UserService", "Failed to update attempts", e);
+      conn = await pool.getConnection();
+
+      // ✅ Dental login_history schema
+      const historyParams = [
+        Number(userContext.tenant_id) || null,
+        req.headers["x-app-name"] || "dental", // app_name field
+        userContext.keycloak_user_id,          // keycloak_user_id (char36)
+        session_id,
+        new Date(),                            // login_time
+        networkDetails?.ip_address || ip,
+        JSON.stringify(ua),                    // user_agent as text
+      ];
+
+      await conn.query(
+        `INSERT INTO login_history 
+         (tenant_id, app_name, keycloak_user_id, session_id, login_time, ip_address, user_agent) 
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        historyParams,
+      );
+      debug.log("AuditService", "📝 Login history inserted");
+
+      // ✅ Dental user_activity schema
+      const activityParams = [
+        Number(userContext.tenant_id) || null,
+        req.headers["x-app-name"] || "dental",
+        userContext.keycloak_user_id,
+        "login",                              // activity_type
+        `User logged in from ${networkDetails?.city || 'Unknown'}`, // activity_desc
+        ip,
+        JSON.stringify(ua),
+        new Date(),                           // activity_time
+      ];
+
+      await conn.query(
+        `INSERT INTO user_activity 
+         (tenant_id, app_name, keycloak_user_id, activity_type, activity_desc, ip_address, user_agent, activity_time) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        activityParams,
+      );
+      debug.log("AuditService", "📊 User activity logged");
+      
+    } catch (err) {
+      debug.error("AuditService", "Failed to log audit", err);
+    } finally {
+      if (conn) conn.release();
     }
   },
-  resetFailedAttempts: async (userId, conn) => {
-    debug.log("UserService", "Resetting failed attempts", { userId });
+
+  logLogout: async (session_id, reason, keycloakUserId) => {
+    debug.log("AuditService", "Logging logout", { session_id, reason });
+    let conn;
     try {
-      const result = await conn.query(
-        `UPDATE user SET failed_attempt_count = 0, last_login = NOW() WHERE user_id = ?`,
-        [userId],
+      conn = await pool.getConnection();
+      
+      // Update login_history
+      await conn.query(
+        `UPDATE login_history SET logout_time = NOW() WHERE session_id = ?`,
+        [session_id],
       );
-      debug.log("UserService", "✅ Failed attempts reset", {
-        affectedRows: result.affectedRows,
-      });
-    } catch (e) {
-      debug.error("UserService", "Failed to reset attempts", e);
+      
+      // Log to user_activity
+      await conn.query(
+        `INSERT INTO user_activity 
+         (tenant_id, app_name, keycloak_user_id, activity_type, activity_desc, ip_address, user_agent, activity_time) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+        [
+          null, // tenant_id from session if needed
+          "dental",
+          keycloakUserId,
+          "logout",
+          `User logged out: ${reason || "manual"}`,
+          null,
+          null,
+        ],
+      );
+      
+      debug.log("AuditService", "✅ Logout audit updated");
+    } catch (err) {
+      debug.error("AuditService", "Failed to log logout", err);
+    } finally {
+      if (conn) conn.release();
     }
   },
 };
 
+const ContextService = {
+  build: async (accessToken, dbUser, role) => {
+    debug.log("ContextService", "Building user context", {
+      userId: dbUser?.user_id,
+      role,
+    });
+    
+    const decoded = decodeToken(accessToken);
+    const info = extractUserInfo(decoded);
+    
+    // ✅ Tenant & Guest roles skip DB context building
+    if (["tenant", "guest"].includes(role)) {
+      return {
+        user_id: null,
+        keycloak_user_id: info.userId,
+        username: info.username,
+        email: info.email,
+        role,
+        tenant_id: decoded?.tenant_id || null,
+        clinic_id: decoded?.clinic_id || null,
+        displayName: info.displayName,
+        branches: [], // Dental uses clinics
+      };
+    }
+
+    // Load tenant info
+    const tenant = dbUser?.tenant_id 
+      ? await getTenantByTenantId(dbUser.tenant_id) 
+      : null;
+
+    // Load clinics (Dental equivalent of branches)
+    let clinics = [];
+    if (dbUser?.user_id && dbUser?.tenant_id) {
+      let conn;
+      try {
+        conn = await pool.getConnection();
+        clinics = await getClinicsByTenantIdAndUserId(
+          dbUser.tenant_id, 
+          dbUser.user_id, 
+          role, 
+          conn
+        );
+      } finally {
+        if (conn) conn.release();
+      }
+    }
+
+    const clinicData = clinics?.map((c) => ({
+      clinic_id: Number(c.clinic_id),
+      clinic_name: c.clinic_name,
+      // branch_code: c.branch_code,
+      address: c.address,
+      city: c.city,
+      state: c.state,
+      pincode: c.pin_code,
+    }));
+
+    return {
+      // User Info
+      user_id: Number(dbUser?.user_id),
+      keycloak_user_id: info.userId,
+      username: dbUser?.username || info.username,
+      first_name: dbUser?.first_name,
+      last_name: dbUser?.last_name,
+      email: dbUser?.email || info.email,
+      phone_number: dbUser?.phone_number,
+      profile_picture: dbUser?.profile_picture,
+      role,
+      
+      // Tenant Info
+      tenant_id: Number(dbUser?.tenant_id) || null,
+      tenant_name: tenant?.tenant_name,
+      tenant_domain: tenant?.tenant_domain,
+      tenant_app_name: tenant?.tenant_app_name,
+      tenant_app_logo: tenant?.tenant_app_logo,
+      tenant_app_font: tenant?.tenant_app_font,
+      tenant_app_themes: tenant?.tenant_app_themes,
+      
+      // Clinic Info (Dental = Branches)
+      clinics: clinicData,
+      clinic_id: Number(dbUser?.clinic_id) || null,
+      default_clinic_id: Number(dbUser?.clinic_id) || null,
+      
+      // Metadata
+      displayName: info.displayName,
+      last_login: dbUser?.last_login,
+      created_time: dbUser?.created_time,
+    };
+  },
+};
+
+// ============================================================================
+// 🗄️ SESSION SERVICE (Redis-based)
+// ============================================================================
 const SessionService = {
   create: async (res, userContext, tokens, clientId, realm, networkDetails) => {
     debug.log("SessionService", "Creating new session", {
       userId: userContext.user_id,
-      tenantId: userContext.tenant_id,
       role: userContext.role,
-      branchId: userContext.clinic_id,
+      clinicId: userContext.clinic_id,
     });
+    
     const session_id = randomUUID();
     const cookieOpts = {
       ...CONFIG.COOKIES.OPTIONS,
       maxAge: CONFIG.COOKIES.EXPIRY.REFRESH,
     };
 
-    // Set Cookies
-    const cookiesSet = [
-      { name: "access_token", maxAge: CONFIG.COOKIES.EXPIRY.ACCESS },
-      { name: "refresh_token", maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
-      { name: "session_id", maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
-      { name: "clientId", maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
-      { name: "realm", maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
-      { name: "user_id", maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
-      { name: "tenant_id", maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
-      { name: "clinic_id", maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
+    // Set all auth cookies
+    const cookiesToSet = [
+      { name: "access_token", value: tokens.access_token, maxAge: CONFIG.COOKIES.EXPIRY.ACCESS },
+      { name: "refresh_token", value: tokens.refresh_token, maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
+      { name: "session_id", value: session_id, maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
+      { name: "clientId", value: clientId, maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
+      { name: "realm", value: realm, maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
+      { name: "user_id", value: userContext.user_id, maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
+      { name: "tenant_id", value: userContext.tenant_id, maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
+      { name: "clinic_id", value: userContext.clinic_id, maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
+      { name: "role", value: userContext.role, maxAge: CONFIG.COOKIES.EXPIRY.REFRESH },
     ];
 
-    cookiesSet.forEach((cookie) => {
+    cookiesToSet.forEach((cookie) => {
       res.cookie(
         cookie.name,
-        cookie.name === "access_token"
-          ? tokens.access_token
-          : cookie.name === "refresh_token"
-            ? tokens.refresh_token
-            : cookie.name === "session_id"
-              ? session_id
-              : cookie.name === "clientId"
-                ? clientId
-                : cookie.name === "realm"
-                  ? realm
-                  : cookie.name === "user_id"
-                    ? userContext.user_id
-                    : cookie.name === "tenant_id"
-                      ? userContext.tenant_id
-                      : cookie.name === "clinic_id"
-                        ? userContext.default_clinic_id
-                        : null,
+        cookie.value,
         cookie.name === "access_token"
           ? { ...CONFIG.COOKIES.OPTIONS, maxAge: CONFIG.COOKIES.EXPIRY.ACCESS }
-          : cookieOpts,
+          : cookieOpts
       );
     });
 
-    debug.log(
-      "SessionService",
-      "🍪 Cookies set",
-      cookiesSet.map((c) => c.name),
-    );
+    debug.log("SessionService", "🍪 Cookies set", cookiesToSet.map(c => c.name));
 
-    // Store in Redis using centralized helper
+    // Store session in Redis
     const sessionData = {
       user_id: userContext.user_id,
+      keycloak_user_id: userContext.keycloak_user_id,
       tenant_id: userContext.tenant_id,
-      clinic_id: userContext.default_clinic_id,
+      clinic_id: userContext.clinic_id,
       role: userContext.role,
+      username: userContext.username,
       clientId,
       realm,
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
-      // Network & Location Data
-      ip_address: networkDetails?.ip_address || null,
-      country: networkDetails?.country || null,
-      state: networkDetails?.state || null,
-      city: networkDetails?.city || null,
-      isp_provider: networkDetails?.isp || null,
-      network_type: networkDetails?.network_type || "Unknown",
-      // Additional data for session-info endpoint
-      ip_decimal: networkDetails?.ip_decimal || null,
-      hostname: networkDetails?.hostname || null,
-      asn: networkDetails?.asn || null,
-      org: networkDetails?.org || null,
-      country_code: networkDetails?.country_code || null,
-      latitude: networkDetails?.latitude || null,
-      longitude: networkDetails?.longitude || null,
-      timezone: networkDetails?.timezone || null,
-      // Session Metadata
+      // Network/Location data
+      ip_address: networkDetails?.ip_address,
+      country: networkDetails?.country,
+      city: networkDetails?.city,
+      isp: networkDetails?.isp,
+      // Session metadata
       login_time: new Date().toISOString(),
       last_activity: new Date().toISOString(),
     };
 
-    // ✅ Use setEx helper (auto JSON.stringify + TTL in seconds)
     await setEx(
       `session:${session_id}`,
       Math.floor(CONFIG.COOKIES.EXPIRY.REFRESH / 1000),
@@ -604,328 +677,197 @@ const SessionService = {
       0
     );
 
-    debug.log("SessionService", "✅ Session stored in Redis", {
-      session_id,
-      ttl: CONFIG.COOKIES.EXPIRY.REFRESH / 1000,
-      hasNetwork: !!networkDetails,
-    });
+    debug.log("SessionService", "✅ Session stored in Redis", { session_id });
     return session_id;
   },
 
   destroy: async (req, res) => {
     const session_id = req.cookies?.session_id;
-    debug.log("SessionService", "Destroying session", { session_id });
-    if (!session_id) {
-      debug.log("SessionService", "⚠️ No session_id found, skipping destroy");
-      return;
-    }
+    if (!session_id) return;
     
-    // ✅ Use del helper for multiple keys
     await del(`session:${session_id}`, `api_count:${session_id}`);
-    debug.log("SessionService", "🗑️ Redis keys deleted");
-
+    
     const clearOpts = { ...CONFIG.COOKIES.OPTIONS, path: "/" };
-    const cookiesCleared = [
-      "access_token",
-      "refresh_token",
-      "session_id",
-      "clientId",
-      "realm",
-      "user_id",
-    ];
-    cookiesCleared.forEach((c) => res.clearCookie(c, clearOpts));
-    debug.log("SessionService", "🍪 Cookies cleared", cookiesCleared);
+    ["access_token", "refresh_token", "session_id", "clientId", "realm", "user_id"].forEach(
+      (c) => res.clearCookie(c, clearOpts)
+    );
+    
+    debug.log("SessionService", "🗑️ Session destroyed", { session_id });
   },
 
   get: async (session_id) => {
-    debug.log("SessionService", "Fetching session from Redis", { session_id });
-    // ✅ Use get helper (auto JSON.parse)
+    if (!session_id) return null;
     const data = await get(`session:${session_id}`);
-    if (data) {
-      debug.log("SessionService", "✅ Session found", {
-        userId: data.user_id,
-        role: data.role,
-        tokenPreview: data.access_token?.substring(0, 10) + "...",
-      });
-      return data;
-    }
-    debug.log("SessionService", "⚠️ Session not found in Redis");
-    return null;
-  },
-};
-
-// ✅ AuditService.logLogin - Using centralized Redis & fixed ua references
-const AuditService = {
-  logLogin: async (userContext, req, geo, ua, dbUser, networkDetails) => {
-    debug.log("AuditService", "Logging login activity", {
-      userId: userContext.user_id,
-      sessionId: userContext.session_id,
-      ip: networkDetails?.ip_address,
-      country: networkDetails?.country,
-    });
-
-    const ip = getIp(req);
-    const session_id = userContext.session_id;
-    const suspicious =
-      dbUser.failed_attempt_count >= 5 ||
-      (networkDetails?.country && networkDetails.country !== "India")
-        ? "Yes"
-        : "No";
-
-    let conn;
-    try {
-      conn = await pool.getConnection();
-
-      const historyParams = [
-        Number(dbUser.tenant_id),
-        Number(userContext.default_clinic_id),
-        Number(userContext.user_id),
-        session_id,
-        networkDetails?.ip_address || null,
-        ua?.device || "Unknown",
-        ua?.browser || "Unknown",
-      ].map((v) => (typeof v === "bigint" ? Number(v) : v));
-
-      const historyResult = await conn.query(
-        `INSERT INTO login_history (tenant_id, clinic_id, user_id, session_id, login_time, ip_address, device_info, browser_info) VALUES (?, ?, ?, ?, NOW(), ?, ?, ?)`,
-        historyParams,
-      );
-
-      debug.log("AuditService", "📝 Login history inserted", {
-        insertId:
-          typeof historyResult?.insertId === "bigint"
-            ? Number(historyResult.insertId)
-            : historyResult?.insertId,
-      });
-
-      const activityParams = [
-        Number(userContext.user_id),
-        session_id,
-        "success",
-        req.headers["x-session-source"] || "web",
-        ip,
-        geo.country,
-        geo.state,
-        geo.city,
-        geo.isp,
-        req.body.network_type || "Unknown",
-        ua.browser,
-        ua.device,
-        Number(dbUser.failed_attempt_count) || 0,
-        dbUser.is_2fa_enabled ? "Yes" : "No",
-        0,
-        suspicious,
-        0,
-      ].map((v) => (typeof v === "bigint" ? Number(v) : v));
-
-      const activityResult = await conn.query(
-        `INSERT INTO user_activity (user_id, session_id, login_status, session_source, ip_address, country, state, city, isp_provider, network_type, browser, device, failed_attempt_count, two_factor_used, password_changed_recently, suspicious_flag, api_calls_count, login_time, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-        activityParams,
-      );
-
-      debug.log("AuditService", "📊 User activity logged", {
-        insertId:
-          typeof activityResult?.insertId === "bigint"
-            ? Number(activityResult.insertId)
-            : activityResult?.insertId,
-        suspicious,
-        location: `${networkDetails?.city}, ${networkDetails?.country}`,
-      });
-    } catch (err) {
-      debug.error("AuditService", "Failed to log audit", err);
-    } finally {
-      if (conn) conn.release();
-    }
-  },
-
-  logLogout: async (session_id, reason) => {
-    debug.log("AuditService", "Logging logout", { session_id, reason });
-    let conn;
-    try {
-      conn = await pool.getConnection();
-      // ✅ Use get helper for api_count
-      const count = await get(`api_count:${session_id}`);
-      await conn.query(
-        `UPDATE login_history SET logout_time = NOW() WHERE session_id = ?`,
-        [session_id],
-      );
-      await conn.query(
-        `UPDATE user_activity SET logout_time = NOW(), logout_reason = ?, api_calls_count = ?, last_activity_time = NOW(), duration = TIMESTAMPDIFF(SECOND, login_time, NOW()) WHERE session_id = ?`,
-        [reason || "manual", Number(count) || 0, session_id],
-      );
-      debug.log("AuditService", "✅ Logout audit updated");
-    } catch (err) {
-      debug.error("AuditService", "Failed to log logout", err);
-      throw err;
-    } finally {
-      if (conn) conn.release();
-    }
-  },
-};
-
-const ContextService = {
-  build: async (accessToken, dbUser, conn) => {
-    debug.log("ContextService", "Building user context", {
-      userId: dbUser.user_id,
-    });
-    const decoded = decodeToken(accessToken);
-    const info = extractUserInfo(decoded);
-    const role = info.role;
-
-    if (role === "DEV") {
-      debug.log(
-        "ContextService",
-        "DEV role detected - skipping tenant/branch load",
-      );
-      return {
-        user_id: Number(dbUser.user_id),
-        username: dbUser.username,
-        role: "DEV",
-        tenant_id: null,
-        tenant_name: null,
-        branches: null,
-        default_clinic_id: null,
-        keycloak_user_id: info.userId,
-        displayName: info.displayName,
-      };
-    }
-
-    debug.log("ContextService", "Loading tenant", {
-      tenantId: dbUser.tenant_id,
-    });
-    const tenant = await getTenantByTenantId(dbUser.tenant_id);
-
-    debug.log("ContextService", "Loading branches", {
-      role,
-      tenantId: dbUser.tenant_id,
-      userId: dbUser.user_id,
-    });
-
-    const branches =
-      role === "ADMIN"
-        ? await getAllBranchByTenantId(dbUser.tenant_id, conn)
-        : await getBranchByTenantIdAndUserId(
-            dbUser.tenant_id,
-            dbUser.user_id,
-            conn,
-          );
-
-    if (role !== "ADMIN" && (!branches || branches.length === 0)) {
-      debug.error("ContextService", "No branches assigned to non-admin user");
-      throw new Error("No branches assigned");
-    }
-
-    const branchData = branches?.map((b) => ({
-      clinic_id: Number(b.clinic_id),
-      branch_name: b.branch_name,
-      branch_code: b.branch_code,
-    }));
-
-    const context = {
-      user_id: Number(dbUser.user_id),
-      username: dbUser.username,
-      role,
-      tenant_id: Number(tenant.tenant_id),
-      tenant_name: tenant.tenant_name,
-      tenant_domain: tenant.tenant_domain,
-      tenant_app_name: tenant.tenant_app_name,
-      tenant_app_logo: tenant.tenant_app_logo,
-      tenant_app_font: tenant.tenant_app_font,
-      tenant_app_themes: tenant.tenant_app_themes,
-      tenant_code: tenant.tenant_code,
-      payment_type: tenant.payment_type,
-      branches: branchData,
-      default_clinic_id: tenant.head_branch || null,
-      head_clinic_id: tenant.head_branch || null,
-      keycloak_user_id: info.userId,
-      displayName: info.displayName,
-    };
-
-    debug.log("ContextService", "✅ Context built", {
-      role: context.role,
-      tenantName: context.tenant_name,
-      branchCount: context.branches?.length || 0,
-    });
-    return context;
+    return data || null;
   },
 };
 
 // ============================================================================
-// 4. MIDDLEWARE
+// 🔐 MIDDLEWARE: authenticateTenantClinicGroup
 // ============================================================================
-const attemptRefresh = async (req, res, next) => {
-  debug.log("Middleware", "🔄 Attempting token refresh");
-  try {
-    const session_id = req.cookies?.session_id || req.headers["session-id"];
-    if (!session_id) {
-      debug.error("Middleware", "No session_id for refresh");
-      return next(new CustomError(MESSAGES.UNAUTHORIZED, 401));
-    }
-    const session = await SessionService.get(session_id);
-    if (!session) {
-      debug.error("Middleware", "Session not found in Redis");
-      return next(new CustomError(MESSAGES.UNAUTHORIZED, 401));
-    }
-    debug.log("Middleware", "Calling Keycloak refresh");
-    const tokens = await keycloakRefresh(
-      session.refresh_token,
-      session.realm,
-      session.clientId,
-    );
-
-    // Update Cookies & Redis
-    res.cookie("access_token", tokens.access_token, {
-      ...CONFIG.COOKIES.OPTIONS,
-      maxAge: CONFIG.COOKIES.EXPIRY.ACCESS,
-    });
-    res.cookie("refresh_token", tokens.refresh_token, {
-      ...CONFIG.COOKIES.OPTIONS,
-      maxAge: CONFIG.COOKIES.EXPIRY.REFRESH,
+/**
+ * Middleware for Dental app authentication
+ * @param {string[]} allowedRoles - Array of roles allowed to access the route
+ * @returns {Function} Express middleware
+ */
+const authenticateTenantClinicGroup = (allowedRoles = []) => {
+  return async (req, res, next) => {
+    debug.log("Middleware", "🔐 authenticateTenantClinicGroup", {
+      allowedRoles,
+      path: req.path,
     });
 
-    session.access_token = tokens.access_token;
-    session.refresh_token = tokens.refresh_token;
-    
-    // ✅ Use setEx helper to update session in Redis
-    await setEx(
-      `session:${session_id}`,
-      Math.floor(CONFIG.COOKIES.EXPIRY.REFRESH / 1000),
-      session
-    );
+    try {
+      // ===== DEV MODE BYPASS =====
+      if (process.env.KEYCLOAK_POWER === "off") {
+        req.user = {
+          username: "dev-user",
+          realm_access: { roles: allowedRoles },
+          sub: "dev-keycloak-id",
+        };
+        req.role = allowedRoles[0] || "guest";
+        req.realm = process.env.KEYCLOAK_REALM;
+        req.token = "dev-token";
+        req.tenant_id = 1;
+        req.clinic_id = 1;
+        return next();
+      }
 
-    req.access_token = tokens.access_token;
-    req.tokenData = jwt.verify(
-      tokens.access_token,
-      CONFIG.KEYCLOAK.PUBLIC_KEY,
-      {
-        algorithms: ["RS256"],
-      },
-    );
-    req.session = session;
-    req.user_id = session.user_id;
-    debug.log("Middleware", "✅ Token refreshed successfully");
-    next();
-  } catch (err) {
-    debug.error("Middleware", "Refresh failed", err);
-    return next(new CustomError("Session expired. Please login again.", 401));
-  }
+      // ===== Extract tokens & headers =====
+      let token = req.cookies?.access_token || req.headers["access_token"];
+      let refreshToken = req.cookies?.refresh_token || req.headers["refresh_token"];
+      const realm = process.env.KEYCLOAK_REALM || req.headers["x-realm"];
+      const clientId = req.cookies?.clientId || req.headers["x-clientid"];
+
+      if (!token || !realm) {
+        throw new CustomError("Missing token or realm", 401);
+      }
+
+      const pubKey = CONFIG.KEYCLOAK.PUBLIC_KEY;
+      let decoded;
+
+      // ===== Verify JWT =====
+      try {
+        decoded = jwt.verify(token, pubKey, { algorithms: ["RS256"] });
+      } catch (err) {
+        // ===== Token expired: attempt refresh =====
+        if (err.name === "TokenExpiredError" && refreshToken) {
+          try {
+            const tokenUrl = getKeycloakUrl(realm, "/protocol/openid-connect/token");
+            const response = await axios.post(
+              tokenUrl,
+              qs.stringify({
+                grant_type: "refresh_token",
+                refresh_token: refreshToken,
+                client_id: clientId,
+              }),
+              { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+            );
+
+            token = response.data.access_token;
+            refreshToken = response.data.refresh_token;
+
+            // Update cookies with new tokens
+            res.cookie("access_token", token, {
+              ...CONFIG.COOKIES.OPTIONS,
+              maxAge: CONFIG.COOKIES.EXPIRY.ACCESS,
+            });
+            res.cookie("refresh_token", refreshToken, {
+              ...CONFIG.COOKIES.OPTIONS,
+              maxAge: CONFIG.COOKIES.EXPIRY.REFRESH,
+            });
+
+            decoded = jwt.verify(token, pubKey, { algorithms: ["RS256"] });
+            debug.log("Middleware", "✅ Token refreshed");
+          } catch (refreshErr) {
+            debug.error("Middleware", "❌ Token refresh failed", refreshErr.message);
+            throw new CustomError("Token expired and refresh failed", 401);
+          }
+        } else {
+          throw new CustomError("Invalid token", 401);
+        }
+      }
+
+      // ===== Extract role from token =====
+      const userRoles = decoded?.realm_access?.roles || [];
+      const userRole = ROLE_PRIORITY.find((r) => 
+        userRoles.some((ur) => ur.toLowerCase() === r.toLowerCase())
+      ) || "guest";
+
+      // ===== Check if role is allowed =====
+      if (!allowedRoles.includes(userRole)) {
+        debug.error("Middleware", "❌ Role not allowed", { userRole, allowedRoles });
+        throw new CustomError("Access denied: insufficient permissions", 403);
+      }
+
+      // ===== Attach basic info to request =====
+      req.user = decoded;
+      req.role = userRole;
+      req.realm = realm;
+      req.clientId = clientId;
+      req.token = token;
+      req.keycloak_user_id = decoded.sub;
+
+      // ===== Tenant & Guest: skip DB lookup =====
+      if (["tenant", "guest"].includes(userRole)) {
+        req.tenant_id = decoded?.tenant_id || null;
+        req.clinic_id = decoded?.clinic_id || null;
+        debug.log("Middleware", "✅ Tenant/Guest role - skipping DB lookup");
+        return next();
+      }
+
+      // ===== Other roles: verify in database =====
+      const dbUser = await UserService.verifyTokenInDB(token, userRole);
+
+      // console.log("Middleware", "DB user verification result", dbUser);
+      
+      if (!dbUser || dbUser.status !== 1) {
+        throw new CustomError("User not found or inactive in system", 401);
+      }
+
+      // ===== Attach DB user data to request =====
+      req.tenant_id = dbUser.tenant_id;
+      req.clinic_id = dbUser.clinic_id;
+      req.dbUser = dbUser;
+
+      debug.log("Middleware", "✅ Authentication successful", {
+        userId: dbUser.user_id,
+        role: userRole,
+        clinicId: dbUser.clinic_id,
+      });
+
+      return next();
+
+    } catch (err) {
+      debug.error("Middleware", "❌ Authentication failed", err);
+      
+      if (err instanceof CustomError) {
+        return res.status(err.statusCode).json({ message: err.message });
+      }
+      
+      return res.status(500).json({
+        status: "error",
+        message: "Authentication failed",
+        error: err.message,
+      });
+    }
+  };
 };
 
+// ============================================================================
+// 🔐 LEGACY: validateToken (for backward compatibility)
+// ============================================================================
 const validateToken = async (req, res, next) => {
-  debug.log("Middleware", "🔐 Validating token", {
-    hasSessionCookie: !!req.cookies?.session_id,
-    hasSessionHeader: !!req.headers["session-id"],
-    hasAuthHeader: !!req.headers.authorization,
-  });
+  debug.log("Middleware", "🔐 validateToken (legacy)");
+  
   try {
     const session_id = req.cookies?.session_id || req.headers["session-id"];
     if (!session_id) {
-      debug.error("Middleware", "No session identifier found");
       return next(new CustomError(MESSAGES.UNAUTHORIZED, 401));
     }
+    
     const session = await SessionService.get(session_id);
     if (!session) {
-      debug.error("Middleware", "Session not found in Redis");
       return next(new CustomError(MESSAGES.UNAUTHORIZED, 401));
     }
 
@@ -935,61 +877,29 @@ const validateToken = async (req, res, next) => {
       if (parts[0] === "Bearer") token = parts[1];
     }
     if (!token) {
-      debug.error("Middleware", "No access token found");
       return next(new CustomError("Token missing", 401));
     }
 
     try {
-      debug.log("Middleware", "Verifying JWT signature");
       req.tokenData = jwt.verify(token, CONFIG.KEYCLOAK.PUBLIC_KEY, {
         algorithms: ["RS256"],
       });
+      
       req.session = session;
       req.user = req.tokenData;
       req.user_id = session.user_id;
       req.tenant_id = session.tenant_id;
       req.clinic_id = session.clinic_id || null;
+      req.role = session.role;
+      req.keycloak_user_id = session.keycloak_user_id;
 
-      const keycloakId = req.tokenData.sub;
-      debug.log("Middleware", "Fetching user from database", {
-        keycloakId,
-        tenantId: req.tenant_id,
-        branchId: req.clinic_id,
-      });
-
-      const userData = await getUserByKeycloakIdWithTenant(
-        keycloakId,
-        req.tenant_id,
-        req.clinic_id,
-      );
-      if (!userData) {
-        debug.error("Middleware", "User not found in database", {
-          keycloakId,
-          tenantId: req.tenant_id,
-        });
-        return next(new CustomError("User not found or inactive in system", 401));
-      }
-
-      req.role = userData.role;
-      req.userStatus = userData.status;
-      debug.log("Middleware", "✅ User fetched from DB, role assigned", {
-        userId: userData.user_id,
-        role: userData.role,
-        status: userData.status,
-      });
-      debug.log(
-        "Middleware",
-        "✅ Token valid, proceeding to next middleware...",
-      );
+      debug.log("Middleware", "✅ Token valid");
       next();
-      debug.log("Middleware", "✅ validateToken function completed");
     } catch (err) {
-      debug.log("Middleware", `JWT verify error: ${err.name}`);
       if (err.name === "TokenExpiredError") {
-        debug.log("Middleware", "Token expired, attempting refresh");
-        return attemptRefresh(req, res, next);
+        // Attempt refresh logic here if needed
+        return next(new CustomError("Token expired", 401));
       }
-      debug.error("Middleware", "Invalid token", err);
       return next(new CustomError("Invalid token", 401));
     }
   } catch (err) {
@@ -999,7 +909,7 @@ const validateToken = async (req, res, next) => {
 };
 
 // ============================================================================
-// 5. ROUTE HANDLERS
+// 🚦 ROUTE HANDLERS
 // ============================================================================
 
 // --- GET /me ---
@@ -1007,92 +917,93 @@ router.get("/me", validateToken, async (req, res) => {
   debug.log("Route", "📍 GET /me called", {
     sessionId: req.cookies?.session_id,
     userId: req.session?.user_id,
+    role: req.role,
   });
-  const user_id = req.session?.user_id || req.cookies.user_id;
-  let conn;
+
   try {
-    conn = await pool.getConnection();
-    const [user] = await conn.query(
-      `SELECT u.user_id, u.username, u.role, t.* FROM user u JOIN tenant t ON t.tenant_id = u.tenant_id WHERE u.user_id = ?`,
-      [user_id],
+    // For tenant/guest, return minimal info from token
+    if (["tenant", "guest"].includes(req.role)) {
+      return res.json({
+        user_id: null,
+        keycloak_user_id: req.keycloak_user_id,
+        username: req.user?.preferred_username,
+        email: req.user?.email,
+        role: req.role,
+        tenant_id: req.tenant_id,
+        clinic_id: req.clinic_id,
+        clinics: [],
+      });
+    }
+
+    // For other roles, fetch from DB
+    const dbUser = await getUserByKeycloakIdAndRole(
+      req.keycloak_user_id,
+      req.role
     );
-    if (!user) {
-      debug.error("Route", "User not found in DB", { user_id });
-      await conn.rollback();
+
+    if (!dbUser) {
       return res.status(404).json({ message: "User not found" });
     }
-    console.log("userdata", user);
-    debug.log("Route", "User found", {
-      userId: user.user_id,
-      role: user.role,
-    });
 
-    const branches =
-      user.role === "ADMIN"
-        ? await conn.query(
-            `SELECT clinic_id, branch_name, branch_code FROM branch WHERE tenant_id = ?`,
-            [user.tenant_id],
-          )
-        : await conn.query(
-            `SELECT b.clinic_id, b.branch_name, b.branch_code FROM user_branch ub JOIN branch b ON b.clinic_id = ub.clinic_id WHERE ub.user_id = ?`,
-            [user_id],
-          );
-
-    if (!branches.length) {
-      debug.error("Route", "No branches found for user");
-      await conn.rollback();
-      return res.status(403).json({ message: "No branches assigned" });
+    // Fetch clinics
+    let clinics = [];
+    let conn;
+    try {
+      conn = await pool.getConnection();
+      clinics = await getClinicsByTenantIdAndUserId(
+        dbUser.tenant_id,
+        dbUser.user_id,
+        req.role,
+        conn
+      );
+    } finally {
+      if (conn) conn.release();
     }
-    debug.log("Route", "Branches loaded", { count: branches.length });
 
     const responseData = {
-      user_id: Number(user.user_id),
-      username: user.username,
-      role: user.role,
-      tenant_id: Number(user.tenant_id),
-      tenant_code: user.tenant_code,
-      tenant_name: user.tenant_name,
-      tenant_app_name: user.tenant_app_name,
-      tenant_app_logo: user.tenant_app_logo,
-      tenant_app_font: user.tenant_app_font,
-      tenant_app_themes: user.tenant_app_themes,
-      payment_type: user.payment_type,
-      branches: branches.map((b) => ({
-        clinic_id: Number(b.clinic_id),
-        branch_name: b.branch_name,
-        branch_code: b.branch_code,
+      user_id: Number(dbUser.user_id),
+      keycloak_user_id: dbUser.keycloak_id,
+      username: dbUser.username,
+      first_name: dbUser.first_name,
+      last_name: dbUser.last_name,
+      email: dbUser.email,
+      phone_number: dbUser.phone_number,
+      profile_picture: dbUser.profile_picture,
+      role: req.role,
+      tenant_id: Number(dbUser.tenant_id),
+      clinic_id: Number(dbUser.clinic_id),
+      clinics: clinics.map((c) => ({
+        clinic_id: Number(c.clinic_id),
+        clinic_name: c.clinic_name,
+        // branch_code: c.branch_code,
+        address: c.address,
+        city: c.city,
+        state: c.state,
+        pincode: c.pin_code,
       })),
-      default_clinic_id: Number(user.head_branch),
-      head_clinic_id: Number(user.head_branch),
+      default_clinic_id: Number(dbUser.clinic_id),
     };
+
     debug.log("Route", "✅ Sending user data");
     res.json(responseData);
+    
   } catch (error) {
     debug.error("Route", "ME API ERROR", error);
-    if (conn) await conn.rollback();
     res.status(500).json({ message: "Failed to load user" });
-  } finally {
-    if (conn) await conn.release();
   }
 });
 
 // --- POST /login ---
 router.post("/login", async (req, res) => {
-  debug.log("Route", "📍 POST /login called", {
+  console.log("Route", "📍 POST /login called", {
     username: req.body.username,
     host: req.body.host,
-    userAgent: req.headers["user-agent"]?.substring(0, 50),
   });
-  const conn = await pool.getConnection();
+
   try {
     const { username, password, host } = req.body;
-    console.log(username, password, host);
-
     if (!username || !password) {
-      debug.error("Route", "Missing credentials");
-      return res
-        .status(400)
-        .json({ message: "Username and password required" });
+      return res.status(400).json({ message: "Username and password required" });
     }
 
     const tenantConfig = CONFIG.HOST_REALM_CLIENT[host];
@@ -1101,41 +1012,35 @@ router.post("/login", async (req, res) => {
     }
     const { realm, clientId } = tenantConfig;
 
-    // 🔐 1. Keycloak Login (External HTTP - Outside Transaction)
+    // 🔐 Keycloak Login
     const tokens = await keycloakLogin(
       username.toLowerCase(),
       password,
       realm,
       clientId,
     );
-    debug.log("Route", "Keycloak login successful, verifying in DB");
+    debug.log("Route", "Keycloak login successful");
 
-    const dbUser = await UserService.verifyTokenInDB(tokens.access_token, conn);
-    debug.log("Route", "DB User verified", dbUser, {
-      userId: dbUser.user_id,
-      status: dbUser.status,
-      role: dbUser.role,
-    });
+    const decoded = decodeToken(tokens.access_token);
+    const info = extractUserInfo(decoded);
+    const role = info.role;
 
-    if (dbUser.status !== "A") {
-      debug.error("Route", "User account inactive", { userId: dbUser.user_id });
-      return res.status(403).json({ message: "User account is inactive" });
+    // ✅ Tenant/Guest: skip DB verification
+    let dbUser = null;
+    if (!["tenant", "guest"].includes(role)) {
+      dbUser = await UserService.verifyTokenInDB(tokens.access_token, role);
+      if (!dbUser || dbUser.status !== 1) {
+        return res.status(403).json({ message: "User account is inactive" });
+      }
     }
 
-    await UserService.resetFailedAttempts(dbUser.user_id, conn);
-    debug.log("Route", "Building user context");
-
-    const userContext = await ContextService.build(
-      tokens.access_token,
-      dbUser,
-      conn,
-    );
-
-    // Create networkDetails object
+    // Build context
+    const userContext = await ContextService.build(tokens.access_token, dbUser, role);
+    
+    // Network details for audit
     const ip = getIp(req);
     const geo = await getGeoInfo(ip);
     const ua = getUserAgentInfo(req);
-
     const networkDetails = {
       ip_address: ip,
       country: geo.country,
@@ -1143,17 +1048,9 @@ router.post("/login", async (req, res) => {
       city: geo.city,
       isp: geo.isp,
       network_type: req.body.network_type || "Unknown",
-      ip_decimal: null,
-      hostname: null,
-      asn: null,
-      org: null,
-      country_code: null,
-      latitude: null,
-      longitude: null,
-      timezone: null,
     };
 
-    debug.log("Route", "Creating session");
+    // Create session
     const session_id = await SessionService.create(
       res,
       userContext,
@@ -1164,36 +1061,28 @@ router.post("/login", async (req, res) => {
     );
     userContext.session_id = session_id;
 
-    debug.log("Route", "Logging audit trail");
-    await AuditService.logLogin(
-      userContext,
-      req,
-      geo,
-      ua,
-      dbUser,
-      networkDetails,
-    );
+    // Audit logging (skip for tenant/guest)
+    if (!["tenant", "guest"].includes(role)) {
+      await AuditService.logLogin(
+        userContext,
+        req,
+        geo,
+        ua,
+        dbUser,
+        networkDetails,
+      );
+    }
 
     debug.log("Route", "✅ Login successful", {
       userId: userContext.user_id,
-      sessionId: userContext.session_id,
       role: userContext.role,
     });
+
     return res.status(200).json(userContext);
+    
   } catch (err) {
     debug.error("Route", "Login failed", err);
-    if (conn && req.body.username) {
-      try {
-        await UserService.updateFailedAttempts(req.body.username, true, conn);
-        debug.log("Route", "Failed attempt recorded");
-      } catch (updateErr) {
-        debug.error("Route", "Failed to record failed attempt", updateErr);
-      }
-    }
     return res.status(401).json({ message: MESSAGES.INVALID_CREDENTIALS });
-  } finally {
-    if (conn) await conn.release();
-    debug.log("Route", "DB Connection Released");
   }
 });
 
@@ -1201,50 +1090,40 @@ router.post("/login", async (req, res) => {
 router.post("/logout", async (req, res) => {
   debug.log("Route", "📍 POST /logout called", {
     sessionId: req.cookies?.session_id,
-    reason: req.body?.reason,
   });
-  let conn;
+
   try {
-    await AuditService.logLogout(req.cookies?.session_id, req.body?.reason);
+    await AuditService.logLogout(
+      req.cookies?.session_id,
+      req.body?.reason,
+      req.keycloak_user_id || req.cookies?.user_id,
+    );
     await SessionService.destroy(req, res);
+    
     debug.log("Route", "✅ Logout successful");
-    return res
-      .status(200)
-      .json({ success: true, message: "Logout successful" });
+    return res.status(200).json({ success: true, message: "Logout successful" });
+    
   } catch (err) {
     debug.error("Route", "Logout failed", err);
-    if (conn) await conn.rollback();
     return res.status(500).json({ success: false, message: "Logout failed" });
-  } finally {
-    if (conn) await conn.release();
   }
 });
 
 // --- POST /refresh-token ---
 router.post("/refresh-token", async (req, res, next) => {
-  debug.log("Route", "📍 POST /refresh-token called", {
-    hasRefreshCookie: !!req.cookies.refresh_token,
-    realm: req.headers["x-realm"],
-    clientId: req.headers["x-clientid"],
-  });
+  debug.log("Route", "📍 POST /refresh-token called");
+  
   const refreshToken = req.cookies.refresh_token;
-  const realm = req.headers["x-realm"];
-  const clientid = req.headers["x-clientid"];
+  const realm = req.headers["x-realm"] || process.env.KEYCLOAK_REALM;
+  const clientId = req.headers["x-clientid"] || req.cookies.clientId;
 
-  if (!refreshToken) {
-    debug.error("Route", "No refresh token in cookies");
-    return next(new CustomError("No refresh token found", 401));
+  if (!refreshToken || !realm || !clientId) {
+    return next(new CustomError("Missing refresh token or config", 401));
   }
 
   try {
-    debug.log("Route", "Refreshing token via Keycloak");
-    const tokenData = await keycloakRefresh(refreshToken, realm, clientid);
-    const decoded = decodeToken(tokenData.access_token);
-    const userInfo = extractUserInfo(decoded);
-
-    debug.log("Route", "Loading tenant for response");
-    const tenant = await getTenantByTenantId(userInfo.tenantId);
-
+    const tokenData = await keycloakRefresh(refreshToken, realm, clientId);
+    
     res.cookie("access_token", tokenData.access_token, {
       ...CONFIG.COOKIES.OPTIONS,
       maxAge: tokenData.expires_in * 1000,
@@ -1253,507 +1132,25 @@ router.post("/refresh-token", async (req, res, next) => {
       ...CONFIG.COOKIES.OPTIONS,
       maxAge: CONFIG.COOKIES.EXPIRY.REFRESH,
     });
-    debug.log("Route", "🍪 New tokens set in cookies");
 
-    const responseData = {
-      tenant_name: tenant?.tenant_name,
-      tenant_domain: tenant?.tenant_domain,
-      tenant_app_logo: tenant?.tenant_app_logo || [],
-      tenant_app_themes: tenant?.tenant_app_themes,
-      tenant_app_font: tenant?.tenant_app_font,
+    const decoded = decodeToken(tokenData.access_token);
+    const userInfo = extractUserInfo(decoded);
+
+    res.status(200).json({
+      success: true,
       username: userInfo.preferred_username,
-      userId: userInfo.userId,
-      displayName: userInfo.displayName,
-      tenantId: userInfo.tenantId,
       role: userInfo.role,
-    };
-    debug.log("Route", "✅ Token refresh response sent");
-    res.status(200).json(responseData);
+      expires_in: tokenData.expires_in,
+    });
+    
   } catch (err) {
     debug.error("Route", "Token refresh failed", err);
-    next(
-      new CustomError(err.response?.data?.error_description || err.message, 401),
-    );
+    next(new CustomError(err.message || "Token refresh failed", 401));
   }
-});
-
-// --- Helper: Get user data by username ---
-const getUserDataByUsername = async (username) => {
-  let conn;
-  try {
-    conn = await pool.getConnection();
-    const rows = await conn.query(
-      `SELECT 
-         u.tenant_id,
-         u.username,
-         u.phone_number,
-         u.email,
-         u.status,
-         t.otp,
-         t.otp_type,
-         t.is_active,
-         t.timezone 
-       FROM user u 
-       LEFT JOIN tenant t ON t.tenant_id = u.tenant_id 
-       WHERE u.username = ? AND u.status = ? AND t.is_active = ?`,
-      [username, "A", "1"],
-    );
-    return rows[0] || null;
-  } catch (err) {
-    console.error("getUserDataByUsername error:", err);
-    throw err;
-  } finally {
-    if (conn) conn.release();
-  }
-};
-
-// --- Helper: Send OTP to Redis using centralized client ---
-const sendOtpToRedis = async (phoneNumber, otp, ttlSeconds = 300) => {
-  try {
-    const key = `otp:${phoneNumber}`;
-    await setCache(key, { otp }, ttlSeconds);
-    console.log(`OTP cached for ${phoneNumber}, expires in ${ttlSeconds}s`);
-  } catch (err) {
-    console.error("Failed to store OTP in cache:", err);
-  }
-};
-
-// --- POST /forgettenpassword ---
-router.post("/forgettenpassword", async (req, res, next) => {
-  debug.log("Route", "📍 POST /forgettenpassword called", {
-    username: req.body.username,
-    host: req.body.host,
-  });
-
-  try {
-    const { username, host } = req.body;
-
-    if (!username) {
-      return res.status(400).json({ message: "Username is required" });
-    }
-
-    const tenantConfig = CONFIG.HOST_REALM_CLIENT[host];
-    if (!tenantConfig) {
-      return res.status(400).json({ error: MESSAGES.INVALID_HOST });
-    }
-    const { realm, clientId, tenant_id: configTenantId } = tenantConfig;
-
-    const userData = await getUserDataByUsername(username);
-    const tenant_id = userData?.tenant_id || configTenantId;
-
-    if (!userData) {
-      return res.status(200).json({
-        message: "If this user exists, you will receive further instructions",
-        step: "complete",
-      });
-    }
-
-    const isOtpEnabled = userData.otp === 1 || userData.otp === true;
-
-    if (isOtpEnabled) {
-      let contactValue;
-      const via = userData?.otp_type;
-
-      if (via === "sms") contactValue = userData?.phone_number;
-      else if (via === "email") contactValue = userData?.email;
-      else if (via === "whatsapp") contactValue = userData?.phone_number;
-
-      if (!contactValue) {
-        return res
-          .status(400)
-          .json({ message: "No contact value found for OTP" });
-      }
-
-      const canSend = await canSendOTP({
-        username,
-        tenant_id,
-        contact: contactValue,
-      });
-
-      if (!canSend.allowed) {
-        return res.status(429).json({
-          message: canSend.message,
-          retryAfter: canSend.retryAfter,
-          step: "otp",
-        });
-      }
-
-      const otpResponse = await sendOTP({
-        to: contactValue,
-        username,
-        via,
-        message: "Your password reset OTP",
-        length: 6,
-        expiryMinutes: 10,
-        tenant_id,
-        timezone: userData?.time_zone
-      });
-
-      await setOtpCooldown({ username, tenant_id });
-
-      return res.status(200).json({
-        message: "OTP sent successfully",
-        step: "otp",
-        username,
-        otpEnabled: true,
-        contactMasked: maskContact(contactValue, via),
-        via,
-      });
-    } else {
-      debug.log("Route", "✅ OTP disabled for user, allowing direct reset", {
-        username,
-      });
-
-      const bypassKey = `bypass:${tenant_id}:${username}`;
-      const bypassToken = generateSecureToken();
-      const bypassData = {
-        username,
-        tenant_id,
-        verified: true,
-        otpDisabled: true,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + 15 * 60 * 1000,
-      };
-
-      // ✅ Use setEx helper for bypass token
-      await setEx(bypassKey, 900, bypassData);
-
-      return res.status(200).json({
-        message: "OTP disabled - proceed to reset password",
-        step: "reset-password",
-        username,
-        otpEnabled: false,
-        tenant_id,
-        bypassToken,
-      });
-    }
-  } catch (err) {
-    debug.error("Route", "Forgot password failed", err);
-    next(new CustomError(err.message || "Failed to process request", 500));
-  }
-});
-
-// 🔐 Helper: Generate secure bypass token
-const generateSecureToken = () => {
-  return require("crypto").randomBytes(32).toString("hex");
-};
-
-// 🔐 Helper: Mask contact for UI
-const maskContact = (contact, via) => {
-  if (!contact) return "";
-  if (via === "email") {
-    const [name, domain] = contact.split("@");
-    return `${name[0]}${"*".repeat(name.length - 2)}${name.slice(-1)}@${domain}`;
-  }
-  return `${contact.slice(0, 3)}****${contact.slice(-4)}`;
-};
-
-// --- POST /verify-otp ---
-router.post("/verify-otp", async (req, res, next) => {
-  debug.log("Route", "📍 POST /verify-otp called", {
-    username: req.body.username,
-  });
-
-  try {
-    const { username, otp, host, contact } = req.body;
-
-    if (!username || !otp) {
-      return res.status(400).json({ message: "Username and OTP are required" });
-    }
-
-    const tenantConfig = CONFIG.HOST_REALM_CLIENT[host];
-    if (!tenantConfig) {
-      return res.status(400).json({ error: MESSAGES.INVALID_HOST });
-    }
-    const { tenant_id } = tenantConfig;
-
-    const userData = await getUserDataByUsername(username);
-
-    if (!userData) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (!userData.otp) {
-      return res.status(400).json({
-        message: "OTP not enabled for this user. Use direct reset.",
-      });
-    }
-
-    let contactValue;
-    const via = userData?.otp_type;
-
-    if (via === "sms") contactValue = userData?.phone_number;
-    else if (via === "email") contactValue = userData?.email;
-    else if (via === "whatsapp") contactValue = userData?.phone_number;
-
-    if (!contactValue) {
-      return res.status(400).json({ message: "No contact value found" });
-    }
-
-    const verification = await verifyOTP({
-      username,
-      enteredOtp: otp,
-      contact: contactValue,
-      tenant_id,
-    });
-
-    if (!verification.success) {
-      const statusCode = verification.locked ? 403 : 400;
-      return res.status(statusCode).json({
-        message: verification.message,
-        step: "otp",
-        attemptsRemaining: verification.attemptsRemaining,
-        locked: verification.locked,
-      });
-    }
-
-    const bypassKey = `bypass:${tenant_id}:${username}`;
-    const bypassToken = generateSecureToken();
-    const bypassData = {
-      username,
-      tenant_id,
-      verified: true,
-      otpVerified: true,
-      createdAt: Date.now(),
-      expiresAt: Date.now() + 15 * 60 * 1000,
-    };
-
-    // ✅ Use setEx helper
-    await setEx(bypassKey, 900, JSON.stringify(bypassData));
-
-    debug.log("Route", "✅ OTP verified successfully", { username });
-
-    return res.status(200).json({
-      message: "OTP verified successfully",
-      step: "reset-password",
-      bypassToken,
-      username,
-      tenant_id,
-    });
-  } catch (err) {
-    debug.error("Route", "Verify OTP failed", err);
-    next(new CustomError(err.message || "OTP verification failed", 500));
-  }
-});
-
-// --- POST /reset-password ---
-router.post("/reset-password", async (req, res, next) => {
-  debug.log("Route", "📍 POST /reset-password called", {
-    username: req.body.username,
-  });
-
-  try {
-    const { username, newPassword, host, tenant_id, bypassToken } = req.body;
-
-    if (!username || !newPassword) {
-      return res
-        .status(400)
-        .json({ message: "Username and newPassword required" });
-    }
-
-    const tenantConfig = CONFIG.HOST_REALM_CLIENT[host];
-    if (!tenantConfig) {
-      return res.status(400).json({ error: MESSAGES.INVALID_HOST });
-    }
-    const { realm, clientId } = tenantConfig;
-
-    const bypassKey = `bypass:${tenant_id}:${username}`;
-    // ✅ Use get helper to retrieve bypass data
-    const bypassDataRaw = await get(bypassKey);
-
-    if (!bypassDataRaw) {
-      return res.status(401).json({
-        message: "Session expired. Please start the reset process again.",
-        step: "otp",
-      });
-    }
-
-    const bypassData = typeof bypassDataRaw === 'string' 
-      ? JSON.parse(bypassDataRaw) 
-      : bypassDataRaw;
-
-    if (
-      bypassToken &&
-      bypassData.bypassToken &&
-      bypassToken !== bypassData.bypassToken
-    ) {
-      return res.status(403).json({ message: "Invalid verification token" });
-    }
-
-    if (Date.now() > bypassData.expiresAt) {
-      // ✅ Use del helper
-      await del(bypassKey);
-      return res.status(401).json({
-        message: "Verification expired. Please request a new reset link.",
-        step: "otp",
-      });
-    }
-
-    if (
-      bypassData.tenant_id &&
-      tenant_id &&
-      bypassData.tenant_id !== tenant_id
-    ) {
-      return res.status(403).json({ message: "Tenant mismatch" });
-    }
-
-    // Rate limiting
-    const resetAttemptsKey = `reset_attempts:${tenant_id}:${username}`;
-    const attempts = await incrWithExpiry(resetAttemptsKey, 3600);
-    
-    // if (attempts > 3) {
-    //   return res
-    //     .status(429)
-    //     .json({ message: "Too many reset attempts. Please wait." });
-    // }
-
-    // Proceed with password reset
-    debug.log("Route", "Authenticating as Keycloak admin");
-    const tokenRes = await keycloakLogin(
-      CONFIG.KEYCLOAK.ADMIN_USER,
-      CONFIG.KEYCLOAK.ADMIN_PASS,
-      realm,
-      clientId,
-    );
-    const adminToken = tokenRes.access_token;
-
-    debug.log("Route", "Fetching user from Keycloak");
-    const userRes = await axios.get(
-      `${CONFIG.KEYCLOAK.BASE_URL}/admin/realms/${realm}/users?username=${username}`,
-      { headers: { Authorization: `Bearer ${adminToken}` } },
-    );
-
-    const user = userRes.data[0];
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    debug.log("Route", "Resetting password in Keycloak");
-    await axios.put(
-      `${CONFIG.KEYCLOAK.BASE_URL}/admin/realms/${realm}/users/${user.id}/reset-password`,
-      { type: "password", value: newPassword, temporary: false },
-      {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    // const userData=await getUserByKeycloakId(user.id)
-    const newHashedPassword=passwordHash.encryptPassword(newPassword);
-
-    const result = await updateUserPassword(newHashedPassword, username);
-
-    if (!result) {
-      return res
-        .status(400)
-        .json({ message: "Error updating password in database" });
-    }
-
-    // ✅ Cleanup using del helper
-    await del(bypassKey, `reset_attempts:${tenant_id}:${username}`);
-
-    debug.log("Route", "✅ Password reset successful", { username });
-    return res.status(200).json({ message: "Password updated successfully" });
-  } catch (err) {
-    debug.error("Route", "Password reset failed", err);
-    next(new CustomError(err.response?.data?.error || err.message, 500));
-  }
-});
-
-// --- POST /register ---
-router.post("/register", async (req, res, next) => {
-  debug.log("Route", "📍 POST /register called", {
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
-    phone: req.body.phone,
-    host: req.body.host,
-  });
-  try {
-    const { email, firstname, lastname, phone, host } = req.body;
-    if (!firstname || !lastname || !phone) {
-      debug.error("Route", "Missing required registration fields");
-      return res
-        .status(400)
-        .json({ message: "Firstname lastname phonenumber required" });
-    }
-    const tenantConfig = CONFIG.HOST_REALM_CLIENT[host];
-    if (!tenantConfig) {
-      debug.error("Route", "Invalid host", { host });
-      return res.status(400).json({ error: MESSAGES.INVALID_HOST });
-    }
-    const { realm, clientId } = tenantConfig;
-
-    debug.log("Route", "Authenticating as Keycloak admin");
-    const tokenRes = await keycloakLogin(
-      CONFIG.KEYCLOAK.ADMIN_USER,
-      CONFIG.KEYCLOAK.ADMIN_PASS,
-      realm,
-      clientId,
-    );
-    const adminToken = tokenRes.access_token;
-
-    const username = `GST${Date.now()}`;
-    const password = "1234";
-    debug.log("Route", "Generated registration credentials", { username });
-
-    debug.log("Route", "Creating user in Keycloak");
-    await axios.post(
-      `${CONFIG.KEYCLOAK.BASE_URL}/admin/realms/${realm}/users`,
-      {
-        username,
-        email: email || `${username}@example.com`,
-        emailVerified: true,
-        firstName: firstname,
-        lastName: lastname,
-        enabled: true,
-        attributes: { phoneNumber: phone, tenant_id: "", clinic_id: "" },
-        credentials: [{ type: "password", value: password, temporary: false }],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-    debug.log("Route", "✅ User registration successful");
-    return res.status(200).json({ message: "User Created successfully" });
-  } catch (err) {
-    debug.error("Route", "Registration failed", err);
-    next(new CustomError(err.response?.data?.error || err.message, 500));
-  }
-});
-
-// --- POST /tokensave ---
-router.post("/tokensave", (req, res) => {
-  debug.log("Route", "📍 POST /tokensave called", {
-    hasAccessToken: !!req.body.access_token,
-    hasRefreshToken: !!req.body.refresh_token,
-  });
-  const { access_token, refresh_token, access_expires_in, refresh_expires_in } =
-    req.body;
-  if (!access_token || !refresh_token) {
-    debug.error("Route", "Missing tokens in request");
-    return res.status(400).json({ success: false, message: "Missing tokens" });
-  }
-  res.cookie("access_token", access_token, {
-    ...CONFIG.COOKIES.OPTIONS,
-    maxAge: (access_expires_in || 900) * 1000,
-  });
-  res.cookie("refresh_token", refresh_token, {
-    ...CONFIG.COOKIES.OPTIONS,
-    maxAge: (refresh_expires_in || 604800) * 1000,
-  });
-  debug.log("Route", "🍪 Tokens saved to cookies");
-  return res
-    .status(200)
-    .json({ success: true, message: "Tokens saved in cookies successfully" });
 });
 
 // ============================================================================
-// 🚀 SERVER STARTUP LOG & REDIS HEALTH CHECK
+// 🚀 STARTUP & EXPORTS
 // ============================================================================
 (async () => {
   try {
@@ -1764,10 +1161,12 @@ router.post("/tokensave", (req, res) => {
   }
 })();
 
-debug.info("SSO_AUTH", "🔐 Authentication module loaded");
-debug.info(
-  "SSO_AUTH",
-  `Routes registered: /me, /login, /logout, /refresh-token, /forgettenpassword, /reset-password, /register, /tokensave`,
-);
+debug.info("SSO_AUTH", "🔐 Dental authentication module loaded");
+debug.info("SSO_AUTH", `Routes: /me, /login, /logout, /refresh-token`);
 
-module.exports = { router, validateToken, redisGracefulShutdown };
+module.exports = {
+  router,
+  validateToken,
+  authenticateTenantClinicGroup, // ✅ New middleware for Dental app
+  redisGracefulShutdown,
+};

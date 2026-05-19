@@ -97,7 +97,7 @@ const deletePrescriptionByTenantAndPrescriptionId = async (
       conditionColumn,
       conditionValue
     );
-    console.log(result);
+    // console.log(result);
     return result.affectedRows;
   } catch (error) {
     console.error("Error deleting prescription:", error);
