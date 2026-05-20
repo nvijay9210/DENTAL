@@ -12,7 +12,7 @@ const userActivityLogger = async (req, res, next) => {
           const tenant_id =
             req.params?.tenant_id || req.body?.tenant_id || req.cookies?.tenant_id || null;
           const keycloak_user_id =
-            req.user?.sub || req.user?.keycloak_id || "anonymous";
+            req.user?.sub || req.user?.keycloak_id ||req.cookies?.keycloak_user_id || "anonymous";
 
           // ✅ Get detailed client info
           const clientInfo = getClientInfo(req);
