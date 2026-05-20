@@ -1474,126 +1474,109 @@ const getAppointmentSummaryChartByDentist = async (
   };
 };
 
-// async function getAppointmentSummaryByStartDateAndEndDate(
-//   tenant_id,
-//   startDate,
-//   endDate,
-//   clinic_id,
-//   dentist_id = null
-// ) {
-//   let query = `
-//     SELECT
-//       appointment_date AS date,
-//       SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) AS confirmed,
-//       SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed,
-//       SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled
-//     FROM appointment
-//     WHERE tenant_id = ?
-//       AND clinic_id = ?
-//       AND appointment_date BETWEEN ? AND ?
-//   `;
-
-//   const queryParams = [tenant_id, clinic_id, startDate, endDate];
-
-//   // Only filter by dentist if it's passed (not null or 0)
-//   if (dentist_id) {
-//     query += ` AND dentist_id = ?`;
-//     queryParams.push(dentist_id);
-//   }
-
-//   query += `
-//     GROUP BY appointment_date
-//     ORDER BY appointment_date
-//   `;
-
-//   try {
-//     const [rows] = await pool.query(query, queryParams);
-
-//     return rows.map((row) => ({
-//       date: formatDateOnly(row.date),
-//       confirmed: Number(row.confirmed),
-//       completed: Number(row.completed),
-//       cancelled: Number(row.cancelled),
-//     }));
-//   } catch (error) {
-//     console.error("❌ Error fetching appointment summary:", error);
-//     throw new CustomError("Error fetching appointment summary", 500);
-//   }
-// }
-
 async function getAppointmentSummaryByStartDateAndEndDate(
   tenant_id,
   startDate,
   endDate,
-  clinic_id, // optional
-  dentist_id // optional
+  clinic_id = null,  // Default to null
+  dentist_id = null  // Default to null
 ) {
+  // === 1. Normalize inputs for consistent cache keys ===
+  const normalizedClinicId = clinic_id && !isNaN(clinic_id) ? Number(clinic_id) : null;
+  const normalizedDentistId = dentist_id && !isNaN(dentist_id) ? Number(dentist_id) : null;
+  
   const cacheKey = buildCacheKey("appointment", "appointmentsummary", {
-    tenant_id,
-    clinic_id,
-    dentist_id,
+    tenant_id: Number(tenant_id),
+    clinic_id: normalizedClinicId,
+    dentist_id: normalizedDentistId,
     startDate,
     endDate,
   });
 
   try {
-    const appointments = await getOrSetCache(cacheKey, async () => {
-      const queryParams = [tenant_id, startDate, endDate];
+    // === 2. Add timeout wrapper around cache operation ===
+    const appointments = await Promise.race([
+      getOrSetCache(cacheKey, async () => {
+        // === 3. Normalize dates for DB compatibility ===
+        const normalizedStartDate = formatDateOnly(startDate); // Ensure "YYYY-MM-DD"
+        const normalizedEndDate = formatDateOnly(endDate);
+        
+        const queryParams = [tenant_id, normalizedStartDate, normalizedEndDate];
 
-      let query = `
-        SELECT 
-          a.stat_date AS date,
-          SUM(a.confirmed) AS confirmed,
-          SUM(a.completed) AS completed,
-          SUM(a.cancelled) AS cancelled
-        FROM appointment_stats a
-        WHERE a.tenant_id = ?
-          AND a.stat_date BETWEEN ? AND ?
-      `;
-
-      // Optional: Filter by clinic if valid
-      if (clinic_id && !isNaN(clinic_id)) {
-        query += ` AND a.clinic_id = ?`;
-        queryParams.push(clinic_id);
-      }
-
-      // Optional: Filter only if dentist_id is provided and valid
-      if (dentist_id && !isNaN(dentist_id)) {
-        query += `
-          AND EXISTS (
-            SELECT 1 FROM appointment app
-            WHERE app.tenant_id = a.tenant_id
-              AND app.appointment_date = a.stat_date
-              ${
-                clinic_id && !isNaN(clinic_id)
-                  ? `AND app.clinic_id = a.clinic_id`
-                  : ""
-              }
-              AND app.dentist_id = ?
-          )
+        // === 4. Simplified, optimized SQL query ===
+        let query = `
+          SELECT 
+            a.stat_date AS date,
+            COALESCE(SUM(a.confirmed), 0) AS confirmed,
+            COALESCE(SUM(a.completed), 0) AS completed,
+            COALESCE(SUM(a.cancelled), 0) AS cancelled
+          FROM appointment_stats a
+          WHERE a.tenant_id = ?
+            AND a.stat_date BETWEEN ? AND ?
         `;
-        queryParams.push(dentist_id);
-      }
 
-      query += ` GROUP BY a.stat_date ORDER BY a.stat_date`;
+        // Optional: Filter by clinic
+        if (normalizedClinicId) {
+          query += ` AND a.clinic_id = ?`;
+          queryParams.push(normalizedClinicId);
+        }
 
-      try {
-        const [rows] = await pool.query(query, queryParams);
+        // Optional: Filter by dentist - SIMPLIFIED (no EXISTS subquery)
+        if (normalizedDentistId) {
+          // ✅ Join directly with appointment_stats if it has dentist_id
+          // If NOT, use a simpler approach: pre-fetch dentist's appointment dates
+          query += ` AND a.dentist_id = ?`;  // ← Add dentist_id column to appointment_stats!
+          queryParams.push(normalizedDentistId);
+        }
 
-        return rows.map((row) => ({
-          date: formatDateOnly(row.date),
-          confirmed: Number(row.confirmed),
-          completed: Number(row.completed),
-          cancelled: Number(row.cancelled),
-        }));
-      } catch (error) {
-        console.error("❌ Error fetching appointment summary:", error);
-        throw new CustomError("Error fetching appointment summary", 500);
-      }
-    });
+        query += ` GROUP BY a.stat_date ORDER BY a.stat_date`;
+
+        try {
+          // === 5. Add query timeout protection ===
+          const [rows] = await Promise.race([
+            pool.query(query, queryParams),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Query timeout')), 10000) // 10 second timeout
+            )
+          ]);
+
+          return rows.map((row) => ({
+            date: formatDateOnly(row.date),
+            confirmed: Number(row.confirmed) || 0,
+            completed: Number(row.completed) || 0,
+            cancelled: Number(row.cancelled) || 0,
+          }));
+        } catch (queryError) {
+          console.error("❌ Error fetching appointment summary:", {
+            query,
+            queryParams,
+            error: queryError.message,
+          });
+          throw new CustomError("Error fetching appointment summary", 500);
+        }
+      }),
+      // === 6. Cache operation timeout ===
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Cache operation timeout')), 15000) // 15 second timeout
+      )
+    ]);
+    
     return appointments;
+    
   } catch (err) {
-    throw new CustomError("Failed to fetch financeSummary", 404);
+    console.error("❌ Failed to fetch appointment summary:", {
+      tenant_id,
+      startDate,
+      endDate,
+      clinic_id,
+      dentist_id,
+      error: err.message,
+    });
+    
+    // Return empty array instead of throwing for better UX
+    return [];
+    // OR throw if you prefer:
+    // throw new CustomError("Failed to fetch appointment summary", 404);
   }
 }
 

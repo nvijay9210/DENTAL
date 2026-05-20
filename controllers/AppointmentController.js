@@ -776,31 +776,48 @@ exports.getAppointmentMonthlySummaryClinic = async (req, res, next) => {
 exports.getAppointmentSummary = async (req, res, next) => {
   const { tenant_id, clinic_id } = req.params;
   const { dentist_id, startDate, endDate } = req.query;
-  await checkIfIdExists("tenant", "tenant_id", tenant_id);
-  await checkIfIdExists("clinic", "clinic_id", clinic_id);
-  // if(period!=='monthly' && period!=='yearly' && period!=='weekly') throw new CustomError('Period mustbe a weekly,monthly or yearly',400)
+  
   try {
+    // === 1. Validate inputs ===
     if (!startDate || !endDate) {
-      return res
-        .status(400)
-        .json({ message: "Start and end dates are required." });
+      return res.status(400).json({ message: "Start and end dates are required." });
     }
-    const appointments =
-      await appointmentService.getAppointmentSummaryByStartDateAndEndDate(
-        parseInt(tenant_id),
-        dateToString(startDate),
-        dateToString(endDate),
-        parseInt(clinic_id),
-        parseInt(dentist_id),
-        // period
-      );
-    await logUserViewActivity(req, "/getallappointments/periodsummary/");
+
+    // === 2. Run ID checks in parallel (optional optimization) ===
+    await Promise.all([
+      checkIfIdExists("tenant", "tenant_id", tenant_id),
+      checkIfIdExists("clinic", "clinic_id", clinic_id)
+    ]);
+
+    // === 3. Fetch appointment summary ===
+    const appointments = await appointmentService.getAppointmentSummaryByStartDateAndEndDate(
+      parseInt(tenant_id),
+      dateToString(startDate),
+      dateToString(endDate),
+      parseInt(clinic_id) || null,    // Handle undefined/null
+      parseInt(dentist_id) || null    // Handle undefined/null
+    );
+
+    // === ✅ CRITICAL: Send response FIRST ===
     res.status(200).json(appointments);
+
+    // === 4. Log activity in background (non-blocking) ===
+    setImmediate(async () => {
+      try {
+        await logUserViewActivity(req, "/getallappointments/periodsummary/");
+      } catch (logErr) {
+        // Log error but don't affect the already-sent response
+        console.error("⚠️ Background activity logging failed:", logErr.message);
+      }
+    });
+
   } catch (err) {
-    next(err);
+    // Only send error if headers not already sent
+    if (!res.headersSent) {
+      next(err);
+    }
   }
 };
-
 exports.getAppointmentSummaryByDentist = async (req, res, next) => {
   const { tenant_id, clinic_id, dentist_id } = req.params;
   const { period } = req.query;

@@ -9,6 +9,7 @@ const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { convertUTCToLocal, isoToSqlDatetime, formatDateOnly, formatDateTime } = require("../utils/DateUtils");
 const { default: KeycloakAdminClient } = require("keycloak-admin");
+const db = require("../config/db");
 
 // Field mapping for loginhistorys (similar to treatment)
 
@@ -152,7 +153,7 @@ const getLoginHistoryByTenantAndKeycloakUserId = async (
 
 // Update LoginHistory
 const updateLoginHistory = async (loginhistoryId, data, tenant_id) => {
-  // console.log(data)
+  console.log(data)
   try {
     const { columns, values } = mapFields(data, loginhistoryFields);
     const affectedRows = await loginhistoryModel.updateLoginHistory(
@@ -171,6 +172,37 @@ const updateLoginHistory = async (loginhistoryId, data, tenant_id) => {
   } catch (error) {
     console.error("Update Error:", error);
     throw new CustomError("Failed to update login_history", 404);
+  }
+};
+
+// ======================================================
+// UPDATE LOGIN HISTORY LOGOUT TIME
+// ======================================================
+
+const updateLoginHistoryLogout = async (
+  login_history_id
+) => {
+  let conn;
+
+  try {
+    conn = await db.getConnection();
+
+    const query = `
+      UPDATE login_history
+      SET logout_time = NOW()
+      WHERE login_history_id = ?
+      AND logout_time IS NULL
+    `;
+
+    const [result] = await conn.query(query, [
+      login_history_id,
+    ]);
+
+    return result;
+  } catch (err) {
+    throw err;
+  } finally {
+    if (conn) conn.release();
   }
 };
 
@@ -205,5 +237,6 @@ module.exports = {
   getLoginHistoryByTenantIdAndLoginHistoryId,
   updateLoginHistory,
   deleteLoginHistoryByTenantIdAndLoginHistoryId,
-  getLoginHistoryByTenantAndKeycloakUserId
+  getLoginHistoryByTenantAndKeycloakUserId,
+  updateLoginHistoryLogout
 };
