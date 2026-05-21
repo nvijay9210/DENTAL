@@ -1,5 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
+const { updateSuperuser } = require("../models/SuperUserModel");
 const superuserService = require("../services/SuperUserService");
 const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
 const superuserValidation = require("../validations/SuperUserValidation");
@@ -82,14 +83,38 @@ exports.updateSuperUser = async (req, res, next) => {
   try {
     // Validate update input
     await superuserValidation.updateSuperUserValidation(superuser_id, details);
+    // const superuserdata=await this.getSuperUserByTenantIdAndSuperUserId(tenant_id,superuser_id);
 
     // Update the superuser
-    await superuserService.updateSuperUser(superuser_id, details, tenant_id,token,realm);
+    await updateSuperuser(superuser_id, details);
     res.status(200).json({ message: "SuperUser updated successfully" });
   } catch (err) {
     next(err);
   }
 };
+
+
+// async function updateSuperuser(req, res) {
+//   try {
+//     const { superuser_id } = req.params;
+
+//     const response = await superuserService.updateSuperuser(
+//       superuser_id,
+//       req.body
+//     );
+
+//     if (!response.success) {
+//       return res.status(400).json(response);
+//     }
+
+//     return res.status(200).json(response);
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// }
 
 /**
  * Delete a superuser by ID and tenant ID

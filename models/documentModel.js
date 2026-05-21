@@ -27,6 +27,8 @@ const createDocument = async (
 
     await invalidateCacheByPattern(cacheKey); // Invalidate cache // Invalidate cache
 
+    console.log("Document created with ID:", result.insertId);
+
     return result.insertId;
   } catch (error) {
     console.error("Error in createDocument:", error);

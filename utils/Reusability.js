@@ -70,17 +70,28 @@ const createEntity = async ({
 
       let prefix = "";
       switch (entityName) {
-        case "superuser": prefix = "SUP"; break;
-        case "dentist": prefix = "DEN"; break;
-        case "patient": prefix = "PAT"; break;
-        case "reception": prefix = "REC"; break;
-        case "supplier": prefix = "SPL"; break;
+        case "superuser":
+          prefix = "SUP";
+          break;
+        case "dentist":
+          prefix = "DEN";
+          break;
+        case "patient":
+          prefix = "PAT";
+          break;
+        case "reception":
+          prefix = "REC";
+          break;
+        case "supplier":
+          prefix = "SPL";
+          break;
       }
 
       username = await helper.generateUsername(prefix, realm, token);
       // rawPassword = helper.generateAlphanumericPassword(12);
 
-      const userEmail = email || 
+      const userEmail =
+        email ||
         `${username}${helper.generateAlphanumericPassword(6)}@example.com`;
 
       const userData = {
@@ -102,13 +113,15 @@ const createEntity = async ({
         throw new CustomError("Keycloak user creation failed", 400);
 
       userId = await getUserIdByUsername(token, realm, username);
-      if (!userId)
-        throw new CustomError("Unable to fetch Keycloak ID", 400);
+      if (!userId) throw new CustomError("Unable to fetch Keycloak ID", 400);
 
       // Assign role
       if (roleName) {
         const roleAssigned = await assignRealmRoleToUser(
-          token, realm, userId, roleName
+          token,
+          realm,
+          userId,
+          roleName,
         );
         if (!roleAssigned)
           throw new CustomError(`Role assignment failed: ${roleName}`, 400);
@@ -139,13 +152,17 @@ const createEntity = async ({
     const codeColumn = `${entityName}_code`;
     await connection.query(
       `UPDATE ${entityName} SET ${codeColumn} = ? WHERE ${entityName}_id = ?`,
-      [code, entityId]
+      [code, entityId],
     );
 
     if (entityName === "patient" && userClinicId) {
       await createPatientClinicFn(
-        { patient_id: entityId, clinic_id: userClinicId, created_by: data.created_by },
-        connection
+        {
+          patient_id: entityId,
+          clinic_id: userClinicId,
+          created_by: data.created_by,
+        },
+        connection,
       );
     }
 
@@ -177,9 +194,7 @@ const createEntity = async ({
       username,
       password: rawPassword,
     };
-
   } catch (error) {
-
     // ============================================================
     //                   SQL ROLLBACK
     // ============================================================
@@ -199,13 +214,12 @@ const createEntity = async ({
 
     throw new CustomError(
       `Failed to create ${entityName}: ${error.message}`,
-      500
+      500,
     );
   } finally {
     connection.release();
   }
 };
-
 
 const updateEntity = async ({
   entityId,
@@ -227,8 +241,12 @@ const updateEntity = async ({
   try {
     await connection.beginTransaction();
 
+    console.log("1 START");
+
     const entity = await getModelById(tenantId, entityId, connection);
     if (!entity) throw new CustomError(`${entityName} not found`, 404);
+
+    console.log("2 ENTITY FETCHED",entity);
 
     userId = entity.keycloak_id;
 
@@ -245,9 +263,9 @@ const updateEntity = async ({
         columns,
         values,
         tenantId,
-        connection
+        connection,
       );
-
+      console.log("3 DB UPDATED",sanitizedData);
       // ✅ Check for Keycloak field changes
       const keycloakFieldsChanged =
         (sanitizedData.email && sanitizedData.email !== entity.email) ||
@@ -288,9 +306,12 @@ const updateEntity = async ({
           payload.attributes = { phoneNumber: sanitizedData.phone_number };
         }
 
+        console.log("KEYCLOAK PAYLOAD:", payload);
+
         if (Object.keys(payload).length > 0) {
           console.log("🔁 Updating user in Keycloak due to changed fields...");
           await updateUserInKeycloak(token, realm, userId, payload);
+          console.log("4 KEYCLOAK UPDATED");
           console.log(`✅ Synced Keycloak user ${userId} with updated fields`);
         }
       }
@@ -319,6 +340,7 @@ const updateEntity = async ({
     }
 
     await connection.commit();
+    console.log("5 COMMIT DONE");
 
     // 🧹 Invalidate caches
     await invalidateCacheByPattern(`${entityName}:*`);
@@ -332,7 +354,7 @@ const updateEntity = async ({
     console.error(`❌ Update ${entityName} failed:`, error.message);
     throw new CustomError(
       `Failed to update ${entityName}: ${error.message}`,
-      500
+      500,
     );
   } finally {
     connection.release();
@@ -351,7 +373,7 @@ const getUserByTenantClinicAndKeycloakId = async (
   tableName,
   tenantId,
   clinicId,
-  keycloakUserId
+  keycloakUserId,
 ) => {
   if (!tableName || !tenantId || !keycloakUserId) {
     throw new Error("Missing required parameters");

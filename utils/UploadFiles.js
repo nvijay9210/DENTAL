@@ -288,7 +288,7 @@ const uploadFileMiddleware2 = (options) => {
         Dentist: "dentist_id",
         Clinic: "clinic_id",
         Tenant: "tenant_id",
-        Superuser: "superuser_id",
+        SuperUser: "superuser_id",
       };
       const id = req.params[idMap[folderName]];
 
@@ -586,6 +586,8 @@ const updateDocumentsDiffBased = async ({
     field_name
   );
 
+  console.log("Existing Docs:", existingDocs);
+
   const getFileName = (fileUrl = "") => path.basename(fileUrl || "");
 
   const existingFileNames = new Set(
@@ -625,7 +627,7 @@ const updateDocumentsDiffBased = async ({
 
   // 4️⃣ Insert new files with descriptions
   await Promise.all(
-    toInsert.map((file, index) => {
+    toInsert.map( (file, index) => {
       const fileUrl = typeof file === "string" ? file : file.file_url;
       let fileDescription = null;
 

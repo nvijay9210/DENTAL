@@ -140,7 +140,8 @@ const getSuperUserByTenantIdAndSuperUserId = async (tenantId, superuserId) => {
 
 // Update SuperUser
 const updateSuperUser = async (superuserId, data, tenant_id, token, realm) => {
-  return await updateEntity({
+  try{
+return await updateEntity({
     entityId: superuserId,
     entityName: "superuser",
     tenantId:tenant_id,
@@ -152,7 +153,17 @@ const updateSuperUser = async (superuserId, data, tenant_id, token, realm) => {
     updateModel: superuserModel.updateSuperUser,
     fileFields: ["profile_picture"],
   });
+  }catch(error){
+    console.error("Update SuperUser Error:", error.message);
+    throw new CustomError(`Failed to update superuser: ${error.message}`, 400);
+  } 
+  
 };
+
+/**
+ * Update Superuser Service
+ */
+
 
 // Delete SuperUser
 const deleteSuperUserByTenantIdAndSuperUserId = async (

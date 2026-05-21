@@ -104,6 +104,140 @@ const updateSuperUser = async (
   }
 };
 
+async function updateSuperuser(superuser_id, data) {
+  let conn;
+
+  try {
+    conn = await pool.getConnection();
+
+    // ================= FETCH EXISTING DATA =================
+    const existingRows = await conn.query(
+      `SELECT * FROM superuser WHERE superuser_id = ?`,
+      [superuser_id],
+    );
+
+    if (existingRows.length === 0) {
+      return {
+        success: false,
+        message: "Superuser not found",
+      };
+    }
+
+    const existing = existingRows[0][0];
+
+    console.log(data.status, existing);
+
+    // ================= MERGE EXISTING + NEW DATA =================
+    const updatedData = {
+      tenant_id: data.tenant_id ?? existing.tenant_id,
+      clinic_id: data.clinic_id ?? existing.clinic_id,
+      keycloak_id: data.keycloak_id ?? existing.keycloak_id,
+      username: data.username ?? existing.username,
+      password: data.password ?? existing.password,
+      superuser_code: data.superuser_code ?? existing.superuser_code,
+      first_name: data.first_name ?? existing.first_name,
+      last_name: data.last_name ?? existing.last_name,
+      email: data.email ?? existing.email,
+      phone_number: data.phone_number ?? existing.phone_number,
+      alternate_phone_number:
+        data.alternate_phone_number ?? existing.alternate_phone_number,
+      profile_picture: data.profile_picture ?? existing.profile_picture,
+      date_of_birth: data.date_of_birth ?? existing.date_of_birth,
+      gender: data.gender ?? existing.gender,
+
+      // FIXED STATUS
+      status:
+        data.status === true ||
+        data.status === "true" ||
+        data.status === 1 ||
+        data.status === "1"
+          ? 1
+          : 0,
+
+      address: data.address ?? existing.address,
+      city: data.city ?? existing.city,
+      state: data.state ?? existing.state,
+      country: data.country ?? existing.country,
+      pincode: data.pincode ?? existing.pincode,
+      last_login: data.last_login ?? existing.last_login,
+      updated_by: data.updated_by ?? existing.updated_by,
+    };
+
+    // ================= UPDATE QUERY =================
+    const query = `
+      UPDATE superuser
+      SET
+        tenant_id = ?,
+        clinic_id = ?,
+        keycloak_id = ?,
+        username = ?,
+        password = ?,
+        superuser_code = ?,
+        first_name = ?,
+        last_name = ?,
+        email = ?,
+        phone_number = ?,
+        alternate_phone_number = ?,
+        profile_picture = ?,
+        date_of_birth = ?,
+        gender = ?,
+        status = ?,
+        address = ?,
+        city = ?,
+        state = ?,
+        country = ?,
+        pincode = ?,
+        last_login = ?,
+        updated_by = ?,
+        updated_time = CURRENT_TIMESTAMP
+      WHERE superuser_id = ?
+    `;
+
+    const values = [
+      updatedData.tenant_id,
+      updatedData.clinic_id,
+      updatedData.keycloak_id,
+      updatedData.username,
+      updatedData.password,
+      updatedData.superuser_code,
+      updatedData.first_name,
+      updatedData.last_name,
+      updatedData.email,
+      updatedData.phone_number,
+      updatedData.alternate_phone_number,
+      updatedData.profile_picture,
+      updatedData.date_of_birth,
+      updatedData.gender,
+      updatedData.status,
+      updatedData.address,
+      updatedData.city,
+      updatedData.state,
+      updatedData.country,
+      updatedData.pincode,
+      updatedData.last_login,
+      updatedData.updated_by,
+      superuser_id,
+    ];
+
+    const [result] = await conn.query(query, values);
+
+    return {
+      success: true,
+      message: "Superuser updated successfully",
+      affectedRows: result.affectedRows,
+    };
+  } catch (error) {
+    console.error("Update Superuser Error:", error);
+
+    return {
+      success: false,
+      message: error.message,
+    };
+  } finally {
+    if (conn) conn.release();
+  }
+}
+
 // Delete superuser
 const deleteSuperUserByTenantAndSuperUserId = async (
   connection,
@@ -181,6 +315,7 @@ module.exports = {
   getAllSuperUsersByTenantId,
   getSuperUserByTenantAndSuperUserId,
   updateSuperUser,
+  updateSuperuser,
   deleteSuperUserByTenantAndSuperUserId,
   getAllSuperUsersByTenantIdAndClinicId,
 };
