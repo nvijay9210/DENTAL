@@ -8,6 +8,8 @@ const { uploadFileMiddleware, uploadFileMiddleware2 } = require("../utils/Upload
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
+const { globalCacheMiddleware } = require("../middlewares/GlobalCacheMiddleware");
+const globalInvalidationMiddleware = require("../middlewares/GlobalInvalidationMiddleware");
 const upload = multer({ storage: multer.memoryStorage() });
 
 // router.use(multiTenantAuthMiddleware);
@@ -33,16 +35,19 @@ router.post(
   authenticateTenantClinicGroup(["tenant", "superuser"]),
   upload.any(),
   TenantFileMiddleware,
+  globalInvalidationMiddleware,
   tenantController.addTenant
 );
 router.get(
   routerPath.GETALL_TENTANT,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
+  globalCacheMiddleware,
   tenantController.getAllTenant
 );
 router.get(
   routerPath.GET_TENANT,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
+  globalCacheMiddleware,
   tenantController.getTenantByTenantId
 );
 router.get(
@@ -56,6 +61,7 @@ router.get(
     "supplier",
     "guest"
   ]),
+  globalCacheMiddleware,
   tenantController.getTenantByTenantNameAndTenantDomain
 );
 router.put(
@@ -63,10 +69,12 @@ router.put(
   authenticateTenantClinicGroup(["tenant", "superuser"]),
   upload.any(),
   TenantFileMiddleware,
+  globalInvalidationMiddleware,
   tenantController.updateTenant
 );
 router.delete(
   routerPath.DELETE_TENANT,
+  globalInvalidationMiddleware,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
   tenantController.deleteTenant
 );

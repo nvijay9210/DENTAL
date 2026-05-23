@@ -13,11 +13,14 @@ const {
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
+const globalInvalidationMiddleware = require("../middlewares/GlobalInvalidationMiddleware");
+const { globalCacheMiddleware } = require("../middlewares/GlobalCacheMiddleware");
 
 // Create StatusType
 router.post(
   ADD_STATUS_TYPE,
   authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient"]),
+  globalInvalidationMiddleware,
   statusTypeController.createStatusType
 );
 
@@ -32,6 +35,7 @@ router.get(
 router.get(
   GET_STATUS_TYPE,
   authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient"]),
+  globalCacheMiddleware,
   statusTypeController.getStatusTypeByStatusTypeId
 );
 
@@ -39,6 +43,7 @@ router.get(
 router.put(
   UPDATE_STATUS_TYPE_TENANT,
   authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient"]),
+  globalInvalidationMiddleware,
   statusTypeController.updateStatusType
 );
 
@@ -46,6 +51,7 @@ router.put(
 router.delete(
   DELETE_STATUS_TYPE_TENANT,
   authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient"]),
+  globalInvalidationMiddleware,
   statusTypeController.deleteStatusTypeByTenantIdAndStatusTypeId
 );
 

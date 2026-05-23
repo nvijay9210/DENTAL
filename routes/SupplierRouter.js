@@ -16,6 +16,8 @@ const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
 const { uploadFileMiddleware, uploadFileMiddleware2 } = require("../utils/UploadFiles");
+const globalInvalidationMiddleware = require("../middlewares/GlobalInvalidationMiddleware");
+const { globalCacheMiddleware } = require("../middlewares/GlobalCacheMiddleware");
 // Setup multer memory storage once
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -43,6 +45,7 @@ router.post(
   ]),
   upload.any(),
   supplierFileMiddleware,
+  globalInvalidationMiddleware,
   supplierController.createSupplier
 );
 
@@ -55,6 +58,7 @@ router.get(
     "dentist","receptionist","superuser",
     "supplier",
   ]),
+  globalCacheMiddleware,
   supplierController.getAllSuppliersByTenantIdAndClinicId
 );
 router.get(
@@ -65,6 +69,7 @@ router.get(
     "dentist","receptionist","superuser",
     "supplier",
   ]),
+  globalCacheMiddleware,
   supplierController.getAllSuppliersByTenantId
 );
 
@@ -76,7 +81,7 @@ router.get(
     "superuser",
     "dentist","receptionist","superuser",
     "supplier",
-  ]),
+  ]),globalCacheMiddleware,
   supplierController.getSupplierByTenantIdAndSupplierId
 );
 
@@ -91,6 +96,7 @@ router.put(
   ]),
   upload.any(),
   supplierFileMiddleware,
+  globalInvalidationMiddleware,
   supplierController.updateSupplier
 );
 
@@ -103,6 +109,7 @@ router.delete(
     "dentist","receptionist","superuser",
     "supplier",
   ]),
+  globalInvalidationMiddleware,
   supplierController.deleteSupplierByTenantIdAndSupplierId
 );
 

@@ -18,6 +18,8 @@ const { multiTenantAuthMiddleware } = require("../middlewares/AuthToken");
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
+const globalInvalidationMiddleware = require("../middlewares/GlobalInvalidationMiddleware");
+const { globalCacheMiddleware } = require("../middlewares/GlobalCacheMiddleware");
 const upload = multer({ storage: multer.memoryStorage() });
 
 // router.use(multiTenantAuthMiddleware)
@@ -42,6 +44,7 @@ router.post(
   authenticateTenantClinicGroup(["tenant", "superuser"]),
   upload.any(),
   receptionFileMiddleware,
+  globalInvalidationMiddleware,
   receptionController.createReception
 );
 
@@ -55,6 +58,7 @@ router.get(
     "patient",
     "receptionist",
   ]),
+  globalCacheMiddleware,
   receptionController.getAllReceptionsByTenantId
 );
 router.get(
@@ -66,6 +70,7 @@ router.get(
     "patient",
     "receptionist",
   ]),
+  globalCacheMiddleware,
   receptionController.getAllReceptionsByTenantIdAndClinicId
 );
 
@@ -73,6 +78,7 @@ router.get(
 router.get(
   GET_RECEPTION_TENANT,
   authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient","receptionist"]),
+   globalCacheMiddleware,
   receptionController.getReceptionByTenantIdAndReceptionId
 );
 
@@ -82,13 +88,14 @@ router.put(
   authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient","receptionist"]),
   upload.any(),
   receptionFileMiddleware,
+  globalInvalidationMiddleware,
   receptionController.updateReception
 );
 
 // Delete Reception
 router.delete(
   DELETE_RECEPTION_TENANT,
-  authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient","receptionist"]),
+  authenticateTenantClinicGroup(["tenant", "superuser", "dentist", "patient","receptionist"]),globalInvalidationMiddleware,
   receptionController.deleteReceptionByTenantIdAndReceptionId
 );
 

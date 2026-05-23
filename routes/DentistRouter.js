@@ -8,6 +8,8 @@ const dentistValidation = require("../validations/DentistValidation");
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
+const globalInvalidationMiddleware = require("../middlewares/GlobalInvalidationMiddleware");
+const { globalCacheMiddleware } = require("../middlewares/GlobalCacheMiddleware");
 
 // Setup multer memory storage
 const upload = multer({ storage: multer.memoryStorage() });
@@ -55,18 +57,21 @@ router.post(
   upload.any(),
   dentistImageFileleMiddleware, // For profile picture
   dentistFileMiddleware,
+  globalInvalidationMiddleware,
   dentistController.createDentist
 );
 
 // Get All Dentists by Tenant ID
 router.get(
   routerPath.GETALL_PUBLIC_DENTIST_TENANT,
+   globalCacheMiddleware,
   // authenticateTenantClinicGroup(["tenant","superuser","patient","receptionist","guest"]),
   dentistController.getAllPublicDentistByTenantIdClinicId
 );
 router.get(
   routerPath.GETALL_DENTIST_TENANT,
   authenticateTenantClinicGroup(["tenant","superuser","patient","receptionist","guest"]),
+  globalCacheMiddleware,
   dentistController.getAllDentistsByTenantId
 );
 
@@ -81,6 +86,7 @@ router.get(
     "patient",
     "dentist"
   ]),
+   globalCacheMiddleware,
   dentistController.getDentistByTenantIdAndDentistId
 );
 
@@ -94,6 +100,7 @@ router.get(
     "receptionist",
     "patient"
   ]),
+   globalCacheMiddleware,
   dentistController.getAllDentistByTenantIdAndClientId
 );
 
@@ -109,6 +116,7 @@ router.put(
   upload.any(),
   dentistImageFileleMiddleware, // For profile picture
   dentistFileMiddleware,
+  globalInvalidationMiddleware,
   dentistController.updateDentist
 );
 
@@ -119,6 +127,7 @@ router.delete(
     "tenant",
     "superuser"
   ]),
+  globalInvalidationMiddleware,
   dentistController.deleteDentistByTenantIdAndDentistId
 );
 

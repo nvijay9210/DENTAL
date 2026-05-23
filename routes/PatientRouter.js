@@ -10,6 +10,8 @@ const { multiTenantAuthMiddleware } = require("../middlewares/AuthToken");
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
+const globalInvalidationMiddleware = require("../middlewares/GlobalInvalidationMiddleware");
+const { globalCacheMiddleware } = require("../middlewares/GlobalCacheMiddleware");
 
 // router.use(multiTenantAuthMiddleware)
 
@@ -44,6 +46,7 @@ router.post(
   authenticateTenantClinicGroup(["tenant","superuser","dentist","guest"]),
   upload.any(),
   patientFileMiddleware,
+  globalInvalidationMiddleware,
   patientController.createPatient
 );
 
@@ -56,6 +59,7 @@ router.get(
     "dentist",
     "receptionist"
   ]),
+  globalCacheMiddleware,
   patientController.getAllPatientsByTenantId
 );
 //getallpatient by tenant and clinic id without pagination
@@ -67,6 +71,7 @@ router.get(
     "dentist",
     "receptionist"
   ]),
+  globalCacheMiddleware,
   patientController.getAllPatientsByTenantIdAndClinicId
 );
 router.get(
@@ -77,6 +82,7 @@ router.get(
     "dentist",
     "receptionist"
   ]),
+  globalCacheMiddleware,
   patientController.getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus
 );
 
@@ -90,6 +96,7 @@ router.get(
     "receptionist",
     "patient"
   ]),
+  globalCacheMiddleware,
   patientController.getPatientByTenantIdAndPatientId
 );
 
@@ -100,6 +107,7 @@ router.put(
   // patientUploadFields,
   upload.any(),
   patientFileMiddleware,
+  globalInvalidationMiddleware,
   patientController.updatePatient
 );
 
@@ -112,6 +120,7 @@ router.delete(
     "dentist",
     "receptionist",
   ]),
+  globalInvalidationMiddleware,
   patientController.deletePatientByTenantIdAndPatientId
 );
 

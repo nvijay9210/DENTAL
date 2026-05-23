@@ -11,28 +11,30 @@ const globalInvalidationMiddleware =
 
     try {
 
-      // ==========================================
-      // ONLY WRITE METHODS
-      // ==========================================
+      /**
+       * ==========================================
+       * ONLY WRITE METHODS
+       * ==========================================
+       */
 
       const methods = [
         "POST",
         "PUT",
-        "DELETE",
         "PATCH",
+        "DELETE",
       ];
 
       if (
-        !methods.includes(
-          req.method
-        )
+        !methods.includes(req.method)
       ) {
         return next();
       }
 
-      // ==========================================
-      // AFTER RESPONSE SUCCESS
-      // ==========================================
+      /**
+       * ==========================================
+       * AFTER RESPONSE SUCCESS
+       * ==========================================
+       */
 
       res.on(
         "finish",
@@ -40,9 +42,11 @@ const globalInvalidationMiddleware =
 
           try {
 
-            // ======================================
-            // ONLY SUCCESS RESPONSES
-            // ======================================
+            /**
+             * ======================================
+             * ONLY SUCCESS RESPONSES
+             * ======================================
+             */
 
             if (
               res.statusCode < 200 ||
@@ -51,12 +55,11 @@ const globalInvalidationMiddleware =
               return;
             }
 
-            // ======================================
-            // VERSION + MODULE
-            // ======================================
-
-            // req.baseUrl:
-            // /v1/clinic
+            /**
+             * ======================================
+             * VERSION + MODULE
+             * ======================================
+             */
 
             const baseParts =
               req.baseUrl
@@ -69,358 +72,155 @@ const globalInvalidationMiddleware =
             const moduleName =
               baseParts[1] || "common";
 
-            // ======================================
-            // PARAMS
-            // ======================================
+            /**
+             * ======================================
+             * IDS
+             * ======================================
+             */
 
             const tenant_id =
-              req.params.tenant_id ||
-              req.body.tenant_id;
+              req.params?.tenant_id ||
+              req.body?.tenant_id ||
+              req.tenant_id;
 
             const clinic_id =
-              req.params.clinic_id ||
-              req.body.clinic_id;
-
-            const dentist_id =
-              req.params.dentist_id ||
-              req.body.dentist_id;
-
-            const patient_id =
-              req.params.patient_id ||
-              req.body.patient_id;
+              req.params?.clinic_id ||
+              req.body?.clinic_id ||
+              req.clinic_id;
 
             const superuser_id =
-              req.params.superuser_id ||
-              req.body.superuser_id;
+              req.params?.superuser_id ||
+              req.body?.superuser_id;
+
+            const dentist_id =
+              req.params?.dentist_id ||
+              req.body?.dentist_id;
+
+            const patient_id =
+              req.params?.patient_id ||
+              req.body?.patient_id;
 
             const appointment_id =
-              req.params.appointment_id ||
-              req.body.appointment_id;
+              req.params?.appointment_id ||
+              req.body?.appointment_id;
 
-            let pattern = "";
+            /**
+             * ======================================
+             * NO TENANT → SKIP
+             * ======================================
+             */
 
-            // ======================================
-            // CLINIC
-            // ======================================
+            if (!tenant_id) {
 
-            if (
-              moduleName ===
-              "clinic"
-            ) {
+              console.log(
+                "⚠️ No tenant_id found. Skipping cache invalidation."
+              );
 
-              // tenant + clinic
-              if (
-                tenant_id &&
-                clinic_id
-              ) {
-
-                pattern =
-                  `cache:${version}:clinic:` +
-                  `tenant_${tenant_id}:` +
-                  `clinic_${clinic_id}*`;
-              }
-
-              // tenant only
-              else if (
-                tenant_id
-              ) {
-
-                pattern =
-                  `cache:${version}:clinic:` +
-                  `tenant_${tenant_id}*`;
-              }
-
-              // all
-              else {
-
-                pattern =
-                  `cache:${version}:clinic*`;
-              }
+              return;
             }
 
-            // ======================================
-            // SUPERUSER
-            // ======================================
+            /**
+             * ======================================
+             * BUILD PATTERNS
+             * ======================================
+             */
 
-            else if (
-              moduleName ===
-              "superuser"
-            ) {
+            const patterns = [];
 
-              // tenant + clinic
-              if (
-                tenant_id &&
-                clinic_id
-              ) {
+            /**
+             * ======================================
+             * CLINIC LEVEL CACHE
+             * ======================================
+             */
 
-                pattern =
-                  `cache:${version}:superuser:` +
-                  `tenant_${tenant_id}:` +
-                  `clinic_${clinic_id}*`;
-              }
+            if (clinic_id) {
 
-              // tenant + superuser
-              else if (
-                tenant_id &&
-                superuser_id
-              ) {
-
-                pattern =
-                  `cache:${version}:superuser:` +
-                  `tenant_${tenant_id}:` +
-                  `superuser_${superuser_id}*`;
-              }
-
-              // tenant only
-              else if (
-                tenant_id
-              ) {
-
-                pattern =
-                  `cache:${version}:superuser:` +
-                  `tenant_${tenant_id}*`;
-              }
-
-              // all
-              else {
-
-                pattern =
-                  `cache:${version}:superuser*`;
-              }
+              patterns.push(
+                `cache:${version}:${moduleName}:tenant_${tenant_id}:clinic_${clinic_id}*`
+              );
             }
 
-            // ======================================
-            // DENTIST
-            // ======================================
+            /**
+             * ======================================
+             * SUPERUSER CACHE
+             * ======================================
+             */
 
-            else if (
-              moduleName ===
-              "dentist"
-            ) {
+            if (superuser_id) {
 
-              // tenant + clinic
-              if (
-                tenant_id &&
-                clinic_id
-              ) {
-
-                pattern =
-                  `cache:${version}:dentist:` +
-                  `tenant_${tenant_id}:` +
-                  `clinic_${clinic_id}*`;
-              }
-
-              // tenant + dentist
-              else if (
-                tenant_id &&
-                dentist_id
-              ) {
-
-                pattern =
-                  `cache:${version}:dentist:` +
-                  `tenant_${tenant_id}:` +
-                  `dentist_${dentist_id}*`;
-              }
-
-              // tenant only
-              else if (
-                tenant_id
-              ) {
-
-                pattern =
-                  `cache:${version}:dentist:` +
-                  `tenant_${tenant_id}*`;
-              }
-
-              // all
-              else {
-
-                pattern =
-                  `cache:${version}:dentist*`;
-              }
+              patterns.push(
+                `cache:${version}:${moduleName}:tenant_${tenant_id}:superuser_${superuser_id}*`
+              );
             }
 
-            // ======================================
-            // PATIENT
-            // ======================================
+            /**
+             * ======================================
+             * DENTIST CACHE
+             * ======================================
+             */
 
-            else if (
-              moduleName ===
-              "patient"
-            ) {
+            if (dentist_id) {
 
-              // tenant + clinic
-              if (
-                tenant_id &&
-                clinic_id
-              ) {
-
-                pattern =
-                  `cache:${version}:patient:` +
-                  `tenant_${tenant_id}:` +
-                  `clinic_${clinic_id}*`;
-              }
-
-              // tenant + patient
-              else if (
-                tenant_id &&
-                patient_id
-              ) {
-
-                pattern =
-                  `cache:${version}:patient:` +
-                  `tenant_${tenant_id}:` +
-                  `patient_${patient_id}*`;
-              }
-
-              // tenant only
-              else if (
-                tenant_id
-              ) {
-
-                pattern =
-                  `cache:${version}:patient:` +
-                  `tenant_${tenant_id}*`;
-              }
-
-              // all
-              else {
-
-                pattern =
-                  `cache:${version}:patient*`;
-              }
+              patterns.push(
+                `cache:${version}:${moduleName}:tenant_${tenant_id}:dentist_${dentist_id}*`
+              );
             }
 
-            // ======================================
-            // APPOINTMENT
-            // ======================================
+            /**
+             * ======================================
+             * PATIENT CACHE
+             * ======================================
+             */
 
-            else if (
-              moduleName ===
-              "appointment"
-            ) {
+            if (patient_id) {
 
-              // tenant + clinic
-              if (
-                tenant_id &&
-                clinic_id
-              ) {
-
-                pattern =
-                  `cache:${version}:appointment:` +
-                  `tenant_${tenant_id}:` +
-                  `clinic_${clinic_id}*`;
-              }
-
-              // tenant + appointment
-              else if (
-                tenant_id &&
-                appointment_id
-              ) {
-
-                pattern =
-                  `cache:${version}:appointment:` +
-                  `tenant_${tenant_id}:` +
-                  `appointment_${appointment_id}*`;
-              }
-
-              // tenant only
-              else if (
-                tenant_id
-              ) {
-
-                pattern =
-                  `cache:${version}:appointment:` +
-                  `tenant_${tenant_id}*`;
-              }
-
-              // all
-              else {
-
-                pattern =
-                  `cache:${version}:appointment*`;
-              }
+              patterns.push(
+                `cache:${version}:${moduleName}:tenant_${tenant_id}:patient_${patient_id}*`
+              );
             }
 
-            // ======================================
-            // DASHBOARD
-            // ======================================
+            /**
+             * ======================================
+             * APPOINTMENT CACHE
+             * ======================================
+             */
 
-            else if (
-              moduleName ===
-              "dashboard"
-            ) {
+            if (appointment_id) {
 
-              // tenant + clinic
-              if (
-                tenant_id &&
-                clinic_id
-              ) {
-
-                pattern =
-                  `cache:${version}:dashboard:` +
-                  `tenant_${tenant_id}:` +
-                  `clinic_${clinic_id}*`;
-              }
-
-              // tenant only
-              else if (
-                tenant_id
-              ) {
-
-                pattern =
-                  `cache:${version}:dashboard:` +
-                  `tenant_${tenant_id}*`;
-              }
-
-              // all
-              else {
-
-                pattern =
-                  `cache:${version}:dashboard*`;
-              }
+              patterns.push(
+                `cache:${version}:${moduleName}:tenant_${tenant_id}:appointment_${appointment_id}*`
+              );
             }
 
-            // ======================================
-            // DEFAULT
-            // ======================================
+            /**
+             * ======================================
+             * FALLBACK → TENANT LEVEL
+             * ======================================
+             */
 
-            else {
+            if (patterns.length === 0) {
 
-              if (
-                tenant_id &&
-                clinic_id
-              ) {
-
-                pattern =
-                  `cache:${version}:${moduleName}:` +
-                  `tenant_${tenant_id}:` +
-                  `clinic_${clinic_id}*`;
-              }
-
-              else if (
-                tenant_id
-              ) {
-
-                pattern =
-                  `cache:${version}:${moduleName}:` +
-                  `tenant_${tenant_id}*`;
-              }
-
-              else {
-
-                pattern =
-                  `cache:${version}:${moduleName}*`;
-              }
+              patterns.push(
+                `cache:${version}:${moduleName}:tenant_${tenant_id}*`
+              );
             }
 
-            // ======================================
-            // CLEAR CACHE
-            // ======================================
+            /**
+             * ======================================
+             * REMOVE DUPLICATES
+             * ======================================
+             */
 
-            if (
-              pattern
-            ) {
+            const uniquePatterns =
+              [...new Set(patterns)];
+
+            /**
+             * ======================================
+             * INVALIDATE CACHE
+             * ======================================
+             */
+
+            for (const pattern of uniquePatterns) {
 
               console.log(
                 "🗑️ INVALIDATING:",
@@ -440,7 +240,7 @@ const globalInvalidationMiddleware =
           } catch (err) {
 
             console.error(
-              "❌ Global Invalidation Error:",
+              "❌ Cache Invalidation Error:",
               err.message
             );
           }

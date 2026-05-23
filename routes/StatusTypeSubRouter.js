@@ -16,11 +16,14 @@ const {
   UPDATE_STATUS_TYPE_SUB,
   GET_STATUS_TYPE_SUB_STATUS_TYPE_ID,
 } = require("./RouterPath");
+const { globalCacheMiddleware } = require("../middlewares/GlobalCacheMiddleware");
+const globalInvalidationMiddleware = require("../middlewares/GlobalInvalidationMiddleware");
 
 // Create StatusTypeSub
 router.post(
   ADD_STATUS_TYPE_SUB,
   authenticateTenantClinicGroup(["tenant", "superuser", "dentist","receptionist", "patient","supplier"]),
+  globalInvalidationMiddleware,
   StatusTypeSubController.createStatusTypeSub
 );
 
@@ -28,6 +31,7 @@ router.post(
 router.get(
   GETALL_STATUS_TYPE_SUB_TENANT,
   authenticateTenantClinicGroup(["tenant", "superuser", "dentist","receptionist", "patient","supplier"]),
+  globalCacheMiddleware,
   StatusTypeSubController.getAllStatusTypeSubsByTenantId
 );
 
@@ -35,18 +39,21 @@ router.get(
 router.get(
   GET_STATUS_TYPE_SUB_TENANT,
   authenticateTenantClinicGroup(["tenant", "superuser", "dentist","receptionist", "patient","supplier"]),
+  globalCacheMiddleware,
   StatusTypeSubController.getStatusTypeSubByTenantIdAndStatusTypeSubId
 );
 
 router.get(
   GET_STATUS_TYPE_SUB_STATUS_TYPE_ID,
   authenticateTenantClinicGroup(["tenant", "superuser", "dentist","receptionist", "patient","supplier","guest"]),
+  globalCacheMiddleware,
   StatusTypeSubController.getAllStatusTypeSubByTenantIdAndStatusTypeId
 );
 
 router.get(
   GET_STATUS_TYPE_SUB_STATUS_TYPE,
   authenticateTenantClinicGroup(["tenant", "superuser", "dentist","receptionist", "patient","supplier","guest"]),
+  globalCacheMiddleware,
   StatusTypeSubController.getAllStatusTypeSubByTenantIdAndStatusType
 );
 
@@ -54,6 +61,7 @@ router.get(
 router.put(
   UPDATE_STATUS_TYPE_SUB,
   authenticateTenantClinicGroup(["tenant", "superuser", "dentist","receptionist", "patient","supplier"]),
+  globalInvalidationMiddleware,
   StatusTypeSubController.updateStatusTypeSub
 );
 
@@ -61,6 +69,7 @@ router.put(
 router.delete(
   DELETE_STATUS_TYPE_SUB_TENANT,
   authenticateTenantClinicGroup(["tenant", "superuser", "dentist","receptionist", "patient","supplier"]),
+  globalInvalidationMiddleware,
   StatusTypeSubController.deleteStatusTypeSubByTenantIdAndStatusTypeSubId
 );
 

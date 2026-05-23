@@ -69,7 +69,7 @@ router.get(
 // Get Single SuperUser by Tenant ID & SuperUser ID
 router.get(
   GET_SUPERUSER_TENANT,
-  authenticateTenantClinicGroup(["tenant"]),
+  authenticateTenantClinicGroup(["tenant","superuser"]),
   globalCacheMiddleware,
   superuserController.getSuperUserByTenantIdAndSuperUserId
 );
@@ -77,7 +77,7 @@ router.get(
 // Update SuperUser
 router.put(
   UPDATE_SUPERUSER_TENANT,
-  authenticateTenantClinicGroup(["tenant"]),
+  authenticateTenantClinicGroup(["tenant","superuser"]),
   upload.any(),
   superuserFileMiddleware,
   globalInvalidationMiddleware,
