@@ -15,7 +15,7 @@ const {
   addUserToGroup,
   updateUserInKeycloak,
   getKeycloakUserIdByEmail,
-  getUserGroups
+  getUserGroups,
 } = require("../Keycloak/KeycloakAdmin");
 const { mapFields } = require("../query/Records");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
@@ -41,7 +41,6 @@ const { updateEntity, createEntity } = require("../utils/Reusability");
 const dentistFieldMap = {
   tenant_id: (val) => val,
   clinic_id: (val) => val,
-  clinic_ids: (val) => val,
   keycloak_id: (val) => val,
   dentist_code: (val) => val,
   username: (val) => val,
@@ -148,7 +147,7 @@ const dentistFieldReverseMap = {
 
 // -------------------- CREATE --------------------
 
-const createDentist = async (data, token, realm,clientId) => {
+const createDentist = async (data, token, realm, clientId) => {
   const newDentist = await createEntity({
     data,
     entityName: "dentist",
@@ -158,16 +157,28 @@ const createDentist = async (data, token, realm,clientId) => {
     createModel: dentistModel.createDentist,
     fileFields: ["awards_certifications"],
     nameFields: { firstName: "first_name", lastName: "last_name" },
-    roleName:'dentist',
-    clientId
+    roleName: "dentist",
+    clientId,
   });
 
-  return newDentist
+  // ✅ Add user_clinic mapping
+  await helper.syncUserClinicMappings({
+    userId: newDentist.entityId,
+    role: "DENTIST",
+    clinicIds: data.clinic_ids,
+    userName: data.username,
+    keycloakId: data.keycloak_id,
+    createdBy: data.created_by,
+  });
+
+  console.log("✅ Dentist User Clinic Mapping Added");
+
+  return newDentist;
 };
 
 // -------------------- UPDATE --------------------
 const updateDentist = async (dentistId, data, tenantId, token, realm) => {
-  return updateEntity({
+  const updateResult=await  updateEntity({
     entityId: dentistId,
     entityName: "dentist",
     tenantId,
@@ -179,9 +190,18 @@ const updateDentist = async (dentistId, data, tenantId, token, realm) => {
     updateModel: dentistModel.updateDentist,
     fileFields: ["awards_certifications"],
   });
+
+  // ✅ Add user_clinic mapping
+  await helper.syncUserUpdateClinicMappings({
+    userId: dentistId,
+    role: "DENTIST",
+    clinicIds: data.clinic_ids,
+    userName: data.username,
+    keycloakId: data.keycloak_id,
+    createdBy: data.created_by,
+  });
+  return updateResult
 };
-
-
 
 // -------------------- GET ALL --------------------
 const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
@@ -197,7 +217,7 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
       return await dentistModel.getAllDentistsByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
     });
 
@@ -205,13 +225,13 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
       dentists.data.map(async (dentist) => {
         const formatted = helper.convertDbToFrontend(
           dentist,
-          dentistFieldReverseMap
+          dentistFieldReverseMap,
         );
 
         const awards = await getDocumentsByField(
           "dentist",
           dentist.dentist_id,
-          "awards_certifications"
+          "awards_certifications",
         );
         const awards_certifications = awards.map((doc) => ({
           document_id: doc.document_id,
@@ -223,7 +243,7 @@ const getAllDentistsByTenantId = async (tenantId, page = 1, limit = 10) => {
           ...formatted,
           awards_certifications,
         };
-      })
+      }),
     );
 
     return { data: convertedRows, total: dentists.total };
@@ -260,7 +280,7 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId, conn) => {
     const dentist = await dentistModel.getDentistByTenantIdAndDentistId(
       tenantId,
       dentistId,
-      conn
+      conn,
     );
 
     if (!dentist) {
@@ -269,13 +289,13 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId, conn) => {
 
     const formatted = helper.convertDbToFrontend(
       dentist,
-      dentistFieldReverseMap
+      dentistFieldReverseMap,
     );
 
     const awards = await getDocumentsByField(
       "dentist",
       dentistId,
-      "awards_certifications"
+      "awards_certifications",
     );
     const awards_certifications = awards.map((doc) => ({
       document_id: doc.document_id,
@@ -291,31 +311,36 @@ const getDentistByTenantIdAndDentistId = async (tenantId, dentistId, conn) => {
     throw new CustomError(error, 500);
   }
 };
-const getAllPublicDentistByTenantIdClinicId = async (tenantId,clinicId, limit=1000, page=1) => {
- const offset = (page - 1) * limit;
+const getAllPublicDentistByTenantIdClinicId = async (
+  tenantId,
+  clinicId,
+  limit = 1000,
+  page = 1,
+) => {
+  const offset = (page - 1) * limit;
   try {
     const dentists = await dentistModel.getAllPublicDentistByTenantIdClinicId(
       tenantId,
       clinicId,
       limit,
-      offset
+      offset,
     );
 
     if (!dentists) {
       throw new CustomError("Dentist not found", 404);
     }
 
-      const convertedRows = await Promise.all(
+    const convertedRows = await Promise.all(
       dentists.data.map(async (dentist) => {
         const formatted = helper.convertDbToFrontend(
           dentist,
-          dentistFieldReverseMap
+          dentistFieldReverseMap,
         );
 
         const awards = await getDocumentsByField(
           "dentist",
           dentist.dentist_id,
-          "awards_certifications"
+          "awards_certifications",
         );
         const awards_certifications = awards.map((doc) => ({
           document_id: doc.document_id,
@@ -327,9 +352,9 @@ const getAllPublicDentistByTenantIdClinicId = async (tenantId,clinicId, limit=10
           ...formatted,
           awards_certifications,
         };
-      })
+      }),
     );
-   return { data: convertedRows, total: dentists.total };
+    return { data: convertedRows, total: dentists.total };
   } catch (error) {
     throw new CustomError(error, 500);
   }
@@ -340,7 +365,7 @@ const deleteDentistByTenantIdAndDentistId = async (
   tenantId,
   dentistId,
   token,
-  realm
+  realm,
 ) => {
   let userId = null;
   const connection = await pool.getConnection();
@@ -352,7 +377,7 @@ const deleteDentistByTenantIdAndDentistId = async (
     const dentist = await dentistModel.getDentistByTenantIdAndDentistId(
       tenantId,
       dentistId,
-      connection
+      connection,
     );
 
     if (!dentist) {
@@ -362,13 +387,13 @@ const deleteDentistByTenantIdAndDentistId = async (
     userId = dentist.keycloak_id;
 
     // 2. Delete documents (files metadata)
-    await deleteDocumentsByTableAndId( "dentist", dentistId,connection);
+    await deleteDocumentsByTableAndId("dentist", dentistId, connection);
 
     // 3. Delete from DB
     const affectedRows = await dentistModel.deleteDentistByTenantIdAndDentistId(
       connection,
       tenantId,
-      dentistId
+      dentistId,
     );
 
     if (affectedRows === 0) {
@@ -386,13 +411,13 @@ const deleteDentistByTenantIdAndDentistId = async (
       } catch (kcError) {
         console.error(
           `❌ Keycloak deletion failed for dentist ${userId}:`,
-          kcError.message
+          kcError.message,
         );
         // 🔁 Rollback DB
         await connection.rollback();
         throw new CustomError(
           "Failed to delete dentist in Keycloak. Aborting delete.",
-          500
+          500,
         );
       }
     }
@@ -415,17 +440,17 @@ const deleteDentistByTenantIdAndDentistId = async (
 // -------------------- CHECK EXISTS --------------------
 const checkDentistExistsByTenantIdAndDentistId = async (
   tenantId,
-  dentistId
+  dentistId,
 ) => {
   try {
     return await dentistModel.checkDentistExistsByTenantIdAndDentistId(
       tenantId,
-      dentistId
+      dentistId,
     );
   } catch (error) {
     throw new CustomError(
       `Failed to check dentist existence: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -434,127 +459,94 @@ const getAllDentistsByTenantIdAndClinicId = async (
   tenantId,
   clinicId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
-
   const offset = (page - 1) * limit;
 
-  const cacheKey = buildCacheKey(
-    "dentist",
-    "list",
-    {
-      tenant_id: tenantId,
-      clinic_id: clinicId,
-      page,
-      limit,
-    }
-  );
+  const cacheKey = buildCacheKey("dentist", "list", {
+    tenant_id: tenantId,
+    clinic_id: clinicId,
+    page,
+    limit,
+  });
 
   try {
-
-    const dentists =
-      await getOrSetCache(
-        cacheKey,
-        async () => {
-
-          return await dentistModel
-            .getAllDentistsByTenantIdAndClinicId(
-              tenantId,
-              clinicId,
-              Number(limit),
-              offset
-            );
-
-        }
+    const dentists = await getOrSetCache(cacheKey, async () => {
+      return await dentistModel.getAllDentistsByTenantIdAndClinicId(
+        tenantId,
+        clinicId,
+        Number(limit),
+        offset,
       );
+    });
 
-    const convertedRows =
-      await Promise.all(
+    const convertedRows = await Promise.all(
+      dentists.data.map(async (dentist) => {
+        const formatted = helper.convertDbToFrontend(
+          dentist,
+          dentistFieldReverseMap,
+        );
 
-        dentists.data.map(
-          async (dentist) => {
+        /**
+         * ✅ Fetch Awards
+         */
 
-            const formatted =
-              helper.convertDbToFrontend(
-                dentist,
-                dentistFieldReverseMap
-              );
+        const awards = await getDocumentsByField(
+          "dentist",
+          dentist.dentist_id,
+          "awards_certifications",
+        );
 
-            /**
-             * ✅ Fetch Awards
-             */
+        const awards_certifications = awards.map((doc) => ({
+          document_id: doc.document_id,
+          awards_certifications: doc.file_url,
+          description: doc.description,
+        }));
 
-            const awards =
-              await getDocumentsByField(
-                "dentist",
-                dentist.dentist_id,
-                "awards_certifications"
-              );
+        /**
+         * ✅ Fetch clinic_ids
+         * from user_clinic
+         */
 
-            const awards_certifications =
-              awards.map((doc) => ({
-                document_id: doc.document_id,
-                awards_certifications:
-                  doc.file_url,
-                description:
-                  doc.description,
-              }));
-
-            /**
-             * ✅ Fetch clinic_ids
-             * from user_clinic
-             */
-
-            const [clinicMappings] =
-              await pool.query(
-                `
+        const [clinicMappings] = await pool.query(
+          `
                 SELECT clinic_id
                 FROM user_clinic
                 WHERE user_id = ?
                 AND role = 'DENTIST'
                 `,
-                [dentist.dentist_id]
-              );
+          [dentist.dentist_id],
+        );
 
-            // console.log(
-            //   "✅ Clinic Mappings:",
-            //   clinicMappings
-            // );
+        // console.log(
+        //   "✅ Clinic Mappings:",
+        //   clinicMappings
+        // );
 
-            const clinic_ids =
-              clinicMappings.map(
-                (item) => item.clinic_id
-              );
+        const clinic_ids = clinicMappings.map((item) => item.clinic_id);
 
-            /**
-             * ✅ Final Response
-             */
+        /**
+         * ✅ Final Response
+         */
 
-            return {
-              ...formatted,
+        return {
+          ...formatted,
 
-              clinic_ids,
+          clinic_ids,
 
-              awards_certifications,
-            };
-
-          }
-        )
-      );
+          awards_certifications,
+        };
+      }),
+    );
 
     return {
       data: convertedRows,
       total: dentists.total,
     };
-
   } catch (error) {
-
     console.log(error);
 
-    throw new CustomError(
-      error,
-      500
-    );
+    throw new CustomError(error, 500);
   }
 };
 
@@ -563,7 +555,7 @@ const updateClinicIdAndNameAndAddress = async (
   clinicId,
   clinic_name,
   clinic_addrss,
-  dentistId
+  dentistId,
 ) => {
   try {
     const result = await dentistModel.updateClinicIdAndNameAndAddress(
@@ -571,7 +563,7 @@ const updateClinicIdAndNameAndAddress = async (
       clinicId,
       clinic_name,
       clinic_addrss,
-      dentistId
+      dentistId,
     );
     await invalidateCacheByPattern("dentist:*");
     return result;
@@ -585,7 +577,7 @@ const updateNullClinicInfoWithJoin = async (tenantId, clinicId, dentistId) => {
     const result = await dentistModel.updateNullClinicInfoWithJoin(
       tenantId,
       clinicId,
-      dentistId
+      dentistId,
     );
     await invalidateCacheByPattern("dentist:*");
     return result;
@@ -604,5 +596,5 @@ module.exports = {
   getAllDentistsByTenantIdAndClinicId,
   updateClinicIdAndNameAndAddress,
   updateNullClinicInfoWithJoin,
-  getAllPublicDentistByTenantIdClinicId
+  getAllPublicDentistByTenantIdClinicId,
 };

@@ -8,8 +8,16 @@ function toBooleanNumber(value) {
   return value ? 1 : 0;
 }
 
-function sameLengthChecker(arr1, arr2, errorMessage = "Arrays must be of the same length.") {
-  if (!Array.isArray(arr1) || !Array.isArray(arr2) || arr1.length !== arr2.length) {
+function sameLengthChecker(
+  arr1,
+  arr2,
+  errorMessage = "Arrays must be of the same length.",
+) {
+  if (
+    !Array.isArray(arr1) ||
+    !Array.isArray(arr2) ||
+    arr1.length !== arr2.length
+  ) {
     throw new Error(errorMessage);
   }
   return true;
@@ -31,19 +39,19 @@ function safeJsonParse(value) {
 function decodeJsonFields(data, jsonFields) {
   if (!Array.isArray(data)) data = [data];
 
-  return data.map(item => {
-    jsonFields.forEach(field => {
+  return data.map((item) => {
+    jsonFields.forEach((field) => {
       if (item[field] !== undefined && item[field] !== null) {
         let value = item[field];
 
-        if (typeof value === 'object') return;
+        if (typeof value === "object") return;
 
         try {
           item[field] = safeJsonParse(value);
         } catch {
-          if (value === '[object Object]' || value.trim() === '') {
+          if (value === "[object Object]" || value.trim() === "") {
             item[field] = null;
-          } else if (typeof value === 'string') {
+          } else if (typeof value === "string") {
             item[field] = value.trim() ? [value] : null;
           }
         }
@@ -54,7 +62,7 @@ function decodeJsonFields(data, jsonFields) {
 }
 
 function mapBooleanFields(item, fields) {
-  fields.forEach(field => {
+  fields.forEach((field) => {
     if (item[field] !== undefined) {
       item[field] = Boolean(item[field]);
     }
@@ -86,10 +94,10 @@ function parseBoolean(val) {
 
 // Robust duration parser
 function duration(val) {
-  if (!val || typeof val !== 'string') return 0;
+  if (!val || typeof val !== "string") return 0;
 
   const cleanVal = val.trim();
-  const parts = cleanVal.split(':').map(Number);
+  const parts = cleanVal.split(":").map(Number);
 
   if (parts.length === 3) {
     const [hours, minutes, seconds] = parts;
@@ -129,10 +137,18 @@ function convertDbToFrontend(row, reverseMap) {
 }
 
 async function getExistingAwardsIfNoneUploaded(req, dentistId, tenant_id) {
-  if (!req.body.awards_certifications && !req.files?.some(f => f.fieldname.startsWith("awards_certifications"))) {
-    const existingDentist = await dentistModel.getDentistByTenantIdAndDentistId(tenant_id, dentistId);
+  if (
+    !req.body.awards_certifications &&
+    !req.files?.some((f) => f.fieldname.startsWith("awards_certifications"))
+  ) {
+    const existingDentist = await dentistModel.getDentistByTenantIdAndDentistId(
+      tenant_id,
+      dentistId,
+    );
     if (existingDentist?.awards_certifications) {
-      req.body.awards_certifications = JSON.parse(existingDentist.awards_certifications);
+      req.body.awards_certifications = JSON.parse(
+        existingDentist.awards_certifications,
+      );
     }
   }
 }
@@ -188,6 +204,7 @@ const axios = require("axios");
 
 // 🔹 Function to generate random username
 function generatePatternUsername(tenant, roleShort) {
+  console.log("generatePatternUsername:", tenant, roleShort);
   const safeTenant = tenant.toUpperCase().replace(/[^A-Z0-9]/g, "");
   const safeRole = roleShort.toUpperCase().replace(/[^A-Z0-9]/g, "");
   const randomId = Math.floor(1000 + Math.random() * 9000);
@@ -196,37 +213,37 @@ function generatePatternUsername(tenant, roleShort) {
 }
 
 // 🔹 Function to check if username exists in Keycloak
-async function checkUsernameExists(username, keycloakUrl, realm, token)
- {
+async function checkUsernameExists(username, keycloakUrl, realm, token) {
   try {
     const response = await axios.get(
       `${keycloakUrl}/admin/realms/${realm}/users`,
       {
         params: { username },
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     );
     return response.data.length > 0; // true if exists
   } catch (error) {
-    console.error("Error checking username:", error.response?.data || error.message);
+    console.error(
+      "Error checking username:",
+      error.response?.data || error.message,
+    );
     throw error;
   }
 }
 
 // 🔹 Main function to generate unique username
-async function generateUsername( roleShort, realm, token) {
+async function generateUsername(roleShort, realm, token) {
   let username;
   let exists = true;
-  const keycloakUrl=process.env.KEYCLOAK_BASE_URL
-  const tenant=realm
+  const keycloakUrl = process.env.KEYCLOAK_BASE_URL;
+  const tenant = realm;
 
   while (exists) {
     username = generatePatternUsername(tenant, roleShort);
     exists = await checkUsernameExists(username, keycloakUrl, realm, token);
   }
 
-
-  
   return username;
 }
 
@@ -240,12 +257,10 @@ async function generateUsername( roleShort, realm, token) {
 //   console.log("Generated unique username:", username);
 // })();
 
-
-
-
 function generateAlphanumericPassword(length = 6) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let pw = '';
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let pw = "";
   for (let i = 0; i < length; i++) {
     pw += chars.charAt(Math.floor(Math.random() * chars.length));
   }
@@ -264,7 +279,7 @@ function encrypt(text) {
   const cipher = crypto.createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(text, "utf8", "hex");
   encrypted += cipher.final("hex");
-  return encrypted
+  return encrypted;
 }
 
 // Decrypt
@@ -272,7 +287,7 @@ function decrypt(encrypted) {
   const decipher = crypto.createDecipheriv(
     algorithm,
     key,
-    Buffer.from(encrypted.iv, "hex")
+    Buffer.from(encrypted.iv, "hex"),
   );
   let decrypted = decipher.update(encrypted.data, "hex", "utf8");
   decrypted += decipher.final("utf8");
@@ -311,6 +326,7 @@ const sendWhatsAppOTP = async (phoneNumber, otp) => {
 };
 
 const record = require("../query/Records");
+const pool = require("../config/db");
 const addUserClinicMapping = async (
   conn,
   { userId, userName, role, keycloakId, clinicId, createdBy = "SYSTEM" },
@@ -338,7 +354,6 @@ const addUserClinicMapping = async (
 };
 
 const syncUserClinicMappings = async ({
-  conn,
   userId,
   role,
   clinicIds = [],
@@ -346,67 +361,53 @@ const syncUserClinicMappings = async ({
   keycloakId,
   createdBy = "SYSTEM",
 }) => {
-
+  const conn = await pool.getConnection();
   try {
-
     console.log("========== SYNC USER CLINIC ==========");
 
     /**
      * Normalize clinic ids
      */
 
-    const normalizedClinicIds =
-      clinicIds.map((id) => Number(id));
+    const normalizedClinicIds = clinicIds.map((id) => Number(id));
 
-    console.log(
-      "Normalized Clinic IDs:",
-      normalizedClinicIds
-    );
+    console.log("Normalized Clinic IDs:", normalizedClinicIds);
 
     /**
      * Get Existing Mappings
      */
 
-    const [existingMappings] =
-      await conn.query(
-        `
+    const [existingMappings] = await conn.query(
+      `
         SELECT clinic_id
         FROM user_clinic
         WHERE user_id = ?
         AND role = ?
         `,
-        [userId, role]
-      );
-
-    const existingClinicIds =
-      existingMappings.map(
-        (item) => Number(item.clinic_id)
-      );
-
-    console.log(
-      "Existing Clinic IDs:",
-      existingClinicIds
+      [userId, role],
     );
+
+    const existingClinicIds = existingMappings.map((item) =>
+      Number(item.clinic_id),
+    );
+
+    console.log("Existing Clinic IDs:", existingClinicIds);
 
     /**
      * Find Added Clinics
      */
 
-    const addedClinicIds =
-      normalizedClinicIds.filter(
-        (id) =>
-          !existingClinicIds.includes(id)
-      );
+    const addedClinicIds = normalizedClinicIds.filter(
+      (id) => !existingClinicIds.includes(id),
+    );
 
     /**
      * Find Removed Clinics
      */
 
-    const removedClinicIds =
-      existingClinicIds.filter(
-        (id) =>
-          !normalizedClinicIds.includes(id)
-      );
+    const removedClinicIds = existingClinicIds.filter(
+      (id) => !normalizedClinicIds.includes(id),
+    );
 
     console.log({
       addedClinicIds,
@@ -418,22 +419,16 @@ const syncUserClinicMappings = async ({
      */
 
     for (const clinicId of addedClinicIds) {
+      console.log(`➕ Adding Clinic: ${clinicId}`);
 
-      console.log(
-        `➕ Adding Clinic: ${clinicId}`
-      );
-
-      await addUserClinicMapping(
-        conn,
-        {
-          userId,
-          userName,
-          role,
-          keycloakId,
-          clinicId,
-          createdBy,
-        }
-      );
+      await addUserClinicMapping(conn, {
+        userId,
+        userName,
+        role,
+        keycloakId,
+        clinicId,
+        createdBy,
+      });
     }
 
     /**
@@ -441,16 +436,13 @@ const syncUserClinicMappings = async ({
      */
 
     for (const clinicId of removedClinicIds) {
-
-      console.log(
-        `❌ Removing Clinic: ${clinicId}`
-      );
+      console.log(`❌ Removing Clinic: ${clinicId}`);
 
       await record.deleteRecord(
         "user_clinic",
         ["user_id", "role", "clinic_id"],
         [userId, role, clinicId],
-        conn
+        conn,
       );
     }
 
@@ -460,44 +452,146 @@ const syncUserClinicMappings = async ({
 
     await record.updateRecord(
       "user_clinic",
-      [
-        "user_name",
-        "keycloak_id",
-      ],
-      [
-        userName,
-        keycloakId,
-      ],
+      ["user_name", "keycloak_id"],
+      [userName, keycloakId],
       ["user_id", "role"],
       [userId, role],
-      conn
+      conn,
     );
 
-    console.log(
-      "✅ Common fields updated"
-    );
+    console.log("✅ Common fields updated");
 
-    console.log(
-      "========== END SYNC =========="
-    );
-
+    console.log("========== END SYNC ==========");
   } catch (error) {
-
-    console.error(
-      "Sync User Clinic Error:",
-      error
-    );
+    console.error("Sync User Clinic Error:", error);
 
     throw error;
+  } finally {
+    conn.release();
   }
 };
 
+const syncUserUpdateClinicMappings = async ({
+  userId,
+  role,
+  clinicIds = [],
+  userName,
+  keycloakId,
+  createdBy = "SYSTEM",
+}) => {
+  const conn = await pool.getConnection();
 
+  try {
+    console.log("========== SYNC USER CLINIC ==========");
 
+    /**
+     * Normalize Clinic IDs
+     */
+    const normalizedClinicIds = [
+      ...new Set(clinicIds.map((id) => Number(id))),
+    ];
 
+    /**
+     * Existing mappings by keycloak_id
+     */
+    const [existingMappings] = await conn.query(
+      `
+      SELECT clinic_id
+      FROM user_clinic
+      WHERE keycloak_id = ?
+      `,
+      [keycloakId]
+    );
 
+    const existingClinicIds = existingMappings.map((item) =>
+      Number(item.clinic_id)
+    );
 
+    /**
+     * New clinic ids to add
+     */
+    const addedClinicIds = normalizedClinicIds.filter(
+      (id) => !existingClinicIds.includes(id)
+    );
 
+    /**
+     * Old clinic ids to remove
+     */
+    const removedClinicIds = existingClinicIds.filter(
+      (id) => !normalizedClinicIds.includes(id)
+    );
+
+    console.log({
+      existingClinicIds,
+      normalizedClinicIds,
+      addedClinicIds,
+      removedClinicIds,
+    });
+
+    /**
+     * ADD NEW CLINICS
+     */
+    for (const clinicId of addedClinicIds) {
+      console.log(`➕ Adding Clinic ${clinicId}`);
+
+      await addUserClinicMapping(conn, {
+        userId,
+        userName,
+        role,
+        keycloakId,
+        clinicId,
+        createdBy,
+      });
+    }
+
+    /**
+     * REMOVE OLD CLINICS
+     */
+    if (removedClinicIds.length > 0) {
+      console.log(`❌ Removing Clinics`, removedClinicIds);
+
+      await conn.query(
+        `
+        DELETE FROM user_clinic
+        WHERE keycloak_id = ?
+        AND clinic_id IN (?)
+        `,
+        [keycloakId, removedClinicIds]
+      );
+    }
+
+    /**
+     * UPDATE COMMON FIELDS
+     */
+    await conn.query(
+      `
+      UPDATE user_clinic
+      SET
+        user_id = ?,
+        user_name = ?,
+        role = ?,
+        updated_by = ?,
+        updated_time = CURRENT_TIMESTAMP
+      WHERE keycloak_id = ?
+      `,
+      [
+        userId,
+        userName,
+        role,
+        createdBy,
+        keycloakId,
+      ]
+    );
+
+    console.log("✅ Sync Completed");
+
+  } catch (error) {
+    console.error("Sync User Clinic Error:", error);
+    throw error;
+  } finally {
+    conn.release();
+  }
+};
 
 // -------------------- EXPORTS --------------------
 
@@ -524,5 +618,6 @@ module.exports = {
   decrypt,
   sanitizeFields,
   addUserClinicMapping,
-  syncUserClinicMappings
+  syncUserClinicMappings,
+  syncUserUpdateClinicMappings
 };

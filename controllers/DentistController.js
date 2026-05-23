@@ -11,6 +11,10 @@ exports.createDentist = async (req, res, next) => {
   const token = req.token;
   const realm = req.realm;
 
+  // console.log('createDentist - token:', token);
+  // console.log('createDentist - realm:', realm);
+  // console.log('createDentist - req.body:', req.body);
+
   try {
     const response = await bulkInsert(
       req.body,

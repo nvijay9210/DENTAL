@@ -5,6 +5,7 @@ const record = require("../query/Records");
 const createDentist = async (conn, table, columns, values) => {
   try {
     // ✅ Create Dentist
+    conn=conn??(await pool.getConnection());
     const dentist = await record.createRecord(table, columns, values, conn);
 
     const dentistId = dentist.insertId;
@@ -21,20 +22,6 @@ const createDentist = async (conn, table, columns, values) => {
      * 4  username
      * ...
      */
-
-    // ✅ Add user_clinic mapping
-   await helper.syncUserClinicMappings({
-  conn,
-  userId: dentistId,
-  role: "DENTIST",
-  clinicIds: values[2],
-  userName: values[5],
-  keycloakId: values[3],
-  createdBy:
-    values[values.length - 1],
-});
-
-    console.log("✅ Dentist User Clinic Mapping Added");
 
     return dentistId;
   } catch (error) {
@@ -314,21 +301,50 @@ const checkDentistExistsByTenantIdAndDentistId = async (
 const getAllDentistsByTenantIdAndClinicId = async (
   tenantId,
   clinicId,
-  limit,
-  offset,
+  limit = 10,
+  offset = 0
 ) => {
-  const query1 = `SELECT * FROM dentist d  WHERE d.tenant_id = ? AND d.clinic_id = ? limit ? offset ?`;
-  const query2 = `SELECT count(*) as total FROM dentist d WHERE d.tenant_id = ? AND d.clinic_id = ?`;
   const conn = await pool.getConnection();
+
   try {
+    limit = Number(limit) || 10;
+    offset = Number(offset) || 0;
+
+    const query1 = `
+      SELECT DISTINCT d.*
+      FROM dentist d
+      INNER JOIN user_clinic uc
+        ON uc.keycloak_id = d.keycloak_id
+      WHERE d.tenant_id = ?
+        AND uc.clinic_id = ?
+      LIMIT ? OFFSET ?
+    `;
+
+    const query2 = `
+      SELECT COUNT(DISTINCT d.dentist_id) AS total
+      FROM dentist d
+      INNER JOIN user_clinic uc
+        ON uc.keycloak_id = d.keycloak_id
+      WHERE d.tenant_id = ?
+        AND uc.clinic_id = ?
+    `;
+
     const [rows] = await conn.query(query1, [
       tenantId,
       clinicId,
       limit,
       offset,
     ]);
-    const [counts] = await conn.query(query2, [tenantId, clinicId]);
-    return { data: rows, total: counts[0].total };
+
+    const [counts] = await conn.query(query2, [
+      tenantId,
+      clinicId,
+    ]);
+
+    return {
+      data: rows,
+      total: counts[0].total,
+    };
   } catch (error) {
     console.error(error);
     throw error;

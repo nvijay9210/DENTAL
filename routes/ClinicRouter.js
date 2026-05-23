@@ -91,6 +91,7 @@ router.put(
   // clinicUploadFields,
   upload.any(),
   clinicFileMiddleware,
+  globalInvalidationMiddleware,
   // clinicFileMiddleware2,
   clinicController.updateClinic
 );

@@ -4,7 +4,7 @@ const { writeLog } = require("../logs/logger");
 require("dotenv").config();
 
 // ================= CONFIG =================
-const REDIS_ENABLED = process.env.REDIS_ENABLED !== "true";
+const REDIS_ENABLED = false;
 
 const REDIS_HOST = process.env.REDIS_HOST || "127.0.0.1";
 const REDIS_PORT = parseInt(process.env.REDIS_PORT, 10) || 6379;

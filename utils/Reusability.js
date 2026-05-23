@@ -47,6 +47,8 @@ const createEntity = async ({
 }) => {
   const create = { ...fieldMap, created_by: (val) => val };
 
+  console.log('realm:', realm);
+
   let userId = null;
   let username = null;
   let rawPassword = "1234";

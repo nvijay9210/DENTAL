@@ -35,6 +35,8 @@ const {
 const patientValidation = require("../validations/PatientValidation");
 const { uploadFileMiddleware2 } = require("../utils/UploadFiles");
 const multer = require("multer");
+const globalInvalidationMiddleware = require("../middlewares/GlobalInvalidationMiddleware");
+const { globalCacheMiddleware } = require("../middlewares/GlobalCacheMiddleware");
 
 // File upload middleware can be added here if needed (e.g. reports, prescriptions)
 const patientFileMiddleware = uploadFileMiddleware2({
@@ -55,7 +57,7 @@ router.post(
   ADD_APPOINTMENT_WEBSITE,
   // upload.any(),
   // patientFileMiddleware,
-  appointmentController.createPatientAndBookAppointment
+  globalInvalidationMiddleware,appointmentController.createPatientAndBookAppointment
 );
 router.post(
   ADD_APPOINTMENT,
@@ -66,7 +68,7 @@ router.post(
     "dentist",
     "superuser",
   ]),
-  appointmentController.createAppointment
+  globalInvalidationMiddleware,appointmentController.createAppointment
 );
 
 // Get All Appointments by Tenant ID with Pagination
@@ -78,7 +80,7 @@ router.get(
     "dentist",
     "superuser",
   ]),
-  appointmentController.getAllAppointmentsByTenantId
+  globalCacheMiddleware,appointmentController.getAllAppointmentsByTenantId
 );
 router.get(
   GETALL_APPOINTMENT_TENANT_CLINIC,
@@ -88,7 +90,7 @@ router.get(
     "dentist",
     "superuser",
   ]),
-  appointmentController.getAllAppointmentsByTenantIdAndClinicId
+  globalCacheMiddleware,appointmentController.getAllAppointmentsByTenantIdAndClinicId
 );
 router.get(
   GETALL_APPOINTMENTS_TENANT_CLINIC_DENTIST,
@@ -100,7 +102,7 @@ router.get(
   //   "superuser",
   //   "receptionist",
   // ]),
-  appointmentController.getAllAppointmentsByTenantIdAndClinicIdByDentist
+  globalCacheMiddleware,appointmentController.getAllAppointmentsByTenantIdAndClinicIdByDentist
 );
 
 // Get Single Appointment by Tenant & Appointment ID
@@ -113,7 +115,7 @@ router.get(
     "dentist",
     "superuser",
   ]),
-  appointmentController.getAppointmentByTenantIdAndAppointmentId
+  globalCacheMiddleware,appointmentController.getAppointmentByTenantIdAndAppointmentId
 );
 
 router.get(
@@ -125,7 +127,7 @@ router.get(
     "superuser",
     "patient",
   ]),
-  appointmentController.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId
+  globalCacheMiddleware,appointmentController.getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId
 );
 
 // Update Appointment
@@ -138,7 +140,7 @@ router.put(
     "dentist",
     "superuser",
   ]),
-  appointmentController.updateAppointment
+  globalInvalidationMiddleware,appointmentController.updateAppointment
 );
 
 // router.put(
@@ -155,7 +157,7 @@ router.put(
     "dentist",
     "superuser",
   ]),
-  appointmentController.updateAppoinmentStatus
+  globalInvalidationMiddleware,appointmentController.updateAppoinmentStatus
 );
 
 router.put(
@@ -167,7 +169,7 @@ router.put(
     "dentist",
     "superuser",
   ]),
-  appointmentController.updateAppoinmentFeedback
+  globalInvalidationMiddleware,appointmentController.updateAppoinmentFeedback
 );
 
 router.put(
@@ -179,7 +181,7 @@ router.put(
     "dentist",
     "superuser",
   ]),
-  appointmentController.updateAppoinmentFeedbackDisplay
+  globalInvalidationMiddleware,appointmentController.updateAppoinmentFeedbackDisplay
 );
 
 // Delete Appointment
@@ -192,19 +194,19 @@ router.delete(
     "dentist",
     "superuser",
   ]),
-  appointmentController.deleteAppointmentByTenantIdAndAppointmentId
+  globalInvalidationMiddleware,appointmentController.deleteAppointmentByTenantIdAndAppointmentId
 );
 
 router.get(
   GETALL_APPOINTMENT_TENANT_CLINIC_DENTIST,
   authenticateTenantClinicGroup(["tenant", "receptionist", "dentist"]),
-  appointmentController.getAppointmentsWithDetails
+  globalCacheMiddleware,appointmentController.getAppointmentsWithDetails
 );
 
 router.get(
   GETALL_APPOINTMENT_WITHDETAILS_TENANT_CLINIC,
   authenticateTenantClinicGroup(["tenant", "receptionist", "dentist","superuser"]),
-  appointmentController.getAppointmentsWithDetailsByClinic
+  globalCacheMiddleware,appointmentController.getAppointmentsWithDetailsByClinic
 );
 router.get(
   GETALL_APPOINTMENT_TENANT_DENTIST,
@@ -214,7 +216,7 @@ router.get(
     "dentist",
     "superuser",
   ]),
-  appointmentController.getAllAppointmentsByTenantIdAndDentistId
+  globalCacheMiddleware,appointmentController.getAllAppointmentsByTenantIdAndDentistId
 );
 router.get(
   GETALL_APPOINTMENT_TENANT_PATIENTID,
@@ -225,7 +227,7 @@ router.get(
     "superuser",
     "patient"
   ]),
-  appointmentController.getAllAppointmentsByTenantIdAndPatientId
+  globalCacheMiddleware,appointmentController.getAllAppointmentsByTenantIdAndPatientId
 );
 
 router.get(
@@ -237,39 +239,39 @@ router.get(
     "superuser",
     "patient",
   ]),
-  appointmentController.getAppointmentsWithDetailsByPatient
+  globalCacheMiddleware,appointmentController.getAppointmentsWithDetailsByPatient
 );
 router.get(
   GETALL_APPOINTMENT_ROOMID_CLINIC,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  appointmentController.getAllRoomIdByTenantIdAndClinicId
+  globalCacheMiddleware,appointmentController.getAllRoomIdByTenantIdAndClinicId
 );
 router.get(
   GETALL_APPOINTMENT_ROOMID_DENTIST,
   authenticateTenantClinicGroup(["tenant", "patient", "dentist", "superuser"]),
-  appointmentController.getAllRoomIdByTenantIdAndClinicIdAndDentistId
+  globalCacheMiddleware,appointmentController.getAllRoomIdByTenantIdAndClinicIdAndDentistId
 );
 router.get(
   GETALL_APPOINTMENT_ROOMID_PATIENT,
   authenticateTenantClinicGroup(["tenant", "patient", "dentist", "superuser"]),
-  appointmentController.getAllRoomIdByTenantIdAndPatientId
+  globalCacheMiddleware,appointmentController.getAllRoomIdByTenantIdAndPatientId
 );
 router.get(
   GET_ROOMID_APPOINTMENTID,
   authenticateTenantClinicGroup(["tenant", "patient", "dentist", "superuser"]),
-  appointmentController.getRoomIdByTenantIdAndAppointmentId
+  globalCacheMiddleware,appointmentController.getRoomIdByTenantIdAndAppointmentId
 );
 
 router.get(
   GET_APPOINTMENT_MONTHLY_SUMMARY,
   authenticateTenantClinicGroup(["dentist"]),
-  appointmentController.getAppointmentMonthlySummary
+  globalCacheMiddleware,appointmentController.getAppointmentMonthlySummary
 );
 
 router.get(
   GET_APPOINTMENT_MONTHLY_SUMMARY_CLINIC,
   authenticateTenantClinicGroup(["superuser", "receptionist"]),
-  appointmentController.getAppointmentMonthlySummaryClinic
+  globalCacheMiddleware,appointmentController.getAppointmentMonthlySummaryClinic
 );
 
 // router.get(

@@ -15,52 +15,106 @@ const {
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
+const {
+  globalCacheMiddleware,
+} = require("../middlewares/GlobalCacheMiddleware");
+const globalInvalidationMiddleware = require("../middlewares/GlobalInvalidationMiddleware");
 
 // Create AppointmentReschedules
 router.post(
   ADD_APPOINTMENT_RESCHEDULES,
-  authenticateTenantClinicGroup(['tenant','receptionist','superuser','dentist','patient']),
-  appointmentRescheduleController.createAppointmentReschedules
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    "superuser",
+    "dentist",
+    "patient",
+  ]),
+  globalInvalidationMiddleware,
+  appointmentRescheduleController.createAppointmentReschedules,
 );
 
 // Get All AppointmentRescheduless by Tenant ID with Pagination
 router.get(
   GETALL_APPOINTMENT_RESCHEDULES_TENANT,
-  authenticateTenantClinicGroup(['tenant','receptionist',,'superuser','dentist']),
-  appointmentRescheduleController.getAllAppointmentReschedulessByTenantId
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    ,
+    "superuser",
+    "dentist",
+  ]),
+  globalCacheMiddleware,
+  appointmentRescheduleController.getAllAppointmentReschedulessByTenantId,
 );
 
 router.get(
   GETALL_APPOINTMENT_RESCHEDULES_TENANT_CLINIC,
-  authenticateTenantClinicGroup(['tenant','receptionist',,'superuser','dentist']),
-  appointmentRescheduleController.getAllAppointmentReschedulessByTenantIdAndClinicId
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    ,
+    "superuser",
+    "dentist",
+  ]),
+  globalCacheMiddleware,
+  appointmentRescheduleController.getAllAppointmentReschedulessByTenantIdAndClinicId,
 );
 
 router.get(
   GETALL_APPOINTMENT_RESCHEDULES_TENANT_CLINIC_DENTIST,
-  authenticateTenantClinicGroup(['tenant','receptionist',,'superuser','dentist']),
-  appointmentRescheduleController.getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    ,
+    "superuser",
+    "dentist",
+  ]),
+  globalCacheMiddleware,
+  appointmentRescheduleController.getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId,
 );
 
 // Get Single AppointmentReschedules by Tenant ID & AppointmentReschedules ID
 router.get(
   GET_APPOINTMENT_RESCHEDULES_TENANT,
-  authenticateTenantClinicGroup(['tenant','receptionist',,'superuser','dentist']),
-  appointmentRescheduleController.getAppointmentReschedulesByTenantIdAndAppointmentReschedulesId
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    ,
+    "superuser",
+    "dentist",
+  ]),
+  globalCacheMiddleware,
+  globalInvalidationMiddleware,
+  appointmentRescheduleController.getAppointmentReschedulesByTenantIdAndAppointmentReschedulesId,
 );
 
 // Update AppointmentReschedules
 router.put(
   UPDATE_APPOINTMENT_RESCHEDULES_TENANT,
-  authenticateTenantClinicGroup(['tenant','receptionist',,'superuser','dentist']),
-  appointmentRescheduleController.updateAppointmentReschedules
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    ,
+    "superuser",
+    "dentist",
+  ]),
+  globalInvalidationMiddleware,
+  appointmentRescheduleController.updateAppointmentReschedules,
 );
 
 // Delete AppointmentReschedules
 router.delete(
   DELETE_APPOINTMENT_RESCHEDULES_TENANT,
-  authenticateTenantClinicGroup(['tenant','receptionist',,'superuser','dentist']),
-  appointmentRescheduleController.deleteAppointmentReschedulesByTenantIdAndAppointmentReschedulesId
+  authenticateTenantClinicGroup([
+    "tenant",
+    "receptionist",
+    ,
+    "superuser",
+    "dentist",
+  ]),
+  globalInvalidationMiddleware,
+  appointmentRescheduleController.deleteAppointmentReschedulesByTenantIdAndAppointmentReschedulesId,
 );
 
 module.exports = router;
