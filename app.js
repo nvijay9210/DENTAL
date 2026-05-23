@@ -270,6 +270,8 @@ const { generateAppBAccessToken } = require('./utils/CodeGenerator');
 const session = require('express-session');
 const  pool  = require('./config/db');
 const { addUserClinicMapping } = require('./utils/Helpers');
+const { globalCacheMiddleware } = require('./middlewares/GlobalCacheMiddleware');
+const globalInvalidationMiddleware = require('./middlewares/GlobalInvalidationMiddleware');
 
 app.use(bodyParser.json())
 
@@ -536,6 +538,8 @@ app.use(session({
   }
 }));
 
+// app.use(globalCacheMiddleware);
+app.use(globalInvalidationMiddleware);
 
 
 // app.listen(4000, () => console.log("Backend running on http://localhost:4000"));

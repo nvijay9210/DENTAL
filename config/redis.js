@@ -4,7 +4,7 @@ const Redis = require("ioredis");
 // Redis configuration from environment variables
 const redisConfig = {
   host: process.env.REDIS_HOST || "127.0.0.1",
-port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+  port: parseInt(process.env.REDIS_PORT, 10) || 6379,
   password: process.env.REDIS_PASSWORD || undefined,
   db: parseInt(process.env.REDIS_DB, 10) || 0,
   // Connection pool settings
@@ -20,7 +20,6 @@ port: parseInt(process.env.REDIS_PORT, 10) || 6379,
 
 // Create Redis client
 const redisClient = new Redis(redisConfig);
-
 
 // Connection event handlers (using console.log since logger isn't available)
 redisClient.on("connect", () => {
@@ -86,7 +85,8 @@ const redisHelpers = {
    */
   setEx: async (key, ttlSeconds, value) => {
     try {
-      const stringValue = typeof value === "object" ? JSON.stringify(value) : String(value);
+      const stringValue =
+        typeof value === "object" ? JSON.stringify(value) : String(value);
       return await redisClient.setex(key, ttlSeconds, stringValue);
     } catch (err) {
       console.error("Redis setEx error:", err);
@@ -166,17 +166,88 @@ const redisHelpers = {
   },
 };
 
+// ======================================================
+// SIMPLE CACHE SET
+// ======================================================
+
+const setCache = async (key, data, ttl = 300) => {
+  try {
+    const safeData = JSON.stringify(data);
+
+    await redisClient.set(cacheKey, JSON.stringify(body), "EX", 300);
+
+    console.log("💾 CACHE STORED:", key);
+  } catch (err) {
+    console.error("Redis setCache error:", err);
+  }
+};
+
+// ======================================================
+// REMOVE SINGLE CACHE
+// ======================================================
+
+const removeCache = async (key) => {
+  try {
+    await redisClient.del(key);
+
+    console.log("🗑️ CACHE REMOVED:", key);
+  } catch (err) {
+    console.error("Redis removeCache error:", err);
+  }
+};
+
+// ======================================================
+// CLEAR CACHE BY PATTERN
+// ======================================================
+
+const clearCacheByPattern = async (pattern) => {
+  try {
+    let cursor = "0";
+
+    do {
+      const result = await redisClient.scan(
+        cursor,
+        "MATCH",
+        pattern,
+        "COUNT",
+        100,
+      );
+
+      cursor = result[0];
+
+      const keys = result[1];
+
+      if (keys && keys.length > 0) {
+        await redisClient.del(...keys);
+
+        console.log("🗑️ REMOVED:", keys);
+      }
+    } while (cursor !== "0");
+
+    console.log(`✅ Cache cleared: ${pattern}`);
+  } catch (err) {
+    console.error("clearCacheByPattern error:", err);
+  }
+};
+
 // Export client and helpers
 // config/redis.js - at the end
 module.exports = {
-  redisClient, // raw client
+  redisClient,
+
   checkRedisHealth,
   gracefulShutdown,
-  // Spread helpers for direct use
+
+  // OLD HELPERS
   setEx: redisHelpers.setEx,
   get: redisHelpers.get,
   del: redisHelpers.del,
   exists: redisHelpers.exists,
   ttl: redisHelpers.ttl,
   incrWithExpiry: redisHelpers.incrWithExpiry,
+
+  // NEW HELPERS
+  setCache,
+  removeCache,
+  clearCacheByPattern,
 };

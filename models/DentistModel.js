@@ -122,7 +122,7 @@ const updateDentist = async (
     // );
 
     const dentistData =
-      existingDentist?.[0];
+      existingDentist;
 
     if (!dentistData) {
       throw new Error(

@@ -8,6 +8,8 @@ const routerPath = require("./RouterPath");
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
+const { globalCacheMiddleware } = require("../middlewares/GlobalCacheMiddleware");
+const globalInvalidationMiddleware = require("../middlewares/GlobalInvalidationMiddleware");
 
 // Setup multer memory storage once
 const upload = multer({ storage: multer.memoryStorage() });
@@ -45,6 +47,7 @@ router.post(
   authenticateTenantClinicGroup(["tenant"]),
   upload.any(),
   clinicFileMiddleware,
+  globalInvalidationMiddleware,
   // clinicFileMiddleware2,
   clinicController.createClinic
 );
@@ -53,6 +56,7 @@ router.post(
 router.get(
   routerPath.GETALL_CLINIC_TENANT,
   authenticateTenantClinicGroup(["tenant", "superuser","guest"]),
+  globalCacheMiddleware,
   //  multiTenantAuthMiddleware,
   clinicController.getAllClinicByTenantId
 );
@@ -60,6 +64,7 @@ router.get(
 // Get All Clinics by Tenant
 router.get(
   routerPath.GETALL_CLINIC,
+  globalCacheMiddleware,
   // authenticateTenantClinicGroup(["tenant", "superuser","guest"]),
   //  multiTenantAuthMiddleware,
   clinicController.getAllClinics
@@ -69,10 +74,12 @@ router.get(
 router.get(
   routerPath.GET_CLINIC_TENANT,
   authenticateTenantClinicGroup(["tenant","superuser","dentist","receptionist","patient"]),
+  globalCacheMiddleware,
   clinicController.getClinicByTenantIdAndClinicId
 );
 router.get(
   routerPath.GET_CLINIC_TENANT_MICROSERVICE,
+  globalCacheMiddleware,
   // authenticateTenantClinicGroup(["tenant","superuser","dentist","receptionist","patient"]),
   clinicController.getClinicByTenantIdAndClinicId
 );
@@ -95,12 +102,14 @@ router.put(
   // clinicUploadFields,
   upload.any(),
   clinicFileMiddleware,
+  globalInvalidationMiddleware,
   clinicController.updateClinicSettings
 );
 
 router.put(
   routerPath.HANDLE_CLINIC_ASSIGNMENT,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
+  globalInvalidationMiddleware,
   clinicController.handleClinicAssignment
 );
 
@@ -108,6 +117,7 @@ router.put(
 router.delete(
   routerPath.DELETE_CLINIC_TENANT,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
+  globalInvalidationMiddleware,
   clinicController.deleteClinicByTenantIdAndClinicId
 );
 

@@ -464,21 +464,26 @@ const checkAppointmentExistsByStartTimeAndEndTimeAndDate = async (
   appointment_id = null
 ) => {
   const conn = await pool.getConnection();
+
   try {
     let query = `
-        SELECT EXISTS (
-          SELECT 1
-          FROM appointment
-          WHERE appointment_date = ?
-            AND clinic_id = ?
-            AND patient_id = ?
-            AND dentist_id = ?
-            AND tenant_id = ?
-            AND status not in('pending','rescheduled')
-            AND NOT (
-              ? >= end_time OR ? <= start_time
-            )
-      `;
+      SELECT EXISTS (
+        SELECT 1
+        FROM appointment a
+        INNER JOIN user_clinic us
+          ON a.clinic_id = us.clinic_id
+          AND a.dentist_id = us.user_id
+        WHERE a.appointment_date = ?
+          AND a.clinic_id = ?
+          AND a.patient_id = ?
+          AND a.dentist_id = ?
+          AND a.tenant_id = ?
+          AND a.status NOT IN ('pending', 'rescheduled')
+          AND NOT (
+            ? >= a.end_time
+            OR ? <= a.start_time
+          )
+    `;
 
     let params = [
       details.appointment_date,
@@ -490,13 +495,13 @@ const checkAppointmentExistsByStartTimeAndEndTimeAndDate = async (
       details.end_time,
     ];
 
-    // Exclude current appointment if we're updating
+    // Exclude current appointment while updating
     if (appointment_id) {
-      query += ` AND appointment_id <> ? `;
+      query += ` AND a.appointment_id <> ? `;
       params.push(appointment_id);
     }
 
-    query += `) AS \`exists\``; // 👈 Escaped alias fixes the syntax error
+    query += ` ) AS \`exists\``;
 
     const [rows] = await conn.query(query, params);
 

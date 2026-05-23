@@ -18,6 +18,8 @@ const { multiTenantAuthMiddleware } = require("../middlewares/AuthToken");
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
+const { globalCacheMiddleware } = require("../middlewares/GlobalCacheMiddleware");
+const globalInvalidationMiddleware = require("../middlewares/GlobalInvalidationMiddleware");
 const upload = multer({ storage: multer.memoryStorage() });
 
 // router.use(multiTenantAuthMiddleware)
@@ -42,6 +44,7 @@ router.post(
   authenticateTenantClinicGroup(["tenant", "superuser"]),
   upload.any(),
   superuserFileMiddleware,
+  globalInvalidationMiddleware,
   superuserController.createSuperUser
 );
 
@@ -51,6 +54,7 @@ router.get(
   // authenticateTenantClinicGroup([
   //   "tenant",
   // ]),
+  globalCacheMiddleware,
   superuserController.getAllSuperUsersByTenantId
 );
 router.get(
@@ -58,6 +62,7 @@ router.get(
   authenticateTenantClinicGroup([
     "tenant",
   ]),
+  globalCacheMiddleware,
   superuserController.getAllSuperUsersByTenantIdAndClinicId
 );
 
@@ -65,6 +70,7 @@ router.get(
 router.get(
   GET_SUPERUSER_TENANT,
   authenticateTenantClinicGroup(["tenant"]),
+  globalCacheMiddleware,
   superuserController.getSuperUserByTenantIdAndSuperUserId
 );
 
@@ -74,6 +80,7 @@ router.put(
   authenticateTenantClinicGroup(["tenant"]),
   upload.any(),
   superuserFileMiddleware,
+  globalInvalidationMiddleware,
   superuserController.updateSuperUser
 );
 
@@ -81,6 +88,7 @@ router.put(
 router.delete(
   DELETE_SUPERUSER_TENANT,
   authenticateTenantClinicGroup(["tenant"]),
+  globalInvalidationMiddleware,
   superuserController.deleteSuperUserByTenantIdAndSuperUserId
 );
 

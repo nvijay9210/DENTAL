@@ -388,6 +388,34 @@ const getAllClinics = async (page = 1, limit = 10) => {
   }
 };
 
+const getClinicsByKeycloakId = async (keycloak_id) => {
+  const conn = await pool.getConnection();
+
+  try {
+    const query = `
+      SELECT
+        c.clinic_id,
+        c.clinic_name,
+        c.clinic_logo,
+        c.clinic_app_font,
+        c.clinic_app_themes
+      FROM user_clinic uc
+      INNER JOIN clinic c
+        ON uc.clinic_id = c.clinic_id
+      WHERE uc.keycloak_id = ?
+    `;
+
+    const [rows] = await conn.query(query, [keycloak_id]);
+
+    return rows;
+  } catch (error) {
+    console.error("Error fetching clinics by keycloak_id:", error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
 // -------------------- GET SINGLE --------------------
 const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
   try {
@@ -902,5 +930,6 @@ module.exports = {
   getFinanceSummarybyDentist,
   getClinicSettingsByTenantIdAndClinicId,
   updateClinicSettings,
-  getAllClinics
+  getAllClinics,
+  getClinicsByKeycloakId
 };
