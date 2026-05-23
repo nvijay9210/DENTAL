@@ -27,6 +27,7 @@ const globalInvalidationMiddleware =
       if (
         !methods.includes(req.method)
       ) {
+
         return next();
       }
 
@@ -52,12 +53,13 @@ const globalInvalidationMiddleware =
               res.statusCode < 200 ||
               res.statusCode >= 300
             ) {
+
               return;
             }
 
             /**
              * ======================================
-             * VERSION + MODULE
+             * VERSION
              * ======================================
              */
 
@@ -69,12 +71,9 @@ const globalInvalidationMiddleware =
             const version =
               baseParts[0] || "v1";
 
-            const moduleName =
-              baseParts[1] || "common";
-
             /**
              * ======================================
-             * IDS
+             * TENANT
              * ======================================
              */
 
@@ -83,37 +82,10 @@ const globalInvalidationMiddleware =
               req.body?.tenant_id ||
               req.tenant_id;
 
-            const clinic_id =
-              req.params?.clinic_id ||
-              req.body?.clinic_id ||
-              req.clinic_id;
-
-            const superuser_id =
-              req.params?.superuser_id ||
-              req.body?.superuser_id;
-
-            const dentist_id =
-              req.params?.dentist_id ||
-              req.body?.dentist_id;
-
-            const patient_id =
-              req.params?.patient_id ||
-              req.body?.patient_id;
-
-            const appointment_id =
-              req.params?.appointment_id ||
-              req.body?.appointment_id;
-
-            /**
-             * ======================================
-             * NO TENANT → SKIP
-             * ======================================
-             */
-
             if (!tenant_id) {
 
               console.log(
-                "⚠️ No tenant_id found. Skipping cache invalidation."
+                "⚠️ No tenant_id found"
               );
 
               return;
@@ -121,121 +93,134 @@ const globalInvalidationMiddleware =
 
             /**
              * ======================================
-             * BUILD PATTERNS
+             * CLINIC IDS
              * ======================================
              */
 
-            const patterns = [];
+            const clinicIds =
+              new Set();
 
             /**
-             * ======================================
-             * CLINIC LEVEL CACHE
-             * ======================================
+             * Current clinic
              */
+
+            const clinic_id =
+              req.params?.clinic_id ||
+              req.body?.clinic_id ||
+              req.clinic_id;
 
             if (clinic_id) {
 
-              patterns.push(
-                `cache:${version}:${moduleName}:tenant_${tenant_id}:clinic_${clinic_id}*`
+              clinicIds.add(
+                Number(clinic_id)
+              );
+            }
+
+            /**
+             * Related clinic ids
+             * From authentication middleware
+             */
+
+            if (
+              Array.isArray(
+                req.related_clinic_ids
+              )
+            ) {
+
+              req.related_clinic_ids.forEach(
+                (id) => {
+
+                  clinicIds.add(
+                    Number(id)
+                  );
+                }
               );
             }
 
             /**
              * ======================================
-             * SUPERUSER CACHE
+             * CLINIC INVALIDATION
              * ======================================
              */
 
-            if (superuser_id) {
+            if (
+              clinicIds.size > 0
+            ) {
 
-              patterns.push(
-                `cache:${version}:${moduleName}:tenant_${tenant_id}:superuser_${superuser_id}*`
-              );
-            }
+              for (const cid of clinicIds) {
 
-            /**
-             * ======================================
-             * DENTIST CACHE
-             * ======================================
-             */
+                /**
+                 * ==================================
+                 * CLINIC SPECIFIC CACHE
+                 * ==================================
+                 */
 
-            if (dentist_id) {
+                const clinicPattern =
+                  `cache:${version}:*:tenant_${tenant_id}:clinic_${cid}*`;
 
-              patterns.push(
-                `cache:${version}:${moduleName}:tenant_${tenant_id}:dentist_${dentist_id}*`
-              );
-            }
+                console.log(
+                  "🗑️ INVALIDATING CLINIC:",
+                  clinicPattern
+                );
 
-            /**
-             * ======================================
-             * PATIENT CACHE
-             * ======================================
-             */
+                await clearCacheByPattern(
+                  clinicPattern
+                );
 
-            if (patient_id) {
+                console.log(
+                  "✅ INVALIDATED:",
+                  clinicPattern
+                );
+              }
 
-              patterns.push(
-                `cache:${version}:${moduleName}:tenant_${tenant_id}:patient_${patient_id}*`
-              );
-            }
+              /**
+               * ==================================
+               * CLINIC MODULE LIST CACHE
+               * ==================================
+               */
 
-            /**
-             * ======================================
-             * APPOINTMENT CACHE
-             * ======================================
-             */
-
-            if (appointment_id) {
-
-              patterns.push(
-                `cache:${version}:${moduleName}:tenant_${tenant_id}:appointment_${appointment_id}*`
-              );
-            }
-
-            /**
-             * ======================================
-             * FALLBACK → TENANT LEVEL
-             * ======================================
-             */
-
-            if (patterns.length === 0) {
-
-              patterns.push(
-                `cache:${version}:${moduleName}:tenant_${tenant_id}*`
-              );
-            }
-
-            /**
-             * ======================================
-             * REMOVE DUPLICATES
-             * ======================================
-             */
-
-            const uniquePatterns =
-              [...new Set(patterns)];
-
-            /**
-             * ======================================
-             * INVALIDATE CACHE
-             * ======================================
-             */
-
-            for (const pattern of uniquePatterns) {
+              const clinicListPattern =
+                `cache:${version}:clinic:tenant_${tenant_id}*`;
 
               console.log(
-                "🗑️ INVALIDATING:",
-                pattern
+                "🗑️ INVALIDATING CLINIC LIST:",
+                clinicListPattern
               );
 
               await clearCacheByPattern(
-                pattern
+                clinicListPattern
               );
 
               console.log(
                 "✅ INVALIDATED:",
-                pattern
+                clinicListPattern
               );
+
+              return;
             }
+
+            /**
+             * ======================================
+             * TENANT LEVEL INVALIDATION
+             * ======================================
+             */
+
+            const tenantPattern =
+              `cache:${version}:*:tenant_${tenant_id}*`;
+
+            console.log(
+              "🗑️ INVALIDATING TENANT:",
+              tenantPattern
+            );
+
+            await clearCacheByPattern(
+              tenantPattern
+            );
+
+            console.log(
+              "✅ INVALIDATED TENANT:",
+              tenantPattern
+            );
 
           } catch (err) {
 

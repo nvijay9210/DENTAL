@@ -243,12 +243,12 @@ const updateEntity = async ({
   try {
     await connection.beginTransaction();
 
-    console.log("1 START");
+    // console.log("1 START");
 
     const entity = await getModelById(tenantId, entityId, connection);
     if (!entity) throw new CustomError(`${entityName} not found`, 404);
 
-    console.log("2 ENTITY FETCHED",entity);
+    // console.log("2 ENTITY FETCHED",entity);
 
     userId = entity.keycloak_id;
 
@@ -267,7 +267,7 @@ const updateEntity = async ({
         tenantId,
         connection,
       );
-      console.log("3 DB UPDATED",sanitizedData);
+      // console.log("3 DB UPDATED",sanitizedData);
       // ✅ Check for Keycloak field changes
       const keycloakFieldsChanged =
         (sanitizedData.email && sanitizedData.email !== entity.email) ||

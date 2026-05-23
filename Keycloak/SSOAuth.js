@@ -41,6 +41,7 @@ const {
 const { generateAppBAccessToken } = require("../utils/CodeGenerator");
 const { getClientInfo } = require("../utils/LoginHistoryInfo");
 const loginHistoryService = require('../services/LoginHistoryService');
+const globalInvalidationMiddleware = require("../middlewares/GlobalInvalidationMiddleware");
 
 const router = express.Router();
 router.use(cookieParser());
@@ -581,196 +582,344 @@ router.post("/refresh-token", async (req, res, next) => {
 // ============================================================================
 // 🚪 LOGOUT ROUTE - Update Login History + Clear Redis + Clear Cookies
 // ============================================================================
-router.post("/logout", async (req, res) => {
+router.post("/logout",globalInvalidationMiddleware, async (req, res) => {
+
   log("LOGOUT", "Initiating logout");
-  
+
   try {
-    // === STEP 1: Capture user data from cookies BEFORE clearing them ===
-    const keycloakUserId = req.cookies.keycloak_user_id;
-    const sessionId = req.cookies.session_id;  // If you store session_id in cookies
-    const tenantId = req.cookies.tenant_id;
-    const username = req.cookies.username;
 
-    console.log('Logout - captured user data:', { keycloakUserId, sessionId, tenantId, username });
-    
-    log("LOGOUT", "Captured user data for cleanup", {
-      keycloakUserId: keycloakUserId?.substring(0, 8) + "...",
-      sessionId: sessionId?.substring(0, 8) + "...",
-      tenantId,
-      username
-    });
+    /**
+     * =========================================
+     * CAPTURE USER DATA BEFORE CLEARING COOKIES
+     * =========================================
+     */
 
-    // === STEP 2: Update login_history with logout_time (async, non-blocking) ===
-    if (keycloakUserId) {
-       try {
-          
-          // Fetch recent login sessions for this user
-          const loginRecords = await loginHistoryService.getLoginHistoryByTenantAndKeycloakUserId(
-            tenantId,
-            keycloakUserId
-          );
+    const keycloakUserId =
+      req.cookies?.keycloak_user_id;
 
-          console.log('Login records for logout:', loginRecords);
-          
-          
-          if (loginRecords) {
-            // Update the most recent session (assuming first is latest)
-            const latestSession = loginRecords;
-            
-            if (!latestSession.logout_time) {  // Only update if not already logged out
-              await loginHistoryService.updateLoginHistoryLogout(
-                latestSession.login_history_id,
-                latestSession.tenantId,
-                latestSession.keycloak_user_id,
-                latestSession.session_id
-              );
-              log("LOGOUT", "✅ Login history updated", {
-                loginHistoryId: latestSession.login_history_id,
-                sessionId: latestSession.session_id
-              });
-            }
-          }
-        } catch (err) {
-          log("LOGOUT", "⚠️ Failed to update login history (non-critical)", err.message);
-          // Don't throw - logout should succeed even if audit logging fails
-        }
-    }
+    const sessionId =
+      req.cookies?.session_id;
 
-    // === STEP 3: Clear Redis keys for this user ===
-    if (keycloakUserId || sessionId) {
+    const tenantId =
+      req.cookies?.tenant_id;
+
+    const username =
+      req.cookies?.username;
+
+    log(
+      "LOGOUT",
+      "Captured logout context",
+      {
+        keycloakUserId,
+        sessionId,
+        tenantId,
+        username,
+      }
+    );
+
+    /**
+     * =========================================
+     * UPDATE LOGIN HISTORY
+     * =========================================
+     */
+
+    if (
+      keycloakUserId &&
+      tenantId
+    ) {
+
       setImmediate(async () => {
+
         try {
-          const { redisClient } = require("../config/redis");
-          
-          const keysToDelete = [];
-          
-          // 🔑 Delete session key
-          if (sessionId) {
-            keysToDelete.push(`session:${sessionId}`);
-            keysToDelete.push(`api_count:${sessionId}`);
-          }
-          
-          // 🔑 Delete OTP keys (if phone number was stored)
-          // Note: You may need to store phone in session to find OTP key
-          if (username) {
-            keysToDelete.push(`otp:${username}`);  // If OTP uses username as key
-          }
-          
-          // 🔑 Delete cache patterns for this user/tenant
-          if (tenantId) {
-            // Use SCAN to find keys matching pattern (safer than KEYS *)
-            const cachePatterns = [
-              `login_history:${tenantId}:*`,
-              `user:${keycloakUserId}:*`,
-              `tenant:${tenantId}:*`
-            ];
-            
-            for (const pattern of cachePatterns) {
-              try {
-                // Scan for keys matching pattern
-                let cursor = "0";
-                do {
-                  const [nextCursor, found] = await redisClient.scan(
-                    cursor,
-                    "MATCH",
-                    pattern,
-                    "COUNT",
-                    100
-                  );
-                  if (found && found.length > 0) {
-                    keysToDelete.push(...found);
-                  }
-                  cursor = nextCursor;
-                } while (cursor !== "0");
-              } catch (scanErr) {
-                log("LOGOUT", "⚠️ SCAN failed for pattern", { pattern, error: scanErr.message });
+
+          const loginRecord =
+            await loginHistoryService.getLoginHistoryByTenantAndKeycloakUserId(
+              tenantId,
+              keycloakUserId
+            );
+
+          if (
+            loginRecord &&
+            !loginRecord.logout_time
+          ) {
+
+            await loginHistoryService.updateLoginHistoryLogout(
+              loginRecord.login_history_id,
+              loginRecord.tenant_id,
+              loginRecord.keycloak_user_id,
+              loginRecord.session_id
+            );
+
+            log(
+              "LOGOUT",
+              "✅ Login history updated",
+              {
+                loginHistoryId:
+                  loginRecord.login_history_id,
               }
-            }
+            );
           }
-          
-          // 🔑 Delete all collected keys
-          if (keysToDelete.length > 0) {
-            const deletedCount = await redisClient.del(...keysToDelete);
-            log("LOGOUT", "✅ Redis keys deleted", {
-              count: deletedCount,
-              keys: keysToDelete.slice(0, 5).map(k => k.substring(0, 30) + "...")  // Log first 5 keys (truncated)
-            });
-          }
-          
+
         } catch (err) {
-          log("LOGOUT", "⚠️ Failed to clear Redis keys (non-critical)", err.message);
-          // Don't throw - logout should succeed even if Redis cleanup fails
+
+          log(
+            "LOGOUT",
+            "⚠️ Login history update failed",
+            err.message
+          );
         }
       });
     }
 
-    // === STEP 4: Clear ALL auth and user context cookies ===
+    /**
+     * =========================================
+     * CLEAR USER REDIS KEYS
+     * =========================================
+     */
+
+    if (
+      keycloakUserId ||
+      sessionId
+    ) {
+
+      setImmediate(async () => {
+
+        try {
+
+          const {
+            redisClient,
+          } = require("../config/redis");
+
+          const keysToDelete = [];
+
+          /**
+           * =====================================
+           * SESSION KEYS
+           * =====================================
+           */
+
+          if (sessionId) {
+
+            keysToDelete.push(
+              `session:${sessionId}`
+            );
+
+            keysToDelete.push(
+              `api_count:${sessionId}`
+            );
+
+            keysToDelete.push(
+              `refresh_token:${sessionId}`
+            );
+          }
+
+          /**
+           * =====================================
+           * USER KEYS
+           * =====================================
+           */
+
+          if (keycloakUserId) {
+
+            keysToDelete.push(
+              `user_session:${keycloakUserId}`
+            );
+
+            keysToDelete.push(
+              `user_permissions:${keycloakUserId}`
+            );
+
+            keysToDelete.push(
+              `user_profile:${keycloakUserId}`
+            );
+          }
+
+          /**
+           * =====================================
+           * OTP KEYS
+           * =====================================
+           */
+
+          if (username) {
+
+            keysToDelete.push(
+              `otp:${username}`
+            );
+          }
+
+          /**
+           * =====================================
+           * REMOVE EMPTY VALUES
+           * =====================================
+           */
+
+          const validKeys =
+            keysToDelete.filter(Boolean);
+
+          /**
+           * =====================================
+           * DELETE REDIS KEYS
+           * =====================================
+           */
+
+          if (
+            validKeys.length > 0
+          ) {
+
+            const deletedCount =
+              await redisClient.del(
+                ...validKeys
+              );
+
+            log(
+              "LOGOUT",
+              "✅ Redis keys deleted",
+              {
+                deletedCount,
+                keys: validKeys,
+              }
+            );
+          }
+
+        } catch (err) {
+
+          log(
+            "LOGOUT",
+            "⚠️ Redis cleanup failed",
+            err.message
+          );
+        }
+      });
+    }
+
+    /**
+     * =========================================
+     * CLEAR COOKIES
+     * =========================================
+     */
+
     const clearOpts = {
       ...COOKIE_OPTIONS,
       path: "/",
     };
 
     const cookiesToClear = [
-      // Auth tokens
+
+      // AUTH
       "access_token",
       "refresh_token",
-      // Config
-      "clientId",
-      "realm",
-      // User identity
+
+      // USER
       "user_id",
-      "keycloak_user_id", 
+      "keycloak_user_id",
       "username",
       "role",
-      // Tenant/Clinic
+
+      // TENANT / CLINIC
       "tenant_id",
       "clinic_id",
-      // Role-specific IDs
+
+      // ROLE IDS
       "dentist_id",
       "patient_id",
-      "reception_id", 
+      "reception_id",
       "supplier_id",
       "superuser_id",
-      // UI settings
+
+      // SESSION
+      "session_id",
+
+      // UI
       "tenant_app_themes",
       "clinic_app_themes",
-      // Session
-      "session_id",
+
+      // ACTIVE CLINIC
+      "active_clinic_id",
     ];
 
-    cookiesToClear.forEach(name => {
-      res.clearCookie(name, clearOpts);
-    });
+    cookiesToClear.forEach(
+      (cookieName) => {
 
-    log("LOGOUT", "✅ All cookies cleared", { username, keycloakUserId });
+        res.clearCookie(
+          cookieName,
+          clearOpts
+        );
+      }
+    );
 
-    // === STEP 5: Send success response ===
+    log(
+      "LOGOUT",
+      "✅ Cookies cleared"
+    );
+
+    /**
+     * =========================================
+     * SUCCESS RESPONSE
+     * =========================================
+     */
+
     return res.status(200).json({
       success: true,
-      message: "Logged out successfully",
+      message:
+        "Logged out successfully",
       data: {
         username,
-        logout_time: new Date().toISOString()
-      }
+        logout_time:
+          new Date().toISOString(),
+      },
     });
-    
+
   } catch (err) {
-    log("LOGOUT", "💥 Logout failed", { error: err.message });
-    
-    // Still try to clear cookies even if other steps failed
+
+    log(
+      "LOGOUT",
+      "💥 Logout failed",
+      err.message
+    );
+
+    /**
+     * =========================================
+     * FAILSAFE COOKIE CLEAR
+     * =========================================
+     */
+
     try {
-      const clearOpts = { ...COOKIE_OPTIONS, path: "/" };
-      ["access_token", "refresh_token", "session_id"].forEach(name => {
-        res.clearCookie(name, clearOpts);
+
+      const clearOpts = {
+        ...COOKIE_OPTIONS,
+        path: "/",
+      };
+
+      [
+        "access_token",
+        "refresh_token",
+        "session_id",
+      ].forEach((cookieName) => {
+
+        res.clearCookie(
+          cookieName,
+          clearOpts
+        );
       });
-    } catch (clearErr) {
-      log("LOGOUT", "⚠️ Failed to clear cookies during error handling", clearErr.message);
+
+    } catch (cookieErr) {
+
+      log(
+        "LOGOUT",
+        "⚠️ Cookie cleanup failed",
+        cookieErr.message
+      );
     }
-    
+
     return res.status(500).json({
       success: false,
-      message: "Error during logout",
-      error: process.env.NODE_ENV === "development" ? err.message : undefined
+      message:
+        "Error during logout",
+      error:
+        process.env.NODE_ENV ===
+        "development"
+          ? err.message
+          : undefined,
     });
   }
 });
