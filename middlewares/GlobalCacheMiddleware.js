@@ -1,4 +1,14 @@
+require("dotenv").config();
+
 const { redisClient } = require("../config/redis");
+
+console.log(
+  "REDIS ENABLED:",
+  process.env.REDIS_ENABLED
+);
+
+const REDIS_ENABLE =
+  process.env.REDIS_ENABLED === "true";
 
 // ======================================================
 // GENERATE CACHE KEY
@@ -25,59 +35,27 @@ const generateCacheKey = (
   let key =
     `cache:${version}:${moduleName}`;
 
-  // ======================================
-  // PARAMS SAFE ACCESS
-  // ======================================
-
-  if (
-    req.params.tenant_id
-  ) {
-
-    key +=
-      `:tenant_${req.params.tenant_id}`;
+  if (req.params.tenant_id) {
+    key += `:tenant_${req.params.tenant_id}`;
   }
 
-  if (
-    req.params.clinic_id
-  ) {
-
-    key +=
-      `:clinic_${req.params.clinic_id}`;
+  if (req.params.clinic_id) {
+    key += `:clinic_${req.params.clinic_id}`;
   }
 
-  if (
-    req.params.superuser_id
-  ) {
-
-    key +=
-      `:superuser_${req.params.superuser_id}`;
+  if (req.params.superuser_id) {
+    key += `:superuser_${req.params.superuser_id}`;
   }
 
-  if (
-    req.params.dentist_id
-  ) {
-
-    key +=
-      `:dentist_${req.params.dentist_id}`;
+  if (req.params.dentist_id) {
+    key += `:dentist_${req.params.dentist_id}`;
   }
 
-  if (
-    req.params.patient_id
-  ) {
-
-    key +=
-      `:patient_${req.params.patient_id}`;
+  if (req.params.patient_id) {
+    key += `:patient_${req.params.patient_id}`;
   }
-
-  // ======================================
-  // API NAME
-  // ======================================
 
   key += `:${apiName}`;
-
-  // ======================================
-  // QUERY PARAMS
-  // ======================================
 
   if (
     Object.keys(req.query)
@@ -107,6 +85,19 @@ const globalCacheMiddleware =
 
     try {
 
+      // ======================================
+      // REDIS DISABLED
+      // ======================================
+
+      if (!REDIS_ENABLE) {
+
+        console.log(
+          "⚠️ REDIS CACHE DISABLED"
+        );
+
+        return next();
+      }
+
       // ONLY GET
       if (
         req.method !== "GET"
@@ -114,32 +105,19 @@ const globalCacheMiddleware =
         return next();
       }
 
-      // ======================================
-      // MODULE
-      // ======================================
-
       const moduleName =
         req.baseUrl
           .split("/")
           .filter(Boolean)[1];
-
-      // ======================================
-      // API NAME
-      // ======================================
 
       const apiName =
         req.path
           .split("/")
           .filter(Boolean)[0];
 
-      // ======================================
-      // CACHE KEY
-      // ======================================
-
       let cacheKey =
         `cache:v1:${moduleName}`;
 
-      // tenant
       if (
         req.params.tenant_id
       ) {
@@ -147,7 +125,6 @@ const globalCacheMiddleware =
           `:tenant_${req.params.tenant_id}`;
       }
 
-      // clinic
       if (
         req.params.clinic_id
       ) {
@@ -155,7 +132,6 @@ const globalCacheMiddleware =
           `:clinic_${req.params.clinic_id}`;
       }
 
-      // dentist
       if (
         req.params.dentist_id
       ) {
@@ -163,7 +139,6 @@ const globalCacheMiddleware =
           `:dentist_${req.params.dentist_id}`;
       }
 
-      // superuser
       if (
         req.params.superuser_id
       ) {
@@ -173,7 +148,6 @@ const globalCacheMiddleware =
 
       cacheKey += `:${apiName}`;
 
-      // query params
       if (
         Object.keys(req.query)
           .length > 0

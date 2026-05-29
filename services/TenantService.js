@@ -98,6 +98,7 @@ const getTenants = async () => {
 
 // Get tenant service
 const getTenantByTenantId = async (tenantId) => {
+  console.log(tenantId)
   try {
     const tenant = await tenantModel.getTenantByTenantId(tenantId); // Call model function to get tenants
     const convertedRows = helper.convertDbToFrontend(
@@ -105,7 +106,7 @@ const getTenantByTenantId = async (tenantId) => {
       tenantFieldsReverseMap
     );
 
-    // console.log(convertedRows)
+    console.log(convertedRows)
 
     const documents = await getDocumentsByField(
       "tenant",

@@ -329,12 +329,21 @@ const record = require("../query/Records");
 const pool = require("../config/db");
 const addUserClinicMapping = async (
   conn,
-  { userId, userName, role, keycloakId, clinicId, createdBy = "SYSTEM" },
+  {
+    tenantId,
+    userId,
+    userName,
+    role,
+    keycloakId,
+    clinicId,
+    createdBy = "SYSTEM",
+  },
 ) => {
   try {
     const result = await record.createRecord(
       "user_clinic",
       [
+        "tenant_id",
         "user_id",
         "user_name",
         "role",
@@ -342,7 +351,7 @@ const addUserClinicMapping = async (
         "clinic_id",
         "created_by",
       ],
-      [userId, userName, role, keycloakId, clinicId, createdBy],
+      [tenantId, userId, userName, role, keycloakId, clinicId, createdBy],
       conn,
     );
 
@@ -472,6 +481,7 @@ const syncUserClinicMappings = async ({
 };
 
 const syncUserUpdateClinicMappings = async ({
+  tenantId,
   userId,
   role,
   clinicIds = [],
@@ -487,9 +497,7 @@ const syncUserUpdateClinicMappings = async ({
     /**
      * Normalize Clinic IDs
      */
-    const normalizedClinicIds = [
-      ...new Set(clinicIds.map((id) => Number(id))),
-    ];
+    const normalizedClinicIds = [...new Set(clinicIds.map((id) => Number(id)))];
 
     /**
      * Existing mappings by keycloak_id
@@ -500,25 +508,25 @@ const syncUserUpdateClinicMappings = async ({
       FROM user_clinic
       WHERE keycloak_id = ?
       `,
-      [keycloakId]
+      [keycloakId],
     );
 
     const existingClinicIds = existingMappings.map((item) =>
-      Number(item.clinic_id)
+      Number(item.clinic_id),
     );
 
     /**
      * New clinic ids to add
      */
     const addedClinicIds = normalizedClinicIds.filter(
-      (id) => !existingClinicIds.includes(id)
+      (id) => !existingClinicIds.includes(id),
     );
 
     /**
      * Old clinic ids to remove
      */
     const removedClinicIds = existingClinicIds.filter(
-      (id) => !normalizedClinicIds.includes(id)
+      (id) => !normalizedClinicIds.includes(id),
     );
 
     console.log({
@@ -535,6 +543,7 @@ const syncUserUpdateClinicMappings = async ({
       console.log(`➕ Adding Clinic ${clinicId}`);
 
       await addUserClinicMapping(conn, {
+        tenantId,
         userId,
         userName,
         role,
@@ -556,7 +565,7 @@ const syncUserUpdateClinicMappings = async ({
         WHERE keycloak_id = ?
         AND clinic_id IN (?)
         `,
-        [keycloakId, removedClinicIds]
+        [keycloakId, removedClinicIds],
       );
     }
 
@@ -574,17 +583,10 @@ const syncUserUpdateClinicMappings = async ({
         updated_time = CURRENT_TIMESTAMP
       WHERE keycloak_id = ?
       `,
-      [
-        userId,
-        userName,
-        role,
-        createdBy,
-        keycloakId,
-      ]
+      [userId, userName, role, createdBy, keycloakId],
     );
 
     console.log("✅ Sync Completed");
-
   } catch (error) {
     console.error("Sync User Clinic Error:", error);
     throw error;
@@ -619,5 +621,5 @@ module.exports = {
   sanitizeFields,
   addUserClinicMapping,
   syncUserClinicMappings,
-  syncUserUpdateClinicMappings
+  syncUserUpdateClinicMappings,
 };

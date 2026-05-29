@@ -103,13 +103,13 @@ const getAllSuperUsersByTenantId = async (tenantId, page = 1, limit = 10) => {
       const result = await superuserModel.getAllSuperUsersByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
 
     const convertedRows = superusers.data.map((superuser) =>
-      helper.convertDbToFrontend(superuser, superuserFieldsReverseMap)
+      helper.convertDbToFrontend(superuser, superuserFieldsReverseMap),
     );
 
     return { data: convertedRows, total: superusers.total };
@@ -124,12 +124,12 @@ const getSuperUserByTenantIdAndSuperUserId = async (tenantId, superuserId) => {
   try {
     const superuser = await superuserModel.getSuperUserByTenantAndSuperUserId(
       tenantId,
-      superuserId
+      superuserId,
     );
 
     const convertedRows = helper.convertDbToFrontend(
       superuser,
-      superuserFieldsReverseMap
+      superuserFieldsReverseMap,
     );
 
     return convertedRows;
@@ -140,37 +140,36 @@ const getSuperUserByTenantIdAndSuperUserId = async (tenantId, superuserId) => {
 
 // Update SuperUser
 const updateSuperUser = async (superuserId, data, tenant_id, token, realm) => {
-  try{
-return await updateEntity({
-    entityId: superuserId,
-    entityName: "superuser",
-    tenantId:tenant_id,
-    data,
-    token,
-    realm,
-    fieldMap: superuserFields,
-    getModelById: superuserModel.getSuperUserByTenantAndSuperUserId,
-    updateModel: superuserModel.updateSuperUser,
-    fileFields: ["profile_picture"],
-  });
-  }catch(error){
+  // console.log(superuserId, data, tenant_id, token, realm)
+  try {
+    return await updateEntity({
+      entityId: superuserId,
+      entityName: "superuser",
+      tenantId: tenant_id,
+      data,
+      token,
+      realm,
+      fieldMap: superuserFields,
+      getModelById: superuserModel.getSuperUserByTenantAndSuperUserId,
+      updateModel: superuserModel.updateSuperUser,
+      fileFields: ["profile_picture"],
+    });
+  } catch (error) {
     console.error("Update SuperUser Error:", error.message);
     throw new CustomError(`Failed to update superuser: ${error.message}`, 400);
-  } 
-  
+  }
 };
 
 /**
  * Update Superuser Service
  */
 
-
 // Delete SuperUser
 const deleteSuperUserByTenantIdAndSuperUserId = async (
   tenantId,
   superuserId,
   token,
-  realm
+  realm,
 ) => {
   let userId = null;
   const connection = await pool.getConnection();
@@ -182,7 +181,7 @@ const deleteSuperUserByTenantIdAndSuperUserId = async (
     const superuser = await superuserModel.getSuperUserByTenantAndSuperUserId(
       tenantId,
       superuserId,
-      connection
+      connection,
     );
 
     if (!superuser) {
@@ -196,7 +195,7 @@ const deleteSuperUserByTenantIdAndSuperUserId = async (
       await superuserModel.deleteSuperUserByTenantAndSuperUserId(
         connection,
         tenantId,
-        superuserId
+        superuserId,
       );
 
     if (affectedRows === 0) {
@@ -214,13 +213,13 @@ const deleteSuperUserByTenantIdAndSuperUserId = async (
       } catch (kcError) {
         console.error(
           `❌ Keycloak deletion failed for superuser ${userId}:`,
-          kcError.message
+          kcError.message,
         );
         // 🔁 Rollback DB delete
         await connection.rollback();
         throw new CustomError(
           "Failed to delete superuser in Keycloak. Aborting delete.",
-          500
+          500,
         );
       }
     }
@@ -244,7 +243,7 @@ const getAllSuperUsersByTenantIdAndClinicId = async (
   tenantId,
   clinic_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("superuser", "list", {
@@ -260,13 +259,13 @@ const getAllSuperUsersByTenantIdAndClinicId = async (
         tenantId,
         clinic_id,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
 
     const convertedRows = superusers.data.map((superuser) =>
-      helper.convertDbToFrontend(superuser, superuserFieldsReverseMap)
+      helper.convertDbToFrontend(superuser, superuserFieldsReverseMap),
     );
 
     return { data: convertedRows, total: superusers.total };

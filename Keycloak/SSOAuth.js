@@ -7,7 +7,7 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const qs = require("querystring");
 const axios = require("axios");
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 const { CustomError } = require("../middlewares/CustomeError");
 
 // ✅ Import from your working KeycloakAdmin.js
@@ -40,8 +40,9 @@ const {
 } = require("../utils/Helpers");
 const { generateAppBAccessToken } = require("../utils/CodeGenerator");
 const { getClientInfo } = require("../utils/LoginHistoryInfo");
-const loginHistoryService = require('../services/LoginHistoryService');
+const loginHistoryService = require("../services/LoginHistoryService");
 const globalInvalidationMiddleware = require("../middlewares/GlobalInvalidationMiddleware");
+const { getTenantConfigByHost } = require("../utils/TenantConfig");
 
 const router = express.Router();
 router.use(cookieParser());
@@ -51,7 +52,7 @@ const log = (label, message, data = null) => {
   console.log(
     `[KeycloakAuth] ${label}:`,
     message,
-    data ? `\nData: ${JSON.stringify(data, null, 2)}` : ""
+    data ? `\nData: ${JSON.stringify(data, null, 2)}` : "",
   );
 };
 
@@ -68,8 +69,8 @@ const COOKIE_OPTIONS = {
 };
 
 const COOKIE_EXPIRY = {
-  ACCESS: parseInt(process.env.ACCESS_COOKIE_EXPIRE_TIME || 900) * 1000,      // 15 min
-  REFRESH: parseInt(process.env.REFRESH_COOKIE_EXPIRE_TIME || 86400) * 1000,  // 24 hours
+  ACCESS: parseInt(process.env.ACCESS_COOKIE_EXPIRE_TIME || 900) * 1000, // 15 min
+  REFRESH: parseInt(process.env.REFRESH_COOKIE_EXPIRE_TIME || 86400) * 1000, // 24 hours
 };
 
 // ============================================================================
@@ -79,8 +80,7 @@ const finalizeLogin = async (req, res) => {
   log("FINALIZE_LOGIN", "Building user context and setting cookies");
 
   const { host } = req.body;
-  const HOST_REALM_CLIENT = JSON.parse(process.env.HOST_REALM_CLIENT);
-  const tenantConfig = HOST_REALM_CLIENT[host];
+  const tenantConfig = getTenantConfigByHost(host);
   if (!tenantConfig) return res.status(400).json({ error: "Invalid host" });
 
   const { realm, clientId } = tenantConfig;
@@ -138,7 +138,7 @@ const finalizeLogin = async (req, res) => {
       ...COOKIE_OPTIONS,
       maxAge: COOKIE_EXPIRY.REFRESH,
     });
-    
+
     // === 🏥 ROLE-SPECIFIC IDs (dentist_id, patient_id, etc.) ===
     if (userContext.dentist_id) {
       res.cookie("dentist_id", userContext.dentist_id, {
@@ -186,7 +186,7 @@ const finalizeLogin = async (req, res) => {
     }
 
     log("FINALIZE_LOGIN", "Login complete — sending user context");
-    console.log('USERCONTEXT:', userContext);
+    console.log("USERCONTEXT:", userContext);
 
     // ✅ CRITICAL: Send response FIRST, before any blocking async ops
     res.status(200).json(userContext);
@@ -195,33 +195,33 @@ const finalizeLogin = async (req, res) => {
     setImmediate(async () => {
       try {
         const clientInfo = await getClientInfo(req);
-        
+
         const loginData = {
           tenant_id: userContext.tenant_id,
-          app_name: 'DENTAL',
+          app_name: "DENTAL",
           keycloak_user_id: userContext.keycloak_user_id,
           session_id: uuidv4(),
           login_time: new Date(),
           ip_address: clientInfo.ip,
           device_info: clientInfo.device,
-          browser_info: clientInfo.browser
+          browser_info: clientInfo.browser,
         };
 
         await loginHistoryService.createLoginHistory(loginData);
         log("LOGIN_HISTORY", "✅ History logged successfully");
-        
       } catch (err) {
         log("LOGIN_HISTORY", "⚠️ Background logging failed", err.message);
       }
     });
 
     return;
-    
   } catch (err) {
     log("FINALIZE_LOGIN", "Finalize failed", { error: err.message });
-    
+
     if (!res.headersSent) {
-      return res.status(401).json({ message: err.message || "Login finalization failed" });
+      return res
+        .status(401)
+        .json({ message: err.message || "Login finalization failed" });
     }
   }
 };
@@ -258,9 +258,9 @@ router.post("/tokensave", (req, res) => {
     } = req.body;
 
     if (!access_token || !refresh_token) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Missing tokens in request body" 
+      return res.status(400).json({
+        success: false,
+        message: "Missing tokens in request body",
       });
     }
 
@@ -303,7 +303,7 @@ router.post("/tokensave", (req, res) => {
 // ============================================================================
 router.post("/login", async (req, res) => {
   log("LOGIN_FLOW", "🚀 Starting login flow", { body: req.body });
-  
+
   try {
     let { username, password, host, otp } = req.body;
     username = username?.toLowerCase();
@@ -315,11 +315,7 @@ router.post("/login", async (req, res) => {
     if (!req.session) req.session = {};
     if (!req.session.temploginstore) req.session.temploginstore = {};
 
-    const HOST_REALM_CLIENT = JSON.parse(process.env.HOST_REALM_CLIENT);
-    const tenantConfig = HOST_REALM_CLIENT[host];
-    if (!tenantConfig) return res.status(400).json({ error: "Invalid host" });
-
-    const { realm, clientId } = tenantConfig;
+    const { realm, clientId } = getTenantConfigByHost(host);
 
     // === OTP Verification Step ===
     if (otp) {
@@ -328,7 +324,9 @@ router.post("/login", async (req, res) => {
       const record = req.session.temploginstore[username];
       if (!record) {
         log("OTP_VERIFY", "❌ No pending login session");
-        return res.status(400).json({ message: "No login session found. Please login again." });
+        return res
+          .status(400)
+          .json({ message: "No login session found. Please login again." });
       }
 
       const verifyOtpData = {
@@ -356,20 +354,27 @@ router.post("/login", async (req, res) => {
     // === Initial Credential Check ===
     if (!password) {
       log("LOGIN_FLOW", "❌ Missing password");
-      return res.status(400).json({ message: "Username and password required" });
+      return res
+        .status(400)
+        .json({ message: "Username and password required" });
     }
 
     // === Keycloak Authentication ===
-    log("KEYCLOAK_AUTH", "Authenticating with Keycloak", { username, realm, clientId });
-    
+    log("KEYCLOAK_AUTH", "Authenticating with Keycloak", {
+      username,
+      realm,
+      clientId,
+    });
+
     const tokens = await keycloakLogin(username, password, realm, clientId);
     log("KEYCLOAK_AUTH", "✅ Keycloak authentication successful");
 
     // === Verify Token in Database ===
     const dbUser = await verifyUserTokenInDB(tokens.access_token);
-    log("DB_VERIFY", "Database verification completed", { 
+    console.log(dbUser)
+    log("DB_VERIFY", "Database verification completed", {
       role: dbUser?.role,
-      userId: dbUser?.dbUser?.user_id 
+      userId: dbUser?.dbUser?.user_id,
     });
 
     // === Bypass OTP for tenant/guest ===
@@ -381,11 +386,15 @@ router.post("/login", async (req, res) => {
     }
 
     // === Check Clinic OTP Settings ===
-    console.log('dbUser-tenant-clinic:', dbUser.dbUser?.tenant_id, dbUser.dbUser?.clinic_id);
-    
+    console.log(
+      "dbUser-tenant-clinic:",
+      dbUser.dbUser?.tenant_id,
+      dbUser.dbUser?.clinic_id,
+    );
+
     const clinic = await getClinicByTenantIdAndClinicId(
       dbUser.dbUser?.tenant_id,
-      dbUser.dbUser?.clinic_id
+      dbUser.dbUser?.clinic_id,
     );
 
     if (!clinic || clinic.otp === 0) {
@@ -400,14 +409,16 @@ router.post("/login", async (req, res) => {
       dbUser.role,
       dbUser.dbUser?.tenant_id,
       dbUser.dbUser?.clinic_id,
-      dbUser.dbUser?.keycloak_id
+      dbUser.dbUser?.keycloak_id,
     );
 
     const via = clinic.otp_type || "email";
     const key = via === "email" ? user2?.email : `+${user2?.phone_number}`;
 
     if (!key) {
-      return res.status(400).json({ message: "No contact method found for OTP" });
+      return res
+        .status(400)
+        .json({ message: "No contact method found for OTP" });
     }
 
     const payload = {
@@ -430,18 +441,18 @@ router.post("/login", async (req, res) => {
       step: "otp",
       to: key,
       via: via,
-      otpDetails: process.env.NODE_ENV === "development" ? otpResult : undefined,
+      otpDetails:
+        process.env.NODE_ENV === "development" ? otpResult : undefined,
     });
-
   } catch (err) {
     log("LOGIN_FLOW", "❌ Login failed", {
       message: err.message,
       stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
     });
 
-    return res.status(401).json({ 
+    return res.status(401).json({
       message: err.message || "Invalid credentials",
-      error: process.env.NODE_ENV === "development" ? err.stack : undefined
+      error: process.env.NODE_ENV === "development" ? err.stack : undefined,
     });
   }
 });
@@ -451,7 +462,7 @@ router.post("/login", async (req, res) => {
 // ============================================================================
 router.post("/refresh-token", async (req, res, next) => {
   log("REFRESH_TOKEN", "Refreshing access token");
-  
+
   const refreshToken = req.cookies.refresh_token;
   const realm = req.headers["x-realm"] || req.cookies.realm;
   const clientid = req.headers["x-clientid"] || req.cookies.clientId;
@@ -483,7 +494,7 @@ router.post("/refresh-token", async (req, res, next) => {
     const userInfo = extractUserInfo(decodedToken);
 
     const tenant = await getTenantByTenantId(userInfo.tenantId);
-    
+
     let clinic = null;
     if (
       userInfo.role !== "tenant" &&
@@ -492,7 +503,7 @@ router.post("/refresh-token", async (req, res, next) => {
     ) {
       clinic = await getClinicByTenantIdAndClinicId(
         userInfo.tenantId,
-        userInfo.clinicId
+        userInfo.clinicId,
       );
     }
 
@@ -503,7 +514,7 @@ router.post("/refresh-token", async (req, res, next) => {
       sameSite: isProduction ? "none" : "lax",
       maxAge: tokenData.expires_in * 1000,
     });
-    
+
     res.cookie("refresh_token", tokenData.refresh_token, {
       httpOnly: true,
       secure: isProduction,
@@ -567,12 +578,16 @@ router.post("/refresh-token", async (req, res, next) => {
 
     log("REFRESH_TOKEN", "✅ Token refreshed successfully");
     res.status(200).json(responseData);
-    
   } catch (err) {
     log("REFRESH_TOKEN", "💥 Refresh failed", {
       error: err.response?.data || err.message,
     });
-    next(new CustomError(err.response?.data?.error_description || err.message, 401));
+    next(
+      new CustomError(
+        err.response?.data?.error_description || err.message,
+        401,
+      ),
+    );
   }
 });
 
@@ -582,40 +597,30 @@ router.post("/refresh-token", async (req, res, next) => {
 // ============================================================================
 // 🚪 LOGOUT ROUTE - Update Login History + Clear Redis + Clear Cookies
 // ============================================================================
-router.post("/logout",globalInvalidationMiddleware, async (req, res) => {
-
+router.post("/logout", globalInvalidationMiddleware, async (req, res) => {
   log("LOGOUT", "Initiating logout");
 
   try {
-
     /**
      * =========================================
      * CAPTURE USER DATA BEFORE CLEARING COOKIES
      * =========================================
      */
 
-    const keycloakUserId =
-      req.cookies?.keycloak_user_id;
+    const keycloakUserId = req.cookies?.keycloak_user_id;
 
-    const sessionId =
-      req.cookies?.session_id;
+    const sessionId = req.cookies?.session_id;
 
-    const tenantId =
-      req.cookies?.tenant_id;
+    const tenantId = req.cookies?.tenant_id;
 
-    const username =
-      req.cookies?.username;
+    const username = req.cookies?.username;
 
-    log(
-      "LOGOUT",
-      "Captured logout context",
-      {
-        keycloakUserId,
-        sessionId,
-        tenantId,
-        username,
-      }
-    );
+    log("LOGOUT", "Captured logout context", {
+      keycloakUserId,
+      sessionId,
+      tenantId,
+      username,
+    });
 
     /**
      * =========================================
@@ -623,50 +628,29 @@ router.post("/logout",globalInvalidationMiddleware, async (req, res) => {
      * =========================================
      */
 
-    if (
-      keycloakUserId &&
-      tenantId
-    ) {
-
+    if (keycloakUserId && tenantId) {
       setImmediate(async () => {
-
         try {
-
           const loginRecord =
             await loginHistoryService.getLoginHistoryByTenantAndKeycloakUserId(
               tenantId,
-              keycloakUserId
+              keycloakUserId,
             );
 
-          if (
-            loginRecord &&
-            !loginRecord.logout_time
-          ) {
-
+          if (loginRecord && !loginRecord.logout_time) {
             await loginHistoryService.updateLoginHistoryLogout(
               loginRecord.login_history_id,
               loginRecord.tenant_id,
               loginRecord.keycloak_user_id,
-              loginRecord.session_id
+              loginRecord.session_id,
             );
 
-            log(
-              "LOGOUT",
-              "✅ Login history updated",
-              {
-                loginHistoryId:
-                  loginRecord.login_history_id,
-              }
-            );
+            log("LOGOUT", "✅ Login history updated", {
+              loginHistoryId: loginRecord.login_history_id,
+            });
           }
-
         } catch (err) {
-
-          log(
-            "LOGOUT",
-            "⚠️ Login history update failed",
-            err.message
-          );
+          log("LOGOUT", "⚠️ Login history update failed", err.message);
         }
       });
     }
@@ -677,18 +661,10 @@ router.post("/logout",globalInvalidationMiddleware, async (req, res) => {
      * =========================================
      */
 
-    if (
-      keycloakUserId ||
-      sessionId
-    ) {
-
+    if (keycloakUserId || sessionId) {
       setImmediate(async () => {
-
         try {
-
-          const {
-            redisClient,
-          } = require("../config/redis");
+          const { redisClient } = require("../config/redis");
 
           const keysToDelete = [];
 
@@ -699,18 +675,11 @@ router.post("/logout",globalInvalidationMiddleware, async (req, res) => {
            */
 
           if (sessionId) {
+            keysToDelete.push(`session:${sessionId}`);
 
-            keysToDelete.push(
-              `session:${sessionId}`
-            );
+            keysToDelete.push(`api_count:${sessionId}`);
 
-            keysToDelete.push(
-              `api_count:${sessionId}`
-            );
-
-            keysToDelete.push(
-              `refresh_token:${sessionId}`
-            );
+            keysToDelete.push(`refresh_token:${sessionId}`);
           }
 
           /**
@@ -720,18 +689,11 @@ router.post("/logout",globalInvalidationMiddleware, async (req, res) => {
            */
 
           if (keycloakUserId) {
+            keysToDelete.push(`user_session:${keycloakUserId}`);
 
-            keysToDelete.push(
-              `user_session:${keycloakUserId}`
-            );
+            keysToDelete.push(`user_permissions:${keycloakUserId}`);
 
-            keysToDelete.push(
-              `user_permissions:${keycloakUserId}`
-            );
-
-            keysToDelete.push(
-              `user_profile:${keycloakUserId}`
-            );
+            keysToDelete.push(`user_profile:${keycloakUserId}`);
           }
 
           /**
@@ -741,10 +703,7 @@ router.post("/logout",globalInvalidationMiddleware, async (req, res) => {
            */
 
           if (username) {
-
-            keysToDelete.push(
-              `otp:${username}`
-            );
+            keysToDelete.push(`otp:${username}`);
           }
 
           /**
@@ -753,8 +712,7 @@ router.post("/logout",globalInvalidationMiddleware, async (req, res) => {
            * =====================================
            */
 
-          const validKeys =
-            keysToDelete.filter(Boolean);
+          const validKeys = keysToDelete.filter(Boolean);
 
           /**
            * =====================================
@@ -762,32 +720,16 @@ router.post("/logout",globalInvalidationMiddleware, async (req, res) => {
            * =====================================
            */
 
-          if (
-            validKeys.length > 0
-          ) {
+          if (validKeys.length > 0) {
+            const deletedCount = await redisClient.del(...validKeys);
 
-            const deletedCount =
-              await redisClient.del(
-                ...validKeys
-              );
-
-            log(
-              "LOGOUT",
-              "✅ Redis keys deleted",
-              {
-                deletedCount,
-                keys: validKeys,
-              }
-            );
+            log("LOGOUT", "✅ Redis keys deleted", {
+              deletedCount,
+              keys: validKeys,
+            });
           }
-
         } catch (err) {
-
-          log(
-            "LOGOUT",
-            "⚠️ Redis cleanup failed",
-            err.message
-          );
+          log("LOGOUT", "⚠️ Redis cleanup failed", err.message);
         }
       });
     }
@@ -804,7 +746,6 @@ router.post("/logout",globalInvalidationMiddleware, async (req, res) => {
     };
 
     const cookiesToClear = [
-
       // AUTH
       "access_token",
       "refresh_token",
@@ -837,20 +778,11 @@ router.post("/logout",globalInvalidationMiddleware, async (req, res) => {
       "active_clinic_id",
     ];
 
-    cookiesToClear.forEach(
-      (cookieName) => {
+    cookiesToClear.forEach((cookieName) => {
+      res.clearCookie(cookieName, clearOpts);
+    });
 
-        res.clearCookie(
-          cookieName,
-          clearOpts
-        );
-      }
-    );
-
-    log(
-      "LOGOUT",
-      "✅ Cookies cleared"
-    );
+    log("LOGOUT", "✅ Cookies cleared");
 
     /**
      * =========================================
@@ -860,22 +792,14 @@ router.post("/logout",globalInvalidationMiddleware, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message:
-        "Logged out successfully",
+      message: "Logged out successfully",
       data: {
         username,
-        logout_time:
-          new Date().toISOString(),
+        logout_time: new Date().toISOString(),
       },
     });
-
   } catch (err) {
-
-    log(
-      "LOGOUT",
-      "💥 Logout failed",
-      err.message
-    );
+    log("LOGOUT", "💥 Logout failed", err.message);
 
     /**
      * =========================================
@@ -884,42 +808,22 @@ router.post("/logout",globalInvalidationMiddleware, async (req, res) => {
      */
 
     try {
-
       const clearOpts = {
         ...COOKIE_OPTIONS,
         path: "/",
       };
 
-      [
-        "access_token",
-        "refresh_token",
-        "session_id",
-      ].forEach((cookieName) => {
-
-        res.clearCookie(
-          cookieName,
-          clearOpts
-        );
+      ["access_token", "refresh_token", "session_id"].forEach((cookieName) => {
+        res.clearCookie(cookieName, clearOpts);
       });
-
     } catch (cookieErr) {
-
-      log(
-        "LOGOUT",
-        "⚠️ Cookie cleanup failed",
-        cookieErr.message
-      );
+      log("LOGOUT", "⚠️ Cookie cleanup failed", cookieErr.message);
     }
 
     return res.status(500).json({
       success: false,
-      message:
-        "Error during logout",
-      error:
-        process.env.NODE_ENV ===
-        "development"
-          ? err.message
-          : undefined,
+      message: "Error during logout",
+      error: process.env.NODE_ENV === "development" ? err.message : undefined,
     });
   }
 });
@@ -950,7 +854,7 @@ router.post("/forgettenpassword", async (req, res, next) => {
       process.env.VIEW_USER_USERNAME,
       process.env.VIEW_USER_PASS,
       realm,
-      clientId
+      clientId,
     );
     const adminToken = tokenRes.access_token;
 
@@ -962,9 +866,9 @@ router.post("/forgettenpassword", async (req, res, next) => {
 
     const clinic = await getClinicByTenantIdAndClinicId(
       user?.attributes?.tenant_id?.[0],
-      user?.attributes?.clinic_id?.[0]
+      user?.attributes?.clinic_id?.[0],
     );
-    
+
     if (!clinic) {
       log("FORGOT_PASSWORD", "❌ Clinic not found");
       return res.status(404).json({ message: "Clinic not found" });
@@ -977,7 +881,7 @@ router.post("/forgettenpassword", async (req, res, next) => {
 
     let sendValue;
     const via = clinic?.otp_type;
-    
+
     if (via === "sms") {
       sendValue = user.attributes?.phoneNumber?.[0];
     } else if (via === "email") {
@@ -988,7 +892,9 @@ router.post("/forgettenpassword", async (req, res, next) => {
 
     if (!sendValue) {
       log("FORGOT_PASSWORD", "❌ No contact value found for OTP");
-      return res.status(400).json({ message: "No contact value found for OTP" });
+      return res
+        .status(400)
+        .json({ message: "No contact value found for OTP" });
     }
 
     const otpResponse = await sendOTP({
@@ -1014,7 +920,6 @@ router.post("/forgettenpassword", async (req, res, next) => {
       otp: process.env.NODE_ENV === "development" ? otpResponse.otp : undefined,
       step: "otp",
     });
-    
   } catch (err) {
     log("FORGOT_PASSWORD", "💥 Error sending OTP", { error: err });
     next(new CustomError(err.message || "Failed to send OTP", 500));
@@ -1026,30 +931,34 @@ router.post("/forgettenpassword", async (req, res, next) => {
 // ============================================================================
 router.post("/reset-password", async (req, res, next) => {
   log("RESET_PASSWORD_ROUTE", "Password reset request", req.body);
-  
+
   try {
     const { username, newPassword, host, otp } = req.body;
     const HOST_REALM_CLIENT = JSON.parse(process.env.HOST_REALM_CLIENT);
     const tenantConfig = HOST_REALM_CLIENT[host];
-    
+
     if (!tenantConfig) return res.status(400).json({ error: "Invalid host" });
     const { realm, clientId } = tenantConfig;
 
     if (!username || !newPassword) {
-      return res.status(400).json({ message: "Username and newPassword are required" });
+      return res
+        .status(400)
+        .json({ message: "Username and newPassword are required" });
     }
 
     if (otp) {
       if (!req.session?.forgotPasswordStore?.[username]) {
-        return res.status(400).json({ message: "No password reset session found" });
+        return res
+          .status(400)
+          .json({ message: "No password reset session found" });
       }
 
       const stored = req.session.forgotPasswordStore[username];
-      
+
       if (stored.otp !== otp || Date.now() > stored.expiry) {
         return res.status(400).json({ message: "Invalid or expired OTP" });
       }
-      
+
       delete req.session.forgotPasswordStore[username];
     }
 
@@ -1057,13 +966,13 @@ router.post("/reset-password", async (req, res, next) => {
       process.env.VIEW_USER_USERNAME,
       process.env.VIEW_USER_PASS,
       realm,
-      clientId
+      clientId,
     );
     const adminToken = tokenResponse.access_token;
 
     const userResponse = await axios.get(
       `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users?username=${username}`,
-      { headers: { Authorization: `Bearer ${adminToken}` } }
+      { headers: { Authorization: `Bearer ${adminToken}` } },
     );
 
     const user = userResponse.data[0];
@@ -1073,7 +982,7 @@ router.post("/reset-password", async (req, res, next) => {
     }
 
     const resetUrl = `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${user.id}/reset-password`;
-    
+
     await axios.put(
       resetUrl,
       { type: "password", value: newPassword, temporary: false },
@@ -1082,12 +991,11 @@ router.post("/reset-password", async (req, res, next) => {
           Authorization: `Bearer ${adminToken}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     log("RESET_PASSWORD_ROUTE", "✅ Password reset successful");
     return res.status(200).json({ message: "Password updated successfully" });
-    
   } catch (err) {
     log("RESET_PASSWORD_ROUTE", "💥 Error", {
       error: err.response?.data || err.message,
@@ -1101,18 +1009,18 @@ router.post("/reset-password", async (req, res, next) => {
 // ============================================================================
 router.post("/register", async (req, res, next) => {
   log("USER_REGISTER_IN_KEYCLOAK", "User register process", req.body);
-  
+
   try {
     const { email, firstname, lastname, phone, host } = req.body;
     const HOST_REALM_CLIENT = JSON.parse(process.env.HOST_REALM_CLIENT);
     const tenantConfig = HOST_REALM_CLIENT[host];
-    
+
     if (!tenantConfig) return res.status(400).json({ error: "Invalid host" });
     const { realm, clientId } = tenantConfig;
 
     if (!firstname || !lastname || !phone) {
-      return res.status(400).json({ 
-        message: "Firstname, lastname, and phone number are required" 
+      return res.status(400).json({
+        message: "Firstname, lastname, and phone number are required",
       });
     }
 
@@ -1120,13 +1028,14 @@ router.post("/register", async (req, res, next) => {
       process.env.VIEW_USER_USERNAME,
       process.env.VIEW_USER_PASS,
       realm,
-      clientId
+      clientId,
     );
     const adminToken = tokenResponse.access_token;
 
     const username = await generateUsername("GST", realm, adminToken);
     const password = generateAlphanumericPassword(12);
-    const userEmail = email || `${username}${generateAlphanumericPassword(6)}@example.com`;
+    const userEmail =
+      email || `${username}${generateAlphanumericPassword(6)}@example.com`;
 
     const userData = {
       username,
@@ -1144,19 +1053,19 @@ router.post("/register", async (req, res, next) => {
     };
 
     const isUserCreated = await addUser(adminToken, realm, userData);
-    
+
     if (!isUserCreated) {
       throw new CustomError("Keycloak user creation failed", 400);
     }
 
     log("USER_CREATED", "✅ User Created successfully", { username });
-    
-    return res.status(200).json({ 
+
+    return res.status(200).json({
       message: "User created successfully",
       username,
-      tempPassword: process.env.NODE_ENV === "development" ? password : undefined,
+      tempPassword:
+        process.env.NODE_ENV === "development" ? password : undefined,
     });
-    
   } catch (err) {
     log("USER_CREATED", "💥 Error", {
       error: err.response?.data || err.message,

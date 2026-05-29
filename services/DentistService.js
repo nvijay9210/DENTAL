@@ -193,6 +193,7 @@ const updateDentist = async (dentistId, data, tenantId, token, realm) => {
 
   // ✅ Add user_clinic mapping
   await helper.syncUserUpdateClinicMappings({
+    tenantId:data.tenant_id,
     userId: dentistId,
     role: "DENTIST",
     clinicIds: data.clinic_ids,

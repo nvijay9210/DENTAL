@@ -47,7 +47,7 @@ const createEntity = async ({
 }) => {
   const create = { ...fieldMap, created_by: (val) => val };
 
-  console.log('realm:', realm);
+  // console.log("realm:", realm);
 
   let userId = null;
   let username = null;
@@ -130,10 +130,10 @@ const createEntity = async ({
       }
 
       // Assign group
-      if (userClinicId) {
-        const groupName = `dental-${data.tenant_id}-${userClinicId}`;
-        await addUserToGroup(token, realm, userId, groupName);
-      }
+      // if (userClinicId) {
+      //   const groupName = `dental-${data.tenant_id}-${userClinicId}`;
+      //   await addUserToGroup(token, realm, userId, groupName);
+      // }
 
       // Push KC Id -> DB
       data.keycloak_id = userId;
@@ -243,12 +243,12 @@ const updateEntity = async ({
   try {
     await connection.beginTransaction();
 
-    // console.log("1 START");
+    console.log("1 START");
 
     const entity = await getModelById(tenantId, entityId, connection);
     if (!entity) throw new CustomError(`${entityName} not found`, 404);
 
-    // console.log("2 ENTITY FETCHED",entity);
+    console.log("2 ENTITY FETCHED", entity);
 
     userId = entity.keycloak_id;
 
@@ -267,7 +267,7 @@ const updateEntity = async ({
         tenantId,
         connection,
       );
-      // console.log("3 DB UPDATED",sanitizedData);
+      console.log("3 DB UPDATED", sanitizedData);
       // ✅ Check for Keycloak field changes
       const keycloakFieldsChanged =
         (sanitizedData.email && sanitizedData.email !== entity.email) ||
@@ -381,7 +381,10 @@ const getUserByTenantClinicAndKeycloakId = async (
     throw new Error("Missing required parameters");
   }
 
-  // ✅ Whitelist to prevent SQL injection
+  // =====================================
+  // WHITELIST
+  // =====================================
+
   const allowedTables = [
     "superuser",
     "dentist",
@@ -389,47 +392,136 @@ const getUserByTenantClinicAndKeycloakId = async (
     "receptionist",
     "supplier",
   ];
+
   if (!allowedTables.includes(tableName)) {
     throw new Error(`Invalid table name: ${tableName}`);
   }
 
-  // ✅ receptionist table naming fix
-  if (tableName === "receptionist") tableName = "reception";
+  // =====================================
+  // TABLE FIX
+  // =====================================
+
+  if (tableName === "receptionist") {
+    tableName = "reception";
+  }
+
+  console.log(tableName, tenantId, clinicId, keycloakUserId);
 
   const conn = await pool.getConnection();
+
   try {
     let query;
     let params;
 
+    // =====================================
+    // PATIENT
+    // =====================================
+
     if (tableName === "patient") {
-      // ✅ Special case: check patient_clinic table for clinic filter
       query = `
         SELECT p.*
+
         FROM patient p
-        JOIN patient_clinic pc ON pc.patient_id = p.patient_id
+
+        JOIN patient_clinic pc
+          ON pc.patient_id = p.patient_id
+
         WHERE p.tenant_id = ?
           AND pc.clinic_id = ?
           AND p.keycloak_id = ?
+
         LIMIT 1
       `;
+
       params = [tenantId, clinicId, keycloakUserId];
     } else {
-      // ✅ Default logic for all other tables
+      // =====================================
+      // OTHER USERS
+      // =====================================
+
       query = `
-        SELECT * FROM ??
-        WHERE tenant_id = ?
-          AND clinic_id = ?
-          AND keycloak_id = ?
+        SELECT DISTINCT t.*
+
+        FROM ${tableName} t
+
+        LEFT JOIN user_clinic uc
+          ON uc.keycloak_id = t.keycloak_id
+
+        WHERE t.tenant_id = ?
+          AND (
+            uc.clinic_id = ?
+            OR t.clinic_id = ?
+          )
+          AND t.keycloak_id = ?
+
         LIMIT 1
       `;
-      params = [tableName, tenantId, clinicId, keycloakUserId];
+
+      params = [tenantId, clinicId, clinicId, keycloakUserId];
     }
 
-    const rows = await conn.query(query, params);
-    // console.log('DBUSERCHECK:',rows[0],query,params)
-    return rows[0][0] || null;
+    const [rows] = await conn.query(query, params);
+
+    return rows[0] || null;
   } catch (error) {
     console.error(`Error fetching user from ${tableName}:`, error);
+
+    throw new Error("Database operation failed");
+  } finally {
+    conn.release();
+  }
+};
+const getUserByKeycloakId = async (tableName, keycloakUserId) => {
+  if (!tableName || !keycloakUserId) {
+    throw new Error("Missing required parameters");
+  }
+
+  // =====================================
+  // WHITELIST
+  // =====================================
+
+  const allowedTables = [
+    "superuser",
+    "dentist",
+    "patient",
+    "receptionist",
+    "supplier",
+  ];
+
+  if (!allowedTables.includes(tableName)) {
+    throw new Error(`Invalid table name: ${tableName}`);
+  }
+
+  // =====================================
+  // TABLE FIX
+  // =====================================
+
+  if (tableName === "receptionist") {
+    tableName = "reception";
+  }
+
+  const conn = await pool.getConnection();
+
+  try {
+    // =====================================
+    // QUERY
+    // =====================================
+
+    const query = `
+      SELECT *
+      FROM ${tableName}
+      WHERE keycloak_id = ?
+      LIMIT 1
+    `;
+
+    const [rows] = await conn.query(query, [keycloakUserId]);
+
+    console.log("DBUSERCHECK:", rows, query);
+
+    return rows[0] || null;
+  } catch (error) {
+    console.error(`Error fetching user from ${tableName}:`, error);
+
     throw new Error("Database operation failed");
   } finally {
     conn.release();
@@ -440,4 +532,5 @@ module.exports = {
   updateEntity,
   createEntity,
   getUserByTenantClinicAndKeycloakId,
+  getUserByKeycloakId,
 };

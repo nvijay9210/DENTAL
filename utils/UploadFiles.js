@@ -330,7 +330,7 @@ const uploadFileMiddleware2 = (options) => {
         try {
           const tableMap = {
             Dentist: { table: "dentist", idField: "dentist_id" },
-            Superuser: { table: "superuser", idField: "superuser_id" },
+            SuperUser: { table: "superuser", idField: "superuser_id" },
             Patient: { table: "patient", idField: "patient_id" },
             Clinic: { table: "clinic", idField: "clinic_id" },
             Reception: { table: "reception", idField: "reception_id" },
@@ -379,6 +379,7 @@ const uploadFileMiddleware2 = (options) => {
         if (id) {
           const tableMap = {
             Dentist: { table: "dentist", idField: "dentist_id" },
+            SuperUser: { table: "superuser", idField: "superuser_id" },
             Patient: { table: "patient", idField: "patient_id" },
             Clinic: { table: "clinic", idField: "clinic_id" },
             Reception: { table: "reception", idField: "reception_id" },

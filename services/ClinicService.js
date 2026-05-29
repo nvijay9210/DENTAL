@@ -389,25 +389,30 @@ const getAllClinics = async (page = 1, limit = 10) => {
 };
 
 const getClinicsByKeycloakId = async (keycloak_id) => {
+  console.log('keycloakid:',keycloak_id)
   const conn = await pool.getConnection();
 
   try {
     const query = `
       SELECT
         c.clinic_id,
+        c.tenant_id,
         c.clinic_name,
         c.clinic_logo,
         c.clinic_app_font,
         c.clinic_app_themes
       FROM user_clinic uc
       INNER JOIN clinic c
-        ON uc.clinic_id = c.clinic_id
+        ON uc.tenant_id=c.tenant_id
       WHERE uc.keycloak_id = ?
     `;
 
-    const [rows] = await conn.query(query, [keycloak_id]);
+    const rows = await conn.query(query, [keycloak_id]);
 
-    return rows;
+
+    // console.log('rows:',rows[0])
+
+    return rows[0];
   } catch (error) {
     console.error("Error fetching clinics by keycloak_id:", error);
     throw new Error("Database Operation Failed");

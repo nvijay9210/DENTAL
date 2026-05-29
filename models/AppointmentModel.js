@@ -84,48 +84,87 @@ WHERE
   }
 };
 
-const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (
+const getAllAppointmentsByTenantIdAndDentist = async (
   tenantId,
-  clinicId,
   dentist_id,
   limit,
   offset
 ) => {
-  const query1 = `SELECT 
-    *
-FROM 
-    appointment AS app
-WHERE 
-    app.tenant_id = ? 
-    AND app.clinic_id = ? 
-    AND app.dentist_id=?
-    limit ? offset ?`;
 
-  const query2 = `SELECT 
-    COUNT(*) AS total
-FROM 
-    appointment AS app
-WHERE 
-    app.tenant_id = ? 
-    AND app.clinic_id = ? 
-    AND app.dentist_id=?
-`;
+  const query1 = `
+    SELECT 
+      app.*,
+
+      uc.user_name,
+      uc.role,
+
+      c.clinic_id,
+      c.clinic_name,
+
+      counts.total
+
+    FROM appointment AS app
+
+    INNER JOIN user_clinic AS uc
+      ON uc.user_id = app.dentist_id
+      AND uc.clinic_id = app.clinic_id
+
+    LEFT JOIN clinic AS c
+      ON c.clinic_id = app.clinic_id
+
+    CROSS JOIN (
+      SELECT 
+        COUNT(*) AS total
+      FROM appointment
+      WHERE 
+        tenant_id = ?
+        AND dentist_id = ?
+    ) AS counts
+
+    WHERE 
+      app.tenant_id = ?
+      AND app.dentist_id = ?
+
+    ORDER BY 
+      app.appointment_date,
+      app.start_time
+
+    LIMIT ? OFFSET ?
+  `;
+
   const conn = await pool.getConnection();
+
   try {
+
     const [rows] = await conn.query(query1, [
       tenantId,
-      clinicId,
       dentist_id,
+
+      tenantId,
+      dentist_id,
+
       limit,
       offset,
     ]);
-    const [counts] = await conn.query(query2, [tenantId, clinicId, dentist_id]);
 
-    return { data: rows, total: counts[0].total };
+    return {
+      data: rows,
+      total:
+        rows.length > 0
+          ? rows[0].total
+          : 0,
+    };
+
   } catch (error) {
+
     console.log(error);
-    throw new Error("Database Operation Failed");
+
+    throw new Error(
+      "Database Operation Failed"
+    );
+
   } finally {
+
     conn.release();
   }
 };
@@ -474,7 +513,6 @@ const checkAppointmentExistsByStartTimeAndEndTimeAndDate = async (
           ON a.clinic_id = us.clinic_id
           AND a.dentist_id = us.user_id
         WHERE a.appointment_date = ?
-          AND a.clinic_id = ?
           AND a.patient_id = ?
           AND a.dentist_id = ?
           AND a.tenant_id = ?
@@ -1318,7 +1356,7 @@ module.exports = {
   updateAppoinmentStatus,
   getAppointmentSummary,
   getAllAppointmentsByTenantIdAndClinicId,
-  getAllAppointmentsByTenantIdAndClinicIdByDentist,
+  getAllAppointmentsByTenantIdAndDentist,
   getAllAppointmentsByTenantIdAndClinicIdAndDentistId,
   fetchDataForRange,
   updateAppoinmentStatusCancelledAndReschedule,

@@ -502,11 +502,11 @@ function decodeToken(token) {
     const payload = parts[1];
     const decoded = Buffer.from(payload, "base64").toString("utf8");
     const parsed = JSON.parse(decoded);
-    log("DECODE_TOKEN", "✅ Decoded token", {
-      sub: parsed.sub,
-      email: parsed.email,
-      roles: parsed.realm_access?.roles,
-    });
+    // log("DECODE_TOKEN", "✅ Decoded token", {
+    //   sub: parsed.sub,
+    //   email: parsed.email,
+    //   roles: parsed.realm_access?.roles,
+    // });
     return parsed;
   } catch (err) {
     log("DECODE_TOKEN", "❌ Failed to decode", { error: err.message });
@@ -616,6 +616,9 @@ function extractUserInfo(token) {
   const issuer = token.iss;
   const realm = issuer.split("/").pop();
   const tenant = token.azp;
+  const tenantId=token.tenant_id
+
+  // console.log('token:',token)
 
   const getTenantIdByRealm = (fullRealm) => {
     const mapString = process.env.REALM_TENANT_MAP || "";
@@ -648,7 +651,7 @@ function extractUserInfo(token) {
     return null;
   };
 
-  const tenantId = getTenantIdByRealm(tenant);
+  // const tenantId = getTenantIdByRealm(tenant);
 
   const groups = token.groups || [];
   const clinicGroup = groups.find((g) => g.startsWith("dental-"));

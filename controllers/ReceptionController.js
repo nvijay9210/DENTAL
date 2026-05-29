@@ -79,7 +79,7 @@ exports.updateReception = async (req, res, next) => {
   const { reception_id, tenant_id } = req.params;
   const details = req.body;
   const token=req.token;
-  const realm=req.realm;
+  const realm=req.realm || process.env.KEYCLOAK_REALM;
 
   try {
     // Validate update input

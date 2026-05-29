@@ -9,7 +9,7 @@ const DB_CONFIG = {
     host: '127.0.0.1',
     user: 'root',           // Your database username
     password: 'root',           // Your database password
-    database: 'dental',     // Your database name
+    database: 'demodental',     // Your database name
     port: 3306,
     multipleStatements: true
 };

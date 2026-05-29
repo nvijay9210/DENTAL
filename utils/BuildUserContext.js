@@ -1,6 +1,9 @@
 // utils/buildUserContext.js
 const { getTenantByTenantId } = require("../services/TenantService");
-const { getClinicByTenantIdAndClinicId, getClinicsByKeycloakId } = require("../services/ClinicService");
+const {
+  getClinicByTenantIdAndClinicId,
+  getClinicsByKeycloakId,
+} = require("../services/ClinicService");
 const { decodeToken, extractUserInfo } = require("../Keycloak/KeycloakAdmin");
 
 /**
@@ -12,26 +15,24 @@ async function buildUserContext(accessToken, dbUser) {
   // 1. Decode token and extract basic info
   const decodedToken = decodeToken(accessToken);
   const userInfo = extractUserInfo(decodedToken);
-  console.log('buildUserContext:',userInfo,dbUser);
+  console.log("buildUserContext:", userInfo, dbUser);
 
   // 2. Fetch tenant
   const tenant = await getTenantByTenantId(userInfo.tenantId);
+  console.log("tenant:", tenant);
 
   // 3. Fetch clinic (if applicable)
   let clinic = null;
   if (userInfo.role !== "tenant" && userInfo.clinicId) {
     clinic = await getClinicByTenantIdAndClinicId(
       userInfo.tenantId,
-      userInfo.clinicId
+      userInfo.clinicId,
     );
   }
   let clinics = [];
-  if (userInfo.role !== "tenant" && userInfo.clinicId) {
-    clinics = await getClinicsByKeycloakId(
-      userInfo.userId
-    );
+  if (userInfo.role !== "tenant") {
+    clinics = await getClinicsByKeycloakId(userInfo.userId);
   }
-  
 
   // 4. Base context
   const context = {
@@ -47,7 +48,7 @@ async function buildUserContext(accessToken, dbUser) {
     clinic_id: userInfo.clinicId,
     role: userInfo.role,
     preferred_username: userInfo.preferred_username,
-    profile_picture:dbUser?.dbUser?.profile_picture,
+    profile_picture: dbUser?.dbUser?.profile_picture,
     clinics: clinics,
   };
 

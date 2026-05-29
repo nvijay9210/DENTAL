@@ -344,18 +344,23 @@ const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (
   try {
     const appointments = await getOrSetCache(cacheKey, async () => {
       const result =
-        await appointmentModel.getAllAppointmentsByTenantIdAndClinicIdByDentist(
+        await appointmentModel.getAllAppointmentsByTenantIdAndDentist(
           tenantId,
-          clinic_id,
+          // clinic_id,
           dentist_id,
           Number(limit),
           offset
         );
       return result;
     });
-    const convertedRows = appointments.data.map((appointment) =>
-      helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
-    );
+    const convertedRows = appointments.data.map((appointment) => ({
+  ...helper.convertDbToFrontend(
+    appointment,
+    appointmentFieldsReverseMap
+  ),
+
+  clinic_name: appointment.clinic_name,
+}));
 
     return { data: convertedRows, total: appointments.total };
   } catch (error) {

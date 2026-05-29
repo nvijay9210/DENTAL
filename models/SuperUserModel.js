@@ -125,7 +125,7 @@ async function updateSuperuser(superuser_id, data) {
 
     const existing = existingRows[0][0];
 
-    // console.log(data.status, existing);
+    console.log(data.status, existing);
 
     // ================= MERGE EXISTING + NEW DATA =================
     const updatedData = {
