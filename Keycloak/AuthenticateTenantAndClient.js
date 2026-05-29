@@ -280,7 +280,7 @@ ${process.env.KEYCLOAK_REALM_PUBLIC_KEY}
       // }
 
       const clinicAccess=await getClinicsByKeycloakId(dt.sub)
-      console.log('clinicAccess:',clinicAccess)
+      // console.log('clinicAccess:',clinicAccess)
 
       /**
        * =====================================

@@ -82,15 +82,25 @@ exports.updateSuperUser = async (req, res, next) => {
   const details = req.body;
   const token = req.token;
   const realm = req.realm || process.env.KEYCLOAK_REALM;
-
   try {
     // Validate update input
     await superuserValidation.updateSuperUserValidation(superuser_id, details);
     // const superuserdata=await superuserService.getSuperUserByTenantIdAndSuperUserId(tenant_id,superuser_id);
     // console.log('superuserdata:',superuserdata)
     // Update the superuser
-    await superuserService.updateSuperUser(superuser_id, details,tenant_id,token,realm);
-    res.status(200).json({ message: "SuperUser updated successfully" });
+    await superuserService.updateSuperUser(
+      superuser_id,
+      details,
+      tenant_id,
+      token,
+      realm,
+    );
+    res
+      .status(200)
+      .json({
+        message: "SuperUser updated successfully",
+        profile_picture: details.profile_picture,
+      });
   } catch (err) {
     console.log(err.message);
     next(err);

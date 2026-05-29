@@ -140,7 +140,7 @@ const getSuperUserByTenantIdAndSuperUserId = async (tenantId, superuserId) => {
 
 // Update SuperUser
 const updateSuperUser = async (superuserId, data, tenant_id, token, realm) => {
-  // console.log(superuserId, data, tenant_id, token, realm)
+  console.log('superuserservice:',superuserId, data, tenant_id, token, realm)
   try {
     return await updateEntity({
       entityId: superuserId,
