@@ -172,13 +172,37 @@ const redisHelpers = {
 
 const setCache = async (key, data, ttl = 300) => {
   try {
-    const safeData = JSON.stringify(data);
+    const value =
+      typeof data === "object" ? JSON.stringify(data) : String(data);
 
-    await redisClient.set(cacheKey, JSON.stringify(body), "EX", 300);
+    await redisClient.set(key, value, "EX", ttl);
 
     console.log("💾 CACHE STORED:", key);
   } catch (err) {
     console.error("Redis setCache error:", err);
+    throw err;
+  }
+};
+
+
+// ======================================================
+// SIMPLE CACHE GET
+// ======================================================
+
+const getCache = async (key) => {
+  try {
+    const value = await redisClient.get(key);
+
+    if (!value) return null;
+
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
+  } catch (err) {
+    console.error("Redis getCache error:", err);
+    throw err;
   }
 };
 
@@ -248,6 +272,7 @@ module.exports = {
 
   // NEW HELPERS
   setCache,
+  getCache,
   removeCache,
   clearCacheByPattern,
 };

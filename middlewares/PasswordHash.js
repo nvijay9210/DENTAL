@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 
-const algorithm = 'aes-256-cbc';
+const algorithm = process.env.LOGIN_DATA_ALOGRITHM;
 const secretKey = crypto.randomBytes(32); // Save this securely!
 const iv = crypto.randomBytes(16);        // Initialization vector
 

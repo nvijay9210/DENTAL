@@ -72,7 +72,7 @@ const COOKIE_EXPIRY = {
   ACCESS: parseInt(process.env.ACCESS_COOKIE_EXPIRE_TIME || 900) * 1000, // 15 min
   REFRESH: parseInt(process.env.REFRESH_COOKIE_EXPIRE_TIME || 86400) * 1000, // 24 hours
 };
-
+const { setCache } = require("../config/redis"); // உங்கள் project path
 // ============================================================================
 // 🎯 FINALIZE LOGIN - Core function that completes authentication
 // ============================================================================
@@ -90,6 +90,24 @@ const finalizeLogin = async (req, res) => {
     const dbUser = req.dbUser;
 
     const userContext = await buildUserContext(access_token, dbUser);
+    const sessionId = uuidv4();
+
+    const sessionData = {
+      sessionId,
+      accessToken: access_token,
+      refreshToken: refresh_token,
+      realm,
+      clientId,
+      userContext,
+    };
+
+    await setCache(
+      `session:${sessionId}`,
+      sessionData,
+      COOKIE_EXPIRY.REFRESH / 1000,
+    );
+
+    console.log("Saved Session:", sessionId);
 
     log("TOKEN_SAVE", "Saving tokens and user data in cookies");
 
@@ -184,6 +202,15 @@ const finalizeLogin = async (req, res) => {
         maxAge: COOKIE_EXPIRY.REFRESH,
       });
     }
+
+    res.cookie("brighton_session", sessionId, {
+      // domain: ".brightoncloudtech.com",
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+      path: "/",
+      maxAge: COOKIE_EXPIRY.REFRESH,
+    });
 
     log("FINALIZE_LOGIN", "Login complete — sending user context");
     console.log("USERCONTEXT:", userContext);
@@ -371,7 +398,7 @@ router.post("/login", async (req, res) => {
 
     // === Verify Token in Database ===
     const dbUser = await verifyUserTokenInDB(tokens.access_token);
-    console.log(dbUser)
+    console.log(dbUser);
     log("DB_VERIFY", "Database verification completed", {
       role: dbUser?.role,
       userId: dbUser?.dbUser?.user_id,

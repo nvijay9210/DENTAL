@@ -3,7 +3,7 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const qs = require("querystring");
 const axios = require("axios");
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 const { CustomError } = require("../middlewares/CustomeError");
 const {
   getKeycloakToken,
@@ -33,7 +33,7 @@ const {
 const { decode } = require("jsonwebtoken");
 const { generateAppBAccessToken } = require("../utils/CodeGenerator");
 const { getClientInfo } = require("../utils/LoginHistoryInfo");
-const loginHistoryService=require('../services/LoginHistoryService')
+const loginHistoryService = require("../services/LoginHistoryService");
 
 const router = express.Router();
 router.use(cookieParser());
@@ -43,7 +43,7 @@ const log = (label, message, data = null) => {
   console.log(
     `[KeycloakAuth] ${label}:`,
     message,
-    data ? `\nData: ${JSON.stringify(data, null, 2)}` : ""
+    data ? `\nData: ${JSON.stringify(data, null, 2)}` : "",
   );
 };
 
@@ -63,85 +63,87 @@ const finalizeLogin = async (req, res) => {
   const { host } = req.body;
   const HOST_REALM_CLIENT = JSON.parse(process.env.HOST_REALM_CLIENT);
   const tenantConfig = HOST_REALM_CLIENT[host];
-  if (!tenantConfig) return res.status(400).json({ error: "Invalid host" });
+
+  if (!tenantConfig) {
+    return res.status(400).json({ error: "Invalid host" });
+  }
 
   const { realm, clientId } = tenantConfig;
 
-  // console.log(req.tokens)
-
   try {
-    const {
-      access_token,
-      refresh_token
-    } = req.tokens;
+    const { access_token, refresh_token } = req.tokens;
 
     const dbUser = req.dbUser;
 
     const userContext = await buildUserContext(access_token, dbUser);
 
+    // ==================================================
+    // Create Session
+    // ==================================================
+
+    const sessionId = uuidv4();
+
+    const sessionData = {
+      sessionId,
+      accessToken: access_token,
+      refreshToken: refresh_token,
+      realm,
+      clientId,
+      userContext,
+      loginTime: new Date(),
+      lastAccessTime: new Date(),
+    };
+
+    const refreshCookieLife =
+      parseInt(process.env.REFRESH_COOKIE_EXPIRE_TIME) * 1000;
+
+    await setCache(
+      `session:${sessionId}`,
+      sessionData,
+      refreshCookieLife / 1000,
+    );
+
+    // ==================================================
+    // Cookie
+    // ==================================================
+
     const isProduction = process.env.NODE_ENV === "production";
-    const cookieOptions = {
-      httpOnly: isProduction,
+
+    res.cookie("brighton_session", sessionId, {
+      domain: ".brightoncloudtech.com",
+      httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? "None" : "Lax",
-    };
-
-    // Convert Keycloak token expiry → milliseconds
-    const accessCookieLife = parseInt(process.env.ACCESS_COOKIE_EXPIRE_TIME) * 1000;
-    const refreshCookieLife = parseInt(process.env.REFRESH_COOKIE_EXPIRE_TIME) * 1000;
-
-    log("TOKEN_SAVE", "Saving tokens with dynamic expiry");
-
-    // ACCESS TOKEN
-    res.cookie("access_token", access_token, {
-      ...cookieOptions,
-      maxAge: accessCookieLife,
-    });
-
-    // REFRESH TOKEN
-    res.cookie("refresh_token", refresh_token, {
-      ...cookieOptions,
+      path: "/",
       maxAge: refreshCookieLife,
     });
 
-    // Client ID
-    res.cookie("clientId", clientId, {
-      ...cookieOptions,
-      maxAge: refreshCookieLife,
-    });
+    // ==================================================
+    // Login History
+    // ==================================================
 
-    // Realm
-    res.cookie("realm", realm, {
-      ...cookieOptions,
-      maxAge: refreshCookieLife,
-    });
-
-    log("FINALIZE_LOGIN", "Login complete — sending user context");
-
-    console.log('USERCONTEXT:',userContext)
     const clientInfo = await getClientInfo(req);
 
-    const data = {
+    await loginHistoryService.createLoginHistory({
       tenant_id: userContext.tenant_id,
-      app_name: 'DENTAL',
+      app_name: "DENTAL",
       keycloak_user_id: userContext.keycloak_user_id,
-      session_id: uuidv4(),
-      login_time:new Date(),
+      session_id: sessionId,
+      login_time: new Date(),
       ip_address: clientInfo.ip,
       device_info: clientInfo.device,
-      browser_info: clientInfo.browser
-    };
-
-    await loginHistoryService.createLoginHistory(data)
+      browser_info: clientInfo.browser,
+    });
 
     return res.status(200).json(userContext);
   } catch (err) {
-    log("FINALIZE_LOGIN", "Finalize failed", { error: err.message });
-    throw new CustomError(err.message || "Login finalization failed", 401);
+    console.error(err);
+
+    return res.status(500).json({
+      message: "Login Failed",
+    });
   }
 };
-
-
 router.post("/assets", async (req, res) => {
   const userToken = req.cookies.access_token;
   const userRefreshToken = req.cookies.refresh_token;
@@ -237,7 +239,7 @@ router.post("/login", async (req, res) => {
   try {
     let { username, password, host, otp } = req.body;
 
-    username=username.toLowerCase()
+    username = username.toLowerCase();
 
     if (!username) {
       return res.status(400).json({ message: "Username is required" });
@@ -313,7 +315,9 @@ router.post("/login", async (req, res) => {
     // Verify in DB
     // =========================
     const dbUser = await verifyUserTokenInDB(tokens.access_token);
-    log("DB_VERIFY", "Database verification completed", { dbUser: dbUser.role });
+    log("DB_VERIFY", "Database verification completed", {
+      dbUser: dbUser.role,
+    });
 
     // Bypass OTP for tenant or guest
     if (dbUser.role === "tenant" || dbUser.role === "guest") {
@@ -326,11 +330,15 @@ router.post("/login", async (req, res) => {
     // =========================
     // Check clinic OTP settings
     // =========================
-    console.log('dbUser-tennat-clinic:',dbUser.dbUser.tenant_id,
-      dbUser.dbUser.clinic_id,dbUser)
+    console.log(
+      "dbUser-tennat-clinic:",
+      dbUser.dbUser.tenant_id,
+      dbUser.dbUser.clinic_id,
+      dbUser,
+    );
     const clinic = await getClinicByTenantIdAndClinicId(
       dbUser.dbUser.tenant_id,
-      dbUser.dbUser.clinic_id
+      dbUser.dbUser.clinic_id,
     );
 
     if (!clinic || clinic.otp === 0) {
@@ -347,7 +355,7 @@ router.post("/login", async (req, res) => {
       dbUser.role,
       dbUser.dbUser.tenant_id,
       dbUser.dbUser.clinic_id,
-      dbUser.dbUser.keycloak_id
+      dbUser.dbUser.keycloak_id,
     );
 
     const via = clinic.otp_type;
@@ -383,7 +391,6 @@ router.post("/login", async (req, res) => {
       .json({ message: err.message || "Invalid credentials" });
   }
 });
-
 
 // POST /login
 // router.post("/login", async (req, res) => {
@@ -451,7 +458,7 @@ router.post("/refresh-token", async (req, res, next) => {
     ) {
       clinic = await getClinicByTenantIdAndClinicId(
         userInfo.tenantId,
-        userInfo.clinicId
+        userInfo.clinicId,
       );
     }
 
@@ -498,7 +505,10 @@ router.post("/refresh-token", async (req, res, next) => {
       error: err.response?.data || err.message,
     });
     next(
-      new CustomError(err.response?.data?.error_description || err.message, 401)
+      new CustomError(
+        err.response?.data?.error_description || err.message,
+        401,
+      ),
     );
   }
 });
@@ -617,7 +627,7 @@ router.post("/forgettenpassword", async (req, res, next) => {
       process.env.VIEW_USER_USERNAME,
       process.env.VIEW_USER_PASS,
       realm,
-      clientId
+      clientId,
     );
     const adminToken = tokenRes.access_token;
 
@@ -629,7 +639,7 @@ router.post("/forgettenpassword", async (req, res, next) => {
 
     const clinic = await getClinicByTenantIdAndClinicId(
       user?.attributes?.tenant_id[0],
-      user?.attributes?.clinic_id[0]
+      user?.attributes?.clinic_id[0],
     );
     if (!clinic) {
       log("FORGOT_PASSWORD", "❌ Clinic not found");
@@ -707,13 +717,13 @@ router.post("/reset-password", async (req, res, next) => {
       process.env.VIEW_USER_USERNAME,
       process.env.VIEW_USER_PASS,
       realm,
-      clientId
+      clientId,
     );
     const adminToken = tokenResponse.access_token;
 
     const userResponse = await axios.get(
       `${process.env.KEYCLOAK_BASE_URL}/admin/realms/${realm}/users?username=${username}`,
-      { headers: { Authorization: `Bearer ${adminToken}` } }
+      { headers: { Authorization: `Bearer ${adminToken}` } },
     );
 
     const user = userResponse.data[0];
@@ -731,7 +741,7 @@ router.post("/reset-password", async (req, res, next) => {
           Authorization: `Bearer ${adminToken}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     log("RESET_PASSWORD_ROUTE", "✅ Password reset successful");
@@ -763,7 +773,7 @@ router.post("/register", async (req, res, next) => {
       process.env.VIEW_USER_USERNAME,
       process.env.VIEW_USER_PASS,
       realm,
-      clientId
+      clientId,
     );
     const adminToken = tokenResponse.access_token;
 

@@ -270,7 +270,7 @@ function generateAlphanumericPassword(length = 6) {
 const crypto = require("crypto");
 const { mapFields } = require("../query/Records");
 
-const algorithm = "aes-256-cbc";
+const algorithm = process.env.LOGIN_DATA_ALOGRITHM;
 const key = crypto.scryptSync("dental@123", "salt", 32);
 const iv = crypto.randomBytes(16);
 

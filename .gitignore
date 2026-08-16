@@ -5,3 +5,6 @@ uploads/
 .env*
 logs/dev.log
 *.log
+.scannerwork
+sonar-project.properties
+liquibase

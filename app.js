@@ -1,74 +1,69 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const morgan = require('morgan');
-const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
-const cookieParser = require('cookie-parser');
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+const morgan = require("morgan");
+const cors = require("cors");
+const path = require("path");
+const fs = require("fs");
+const cookieParser = require("cookie-parser");
 
-require('./middlewares/Schedule') //appointment schedule
+require("./middlewares/Schedule"); //appointment schedule
 // const { logFilePath, logStream, logRequest } = require('./logs/logger'); //log file
 
-const errorHandler = require('./middlewares/errorHandler');
-const createTable = require('./models/CreateModel');
-require('dotenv').config();
-const rateLimit = require('express-rate-limit');
-const {userActivityLogger} = require('./utils/UserActivityUtil');
-
-
+const errorHandler = require("./middlewares/errorHandler");
+const createTable = require("./models/CreateModel");
+require("dotenv").config();
+const rateLimit = require("express-rate-limit");
+const { userActivityLogger } = require("./utils/UserActivityUtil");
 
 // Routers
-const userRouter = require('./routes/userRouter');
-const tenantRouter = require('./routes/TenantRouter');
-const clinicRouter = require('./routes/ClinicRouter');
-const dentistRouter = require('./routes/DentistRouter');
-const patientRouter = require('./routes/PatientRouter');
-const appointmentRouter = require('./routes/AppointmentRouter');
-const treatmentRouter = require('./routes/TreatmentRouter');
-const prescriptionRouter = require('./routes/PrescriptionRouter');
-const statusTypeRouter = require('./routes/StatusTypeRouter');
-const statusTypeSubRouter = require('./routes/StatusTypeSubRouter');
-const assetRouter = require('./routes/AssetRouter');
-const expenseRouter = require('./routes/ExpenseRouter');
-const supplierRouter = require('./routes/SupplierRouter');
-const supplierProductsRouter = require('./routes/SupplierProductsRouter');
-const supplierPaymentsRouter = require('./routes/SupplierPaymentsRouter');
-const purchaseOrdersRouter = require('./routes/PurchaseOrdersRouter');
-const supplierReviewsRouter = require('./routes/SupplierReviewsRouter');
-const reminderRouter = require('./routes/ReminderRouter');
-const paymentRouter = require('./routes/PaymentRouter');
-const dashboardRouter = require('./routes/DashboardRouter');
-const appointment_reschedules = require('./routes/AppointmentReschedulesRouter');
-const receptionRouter = require('./routes/ReceptionRouter');
-const superuserRouter = require('./routes/SuperUserRouter');
-const userActivityRouter = require('./routes/UserActivityRouter');
-const loginHistoryRouter = require('./routes/LoginHistoryRouter');
-const notificationRouter = require('./routes/NotificationRouter');
-const toothdetailsRouter = require('./routes/ToothDetailsRouter');
-const referenceRouter = require('./routes/ReferenceRouter');
+const userRouter = require("./routes/userRouter");
+const tenantRouter = require("./routes/TenantRouter");
+const clinicRouter = require("./routes/ClinicRouter");
+const dentistRouter = require("./routes/DentistRouter");
+const patientRouter = require("./routes/PatientRouter");
+const appointmentRouter = require("./routes/AppointmentRouter");
+const treatmentRouter = require("./routes/TreatmentRouter");
+const prescriptionRouter = require("./routes/PrescriptionRouter");
+const statusTypeRouter = require("./routes/StatusTypeRouter");
+const statusTypeSubRouter = require("./routes/StatusTypeSubRouter");
+const assetRouter = require("./routes/AssetRouter");
+const expenseRouter = require("./routes/ExpenseRouter");
+const supplierRouter = require("./routes/SupplierRouter");
+const supplierProductsRouter = require("./routes/SupplierProductsRouter");
+const supplierPaymentsRouter = require("./routes/SupplierPaymentsRouter");
+const purchaseOrdersRouter = require("./routes/PurchaseOrdersRouter");
+const supplierReviewsRouter = require("./routes/SupplierReviewsRouter");
+const reminderRouter = require("./routes/ReminderRouter");
+const paymentRouter = require("./routes/PaymentRouter");
+const dashboardRouter = require("./routes/DashboardRouter");
+const appointment_reschedules = require("./routes/AppointmentReschedulesRouter");
+const receptionRouter = require("./routes/ReceptionRouter");
+const superuserRouter = require("./routes/SuperUserRouter");
+const userActivityRouter = require("./routes/UserActivityRouter");
+const loginHistoryRouter = require("./routes/LoginHistoryRouter");
+const notificationRouter = require("./routes/NotificationRouter");
+const toothdetailsRouter = require("./routes/ToothDetailsRouter");
+const referenceRouter = require("./routes/ReferenceRouter");
 const otpRouter = require("./Modules/MailSmsOtp/MailSmsOtpRouter");
 
-const keycloakrouter=require('./Keycloak/KeycloakAuth')
-const ssoRouter=require('./Keycloak/SSOAuth')
-
+const keycloakrouter = require("./Keycloak/KeycloakAuth");
+const ssoRouter = require("./Keycloak/SSOAuth");
 
 // const compressionMiddleware = require('./middlewares/CompressionMiddleware');
 
-
-const { connect: redisConnect, closeRedis } = require('./config/redis');
+const { connect: redisConnect, closeRedis } = require("./config/redis");
 
 // Initialize Express
 const app = express();
 
-
-// const limiter = rateLimit({
-//   windowMs: 15 * 60 * 1000, // 15 minutes
-//   max: 100, // Limit each IP to 100 requests per window
-//   message: 'Too many requests from this IP, please try again later.',
-//   standardHeaders: true, // Return rate limit info in headers
-//   legacyHeaders: false, // Disable `X-RateLimit-*` headers
-// });
+const limiter = rateLimit({
+  windowMs: 3 * 60 * 1000, // 3 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true, // Return rate limit info in headers
+  legacyHeaders: false, // Disable `X-RateLimit-*` headers
+});
 
 // Apply to all routes
 // app.use(limiter);
@@ -79,27 +74,27 @@ const server = http.createServer(app);
 // Socket.IO setup
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",")
-  : [];
+  : [];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // allow Postman or curl
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // allow Postman or curl
 
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error(`CORS not allowed for origin: ${origin}`));
-    }
-  },
-  credentials: true, // ✅ allow cookies
-}));
-
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS not allowed for origin: ${origin}`));
+      }
+    },
+    credentials: true, // ✅ allow cookies
+  }),
+);
 
 app.get("/check-cookie", (req, res) => {
   // console.log(req.cookies); // all cookies sent by the client
   res.json({ cookies: req.cookies });
 });
-
 
 const cloudflareRegex = /\.trycloudflare\.com$/;
 
@@ -111,7 +106,8 @@ const io = new Server(server, {
       try {
         if (
           allowedOrigins.includes(origin) ||
-          (origin.startsWith('https://')  && cloudflareRegex.test(new URL(origin).hostname))
+          (origin.startsWith("https://") &&
+            cloudflareRegex.test(new URL(origin).hostname))
         ) {
           callback(null, true);
         } else {
@@ -121,7 +117,7 @@ const io = new Server(server, {
         callback(new Error(`Invalid origin: ${origin}`));
       }
     },
-    methods: ['GET', 'POST'],
+    methods: ["GET", "POST"],
     credentials: true,
   },
 });
@@ -129,36 +125,36 @@ const io = new Server(server, {
 // Socket.IO events
 const rooms = {};
 
-io.on('connection', (socket) => {
-  console.log('New client connected');
+io.on("connection", (socket) => {
+  console.log("New client connected");
 
-  socket.on('join', (roomId) => {
+  socket.on("join", (roomId) => {
     socket.join(roomId);
     rooms[roomId] = rooms[roomId] || [];
     rooms[roomId].push(socket.id);
 
-    const otherUser = rooms[roomId].find(id => id !== socket.id);
+    const otherUser = rooms[roomId].find((id) => id !== socket.id);
     if (otherUser) {
-      socket.to(otherUser).emit('ready');
+      socket.to(otherUser).emit("ready");
     }
   });
 
-  socket.on('offer', (offer, roomId) => {
-    socket.to(roomId).emit('offer', offer);
+  socket.on("offer", (offer, roomId) => {
+    socket.to(roomId).emit("offer", offer);
   });
 
-  socket.on('answer', (answer, roomId) => {
-    socket.to(roomId).emit('answer', answer);
+  socket.on("answer", (answer, roomId) => {
+    socket.to(roomId).emit("answer", answer);
   });
 
-  socket.on('ice-candidate', (candidate, roomId) => {
-    socket.to(roomId).emit('ice-candidate', candidate);
+  socket.on("ice-candidate", (candidate, roomId) => {
+    socket.to(roomId).emit("ice-candidate", candidate);
   });
 
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
     for (const roomId in rooms) {
-      rooms[roomId] = rooms[roomId].filter(id => id !== socket.id);
+      rooms[roomId] = rooms[roomId].filter((id) => id !== socket.id);
       if (rooms[roomId].length === 0) delete rooms[roomId];
     }
   });
@@ -166,7 +162,7 @@ io.on('connection', (socket) => {
 
 // Middleware setup
 // app.use(cors());
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
@@ -175,12 +171,9 @@ app.use("/files", express.static("uploads/"));
 app.use(userActivityLogger);
 // app.use(logRequest);
 
-
-
 // ✅ Morgan logging (system time)
 // morgan.token('local-date', () => new Date().toLocaleString());
 // app.use(morgan(':local-date :method :url :status', { stream: logStream }));
-
 
 // Redis connection
 // redisconnect();
@@ -189,7 +182,6 @@ app.use(userActivityLogger);
 
 // process.on("SIGINT", async () => { await closeRedis(); process.exit(0); });
 // process.on("SIGTERM", async () => { await closeRedis(); process.exit(0); });
-
 
 // Initialize tables
 async function initializeTables() {
@@ -202,7 +194,7 @@ async function initializeTables() {
     await createTable.createTreatmentTable();
     await createTable.createPrescriptionTable();
     await createTable.createStatusTypeTable();
-    await createTable.addStatusTypeTableData()
+    await createTable.addStatusTypeTableData();
     await createTable.createStatusTypeSubTable();
     // await createTable.createAssetTable();
     await createTable.addStatusTypeSubTableData();
@@ -227,19 +219,15 @@ async function initializeTables() {
     await createTable.createReferenceTable();
     await createTable.createSuperuUser();
 
-    console.log('All tables created in order.');
+    console.log("All tables created in order.");
   } catch (err) {
-    console.error('Error creating tables:', err);
+    console.error("Error creating tables:", err);
   }
 }
 
 // initializeTables(); // Uncomment if you want to auto-create tables on startup
 
-
 // require('./models/AlterTables')
-
-
-
 
 // ✅ Log viewer route
 // app.get('/logs', (req, res) => {
@@ -256,24 +244,42 @@ async function initializeTables() {
 //   });
 // });
 
-
 // Test route
-app.get('/test', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'Successfully Running' });
+app.get("/test", (req, res) => {
+  res.status(200).json({ status: "OK", message: "Successfully Running" });
 });
 
+const helmet = require("helmet");
 
+app.use(helmet.contentSecurityPolicy());
+
+app.use((req, res, next) => {
+  res.setHeader("X-Frame-Options", "DENY");
+
+  next();
+});
+app.use(
+  helmet.hsts({
+    maxAge: 31536000,
+    includeSubDomains: true,
+  }),
+);
+app.disable("x-powered-by");
 
 const bodyParser = require("body-parser");
-const { authenticateTenantClinicGroup } = require('./Keycloak/AuthenticateTenantAndClient');
-const { generateAppBAccessToken } = require('./utils/CodeGenerator');
-const session = require('express-session');
-const  pool  = require('./config/db');
-const { addUserClinicMapping } = require('./utils/Helpers');
-const { globalCacheMiddleware } = require('./middlewares/GlobalCacheMiddleware');
-const globalInvalidationMiddleware = require('./middlewares/GlobalInvalidationMiddleware');
+const {
+  authenticateTenantClinicGroup,
+} = require("./Keycloak/AuthenticateTenantAndClient");
+const { generateAppBAccessToken } = require("./utils/CodeGenerator");
+const session = require("express-session");
+const pool = require("./config/db");
+const { addUserClinicMapping } = require("./utils/Helpers");
+const {
+  globalCacheMiddleware,
+} = require("./middlewares/GlobalCacheMiddleware");
+const globalInvalidationMiddleware = require("./middlewares/GlobalInvalidationMiddleware");
 
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
 // In production use Redis/DB instead of memory
 let sharedToken = null;
@@ -289,7 +295,6 @@ app.post("/store-token", (req, res) => {
 });
 
 app.post("/v1/add", async (req, res) => {
-
   console.log("========== USER CLINIC ADD API ==========");
   console.log("Request Body:", req.body);
 
@@ -298,15 +303,8 @@ app.post("/v1/add", async (req, res) => {
   console.log("✅ DB Connection Created");
 
   try {
-
-    const {
-      user_id,
-      user_name,
-      role,
-      keycloak_id,
-      clinic_ids,
-      created_by,
-    } = req.body;
+    const { user_id, user_name, role, keycloak_id, clinic_ids, created_by } =
+      req.body;
 
     console.log("Extracted Values:");
     console.log({
@@ -326,7 +324,6 @@ app.post("/v1/add", async (req, res) => {
       !Array.isArray(clinic_ids) ||
       clinic_ids.length === 0
     ) {
-
       console.log("❌ Validation Failed");
 
       return res.status(400).json({
@@ -345,7 +342,6 @@ app.post("/v1/add", async (req, res) => {
 
     // ✅ Loop all clinics
     for (const clinicId of clinic_ids) {
-
       console.log("Checking Clinic:", clinicId);
 
       // ✅ Duplicate Check
@@ -356,46 +352,36 @@ app.post("/v1/add", async (req, res) => {
         WHERE user_id = ?
         AND clinic_id = ?
         `,
-        [user_id, clinicId]
+        [user_id, clinicId],
       );
 
       console.log("Existing Result:", existing);
 
       // Skip duplicates
       if (existing.length > 0) {
-
-        console.log(
-          `⚠️ User already assigned to clinic ${clinicId}`
-        );
+        console.log(`⚠️ User already assigned to clinic ${clinicId}`);
 
         continue;
       }
 
-      console.log(
-        `✅ Assigning user to clinic ${clinicId}`
-      );
+      console.log(`✅ Assigning user to clinic ${clinicId}`);
 
       // ✅ Insert Mapping
-      const insertId = await addUserClinicMapping(
-        conn,
-        {
-          userId: user_id,
-          userName: user_name,
-          role,
-          keycloakId: keycloak_id,
-          clinicId,
-          createdBy: created_by || "SYSTEM",
-        }
-      );
+      const insertId = await addUserClinicMapping(conn, {
+        userId: user_id,
+        userName: user_name,
+        role,
+        keycloakId: keycloak_id,
+        clinicId,
+        createdBy: created_by || "SYSTEM",
+      });
 
       insertedClinicIds.push({
         clinic_id: clinicId,
         insert_id: insertId,
       });
 
-      console.log(
-        `✅ Inserted for clinic ${clinicId}`
-      );
+      console.log(`✅ Inserted for clinic ${clinicId}`);
     }
 
     await conn.commit();
@@ -409,9 +395,7 @@ app.post("/v1/add", async (req, res) => {
       message: "User assigned successfully",
       data: insertedClinicIds,
     });
-
   } catch (error) {
-
     console.log("❌ ERROR OCCURRED");
     console.log(error);
 
@@ -424,13 +408,9 @@ app.post("/v1/add", async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message:
-        error.message ||
-        "Failed to assign user",
+      message: error.message || "Failed to assign user",
     });
-
   } finally {
-
     if (conn) {
       conn.release();
       console.log("✅ DB Connection Released");
@@ -445,13 +425,11 @@ app.post("/v1/add", async (req, res) => {
 app.get(
   "/v1/userclinic/getclinicsbysuperuser/:keycloak_id",
   async (req, res) => {
-
     console.log("========== GET CLINICS BY SUPERUSER ==========");
 
     const conn = await pool.getConnection();
 
     try {
-
       const { keycloak_id } = req.params;
 
       console.log("Superuser ID:", keycloak_id);
@@ -487,7 +465,7 @@ app.get(
 
         WHERE uc.keycloak_id = ?
         `,
-        [keycloak_id]
+        [keycloak_id],
       );
 
       // console.log("Fetched Clinics:", rows.length);
@@ -497,81 +475,76 @@ app.get(
         data: rows,
         total: rows.length,
       });
-
     } catch (error) {
-
       console.log("❌ ERROR:", error);
 
       return res.status(500).json({
         success: false,
-        message:
-          error.message ||
-          "Failed to fetch clinics",
+        message: error.message || "Failed to fetch clinics",
       });
-
     } finally {
-
       conn.release();
 
       console.log("✅ DB Connection Released");
       console.log("========== END API ==========");
     }
-  }
+  },
 );
 
 // Get token (called by Asset app)
-app.get("/v1/get-token", (req, res) => {
-  // if (!sharedToken) {
-  //   return res.status(404).json({ message: "No token available" });
-  // }
-  return res.json({ token: req.cookies.access_token });
-});
+// app.get("/v1/get-token", (req, res) => {
+//   // if (!sharedToken) {
+//   //   return res.status(404).json({ message: "No token available" });
+//   // }
+//   return res.json({ token: req.cookies.access_token });
+// });
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || "a-very-strong-secret",
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    secure: process.env.NODE_ENV === "production", // only true in prod
-    maxAge: 10 * 60 * 1000, // optional: 10 min
-    sameSite: "lax",
-  }
-}));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "a-very-strong-secret",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      secure: process.env.NODE_ENV === "production", // only true in prod
+      maxAge: 10 * 60 * 1000, // optional: 10 min
+      sameSite: "lax",
+    },
+  }),
+);
 
 // app.use(globalCacheMiddleware);
 app.use(globalInvalidationMiddleware);
 
-
 // app.listen(4000, () => console.log("Backend running on http://localhost:4000"));
 
 // API Routes
-app.use('/v1/tenant', tenantRouter);
-app.use('/v1/clinic', clinicRouter);
-app.use('/v1/dentist', dentistRouter);
-app.use('/v1/patient', patientRouter);
-app.use('/v1/appointment', appointmentRouter);
-app.use('/v1/treatment', treatmentRouter);
-app.use('/v1/prescription', prescriptionRouter);
-app.use('/v1/statustype', statusTypeRouter);
-app.use('/v1/statustypesub', statusTypeSubRouter);
-app.use('/v1/asset', assetRouter);
-app.use('/v1/expense', expenseRouter);
-app.use('/v1/supplier', supplierRouter);
-app.use('/v1/supplierproduct', supplierProductsRouter);
-app.use('/v1/supplierpayment', supplierPaymentsRouter);
-app.use('/v1/purchaseorder', purchaseOrdersRouter);
-app.use('/v1/supplierreview', supplierReviewsRouter);
-app.use('/v1/reminder', reminderRouter);
-app.use('/v1/payment', paymentRouter);
-app.use('/v1/dashboard', dashboardRouter);
-app.use('/v1/appointment_reschedules', appointment_reschedules);
-app.use('/v1/reception', receptionRouter);
-app.use('/v1/superuser', superuserRouter);
-app.use('/v1/useractivity', userActivityRouter);
-app.use('/v1/loginhistory', loginHistoryRouter);
-app.use('/v1/notification', notificationRouter);
-app.use('/v1/toothdetails', toothdetailsRouter);
-app.use('/v1/reference', referenceRouter);
+app.use("/v1/tenant", tenantRouter);
+app.use("/v1/clinic", clinicRouter);
+app.use("/v1/dentist", dentistRouter);
+app.use("/v1/patient", patientRouter);
+app.use("/v1/appointment", appointmentRouter);
+app.use("/v1/treatment", treatmentRouter);
+app.use("/v1/prescription", prescriptionRouter);
+app.use("/v1/statustype", statusTypeRouter);
+app.use("/v1/statustypesub", statusTypeSubRouter);
+app.use("/v1/asset", assetRouter);
+app.use("/v1/expense", expenseRouter);
+app.use("/v1/supplier", supplierRouter);
+app.use("/v1/supplierproduct", supplierProductsRouter);
+app.use("/v1/supplierpayment", supplierPaymentsRouter);
+app.use("/v1/purchaseorder", purchaseOrdersRouter);
+app.use("/v1/supplierreview", supplierReviewsRouter);
+app.use("/v1/reminder", reminderRouter);
+app.use("/v1/payment", paymentRouter);
+app.use("/v1/dashboard", dashboardRouter);
+app.use("/v1/appointment_reschedules", appointment_reschedules);
+app.use("/v1/reception", receptionRouter);
+app.use("/v1/superuser", superuserRouter);
+app.use("/v1/useractivity", userActivityRouter);
+app.use("/v1/loginhistory", loginHistoryRouter);
+app.use("/v1/notification", notificationRouter);
+app.use("/v1/toothdetails", toothdetailsRouter);
+app.use("/v1/reference", referenceRouter);
 app.use("/v1/messaging", otpRouter);
 app.use("/v1/keycloak", keycloakrouter);
 app.use("/v1/ssoAuth", ssoRouter);
@@ -579,4 +552,4 @@ app.use("/v1/ssoAuth", ssoRouter);
 // Error handler must be last
 app.use(errorHandler);
 
-module.exports={app}
+module.exports = { app };
