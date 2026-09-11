@@ -47,7 +47,7 @@ const toothdetailsRouter = require("./routes/ToothDetailsRouter");
 const referenceRouter = require("./routes/ReferenceRouter");
 const otpRouter = require("./Modules/MailSmsOtp/MailSmsOtpRouter");
 
-const keycloakrouter = require("./Keycloak/KeycloakAuth");
+
 const ssoRouter = require("./Keycloak/SSOAuth");
 
 // const compressionMiddleware = require('./middlewares/CompressionMiddleware');
@@ -452,6 +452,7 @@ app.get(
           c.clinic_id,
           c.clinic_name,
           c.clinic_logo,
+          c.teleconsultation_supported,
           c.city,
           c.state,
           c.country,
@@ -546,7 +547,6 @@ app.use("/v1/notification", notificationRouter);
 app.use("/v1/toothdetails", toothdetailsRouter);
 app.use("/v1/reference", referenceRouter);
 app.use("/v1/messaging", otpRouter);
-app.use("/v1/keycloak", keycloakrouter);
 app.use("/v1/ssoAuth", ssoRouter);
 
 // Error handler must be last

@@ -3,16 +3,21 @@ const { CustomError } = require("../middlewares/CustomeError");
 const helper = require("../utils/Helpers");
 const record = require("../query/Records");
 const { formatDateOnly } = require("../utils/DateUtils");
-const moment = require('moment');
+const moment = require("moment");
 
 // Create Clinic
-const createClinic = async (connection,table, columns, values) => {
+const createClinic = async (connection, table, columns, values) => {
   try {
-    const clinic = await record.createRecord(table, columns, values,connection);
+    const clinic = await record.createRecord(
+      table,
+      columns,
+      values,
+      connection,
+    );
     return clinic.insertId;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw error
+    throw error;
   }
 };
 
@@ -24,32 +29,32 @@ const getAllClinicsByTenantId = async (tenantId, limit, offset) => {
       "tenant_id",
       tenantId,
       limit,
-      offset
+      offset,
     );
     return clinics;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw error
+    throw error;
   }
 };
 
-const getAllClinics = async (limit,offset) => {
+const getAllClinics = async (limit, offset) => {
   const query = `select clinic_id,tenant_id,clinic_name,phone_number,address,city,state,country,landmark,clinic_logo,email,available_services,operating_hours from clinic LIMIT ? OFFSET ?`;
   const conn = await pool.getConnection();
   try {
-    const rows = await conn.query(query,[limit,offset]);
+    const rows = await conn.query(query, [limit, offset]);
     // console.log('rows:',rows)
     return rows[0];
   } catch (error) {
     console.error(error);
-    throw error
+    throw error;
   } finally {
     conn.release();
   }
 };
 
 // Get Clinic by Tenant ID and Clinic ID
-const getClinicByTenantIdAndClinicId = async (tenant_id, clinic_id,conn) => {
+const getClinicByTenantIdAndClinicId = async (tenant_id, clinic_id, conn) => {
   try {
     const rows = await record.getRecordByIdAndTenantId(
       "clinic",
@@ -57,18 +62,24 @@ const getClinicByTenantIdAndClinicId = async (tenant_id, clinic_id,conn) => {
       tenant_id,
       "clinic_id",
       clinic_id,
-      conn
+      conn,
     );
     // console.log('rows',rows,tenant_id,clinic_id);
     return rows || null;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw error
+    throw error;
   }
 };
 
 // Update Clinic
-const updateClinic = async (connection,clinic_id, columns, values, tenant_id) => {
+const updateClinic = async (
+  connection,
+  clinic_id,
+  columns,
+  values,
+  tenant_id,
+) => {
   const conditionColumn = ["tenant_id", "clinic_id"];
   const conditionValue = [tenant_id, clinic_id];
 
@@ -79,17 +90,21 @@ const updateClinic = async (connection,clinic_id, columns, values, tenant_id) =>
       values,
       conditionColumn,
       conditionValue,
-      connection
+      connection,
     );
     return result.affectedRows;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw error
+    throw error;
   }
 };
 
 // Delete Clinic
-const deleteClinicByTenantIdAndClinicId = async (conn,tenant_id, clinic_id) => {
+const deleteClinicByTenantIdAndClinicId = async (
+  conn,
+  tenant_id,
+  clinic_id,
+) => {
   const conditionColumn = ["tenant_id", "clinic_id"];
   const conditionValue = [tenant_id, clinic_id];
 
@@ -98,12 +113,12 @@ const deleteClinicByTenantIdAndClinicId = async (conn,tenant_id, clinic_id) => {
       "clinic",
       conditionColumn,
       conditionValue,
-      conn
+      conn,
     );
     return result.affectedRows;
   } catch (error) {
     console.error("Error executing query:", error);
-    throw error
+    throw error;
   }
 };
 
@@ -116,7 +131,7 @@ const checkClinicExistsByTenantIdAndClinicId = async (tenantId, clinicId) => {
     return rows.length > 0;
   } catch (error) {
     console.error(error);
-    throw error
+    throw error;
   } finally {
     conn.release();
   }
@@ -130,7 +145,7 @@ const getClinicNameAndAddressByClinicId = async (tenantId, clinicId) => {
     return rows[0][0];
   } catch (error) {
     console.error(error);
-    throw error
+    throw error;
   } finally {
     conn.release();
   }
@@ -150,7 +165,7 @@ const updateDoctorCount = async (tenantId, clinicId, assign = "true") => {
     throw new Error(
       `Database Operation Failed while ${
         assign ? "creat" : "updat"
-      }ing doctor count`
+      }ing doctor count`,
     );
   } finally {
     conn.release();
@@ -171,158 +186,299 @@ const updatePatientCount = async (tenantId, clinicId, assign = true) => {
     throw new Error(
       `Database Operation Failed while ${
         assign ? "creat" : "updat"
-      }ing patient count`
+      }ing patient count`,
     );
   } finally {
     conn.release();
   }
 };
 
-
-async function getFinanceSummary(tenant_id, clinic_id, startDate, endDate, dentist_id = null) {
+async function getFinanceSummary(
+  tenant_id,
+  clinic_id,
+  startDate,
+  endDate,
+  dentist_id = null,
+) {
   const conn = await pool.getConnection();
+
   try {
     const query = `
       SELECT
         d.date,
+
         -- Payment income
         COALESCE(p_income.total, 0) AS payment_income,
+
         -- Appointment income
         COALESCE(a_income.total, 0) AS appointment_income,
+
         -- Treatment income
         COALESCE(t_income.total, 0) AS treatment_income,
+
         -- Expense types
         COALESCE(e_operational.total, 0) AS operational_expense,
         COALESCE(e_supplier.total, 0) AS supplier_expense
+
       FROM (
-        SELECT DATE(payment_date) AS date FROM payment
-        WHERE tenant_id = ? AND clinic_id = ? AND (? IS NULL OR dentist_id = ?) AND payment_status = 'completed' AND DATE(payment_date) BETWEEN ? AND ?
-        UNION
-        SELECT appointment_date AS date FROM appointment
-        WHERE tenant_id = ? AND clinic_id = ? AND (? IS NULL OR dentist_id = ?) AND status = 'completed' AND appointment_date BETWEEN ? AND ?
-        UNION
-        SELECT treatment_date AS date FROM treatment
-        WHERE tenant_id = ? AND clinic_id = ? AND (? IS NULL OR dentist_id = ?) AND treatment_date BETWEEN ? AND ?
-        UNION
-        SELECT expense_date AS date FROM expense
-        WHERE tenant_id = ? AND clinic_id = ? AND expense_date BETWEEN ? AND ?
-        UNION
-        SELECT payment_date AS date FROM supplier_payments
-        WHERE tenant_id = ? AND clinic_id = ? AND payment_date BETWEEN ? AND ?
-      ) AS d
-      LEFT JOIN (
-        SELECT DATE(payment_date) AS date, SUM(final_amount) AS total
+        SELECT DATE(payment_date) AS date
         FROM payment
-        WHERE payment_status = 'completed' AND tenant_id = ? AND clinic_id = ? AND (? IS NULL OR dentist_id = ?) AND DATE(payment_date) BETWEEN ? AND ?
-        GROUP BY DATE(payment_date)
-      ) AS p_income ON d.date = p_income.date
-      LEFT JOIN (
-        SELECT appointment_date AS date, SUM(consultation_fee - IFNULL(discount_applied, 0)) AS total
+        WHERE tenant_id = ?
+          AND clinic_id = ?
+          AND (? IS NULL OR dentist_id = ?)
+          AND payment_status = 'completed'
+          AND DATE(payment_date) BETWEEN ? AND ?
+
+        UNION
+
+        SELECT appointment_date AS date
         FROM appointment
-        WHERE status = 'completed' AND tenant_id = ? AND clinic_id = ? AND (? IS NULL OR dentist_id = ?) AND appointment_date BETWEEN ? AND ?
-        GROUP BY appointment_date
-      ) AS a_income ON d.date = a_income.date
-      LEFT JOIN (
-        SELECT treatment_date AS date, SUM(cost) AS total
+        WHERE tenant_id = ?
+          AND clinic_id = ?
+          AND (? IS NULL OR dentist_id = ?)
+          AND status = 'completed'
+          AND appointment_date BETWEEN ? AND ?
+
+        UNION
+
+        SELECT treatment_date AS date
         FROM treatment
-        WHERE tenant_id = ? AND clinic_id = ? AND (? IS NULL OR dentist_id = ?) AND treatment_date BETWEEN ? AND ?
-        GROUP BY treatment_date
-      ) AS t_income ON d.date = t_income.date
-      LEFT JOIN (
-        SELECT expense_date AS date, SUM(expense_amount) AS total
+        WHERE tenant_id = ?
+          AND clinic_id = ?
+          AND (? IS NULL OR dentist_id = ?)
+          AND treatment_date BETWEEN ? AND ?
+
+        UNION
+
+        SELECT expense_date AS date
         FROM expense
-        WHERE tenant_id = ? AND clinic_id = ? AND expense_date BETWEEN ? AND ?
-        GROUP BY expense_date
-      ) AS e_operational ON d.date = e_operational.date
-      LEFT JOIN (
-        SELECT payment_date AS date, SUM(amount) AS total
+        WHERE tenant_id = ?
+          AND clinic_id = ?
+          AND expense_date BETWEEN ? AND ?
+
+        UNION
+
+        SELECT payment_date AS date
         FROM supplier_payments
-        WHERE tenant_id = ? AND clinic_id = ? AND payment_date BETWEEN ? AND ?
+        WHERE tenant_id = ?
+          AND clinic_id = ?
+          AND payment_date BETWEEN ? AND ?
+      ) AS d
+
+      LEFT JOIN (
+        SELECT
+          DATE(payment_date) AS date,
+          SUM(final_amount) AS total
+        FROM payment
+        WHERE payment_status = 'completed'
+          AND tenant_id = ?
+          AND clinic_id = ?
+          AND (? IS NULL OR dentist_id = ?)
+          AND DATE(payment_date) BETWEEN ? AND ?
+        GROUP BY DATE(payment_date)
+      ) AS p_income
+        ON d.date = p_income.date
+
+      LEFT JOIN (
+        SELECT
+          appointment_date AS date,
+          SUM(
+            consultation_fee - IFNULL(discount_applied, 0)
+          ) AS total
+        FROM appointment
+        WHERE status = 'completed'
+          AND tenant_id = ?
+          AND clinic_id = ?
+          AND (? IS NULL OR dentist_id = ?)
+          AND appointment_date BETWEEN ? AND ?
+        GROUP BY appointment_date
+      ) AS a_income
+        ON d.date = a_income.date
+
+      LEFT JOIN (
+        SELECT
+          treatment_date AS date,
+          SUM(cost) AS total
+        FROM treatment
+        WHERE tenant_id = ?
+          AND clinic_id = ?
+          AND (? IS NULL OR dentist_id = ?)
+          AND treatment_date BETWEEN ? AND ?
+        GROUP BY treatment_date
+      ) AS t_income
+        ON d.date = t_income.date
+
+      LEFT JOIN (
+        SELECT
+          expense_date AS date,
+          SUM(expense_amount) AS total
+        FROM expense
+        WHERE tenant_id = ?
+          AND clinic_id = ?
+          AND expense_date BETWEEN ? AND ?
+        GROUP BY expense_date
+      ) AS e_operational
+        ON d.date = e_operational.date
+
+      LEFT JOIN (
+        SELECT
+          payment_date AS date,
+          SUM(amount) AS total
+        FROM supplier_payments
+        WHERE tenant_id = ?
+          AND clinic_id = ?
+          AND payment_date BETWEEN ? AND ?
         GROUP BY payment_date
-      ) AS e_supplier ON d.date = e_supplier.date
+      ) AS e_supplier
+        ON d.date = e_supplier.date
+
       ORDER BY d.date;
     `;
 
     const numTenantId = Number(tenant_id);
     const numClinicId = Number(clinic_id);
+
     const numDentistId = dentist_id !== null ? Number(dentist_id) : null;
 
-    // Helper to repeat params for each block
-    const dateParams = (withDentist = true) => 
-      withDentist 
-        ? [numTenantId, numClinicId, numDentistId, numDentistId, startDate, endDate]
-        : [numTenantId, numClinicId, startDate, endDate];
+    // ============================================================
+    // Helper for query parameters
+    // ============================================================
+
+    const dateParams = (withDentist = true) => {
+      if (withDentist) {
+        return [
+          numTenantId,
+          numClinicId,
+          numDentistId,
+          numDentistId,
+          startDate,
+          endDate,
+        ];
+      }
+
+      return [numTenantId, numClinicId, startDate, endDate];
+    };
+
+    // ============================================================
+    // Query parameters
+    // ============================================================
 
     const params = [
-      // Main date union sources
-      ...dateParams(true),  // payment
-      ...dateParams(true),  // appointment
-      ...dateParams(true),  // treatment
+      // Main date UNION sources
+      ...dateParams(true), // payment
+      ...dateParams(true), // appointment
+      ...dateParams(true), // treatment
       ...dateParams(false), // expense
-      ...dateParams(false), // supplier_payments
+      ...dateParams(false), // supplier payments
 
-      // Joins
-      ...dateParams(true),  // p_income
-      ...dateParams(true),  // a_income
-      ...dateParams(true),  // t_income
-      ...dateParams(false), // e_operational
-      ...dateParams(false)  // e_supplier
+      // LEFT JOIN sources
+      ...dateParams(true), // payment income
+      ...dateParams(true), // appointment income
+      ...dateParams(true), // treatment income
+      ...dateParams(false), // operational expense
+      ...dateParams(false), // supplier expense
     ];
+
+    // ============================================================
+    // Execute query
+    // ============================================================
 
     const [rows] = await conn.query(query, params);
 
-    // Build map with detailed breakdown
+    // ============================================================
+    // Build date-based result map
+    // ============================================================
+
     const resultMap = {};
-    rows.forEach(row => {
+
+    rows.forEach((row) => {
       const dateStr = moment(row.date).format("YYYY-MM-DD");
-      const pi = parseFloat(row.payment_income || 0);
-      const ai = parseFloat(row.appointment_income || 0);
-      const ti = parseFloat(row.treatment_income || 0);
-      const oe = parseFloat(row.operational_expense || 0);
-      const se = parseFloat(row.supplier_expense || 0);
+
+      const paymentIncome = parseFloat(row.payment_income || 0);
+
+      const appointmentIncome = parseFloat(row.appointment_income || 0);
+
+      const treatmentIncome = parseFloat(row.treatment_income || 0);
+
+      const operationalExpense = parseFloat(row.operational_expense || 0);
+
+      const supplierExpense = parseFloat(row.supplier_expense || 0);
 
       resultMap[dateStr] = {
         income: {
-          payment: pi,
-          appointment: ai,
-          treatment: ti,
-          total: pi + ai + ti
+          payment: paymentIncome,
+          appointment: appointmentIncome,
+          treatment: treatmentIncome,
+          total: paymentIncome + appointmentIncome + treatmentIncome,
         },
+
         expense: {
-          operational: oe,
-          supplier: se,
-          total: oe + se
-        }
+          operational: operationalExpense,
+          supplier: supplierExpense,
+          total: operationalExpense + supplierExpense,
+        },
       };
     });
 
+    // ============================================================
+    // Validate date range
+    // ============================================================
+
+    const start = moment(startDate).startOf("day");
+    const end = moment(endDate).startOf("day");
+
+    if (!start.isValid() || !end.isValid()) {
+      throw new Error("Invalid startDate or endDate");
+    }
+
+    if (end.isBefore(start)) {
+      return [];
+    }
+
+    // ============================================================
     // Fill all dates in range
+    // ============================================================
+
     const result = [];
-    let current = moment(startDate);
-    const last = moment(endDate);
-    while (current <= last) {
-      const dateStr = current.format("YYYY-MM-DD");
+
+    const totalDays = end.diff(start, "days");
+
+    for (let day = 0; day <= totalDays; day++) {
+      const currentDate = start.clone().add(day, "days");
+
+      const dateStr = currentDate.format("YYYY-MM-DD");
+
       const entry = resultMap[dateStr] || {
-        income: { payment: 0, appointment: 0, treatment: 0, total: 0 },
-        expense: { operational: 0, supplier: 0, total: 0 }
+        income: {
+          payment: 0,
+          appointment: 0,
+          treatment: 0,
+          total: 0,
+        },
+
+        expense: {
+          operational: 0,
+          supplier: 0,
+          total: 0,
+        },
       };
+
       result.push({
         date: dateStr,
         income: entry.income,
-        expense: entry.expense
+        expense: entry.expense,
       });
-      current.add(1, "day");
     }
 
     return result;
   } catch (error) {
     console.error("Error in getFinanceSummary:", error);
+
     throw error;
   } finally {
     conn.release();
   }
 }
-
 
 const getFinanceSummarybyDentist = async (tenant_id, clinic_id, dentist_id) => {
   const conn = await pool.getConnection();
@@ -340,7 +496,7 @@ const getFinanceSummarybyDentist = async (tenant_id, clinic_id, dentist_id) => {
         tenant_id,
         clinic_id,
         dentist_id,
-      ]
+      ],
     ),
     conn.query(
       `SELECT treatment_date AS date, cost AS amount FROM treatment 
@@ -350,7 +506,7 @@ const getFinanceSummarybyDentist = async (tenant_id, clinic_id, dentist_id) => {
         tenant_id,
         clinic_id,
         dentist_id,
-      ]
+      ],
     ),
     conn.query(
       `SELECT e.expense_date AS date, e.expense_amount AS amount
@@ -360,7 +516,7 @@ const getFinanceSummarybyDentist = async (tenant_id, clinic_id, dentist_id) => {
         new Date(now.getFullYear() - 4, now.getMonth(), now.getDate()),
         tenant_id,
         clinic_id,
-      ]
+      ],
     ),
   ]);
 
@@ -379,7 +535,7 @@ const getClinicSettingsByTenantIdAndClinicId = async (tenantId, clinicId) => {
     return rows[0][0];
   } catch (error) {
     console.error(error);
-    throw error
+    throw error;
   } finally {
     conn.release();
   }
@@ -405,13 +561,11 @@ const updateClinicSettings = async (tenantId, clinicId, details) => {
     ]);
     return result.affectedRows > 0;
   } catch (error) {
-    throw error
+    throw error;
   } finally {
     conn.release();
   }
 };
-
-
 
 module.exports = {
   createClinic,
@@ -427,5 +581,5 @@ module.exports = {
   getFinanceSummarybyDentist,
   getClinicSettingsByTenantIdAndClinicId,
   updateClinicSettings,
-  getAllClinics
+  getAllClinics,
 };

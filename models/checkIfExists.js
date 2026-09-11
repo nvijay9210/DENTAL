@@ -144,6 +144,8 @@ const checkIfExists = async (table, field, value, tenantId) => {
       [table, field, value, tenantId]
     );
 
+    console.log('result:',result)
+
     return result.length > 0 ? true : false;
   } catch (err) {
     console.error(err);

@@ -16,6 +16,7 @@ exports.createReminder = async (req, res, next) => {
   try {
     // Validate reminder data
     await reminderValidation.createReminderValidation(details);
+    console.log('RemiderValidation Finished')
 
     // Create the reminder
     const id = await reminderService.createReminder(details);
@@ -379,7 +380,7 @@ exports.deleteReminderByTenantIdAndReminderId = async (req, res, next) => {
       tenant_id
     );
 
-    if (!reminder1) throw new CustomError("Reminder not found", 404);
+    // if (!reminder1) throw new CustomError("Reminder not found", 404);
 
     // Delete the reminder
     await reminderService.deleteReminderByTenantIdAndReminderId(
