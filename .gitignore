@@ -8,3 +8,4 @@ logs/dev.log
 .scannerwork
 sonar-project.properties
 liquibase
+/generated/prisma

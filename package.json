@@ -2,16 +2,24 @@
   "name": "dental",
   "version": "1.0.0",
   "main": "server.js",
-  "scripts": {
-    "start": "cross-env NODE_ENV=production node server.js",
-    "start-redis-dental": "redis-server C:/Redis/redis-dental.conf",
-    "dev": "cross-env NODE_ENV=development nodemon server.js",
-    "test": "cross-env NODE_ENV=test jest"
-  },
+"scripts": {
+  "start": "cross-env NODE_ENV=production node server.js",
+  "start-redis-dental": "redis-server C:/Redis/redis-dental.conf",
+  "dev": "cross-env NODE_ENV=development nodemon server.js",
+  "test": "cross-env NODE_ENV=test jest",
+
+  "db:generate": "prisma generate",
+  "db:migrate": "prisma migrate dev",
+  "db:status": "prisma migrate status",
+  "db:deploy": "prisma migrate deploy",
+  "db:validate": "prisma validate",
+  "db:pull": "prisma db pull"
+},
   "author": "VIJAY N",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "@sendgrid/mail": "^8.1.6",
     "axios": "^1.9.0",
     "bcrypt": "^6.0.0",
@@ -53,6 +61,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "prisma": "^6.19.3"
   }
 }
