@@ -329,7 +329,13 @@ router.post("/tokensave", (req, res) => {
 // 🔐 MAIN LOGIN ROUTE
 // ============================================================================
 router.post("/login", async (req, res) => {
-  log("LOGIN_FLOW", "🚀 Starting login flow", { body: req.body });
+
+  log("LOGIN_FLOW", "🚀 Starting login flow", {
+  username: req.body?.username,
+  host: req.body?.host,
+  hasPassword: !!req.body?.password,
+  hasOtp: !!req.body?.otp,
+});
 
   try {
     let { username, password, host, otp } = req.body;
@@ -398,7 +404,7 @@ router.post("/login", async (req, res) => {
 
     // === Verify Token in Database ===
     const dbUser = await verifyUserTokenInDB(tokens.access_token);
-    console.log(dbUser);
+  
     log("DB_VERIFY", "Database verification completed", {
       role: dbUser?.role,
       userId: dbUser?.dbUser?.user_id,
