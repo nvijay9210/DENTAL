@@ -1,12 +1,12 @@
 const twilio = require("twilio");
-const sgMail = require("@sendgrid/mail");
+// const sgMail = require("@sendgrid/mail");
 
 const client = twilio(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
 );
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 /**
  * Send Notification (SMS / WhatsApp / Email)
