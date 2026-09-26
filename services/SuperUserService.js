@@ -1,10 +1,7 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const superuserModel = require("../models/SuperUserModel");
 const pool = require("../config/db");
-const {
-  getOrSetCache,
-  invalidateCacheByPattern,
-} = require("../config/redisConfig");
+const { getOrSetCache, invalidateCacheByPattern } = require("../config/redis");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
@@ -16,7 +13,7 @@ const {
   addUserToGroup,
   updateUserInKeycloak,
 } = require("../Keycloak/KeycloakAdmin");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 const { rollbackKeycloakUser } = require("../Keycloak/KeycloakService");
 const { createEntity, updateEntity } = require("../utils/Reusability");
 
@@ -140,7 +137,7 @@ const getSuperUserByTenantIdAndSuperUserId = async (tenantId, superuserId) => {
 
 // Update SuperUser
 const updateSuperUser = async (superuserId, data, tenant_id, token, realm) => {
-  console.log('superuserservice:',superuserId, data, tenant_id, token, realm)
+  console.log("superuserservice:", superuserId, data, tenant_id, token, realm);
   try {
     return await updateEntity({
       entityId: superuserId,

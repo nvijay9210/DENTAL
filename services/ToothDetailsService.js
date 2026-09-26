@@ -4,13 +4,13 @@ const {
   redisClient,
   getOrSetCache,
   invalidateCacheByPattern,
-} = require("../config/redisConfig");
+} = require("../config/redis");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 
 const toothdetailsFields = {
   tenant_id: (val) => val,
@@ -27,7 +27,7 @@ const toothdetailsFields = {
 };
 
 const toothdetailsFieldsReverseMap = {
-  toothdetails_id:(val)=>val,
+  toothdetails_id: (val) => val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   dentist_id: (val) => val,
@@ -59,7 +59,7 @@ const createToothDetails = async (data) => {
     const toothdetailsId = await toothdetailsModel.createToothDetails(
       "toothdetails",
       columns,
-      values
+      values,
     );
     await invalidateCacheByPattern("toothdetails:*");
     return toothdetailsId;
@@ -67,7 +67,7 @@ const createToothDetails = async (data) => {
     console.error("Failed to create toothdetails:", error);
     throw new CustomError(
       `Failed to create toothdetails: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -76,7 +76,7 @@ const createToothDetails = async (data) => {
 const getAllToothDetailssByTenantId = async (
   tenantId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("toothdetails", "list", {
@@ -90,13 +90,13 @@ const getAllToothDetailssByTenantId = async (
       const result = await toothdetailsModel.getAllToothDetailssByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
 
     const convertedRows = toothdetailss.data.map((toothdetails) =>
-      helper.convertDbToFrontend(toothdetails, toothdetailsFieldsReverseMap)
+      helper.convertDbToFrontend(toothdetails, toothdetailsFieldsReverseMap),
     );
 
     return { data: convertedRows, total: toothdetailss.total };
@@ -111,14 +111,14 @@ const getAllToothDetailsByTenantAndClinicAndDentistAndPatientId = async (
   dentistId,
   patientId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("toothdetails", "list", {
     tenant_id: tenantId,
-    clinic_id:clinicId,
-    dentist_id:dentistId,
-    patient_id:patientId,
+    clinic_id: clinicId,
+    dentist_id: dentistId,
+    patient_id: patientId,
     page,
     limit,
   });
@@ -132,13 +132,13 @@ const getAllToothDetailsByTenantAndClinicAndDentistAndPatientId = async (
           dentistId,
           patientId,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
 
     const convertedRows = toothdetailss.data.map((toothdetails) =>
-      helper.convertDbToFrontend(toothdetails, toothdetailsFieldsReverseMap)
+      helper.convertDbToFrontend(toothdetails, toothdetailsFieldsReverseMap),
     );
 
     return { data: convertedRows, total: toothdetailss.total };
@@ -153,13 +153,13 @@ const getAllToothDetailsByTenantAndClinicAndPatientId = async (
   clinicId,
   patientId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("toothdetails", "list", {
     tenant_id: tenantId,
-    clinic_id:clinicId,
-    patient_id:patientId,
+    clinic_id: clinicId,
+    patient_id: patientId,
     page,
     limit,
   });
@@ -172,12 +172,10 @@ const getAllToothDetailsByTenantAndClinicAndPatientId = async (
           clinicId,
           patientId,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
-
-   
 
     const convertedRows = toothdetailss.data.map((r) => ({
       ...r,
@@ -194,17 +192,17 @@ const getAllToothDetailsByTenantAndClinicAndPatientId = async (
 // Get ToothDetails by ID & Tenant
 const getToothDetailsByTenantIdAndToothDetailsId = async (
   tenantId,
-  toothdetailsId
+  toothdetailsId,
 ) => {
   try {
     const toothdetails =
       await toothdetailsModel.getToothDetailsByTenantAndToothDetailsId(
         tenantId,
-        toothdetailsId
+        toothdetailsId,
       );
     const convertedRows = helper.convertDbToFrontend(
       toothdetails,
-      toothdetailsFieldsReverseMap
+      toothdetailsFieldsReverseMap,
     );
 
     return convertedRows;
@@ -226,7 +224,7 @@ const updateToothDetails = async (toothdetailsId, data, tenant_id) => {
       toothdetailsId,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     // if (affectedRows === 0) {
@@ -244,13 +242,13 @@ const updateToothDetails = async (toothdetailsId, data, tenant_id) => {
 // Delete ToothDetails
 const deleteToothDetailsByTenantIdAndToothDetailsId = async (
   tenantId,
-  toothdetailsId
+  toothdetailsId,
 ) => {
   try {
     const affectedRows =
       await toothdetailsModel.deleteToothDetailsByTenantAndToothDetailsId(
         tenantId,
-        toothdetailsId
+        toothdetailsId,
       );
     // if (affectedRows === 0) {
     //   throw new CustomError(err, 500);
@@ -261,7 +259,7 @@ const deleteToothDetailsByTenantIdAndToothDetailsId = async (
   } catch (error) {
     throw new CustomError(
       `Failed to delete toothdetails: ${error.message}`,
-      404
+      404,
     );
   }
 };

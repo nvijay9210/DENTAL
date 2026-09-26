@@ -4,7 +4,7 @@ const {
   redisClient,
   getOrSetCache,
   invalidateCacheByPattern,
-} = require("../config/redisConfig");
+} = require("../config/redis");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
@@ -21,7 +21,7 @@ const supplier_reviewsFields = {
   rating_quality: (val) => parseInt(val),
   rating_delivery: (val) => parseInt(val),
   rating_communication: (val) => parseInt(val),
-  comment:helper.safeStringify,
+  comment: helper.safeStringify,
   reviewed_by: (val) => val,
 };
 const supplier_reviewsFieldsReverseMap = {
@@ -53,7 +53,7 @@ const createSupplierReviews = async (data) => {
       await supplier_reviewsModel.createSupplierReviews(
         "supplier_reviews",
         columns,
-        values
+        values,
       );
     await invalidateCacheByPattern("supplier_reviews:*");
     return supplier_reviewsId;
@@ -61,7 +61,7 @@ const createSupplierReviews = async (data) => {
     console.error("Failed to create supplier_reviews:", error);
     throw new CustomError(
       `Failed to create supplier_reviews: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -70,7 +70,7 @@ const createSupplierReviews = async (data) => {
 const getAllSupplierReviewssByTenantId = async (
   tenantId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("supplier_reviews", "list", {
@@ -85,7 +85,7 @@ const getAllSupplierReviewssByTenantId = async (
         await supplier_reviewsModel.getAllSupplierReviewssByTenantId(
           tenantId,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
@@ -93,8 +93,8 @@ const getAllSupplierReviewssByTenantId = async (
     const convertedRows = supplier_reviewss.data.map((supplier_reviews) =>
       helper.convertDbToFrontend(
         supplier_reviews,
-        supplier_reviewsFieldsReverseMap
-      )
+        supplier_reviewsFieldsReverseMap,
+      ),
     );
 
     return { data: convertedRows, total: supplier_reviewss.total };
@@ -107,7 +107,7 @@ const getAllSupplierReviewsByTenantIdAndSupplierId = async (
   tenantId,
   supplier_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("supplier_reviews", "list", {
@@ -124,7 +124,7 @@ const getAllSupplierReviewsByTenantIdAndSupplierId = async (
           tenantId,
           supplier_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
@@ -132,8 +132,8 @@ const getAllSupplierReviewsByTenantIdAndSupplierId = async (
     const convertedRows = supplier_reviewss.data.map((supplier_reviews) =>
       helper.convertDbToFrontend(
         supplier_reviews,
-        supplier_reviewsFieldsReverseMap
-      )
+        supplier_reviewsFieldsReverseMap,
+      ),
     );
 
     return { data: convertedRows, total: supplier_reviewss.total };
@@ -146,25 +146,25 @@ const getAllSupplierReviewsByTenantIdAndSupplierId = async (
 // Get SupplierReviews by ID & Tenant
 const getSupplierReviewsByTenantIdAndSupplierReviewsId = async (
   tenantId,
-  supplier_reviewsId
+  supplier_reviewsId,
 ) => {
   try {
     const supplier_reviews =
       await supplier_reviewsModel.getSupplierReviewsByTenantAndSupplierReviewsId(
         tenantId,
-        supplier_reviewsId
+        supplier_reviewsId,
       );
 
     const convertedRows = helper.convertDbToFrontend(
       supplier_reviews,
-      supplier_reviewsFieldsReverseMap
+      supplier_reviewsFieldsReverseMap,
     );
 
     return convertedRows;
   } catch (error) {
     throw new CustomError(
       "Failed to get supplier_reviews: " + error.message,
-      404
+      404,
     );
   }
 };
@@ -181,7 +181,7 @@ const updateSupplierReviews = async (supplier_reviewsId, data, tenant_id) => {
       supplier_reviewsId,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     // if (affectedRows === 0) {
@@ -202,13 +202,13 @@ const updateSupplierReviews = async (supplier_reviewsId, data, tenant_id) => {
 // Delete SupplierReviews
 const deleteSupplierReviewsByTenantIdAndSupplierReviewsId = async (
   tenantId,
-  supplier_reviewsId
+  supplier_reviewsId,
 ) => {
   try {
     const affectedRows =
       await supplier_reviewsModel.deleteSupplierReviewsByTenantAndSupplierReviewsId(
         tenantId,
-        supplier_reviewsId
+        supplier_reviewsId,
       );
     // if (affectedRows === 0) {
     //   throw new CustomError(err, 500);
@@ -219,7 +219,7 @@ const deleteSupplierReviewsByTenantIdAndSupplierReviewsId = async (
   } catch (error) {
     throw new CustomError(
       `Failed to delete supplier_reviews: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -230,5 +230,5 @@ module.exports = {
   getSupplierReviewsByTenantIdAndSupplierReviewsId,
   updateSupplierReviews,
   deleteSupplierReviewsByTenantIdAndSupplierReviewsId,
-  getAllSupplierReviewsByTenantIdAndSupplierId
+  getAllSupplierReviewsByTenantIdAndSupplierId,
 };

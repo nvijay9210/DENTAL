@@ -1,10 +1,7 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const clinicModel = require("../models/ClinicModel");
 const pool = require("../config/db");
-const {
-  invalidateCacheByPattern,
-  getOrSetCache,
-} = require("../config/redisConfig");
+const { invalidateCacheByPattern, getOrSetCache } = require("../config/redis");
 const { decodeJsonFields } = require("../utils/Helpers");
 const helper = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
@@ -15,8 +12,13 @@ const {
 
 const message = require("../middlewares/ErrorMessages");
 const { convertUTCToLocal } = require("../utils/DateUtils");
-const { createGroup, deleteKeycloakGroup, updateGroupAttributes, getGroupIdByName } = require("../Keycloak/KeycloakAdmin");
-const { buildCacheKey } = require("../utils/RedisCache");
+const {
+  createGroup,
+  deleteKeycloakGroup,
+  updateGroupAttributes,
+  getGroupIdByName,
+} = require("../Keycloak/KeycloakAdmin");
+const { buildCacheKey } = require("../config/redis");
 const {
   saveDocuments,
   updateDocumentsDiffBased,
@@ -127,7 +129,7 @@ const createClinic = async (data, token, realm) => {
       connection,
       "clinic",
       columns,
-      values
+      values,
     );
 
     // 2. Create Keycloak group (if enabled)
@@ -147,7 +149,10 @@ const createClinic = async (data, token, realm) => {
         groupId = response.groupId;
         console.log(`✅ Keycloak group created: ${groupName} (ID: ${groupId})`);
       } catch (kcError) {
-        console.error("❌ Keycloak group creation failed:", kcError.response?.data || kcError.message);
+        console.error(
+          "❌ Keycloak group creation failed:",
+          kcError.response?.data || kcError.message,
+        );
         throw new CustomError("Failed to create clinic group in Keycloak", 500);
       }
     }
@@ -203,18 +208,24 @@ const updateClinic = async (clinicId, data, tenant_id, token, realm) => {
     const clinic = await clinicModel.getClinicByTenantIdAndClinicId(
       tenant_id,
       clinicId,
-      connection
+      connection,
     );
 
     if (!clinic) {
       throw new CustomError("Clinic not found", 404);
     }
 
-    data.otp=data?.otp?data?.otp:clinic.otp
-    data.otp_type=data?.otp_type?data?.otp_type:clinic.otp_type
-    data.clinic_app_themes=data?.clinic_app_themes?data?.clinic_app_themes:clinic.clinic_app_themes
-    data.clinic_logo=data?.clinic_logo?data?.clinic_logo:clinic.clinic_logo
-    data.clinic_app_font=data?.clinic_app_font?data?.clinic_app_font:clinic.clinic_app_font
+    data.otp = data?.otp ? data?.otp : clinic.otp;
+    data.otp_type = data?.otp_type ? data?.otp_type : clinic.otp_type;
+    data.clinic_app_themes = data?.clinic_app_themes
+      ? data?.clinic_app_themes
+      : clinic.clinic_app_themes;
+    data.clinic_logo = data?.clinic_logo
+      ? data?.clinic_logo
+      : clinic.clinic_logo;
+    data.clinic_app_font = data?.clinic_app_font
+      ? data?.clinic_app_font
+      : clinic.clinic_app_font;
 
     // 2. Update DB
     const { columns, values } = mapFields(data, updateClinicFieldMap);
@@ -224,7 +235,7 @@ const updateClinic = async (clinicId, data, tenant_id, token, realm) => {
       clinicId,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     if (affectedRows === 0) {
@@ -249,7 +260,7 @@ const updateClinic = async (clinicId, data, tenant_id, token, realm) => {
         } catch (kcError) {
           console.warn(
             `⚠️ Failed to update Keycloak group attributes for clinic ${clinicId}. Continuing...`,
-            kcError.message
+            kcError.message,
           );
           // 🟡 Do NOT rollback — best effort
         }
@@ -262,7 +273,8 @@ const updateClinic = async (clinicId, data, tenant_id, token, realm) => {
     if (clinic_images.length > 0 || data.deletedFileIds?.length > 0) {
       await updateDocumentsDiffBased({
         table_name: "clinic",
-        table_id: clinicId,clinic_images,
+        table_id: clinicId,
+        clinic_images,
         field_name: "clinic_images",
         newFiles: clinic_images,
         deletedFileIds: data.deletedFileIds || [],
@@ -302,7 +314,7 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
       const result = await clinicModel.getAllClinicsByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
@@ -311,23 +323,23 @@ const getAllClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
       clinics.data.map(async (clinic) => {
         const formatted = helper.convertDbToFrontend(
           clinic,
-          clinicFieldReverseMap
+          clinicFieldReverseMap,
         );
         const images = await getDocumentsByField(
           "clinic",
           clinic.clinic_id,
-          "clinic_images"
+          "clinic_images",
         );
         const clinic_images = images.map((doc) => ({
           document_id: doc.document_id,
           file_url: doc.file_url,
-          description:doc.description
+          description: doc.description,
         }));
         return {
           ...formatted,
-          clinic_images
+          clinic_images,
         };
-      })
+      }),
     );
 
     return {
@@ -348,10 +360,7 @@ const getAllClinics = async (page = 1, limit = 10) => {
 
   try {
     const clinics = await getOrSetCache(cacheKey, async () => {
-      const result = await clinicModel.getAllClinics(
-        Number(limit),
-        offset
-      );
+      const result = await clinicModel.getAllClinics(Number(limit), offset);
       return result;
     });
 
@@ -359,23 +368,23 @@ const getAllClinics = async (page = 1, limit = 10) => {
       clinics.map(async (clinic) => {
         const formatted = helper.convertDbToFrontend(
           clinic,
-          clinicFieldReverseMap
+          clinicFieldReverseMap,
         );
         const images = await getDocumentsByField(
           "clinic",
           clinic.clinic_id,
-          "clinic_images"
+          "clinic_images",
         );
         const clinic_images = images.map((doc) => ({
           document_id: doc.document_id,
           file_url: doc.file_url,
-          description:doc.description
+          description: doc.description,
         }));
         return {
           ...formatted,
-          clinic_images
+          clinic_images,
         };
-      })
+      }),
     );
 
     return {
@@ -389,7 +398,7 @@ const getAllClinics = async (page = 1, limit = 10) => {
 };
 
 const getClinicsByKeycloakId = async (keycloak_id) => {
-  console.log('keycloakid:',keycloak_id)
+  console.log("keycloakid:", keycloak_id);
   const conn = await pool.getConnection();
 
   try {
@@ -409,7 +418,6 @@ const getClinicsByKeycloakId = async (keycloak_id) => {
 
     const rows = await conn.query(query, [keycloak_id]);
 
-
     // console.log('rows:',rows[0])
 
     return rows[0];
@@ -426,7 +434,7 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
   try {
     const clinic = await clinicModel.getClinicByTenantIdAndClinicId(
       tenantId,
-      clinicId
+      clinicId,
     );
 
     // console.log(clinic)
@@ -435,17 +443,17 @@ const getClinicByTenantIdAndClinicId = async (tenantId, clinicId) => {
     const images = await getDocumentsByField(
       "clinic",
       clinic.clinic_id,
-      "clinic_images"
+      "clinic_images",
     );
     const clinic_images = images.map((doc) => ({
       document_id: doc.document_id,
       file_url: doc.file_url,
-      description:doc.description
+      description: doc.description,
     }));
-    
 
     return {
-      ...formatted,clinic_images
+      ...formatted,
+      clinic_images,
     };
   } catch (error) {
     throw new CustomError(error, 500);
@@ -456,7 +464,7 @@ const deleteClinicByTenantIdAndClinicId = async (
   tenantId,
   clinicId,
   token,
-  realm
+  realm,
 ) => {
   let groupId = null;
   const connection = await pool.getConnection();
@@ -468,7 +476,7 @@ const deleteClinicByTenantIdAndClinicId = async (
     const clinic = await clinicModel.getClinicByTenantIdAndClinicId(
       tenantId,
       clinicId,
-      connection
+      connection,
     );
 
     if (!clinic) {
@@ -476,13 +484,13 @@ const deleteClinicByTenantIdAndClinicId = async (
     }
 
     // 2. Delete documents
-    await deleteDocumentsByTableAndId("clinic", clinicId,connection);
+    await deleteDocumentsByTableAndId("clinic", clinicId, connection);
 
     // 3. Delete from DB
     const affectedRows = await clinicModel.deleteClinicByTenantIdAndClinicId(
       connection,
       tenantId,
-      clinicId
+      clinicId,
     );
 
     if (affectedRows === 0) {
@@ -499,12 +507,15 @@ const deleteClinicByTenantIdAndClinicId = async (
           await deleteKeycloakGroup(token, realm, groupId);
           console.log(`✅ Keycloak group deleted: ${groupName}`);
         } catch (kcError) {
-          console.error(`❌ Failed to delete Keycloak group ${groupName}:`, kcError.message);
+          console.error(
+            `❌ Failed to delete Keycloak group ${groupName}:`,
+            kcError.message,
+          );
           // 🔁 Rollback DB
           await connection.rollback();
           throw new CustomError(
             "Failed to delete clinic group in Keycloak. Aborting delete.",
-            500
+            500,
           );
         }
       }
@@ -529,7 +540,7 @@ const checkClinicExistsByTenantIdAndClinicId = async (tenantId, clinicId) => {
   try {
     return await clinicModel.checkClinicExistsByTenantIdAndClinicId(
       tenantId,
-      clinicId
+      clinicId,
     );
   } catch (error) {
     throw new CustomError(error, 500);
@@ -540,13 +551,13 @@ const handleClinicAssignment = async (
   tenantId,
   clinicId,
   details,
-  assign = true
+  assign = true,
 ) => {
   try {
     if (assign === "true") {
       const clinic = await clinicModel.getClinicNameAndAddressByClinicId(
         tenantId,
-        clinicId
+        clinicId,
       );
 
       const dentistIds = details?.dentist_id;
@@ -561,9 +572,9 @@ const handleClinicAssignment = async (
             clinicId,
             clinic.clinic_name,
             clinic.address,
-            dentistId
-          )
-        )
+            dentistId,
+          ),
+        ),
       );
 
       await clinicModel.updateDoctorCount(tenantId, clinicId, assign);
@@ -578,8 +589,8 @@ const handleClinicAssignment = async (
 
       await Promise.all(
         dentistIds.map((dentistId) =>
-          updateNullClinicInfoWithJoin(tenantId, clinicId, dentistId)
-        )
+          updateNullClinicInfoWithJoin(tenantId, clinicId, dentistId),
+        ),
       );
 
       await clinicModel.updateDoctorCount(tenantId, clinicId, assign);
@@ -591,7 +602,7 @@ const handleClinicAssignment = async (
     console.error("Error in handleClinicAssignment:", error);
     throw new CustomError(
       `Failed to update clinic assignment: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -601,7 +612,7 @@ const getFinanceSummary = async (
   clinicId,
   dentistId = null,
   startDate,
-  endDate
+  endDate,
 ) => {
   const cacheKey = buildCacheKey("clinic", "financesummary", {
     tenant_id: tenantId,
@@ -618,7 +629,7 @@ const getFinanceSummary = async (
         clinicId,
         startDate,
         endDate,
-        dentistId
+        dentistId,
       );
       console.log("✅ Serving patients from DB and caching result");
       return result;
@@ -640,7 +651,7 @@ const getFinanceSummarybyDentist = async (tenant_id, clinic_id, dentist_id) => {
         await clinicModel.getFinanceSummarybyDentist(
           tenant_id,
           clinic_id,
-          dentist_id
+          dentist_id,
         );
 
       // Convert to uniform format and normalize dates
@@ -752,7 +763,7 @@ const getFinanceSummarybyDentist = async (tenant_id, clinic_id, dentist_id) => {
           const refDate = new Date(
             today.getFullYear(),
             today.getMonth() - (numMonths - i - 1),
-            1
+            1,
           ); // First of month
           refDates.push({
             year: refDate.getFullYear(),
@@ -899,11 +910,11 @@ const getClinicSettingsByTenantIdAndClinicId = async (tenantId, clinicId) => {
   try {
     const clinic = await clinicModel.getClinicSettingsByTenantIdAndClinicId(
       tenantId,
-      clinicId
+      clinicId,
     );
-  
+
     return {
-      ...clinic
+      ...clinic,
     };
   } catch (error) {
     throw new CustomError(error, 500);
@@ -915,7 +926,7 @@ const updateClinicSettings = async (tenantId, clinicId, details) => {
     const clinic = await clinicModel.updateClinicSettings(
       tenantId,
       clinicId,
-      details
+      details,
     );
     return clinic;
   } catch (error) {
@@ -936,5 +947,5 @@ module.exports = {
   getClinicSettingsByTenantIdAndClinicId,
   updateClinicSettings,
   getAllClinics,
-  getClinicsByKeycloakId
+  getClinicsByKeycloakId,
 };

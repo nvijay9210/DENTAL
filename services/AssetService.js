@@ -4,13 +4,13 @@ const {
   redisClient,
   getOrSetCache,
   invalidateCacheByPattern,
-} = require("../config/redisConfig");
+} = require("../config/redis");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 
 const assetFields = {
   tenant_id: (val) => val,
@@ -20,8 +20,8 @@ const assetFields = {
   asset_status: (val) => val,
   asset_photo: (val) => val,
   allocated_to: (val) => val,
-  quantity: (val) => val? parseInt(val) : 0,
-  price: (val) => val? parseFloat(val) : 0,
+  quantity: (val) => (val ? parseInt(val) : 0),
+  price: (val) => (val ? parseFloat(val) : 0),
   purchased_date: (val) => val,
   purchased_by: (val) => val,
   expired_date: (val) => val,
@@ -30,7 +30,7 @@ const assetFields = {
 };
 
 const assetFieldsReverseMap = {
-  asset_id:val=>val,
+  asset_id: (val) => val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   asset_name: (val) => val,
@@ -38,17 +38,17 @@ const assetFieldsReverseMap = {
   asset_status: (val) => val,
   asset_photo: (val) => val,
   allocated_to: (val) => val,
-  quantity: (val) => val? parseInt(val) : 0,
-  price: (val) => val? parseFloat(val) : 0,
-  purchased_date: val => val ? formatDateOnly(val): null,
+  quantity: (val) => (val ? parseInt(val) : 0),
+  price: (val) => (val ? parseFloat(val) : 0),
+  purchased_date: (val) => (val ? formatDateOnly(val) : null),
   purchased_by: (val) => val,
-  expired_date: val => val ? formatDateOnly(val): null,
+  expired_date: (val) => (val ? formatDateOnly(val) : null),
   invoice_number: (val) => val,
-  description:val=> helper.safeJsonParse(val),
-  created_by: val => val,
-  created_time: val => val ? convertUTCToLocal(val) : null,
-  updated_by: val => val,
-  updated_time: val => val ? convertUTCToLocal(val) : null
+  description: (val) => helper.safeJsonParse(val),
+  created_by: (val) => val,
+  created_time: (val) => (val ? convertUTCToLocal(val) : null),
+  updated_by: (val) => val,
+  updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 
 // Field mapping for assets (similar to treatment)
@@ -83,15 +83,16 @@ const getAllAssetsByTenantId = async (tenantId, page = 1, limit = 10) => {
       const result = await assetModel.getAllAssetsByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
 
-    const convertedRows = assets.data.map(asset => helper.convertDbToFrontend(asset, assetFieldsReverseMap));
-    
-        return {data:convertedRows,total:assets.total};;
-     
+    const convertedRows = assets.data.map((asset) =>
+      helper.convertDbToFrontend(asset, assetFieldsReverseMap),
+    );
+
+    return { data: convertedRows, total: assets.total };
   } catch (err) {
     console.error("Database error while fetching assets:", err);
     throw new CustomError(err, 500);
@@ -102,7 +103,7 @@ const getAllAssetsByTenantIdAndClinicId = async (
   tenantId,
   clinic_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("asset", "list", {
@@ -118,13 +119,13 @@ const getAllAssetsByTenantIdAndClinicId = async (
         tenantId,
         clinic_id,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
 
     const convertedRows = assets.data.map((asset) =>
-      helper.convertDbToFrontend(asset, assetFieldsReverseMap)
+      helper.convertDbToFrontend(asset, assetFieldsReverseMap),
     );
 
     return { data: convertedRows, total: assets.total };
@@ -139,11 +140,14 @@ const getAssetByTenantIdAndAssetId = async (tenantId, assetId) => {
   try {
     const asset = await assetModel.getAssetByTenantAndAssetId(
       tenantId,
-      assetId
+      assetId,
     );
-    const convertedRows = helper.convertDbToFrontend(asset, assetFieldsReverseMap);
-    
-        return convertedRows;
+    const convertedRows = helper.convertDbToFrontend(
+      asset,
+      assetFieldsReverseMap,
+    );
+
+    return convertedRows;
   } catch (error) {
     throw new CustomError(err, 500);
   }
@@ -162,7 +166,7 @@ const updateAsset = async (assetId, data, tenant_id) => {
       assetId,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     // if (affectedRows === 0) {
@@ -182,7 +186,7 @@ const deleteAssetByTenantIdAndAssetId = async (tenantId, assetId) => {
   try {
     const affectedRows = await assetModel.deleteAssetByTenantAndAssetId(
       tenantId,
-      assetId
+      assetId,
     );
     // if (affectedRows === 0) {
     //   throw new CustomError(err, 500);
@@ -200,8 +204,8 @@ const getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   clinicId,
   startDate,
   endDate,
-  page=1,
-  limit=10
+  page = 1,
+  limit = 10,
 ) => {
   const cacheKey = buildCacheKey("asset", "list", {
     tenant_id: tenantId,
@@ -221,14 +225,16 @@ const getAllAssetsByTenantIdAndClinicIdAndStartDateAndEndDate = async (
           startDate,
           endDate,
           parseInt(offset),
-          parseInt(limit)
+          parseInt(limit),
         );
       return result;
     });
 
-    const convertedRows = assets.data.map(asset => helper.convertDbToFrontend(asset, assetFieldsReverseMap));
-    
-      return {data:convertedRows,total:assets.total};;
+    const convertedRows = assets.data.map((asset) =>
+      helper.convertDbToFrontend(asset, assetFieldsReverseMap),
+    );
+
+    return { data: convertedRows, total: assets.total };
   } catch (err) {
     console.error("Database error while fetching assets:", err);
     throw new CustomError(err, 500);

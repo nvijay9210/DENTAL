@@ -4,13 +4,13 @@ const {
   redisClient,
   getOrSetCache,
   invalidateCacheByPattern,
-} = require("../config/redisConfig");
+} = require("../config/redis");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 const { randomUUID } = require("crypto");
 const {
   updateSupplierProductCount,
@@ -64,12 +64,12 @@ const createPurchaseOrder = async (data) => {
     const purchase_orderId = await purchase_orderModel.createPurchaseOrders(
       "purchase_orders",
       columns,
-      values
+      values,
     );
 
     const product = await getSupplierProductsByTenantAndSupplierProductsId(
       data.tenant_id,
-      data.supplier_product_id
+      data.supplier_product_id,
     );
 
     // console.log(product);
@@ -80,7 +80,7 @@ const createPurchaseOrder = async (data) => {
       data.supplier_product_id,
       data.tenant_id,
       data.clinic_id,
-      count
+      count,
     );
 
     await invalidateCacheByPattern("supplier_products:*");
@@ -91,7 +91,7 @@ const createPurchaseOrder = async (data) => {
     console.error("Failed to create purchase_order:", error);
     throw new CustomError(
       `Failed to create purchase_order: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -100,7 +100,7 @@ const createPurchaseOrder = async (data) => {
 const getAllPurchaseOrdersByTenantId = async (
   tenantId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("purchase_order", "list", {
@@ -114,13 +114,16 @@ const getAllPurchaseOrdersByTenantId = async (
       const result = await purchase_orderModel.getAllPurchaseOrderssByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
 
     const convertedRows = purchase_orders.data.map((purchase_order) =>
-      helper.convertDbToFrontend(purchase_order, purchase_orderFieldsReverseMap)
+      helper.convertDbToFrontend(
+        purchase_order,
+        purchase_orderFieldsReverseMap,
+      ),
     );
 
     return { data: convertedRows, total: purchase_orders.total };
@@ -134,7 +137,7 @@ const getAllPurchaseOrdersByTenantIdAndSupplierId = async (
   tenantId,
   supplier_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("purchase_order", "list", {
@@ -151,13 +154,16 @@ const getAllPurchaseOrdersByTenantIdAndSupplierId = async (
           tenantId,
           supplier_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
 
     const convertedRows = purchase_orders.data.map((purchase_order) =>
-      helper.convertDbToFrontend(purchase_order, purchase_orderFieldsReverseMap)
+      helper.convertDbToFrontend(
+        purchase_order,
+        purchase_orderFieldsReverseMap,
+      ),
     );
 
     return { data: convertedRows, total: purchase_orders.total };
@@ -171,7 +177,7 @@ const getAllPurchaseOrdersByTenantIdAndClinicId = async (
   tenantId,
   clinic_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("purchase_order", "list", {
@@ -188,13 +194,16 @@ const getAllPurchaseOrdersByTenantIdAndClinicId = async (
           tenantId,
           clinic_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
 
     const convertedRows = purchase_orders.data.map((purchase_order) =>
-      helper.convertDbToFrontend(purchase_order, purchase_orderFieldsReverseMap)
+      helper.convertDbToFrontend(
+        purchase_order,
+        purchase_orderFieldsReverseMap,
+      ),
     );
 
     return { data: convertedRows, total: purchase_orders.total };
@@ -207,25 +216,25 @@ const getAllPurchaseOrdersByTenantIdAndClinicId = async (
 // Get PurchaseOrder by ID & Tenant
 const getPurchaseOrderByTenantIdAndPurchaseOrderId = async (
   tenantId,
-  purchase_orderId
+  purchase_orderId,
 ) => {
   try {
     const purchase_order =
       await purchase_orderModel.getPurchaseOrdersByTenantAndPurchaseOrdersId(
         tenantId,
-        purchase_orderId
+        purchase_orderId,
       );
 
     const convertedRows = helper.convertDbToFrontend(
       purchase_order,
-      purchase_orderFieldsReverseMap
+      purchase_orderFieldsReverseMap,
     );
 
     return convertedRows;
   } catch (error) {
     throw new CustomError(
       "Failed to get purchase_order: " + error.message,
-      404
+      404,
     );
   }
 };
@@ -242,7 +251,7 @@ const updatePurchaseOrder = async (purchase_orderId, data, tenant_id) => {
       purchase_orderId,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     // if (affectedRows === 0) {
@@ -261,27 +270,27 @@ const updatePurchaseOrderStatus = async (
   purchase_orderId,
   tenant_id,
   clinic_id,
-  status
+  status,
 ) => {
   try {
     const affectedRows = await purchase_orderModel.updatePurchaseOrderStatus(
       purchase_orderId,
       tenant_id,
       clinic_id,
-      status
+      status,
     );
 
     if (status === "cancelled") {
       const purchase_order = await getPurchaseOrderByTenantIdAndPurchaseOrderId(
         tenant_id,
-        purchase_orderId
+        purchase_orderId,
       );
 
       // console.log(purchase_order);
 
       const product = await getSupplierProductsByTenantAndSupplierProductsId(
         tenant_id,
-        purchase_order.supplier_product_id
+        purchase_order.supplier_product_id,
       );
 
       // console.log(product);
@@ -292,7 +301,7 @@ const updatePurchaseOrderStatus = async (
         purchase_order.supplier_product_id,
         tenant_id,
         clinic_id,
-        count
+        count,
       );
 
       await invalidateCacheByPattern("supplier_products:*");
@@ -309,13 +318,13 @@ const updatePurchaseOrderStatus = async (
 // Delete PurchaseOrder
 const deletePurchaseOrderByTenantIdAndPurchaseOrderId = async (
   tenantId,
-  purchase_orderId
+  purchase_orderId,
 ) => {
   try {
     const affectedRows =
       await purchase_orderModel.deletePurchaseOrdersByTenantAndPurchaseOrdersId(
         tenantId,
-        purchase_orderId
+        purchase_orderId,
       );
     // if (affectedRows === 0) {
     //   throw new CustomError(err, 500);
@@ -326,7 +335,7 @@ const deletePurchaseOrderByTenantIdAndPurchaseOrderId = async (
   } catch (error) {
     throw new CustomError(
       `Failed to delete purchase_order: ${error.message}`,
-      404
+      404,
     );
   }
 };

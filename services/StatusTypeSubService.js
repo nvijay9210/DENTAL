@@ -1,16 +1,13 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const statusTypeSubModel = require("../models/StatusTypeSubModel");
-const {
-  getOrSetCache,
-  invalidateCacheByPattern,
-} = require("../config/redisConfig");
+const { getOrSetCache, invalidateCacheByPattern } = require("../config/redis");
 const { mapFields } = require("../query/Records");
 const {
   getStatusTypeIdByTenantAndStatusType,
 } = require("../models/StatusTypeModel");
 const helper = require("../utils/Helpers");
 const { convertUTCToLocal } = require("../utils/DateUtils");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 const statusTypeSubFields = {
   tenant_id: (val) => val,
   status_type_id: (val) => val,
@@ -36,9 +33,8 @@ const createStatusTypeSub = async (details, statusType) => {
   };
 
   try {
-    const status_type_id = await getStatusTypeIdByTenantAndStatusType(
-      statusType
-    );
+    const status_type_id =
+      await getStatusTypeIdByTenantAndStatusType(statusType);
 
     details.status_type_id = status_type_id;
 
@@ -46,7 +42,7 @@ const createStatusTypeSub = async (details, statusType) => {
     const statusTypeSubId = await statusTypeSubModel.createStatusTypeSub(
       "statustypesub",
       columns,
-      values
+      values,
     );
     await invalidateCacheByPattern("statustypesub:*");
     return statusTypeSubId;
@@ -54,7 +50,7 @@ const createStatusTypeSub = async (details, statusType) => {
     console.error("Failed to create statusTypeSub:", error);
     throw new CustomError(
       `Failed to create statusTypeSub: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -63,7 +59,7 @@ const createStatusTypeSub = async (details, statusType) => {
 const getAllStatusTypeSubsByTenantId = async (
   tenantId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("statustypesub", "list", {
@@ -77,16 +73,16 @@ const getAllStatusTypeSubsByTenantId = async (
       const result = await statusTypeSubModel.getAllStatusTypeSubsByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
 
     const convertedRows = statusTypeSubs.data.map((statusTypeSub) =>
-      helper.convertDbToFrontend(statusTypeSub, statusTypeSubFieldsReverseMap)
+      helper.convertDbToFrontend(statusTypeSub, statusTypeSubFieldsReverseMap),
     );
 
-    return {data:convertedRows,total:statusTypeSubs.total};;
+    return { data: convertedRows, total: statusTypeSubs.total };
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
     throw new CustomError("Failed to fetch statusTypeSubs", 404);
@@ -96,7 +92,7 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
   tenantId,
   status_type_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("statustypesub", "list", {
@@ -112,17 +108,17 @@ const getAllStatusTypeSubByTenantIdAndStatusTypeId = async (
           tenantId,
           status_type_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
 
     const convertedRows = helper.convertDbToFrontend(
       statusTypeSubs,
-      statusTypeSubFieldsReverseMap
+      statusTypeSubFieldsReverseMap,
     );
 
-    return {data:convertedRows,total:statusTypeSubs.total};;
+    return { data: convertedRows, total: statusTypeSubs.total };
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
     throw new CustomError("Failed to fetch statusTypeSubs", 404);
@@ -133,7 +129,7 @@ const getAllStatusTypeSubByTenantIdAndStatusType = async (
   tenantId,
   status_type,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("statustypesub", "list", {
@@ -145,25 +141,24 @@ const getAllStatusTypeSubByTenantIdAndStatusType = async (
 
   try {
     const statusTypeSubs = await getOrSetCache(cacheKey, async () => {
-      const statusTypeId = await getStatusTypeIdByTenantAndStatusType(
-        status_type
-      );
+      const statusTypeId =
+        await getStatusTypeIdByTenantAndStatusType(status_type);
 
       const result =
         await statusTypeSubModel.getAllStatusTypeSubByTenantIdAndStatusTypeId(
           tenantId,
           statusTypeId,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
 
     const convertedRows = statusTypeSubs.map((statusTypeSub) =>
-      helper.convertDbToFrontend(statusTypeSub, statusTypeSubFieldsReverseMap)
+      helper.convertDbToFrontend(statusTypeSub, statusTypeSubFieldsReverseMap),
     );
 
-    return {data:convertedRows,total:statusTypeSubs.total};;
+    return { data: convertedRows, total: statusTypeSubs.total };
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
     throw new CustomError("Failed to fetch statusTypeSubs", 404);
@@ -174,7 +169,7 @@ const getAllStatusTypeSubByStatusTypeAndTenantId = async (
   status_type,
   tenantId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = `statusTypeSub:${tenantId}:statusType:${status_type}:page:${page}:limit:${limit}`;
@@ -186,16 +181,16 @@ const getAllStatusTypeSubByStatusTypeAndTenantId = async (
           status_type,
           tenantId,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
 
     const convertedRows = statusTypeSubs.data.map((statusTypeSub) =>
-      helper.convertDbToFrontend(statusTypeSub, statusTypeSubFieldsReverseMap)
+      helper.convertDbToFrontend(statusTypeSub, statusTypeSubFieldsReverseMap),
     );
 
-    return {data:convertedRows,total:statusTypeSubs.total};;
+    return { data: convertedRows, total: statusTypeSubs.total };
   } catch (err) {
     console.error("Database error while fetching statusTypeSubs:", err);
     throw new CustomError("Failed to fetch statusTypeSubs", 404);
@@ -205,22 +200,25 @@ const getAllStatusTypeSubByStatusTypeAndTenantId = async (
 // Get StatusTypeSub by ID & Tenant
 const getStatusTypeSubByTenantIdAndStatusTypeSubId = async (
   tenantId,
-  statusTypeSubId
+  statusTypeSubId,
 ) => {
   try {
     const statusTypeSub =
       await statusTypeSubModel.getStatusTypeSubByTenantAndStatusTypeSubId(
         tenantId,
-        statusTypeSubId
+        statusTypeSubId,
       );
     const convertedRows = helper.convertDbToFrontend(
       statusTypeSub,
-      statusTypeSubFieldsReverseMap
+      statusTypeSubFieldsReverseMap,
     );
 
-    return {data:convertedRows,total:statusTypeSub.total};;
+    return { data: convertedRows, total: statusTypeSub.total };
   } catch (error) {
-    throw new CustomError("Failed to fetch statusTypeSub: " + error.message, 404);
+    throw new CustomError(
+      "Failed to fetch statusTypeSub: " + error.message,
+      404,
+    );
   }
 };
 
@@ -237,7 +235,7 @@ const updateStatusTypeSub = async (statusTypeSubId, data, tenant_id) => {
       statusTypeSubId,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     // if (affectedRows === 0) {
@@ -255,13 +253,13 @@ const updateStatusTypeSub = async (statusTypeSubId, data, tenant_id) => {
 // Delete StatusTypeSub
 const deleteStatusTypeSubByTenantIdAndStatusTypeSubId = async (
   tenantId,
-  statusTypeSubId
+  statusTypeSubId,
 ) => {
   try {
     const affectedRows =
       await statusTypeSubModel.deleteStatusTypeSubByTenantAndStatusTypeSubId(
         tenantId,
-        statusTypeSubId
+        statusTypeSubId,
       );
     // if (affectedRows === 0) {
     //   throw new CustomError("StatusTypeSub not found.", 404);
@@ -272,7 +270,7 @@ const deleteStatusTypeSubByTenantIdAndStatusTypeSubId = async (
   } catch (error) {
     throw new CustomError(
       `Failed to delete statusTypeSub: ${error.message}`,
-      404
+      404,
     );
   }
 };

@@ -1,6 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfIdExists, checkIfExists } = require("../models/checkIfExists");
-const { bulkInsert } = require("../Modules/BulkInsert");
+const { bulkInsert } = require("../utils/BulkInsert");
 const treatmentService = require("../services/TreatmentService");
 const {
   validateTenantIdAndPageAndLimit,
@@ -15,7 +15,7 @@ exports.createTreatment = async (req, res, next) => {
     const response = await bulkInsert(
       req.body,
       treatmentValidation.createTreatmentValidation,
-      treatmentService.createTreatment
+      treatmentService.createTreatment,
     );
     res.status(201).json(response);
   } catch (err) {
@@ -34,7 +34,7 @@ exports.getAllTreatmentsByTenantId = async (req, res, next) => {
     const treatments = await treatmentService.getAllTreatmentsByTenantId(
       tenant_id,
       page,
-      limit
+      limit,
     );
     res.status(200).json(treatments);
   } catch (err) {
@@ -52,7 +52,7 @@ exports.getAllTreatmentsByTenantAndClinicId = async (req, res, next) => {
     "appointment",
     "appointment_id",
     appointment_id,
-    tenant_id
+    tenant_id,
   );
 
   if (!appointment) throw new CustomError("Appointment not found", 404);
@@ -63,7 +63,7 @@ exports.getAllTreatmentsByTenantAndClinicId = async (req, res, next) => {
         clinic_id,
         appointment_id,
         page,
-        limit
+        limit,
       );
     res.status(200).json(treatments);
   } catch (err) {
@@ -74,7 +74,7 @@ exports.getAllTreatmentsByTenantAndClinicId = async (req, res, next) => {
 exports.getAllTreatmentsByTenantAndClinicIdAndDentist = async (
   req,
   res,
-  next
+  next,
 ) => {
   const { tenant_id, clinic_id, dentist_id, appointment_id } = req.params;
   const { page, limit } = req.query;
@@ -87,7 +87,7 @@ exports.getAllTreatmentsByTenantAndClinicIdAndDentist = async (
     "appointment",
     "appointment_id",
     appointment_id,
-    tenant_id
+    tenant_id,
   );
 
   if (!appointment) throw new CustomError("Appointment not found", 404);
@@ -99,7 +99,7 @@ exports.getAllTreatmentsByTenantAndClinicIdAndDentist = async (
         dentist_id,
         appointment_id,
         page,
-        limit
+        limit,
       );
     res.status(200).json(treatments);
   } catch (err) {
@@ -120,7 +120,7 @@ exports.getAllTreatmentsByTenantAndDentistId = async (req, res, next) => {
         tenant_id,
         dentist_id,
         page,
-        limit
+        limit,
       );
     res.status(200).json(treatments);
   } catch (err) {
@@ -141,7 +141,7 @@ exports.getAllTreatmentsByTenantAndPatientId = async (req, res, next) => {
         tenant_id,
         patient_id,
         page,
-        limit
+        limit,
       );
     res.status(200).json(treatments);
   } catch (err) {
@@ -158,7 +158,7 @@ exports.getTreatmentByTenantIdAndTreatmentId = async (req, res, next) => {
     "treatment",
     "treatment_id",
     treatment_id,
-    tenant_id
+    tenant_id,
   );
   if (!treatment) throw new CustomError("Treatment not found", 404);
 
@@ -167,7 +167,7 @@ exports.getTreatmentByTenantIdAndTreatmentId = async (req, res, next) => {
     const treatment =
       await treatmentService.getTreatmentByTenantIdAndTreatmentId(
         tenant_id,
-        treatment_id
+        treatment_id,
       );
     res.status(200).json(treatment);
   } catch (err) {
@@ -187,7 +187,7 @@ exports.updateTreatment = async (req, res, next) => {
     await treatmentValidation.updateTreatmentValidation(
       treatment_id,
       details,
-      tenant_id
+      tenant_id,
     );
 
     // Update the treatment
@@ -210,14 +210,14 @@ exports.deleteTreatmentByTenantIdAndTreatmentId = async (req, res, next) => {
       "treatment",
       "treatment_id",
       treatment_id,
-      tenant_id
+      tenant_id,
     );
     if (!treatment) throw new CustomError("TreatmentId not Exists", 404);
 
     // Delete the treatment
     await treatmentService.deleteTreatmentByTenantIdAndTreatmentId(
       tenant_id,
-      treatment_id
+      treatment_id,
     );
     res.status(200).json({ message: "Treatment deleted successfully" });
   } catch (err) {
@@ -229,14 +229,14 @@ exports.getTodayFollowUps = async (req, res, next) => {
   const { tenant_id, clinic_id } = req.params;
   const { role, user_id } = req.query;
 
-  if (role!=='superuser' && !role || !user_id) throw new CustomError("Role and userid required", 400);
+  if ((role !== "superuser" && !role) || !user_id)
+    throw new CustomError("Role and userid required", 400);
 
   await checkIfIdExists("tenant", "tenant_id", tenant_id);
   await checkIfIdExists("clinic", "clinic_id", clinic_id);
-  if(role === "dentist"){
-    await checkIfIdExists("dentist", "dentist_id", user_id)
-  }
-  else if(role==='patient'){
+  if (role === "dentist") {
+    await checkIfIdExists("dentist", "dentist_id", user_id);
+  } else if (role === "patient") {
     await checkIfIdExists("patient", "patient_id", user_id);
   }
 
@@ -245,7 +245,7 @@ exports.getTodayFollowUps = async (req, res, next) => {
       tenant_id,
       clinic_id,
       role,
-      user_id
+      user_id,
     );
     res.status(200).json(treatments);
   } catch (err) {

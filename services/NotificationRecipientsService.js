@@ -4,24 +4,24 @@ const {
   redisClient,
   getOrSetCache,
   invalidateCacheByPattern,
-} = require("../config/redisConfig");
+} = require("../config/redis");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 
 // Field mapping for notificationRecipients (similar to treatment)
 
 const notificationRecipientFields = {
-    notification_id: (val) => val,
-    receiver_role: (val) => val,
-    receiver_id: (val) => val,
-    status: (val) => val,
-    delivered_at: (val) => val,
-    read_at: (val) => val
-  };
+  notification_id: (val) => val,
+  receiver_role: (val) => val,
+  receiver_id: (val) => val,
+  status: (val) => val,
+  delivered_at: (val) => val,
+  read_at: (val) => val,
+};
 const notificationRecipientFieldsReverseMap = {
   notification_recipient_id: (val) => val,
   notification_id: (val) => val,
@@ -47,7 +47,7 @@ const createNotificationRecipient = async (data) => {
       await notificationRecipientModel.createNotificationRecipient(
         "notificationrecipients",
         columns,
-        values
+        values,
       );
     await invalidateCacheByPattern("notificationrecipient:*");
     return notification_recipient_id;
@@ -55,7 +55,7 @@ const createNotificationRecipient = async (data) => {
     console.error("Failed to create notificationRecipient:", error);
     throw new CustomError(
       `Failed to create notificationRecipient: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -64,7 +64,7 @@ const createNotificationRecipient = async (data) => {
 const getAllNotificationRecipientsByTenantId = async (
   tenantId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("notificationrecipient", "list", {
@@ -79,16 +79,17 @@ const getAllNotificationRecipientsByTenantId = async (
         await notificationRecipientModel.getAllNotificationRecipientsByTenantId(
           tenantId,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
 
-    const convertedRows = notificationRecipients.data.map((notificationRecipient) =>
-      helper.convertDbToFrontend(
-        notificationRecipient,
-        notificationRecipientFieldsReverseMap
-      )
+    const convertedRows = notificationRecipients.data.map(
+      (notificationRecipient) =>
+        helper.convertDbToFrontend(
+          notificationRecipient,
+          notificationRecipientFieldsReverseMap,
+        ),
     );
 
     return { data: convertedRows, total: notificationRecipients.total };
@@ -101,7 +102,7 @@ const getAllNotificationRecipientByTenantIdAndSupplierId = async (
   tenantId,
   supplier_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("notificationrecipient", "list", {
@@ -118,16 +119,17 @@ const getAllNotificationRecipientByTenantIdAndSupplierId = async (
           tenantId,
           supplier_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
 
-    const convertedRows = notificationRecipients.data.map((notificationRecipient) =>
-      helper.convertDbToFrontend(
-        notificationRecipient,
-        notificationRecipientFieldsReverseMap
-      )
+    const convertedRows = notificationRecipients.data.map(
+      (notificationRecipient) =>
+        helper.convertDbToFrontend(
+          notificationRecipient,
+          notificationRecipientFieldsReverseMap,
+        ),
     );
 
     return { data: convertedRows, total: notificationRecipients.total };
@@ -140,43 +142,48 @@ const getAllNotificationRecipientByTenantIdAndSupplierId = async (
 // Get NotificationRecipient by ID & Tenant
 const getNotificationRecipientByTenantIdAndNotificationRecipientId = async (
   tenantId,
-  notification_recipient_id
+  notification_recipient_id,
 ) => {
   try {
     const notificationRecipient =
       await notificationRecipientModel.getNotificationRecipientByTenantAndNotificationRecipientId(
         tenantId,
-        notification_recipient_id
+        notification_recipient_id,
       );
 
     const convertedRows = helper.convertDbToFrontend(
       notificationRecipient,
-      notificationRecipientFieldsReverseMap
+      notificationRecipientFieldsReverseMap,
     );
 
     return convertedRows;
   } catch (error) {
     throw new CustomError(
       "Failed to get notificationRecipient: " + error.message,
-      404
+      404,
     );
   }
 };
 
 // Update NotificationRecipient
-const updateNotificationRecipient = async (notification_recipient_id, data, tenant_id) => {
+const updateNotificationRecipient = async (
+  notification_recipient_id,
+  data,
+  tenant_id,
+) => {
   const fieldMap = {
     ...notificationRecipientFields,
     updated_by: (val) => val,
   };
   try {
     const { columns, values } = mapFields(data, fieldMap);
-    const affectedRows = await notificationRecipientModel.updateNotificationRecipient(
-      notification_recipient_id,
-      columns,
-      values,
-      tenant_id
-    );
+    const affectedRows =
+      await notificationRecipientModel.updateNotificationRecipient(
+        notification_recipient_id,
+        columns,
+        values,
+        tenant_id,
+      );
 
     // if (affectedRows === 0) {
     //   throw new CustomError(
@@ -194,16 +201,16 @@ const updateNotificationRecipient = async (notification_recipient_id, data, tena
 };
 
 const markNotificationAsRead = async (notification_recipient_id) => {
-
   try {
-    const affectedRows = await notificationRecipientModel.markNotificationAsRead(
-      notification_recipient_id
-    );
+    const affectedRows =
+      await notificationRecipientModel.markNotificationAsRead(
+        notification_recipient_id,
+      );
 
     if (affectedRows === false) {
       throw new CustomError(
         "NotificationRecipient not found or no changes made.",
-        404
+        404,
       );
     }
 
@@ -218,13 +225,13 @@ const markNotificationAsRead = async (notification_recipient_id) => {
 // Delete NotificationRecipient
 const deleteNotificationRecipientByTenantIdAndNotificationRecipientId = async (
   tenantId,
-  notification_recipient_id
+  notification_recipient_id,
 ) => {
   try {
     const affectedRows =
       await notificationRecipientModel.deleteNotificationRecipientByTenantAndNotificationRecipientId(
         tenantId,
-        notification_recipient_id
+        notification_recipient_id,
       );
     // if (affectedRows === 0) {
     //   throw new CustomError("NotificationRecipient not found.", 404);
@@ -235,7 +242,7 @@ const deleteNotificationRecipientByTenantIdAndNotificationRecipientId = async (
   } catch (error) {
     throw new CustomError(
       `Failed to delete notificationRecipient: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -247,5 +254,5 @@ module.exports = {
   updateNotificationRecipient,
   deleteNotificationRecipientByTenantIdAndNotificationRecipientId,
   getAllNotificationRecipientByTenantIdAndSupplierId,
-  markNotificationAsRead
+  markNotificationAsRead,
 };

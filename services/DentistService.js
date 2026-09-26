@@ -7,7 +7,7 @@ const {
   redisClient,
   invalidateCacheByPattern,
   getOrSetCache,
-} = require("../config/redisConfig");
+} = require("../config/redis");
 const {
   addUser,
   getUserIdByUsername,
@@ -23,7 +23,7 @@ const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const helper = require("../utils/Helpers");
 
 const { encrypt } = require("../middlewares/PasswordHash");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 const {
   deleteUploadedFiles,
   deleteFileIfExists,
@@ -178,7 +178,7 @@ const createDentist = async (data, token, realm, clientId) => {
 
 // -------------------- UPDATE --------------------
 const updateDentist = async (dentistId, data, tenantId, token, realm) => {
-  const updateResult=await  updateEntity({
+  const updateResult = await updateEntity({
     entityId: dentistId,
     entityName: "dentist",
     tenantId,
@@ -193,7 +193,7 @@ const updateDentist = async (dentistId, data, tenantId, token, realm) => {
 
   // ✅ Add user_clinic mapping
   await helper.syncUserUpdateClinicMappings({
-    tenantId:data.tenant_id,
+    tenantId: data.tenant_id,
     userId: dentistId,
     role: "DENTIST",
     clinicIds: data.clinic_ids,
@@ -201,7 +201,7 @@ const updateDentist = async (dentistId, data, tenantId, token, realm) => {
     keycloakId: data.keycloak_id,
     createdBy: data.created_by,
   });
-  return updateResult
+  return updateResult;
 };
 
 // -------------------- GET ALL --------------------

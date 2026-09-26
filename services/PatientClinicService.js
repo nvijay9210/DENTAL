@@ -1,19 +1,16 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const patient_clinicModel = require("../models/PatientClinicModel");
-const {
-  getOrSetCache,
-  invalidateCacheByPattern,
-} = require("../config/redisConfig");
+const { getOrSetCache, invalidateCacheByPattern } = require("../config/redis");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 
 // Field mapping for patient_clinics (similar to treatment)
 
 const patient_clinicFields = {
   patient_id: (val) => val,
-  clinic_id: (val) => val
+  clinic_id: (val) => val,
 };
 const patient_clinicFieldsReverseMap = {
   patient_clinic_id: (val) => val,
@@ -25,19 +22,19 @@ const patient_clinicFieldsReverseMap = {
   updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 // Create PatientClinic
-const createPatientClinic = async (data,conn) => {
+const createPatientClinic = async (data, conn) => {
   const fieldMap = {
     ...patient_clinicFields,
     created_by: (val) => val,
   };
   try {
-    console.log(data)
+    console.log(data);
     const { columns, values } = mapFields(data, fieldMap);
     const patient_clinicId = await patient_clinicModel.createPatientClinic(
       "patient_clinic",
       columns,
       values,
-      conn
+      conn,
     );
     return patient_clinicId;
   } catch (error) {
@@ -47,19 +44,25 @@ const createPatientClinic = async (data,conn) => {
 };
 
 // Get All PatientClinics by Tenant ID with Caching
-const getAllPatientClinicsByTenantId = async (tenantId, page = 1, limit = 10) => {
+const getAllPatientClinicsByTenantId = async (
+  tenantId,
+  page = 1,
+  limit = 10,
+) => {
   const offset = (page - 1) * limit;
 
   try {
-   
-      const result = await patient_clinicModel.getAllPatientClinicsByTenantId(
-        tenantId,
-        Number(limit),
-        offset
-      );
+    const result = await patient_clinicModel.getAllPatientClinicsByTenantId(
+      tenantId,
+      Number(limit),
+      offset,
+    );
 
     const convertedRows = result.data.map((patient_clinic) =>
-      helper.convertDbToFrontend(patient_clinic, patient_clinicFieldsReverseMap)
+      helper.convertDbToFrontend(
+        patient_clinic,
+        patient_clinicFieldsReverseMap,
+      ),
     );
 
     return { data: convertedRows, total: result.total };
@@ -70,16 +73,20 @@ const getAllPatientClinicsByTenantId = async (tenantId, page = 1, limit = 10) =>
 };
 
 // Get PatientClinic by ID & Tenant
-const getPatientClinicByTenantIdAndPatientClinicId = async (tenantId, patient_clinicId) => {
+const getPatientClinicByTenantIdAndPatientClinicId = async (
+  tenantId,
+  patient_clinicId,
+) => {
   try {
-    const patient_clinic = await patient_clinicModel.getPatientClinicByTenantAndPatientClinicId(
-      tenantId,
-      patient_clinicId
-    );
+    const patient_clinic =
+      await patient_clinicModel.getPatientClinicByTenantAndPatientClinicId(
+        tenantId,
+        patient_clinicId,
+      );
 
     const convertedRows = helper.convertDbToFrontend(
       patient_clinic,
-      patient_clinicFieldsReverseMap
+      patient_clinicFieldsReverseMap,
     );
 
     return convertedRows;
@@ -100,7 +107,7 @@ const updatePatientClinic = async (patient_clinicId, data, tenant_id) => {
       patient_clinicId,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     // if (affectedRows === 0) {
@@ -118,13 +125,13 @@ const updatePatientClinic = async (patient_clinicId, data, tenant_id) => {
 // Delete PatientClinic
 const deletePatientClinicByTenantIdAndPatientClinicId = async (
   tenantId,
-  patient_clinicId
+  patient_clinicId,
 ) => {
   try {
     const affectedRows =
       await patient_clinicModel.deletePatientClinicByTenantAndPatientClinicId(
         tenantId,
-        patient_clinicId
+        patient_clinicId,
       );
     // if (affectedRows === 0) {
     //   throw new CustomError("PatientClinic not found.", 404);
@@ -141,20 +148,24 @@ const getAllPatientClinicsByTenantIdAndClinicId = async (
   tenantId,
   clinic_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
 
   try {
-      const result = await patient_clinicModel.getAllPatientClinicsByTenantIdAndClinicId(
+    const result =
+      await patient_clinicModel.getAllPatientClinicsByTenantIdAndClinicId(
         tenantId,
         clinic_id,
         Number(limit),
-        offset
+        offset,
       );
 
     const convertedRows = result.data.map((patient_clinic) =>
-      helper.convertDbToFrontend(patient_clinic, patient_clinicFieldsReverseMap)
+      helper.convertDbToFrontend(
+        patient_clinic,
+        patient_clinicFieldsReverseMap,
+      ),
     );
 
     return { data: convertedRows, total: result.total };
@@ -170,5 +181,5 @@ module.exports = {
   getPatientClinicByTenantIdAndPatientClinicId,
   updatePatientClinic,
   deletePatientClinicByTenantIdAndPatientClinicId,
-  getAllPatientClinicsByTenantIdAndClinicId
+  getAllPatientClinicsByTenantIdAndClinicId,
 };

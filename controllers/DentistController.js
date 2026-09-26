@@ -1,11 +1,10 @@
 // src/controllers/DentistController.js
-const { bulkInsert } = require("../Modules/BulkInsert");
+const { bulkInsert } = require("../utils/BulkInsert");
 const dentistService = require("../services/DentistService");
 const {
   validateTenantIdAndPageAndLimit,
 } = require("../validations/CommonValidations");
 const dentistValidation = require("../validations/DentistValidation");
-
 
 exports.createDentist = async (req, res, next) => {
   const token = req.token;
@@ -21,7 +20,7 @@ exports.createDentist = async (req, res, next) => {
       dentistValidation.createDentistValidation,
       dentistService.createDentist,
       token,
-      realm
+      realm,
     );
 
     res.status(200).json(response);
@@ -29,7 +28,6 @@ exports.createDentist = async (req, res, next) => {
     next(err);
   }
 };
-
 
 exports.getAllDentistsByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
@@ -39,7 +37,7 @@ exports.getAllDentistsByTenantId = async (req, res, next) => {
     const dentists = await dentistService.getAllDentistsByTenantId(
       tenant_id,
       page,
-      limit
+      limit,
     );
     res.status(200).json(dentists);
   } catch (err) {
@@ -47,7 +45,7 @@ exports.getAllDentistsByTenantId = async (req, res, next) => {
   }
 };
 exports.getAllPublicDentistByTenantIdClinicId = async (req, res, next) => {
-  const { tenant_id,clinic_id } = req.params;
+  const { tenant_id, clinic_id } = req.params;
   const { page, limit } = req.query;
   // await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
@@ -55,7 +53,7 @@ exports.getAllPublicDentistByTenantIdClinicId = async (req, res, next) => {
       tenant_id,
       clinic_id,
       limit,
-      page
+      page,
     );
     res.status(200).json(dentists);
   } catch (err) {
@@ -68,12 +66,12 @@ exports.getDentistByTenantIdAndDentistId = async (req, res, next) => {
   try {
     await dentistValidation.checkDentistExistsByDentistIdValidation(
       tenant_id,
-      dentist_id
-    );        
+      dentist_id,
+    );
 
     const dentist = await dentistService.getDentistByTenantIdAndDentistId(
       tenant_id,
-      dentist_id
+      dentist_id,
     );
     res.status(200).json(dentist);
   } catch (err) {
@@ -84,17 +82,23 @@ exports.getDentistByTenantIdAndDentistId = async (req, res, next) => {
 exports.updateDentist = async (req, res, next) => {
   const { dentist_id, tenant_id } = req.params;
   const details = req.body;
-  const token=req.token;
-  const realm=req.realm;
+  const token = req.token;
+  const realm = req.realm;
 
   try {
     await dentistValidation.updateDentistValidation(
       dentist_id,
       details,
-      tenant_id
+      tenant_id,
     );
 
-    await dentistService.updateDentist(dentist_id, details, tenant_id,token,realm);
+    await dentistService.updateDentist(
+      dentist_id,
+      details,
+      tenant_id,
+      token,
+      realm,
+    );
     res.status(200).json({ message: "Dentist updated successfully" });
   } catch (err) {
     next(err);
@@ -103,18 +107,20 @@ exports.updateDentist = async (req, res, next) => {
 
 exports.deleteDentistByTenantIdAndDentistId = async (req, res, next) => {
   const { dentist_id, tenant_id } = req.params;
-  const token=req.token;
-  const realm=req.realm;
+  const token = req.token;
+  const realm = req.realm;
 
   try {
     await dentistValidation.checkDentistExistsByDentistIdValidation(
       tenant_id,
-      dentist_id
+      dentist_id,
     );
 
     await dentistService.deleteDentistByTenantIdAndDentistId(
       tenant_id,
-      dentist_id,token,realm
+      dentist_id,
+      token,
+      realm,
     );
     res.status(200).json({ message: "Dentist deleted successfully" });
   } catch (err) {
@@ -131,7 +137,7 @@ exports.getAllDentistByTenantIdAndClientId = async (req, res, next) => {
       tenant_id,
       clinic_id,
       page,
-      limit
+      limit,
     );
     res.status(200).json(dentists);
   } catch (err) {

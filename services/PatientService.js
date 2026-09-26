@@ -6,7 +6,7 @@ const {
   redisClient,
   invalidateCacheByPattern,
   getOrSetCache,
-} = require("../config/redisConfig");
+} = require("../config/redis");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const { mapFields } = require("../query/Records");
@@ -21,7 +21,7 @@ const {
   getUserGroups,
 } = require("../Keycloak/KeycloakAdmin");
 const { encrypt } = require("../middlewares/PasswordHash");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 const { createPatientClinic } = require("./PatientClinicService");
 const { rollbackKeycloakUser } = require("../Keycloak/KeycloakService");
 const { updateEntity, createEntity } = require("../utils/Reusability");
@@ -66,7 +66,7 @@ const patientFieldsReverseMap = {
   tenant_id: (val) => val,
   patient_reference_id: (val) => val,
   keycloak_id: (val) => val,
-patient_code: (val) => val,
+  patient_code: (val) => val,
   username: (val) => val,
   password: (val) => (val ? String(val) : null),
   first_name: (val) => val,
@@ -103,7 +103,7 @@ patient_code: (val) => val,
   updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 
-const createPatient = async (data, token, realm,clientId) => {
+const createPatient = async (data, token, realm, clientId) => {
   // console.log('ser-clientId:',clientId)
   return await createEntity({
     data,
@@ -114,7 +114,7 @@ const createPatient = async (data, token, realm,clientId) => {
     createModel: patientModel.createPatient,
     createPatientClinicFn: createPatientClinic,
     roleName: "patient",
-    clientId
+    clientId,
   });
 };
 
@@ -131,14 +131,14 @@ const getAllPatientsByTenantId = async (tenantId, page = 1, limit = 10) => {
       const result = await patientModel.getAllPatientsByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       console.log("✅ Serving patients from DB and caching result");
       return result;
     });
 
     const convertedRows = patients.data.map((patient) =>
-      helper.convertDbToFrontend(patient, patientFieldsReverseMap)
+      helper.convertDbToFrontend(patient, patientFieldsReverseMap),
     );
 
     return { data: convertedRows, total: patients.total };
@@ -152,7 +152,7 @@ const getMostVisitedPatientsByDentistPeriods = async (
   tenantId,
   dentistId,
   clinicId = null,
-  topN = 5
+  topN = 5,
 ) => {
   // Fetch all appointments for the dentist (and optionally clinic)
   const cacheData = `patient:mostvisit:tenant:${tenantId}:clinic:${clinicId}:dentist:${dentistId}`;
@@ -160,7 +160,7 @@ const getMostVisitedPatientsByDentistPeriods = async (
     const rows = await patientModel.getMostVisitedPatientsByDentistPeriods(
       tenantId,
       clinicId,
-      dentistId
+      dentistId,
     );
 
     //console.log(rows)
@@ -368,7 +368,7 @@ const getMostVisitedPatientsByClinicPeriods = async (
   clinic_id,
   startDate,
   endDate,
-  dentist_id
+  dentist_id,
 ) => {
   const cacheKey = buildCacheKey("patient", "mostvisitedpatients", {
     tenant_id,
@@ -384,9 +384,9 @@ const getMostVisitedPatientsByClinicPeriods = async (
         clinic_id,
         startDate,
         endDate,
-        dentist_id
+        dentist_id,
       );
-      
+
       console.log("✅ Serving patients from DB and caching result");
       return patient;
     });
@@ -481,7 +481,7 @@ const getNewPatientsTrends = async (tenantId, clinicId) => {
 const getNewPatientsTrendsByDentistAndClinic = async (
   tenantId,
   clinicId,
-  dentist_id
+  dentist_id,
 ) => {
   const cacheData = `patient:newpatient:tenant:${tenantId}:clinic:${clinicId}:dentist:${dentist_id}`;
 
@@ -489,7 +489,7 @@ const getNewPatientsTrendsByDentistAndClinic = async (
     const rows = await patientModel.getNewPatientsTrendsByDentistAndClinic(
       tenantId,
       clinicId,
-      dentist_id
+      dentist_id,
     );
     const now = moment().utc();
     const result = {};
@@ -573,7 +573,7 @@ const getAgeGenderByDentist = async (tenantId, clinicId, dentistId) => {
     const patients = await patientModel.getAgeGenderByDentist(
       tenantId,
       clinicId,
-      dentistId
+      dentistId,
     );
 
     const ageGroups = [
@@ -636,7 +636,7 @@ const getAgeGenderByClinic = async (tenantId, clinicId) => {
   const rows = await getOrSetCache(cacheData, async () => {
     const patients = await patientModel.getAgeGenderByClinic(
       tenantId,
-      clinicId
+      clinicId,
     );
     const ageGroups = [
       { label: "2-12", min: 2, max: 12 },
@@ -697,12 +697,12 @@ const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
   try {
     const patient = await patientModel.getPatientByTenantIdAndPatientId(
       tenantId,
-      patientId
+      patientId,
     );
     // console.log(patient);
     const convertedRows = helper.convertDbToFrontend(
       patient,
-      patientFieldsReverseMap
+      patientFieldsReverseMap,
     );
 
     return convertedRows;
@@ -714,12 +714,12 @@ const getPatientByTenantIdAndPatientId = async (tenantId, patientId) => {
 // Check existence
 const checkPatientExistsByTenantIdAndPatientId = async (
   tenantId,
-  patientId
+  patientId,
 ) => {
   try {
     return await patientModel.checkPatientExistsByTenantIdAndPatientId(
       tenantId,
-      patientId
+      patientId,
     );
   } catch (error) {
     throw new CustomError("Failed to check patient: " + error.message, 404);
@@ -764,7 +764,7 @@ const updatePatient = async (patientId, data, tenantId, token, realm) => {
     realm,
     fieldMap: patientFields,
     getModelById: patientModel.getPatientByTenantIdAndPatientId,
-    updateModel: patientModel.updatePatient
+    updateModel: patientModel.updatePatient,
   });
 };
 
@@ -773,7 +773,7 @@ const deletePatientByTenantIdAndPatientId = async (
   tenantId,
   patientId,
   token, // Keycloak admin token
-  realm // Keycloak realm
+  realm, // Keycloak realm
 ) => {
   let userId = null; // To track Keycloak user ID
   const connection = await pool.getConnection();
@@ -785,7 +785,7 @@ const deletePatientByTenantIdAndPatientId = async (
     const patient = await patientModel.getPatientByTenantIdAndPatientId(
       tenantId,
       patientId,
-      connection
+      connection,
     );
 
     if (!patient) {
@@ -798,7 +798,7 @@ const deletePatientByTenantIdAndPatientId = async (
     const affectedRows = await patientModel.deletePatientByTenantIdAndPatientId(
       tenantId,
       patientId,
-      connection
+      connection,
     );
 
     if (affectedRows === 0) {
@@ -816,13 +816,13 @@ const deletePatientByTenantIdAndPatientId = async (
       } catch (kcError) {
         console.error(
           `❌ Keycloak deletion failed for user ${userId}:`,
-          kcError.message
+          kcError.message,
         );
         // 🔁 Rollback DB delete
         await connection.rollback();
         throw new CustomError(
           "Failed to delete patient in Keycloak. Aborting delete.",
-          500
+          500,
         );
       }
     }
@@ -850,7 +850,7 @@ const groupToothProceduresByTimeRangeCumulative = async (
   clinicId,
   dentistId,
   startDate,
-  endDate
+  endDate,
 ) => {
   const cacheKey = buildCacheKey("patient", "toothdetails", {
     tenant_id: tenantId,
@@ -868,7 +868,7 @@ const groupToothProceduresByTimeRangeCumulative = async (
           clinicId,
           startDate,
           endDate,
-          dentistId
+          dentistId,
         );
       console.log("✅ Serving patients from DB and caching result");
       return result;
@@ -885,7 +885,7 @@ async function groupToothProceduresByTimeRangeCumulativeByDentist(
   tenant_id,
   clinic_id,
   dentist_id,
-  referenceDateStr = null
+  referenceDateStr = null,
 ) {
   const cacheData = `patient:toothdetails:tenant:${tenant_id}:clinic:${clinic_id}:dentist:${dentist_id}`;
   const rows = await getOrSetCache(cacheData, async () => {
@@ -893,7 +893,7 @@ async function groupToothProceduresByTimeRangeCumulativeByDentist(
       await patientModel.groupToothProceduresByTimeRangeCumulativeByDentist(
         tenant_id,
         clinic_id,
-        dentist_id
+        dentist_id,
       );
 
     const referenceDate = referenceDateStr
@@ -1016,7 +1016,7 @@ const getAllPatientsByTenantIdAndClinicId = async (
   tenantId,
   clinic_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   try {
     const offset = (page - 1) * limit;
@@ -1032,7 +1032,7 @@ const getAllPatientsByTenantIdAndClinicId = async (
         tenantId,
         clinic_id,
         Number(limit),
-        offset
+        offset,
       );
       console.log("✅ Serving patients from DB and caching result");
       return result;
@@ -1043,7 +1043,7 @@ const getAllPatientsByTenantIdAndClinicId = async (
 
       const converted = helper.convertDbToFrontend(
         patientFields,
-        patientFieldsReverseMap
+        patientFieldsReverseMap,
       );
 
       return {
@@ -1067,7 +1067,7 @@ const getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
   clinic_id,
   dentist_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("patient", "list", {
@@ -1086,7 +1086,7 @@ const getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
           clinic_id,
           dentist_id,
           Number(limit),
-          offset
+          offset,
         );
       console.log("✅ Serving patients from DB and caching result");
       return result;
@@ -1097,7 +1097,7 @@ const getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
 
       const converted = helper.convertDbToFrontend(
         patientFields,
-        patientFieldsReverseMap
+        patientFieldsReverseMap,
       );
 
       return {
@@ -1121,7 +1121,7 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
   clinic_id,
   dentist_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const cacheKey = buildCacheKey("patient", "list", {
     tenant_id: tenantId,
@@ -1138,7 +1138,7 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
           clinic_id,
           dentist_id,
           Number(limit),
-          offset
+          offset,
         );
       console.log("✅ Serving patients from DB and caching result");
       return result;
@@ -1149,7 +1149,7 @@ const getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
 
       const converted = helper.convertDbToFrontend(
         patientFields,
-        patientFieldsReverseMap
+        patientFieldsReverseMap,
       );
 
       return {

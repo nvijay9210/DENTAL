@@ -1,8 +1,10 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
-const { bulkInsert } = require("../Modules/BulkInsert");
+const { bulkInsert } = require("../utils/BulkInsert");
 const receptionService = require("../services/ReceptionService");
-const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
+const {
+  validateTenantIdAndPageAndLimit,
+} = require("../validations/CommonValidations");
 const receptionValidation = require("../validations/ReceptionValidation");
 
 /**
@@ -18,7 +20,7 @@ exports.createReception = async (req, res, next) => {
       receptionValidation.createReceptionValidation,
       receptionService.createReception,
       token,
-      realm
+      realm,
     );
     res.status(201).json(response);
   } catch (err) {
@@ -37,7 +39,7 @@ exports.getAllReceptionsByTenantId = async (req, res, next) => {
     const receptions = await receptionService.getAllReceptionsByTenantId(
       tenant_id,
       page,
-      limit
+      limit,
     );
     res.status(200).json(receptions);
   } catch (err) {
@@ -56,16 +58,17 @@ exports.getReceptionByTenantIdAndReceptionId = async (req, res, next) => {
       "reception",
       "reception_id",
       reception_id,
-      tenant_id
+      tenant_id,
     );
 
     if (!reception1) throw new CustomError("Reception not found", 404);
 
     // Fetch reception details
-    const reception = await receptionService.getReceptionByTenantIdAndReceptionId(
-      tenant_id,
-      reception_id
-    );
+    const reception =
+      await receptionService.getReceptionByTenantIdAndReceptionId(
+        tenant_id,
+        reception_id,
+      );
     res.status(200).json(reception);
   } catch (err) {
     next(err);
@@ -78,15 +81,21 @@ exports.getReceptionByTenantIdAndReceptionId = async (req, res, next) => {
 exports.updateReception = async (req, res, next) => {
   const { reception_id, tenant_id } = req.params;
   const details = req.body;
-  const token=req.token;
-  const realm=req.realm || process.env.KEYCLOAK_REALM;
+  const token = req.token;
+  const realm = req.realm || process.env.KEYCLOAK_REALM;
 
   try {
     // Validate update input
     await receptionValidation.updateReceptionValidation(reception_id, details);
 
     // Update the reception
-    await receptionService.updateReception(reception_id, details, tenant_id,token,realm);
+    await receptionService.updateReception(
+      reception_id,
+      details,
+      tenant_id,
+      token,
+      realm,
+    );
     res.status(200).json({ message: "Reception updated successfully" });
   } catch (err) {
     next(err);
@@ -98,22 +107,24 @@ exports.updateReception = async (req, res, next) => {
  */
 exports.deleteReceptionByTenantIdAndReceptionId = async (req, res, next) => {
   const { reception_id, tenant_id } = req.params;
-  const token=req.token;
-  const realm=req.realm;
+  const token = req.token;
+  const realm = req.realm;
   try {
     // Validate if reception exists
     const treatment = await checkIfExists(
       "reception",
       "reception_id",
       reception_id,
-      tenant_id
+      tenant_id,
     );
     if (!treatment) throw new CustomError("receptionId not Exists", 404);
 
     // Delete the reception
     await receptionService.deleteReceptionByTenantIdAndReceptionId(
       tenant_id,
-      reception_id,token,realm
+      reception_id,
+      token,
+      realm,
     );
     res.status(200).json({ message: "Reception deleted successfully" });
   } catch (err) {
@@ -122,16 +133,17 @@ exports.deleteReceptionByTenantIdAndReceptionId = async (req, res, next) => {
 };
 
 exports.getAllReceptionsByTenantIdAndClinicId = async (req, res, next) => {
-  const { tenant_id,clinic_id } = req.params;
+  const { tenant_id, clinic_id } = req.params;
   const { page, limit } = req.query;
   await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
-    const receptions = await receptionService.getAllReceptionsByTenantIdAndClinicId(
-      tenant_id,
-      clinic_id,
-      page,
-      limit
-    );
+    const receptions =
+      await receptionService.getAllReceptionsByTenantIdAndClinicId(
+        tenant_id,
+        clinic_id,
+        page,
+        limit,
+      );
     res.status(200).json(receptions);
   } catch (err) {
     next(err);

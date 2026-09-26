@@ -1,10 +1,7 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const reminderModel = require("../models/ReminderModel");
 
-const {
-  getOrSetCache,
-  invalidateCacheByPattern,
-} = require("../config/redisConfig");
+const { getOrSetCache, invalidateCacheByPattern } = require("../config/redis");
 
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
@@ -22,7 +19,7 @@ dayjs.extend(customParseFormat);
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 
 /* ============================================================
    HELPERS
@@ -926,8 +923,7 @@ const getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (
         current = current.add(1, "day");
       }
     } else if (repeatType === "weekly" || repeatType === "every week") {
-
-    /* --------------------------------------------------------
+      /* --------------------------------------------------------
          WEEKLY
       -------------------------------------------------------- */
       const weekdaysArray = parseWeekdays(repeat_weekdays);
@@ -966,8 +962,7 @@ const getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (
         current = current.add(1, "week");
       }
     } else if (repeatType === "monthly" || repeatType === "every month") {
-
-    /* --------------------------------------------------------
+      /* --------------------------------------------------------
          MONTHLY
       -------------------------------------------------------- */
       let current = start;
@@ -1004,8 +999,7 @@ const getReminderByTenantAndClinicIdAndDentistIdAndReminderId = async (
         current = current.add(1, "month");
       }
     } else {
-
-    /* --------------------------------------------------------
+      /* --------------------------------------------------------
          ONE TIME
       -------------------------------------------------------- */
       schedule.push({
@@ -1155,8 +1149,7 @@ const getMonthlywiseRemindersByTenantAndClinicIdAndDentistId = async (
           current = current.add(interval, "day");
         }
       } else if (repeatType === "weekly" || repeatType === "every week") {
-
-      /* ------------------------------------------------------
+        /* ------------------------------------------------------
            WEEKLY
         ------------------------------------------------------ */
         const weekdays = parseWeekdays(repeat_weekdays);
@@ -1207,8 +1200,7 @@ const getMonthlywiseRemindersByTenantAndClinicIdAndDentistId = async (
           current = current.add(interval, "week");
         }
       } else if (repeatType === "monthly" || repeatType === "every month") {
-
-      /* ------------------------------------------------------
+        /* ------------------------------------------------------
            MONTHLY
         ------------------------------------------------------ */
         const dayOfMonth = start.date();
@@ -1251,8 +1243,7 @@ const getMonthlywiseRemindersByTenantAndClinicIdAndDentistId = async (
           current = current.add(interval, "month");
         }
       } else {
-
-      /* ------------------------------------------------------
+        /* ------------------------------------------------------
            ONE TIME
         ------------------------------------------------------ */
         if (start.isSameOrAfter(startDate) && start.isSameOrBefore(endDate)) {

@@ -1,85 +1,77 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const paymentModel = require("../models/PaymentModel");
-const {
-  getOrSetCache,
-  invalidateCacheByPattern,
-} = require("../config/redisConfig");
+const { getOrSetCache, invalidateCacheByPattern } = require("../config/redis");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 const { createPaymentValidation } = require("../validations/PaymentValidation");
 const { updateAppoinmentFinalStatus } = require("../models/AppointmentModel");
 
 // Field mapping for payments (similar to treatment)
 
 const paymentFields = {
-    tenant_id: (val) => val,
-    clinic_id: (val) => val,
-    patient_id: (val) => val,
-    dentist_id: (val) => val,
-    appointment_id: (val) => val,
-    amount: (val) => val? parseFloat(val) : 0,
-    discount_applied: (val) => val? parseFloat(val) : 0,
-    final_amount: (val) => val? parseFloat(val) : 0,
-    total_amount: (val) => val? parseFloat(val) : 0,
-    payment_for: (val) => val,
-    mode_of_payment: (val) => val,
-    payment_source: (val) => val,
-    payment_reference: (val) => helper.safeStringify(val),
-    payment_status: (val) => val,
-    payment_verified: (val) => val,
-    receipt_number: (val) => val,
-    insurance_number: (val) => val,
-    payment_date: (val) => val?formatDateOnly(val):null
-  };
-  
-  const paymentFieldsReverseMap = {
-    payment_id: (val) => val,
-    tenant_id: (val) => val,
-    clinic_id: (val) => val,
-    patient_id: (val) => val,
-    dentist_id: (val) => val,
-    appointment_id: (val) => val,
-    amount: (val) => val? parseFloat(val) : 0,
-    discount_applied: (val) => val? parseFloat(val) : 0,
-    final_amount: (val) => val? parseFloat(val) : 0,
-    total_amount: (val) => val? parseFloat(val) : 0,
-    payment_for: (val) => val,
-    mode_of_payment: (val) => val,
-    payment_source: (val) => val,
-    payment_reference:(val)=> helper.safeJsonParse
-    (val),
-    payment_status: (val) => val,
-    payment_verified: (val) => val,
-    receipt_number: (val) => val,
-    insurance_number: (val) => val,
-    payment_date: (val) =>
-      val ? formatDateOnly(val)  : null,
-    created_by: (val) => val,
-    created_time: (val) =>
-      val ? convertUTCToLocal(val) : null,
-    updated_by: (val) => val,
-    updated_time: (val) =>
-      val ? convertUTCToLocal(val) : null,
-  };
-  
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
+  patient_id: (val) => val,
+  dentist_id: (val) => val,
+  appointment_id: (val) => val,
+  amount: (val) => (val ? parseFloat(val) : 0),
+  discount_applied: (val) => (val ? parseFloat(val) : 0),
+  final_amount: (val) => (val ? parseFloat(val) : 0),
+  total_amount: (val) => (val ? parseFloat(val) : 0),
+  payment_for: (val) => val,
+  mode_of_payment: (val) => val,
+  payment_source: (val) => val,
+  payment_reference: (val) => helper.safeStringify(val),
+  payment_status: (val) => val,
+  payment_verified: (val) => val,
+  receipt_number: (val) => val,
+  insurance_number: (val) => val,
+  payment_date: (val) => (val ? formatDateOnly(val) : null),
+};
+
+const paymentFieldsReverseMap = {
+  payment_id: (val) => val,
+  tenant_id: (val) => val,
+  clinic_id: (val) => val,
+  patient_id: (val) => val,
+  dentist_id: (val) => val,
+  appointment_id: (val) => val,
+  amount: (val) => (val ? parseFloat(val) : 0),
+  discount_applied: (val) => (val ? parseFloat(val) : 0),
+  final_amount: (val) => (val ? parseFloat(val) : 0),
+  total_amount: (val) => (val ? parseFloat(val) : 0),
+  payment_for: (val) => val,
+  mode_of_payment: (val) => val,
+  payment_source: (val) => val,
+  payment_reference: (val) => helper.safeJsonParse(val),
+  payment_status: (val) => val,
+  payment_verified: (val) => val,
+  receipt_number: (val) => val,
+  insurance_number: (val) => val,
+  payment_date: (val) => (val ? formatDateOnly(val) : null),
+  created_by: (val) => val,
+  created_time: (val) => (val ? convertUTCToLocal(val) : null),
+  updated_by: (val) => val,
+  updated_time: (val) => (val ? convertUTCToLocal(val) : null),
+};
 
 // Create Payment
-const createPayment = async (data,conn) => {
+const createPayment = async (data, conn) => {
   const fieldMap = {
     ...paymentFields,
     created_by: (val) => val,
   };
   try {
-    await createPaymentValidation(data)
+    await createPaymentValidation(data);
     // console.log('data:',data)
     const { columns, values } = mapFields(data, fieldMap);
     const paymentId = await paymentModel.createPayment(
       conn,
       "payment",
       columns,
-      values
+      values,
     );
     await invalidateCacheByPattern("payment:*");
     await invalidateCacheByPattern("financeSummary:*");
@@ -104,16 +96,16 @@ const getAllPaymentsByTenantId = async (tenantId, page = 1, limit = 10) => {
       const result = await paymentModel.getAllPaymentsByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
 
     const convertedRows = payments.data.map((payment) =>
-      helper.convertDbToFrontend(payment, paymentFieldsReverseMap)
+      helper.convertDbToFrontend(payment, paymentFieldsReverseMap),
     );
 
-    return {data:convertedRows,total:payments.total};;
+    return { data: convertedRows, total: payments.total };
   } catch (error) {
     console.error("Database error while fetching payments:", error);
     throw new CustomError(error, 500);
@@ -125,14 +117,14 @@ const getPaymentByTenantIdAndPaymentId = async (tenantId, paymentId) => {
   try {
     const payment = await paymentModel.getPaymentByTenantAndPaymentId(
       tenantId,
-      paymentId
+      paymentId,
     );
     const convertedRows = helper.convertDbToFrontend(
       payment,
-      paymentFieldsReverseMap
+      paymentFieldsReverseMap,
     );
 
-    return {data:convertedRows,total:payment.total};;
+    return { data: convertedRows, total: payment.total };
   } catch (error) {
     throw new CustomError(error, 500);
   }
@@ -151,37 +143,33 @@ const getPaymentByTenantIdAndPaymentId = async (tenantId, paymentId) => {
 //         paymentFieldsReverseMap
 //       );
 //     }
-    
+
 //     return result;
 //   } catch (error) {
 //     throw new CustomError(error, 500);
 //   }
 // };
 
-const getPaymentByTenantAndAppointmentId = async (
-  tenantId, appointment_id
-) => {
+const getPaymentByTenantAndAppointmentId = async (tenantId, appointment_id) => {
   const cacheKey = buildCacheKey("payment", "appointmentlist", {
     tenant_id: tenantId,
-    appointment_id
+    appointment_id,
   });
 
   try {
     const payments = await getOrSetCache(cacheKey, async () => {
-      const result =
-        await paymentModel.getPaymentByTenantAndAppointmentId(
-          tenantId,
-          appointment_id
-        );
+      const result = await paymentModel.getPaymentByTenantAndAppointmentId(
+        tenantId,
+        appointment_id,
+      );
       return result;
     });
     // console.log(payments)
     const convertedRows = payments.map((payment) =>
-      helper.convertDbToFrontend(payment, paymentFieldsReverseMap
-      )
+      helper.convertDbToFrontend(payment, paymentFieldsReverseMap),
     );
 
-    return convertedRows
+    return convertedRows;
   } catch (error) {
     console.error("Database error while fetching payments:", error);
     throw new CustomError("Failed to fetch payments", 404);
@@ -190,19 +178,19 @@ const getPaymentByTenantAndAppointmentId = async (
 
 const getallPaymentSummaryByAppointment = async (tenantId, appointment_id) => {
   const cacheKey = buildCacheKey("payments", "summarylist", {
-    tenant_id: tenantId,appointment_id:appointment_id
-
+    tenant_id: tenantId,
+    appointment_id: appointment_id,
   });
   try {
     const payments = await getOrSetCache(cacheKey, async () => {
       const result = await paymentModel.getallPaymentSummaryByAppointment(
         tenantId,
-       appointment_id
+        appointment_id,
       );
       return result;
     });
 
-    return payments
+    return payments;
   } catch (error) {
     console.error("Database error while fetching payments:", error);
     throw new CustomError(error, 500);
@@ -221,7 +209,7 @@ const updatePayment = async (paymentId, data, tenant_id) => {
       paymentId,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     // if (affectedRows === 0) {
@@ -242,7 +230,7 @@ const deletePaymentByTenantIdAndPaymentId = async (tenantId, paymentId) => {
   try {
     const affectedRows = await paymentModel.deletePaymentByTenantAndPaymentId(
       tenantId,
-      paymentId
+      paymentId,
     );
     // if (affectedRows === 0) {
     //   throw new CustomError("Payment not found.", 404);
@@ -262,5 +250,5 @@ module.exports = {
   updatePayment,
   deletePaymentByTenantIdAndPaymentId,
   getPaymentByTenantAndAppointmentId,
-  getallPaymentSummaryByAppointment
+  getallPaymentSummaryByAppointment,
 };

@@ -4,13 +4,13 @@ const {
   redisClient,
   getOrSetCache,
   invalidateCacheByPattern,
-} = require("../config/redisConfig");
+} = require("../config/redis");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 
 // Field mapping for prescriptions (similar to treatment)
 
@@ -23,11 +23,11 @@ const prescriptionFields = {
   medication: helper.safeStringify,
   generic_name: (val) => val || null,
   brand_name: (val) => val || null,
-  dosage: val=>val? parseInt(val) : 0,
+  dosage: (val) => (val ? parseInt(val) : 0),
   frequency: helper.safeStringify,
-  quantity: (val) => val? parseInt(val) : 0,
+  quantity: (val) => (val ? parseInt(val) : 0),
   refill_allowed: helper.parseBoolean,
-  refill_count: (val) => val? parseInt(val) : 0,
+  refill_count: (val) => (val ? parseInt(val) : 0),
   side_effects: helper.safeStringify,
   start_date: (val) => val || null,
   end_date: (val) => val || null,
@@ -36,7 +36,7 @@ const prescriptionFields = {
   is_active: helper.parseBoolean,
 };
 const prescriptionFieldsReversMap = {
-  prescription_id:val=>val,
+  prescription_id: (val) => val,
   tenant_id: (val) => val,
   clinic_id: (val) => val,
   patient_id: (val) => val,
@@ -45,21 +45,21 @@ const prescriptionFieldsReversMap = {
   medication: helper.safeJsonParse,
   generic_name: (val) => val || null,
   brand_name: (val) => val || null,
-  dosage: val=>val? parseInt(val) : 0,
+  dosage: (val) => (val ? parseInt(val) : 0),
   frequency: helper.safeJsonParse,
-  quantity: (val) => val? parseInt(val) : 0,
-  refill_allowed: val => Boolean(val),
-  refill_count: (val) => val? parseInt(val) : 0,
+  quantity: (val) => (val ? parseInt(val) : 0),
+  refill_allowed: (val) => Boolean(val),
+  refill_count: (val) => (val ? parseInt(val) : 0),
   side_effects: helper.safeJsonParse,
-  start_date: (val) => val ? formatDateOnly(val) : null,
-  end_date: (val) => val ? formatDateOnly(val) : null,
+  start_date: (val) => (val ? formatDateOnly(val) : null),
+  end_date: (val) => (val ? formatDateOnly(val) : null),
   instructions: helper.safeJsonParse,
   notes: helper.safeJsonParse,
-  is_active: val => Boolean(val),
+  is_active: (val) => Boolean(val),
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
   updated_by: (val) => val,
-  updated_time: (val) => (val ? convertUTCToLocal(val) : null)
+  updated_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 
 // Create Prescription
@@ -73,7 +73,7 @@ const createPrescription = async (data) => {
     const prescriptionId = await prescriptionModel.createPrescription(
       "prescription",
       columns,
-      values
+      values,
     );
     await invalidateCacheByPattern("prescription:*");
     await invalidateCacheByPattern("prescriptionByPatientId:*");
@@ -82,7 +82,7 @@ const createPrescription = async (data) => {
     console.error("Failed to create prescription:", error);
     throw new CustomError(
       `Failed to create prescription: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -91,7 +91,7 @@ const createPrescription = async (data) => {
 const getAllPrescriptionsByTenantId = async (
   tenantId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("prescription", "list", {
@@ -105,16 +105,16 @@ const getAllPrescriptionsByTenantId = async (
       const result = await prescriptionModel.getAllPrescriptionsByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
 
-     const convertedRows = prescriptions.data.map((prescription) =>
-          helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
-        );
-    
-        return {data:convertedRows,total:prescriptions.total};;
+    const convertedRows = prescriptions.data.map((prescription) =>
+      helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap),
+    );
+
+    return { data: convertedRows, total: prescriptions.total };
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
     throw new CustomError(err, 500);
@@ -126,7 +126,7 @@ const getAllPrescriptionsByTenantAndClinicIdAndTreatmentId = async (
   clinic_id,
   treatment_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("treatment", "list", {
@@ -137,7 +137,6 @@ const getAllPrescriptionsByTenantAndClinicIdAndTreatmentId = async (
     limit,
   });
 
-
   try {
     const prescriptions = await getOrSetCache(cacheKey, async () => {
       const result =
@@ -146,16 +145,16 @@ const getAllPrescriptionsByTenantAndClinicIdAndTreatmentId = async (
           clinic_id,
           treatment_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
 
     const convertedRows = prescriptions.data.map((prescription) =>
-          helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
-        );
-    
-        return {data:convertedRows,total:prescriptions.total};;
+      helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap),
+    );
+
+    return { data: convertedRows, total: prescriptions.total };
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
     throw new CustomError(err, 500);
@@ -167,7 +166,7 @@ const getAllPrescriptionsByTenantAndClinicIdAndAppointmentId = async (
   clinic_id,
   appointment_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
 
@@ -186,7 +185,7 @@ const getAllPrescriptionsByTenantAndClinicIdAndAppointmentId = async (
         clinic_id,
         appointment_id,
         Number(limit),
-        offset
+        offset,
       );
     });
 
@@ -214,10 +213,7 @@ const getAllPrescriptionsByTenantAndClinicIdAndAppointmentId = async (
       : null;
 
     const convertedRows = prescriptions.data.map((prescription) =>
-      helper.convertDbToFrontend(
-        prescription,
-        prescriptionFieldsReversMap
-      )
+      helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap),
     );
 
     return {
@@ -226,10 +222,7 @@ const getAllPrescriptionsByTenantAndClinicIdAndAppointmentId = async (
       total: prescriptions.total,
     };
   } catch (err) {
-    console.error(
-      "Database error while fetching prescriptions:",
-      err
-    );
+    console.error("Database error while fetching prescriptions:", err);
 
     throw new CustomError(err, 500);
   }
@@ -241,7 +234,7 @@ const getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (
   dentist_id,
   treatment_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("treatment", "list", {
@@ -253,7 +246,6 @@ const getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (
     limit,
   });
 
-
   try {
     const prescriptions = await getOrSetCache(cacheKey, async () => {
       const result =
@@ -263,16 +255,16 @@ const getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (
           dentist_id,
           treatment_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
 
     const convertedRows = prescriptions.data.map((prescription) =>
-          helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
-        );
-    
-        return {data:convertedRows,total:prescriptions.total};;
+      helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap),
+    );
+
+    return { data: convertedRows, total: prescriptions.total };
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
     throw new CustomError(err, 500);
@@ -282,7 +274,7 @@ const getAllPrescriptionsByTenantIdAndDentistId = async (
   tenantId,
   dentist_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("treatment", "list", {
@@ -299,16 +291,16 @@ const getAllPrescriptionsByTenantIdAndDentistId = async (
           tenantId,
           dentist_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
 
     const convertedRows = prescriptions.data.map((prescription) =>
-          helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
-        );
-    
-        return {data:convertedRows,total:prescriptions.total};;
+      helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap),
+    );
+
+    return { data: convertedRows, total: prescriptions.total };
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
     throw new CustomError(err, 500);
@@ -318,7 +310,7 @@ const getAllPrescriptionsByTenantIdAndPatientId = async (
   tenantId,
   patient_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("treatment", "list", {
@@ -328,7 +320,6 @@ const getAllPrescriptionsByTenantIdAndPatientId = async (
     limit,
   });
 
-
   try {
     const prescriptions = await getOrSetCache(cacheKey, async () => {
       const result =
@@ -336,16 +327,16 @@ const getAllPrescriptionsByTenantIdAndPatientId = async (
           tenantId,
           patient_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
 
     const convertedRows = prescriptions.data.map((prescription) =>
-          helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
-        );
-    
-        return {data:convertedRows,total:prescriptions.total};;
+      helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap),
+    );
+
+    return { data: convertedRows, total: prescriptions.total };
   } catch (err) {
     console.error("Database error while fetching prescriptions:", err);
     throw new CustomError(err, 500);
@@ -355,20 +346,21 @@ const getAllPrescriptionsByTenantIdAndPatientId = async (
 // Get Prescription by ID & Tenant
 const getPrescriptionByTenantIdAndPrescriptionId = async (
   tenantId,
-  prescriptionId
+  prescriptionId,
 ) => {
   try {
     const prescription =
       await prescriptionModel.getPrescriptionByTenantAndPrescriptionId(
         tenantId,
-        prescriptionId
+        prescriptionId,
       );
 
-    const convertedRows =
-      helper.convertDbToFrontend(prescription, prescriptionFieldsReversMap)
+    const convertedRows = helper.convertDbToFrontend(
+      prescription,
+      prescriptionFieldsReversMap,
+    );
 
-    return convertedRows
-    
+    return convertedRows;
   } catch (error) {
     throw new CustomError(err, 500);
   }
@@ -386,7 +378,7 @@ const updatePrescription = async (prescriptionId, data, tenant_id) => {
       prescriptionId,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     // if (affectedRows === 0) {
@@ -405,13 +397,13 @@ const updatePrescription = async (prescriptionId, data, tenant_id) => {
 // Delete Prescription
 const deletePrescriptionByTenantIdAndPrescriptionId = async (
   tenantId,
-  prescriptionId
+  prescriptionId,
 ) => {
   try {
     const affectedRows =
       await prescriptionModel.deletePrescriptionByTenantAndPrescriptionId(
         tenantId,
-        prescriptionId
+        prescriptionId,
       );
     // if (affectedRows === 0) {
     //   throw new CustomError(err, 500);
@@ -423,7 +415,7 @@ const deletePrescriptionByTenantIdAndPrescriptionId = async (
   } catch (error) {
     throw new CustomError(
       `Failed to delete prescription: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -438,5 +430,5 @@ module.exports = {
   getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId,
   getAllPrescriptionsByTenantIdAndDentistId,
   getAllPrescriptionsByTenantIdAndPatientId,
-  getAllPrescriptionsByTenantAndClinicIdAndAppointmentId
+  getAllPrescriptionsByTenantAndClinicIdAndAppointmentId,
 };

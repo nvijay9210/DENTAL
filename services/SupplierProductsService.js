@@ -4,13 +4,13 @@ const {
   redisClient,
   getOrSetCache,
   invalidateCacheByPattern,
-} = require("../config/redisConfig");
+} = require("../config/redis");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 
 // Field mapping for supplier_productss (similar to treatment)
 
@@ -22,9 +22,9 @@ const supplier_productsFields = {
   currency_code: (val) => val,
   description: helper.safeStringify,
   unit: (val) => val,
-  unit_price: (val) =>val? parseFloat(val) :0,
-  moq: (val) =>val? parseInt(val) :0,
-  lead_time_days:(val)=> val? parseInt(val) :0,
+  unit_price: (val) => (val ? parseFloat(val) : 0),
+  moq: (val) => (val ? parseInt(val) : 0),
+  lead_time_days: (val) => (val ? parseInt(val) : 0),
   image_url: (val) => val,
   active: (val) => helper.parseBoolean(val),
 };
@@ -37,9 +37,9 @@ const supplier_productsFieldsReverseMap = {
   currency_code: (val) => val,
   description: helper.safeJsonParse,
   unit: (val) => val,
-  unit_price: (val) =>val? parseFloat(val) :0,
-  moq: (val) =>val? parseInt(val) :0,
-  lead_time_days:(val)=> val? parseInt(val) :0,
+  unit_price: (val) => (val ? parseFloat(val) : 0),
+  moq: (val) => (val ? parseInt(val) : 0),
+  lead_time_days: (val) => (val ? parseInt(val) : 0),
   image_url: (val) => val,
   active: (val) => Boolean(val),
   created_by: (val) => val,
@@ -54,23 +54,30 @@ const createSupplierProducts = async (data) => {
     created_by: (val) => val,
   };
   try {
-
     const { columns, values } = mapFields(data, fieldMap);
-    const supplier_productsId = await supplier_productsModel.createSupplierProducts(
-      "supplier_products",
-      columns,
-      values
-    );
+    const supplier_productsId =
+      await supplier_productsModel.createSupplierProducts(
+        "supplier_products",
+        columns,
+        values,
+      );
     await invalidateCacheByPattern("supplier_products:*");
     return supplier_productsId;
   } catch (error) {
     console.error("Failed to create supplier_products:", error);
-    throw new CustomError(`Failed to create supplier_products: ${error.message}`, 404);
+    throw new CustomError(
+      `Failed to create supplier_products: ${error.message}`,
+      404,
+    );
   }
 };
 
 // Get All SupplierProductss by Tenant ID with Caching
-const getAllSupplierProductssByTenantId = async (tenantId, page = 1, limit = 10) => {
+const getAllSupplierProductssByTenantId = async (
+  tenantId,
+  page = 1,
+  limit = 10,
+) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("supplier_products", "list", {
     tenant_id: tenantId,
@@ -80,16 +87,20 @@ const getAllSupplierProductssByTenantId = async (tenantId, page = 1, limit = 10)
 
   try {
     const supplier_productss = await getOrSetCache(cacheKey, async () => {
-      const result = await supplier_productsModel.getAllSupplierProductssByTenantId(
-        tenantId,
-        Number(limit),
-        offset
-      );
+      const result =
+        await supplier_productsModel.getAllSupplierProductssByTenantId(
+          tenantId,
+          Number(limit),
+          offset,
+        );
       return result;
     });
 
     const convertedRows = supplier_productss.data.map((supplier_products) =>
-      helper.convertDbToFrontend(supplier_products, supplier_productsFieldsReverseMap)
+      helper.convertDbToFrontend(
+        supplier_products,
+        supplier_productsFieldsReverseMap,
+      ),
     );
 
     return { data: convertedRows, total: supplier_productss.total };
@@ -99,27 +110,36 @@ const getAllSupplierProductssByTenantId = async (tenantId, page = 1, limit = 10)
   }
 };
 
-const getAllSupplierProductssByTenantIdAndSupplierId = async (tenantId,supplierId, page = 1, limit = 10) => {
+const getAllSupplierProductssByTenantIdAndSupplierId = async (
+  tenantId,
+  supplierId,
+  page = 1,
+  limit = 10,
+) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("supplier_products", "list", {
     tenant_id: tenantId,
-    supplier_id:supplierId,
+    supplier_id: supplierId,
     page,
     limit,
   });
   try {
     const supplier_productss = await getOrSetCache(cacheKey, async () => {
-      const result = await supplier_productsModel.getAllSupplierProductssByTenantIdAndSupplierId(
-        tenantId,
-        supplierId,
-        Number(limit),
-        offset
-      );
+      const result =
+        await supplier_productsModel.getAllSupplierProductssByTenantIdAndSupplierId(
+          tenantId,
+          supplierId,
+          Number(limit),
+          offset,
+        );
       return result;
     });
 
     const convertedRows = supplier_productss.data.map((supplier_products) =>
-      helper.convertDbToFrontend(supplier_products, supplier_productsFieldsReverseMap)
+      helper.convertDbToFrontend(
+        supplier_products,
+        supplier_productsFieldsReverseMap,
+      ),
     );
 
     return { data: convertedRows, total: supplier_productss.total };
@@ -130,21 +150,28 @@ const getAllSupplierProductssByTenantIdAndSupplierId = async (tenantId,supplierI
 };
 
 // Get SupplierProducts by ID & Tenant
-const getSupplierProductsByTenantIdAndSupplierProductsId = async (tenantId, supplier_productsId) => {
+const getSupplierProductsByTenantIdAndSupplierProductsId = async (
+  tenantId,
+  supplier_productsId,
+) => {
   try {
-    const supplier_products = await supplier_productsModel.getSupplierProductsByTenantAndSupplierProductsId(
-      tenantId,
-      supplier_productsId
-    );
+    const supplier_products =
+      await supplier_productsModel.getSupplierProductsByTenantAndSupplierProductsId(
+        tenantId,
+        supplier_productsId,
+      );
 
     const convertedRows = helper.convertDbToFrontend(
       supplier_products,
-      supplier_productsFieldsReverseMap
+      supplier_productsFieldsReverseMap,
     );
 
     return convertedRows;
   } catch (error) {
-    throw new CustomError("Failed to get supplier_products: " + error.message, 404);
+    throw new CustomError(
+      "Failed to get supplier_products: " + error.message,
+      404,
+    );
   }
 };
 
@@ -160,11 +187,14 @@ const updateSupplierProducts = async (supplier_productsId, data, tenant_id) => {
       supplier_productsId,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     if (affectedRows === 0) {
-      throw new CustomError("SupplierProducts not found or no changes made.", 404);
+      throw new CustomError(
+        "SupplierProducts not found or no changes made.",
+        404,
+      );
     }
 
     await invalidateCacheByPattern("supplier_products:*");
@@ -176,12 +206,15 @@ const updateSupplierProducts = async (supplier_productsId, data, tenant_id) => {
 };
 
 // Delete SupplierProducts
-const deleteSupplierProductsByTenantIdAndSupplierProductsId = async (tenantId, supplier_productsId) => {
+const deleteSupplierProductsByTenantIdAndSupplierProductsId = async (
+  tenantId,
+  supplier_productsId,
+) => {
   try {
     const affectedRows =
       await supplier_productsModel.deleteSupplierProductsByTenantAndSupplierProductsId(
         tenantId,
-        supplier_productsId
+        supplier_productsId,
       );
     if (affectedRows === 0) {
       throw new CustomError("SupplierProducts not found.", 404);
@@ -190,7 +223,10 @@ const deleteSupplierProductsByTenantIdAndSupplierProductsId = async (tenantId, s
     await invalidateCacheByPattern("supplier_products:*");
     return affectedRows;
   } catch (error) {
-    throw new CustomError(`Failed to delete supplier_products: ${error.message}`, 404);
+    throw new CustomError(
+      `Failed to delete supplier_products: ${error.message}`,
+      404,
+    );
   }
 };
 
@@ -200,5 +236,5 @@ module.exports = {
   getSupplierProductsByTenantIdAndSupplierProductsId,
   updateSupplierProducts,
   deleteSupplierProductsByTenantIdAndSupplierProductsId,
-  getAllSupplierProductssByTenantIdAndSupplierId
+  getAllSupplierProductssByTenantIdAndSupplierId,
 };

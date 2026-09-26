@@ -4,10 +4,7 @@ const paymentService = require("../services/PaymentService");
 const pool = require("../config/db");
 const dayjs = require("dayjs");
 const helper = require("../utils/Helpers");
-const {
-  getOrSetCache,
-  invalidateCacheByPattern,
-} = require("../config/redisConfig");
+const { getOrSetCache, invalidateCacheByPattern } = require("../config/redis");
 const {
   decodeJsonFields,
   duration,
@@ -38,7 +35,7 @@ const appointmentFields = {
   start_time: (val) => val,
   end_time: (val) => val,
   status: (val) => val,
-  appointment_final_status: (val) => val||'pending',
+  appointment_final_status: (val) => val || "pending",
   doctor_rating: (val) => (val ? parseFloat(val) : 0),
   feedback: (val) => helper.safeStringify(val),
   appointment_type: (val) => val,
@@ -129,7 +126,7 @@ const createAppointment = async (data, connection = null) => {
       "appointment",
       columns,
       values,
-      conn
+      conn,
     );
 
     if (!appointmentId) {
@@ -143,7 +140,7 @@ const createAppointment = async (data, connection = null) => {
     const consultationFee = parseFloat(data?.consultation_fee) || 0;
     const discountApplied = parseFloat(data?.discount_applied) || 0;
 
-    const totalAmount =  consultationFee;
+    const totalAmount = consultationFee;
     const finalAmount = totalAmount - minBookingFee;
 
     const paymentData = {
@@ -190,26 +187,26 @@ const createAppointment = async (data, connection = null) => {
       await updatePatientAppointmentCount(
         data.tenant_id,
         data.patient_id,
-        true
+        true,
       );
       await updateDentistAppointmentCount(
         data.tenant_id,
         data.clinic_id,
         data.dentist_id,
-        true
+        true,
       );
       await appointmentModel.updateAppointmentStats(
         data.tenant_id,
         data.clinic_id,
         data.dentist_id,
         data.appointment_date,
-        conn
+        conn,
       );
       // console.log("[Appointment] Stats updated successfully");
     } catch (statsErr) {
       console.warn(
         "[Appointment] Background stat update failed (non-critical):",
-        statsErr.message
+        statsErr.message,
       );
       // Continue — don't throw
     }
@@ -228,14 +225,14 @@ const createAppointment = async (data, connection = null) => {
     } catch (cacheErr) {
       console.warn(
         "[Appointment] Cache invalidation failed (non-critical):",
-        cacheErr.message
+        cacheErr.message,
       );
     }
 
     return appointmentId;
   } catch (error) {
     if (conn) {
-      await conn.rollback()
+      await conn.rollback();
     }
     console.error("[Appointment] ❌ Failed to create appointment:", {
       message: error.message,
@@ -250,12 +247,12 @@ const createAppointment = async (data, connection = null) => {
 
     throw new CustomError(
       `Failed to create appointment: ${error.message}`,
-      error.statusCode || 500
+      error.statusCode || 500,
     );
   } finally {
     if (conn && !connection) {
       // Only release if we created the connection
-      await conn.release()
+      await conn.release();
       //console.log("[Appointment] Database connection released");
     }
   }
@@ -274,12 +271,12 @@ const getAllAppointmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
       const result = await appointmentModel.getAllAppointmentsByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
     const convertedRows = appointments.data.map((appointment) =>
-      helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
+      helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap),
     );
 
     return { data: convertedRows, total: appointments.total };
@@ -293,7 +290,7 @@ const getAllAppointmentsByTenantIdAndClinicId = async (
   tenantId,
   clinic_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointment", "list", {
@@ -310,12 +307,12 @@ const getAllAppointmentsByTenantIdAndClinicId = async (
           tenantId,
           clinic_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
     const convertedRows = appointments.data.map((appointment) =>
-      helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
+      helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap),
     );
 
     return { data: convertedRows, total: appointments.total };
@@ -330,7 +327,7 @@ const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (
   clinic_id,
   dentist_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointment", "list", {
@@ -349,18 +346,15 @@ const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (
           // clinic_id,
           dentist_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
     const convertedRows = appointments.data.map((appointment) => ({
-  ...helper.convertDbToFrontend(
-    appointment,
-    appointmentFieldsReverseMap
-  ),
+      ...helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap),
 
-  clinic_name: appointment.clinic_name,
-}));
+      clinic_name: appointment.clinic_name,
+    }));
 
     return { data: convertedRows, total: appointments.total };
   } catch (error) {
@@ -372,14 +366,14 @@ const getAllAppointmentsByTenantIdAndClinicIdByDentist = async (
 const getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (
   tenantId,
   clinic_id,
-  dentist_id
+  dentist_id,
 ) => {
   try {
     const result =
       await appointmentModel.getAllRoomIdByTenantIdAndClinicIdAndDentistId(
         tenantId,
         clinic_id,
-        dentist_id
+        dentist_id,
       );
     return result;
   } catch (error) {
@@ -387,16 +381,12 @@ const getAllRoomIdByTenantIdAndClinicIdAndDentistId = async (
     throw new CustomError("Failed to fetch appointment", 404);
   }
 };
-const getAllRoomIdByTenantIdAndClinicId = async (
-  tenantId,
-  clinic_id
-) => {
+const getAllRoomIdByTenantIdAndClinicId = async (tenantId, clinic_id) => {
   try {
-    const result =
-      await appointmentModel.getAllRoomIdByTenantIdAndClinicId(
-        tenantId,
-        clinic_id
-      );
+    const result = await appointmentModel.getAllRoomIdByTenantIdAndClinicId(
+      tenantId,
+      clinic_id,
+    );
     return result;
   } catch (error) {
     console.error("Database error while fetching appointment roomid:", error);
@@ -408,7 +398,7 @@ const getAllRoomIdByTenantIdAndPatientId = async (tenantId, patient_id) => {
   try {
     const result = await appointmentModel.getAllRoomIdByTenantIdAndPatientId(
       tenantId,
-      patient_id
+      patient_id,
     );
     return result;
   } catch (error) {
@@ -421,7 +411,7 @@ const getAllAppointmentsByTenantIdAndAndDentistId = async (
   tenantId,
   dentist_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointment", "list", {
@@ -438,12 +428,12 @@ const getAllAppointmentsByTenantIdAndAndDentistId = async (
           tenantId,
           dentist_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
     const convertedRows = appointments.data.map((appointment) =>
-      helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
+      helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap),
     );
 
     return { data: convertedRows, total: appointments.total };
@@ -458,7 +448,7 @@ const getAllAppointmentsByTenantIdAndPatientId = async (
   patient_id,
   status,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointment", "list", {
@@ -477,12 +467,12 @@ const getAllAppointmentsByTenantIdAndPatientId = async (
           patient_id,
           status,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
     const convertedRows = appointments.data.map((appointment) =>
-      helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap)
+      helper.convertDbToFrontend(appointment, appointmentFieldsReverseMap),
     );
 
     return { data: convertedRows, total: appointments.total };
@@ -495,19 +485,19 @@ const getAllAppointmentsByTenantIdAndPatientId = async (
 // Get Appointment by Tenant & ID
 const getAppointmentByTenantIdAndAppointmentId = async (
   tenantId,
-  appointmentId
+  appointmentId,
 ) => {
   try {
     const appointment =
       await appointmentModel.getAppointmentByTenantIdAndAppointmentId(
         tenantId,
-        appointmentId
+        appointmentId,
       );
     // console.log(appointment)
 
     const convertedRows = helper.convertDbToFrontend(
       appointment,
-      appointmentFieldsReverseMap
+      appointmentFieldsReverseMap,
     );
 
     return convertedRows;
@@ -521,7 +511,7 @@ const getRoomIdByTenantIdAndAppointmentId = async (tenantId, appointmentId) => {
     const appointment =
       await appointmentModel.getRoomIdByTenantIdAndAppointmentId(
         tenantId,
-        appointmentId
+        appointmentId,
       );
 
     if (appointment === null)
@@ -559,7 +549,7 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
       appointmentId,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     if (affectedRows === 0) {
@@ -569,7 +559,7 @@ const updateAppointment = async (appointmentId, data, tenant_id) => {
     await appointmentModel.updateAppointmentStats(
       data.tenant_id,
       data.clinic_id,
-      data.appointment_date
+      data.appointment_date,
     );
 
     await invalidateCacheByPattern("appointment:*");
@@ -588,7 +578,7 @@ const updateAppoinmentFeedback = async (
   appointment_id,
   tenant_id,
   details,
-  status = "completed"
+  status = "completed",
 ) => {
   try {
     const newRating = Number(details.doctor_rating ?? 0);
@@ -599,7 +589,7 @@ const updateAppoinmentFeedback = async (
       tenant_id,
       details,
       status,
-      Number(details.feedback_display ?? 1) // still store it in DB
+      Number(details.feedback_display ?? 1), // still store it in DB
     );
     if (updated === 0)
       throw new CustomError("Appointment not found or no changes made.", 404);
@@ -620,14 +610,14 @@ const updateAppoinmentFeedback = async (
       await appointmentModel.getDentistIdByTenantIdAndAppointmentId(
         tenant_id,
         appointment_id,
-        status
+        status,
       );
     if (!dentistId)
       throw new CustomError("Dentist not found for this appointment.", 404);
 
     const dentist = await getDentistByTenantIdAndDentistId(
       tenant_id,
-      dentistId
+      dentistId,
     );
     if (!dentist) throw new CustomError("Dentist details not found.", 404);
 
@@ -644,7 +634,7 @@ const updateAppoinmentFeedback = async (
       tenant_id,
       dentistId,
       updatedRating,
-      updatedCount
+      updatedCount,
     );
     if (result === 0)
       throw new CustomError("Dentist rating update failed.", 404);
@@ -654,7 +644,7 @@ const updateAppoinmentFeedback = async (
     console.error("Update Error:", error);
     throw new CustomError(
       error.message || "Failed to update appointment",
-      error.statusCode || 500
+      error.statusCode || 500,
     );
   }
 };
@@ -663,14 +653,14 @@ const updateAppoinmentFeedbackDisplay = async (
   appointment_id,
   tenant_id,
   status,
-  feedback_display
+  feedback_display,
 ) => {
   try {
     const result = await appointmentModel.updateAppoinmentFeedbackDisplay(
       appointment_id,
       tenant_id,
       status,
-      feedback_display
+      feedback_display,
     );
     const patterns = [
       "appointment:*",
@@ -692,52 +682,79 @@ const updateAppoinmentStatus = async (
   appointment_id,
   tenant_id,
   clinic_id,
-  details
+  details,
 ) => {
   try {
     const affectedRows = await appointmentModel.updateAppoinmentStatus(
       appointment_id,
       tenant_id,
       clinic_id,
-      details
+      details,
     );
 
     if (affectedRows === 0) {
       throw new CustomError("Appointment not found or no changes made.", 404);
     }
 
-    const payment=await getPaymentByTenantAndAppointmentId(tenant_id,appointment_id)
+    const payment = await getPaymentByTenantAndAppointmentId(
+      tenant_id,
+      appointment_id,
+    );
 
     const paid_amount = payment.reduce((acc, curr) => {
       return acc + (curr.amount || 0); // assuming "amount" field
     }, 0);
 
-    if(details.status==='confirmed' && paid_amount>0){
-      await appointmentModel.updateAppoinmentFinalStatus(appointment_id,tenant_id,clinic_id,'pending_payment')
+    if (details.status === "confirmed" && paid_amount > 0) {
+      await appointmentModel.updateAppoinmentFinalStatus(
+        appointment_id,
+        tenant_id,
+        clinic_id,
+        "pending_payment",
+      );
     }
-    if(details.status==='confirmed' && paid_amount===0){
-      await appointmentModel.updateAppoinmentFinalStatus(appointment_id,tenant_id,clinic_id,'inprogress')
+    if (details.status === "confirmed" && paid_amount === 0) {
+      await appointmentModel.updateAppoinmentFinalStatus(
+        appointment_id,
+        tenant_id,
+        clinic_id,
+        "inprogress",
+      );
     }
-    if(details.status==='completed' && paid_amount===0){
-      await appointmentModel.updateAppoinmentFinalStatus(appointment_id,tenant_id,clinic_id,'completed')
+    if (details.status === "completed" && paid_amount === 0) {
+      await appointmentModel.updateAppoinmentFinalStatus(
+        appointment_id,
+        tenant_id,
+        clinic_id,
+        "completed",
+      );
     }
 
-    const paymentsummary=await paymentService.getallPaymentSummaryByAppointment(tenant_id,appointment_id)
+    const paymentsummary =
+      await paymentService.getallPaymentSummaryByAppointment(
+        tenant_id,
+        appointment_id,
+      );
 
-    if(paymentsummary.balance_remaining===0){
-      await appointmentModel.updateAppoinmentFinalStatus(appointment_id,tenant_id,clinic_id,'fully_completed')
+    if (paymentsummary.balance_remaining === 0) {
+      await appointmentModel.updateAppoinmentFinalStatus(
+        appointment_id,
+        tenant_id,
+        clinic_id,
+        "fully_completed",
+      );
     }
 
     const appointment = await getAppointmentByTenantIdAndAppointmentId(
       tenant_id,
-      appointment_id
+      appointment_id,
     );
 
     await appointmentModel.updateAppointmentStats(
       tenant_id,
       clinic_id,
       appointment.dentist_id,
-      appointment.appointment_date
+      appointment.appointment_date,
     );
 
     await invalidateCacheByPattern("appointment:*");
@@ -756,13 +773,13 @@ const updateAppoinmentStatus = async (
 // Delete Appointment
 const deleteAppointmentByTenantIdAndAppointmentId = async (
   tenantId,
-  appointmentId
+  appointmentId,
 ) => {
   try {
     const affectedRows =
       await appointmentModel.deleteAppointmentByTenantIdAndAppointmentId(
         tenantId,
-        appointmentId
+        appointmentId,
       );
     if (affectedRows === 0) {
       throw new CustomError("Appointment not found.", 404);
@@ -771,7 +788,7 @@ const deleteAppointmentByTenantIdAndAppointmentId = async (
     await appointmentModel.updateAppointmentStats(
       data.tenant_id,
       data.clinic_id,
-      data.appointment_date
+      data.appointment_date,
     );
 
     await invalidateCacheByPattern("appointment:*");
@@ -782,7 +799,7 @@ const deleteAppointmentByTenantIdAndAppointmentId = async (
   } catch (error) {
     throw new CustomError(
       `Failed to delete appointment: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -794,7 +811,7 @@ const checkAppointmentExistsByStartTimeAndEndTimeAndDate = async (
   patient_id,
   dentist_id,
   details,
-  appointment_id = null
+  appointment_id = null,
 ) => {
   try {
     return await appointmentModel.checkAppointmentExistsByStartTimeAndEndTimeAndDate(
@@ -803,7 +820,7 @@ const checkAppointmentExistsByStartTimeAndEndTimeAndDate = async (
       patient_id,
       dentist_id,
       details,
-      appointment_id
+      appointment_id,
     );
   } catch (error) {
     throw new CustomError("Failed to check overlapping appointment", 404);
@@ -815,7 +832,7 @@ const getAppointmentsWithDetails = async (
   clinic_id,
   dentist_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointment", "appointmentwithdetails", {
@@ -833,7 +850,7 @@ const getAppointmentsWithDetails = async (
         clinic_id,
         dentist_id,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
@@ -857,7 +874,7 @@ const getAppointmentsWithDetailsByClinic = async (
   clinic_id,
 
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointment", "appointmentwithdetails", {
@@ -875,7 +892,7 @@ const getAppointmentsWithDetailsByClinic = async (
         clinic_id,
 
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
@@ -897,7 +914,7 @@ const getAppointmentsWithDetailsByPatient = async (
   patient_id,
   status,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointment", "appointmentwithdetails", {
@@ -916,7 +933,7 @@ const getAppointmentsWithDetailsByPatient = async (
         patient_id,
         status,
         Number(limit),
-        offset
+        offset,
       );
 
       if (result && Array.isArray(result.data)) {
@@ -951,7 +968,7 @@ const getAppointmentsWithDetailsByPatient = async (
 const getAppointmentMonthlySummary = async (
   tenantId,
   clinic_id,
-  dentist_id
+  dentist_id,
 ) => {
   try {
     const cacheKey = `appointmentsmonthlysummary:${tenantId}/${clinic_id}/${dentist_id}`;
@@ -959,7 +976,7 @@ const getAppointmentMonthlySummary = async (
       const result = await appointmentModel.getAppointmentMonthlySummary(
         tenantId,
         clinic_id,
-        dentist_id
+        dentist_id,
       );
       return result; // 🔁 Important: return from cache function
     });
@@ -977,7 +994,7 @@ const getAppointmentMonthlySummaryClinic = async (tenantId, clinic_id) => {
     const appointment = await getOrSetCache(cacheKey, async () => {
       const result = await appointmentModel.getAppointmentMonthlySummaryClinic(
         tenantId,
-        clinic_id
+        clinic_id,
       );
       return result; // 🔁 Important: return from cache function
     });
@@ -994,7 +1011,7 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
   clinicId,
   patientId,
   page,
-  limit
+  limit,
 ) => {
   try {
     const offset = (page - 1) * limit;
@@ -1007,7 +1024,7 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
           clinicId,
           patientId,
           limit,
-          offset
+          offset,
         );
 
       // Format appointment_date to 'YYYY-MM-DD'
@@ -1032,8 +1049,10 @@ const getPatientVisitDetailsByPatientIdAndTenantIdAndClinicId = async (
 };
 
 const isoWeek = require("dayjs/plugin/isoWeek");
-const { buildCacheKey } = require("../utils/RedisCache");
-const { getPaymentByTenantAndAppointmentId } = require("../models/PaymentModel");
+const { buildCacheKey } = require("../config/redis");
+const {
+  getPaymentByTenantAndAppointmentId,
+} = require("../models/PaymentModel");
 dayjs.extend(isoWeek);
 
 const getAppointmentSummary = async (tenant_id, clinic_id) => {
@@ -1074,7 +1093,7 @@ const getAppointmentSummary = async (tenant_id, clinic_id) => {
        FROM appointment
        WHERE tenant_id = ? AND clinic_id = ? AND created_time BETWEEN ? AND ?
        GROUP BY status`,
-      [tenant_id, clinic_id, from, to]
+      [tenant_id, clinic_id, from, to],
     );
 
     const result = {
@@ -1104,11 +1123,11 @@ const getAppointmentSummary = async (tenant_id, clinic_id) => {
   const mergeStats = (acc, newStats) => {
     acc.total_appointments += parseInt(newStats.total_appointments || 0);
     acc.completed_appointments += parseInt(
-      newStats.completed_appointments || 0
+      newStats.completed_appointments || 0,
     );
     acc.pending_appointments += parseInt(newStats.pending_appointments || 0);
     acc.cancelled_appointments += parseInt(
-      newStats.cancelled_appointments || 0
+      newStats.cancelled_appointments || 0,
     );
     return acc;
   };
@@ -1147,7 +1166,7 @@ const getAppointmentSummary = async (tenant_id, clinic_id) => {
 const getAppointmentSummaryByDentist = async (
   tenant_id,
   clinic_id,
-  dentist_id
+  dentist_id,
 ) => {
   const summary = {};
 
@@ -1186,7 +1205,7 @@ const getAppointmentSummaryByDentist = async (
        FROM appointment
        WHERE tenant_id = ? AND clinic_id = ? AND dentist_id=? AND created_time BETWEEN ? AND ?
        GROUP BY status`,
-      [tenant_id, clinic_id, dentist_id, from, to]
+      [tenant_id, clinic_id, dentist_id, from, to],
     );
 
     const result = {
@@ -1216,11 +1235,11 @@ const getAppointmentSummaryByDentist = async (
   const mergeStats = (acc, newStats) => {
     acc.total_appointments += parseInt(newStats.total_appointments || 0);
     acc.completed_appointments += parseInt(
-      newStats.completed_appointments || 0
+      newStats.completed_appointments || 0,
     );
     acc.pending_appointments += parseInt(newStats.pending_appointments || 0);
     acc.cancelled_appointments += parseInt(
-      newStats.cancelled_appointments || 0
+      newStats.cancelled_appointments || 0,
     );
     return acc;
   };
@@ -1280,7 +1299,7 @@ const getAppointmentSummaryChartByClinic = async (tenant_id, clinic_id) => {
         tenant_id,
         clinic_id,
         from,
-        to
+        to,
       );
       fourWeeks.push(total); // [this week, last week, ...]
     }
@@ -1294,7 +1313,7 @@ const getAppointmentSummaryChartByClinic = async (tenant_id, clinic_id) => {
         tenant_id,
         clinic_id,
         from,
-        to
+        to,
       );
       monthTotals.push(total); // [current month, last month, ...]
     }
@@ -1308,7 +1327,7 @@ const getAppointmentSummaryChartByClinic = async (tenant_id, clinic_id) => {
         tenant_id,
         clinic_id,
         from,
-        to
+        to,
       );
       yearTotals.push(total); // [current year, last year, ...]
     }
@@ -1350,7 +1369,7 @@ const getAppointmentSummaryChartByClinic = async (tenant_id, clinic_id) => {
 const getAppointmentSummaryChartByDentist = async (
   tenant_id,
   clinic_id,
-  dentist_id
+  dentist_id,
 ) => {
   const fetchDataForRange = async (from, to) => {
     const [rows] = await pool.query(
@@ -1358,7 +1377,7 @@ const getAppointmentSummaryChartByDentist = async (
        FROM appointment
        WHERE tenant_id = ? AND clinic_id = ? AND dentist_id=? AND created_time BETWEEN ? AND ?
        GROUP BY status`,
-      [tenant_id, clinic_id, dentist_id, from, to]
+      [tenant_id, clinic_id, dentist_id, from, to],
     );
     const result = { CP: 0, SC: 0, CL: 0 };
     rows.forEach((row) => {
@@ -1483,13 +1502,15 @@ async function getAppointmentSummaryByStartDateAndEndDate(
   tenant_id,
   startDate,
   endDate,
-  clinic_id = null,  // Default to null
-  dentist_id = null  // Default to null
+  clinic_id = null, // Default to null
+  dentist_id = null, // Default to null
 ) {
   // === 1. Normalize inputs for consistent cache keys ===
-  const normalizedClinicId = clinic_id && !isNaN(clinic_id) ? Number(clinic_id) : null;
-  const normalizedDentistId = dentist_id && !isNaN(dentist_id) ? Number(dentist_id) : null;
-  
+  const normalizedClinicId =
+    clinic_id && !isNaN(clinic_id) ? Number(clinic_id) : null;
+  const normalizedDentistId =
+    dentist_id && !isNaN(dentist_id) ? Number(dentist_id) : null;
+
   const cacheKey = buildCacheKey("appointment", "appointmentsummary", {
     tenant_id: Number(tenant_id),
     clinic_id: normalizedClinicId,
@@ -1505,7 +1526,7 @@ async function getAppointmentSummaryByStartDateAndEndDate(
         // === 3. Normalize dates for DB compatibility ===
         const normalizedStartDate = formatDateOnly(startDate); // Ensure "YYYY-MM-DD"
         const normalizedEndDate = formatDateOnly(endDate);
-        
+
         const queryParams = [tenant_id, normalizedStartDate, normalizedEndDate];
 
         // === 4. Simplified, optimized SQL query ===
@@ -1530,7 +1551,7 @@ async function getAppointmentSummaryByStartDateAndEndDate(
         if (normalizedDentistId) {
           // ✅ Join directly with appointment_stats if it has dentist_id
           // If NOT, use a simpler approach: pre-fetch dentist's appointment dates
-          query += ` AND a.dentist_id = ?`;  // ← Add dentist_id column to appointment_stats!
+          query += ` AND a.dentist_id = ?`; // ← Add dentist_id column to appointment_stats!
           queryParams.push(normalizedDentistId);
         }
 
@@ -1540,9 +1561,10 @@ async function getAppointmentSummaryByStartDateAndEndDate(
           // === 5. Add query timeout protection ===
           const [rows] = await Promise.race([
             pool.query(query, queryParams),
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Query timeout')), 10000) // 10 second timeout
-            )
+            new Promise(
+              (_, reject) =>
+                setTimeout(() => reject(new Error("Query timeout")), 10000), // 10 second timeout
+            ),
           ]);
 
           return rows.map((row) => ({
@@ -1561,13 +1583,13 @@ async function getAppointmentSummaryByStartDateAndEndDate(
         }
       }),
       // === 6. Cache operation timeout ===
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Cache operation timeout')), 15000) // 15 second timeout
-      )
+      new Promise(
+        (_, reject) =>
+          setTimeout(() => reject(new Error("Cache operation timeout")), 15000), // 15 second timeout
+      ),
     ]);
-    
+
     return appointments;
-    
   } catch (err) {
     console.error("❌ Failed to fetch appointment summary:", {
       tenant_id,
@@ -1577,7 +1599,7 @@ async function getAppointmentSummaryByStartDateAndEndDate(
       dentist_id,
       error: err.message,
     });
-    
+
     // Return empty array instead of throwing for better UX
     return [];
     // OR throw if you prefer:
@@ -1613,5 +1635,5 @@ module.exports = {
   updateAppoinmentFeedbackDisplay,
   getAppointmentMonthlySummaryClinic,
   getAppointmentsWithDetailsByClinic,
-  getAllRoomIdByTenantIdAndClinicId
+  getAllRoomIdByTenantIdAndClinicId,
 };

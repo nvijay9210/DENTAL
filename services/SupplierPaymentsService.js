@@ -4,14 +4,17 @@ const {
   redisClient,
   getOrSetCache,
   invalidateCacheByPattern,
-} = require("../config/redisConfig");
+} = require("../config/redis");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
-const { buildCacheKey } = require("../utils/RedisCache");
-const { saveDocuments, updateDocumentsDiffBased } = require("../utils/UploadFiles");
+const { buildCacheKey } = require("../config/redis");
+const {
+  saveDocuments,
+  updateDocumentsDiffBased,
+} = require("../utils/UploadFiles");
 const { convertRowsWithDocs } = require("../utils/ResponseConvertion");
 
 // Field mapping for supplier_paymentss (similar to treatment)
@@ -67,16 +70,16 @@ const createSupplierPayments = async (data) => {
       await supplier_paymentsModel.createSupplierPayments(
         "supplier_payments",
         columns,
-        values
+        values,
       );
 
-      await saveDocuments({
-        table_name: "supplier_payments",
-        table_id: supplier_paymentsId,
-        field_name: "supplier_payment_documents",
-        files: data.supplier_payment_documents,
-        created_by: data.created_by,
-      });
+    await saveDocuments({
+      table_name: "supplier_payments",
+      table_id: supplier_paymentsId,
+      field_name: "supplier_payment_documents",
+      files: data.supplier_payment_documents,
+      created_by: data.created_by,
+    });
 
     await invalidateCacheByPattern("supplier_payments:*");
     await invalidateCacheByPattern("financeSummary:*");
@@ -85,20 +88,28 @@ const createSupplierPayments = async (data) => {
     console.error("Failed to create supplier_payments:", error);
     throw new CustomError(
       `Failed to create supplier_payments: ${error.message}`,
-      404
+      404,
     );
   }
 };
 
-
 // fullpayment update
-async function updateSupplierPaymentService(paymentId, tenantId, clinicId, updateData) {
+async function updateSupplierPaymentService(
+  paymentId,
+  tenantId,
+  clinicId,
+  updateData,
+) {
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
 
     // 1. Fetch existing payment
-    const currentPayment = await supplier_paymentsModel.getSupplierPaymentById(paymentId, tenantId, clinicId);
+    const currentPayment = await supplier_paymentsModel.getSupplierPaymentById(
+      paymentId,
+      tenantId,
+      clinicId,
+    );
     if (!currentPayment) {
       throw new Error("Supplier payment not found");
     }
@@ -107,21 +118,35 @@ async function updateSupplierPaymentService(paymentId, tenantId, clinicId, updat
     const updatedFields = {
       amount: updateData.amount ?? currentPayment.amount,
       paid_amount: updateData.paid_amount ?? currentPayment.paid_amount,
-      balance_amount: updateData.balance_amount ?? currentPayment.balance_amount,
-      supplier_payment_documents: updateData.supplier_payment_documents ?? currentPayment.supplier_payment_documents,
-      mode_of_payment: updateData.mode_of_payment ?? currentPayment.mode_of_payment,
-      receipt_number: updateData.receipt_number ?? currentPayment.receipt_number,
+      balance_amount:
+        updateData.balance_amount ?? currentPayment.balance_amount,
+      supplier_payment_documents:
+        updateData.supplier_payment_documents ??
+        currentPayment.supplier_payment_documents,
+      mode_of_payment:
+        updateData.mode_of_payment ?? currentPayment.mode_of_payment,
+      receipt_number:
+        updateData.receipt_number ?? currentPayment.receipt_number,
       bank_name: updateData.bank_name ?? currentPayment.bank_name,
-      bank_account_number: updateData.bank_account_number ?? currentPayment.bank_account_number,
+      bank_account_number:
+        updateData.bank_account_number ?? currentPayment.bank_account_number,
       bank_ifsc: updateData.bank_ifsc ?? currentPayment.bank_ifsc,
-      transaction_id: updateData.transaction_id ?? currentPayment.transaction_id,
+      transaction_id:
+        updateData.transaction_id ?? currentPayment.transaction_id,
       payment_date: updateData.payment_date ?? currentPayment.payment_date,
-      supplier_payment_type: updateData.supplier_payment_type ?? currentPayment.supplier_payment_type,
-      updated_by: updateData.updated_by || "system"
+      supplier_payment_type:
+        updateData.supplier_payment_type ??
+        currentPayment.supplier_payment_type,
+      updated_by: updateData.updated_by || "system",
     };
 
     // 3. Update in DB
-    await supplier_paymentsModel.updateSupplierPayment(paymentId, tenantId, clinicId, updatedFields);
+    await supplier_paymentsModel.updateSupplierPayment(
+      paymentId,
+      tenantId,
+      clinicId,
+      updatedFields,
+    );
 
     await conn.commit();
     return { success: true, message: "Supplier payment updated successfully" };
@@ -137,7 +162,7 @@ async function updateSupplierPaymentService(paymentId, tenantId, clinicId, updat
 const getAllSupplierPaymentssByTenantId = async (
   tenantId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("supplier_payments", "list", {
@@ -152,7 +177,7 @@ const getAllSupplierPaymentssByTenantId = async (
         await supplier_paymentsModel.getAllSupplierPaymentssByTenantId(
           tenantId,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
@@ -166,15 +191,15 @@ const getAllSupplierPaymentssByTenantId = async (
           tableName: "supplier_payments",
           idField: "supplier_payment_id",
           docFieldName: "supplier_payment_documents",
-          extractFields: ["document_id", "file_url"]
-        }
-      ]
+          extractFields: ["document_id", "file_url"],
+        },
+      ],
     });
 
     return { data: convertedRows, total: supplier_paymentss.total };
   } catch (err) {
     console.error("Database error while fetching supplier_paymentss:", err);
-    throw new CustomError(error.message,500);
+    throw new CustomError(error.message, 500);
   }
 };
 
@@ -182,7 +207,7 @@ const getAllSupplierPaymentssByTenantIdAndSupplierId = async (
   tenantId,
   supplier_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("supplier_payments", "list", {
@@ -199,7 +224,7 @@ const getAllSupplierPaymentssByTenantIdAndSupplierId = async (
           tenantId,
           supplier_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
@@ -214,21 +239,26 @@ const getAllSupplierPaymentssByTenantIdAndSupplierId = async (
 
     const convertedRows = await convertRowsWithDocs({
       rows: supplier_paymentss.data,
-      dateFields: ["order_date", "delivery_date","payment_date","created_time"],
+      dateFields: [
+        "order_date",
+        "delivery_date",
+        "payment_date",
+        "created_time",
+      ],
       docOptions: [
         {
           tableName: "supplier_payments",
           idField: "supplier_payment_id",
           docFieldName: "supplier_payment_documents",
-          extractFields: ["document_id", "file_url"]
-        }
-      ]
+          extractFields: ["document_id", "file_url"],
+        },
+      ],
     });
 
     return { data: convertedRows, total: supplier_paymentss.total };
   } catch (err) {
     console.error("Database error while fetching supplier_paymentss:", err);
-    throw new CustomError(error.message,500);
+    throw new CustomError(error.message, 500);
   }
 };
 
@@ -236,7 +266,7 @@ const getSupplierPaymentsByTenantAndPurchaseOrderId = async (
   tenantId,
   purchase_order_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("supplier_payments", "list", {
@@ -253,41 +283,46 @@ const getSupplierPaymentsByTenantAndPurchaseOrderId = async (
           tenantId,
           purchase_order_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
 
     const convertedRows = await convertRowsWithDocs({
       rows: supplier_paymentss.data,
-      dateFields: ["order_date", "delivery_date","payment_date","created_time"],
+      dateFields: [
+        "order_date",
+        "delivery_date",
+        "payment_date",
+        "created_time",
+      ],
       docOptions: [
         {
           tableName: "supplier_payments",
           idField: "supplier_payment_id",
           docFieldName: "supplier_payment_documents",
-          extractFields: ["document_id", "file_url"]
-        }
-      ]
+          extractFields: ["document_id", "file_url"],
+        },
+      ],
     });
 
     return { data: convertedRows, total: supplier_paymentss.total };
   } catch (err) {
     console.error("Database error while fetching supplier_paymentss:", err);
-    throw new CustomError(error.message,500);
+    throw new CustomError(error.message, 500);
   }
 };
 
 // Get SupplierPayments by ID & Tenant
 const getSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (
   tenantId,
-  supplier_paymentsId
+  supplier_paymentsId,
 ) => {
   try {
     const supplier_payments =
       await supplier_paymentsModel.getSupplierPaymentsByTenantAndSupplierPaymentsId(
         tenantId,
-        supplier_paymentsId
+        supplier_paymentsId,
       );
 
     // const convertedRows = helper.convertDbToFrontend(
@@ -304,16 +339,16 @@ const getSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (
           tableName: "supplier_payments",
           idField: "supplier_payment_id",
           docFieldName: "supplier_payment_documents",
-          extractFields: ["document_id", "file_url"]
-        }
-      ]
+          extractFields: ["document_id", "file_url"],
+        },
+      ],
     });
 
     return convertedRows;
   } catch (error) {
     throw new CustomError(
       "Failed to get supplier_payments: " + error.message,
-      404
+      404,
     );
   }
 };
@@ -356,7 +391,7 @@ const updateSupplierPayments = async (supplier_paymentsId, data, tenant_id) => {
       supplier_paymentsId,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     await updateDocumentsDiffBased({
@@ -364,7 +399,7 @@ const updateSupplierPayments = async (supplier_paymentsId, data, tenant_id) => {
       table_id: supplier_paymentsId,
       field_name: "supplier_payment_documents",
       newFiles: data.supplier_payment_documents,
-      deletedFileIds:data.deletedFileIds,
+      deletedFileIds: data.deletedFileIds,
       created_by: data.created_by,
       updated_by: data.updated_by,
     });
@@ -374,21 +409,21 @@ const updateSupplierPayments = async (supplier_paymentsId, data, tenant_id) => {
     return affectedRows;
   } catch (error) {
     console.error("Update Error:", error);
-    throw new CustomError(error.message,500);
+    throw new CustomError(error.message, 500);
   }
 };
 
 // Delete SupplierPayments
 const deleteSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (
   tenantId,
-  supplier_paymentsId
+  supplier_paymentsId,
 ) => {
   try {
-    await deleteDocumentsByTableAndId('supplier_payments',supplier_paymentsId)
+    await deleteDocumentsByTableAndId("supplier_payments", supplier_paymentsId);
     const affectedRows =
       await supplier_paymentsModel.deleteSupplierPaymentsByTenantAndSupplierPaymentsId(
         tenantId,
-        supplier_paymentsId
+        supplier_paymentsId,
       );
     // if (affectedRows === 0) {
     //   throw new CustomError(error.message,500);
@@ -399,7 +434,7 @@ const deleteSupplierPaymentsByTenantIdAndSupplierPaymentsId = async (
   } catch (error) {
     throw new CustomError(
       `Failed to delete supplier_payments: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -412,5 +447,5 @@ module.exports = {
   deleteSupplierPaymentsByTenantIdAndSupplierPaymentsId,
   getSupplierPaymentsByTenantAndPurchaseOrderId,
   getAllSupplierPaymentssByTenantIdAndSupplierId,
-  updateSupplierPaymentService
+  updateSupplierPaymentService,
 };

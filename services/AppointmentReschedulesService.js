@@ -2,10 +2,7 @@ const { CustomError } = require("../middlewares/CustomeError");
 const appointmentRescheduleModel = require("../models/AppointmentReschedulesModel");
 const paymentService = require("../services/PaymentService");
 const pool = require("../config/db");
-const {
-  getOrSetCache,
-  invalidateCacheByPattern,
-} = require("../config/redisConfig");
+const { getOrSetCache, invalidateCacheByPattern } = require("../config/redis");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const {
@@ -24,7 +21,7 @@ const appointmentService = require("../services/AppointmentService");
 const {
   createAppointmentValidation,
 } = require("../validations/AppointmentValidation");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 const {
   createPayment,
   getPaymentByTenantAndAppointmentId,
@@ -85,11 +82,12 @@ const createAppointmentReschedules = async (details) => {
     await conn.beginTransaction();
 
     // 1. Fetch original appointment
-    const appointment = await appointmentService.getAppointmentByTenantIdAndAppointmentId(
-      details.tenant_id,
-      details.original_appointment_id,
-      conn
-    );
+    const appointment =
+      await appointmentService.getAppointmentByTenantIdAndAppointmentId(
+        details.tenant_id,
+        details.original_appointment_id,
+        conn,
+      );
     if (!appointment) {
       throw new CustomError("Original appointment not found", 404);
     }
@@ -101,7 +99,7 @@ const createAppointmentReschedules = async (details) => {
       details.clinic_id,
       details.rescheduled_by,
       details.reason,
-      conn
+      conn,
     );
 
     // 3. Validate new date/time
@@ -109,7 +107,7 @@ const createAppointmentReschedules = async (details) => {
       appointment.appointment_date,
       appointment.start_time,
       details.new_date,
-      details.new_start_time
+      details.new_start_time,
     );
 
     // 4. Prepare new appointment object
@@ -128,7 +126,10 @@ const createAppointmentReschedules = async (details) => {
     await createAppointmentValidation(newAppointment);
 
     // 6. Create new appointment record
-    const newAppointmentId = await appointmentService.createAppointment(newAppointment, conn);
+    const newAppointmentId = await appointmentService.createAppointment(
+      newAppointment,
+      conn,
+    );
     if (!newAppointmentId) {
       throw new CustomError("Failed to create new appointment", 500);
     }
@@ -136,10 +137,10 @@ const createAppointmentReschedules = async (details) => {
     // 7. Handle payment
     const oldData = await getPaymentByTenantAndAppointmentId(
       details.tenant_id,
-      details.original_appointment_id
+      details.original_appointment_id,
     );
 
-    const oldPayment=oldData[0]
+    const oldPayment = oldData[0];
 
     const minBookingFee = parseFloat(appointment.min_booking_fee || 0);
     const consultationFee = parseFloat(appointment.consultation_fee || 0);
@@ -200,7 +201,7 @@ const createAppointmentReschedules = async (details) => {
       "appointment_reschedules",
       columns,
       values,
-      conn
+      conn,
     );
 
     // 9. Update stats
@@ -209,7 +210,7 @@ const createAppointmentReschedules = async (details) => {
       newAppointment.clinic_id,
       newAppointment.dentist_id,
       newAppointment.appointment_date,
-      conn
+      conn,
     );
 
     // 10. Commit
@@ -224,19 +225,18 @@ const createAppointmentReschedules = async (details) => {
     console.error("[Reschedule] ❌ Transaction failed:", error);
     throw new CustomError(
       `Failed to reschedule appointment: ${error.message}`,
-      error.statusCode || 500
+      error.statusCode || 500,
     );
   } finally {
     if (conn) await conn.release();
   }
 };
 
-
 // Get All AppointmentRescheduless by Tenant ID with Caching
 const getAllAppointmentReschedulessByTenantId = async (
   tenantId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointmentreschedule", "list", {
@@ -250,7 +250,7 @@ const getAllAppointmentReschedulessByTenantId = async (
         await appointmentRescheduleModel.getAllAppointmentReschedulessByTenantId(
           tenantId,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
@@ -259,15 +259,15 @@ const getAllAppointmentReschedulessByTenantId = async (
       (appointmentReschedules) =>
         helper.convertDbToFrontend(
           appointmentReschedules,
-          appointmentRescheduleFieldsReverseMap
-        )
+          appointmentRescheduleFieldsReverseMap,
+        ),
     );
 
     return { data: convertedRows, total: appointmentReschedules.total };
   } catch (error) {
     console.error(
       "Database error while fetching appointmentReschedules:",
-      error
+      error,
     );
     throw new CustomError(error, 500);
   }
@@ -276,7 +276,7 @@ const getAllAppointmentReschedulessByTenantIdAndClinicId = async (
   tenantId,
   clinic_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointmentreschedule", "list", {
@@ -293,7 +293,7 @@ const getAllAppointmentReschedulessByTenantIdAndClinicId = async (
           tenantId,
           clinic_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
@@ -302,15 +302,15 @@ const getAllAppointmentReschedulessByTenantIdAndClinicId = async (
       (appointmentReschedule) =>
         helper.convertDbToFrontend(
           appointmentReschedule,
-          appointmentRescheduleFieldsReverseMap
-        )
+          appointmentRescheduleFieldsReverseMap,
+        ),
     );
 
     return { data: convertedRows, total: appointmentReschedules.total };
   } catch (error) {
     console.error(
       "Database error while fetching appointmentReschedules:",
-      error
+      error,
     );
     throw new CustomError(error, 500);
   }
@@ -321,7 +321,7 @@ const getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId = async (
   clinic_id,
   dentist_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("appointmentreschedule", "list", {
@@ -339,7 +339,7 @@ const getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId = async (
           clinic_id,
           dentist_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
@@ -348,15 +348,15 @@ const getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId = async (
       (appointmentReschedule) =>
         helper.convertDbToFrontend(
           appointmentReschedule,
-          appointmentRescheduleFieldsReverseMap
-        )
+          appointmentRescheduleFieldsReverseMap,
+        ),
     );
 
     return { data: convertedRows, total: appointmentReschedules.total };
   } catch (error) {
     console.error(
       "Database error while fetching appointmentReschedules:",
-      error
+      error,
     );
     throw new CustomError(error, 500);
   }
@@ -365,24 +365,24 @@ const getAllAppointmentReschedulessByTenantIdAndClinicIdAndDentistId = async (
 // Get AppointmentReschedules by ID & Tenant
 const getAppointmentReschedulesByTenantIdAndAppointmentReschedulesId = async (
   tenantId,
-  appointmentRescheduleId
+  appointmentRescheduleId,
 ) => {
   try {
     const appointmentReschedule =
       await appointmentRescheduleModel.getAppointmentReschedulesByTenantAndAppointmentReschedulesId(
         tenantId,
-        appointmentRescheduleId
+        appointmentRescheduleId,
       );
     const convertedRows = helper.convertDbToFrontend(
       appointmentReschedule,
-      appointmentRescheduleFieldsReverseMap
+      appointmentRescheduleFieldsReverseMap,
     );
 
     return { data: convertedRows, total: appointmentReschedules.total };
   } catch (error) {
     throw new CustomError(
       "Failed to get appointmentReschedule: " + error.message,
-      404
+      404,
     );
   }
 };
@@ -391,7 +391,7 @@ const getAppointmentReschedulesByTenantIdAndAppointmentReschedulesId = async (
 const updateAppointmentReschedules = async (
   appointmentRescheduleId,
   data,
-  tenant_id
+  tenant_id,
 ) => {
   const fieldMap = {
     ...appointmentRescheduleFields,
@@ -404,7 +404,7 @@ const updateAppointmentReschedules = async (
         appointmentRescheduleId,
         columns,
         values,
-        tenant_id
+        tenant_id,
       );
 
     // if (affectedRows === 0) {
@@ -429,7 +429,7 @@ const deleteAppointmentReschedulesByTenantIdAndAppointmentReschedulesId =
       const affectedRows =
         await appointmentRescheduleModel.deleteAppointmentReschedulesByTenantAndAppointmentReschedulesId(
           tenantId,
-          appointmentRescheduleId
+          appointmentRescheduleId,
         );
       // if (affectedRows === 0) {
       //   throw new CustomError("AppointmentReschedules not found.", 404);
@@ -440,7 +440,7 @@ const deleteAppointmentReschedulesByTenantIdAndAppointmentReschedulesId =
     } catch (error) {
       throw new CustomError(
         `Failed to delete appointmentReschedule: ${error.message}`,
-        404
+        404,
       );
     }
   };

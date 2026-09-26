@@ -4,13 +4,13 @@ const {
   redisClient,
   getOrSetCache,
   invalidateCacheByPattern,
-} = require("../config/redisConfig");
+} = require("../config/redis");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 const {
   createDocument,
   deleteDocumentsByTableAndId,
@@ -72,7 +72,7 @@ const createExpense = async (data) => {
     const expenseId = await expenseModel.createExpense(
       "expense",
       columns,
-      values
+      values,
     );
 
     // console.log("expenseId:", data.expense_documents);
@@ -109,7 +109,7 @@ const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
       const result = await expenseModel.getAllExpensesByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
@@ -118,13 +118,13 @@ const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
       expenses.data.map(async (expense) => {
         const formatted = helper.convertDbToFrontend(
           expense,
-          expenseFieldsReverseMap
+          expenseFieldsReverseMap,
         );
 
         const docs = await getDocumentsByField(
           "expense",
           expense.expense_id,
-          "expense_documents"
+          "expense_documents",
         );
 
         // console.log('docs:',docs)
@@ -139,7 +139,7 @@ const getAllExpensesByTenantId = async (tenantId, page = 1, limit = 10) => {
           ...formatted,
           expense_documents: fileInfos,
         };
-      })
+      }),
     );
 
     return { data: convertedRows, total: expenses.total };
@@ -153,7 +153,7 @@ const getAllExpensesByTenantIdAndClinicId = async (
   tenantId,
   clinic_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
 
@@ -170,7 +170,7 @@ const getAllExpensesByTenantIdAndClinicId = async (
         tenantId,
         clinic_id,
         Number(limit),
-        offset
+        offset,
       );
 
       return result;
@@ -179,37 +179,37 @@ const getAllExpensesByTenantIdAndClinicId = async (
     // Get clinic details from first expense row
     const firstExpense = expenses.data[0];
 
-   const clinic = firstExpense
-  ? {
-      clinic_id: firstExpense.clinic_id,
-      clinic_name: firstExpense.clinic_name,
-      email: firstExpense.email,
-      phone_number: firstExpense.phone_number,
+    const clinic = firstExpense
+      ? {
+          clinic_id: firstExpense.clinic_id,
+          clinic_name: firstExpense.clinic_name,
+          email: firstExpense.email,
+          phone_number: firstExpense.phone_number,
 
-      address: firstExpense.address
-        ? JSON.parse(firstExpense.address)
-        : null,
+          address: firstExpense.address
+            ? JSON.parse(firstExpense.address)
+            : null,
 
-      website: firstExpense.website,
-      city: firstExpense.city,
-      state: firstExpense.state,
-      country: firstExpense.country,
-      pincode: firstExpense.pincode,
-      clinic_logo: firstExpense.clinic_logo,
-    }
-  : null;
+          website: firstExpense.website,
+          city: firstExpense.city,
+          state: firstExpense.state,
+          country: firstExpense.country,
+          pincode: firstExpense.pincode,
+          clinic_logo: firstExpense.clinic_logo,
+        }
+      : null;
 
     const convertedRows = await Promise.all(
       expenses.data.map(async (expense) => {
         const formatted = helper.convertDbToFrontend(
           expense,
-          expenseFieldsReverseMap
+          expenseFieldsReverseMap,
         );
 
         const docs = await getDocumentsByField(
           "expense",
           expense.expense_id,
-          "expense_documents"
+          "expense_documents",
         );
 
         // console.log("docs:", docs);
@@ -223,7 +223,7 @@ const getAllExpensesByTenantIdAndClinicId = async (
           ...formatted,
           expense_documents: fileInfos,
         };
-      })
+      }),
     );
 
     return {
@@ -243,7 +243,7 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
   startDate,
   endDate,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const cacheKey = buildCacheKey("expense", "list", {
     tenant_id: tenantId,
@@ -258,13 +258,9 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
 
   try {
     const expenses = await getOrSetCache(cacheKey, async () => {
-      const startDateStr = new Date(startDate)
-        .toISOString()
-        .split("T")[0];
+      const startDateStr = new Date(startDate).toISOString().split("T")[0];
 
-      const endDateStr = new Date(endDate)
-        .toISOString()
-        .split("T")[0];
+      const endDateStr = new Date(endDate).toISOString().split("T")[0];
 
       return await expenseModel.getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate(
         tenantId,
@@ -272,44 +268,44 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
         startDateStr,
         endDateStr,
         parseInt(limit),
-        parseInt(offset)
+        parseInt(offset),
       );
     });
 
     // Get clinic data from first row
     const firstExpense = expenses.data[0];
 
- const clinic = firstExpense
-  ? {
-      clinic_id: firstExpense.clinic_id,
-      clinic_name: firstExpense.clinic_name,
-      email: firstExpense.email,
-      phone_number: firstExpense.phone_number,
+    const clinic = firstExpense
+      ? {
+          clinic_id: firstExpense.clinic_id,
+          clinic_name: firstExpense.clinic_name,
+          email: firstExpense.email,
+          phone_number: firstExpense.phone_number,
 
-      address: firstExpense.address
-        ? JSON.parse(firstExpense.address)
-        : null,
+          address: firstExpense.address
+            ? JSON.parse(firstExpense.address)
+            : null,
 
-      website: firstExpense.website,
-      city: firstExpense.city,
-      state: firstExpense.state,
-      country: firstExpense.country,
-      pincode: firstExpense.pincode,
-      clinic_logo: firstExpense.clinic_logo,
-    }
-  : null;
+          website: firstExpense.website,
+          city: firstExpense.city,
+          state: firstExpense.state,
+          country: firstExpense.country,
+          pincode: firstExpense.pincode,
+          clinic_logo: firstExpense.clinic_logo,
+        }
+      : null;
 
     const convertedRows = await Promise.all(
       expenses.data.map(async (expense) => {
         const formatted = helper.convertDbToFrontend(
           expense,
-          expenseFieldsReverseMap
+          expenseFieldsReverseMap,
         );
 
         const docs = await getDocumentsByField(
           "expense",
           expense.expense_id,
-          "expense_documents"
+          "expense_documents",
         );
 
         const fileInfos = docs.map((doc) => ({
@@ -321,7 +317,7 @@ const getAllExpensesByTenantIdAndClinicIdAndStartDateAndEndDate = async (
           ...formatted,
           expense_documents: fileInfos,
         };
-      })
+      }),
     );
 
     return {
@@ -340,7 +336,7 @@ const getExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
   try {
     const expense = await expenseModel.getExpenseByTenantAndExpenseId(
       tenantId,
-      expenseId
+      expenseId,
     );
 
     if (!expense) {
@@ -350,14 +346,14 @@ const getExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
     // Convert DB record to frontend format
     const convertedRows = helper.convertDbToFrontend(
       expense,
-      expenseFieldsReverseMap
+      expenseFieldsReverseMap,
     );
 
     // Fetch document records for this expense
     const documents = await getDocumentsByField(
       "expense",
       expenseId,
-      "expense_documents"
+      "expense_documents",
     );
 
     // Format each document
@@ -392,7 +388,7 @@ const updateExpense = async (expenseId, data, tenant_id, req) => {
       expenseId,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     // ✅ Fix: Extract from data or req.body
@@ -425,7 +421,7 @@ const deleteExpenseByTenantIdAndExpenseId = async (tenantId, expenseId) => {
     await deleteDocumentsByTableAndId("expense", expenseId);
     const affectedRows = await expenseModel.deleteExpenseByTenantAndExpenseId(
       tenantId,
-      expenseId
+      expenseId,
     );
 
     // 5. Clear cache

@@ -6,14 +6,14 @@ const tenantValidation = require("../validations/TenantValidation");
 const {
   getClinicSettingsByTenantIdAndClinicId,
 } = require("../services/ClinicService");
-const { bulkInsert } = require("../Modules/BulkInsert");
+const { bulkInsert } = require("../utils/BulkInsert");
 
 exports.addTenant = async (req, res, next) => {
   try {
     const response = await bulkInsert(
       req.body,
       tenantValidation.createTenantValidation,
-      tenantService.createTenant
+      tenantService.createTenant,
     );
     res.status(201).json(response);
   } catch (err) {
@@ -48,15 +48,12 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
   if (process.env.KEYCLOAK_POWER === "on") {
     user = extractUserInfo(req.user);
 
-    if (
-      user.role !== "tenant" &&
-      user.role !== "guest"
-    ) {
+    if (user.role !== "tenant" && user.role !== "guest") {
       const userdetails = await getUserIdUsingKeycloakId(
         user.role,
         user.userId,
         user.tenantId,
-        user.clinicId
+        user.clinicId,
       );
 
       if (!userdetails) {
@@ -88,7 +85,7 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
     ) {
       settings = await getClinicSettingsByTenantIdAndClinicId(
         user.tenantId,
-        user.clinicId
+        user.clinicId,
       );
     } else {
       if (!tenant_name || !tenant_domain) {
@@ -96,7 +93,7 @@ exports.getTenantByTenantNameAndTenantDomain = async (req, res, next) => {
       }
       settings = await tenantService.getTenantByTenantNameAndTenantDomain(
         tenant_name,
-        tenant_domain
+        tenant_domain,
       );
     }
 

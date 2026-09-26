@@ -4,7 +4,7 @@ const {
   redisClient,
   getOrSetCache,
   invalidateCacheByPattern,
-} = require("../config/redisConfig");
+} = require("../config/redis");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
@@ -13,12 +13,15 @@ const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 const {
   createNotificationRecipient,
 } = require("./NotificationRecipientsService");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 const {
   saveDocuments,
   updateDocumentsDiffBased,
 } = require("../utils/UploadFiles");
-const { getDocumentsByField, deleteDocumentsByTableAndId } = require("../models/documentModel");
+const {
+  getDocumentsByField,
+  deleteDocumentsByTableAndId,
+} = require("../models/documentModel");
 
 // Field mapping for notifications (similar to treatment)
 
@@ -61,7 +64,7 @@ const createNotification = async (data) => {
     const notification_id = await notificationModel.createNotification(
       "notifications",
       columns,
-      values
+      values,
     );
 
     if (isNaN(notification_id)) {
@@ -105,14 +108,12 @@ const createNotification = async (data) => {
 
       console.log("Saving recipient for receiver_id:", receiver_id);
 
-      const notification_recipients_id = await createNotificationRecipient(
-        recipientData
-      );
+      const notification_recipients_id =
+        await createNotificationRecipient(recipientData);
 
       recipientIds.push(notification_recipients_id);
     }
 
-    
     await saveDocuments({
       table_name: "notifications",
       table_id: notification_id,
@@ -128,7 +129,7 @@ const createNotification = async (data) => {
     console.error("Failed to create notification:", error);
     throw new CustomError(
       `Failed to create notification: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -137,7 +138,7 @@ const createNotification = async (data) => {
 const getAllNotificationsByTenantId = async (
   tenantId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("notification", "list", {
@@ -151,7 +152,7 @@ const getAllNotificationsByTenantId = async (
       const result = await notificationModel.getAllNotificationsByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
@@ -160,13 +161,13 @@ const getAllNotificationsByTenantId = async (
       notifications.data.map(async (notification) => {
         const formatted = helper.convertDbToFrontend(
           notification,
-          notificationFieldsReverseMap
+          notificationFieldsReverseMap,
         );
 
         const docs = await getDocumentsByField(
           "notifications",
           notification.notification_id,
-          "file_url"
+          "file_url",
         );
 
         // Extract only file_url
@@ -179,7 +180,7 @@ const getAllNotificationsByTenantId = async (
           ...formatted,
           file_url: fileInfos,
         };
-      })
+      }),
     );
 
     return { data: convertedRows, total: notifications.total };
@@ -193,7 +194,7 @@ const getNotificationsForReceiver = async (
   tenantId,
   clinicId,
   receiverId,
-  receiverRole
+  receiverRole,
 ) => {
   const cacheKey = `notification:${tenantId}`;
 
@@ -203,7 +204,7 @@ const getNotificationsForReceiver = async (
         tenantId,
         receiverId,
         receiverRole,
-        clinicId
+        clinicId,
       );
       return result;
     });
@@ -218,7 +219,7 @@ const getNotificationsForReceiver = async (
         const docs = await getDocumentsByField(
           "notifications",
           notification.notification_id,
-          "file_url"
+          "file_url",
         );
 
         // Extract only file_url
@@ -231,7 +232,7 @@ const getNotificationsForReceiver = async (
           ...formatted,
           file_url: fileInfos,
         };
-      })
+      }),
     );
 
     return convertedRows;
@@ -244,24 +245,24 @@ const getNotificationsForReceiver = async (
 // Get Notification by ID & Tenant
 const getNotificationByTenantIdAndNotificationId = async (
   tenantId,
-  notification_id
+  notification_id,
 ) => {
   try {
     const notification =
       await notificationModel.getNotificationByTenantAndNotificationId(
         tenantId,
-        notification_id
+        notification_id,
       );
 
     const convertedRows = helper.convertDbToFrontend(
       notification,
-      notificationFieldsReverseMap
+      notificationFieldsReverseMap,
     );
 
     const docs = await getDocumentsByField(
       "notifications",
       notification.notification_id,
-      "file_url"
+      "file_url",
     );
 
     const fileInfos = docs.map((doc) => ({
@@ -290,7 +291,7 @@ const updateNotification = async (notification_id, data, tenant_id) => {
       notification_id,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     const file_url = data.file_url || req?.body?.file_url || [];
@@ -315,14 +316,14 @@ const updateNotification = async (notification_id, data, tenant_id) => {
 // Delete Notification
 const deleteNotificationByTenantIdAndNotificationId = async (
   tenantId,
-  notification_id
+  notification_id,
 ) => {
   try {
-    await deleteDocumentsByTableAndId('notification',notification_id)
+    await deleteDocumentsByTableAndId("notification", notification_id);
     const affectedRows =
       await notificationModel.deleteNotificationByTenantAndNotificationId(
         tenantId,
-        notification_id
+        notification_id,
       );
     // if (affectedRows === 0) {
     //   throw new CustomError(err, 500);
@@ -333,7 +334,7 @@ const deleteNotificationByTenantIdAndNotificationId = async (
   } catch (error) {
     throw new CustomError(
       `Failed to delete notification: ${error.message}`,
-      404
+      404,
     );
   }
 };

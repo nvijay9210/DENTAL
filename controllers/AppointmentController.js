@@ -7,7 +7,7 @@ const appointmentValidation = require("../validations/AppointmentValidation");
 const {
   validateTenantIdAndPageAndLimit,
 } = require("../validations/CommonValidations");
-const { bulkInsert } = require("../Modules/BulkInsert");
+const { bulkInsert } = require("../utils/BulkInsert");
 const pool = require("../config/db");
 const { uploadFileMiddleware2 } = require("../utils/UploadFiles");
 const { getClinicByTenantIdAndClinicId } = require("../services/ClinicService");
@@ -183,7 +183,7 @@ exports.createPatientAndBookAppointment = async (req, res) => {
     await connection.commit();
     console.log("✅ Transaction committed successfully");
 
-    const clinic = await getClinicByTenantIdAndClinicId(tenant_id,clinic_id);
+    const clinic = await getClinicByTenantIdAndClinicId(tenant_id, clinic_id);
     const tenant = await getTenantByTenantId(tenant_id);
     // 📩 Dynamic Notification based on clinic config
     try {
@@ -776,27 +776,30 @@ exports.getAppointmentMonthlySummaryClinic = async (req, res, next) => {
 exports.getAppointmentSummary = async (req, res, next) => {
   const { tenant_id, clinic_id } = req.params;
   const { dentist_id, startDate, endDate } = req.query;
-  
+
   try {
     // === 1. Validate inputs ===
     if (!startDate || !endDate) {
-      return res.status(400).json({ message: "Start and end dates are required." });
+      return res
+        .status(400)
+        .json({ message: "Start and end dates are required." });
     }
 
     // === 2. Run ID checks in parallel (optional optimization) ===
     await Promise.all([
       checkIfIdExists("tenant", "tenant_id", tenant_id),
-      checkIfIdExists("clinic", "clinic_id", clinic_id)
+      checkIfIdExists("clinic", "clinic_id", clinic_id),
     ]);
 
     // === 3. Fetch appointment summary ===
-    const appointments = await appointmentService.getAppointmentSummaryByStartDateAndEndDate(
-      parseInt(tenant_id),
-      dateToString(startDate),
-      dateToString(endDate),
-      parseInt(clinic_id) || null,    // Handle undefined/null
-      parseInt(dentist_id) || null    // Handle undefined/null
-    );
+    const appointments =
+      await appointmentService.getAppointmentSummaryByStartDateAndEndDate(
+        parseInt(tenant_id),
+        dateToString(startDate),
+        dateToString(endDate),
+        parseInt(clinic_id) || null, // Handle undefined/null
+        parseInt(dentist_id) || null, // Handle undefined/null
+      );
 
     // === ✅ CRITICAL: Send response FIRST ===
     res.status(200).json(appointments);
@@ -810,7 +813,6 @@ exports.getAppointmentSummary = async (req, res, next) => {
         console.error("⚠️ Background activity logging failed:", logErr.message);
       }
     });
-
   } catch (err) {
     // Only send error if headers not already sent
     if (!res.headersSent) {

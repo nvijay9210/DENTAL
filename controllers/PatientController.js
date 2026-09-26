@@ -1,6 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists, checkIfIdExists } = require("../models/checkIfExists");
-const { bulkInsert } = require("../Modules/BulkInsert");
+const { bulkInsert } = require("../utils/BulkInsert");
 const patientService = require("../services/PatientService");
 const { logUserViewActivity } = require("../utils/UserActivityUtil");
 const {
@@ -28,9 +28,8 @@ const patientValidation = require("../validations/PatientValidation");
 //     console.log("Caught in controller:", err);
 //     next(err);
 //   }
-  
-// };
 
+// };
 
 exports.createPatient = async (req, res, next) => {
   const token = req.token;
@@ -39,7 +38,7 @@ exports.createPatient = async (req, res, next) => {
   const group = req.user.groups[0];
   const value = group.split("-")[2];
 
-  console.log('con-clientId',clientId)
+  console.log("con-clientId", clientId);
 
   try {
     const response = await bulkInsert(
@@ -48,7 +47,7 @@ exports.createPatient = async (req, res, next) => {
       patientService.createPatient,
       token,
       realm,
-      clientId
+      clientId,
     );
 
     res.status(200).json(response);
@@ -56,7 +55,6 @@ exports.createPatient = async (req, res, next) => {
     next(err);
   }
 };
-
 
 exports.getAllPatientsByTenantId = async (req, res, next) => {
   const { tenant_id } = req.params;
@@ -66,7 +64,7 @@ exports.getAllPatientsByTenantId = async (req, res, next) => {
     const patients = await patientService.getAllPatientsByTenantId(
       tenant_id,
       page,
-      limit
+      limit,
     );
     res.status(200).json(patients);
   } catch (err) {
@@ -77,13 +75,13 @@ exports.getAllPatientsByTenantIdAndClinicId = async (req, res, next) => {
   const { tenant_id, clinic_id } = req.params;
   const { page, limit } = req.query;
   try {
-    await checkIfIdExists('tenant','tenant_id',tenant_id)
-    await checkIfIdExists('clinic','clinic_id',clinic_id)
+    await checkIfIdExists("tenant", "tenant_id", tenant_id);
+    await checkIfIdExists("clinic", "clinic_id", clinic_id);
     const patients = await patientService.getAllPatientsByTenantIdAndClinicId(
       tenant_id,
       clinic_id,
       page,
-      limit
+      limit,
     );
     res.status(200).json(patients);
   } catch (err) {
@@ -95,7 +93,7 @@ exports.getAllPatientsByTenantIdAndClinicId = async (req, res, next) => {
 exports.getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
   req,
   res,
-  next
+  next,
 ) => {
   const { tenant_id, clinic_id } = req.params;
   const { page, limit } = req.query;
@@ -104,7 +102,7 @@ exports.getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
       tenant_id,
       clinic_id,
       page,
-      limit
+      limit,
     );
     res.status(200).json(patients);
   } catch (err) {
@@ -115,7 +113,7 @@ exports.getAllPatientsByTenantIdAndClinicIdAndDentistId = async (
 exports.getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
   req,
   res,
-  next
+  next,
 ) => {
   const { tenant_id, clinic_id, dentist_id } = req.params;
   const { page, limit } = req.query;
@@ -126,7 +124,7 @@ exports.getAllPatientsByTenantIdAndClinicIdUsingAppointmentStatus = async (
         clinic_id,
         dentist_id,
         page,
-        limit
+        limit,
       );
     res.status(200).json(patients);
   } catch (err) {
@@ -162,7 +160,7 @@ exports.getMostVisitedPatientsByDentistPeriods = async (req, res, next) => {
       await patientService.getMostVisitedPatientsByDentistPeriods(
         tenant_id,
         dentist_id,
-        clinic_id
+        clinic_id,
       );
     res.status(200).json(patients);
   } catch (err) {
@@ -181,9 +179,9 @@ exports.getMostVisitedPatientsByClinicPeriods = async (req, res, next) => {
       clinic_id,
       startDate,
       endDate,
-      dentist_id
+      dentist_id,
     );
-    await logUserViewActivity(req,'/getallpatients/patientsummaryclinic/')
+    await logUserViewActivity(req, "/getallpatients/patientsummaryclinic/");
     res.status(200).json(patients);
   } catch (err) {
     next(err);
@@ -197,7 +195,7 @@ exports.getNewPatientsByClinicPeriods = async (req, res, next) => {
   try {
     const patients = await patientService.getNewPatientsTrends(
       tenant_id,
-      clinic_id
+      clinic_id,
     );
     res.status(200).json(patients);
   } catch (err) {
@@ -215,7 +213,7 @@ exports.getNewPatientsTrendsByDentistAndClinic = async (req, res, next) => {
       await patientService.getNewPatientsTrendsByDentistAndClinic(
         tenant_id,
         clinic_id,
-        dentist_id
+        dentist_id,
       );
     res.status(200).json(patients);
   } catch (err) {
@@ -232,7 +230,7 @@ exports.getAgeGenderByDentist = async (req, res, next) => {
     const patients = await patientService.getAgeGenderByDentist(
       tenant_id,
       clinic_id,
-      dentist_id
+      dentist_id,
     );
     res.status(200).json(patients);
   } catch (err) {
@@ -247,7 +245,7 @@ exports.getAgeGenderByClinic = async (req, res, next) => {
   try {
     const patients = await patientService.getAgeGenderByClinic(
       tenant_id,
-      clinic_id
+      clinic_id,
     );
     res.status(200).json(patients);
   } catch (err) {
@@ -269,9 +267,9 @@ exports.groupToothProceduresByTimeRangeCumulative = async (req, res, next) => {
         clinic_id,
         dentist_id,
         startDate,
-        endDate
+        endDate,
       );
-      await logUserViewActivity(req,'/toothdetails/')
+    await logUserViewActivity(req, "/toothdetails/");
     res.status(200).json(patients);
   } catch (err) {
     next(err);
@@ -281,7 +279,7 @@ exports.groupToothProceduresByTimeRangeCumulative = async (req, res, next) => {
 exports.groupToothProceduresByTimeRangeCumulativeByDentist = async (
   req,
   res,
-  next
+  next,
 ) => {
   const { tenant_id, clinic_id, dentist_id } = req.params;
   await checkIfIdExists("tenant", "tenant_id", tenant_id);
@@ -292,7 +290,7 @@ exports.groupToothProceduresByTimeRangeCumulativeByDentist = async (
       await patientService.groupToothProceduresByTimeRangeCumulativeByDentist(
         tenant_id,
         clinic_id,
-        dentist_id
+        dentist_id,
       );
     res.status(200).json(patients);
   } catch (err) {
@@ -308,7 +306,7 @@ exports.getPatientByTenantIdAndPatientId = async (req, res, next) => {
       "patient",
       "patient_id",
       patient_id,
-      tenant_id
+      tenant_id,
     );
 
     if (!patient1) throw new CustomError("Patient not found", 404);
@@ -316,7 +314,7 @@ exports.getPatientByTenantIdAndPatientId = async (req, res, next) => {
     // Fetch patient details
     const patient = await patientService.getPatientByTenantIdAndPatientId(
       tenant_id,
-      patient_id
+      patient_id,
     );
     res.status(200).json(patient);
   } catch (err) {
@@ -344,7 +342,7 @@ exports.updatePatient = async (req, res, next) => {
       details,
       tenant_id,
       token,
-      realm
+      realm,
     );
     res.status(200).json({ message: "Patient updated successfully" });
   } catch (err) {
@@ -361,7 +359,7 @@ exports.deletePatientByTenantIdAndPatientId = async (req, res, next) => {
       "patient",
       "patient_id",
       patient_id,
-      tenant_id
+      tenant_id,
     );
 
     if (!patient) throw new CustomError("Patient not found", 404);
@@ -371,7 +369,7 @@ exports.deletePatientByTenantIdAndPatientId = async (req, res, next) => {
       tenant_id,
       patient_id,
       token,
-      realm
+      realm,
     );
     res.status(200).json({ message: "Patient deleted successfully" });
   } catch (err) {

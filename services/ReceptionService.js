@@ -1,10 +1,7 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const receptionModel = require("../models/ReceptionModel");
 const pool = require("../config/db");
-const {
-  getOrSetCache,
-  invalidateCacheByPattern,
-} = require("../config/redisConfig");
+const { getOrSetCache, invalidateCacheByPattern } = require("../config/redis");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
@@ -16,7 +13,7 @@ const {
   addUserToGroup,
   updateUserInKeycloak,
 } = require("../Keycloak/KeycloakAdmin");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 const { rollbackKeycloakUser } = require("../Keycloak/KeycloakService");
 const { createEntity, updateEntity } = require("../utils/Reusability");
 
@@ -101,13 +98,13 @@ const getAllReceptionsByTenantId = async (tenantId, page = 1, limit = 10) => {
       const result = await receptionModel.getAllReceptionsByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
 
     const convertedRows = receptions.data.map((reception) =>
-      helper.convertDbToFrontend(reception, receptionFieldsReverseMap)
+      helper.convertDbToFrontend(reception, receptionFieldsReverseMap),
     );
 
     return { data: convertedRows, total: receptions.total };
@@ -122,12 +119,12 @@ const getReceptionByTenantIdAndReceptionId = async (tenantId, receptionId) => {
   try {
     const reception = await receptionModel.getReceptionByTenantAndReceptionId(
       tenantId,
-      receptionId
+      receptionId,
     );
 
     const convertedRows = helper.convertDbToFrontend(
       reception,
-      receptionFieldsReverseMap
+      receptionFieldsReverseMap,
     );
 
     return convertedRows;
@@ -141,7 +138,7 @@ const updateReception = async (receptionId, data, tenant_id, token, realm) => {
   return await updateEntity({
     entityId: receptionId,
     entityName: "reception",
-    tenantId:tenant_id,
+    tenantId: tenant_id,
     data,
     token,
     realm,
@@ -157,7 +154,7 @@ const deleteReceptionByTenantIdAndReceptionId = async (
   tenantId,
   receptionId,
   token,
-  realm
+  realm,
 ) => {
   let userId = null;
   const connection = await pool.getConnection();
@@ -169,7 +166,7 @@ const deleteReceptionByTenantIdAndReceptionId = async (
     const reception = await receptionModel.getReceptionByTenantAndReceptionId(
       tenantId,
       receptionId,
-      connection
+      connection,
     );
 
     if (!reception) {
@@ -183,7 +180,7 @@ const deleteReceptionByTenantIdAndReceptionId = async (
       await receptionModel.deleteReceptionByTenantAndReceptionId(
         connection,
         tenantId,
-        receptionId
+        receptionId,
       );
 
     if (affectedRows === 0) {
@@ -201,13 +198,13 @@ const deleteReceptionByTenantIdAndReceptionId = async (
       } catch (kcError) {
         console.error(
           `❌ Keycloak deletion failed for receptionist ${userId}:`,
-          kcError.message
+          kcError.message,
         );
         // 🔁 Rollback DB delete
         await connection.rollback();
         throw new CustomError(
           "Failed to delete receptionist in Keycloak. Aborting delete.",
-          500
+          500,
         );
       }
     }
@@ -231,7 +228,7 @@ const getAllReceptionsByTenantIdAndClinicId = async (
   tenantId,
   clinic_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("reception", "list", {
@@ -247,13 +244,13 @@ const getAllReceptionsByTenantIdAndClinicId = async (
         tenantId,
         clinic_id,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
 
     const convertedRows = receptions.data.map((reception) =>
-      helper.convertDbToFrontend(reception, receptionFieldsReverseMap)
+      helper.convertDbToFrontend(reception, receptionFieldsReverseMap),
     );
 
     return { data: convertedRows, total: receptions.total };

@@ -4,19 +4,22 @@ const {
   redisClient,
   getOrSetCache,
   invalidateCacheByPattern,
-} = require("../config/redisConfig");
+} = require("../config/redis");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
 
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 const {
   saveDocuments,
   updateDocumentsDiffBased,
 } = require("../utils/UploadFiles");
-const { getDocumentsByField, deleteDocumentsByTableAndId } = require("../models/documentModel");
+const {
+  getDocumentsByField,
+  deleteDocumentsByTableAndId,
+} = require("../models/documentModel");
 const { default: axios } = require("axios");
 
 // Field mapping for references (similar to treatment)
@@ -29,8 +32,8 @@ const referenceFields = {
   receiver_email: (val) => val,
   receiver_phone: (val) => val,
   sender_keycloak_id: (val) => val,
-  reference_message:helper.safeStringify,
-  reference_image: (val) => val
+  reference_message: helper.safeStringify,
+  reference_image: (val) => val,
 };
 const referenceFieldsReverseMap = {
   referral_reference_id: (val) => val,
@@ -40,7 +43,7 @@ const referenceFieldsReverseMap = {
   receiver_name: (val) => val,
   receiver_email: (val) => val,
   sender_keycloak_id: (val) => val,
-  reference_message:helper.safeJsonParse,
+  reference_message: helper.safeJsonParse,
   reference_image: (val) => val,
   created_by: (val) => val,
   created_time: (val) => (val ? convertUTCToLocal(val) : null),
@@ -55,20 +58,17 @@ const createReference = async (data) => {
   };
   try {
     const { columns, values } = mapFields(data, fieldMap);
-  
+
     const referenceId = await referenceModel.createReference(
       "reference",
       columns,
-      values
+      values,
     );
     await invalidateCacheByPattern("reference:*");
     return referenceId;
   } catch (error) {
     console.error("Failed to create reference:", error);
-    throw new CustomError(
-      `Failed to create reference: ${error.message}`,
-      404
-    );
+    throw new CustomError(`Failed to create reference: ${error.message}`, 404);
   }
 };
 
@@ -143,7 +143,7 @@ const createReference = async (data) => {
 
 //         return {
 //           ...formatted,
-         
+
 //         };
 //       })
 //     );

@@ -3,8 +3,8 @@ const {
   redisClient,
   getOrSetCache,
   invalidateCacheByPattern,
-} = require("../config/redisConfig");
-const { buildCacheKey } = require("../utils/RedisCache");
+} = require("../config/redis");
+const { buildCacheKey } = require("../config/redis");
 
 // Create a new document entry
 const createDocument = async (
@@ -13,7 +13,7 @@ const createDocument = async (
   field_name,
   file_url,
   created_by,
-  description
+  description,
 ) => {
   const conn = await pool.getConnection();
   const cacheKey = buildCacheKey("document", table_name, table_id);
@@ -22,7 +22,7 @@ const createDocument = async (
     const [result] = await conn.query(
       `INSERT INTO document (table_name, table_id, field_name, file_url, created_by,description)
        VALUES (?, ?, ?, ?, ?,?)`,
-      [table_name, table_id, field_name, file_url, created_by, description]
+      [table_name, table_id, field_name, file_url, created_by, description],
     );
 
     await invalidateCacheByPattern(cacheKey); // Invalidate cache // Invalidate cache
@@ -48,7 +48,7 @@ const getDocumentsByTableAndId = async (table_name, table_id) => {
       try {
         const [rows] = await conn.query(
           `SELECT * FROM document WHERE table_name = ? AND table_id = ?`,
-          [table_name, table_id]
+          [table_name, table_id],
         );
         return rows;
       } finally {
@@ -69,7 +69,7 @@ const getDocumentsByField = async (table_name, table_id, field_name) => {
   try {
     const [rows] = await conn.query(
       `SELECT * FROM document WHERE table_name = ? AND table_id = ? AND field_name = ?`,
-      [table_name, table_id, field_name]
+      [table_name, table_id, field_name],
     );
     return rows;
   } catch (error) {
@@ -86,7 +86,7 @@ const updateDocument = async (document_id, file_url, updated_by) => {
   try {
     const [result] = await conn.query(
       `UPDATE document SET file_url = ?, updated_by = ? WHERE document_id = ?`,
-      [file_url, updated_by, document_id]
+      [file_url, updated_by, document_id],
     );
     return result.affectedRows;
   } catch (error) {
@@ -102,7 +102,7 @@ const updateDocumentDescription = async (document_id, description) => {
   try {
     const [result] = await conn.query(
       `UPDATE document SET description = ? WHERE document_id = ?`,
-      [description, document_id]
+      [description, document_id],
     );
     return result.affectedRows;
   } catch (error) {
@@ -114,14 +114,18 @@ const updateDocumentDescription = async (document_id, description) => {
 };
 
 // Delete all documents for a record
-const deleteDocumentsByTableAndId = async ({table_name, table_id,connection=null}) => {
-  const conn = connection || await pool.getConnection();
+const deleteDocumentsByTableAndId = async ({
+  table_name,
+  table_id,
+  connection = null,
+}) => {
+  const conn = connection || (await pool.getConnection());
   const cacheKey = buildCacheKey("document", table_name, table_id);
 
   try {
     const [result] = await conn.query(
       `DELETE FROM document WHERE table_name = ? AND table_id = ?`,
-      [table_name, table_id]
+      [table_name, table_id],
     );
 
     await invalidateCacheByPattern(cacheKey); // Invalidate cache
@@ -141,7 +145,7 @@ const deleteDocumentById = async (document_id) => {
   try {
     const [result] = await conn.query(
       `DELETE FROM document WHERE document_id = ?`,
-      [document_id]
+      [document_id],
     );
     return result.affectedRows;
   } catch (error) {
@@ -159,5 +163,5 @@ module.exports = {
   updateDocument,
   deleteDocumentsByTableAndId,
   deleteDocumentById,
-  updateDocumentDescription
+  updateDocumentDescription,
 };

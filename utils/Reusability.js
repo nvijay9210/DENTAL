@@ -1,5 +1,5 @@
 const pool = require("../config/db");
-const { invalidateCacheByPattern } = require("../config/redisConfig");
+const { invalidateCacheByPattern } = require("../config/redis");
 const { rollbackKeycloakUser } = require("../Keycloak/KeycloakService");
 const { CustomError } = require("../middlewares/CustomeError");
 const {

@@ -1,9 +1,6 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const useractivityModel = require("../models/UserActivityModel");
-const {
-  getOrSetCache,
-  invalidateCacheByPattern,
-} = require("../config/redisConfig");
+const { getOrSetCache, invalidateCacheByPattern } = require("../config/redis");
 
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
@@ -18,7 +15,7 @@ const userActivityFields = {
   activity_type: (val) => val,
   activity_desc: (val) => val,
   ip_address: (val) => val,
-  user_agent: (val) => helper.safeStringify(val)
+  user_agent: (val) => helper.safeStringify(val),
 };
 
 const userActivityFieldsReverseMap = {
@@ -33,7 +30,6 @@ const userActivityFieldsReverseMap = {
   activity_time: (val) => (val ? convertUTCToLocal(val) : null),
 };
 
-
 // Create UserActivity
 
 const createUserActivity = async (data) => {
@@ -42,7 +38,7 @@ const createUserActivity = async (data) => {
     const user_activity_id = await useractivityModel.createUserActivity(
       "user_activity",
       columns,
-      values
+      values,
     );
     await invalidateCacheByPattern("user_activity:*");
     return user_activity_id;
@@ -50,7 +46,7 @@ const createUserActivity = async (data) => {
     console.error("Failed to create user_activity:", error);
     throw new CustomError(
       `Failed to create user_activity: ${error.message}`,
-      404
+      404,
     );
   }
 };
@@ -59,7 +55,7 @@ const createUserActivity = async (data) => {
 const getAllUserActivitysByTenantId = async (
   tenantId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = `user_activity:${tenantId}:page:${page}:limit:${limit}`;
@@ -69,13 +65,13 @@ const getAllUserActivitysByTenantId = async (
       const result = await useractivityModel.getAllUserActivitysByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
 
     const convertedRows = useractivitys.data.map((user_activity) =>
-      helper.convertDbToFrontend(user_activity, userActivityFieldsReverseMap)
+      helper.convertDbToFrontend(user_activity, userActivityFieldsReverseMap),
     );
 
     return { data: convertedRows, total: useractivitys.total };
@@ -88,18 +84,18 @@ const getAllUserActivitysByTenantId = async (
 // Get UserActivity by ID & Tenant
 const getUserActivityByTenantIdAndUserActivityId = async (
   tenantId,
-  user_activity_id
+  user_activity_id,
 ) => {
   try {
     const user_activity =
       await useractivityModel.getUserActivityByTenantAndUserActivityId(
         tenantId,
-        user_activity_id
+        user_activity_id,
       );
 
     const convertedRows = helper.convertDbToFrontend(
       user_activity,
-      userActivityFieldsReverseMap
+      userActivityFieldsReverseMap,
     );
 
     return convertedRows;
@@ -115,7 +111,7 @@ const updateUserActivity = async (user_activity_id, data) => {
     const affectedRows = await useractivityModel.updateUserActivity(
       user_activity_id,
       columns,
-      values
+      values,
     );
 
     // if (affectedRows === 0) {
@@ -134,5 +130,5 @@ module.exports = {
   createUserActivity,
   getAllUserActivitysByTenantId,
   getUserActivityByTenantIdAndUserActivityId,
-  updateUserActivity
+  updateUserActivity,
 };

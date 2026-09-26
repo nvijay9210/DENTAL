@@ -1,14 +1,11 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const treatmentModel = require("../models/TreatmentModel");
 const PaymentService = require("../services/PaymentService");
-const {
-  getOrSetCache,
-  invalidateCacheByPattern,
-} = require("../config/redisConfig");
+const { getOrSetCache, invalidateCacheByPattern } = require("../config/redis");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 const {
   saveDocuments,
   updateDocumentsDiffBased,
@@ -25,16 +22,16 @@ const {
 const { getallPaymentSummaryByAppointment } = require("../models/PaymentModel");
 
 const treatmentFields = {
-  tenant_id: (val) => val ||null,
-  patient_id: (val) => val ||null,
-  appointment_id: (val) => val ||null,
-  dentist_id: (val) => val ||null,
-  clinic_id: (val) => val ||null,
-  diagnosis: (val) => val ||null,
-  treatment_procedure: (val) => val ||null,
-  treatment_type: (val) => val ||null,
-  treatment_status: (val) => val ||null,
-  treatment_date: (val) => val ||null,
+  tenant_id: (val) => val || null,
+  patient_id: (val) => val || null,
+  appointment_id: (val) => val || null,
+  dentist_id: (val) => val || null,
+  clinic_id: (val) => val || null,
+  diagnosis: (val) => val || null,
+  treatment_procedure: (val) => val || null,
+  treatment_type: (val) => val || null,
+  treatment_status: (val) => val || null,
+  treatment_date: (val) => val || null,
   cost: (val) => (val ? parseFloat(val) : 0),
   tax_percentage: (val) => (val ? parseFloat(val) : 0),
   tax_catalog: helper.safeStringify,
@@ -96,7 +93,7 @@ const createTreatment = async (data) => {
     dentist_id: data?.dentist_id,
     patient_id: data?.patient_id,
     appointment_id: data?.appointment_id,
-    amount: parseFloat(data?.amount)||0,
+    amount: parseFloat(data?.amount) || 0,
     discount_applied: parseFloat(data?.discount_applied),
     final_amount: parseFloat(data?.final_amount),
     total_amount: parseFloat(data?.cost),
@@ -119,7 +116,7 @@ const createTreatment = async (data) => {
       conn,
       "treatment",
       columns,
-      values
+      values,
     );
 
     // Handle single or multiple file upload
@@ -135,7 +132,8 @@ const createTreatment = async (data) => {
 
     const payment = await getallPaymentSummaryByAppointment(
       data.tenant_id,
-      data.appointment_id,conn
+      data.appointment_id,
+      conn,
     );
 
     // console.log(payment);
@@ -146,7 +144,7 @@ const createTreatment = async (data) => {
         data.tenant_id,
         data.clinic_id,
         "fully_completed",
-        conn
+        conn,
       );
     }
     if (payment.balance_remaining > 0) {
@@ -155,7 +153,7 @@ const createTreatment = async (data) => {
         data.tenant_id,
         data.clinic_id,
         "pending_payment",
-        conn
+        conn,
       );
     }
     // await updateAppoinmentStatusCompleted(data.tenant_id,data.appointment_id);
@@ -187,7 +185,7 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
       const result = await treatmentModel.getAllTreatmentsByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
@@ -196,13 +194,13 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
       treatments.data.map(async (treatment) => {
         const formatted = helper.convertDbToFrontend(
           treatment,
-          treatmentFieldsReverseMap
+          treatmentFieldsReverseMap,
         );
 
         const docs = await getDocumentsByField(
           "treatment",
           treatment.treatment_id,
-          "treatment_images"
+          "treatment_images",
         );
 
         // Extract only file_url
@@ -215,7 +213,7 @@ const getAllTreatmentsByTenantId = async (tenantId, page = 1, limit = 10) => {
           ...formatted,
           treatment_images: fileInfos,
         };
-      })
+      }),
     );
 
     return { data: convertedRows, total: treatments.total };
@@ -247,7 +245,7 @@ const getAllTreatmentsByTenantAndClinicId = async (
   clinic_id,
   appointment_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("treatment", "list", {
@@ -265,7 +263,7 @@ const getAllTreatmentsByTenantAndClinicId = async (
         clinic_id,
         appointment_id,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
@@ -274,13 +272,13 @@ const getAllTreatmentsByTenantAndClinicId = async (
       treatments.data.map(async (treatment) => {
         const formatted = helper.convertDbToFrontend(
           treatment,
-          treatmentFieldsReverseMap
+          treatmentFieldsReverseMap,
         );
 
         const docs = await getDocumentsByField(
           "treatment",
           treatment.treatment_id,
-          "treatment_images"
+          "treatment_images",
         );
 
         // Extract only file_url
@@ -293,7 +291,7 @@ const getAllTreatmentsByTenantAndClinicId = async (
           ...formatted,
           treatment_images: fileInfos,
         };
-      })
+      }),
     );
 
     return { data: convertedRows, total: treatments.total };
@@ -309,7 +307,7 @@ const getAllTreatmentsByTenantAndClinicIdAndDentist = async (
   dentist_id,
   appointment_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("treatment", "list", {
@@ -330,7 +328,7 @@ const getAllTreatmentsByTenantAndClinicIdAndDentist = async (
           dentist_id,
           appointment_id,
           Number(limit),
-          offset
+          offset,
         );
       return result;
     });
@@ -339,13 +337,13 @@ const getAllTreatmentsByTenantAndClinicIdAndDentist = async (
       treatments.data.map(async (treatment) => {
         const formatted = helper.convertDbToFrontend(
           treatment,
-          treatmentFieldsReverseMap
+          treatmentFieldsReverseMap,
         );
 
         const docs = await getDocumentsByField(
           "treatment",
           treatment.treatment_id,
-          "treatment_images"
+          "treatment_images",
         );
 
         // Extract only file_url
@@ -358,7 +356,7 @@ const getAllTreatmentsByTenantAndClinicIdAndDentist = async (
           ...formatted,
           treatment_images: fileInfos,
         };
-      })
+      }),
     );
     return { data: convertedRows, total: treatments.total };
   } catch (error) {
@@ -370,7 +368,7 @@ const getAllTreatmentsByTenantAndDentistId = async (
   tenantId,
   dentist_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("treatment", "list", {
@@ -386,7 +384,7 @@ const getAllTreatmentsByTenantAndDentistId = async (
         tenantId,
         dentist_id,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
@@ -395,13 +393,13 @@ const getAllTreatmentsByTenantAndDentistId = async (
       treatments.data.map(async (treatment) => {
         const formatted = helper.convertDbToFrontend(
           treatment,
-          treatmentFieldsReverseMap
+          treatmentFieldsReverseMap,
         );
 
         const docs = await getDocumentsByField(
           "treatment",
           treatment.treatment_id,
-          "treatment_images"
+          "treatment_images",
         );
 
         // Extract only file_url
@@ -414,7 +412,7 @@ const getAllTreatmentsByTenantAndDentistId = async (
           ...formatted,
           treatment_images: fileInfos,
         };
-      })
+      }),
     );
 
     return { data: convertedRows, total: treatments.total };
@@ -428,7 +426,7 @@ const getAllTreatmentsByTenantAndPatientId = async (
   tenantId,
   patient_id,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("treatment", "list", {
@@ -444,7 +442,7 @@ const getAllTreatmentsByTenantAndPatientId = async (
         tenantId,
         patient_id,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
@@ -453,13 +451,13 @@ const getAllTreatmentsByTenantAndPatientId = async (
       treatments.data.map(async (treatment) => {
         const formatted = helper.convertDbToFrontend(
           treatment,
-          treatmentFieldsReverseMap
+          treatmentFieldsReverseMap,
         );
 
         const docs = await getDocumentsByField(
           "treatment",
           treatment.treatment_id,
-          "treatment_images"
+          "treatment_images",
         );
 
         // Extract only file_url
@@ -472,7 +470,7 @@ const getAllTreatmentsByTenantAndPatientId = async (
           ...formatted,
           treatment_images: fileInfos,
         };
-      })
+      }),
     );
 
     return { data: convertedRows, total: treatments.total };
@@ -488,7 +486,7 @@ const getTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {
     // 1️⃣ Get treatment record
     const treatment = await treatmentModel.getTreatmentByTenantAndTreatmentId(
       tenantId,
-      treatmentId
+      treatmentId,
     );
 
     if (!treatment) {
@@ -498,14 +496,14 @@ const getTreatmentByTenantIdAndTreatmentId = async (tenantId, treatmentId) => {
     // 2️⃣ Convert DB → Frontend format
     const formatted = helper.convertDbToFrontend(
       treatment,
-      treatmentFieldsReverseMap
+      treatmentFieldsReverseMap,
     );
 
     // 3️⃣ Get related treatment images
     const docs = await getDocumentsByField(
       "treatment",
       treatment.treatment_id,
-      "treatment_images"
+      "treatment_images",
     );
 
     // 4️⃣ Extract only needed info
@@ -542,8 +540,8 @@ const updateTreatment = async (treatmentId, data, tenant_id, req) => {
     patient_id: data?.patient_id,
     appointment_id: data?.appointment_id,
     amount: parseFloat(data?.cost),
-    discount_applied: parseFloat(data?.discount_applied)||0,
-    final_amount: parseFloat(data?.final_amount)||0,
+    discount_applied: parseFloat(data?.discount_applied) || 0,
+    final_amount: parseFloat(data?.final_amount) || 0,
     mode_of_payment: data?.mode_of_payment,
     payment_source: data?.payment_source,
     payment_reference: data?.payment_reference,
@@ -566,7 +564,7 @@ const updateTreatment = async (treatmentId, data, tenant_id, req) => {
       columns,
       values,
       tenant_id,
-      conn
+      conn,
     );
 
     // ✅ Handle images
@@ -611,18 +609,18 @@ const updateTreatment = async (treatmentId, data, tenant_id, req) => {
 // Delete Treatment
 const deleteTreatmentByTenantIdAndTreatmentId = async (
   tenantId,
-  treatmentId
+  treatmentId,
 ) => {
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    await deleteDocumentsByTableAndId("treatment", treatmentId,conn);
-   
+    await deleteDocumentsByTableAndId("treatment", treatmentId, conn);
+
     const affectedRows =
       await treatmentModel.deleteTreatmentByTenantAndTreatmentId(
         conn,
         tenantId,
-        treatmentId
+        treatmentId,
       );
     // if (affectedRows === 0) {
     //   throw new CustomError(error, 500);
@@ -653,7 +651,7 @@ const getTodayFollowUps = async (tenant_id, clinic_id, role, user_id = 0) => {
         tenant_id,
         clinic_id,
         role,
-        user_id
+        user_id,
       );
       const result1 = result.map((r) => ({
         ...r,

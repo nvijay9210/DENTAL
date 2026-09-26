@@ -5,7 +5,7 @@ const {
   redisClient,
   getOrSetCache,
   invalidateCacheByPattern,
-} = require("../config/redisConfig");
+} = require("../config/redis");
 const { decodeJsonFields } = require("../utils/Helpers");
 const { mapFields } = require("../query/Records");
 const helper = require("../utils/Helpers");
@@ -18,7 +18,7 @@ const {
 } = require("../Keycloak/KeycloakAdmin");
 
 const { formatDateOnly, convertUTCToLocal } = require("../utils/DateUtils");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 const { encrypt } = require("../middlewares/PasswordHash");
 const { rollbackKeycloakUser } = require("../Keycloak/KeycloakService");
 const { createEntity, updateEntity } = require("../utils/Reusability");
@@ -116,7 +116,7 @@ const getAllSuppliersByTenantIdAndClinicId = async (
   tenantId,
   clinicId,
   page = 1,
-  limit = 10
+  limit = 10,
 ) => {
   const offset = (page - 1) * limit;
   const cacheKey = buildCacheKey("supplier", "list", {
@@ -132,13 +132,13 @@ const getAllSuppliersByTenantIdAndClinicId = async (
         tenantId,
         clinicId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
 
     const convertedRows = suppliers.data.map((supplier) =>
-      helper.convertDbToFrontend(supplier, supplierFieldsReverseMap)
+      helper.convertDbToFrontend(supplier, supplierFieldsReverseMap),
     );
 
     return { data: convertedRows, total: suppliers.total };
@@ -160,13 +160,13 @@ const getAllSuppliersByTenantId = async (tenantId, page = 1, limit = 10) => {
       const result = await supplierModel.getAllSuppliersByTenantId(
         tenantId,
         Number(limit),
-        offset
+        offset,
       );
       return result;
     });
 
     const convertedRows = suppliers.data.map((supplier) =>
-      helper.convertDbToFrontend(supplier, supplierFieldsReverseMap)
+      helper.convertDbToFrontend(supplier, supplierFieldsReverseMap),
     );
 
     return { data: convertedRows, total: suppliers.total };
@@ -181,12 +181,12 @@ const getSupplierByTenantIdAndSupplierId = async (tenantId, supplierId) => {
   try {
     const supplier = await supplierModel.getSupplierByTenantAndSupplierId(
       tenantId,
-      supplierId
+      supplierId,
     );
 
     const convertedRows = helper.convertDbToFrontend(
       supplier,
-      supplierFieldsReverseMap
+      supplierFieldsReverseMap,
     );
 
     return convertedRows;
@@ -215,7 +215,7 @@ const deleteSupplierByTenantIdAndSupplierId = async (
   tenantId,
   supplierId,
   token,
-  realm
+  realm,
 ) => {
   let userId = null;
   const connection = await pool.getConnection();
@@ -227,7 +227,7 @@ const deleteSupplierByTenantIdAndSupplierId = async (
     const supplier = await supplierModel.getSupplierByTenantAndSupplierId(
       tenantId,
       supplierId,
-      connection
+      connection,
     );
 
     if (!supplier) {
@@ -241,7 +241,7 @@ const deleteSupplierByTenantIdAndSupplierId = async (
       await supplierModel.deleteSupplierByTenantAndSupplierId(
         connection,
         tenantId,
-        supplierId
+        supplierId,
       );
 
     if (affectedRows === 0) {
@@ -259,13 +259,13 @@ const deleteSupplierByTenantIdAndSupplierId = async (
       } catch (kcError) {
         console.error(
           `❌ Keycloak deletion failed for supplier ${userId}:`,
-          kcError.message
+          kcError.message,
         );
         // 🔁 Rollback DB
         await connection.rollback();
         throw new CustomError(
           "Failed to delete supplier in Keycloak. Aborting delete.",
-          500
+          500,
         );
       }
     }

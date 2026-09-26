@@ -1,19 +1,16 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const statusTypeModel = require("../models/StatusTypeModel");
-const {
-  getOrSetCache,
-  invalidateCacheByPattern,
-} = require("../config/redisConfig");
+const { getOrSetCache, invalidateCacheByPattern } = require("../config/redis");
 const helper = require("../utils/Helpers");
 const { convertUTCToLocal } = require("../utils/DateUtils");
-const { buildCacheKey } = require("../utils/RedisCache");
+const { buildCacheKey } = require("../config/redis");
 
 const statusTypeField = {
   tenant_id: (val) => val,
   status_type: (val) => val,
 };
 const statusTypeFieldReverseMap = {
-  status_type_id:val=>val,
+  status_type_id: (val) => val,
   tenant_id: (val) => val,
   status_type: (val) => val,
   created_by: (val) => val,
@@ -23,7 +20,6 @@ const statusTypeFieldReverseMap = {
 };
 // Create StatusType
 const createStatusType = async (data) => {
-  
   const fieldMap = {
     statusTypeField,
     created_by: (val) => val,
@@ -34,7 +30,7 @@ const createStatusType = async (data) => {
     const statusTypeId = await statusTypeModel.createStatusType(
       "statusType",
       columns,
-      values
+      values,
     );
     await invalidateCacheByPattern("statusType:*");
     await invalidateCacheByPattern("statusType_patient:*");
@@ -55,16 +51,15 @@ const getAllStatusTypesByTenantId = async (page = 1, limit = 10) => {
 
   try {
     const statusTypes = await getOrSetCache(cacheKey, async () => {
-      const result = await statusTypeModel.getAllStatusTypesByTenantId(
-      );
+      const result = await statusTypeModel.getAllStatusTypesByTenantId();
       return result;
     });
 
     const convertedRows = statusTypes.map((statusType) =>
-          helper.convertDbToFrontend(statusType, statusTypeFieldReverseMap)
-        );
-    
-        return convertedRows;
+      helper.convertDbToFrontend(statusType, statusTypeFieldReverseMap),
+    );
+
+    return convertedRows;
   } catch (err) {
     console.error("Database error while fetching statusTypes:", err);
     throw new CustomError(err, 500);
@@ -74,11 +69,13 @@ const getAllStatusTypesByTenantId = async (page = 1, limit = 10) => {
 // Get StatusType by ID & Tenant
 const getStatusTypeByStatusTypeId = async (statusTypeId) => {
   try {
-    const statusType = await statusTypeModel.getStatusTypeByStatusTypeId(
-      statusTypeId
+    const statusType =
+      await statusTypeModel.getStatusTypeByStatusTypeId(statusTypeId);
+    const convertedRows = helper.convertDbToFrontend(
+      statusType,
+      statusTypeFieldReverseMap,
     );
-    const convertedRows=helper.convertDbToFrontend(statusType, statusTypeFieldReverseMap)
-    return {data:convertedRows,total:statusType.total};;
+    return { data: convertedRows, total: statusType.total };
   } catch (error) {
     throw new CustomError(err, 500);
   }
@@ -97,7 +94,7 @@ const updateStatusType = async (statusTypeId, data, tenant_id) => {
       statusTypeId,
       columns,
       values,
-      tenant_id
+      tenant_id,
     );
 
     // if (affectedRows === 0) {
@@ -116,13 +113,13 @@ const updateStatusType = async (statusTypeId, data, tenant_id) => {
 // Delete StatusType
 const deleteStatusTypeByTenantIdAndStatusTypeId = async (
   tenantId,
-  statusTypeId
+  statusTypeId,
 ) => {
   try {
     const affectedRows =
       await statusTypeModel.deleteStatusTypeByTenantAndStatusTypeId(
         tenantId,
-        statusTypeId
+        statusTypeId,
       );
     // if (affectedRows === 0) {
     //   throw new CustomError(err, 500);

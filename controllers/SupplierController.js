@@ -1,9 +1,11 @@
 const { CustomError } = require("../middlewares/CustomeError");
 const { checkIfExists } = require("../models/checkIfExists");
 const supplierService = require("../services/SupplierService");
-const { validateTenantIdAndPageAndLimit } = require("../validations/CommonValidations");
+const {
+  validateTenantIdAndPageAndLimit,
+} = require("../validations/CommonValidations");
 const supplierValidation = require("../validations/SupplierValidation");
-const { bulkInsert } = require("../Modules/BulkInsert");
+const { bulkInsert } = require("../utils/BulkInsert");
 /**
  * Create a new supplier
  */
@@ -17,7 +19,7 @@ exports.createSupplier = async (req, res, next) => {
       supplierValidation.createSupplierValidation,
       supplierService.createSupplier,
       token,
-      realm
+      realm,
     );
     res.status(201).json(response);
   } catch (err) {
@@ -29,16 +31,17 @@ exports.createSupplier = async (req, res, next) => {
  * Get all suppliers by tenant ID with pagination
  */
 exports.getAllSuppliersByTenantIdAndClinicId = async (req, res, next) => {
-  const { tenant_id,clinic_id } = req.params;
+  const { tenant_id, clinic_id } = req.params;
   const { page, limit } = req.query;
   await validateTenantIdAndPageAndLimit(tenant_id, page, limit);
   try {
-    const suppliers = await supplierService.getAllSuppliersByTenantIdAndClinicId(
-      tenant_id,
-      clinic_id,
-      page,
-      limit
-    );
+    const suppliers =
+      await supplierService.getAllSuppliersByTenantIdAndClinicId(
+        tenant_id,
+        clinic_id,
+        page,
+        limit,
+      );
     res.status(200).json(suppliers);
   } catch (err) {
     next(err);
@@ -52,7 +55,7 @@ exports.getAllSuppliersByTenantId = async (req, res, next) => {
     const suppliers = await supplierService.getAllSuppliersByTenantId(
       tenant_id,
       page,
-      limit
+      limit,
     );
     res.status(200).json(suppliers);
   } catch (err) {
@@ -71,7 +74,7 @@ exports.getSupplierByTenantIdAndSupplierId = async (req, res, next) => {
       "supplier",
       "supplier_id",
       supplier_id,
-      tenant_id
+      tenant_id,
     );
 
     if (!supplier1) throw new CustomError("Supplier not found", 404);
@@ -79,7 +82,7 @@ exports.getSupplierByTenantIdAndSupplierId = async (req, res, next) => {
     // Fetch supplier details
     const supplier = await supplierService.getSupplierByTenantIdAndSupplierId(
       tenant_id,
-      supplier_id
+      supplier_id,
     );
     res.status(200).json(supplier);
   } catch (err) {
@@ -93,14 +96,20 @@ exports.getSupplierByTenantIdAndSupplierId = async (req, res, next) => {
 exports.updateSupplier = async (req, res, next) => {
   const { supplier_id, tenant_id } = req.params;
   const details = req.body;
-  const token=req.token;
-  const realm=req.realm;
+  const token = req.token;
+  const realm = req.realm;
   try {
     // Validate update input
     await supplierValidation.updateSupplierValidation(supplier_id, details);
 
     // Update the supplier
-    await supplierService.updateSupplier(supplier_id, details, tenant_id,token,realm);
+    await supplierService.updateSupplier(
+      supplier_id,
+      details,
+      tenant_id,
+      token,
+      realm,
+    );
     res.status(200).json({ message: "Supplier updated successfully" });
   } catch (err) {
     next(err);
@@ -112,8 +121,8 @@ exports.updateSupplier = async (req, res, next) => {
  */
 exports.deleteSupplierByTenantIdAndSupplierId = async (req, res, next) => {
   const { supplier_id, tenant_id } = req.params;
-  const token=req.token;
-  const realm=req.realm;
+  const token = req.token;
+  const realm = req.realm;
   try {
     // Validate if supplier exists
     const treatment = await checkIfExists(
@@ -121,7 +130,6 @@ exports.deleteSupplierByTenantIdAndSupplierId = async (req, res, next) => {
       "supplier_id",
       supplier_id,
       tenant_id,
-      
     );
     if (!treatment) throw new CustomError("supplierId not Exists", 404);
 
@@ -130,7 +138,7 @@ exports.deleteSupplierByTenantIdAndSupplierId = async (req, res, next) => {
       tenant_id,
       supplier_id,
       token,
-      realm
+      realm,
     );
     res.status(200).json({ message: "Supplier deleted successfully" });
   } catch (err) {
