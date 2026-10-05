@@ -9,3 +9,4 @@ logs/dev.log
 sonar-project.properties
 liquibase
 /generated/prisma
+*.zip

@@ -102,7 +102,7 @@ const finalizeLogin = async (req, res) => {
     };
 
     await setCache(
-      `session:${sessionId}`,
+      `dental:session:${sessionId}`,
       sessionData,
       COOKIE_EXPIRY.REFRESH / 1000,
     );
@@ -112,11 +112,11 @@ const finalizeLogin = async (req, res) => {
     log("TOKEN_SAVE", "Saving tokens and user data in cookies");
 
     // === 🔐 AUTH TOKENS (short/long expiry) ===
-    res.cookie("access_token", access_token, {
+    res.cookie("dental_access_token", access_token, {
       ...COOKIE_OPTIONS,
       maxAge: COOKIE_EXPIRY.ACCESS,
     });
-    res.cookie("refresh_token", refresh_token, {
+    res.cookie("dental_refresh_token", refresh_token, {
       ...COOKIE_OPTIONS,
       maxAge: COOKIE_EXPIRY.REFRESH,
     });
@@ -203,7 +203,7 @@ const finalizeLogin = async (req, res) => {
       });
     }
 
-    res.cookie("brighton_session", sessionId, {
+    res.cookie("dental_session", sessionId, {
       // domain: ".brightoncloudtech.com",
       httpOnly: true,
       secure: isProduction,
@@ -301,12 +301,12 @@ router.post("/tokensave", (req, res) => {
     const accessExpiry = (access_expires_in || 15 * 60) * 1000;
     const refreshExpiry = (refresh_expires_in || 7 * 24 * 60 * 60) * 1000;
 
-    res.cookie("access_token", access_token, {
+    res.cookie("dental_access_token", access_token, {
       ...baseOptions,
       maxAge: accessExpiry,
     });
 
-    res.cookie("refresh_token", refresh_token, {
+    res.cookie("dental_refresh_token", refresh_token, {
       ...baseOptions,
       maxAge: refreshExpiry,
     });
@@ -329,13 +329,12 @@ router.post("/tokensave", (req, res) => {
 // 🔐 MAIN LOGIN ROUTE
 // ============================================================================
 router.post("/login", async (req, res) => {
-
   log("LOGIN_FLOW", "🚀 Starting login flow", {
-  username: req.body?.username,
-  host: req.body?.host,
-  hasPassword: !!req.body?.password,
-  hasOtp: !!req.body?.otp,
-});
+    username: req.body?.username,
+    host: req.body?.host,
+    hasPassword: !!req.body?.password,
+    hasOtp: !!req.body?.otp,
+  });
 
   try {
     let { username, password, host, otp } = req.body;
@@ -404,7 +403,7 @@ router.post("/login", async (req, res) => {
 
     // === Verify Token in Database ===
     const dbUser = await verifyUserTokenInDB(tokens.access_token);
-  
+
     log("DB_VERIFY", "Database verification completed", {
       role: dbUser?.role,
       userId: dbUser?.dbUser?.user_id,
@@ -496,7 +495,7 @@ router.post("/login", async (req, res) => {
 router.post("/refresh-token", async (req, res, next) => {
   log("REFRESH_TOKEN", "Refreshing access token");
 
-  const refreshToken = req.cookies.refresh_token;
+  const refreshToken = req.cookies.dental_refresh_token;
   const realm = req.headers["x-realm"] || req.cookies.realm;
   const clientid = req.headers["x-clientid"] || req.cookies.clientId;
 
@@ -541,14 +540,14 @@ router.post("/refresh-token", async (req, res, next) => {
     }
 
     // ✅ Update auth token cookies
-    res.cookie("access_token", tokenData.access_token, {
+    res.cookie("dental_access_token", tokenData.access_token, {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? "none" : "lax",
       maxAge: tokenData.expires_in * 1000,
     });
 
-    res.cookie("refresh_token", tokenData.refresh_token, {
+    res.cookie("dental_refresh_token", tokenData.refresh_token, {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? "none" : "lax",
@@ -642,7 +641,7 @@ router.post("/logout", globalInvalidationMiddleware, async (req, res) => {
 
     const keycloakUserId = req.cookies?.keycloak_user_id;
 
-    const sessionId = req.cookies?.session_id;
+    const sessionId = req.cookies?.dental_session_id;
 
     const tenantId = req.cookies?.tenant_id;
 
@@ -708,11 +707,9 @@ router.post("/logout", globalInvalidationMiddleware, async (req, res) => {
            */
 
           if (sessionId) {
-            keysToDelete.push(`session:${sessionId}`);
-
-            keysToDelete.push(`api_count:${sessionId}`);
-
-            keysToDelete.push(`refresh_token:${sessionId}`);
+            keysToDelete.push(`dental:session:${sessionId}`);
+            keysToDelete.push(`dental:api_count:${sessionId}`);
+            keysToDelete.push(`dental:refresh_token:${sessionId}`);
           }
 
           /**
@@ -780,8 +777,8 @@ router.post("/logout", globalInvalidationMiddleware, async (req, res) => {
 
     const cookiesToClear = [
       // AUTH
-      "access_token",
-      "refresh_token",
+      "dental_access_token",
+      "dental_refresh_token",
 
       // USER
       "user_id",
@@ -801,7 +798,7 @@ router.post("/logout", globalInvalidationMiddleware, async (req, res) => {
       "superuser_id",
 
       // SESSION
-      "session_id",
+      "dental_session_id",
 
       // UI
       "tenant_app_themes",
