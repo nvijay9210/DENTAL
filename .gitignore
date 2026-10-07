@@ -1,0 +1,12 @@
+node_modules/
+uploads/
+.env
+.env.development
+.env*
+logs/dev.log
+*.log
+.scannerwork
+sonar-project.properties
+liquibase
+/generated/prisma
+*.zip

@@ -1,0 +1,625 @@
+// utils/helper.js
+
+function getJsonValue(field) {
+  return field && field.length > 0 ? JSON.stringify(field) : null;
+}
+
+function toBooleanNumber(value) {
+  return value ? 1 : 0;
+}
+
+function sameLengthChecker(
+  arr1,
+  arr2,
+  errorMessage = "Arrays must be of the same length.",
+) {
+  if (
+    !Array.isArray(arr1) ||
+    !Array.isArray(arr2) ||
+    arr1.length !== arr2.length
+  ) {
+    throw new Error(errorMessage);
+  }
+  return true;
+}
+
+// -------------------- JSON SAFE PARSE --------------------
+
+function safeJsonParse(value) {
+  if (!value) return null;
+
+  try {
+    const parsed = JSON.parse(value);
+    return typeof parsed === "string" ? [parsed] : parsed;
+  } catch (err) {
+    return [value]; // Fallback: wrap bad string in array
+  }
+}
+
+function decodeJsonFields(data, jsonFields) {
+  if (!Array.isArray(data)) data = [data];
+
+  return data.map((item) => {
+    jsonFields.forEach((field) => {
+      if (item[field] !== undefined && item[field] !== null) {
+        let value = item[field];
+
+        if (typeof value === "object") return;
+
+        try {
+          item[field] = safeJsonParse(value);
+        } catch {
+          if (value === "[object Object]" || value.trim() === "") {
+            item[field] = null;
+          } else if (typeof value === "string") {
+            item[field] = value.trim() ? [value] : null;
+          }
+        }
+      }
+    });
+    return item;
+  });
+}
+
+function mapBooleanFields(item, fields) {
+  fields.forEach((field) => {
+    if (item[field] !== undefined) {
+      item[field] = Boolean(item[field]);
+    }
+  });
+}
+
+function buildUpdatedData(fields, updateObj, createObj) {
+  const result = {};
+  for (const field of fields) {
+    result[field] = updateObj[field] ?? createObj[field] ?? null;
+  }
+  return result;
+}
+
+function safeStringify(val) {
+  if (!val) return null;
+  try {
+    // if already a valid JSON string
+    JSON.parse(val);
+    return val;
+  } catch {
+    return JSON.stringify(val);
+  }
+}
+
+function parseBoolean(val) {
+  return val === true || val === "true" || val === 1 || val === "1" ? 1 : 0;
+}
+
+// Robust duration parser
+function duration(val) {
+  if (!val || typeof val !== "string") return 0;
+
+  const cleanVal = val.trim();
+  const parts = cleanVal.split(":").map(Number);
+
+  if (parts.length === 3) {
+    const [hours, minutes, seconds] = parts;
+    return (hours * 3600 + minutes * 60 + seconds) * 1000;
+  }
+
+  if (parts.length === 2) {
+    const [minutes, seconds] = parts;
+    return (minutes * 60 + seconds) * 1000;
+  }
+
+  const match = cleanVal.match(/^(\d+)([smhd])$/i);
+  if (match) {
+    const num = parseInt(match[1], 10);
+    const unit = match[2].toLowerCase();
+
+    const unitToMs = {
+      s: 1000,
+      m: 60 * 1000,
+      h: 3600 * 1000,
+      d: 86400 * 1000,
+    };
+
+    return num * (unitToMs[unit] || 0);
+  }
+
+  return 0;
+}
+
+function convertDbToFrontend(row, reverseMap) {
+  const result = {};
+  for (const key in reverseMap) {
+    const converter = reverseMap[key];
+    result[key] = row.hasOwnProperty(key) ? converter(row[key]) : null;
+  }
+  return result;
+}
+
+async function getExistingAwardsIfNoneUploaded(req, dentistId, tenant_id) {
+  if (
+    !req.body.awards_certifications &&
+    !req.files?.some((f) => f.fieldname.startsWith("awards_certifications"))
+  ) {
+    const existingDentist = await dentistModel.getDentistByTenantIdAndDentistId(
+      tenant_id,
+      dentistId,
+    );
+    if (existingDentist?.awards_certifications) {
+      req.body.awards_certifications = JSON.parse(
+        existingDentist.awards_certifications,
+      );
+    }
+  }
+}
+
+function unflattenAwards(data) {
+  const awards = [];
+  const processedIndexes = new Set();
+
+  // Loop through all keys and find awards and descriptions
+  Object.keys(data).forEach((key) => {
+    const awardMatch = key.match(/^awards_certifications_(\d+)$/);
+    const descMatch = key.match(/^description_awards_certifications_(\d+)$/);
+
+    if (awardMatch || descMatch) {
+      const index = awardMatch ? awardMatch[1] : descMatch[1];
+
+      if (!processedIndexes.has(index)) {
+        processedIndexes.add(index);
+
+        const image = data[`awards_certifications_${index}`] || "";
+        const description =
+          data[`description_awards_certifications_${index}`] || "";
+
+        awards.push({
+          image,
+          description,
+        });
+
+        // Optional: remove the flat keys from the object
+        delete data[`awards_certifications_${index}`];
+        delete data[`description_awards_certifications_${index}`];
+      }
+    }
+  });
+
+  // Only set if there are any awards
+  if (awards.length > 0) {
+    data.awards_certifications = awards;
+  }
+
+  return data;
+}
+
+// function generateUsername(firstname, mobileno) {
+//   const namePart = firstname.slice(0, 4).toLowerCase(); // first 4 letters
+//   const mobilePart = mobileno.slice(-4);                // last 4 digits
+//   return namePart + mobilePart;
+// }
+
+// utils/usernameGenerator.js
+
+const axios = require("axios");
+
+// 🔹 Function to generate random username
+function generatePatternUsername(tenant, roleShort) {
+  console.log("generatePatternUsername:", tenant, roleShort);
+  const safeTenant = tenant.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const safeRole = roleShort.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const randomId = Math.floor(1000 + Math.random() * 9000);
+  // console.log(tenant, roleShort, safeTenant, safeRole, randomId);
+  return `${safeTenant}-${safeRole}-${randomId}`;
+}
+
+// 🔹 Function to check if username exists in Keycloak
+async function checkUsernameExists(username, keycloakUrl, realm, token) {
+  try {
+    const response = await axios.get(
+      `${keycloakUrl}/admin/realms/${realm}/users`,
+      {
+        params: { username },
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    return response.data.length > 0; // true if exists
+  } catch (error) {
+    console.error(
+      "Error checking username:",
+      error.response?.data || error.message,
+    );
+    throw error;
+  }
+}
+
+// 🔹 Main function to generate unique username
+async function generateUsername(roleShort, realm, token) {
+  let username;
+  let exists = true;
+  const keycloakUrl = process.env.KEYCLOAK_BASE_URL;
+  const tenant = realm;
+
+  while (exists) {
+    username = generatePatternUsername(tenant, roleShort);
+    exists = await checkUsernameExists(username, keycloakUrl, realm, token);
+  }
+
+  return username;
+}
+
+// ✅ Example usage
+// (async () => {
+//   const keycloakUrl = "http://localhost:8080"; // your keycloak base URL
+//   const realm = "myrealm"; // your realm
+//   const token = "YOUR_ADMIN_ACCESS_TOKEN"; // get from Keycloak admin auth
+
+//   const username = await generateUniqueUsername("smilecare", "pat", keycloakUrl, realm, token);
+//   console.log("Generated unique username:", username);
+// })();
+
+function generateAlphanumericPassword(length = 6) {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let pw = "";
+  for (let i = 0; i < length; i++) {
+    pw += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return pw;
+}
+
+const crypto = require("crypto");
+const { mapFields } = require("../query/Records");
+
+const algorithm = process.env.LOGIN_DATA_ALOGRITHM;
+const key = crypto.scryptSync("dental@123", "salt", 32);
+const iv = crypto.randomBytes(16);
+
+// Encrypt
+function encrypt(text) {
+  const cipher = crypto.createCipheriv(algorithm, key, iv);
+  let encrypted = cipher.update(text, "utf8", "hex");
+  encrypted += cipher.final("hex");
+  return encrypted;
+}
+
+// Decrypt
+function decrypt(encrypted) {
+  const decipher = crypto.createDecipheriv(
+    algorithm,
+    key,
+    Buffer.from(encrypted.iv, "hex"),
+  );
+  let decrypted = decipher.update(encrypted.data, "hex", "utf8");
+  decrypted += decipher.final("utf8");
+  return decrypted;
+}
+
+function sanitizeFields(data) {
+  const sanitized = {};
+  for (const key in data) {
+    if (data[key] === undefined) {
+      sanitized[key] = null; // replace undefined with null
+    } else {
+      sanitized[key] = data[key];
+    }
+  }
+  return sanitized;
+}
+
+// Generate 6-digit OTP
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000);
+
+// Send OTP via WhatsApp
+const sendWhatsAppOTP = async (phoneNumber, otp) => {
+  try {
+    const message = await twilioClient.messages.create({
+      from: TWILIO_FROM,
+      to: `whatsapp:${phoneNumber}`,
+      body: `Your OTP is ${otp}`,
+    });
+    log("OTP_SEND", "OTP sent via WhatsApp", { phoneNumber, otp });
+    return true;
+  } catch (err) {
+    log("OTP_SEND", "Failed to send OTP", { phoneNumber, error: err.message });
+    throw new Error("Failed to send OTP");
+  }
+};
+
+const record = require("../query/Records");
+const pool = require("../config/db");
+const addUserClinicMapping = async (
+  conn,
+  {
+    tenantId,
+    userId,
+    userName,
+    role,
+    keycloakId,
+    clinicId,
+    createdBy = "SYSTEM",
+  },
+) => {
+  try {
+    const result = await record.createRecord(
+      "user_clinic",
+      [
+        "tenant_id",
+        "user_id",
+        "user_name",
+        "role",
+        "keycloak_id",
+        "clinic_id",
+        "created_by",
+      ],
+      [tenantId, userId, userName, role, keycloakId, clinicId, createdBy],
+      conn,
+    );
+
+    return result.insertId;
+  } catch (error) {
+    console.error("Error adding user clinic mapping:", error);
+    throw error;
+  }
+};
+
+const syncUserClinicMappings = async ({
+  userId,
+  role,
+  clinicIds = [],
+  userName,
+  keycloakId,
+  createdBy = "SYSTEM",
+}) => {
+  const conn = await pool.getConnection();
+  try {
+    console.log("========== SYNC USER CLINIC ==========");
+
+    /**
+     * Normalize clinic ids
+     */
+
+    const normalizedClinicIds = clinicIds.map((id) => Number(id));
+
+    console.log("Normalized Clinic IDs:", normalizedClinicIds);
+
+    /**
+     * Get Existing Mappings
+     */
+
+    const [existingMappings] = await conn.query(
+      `
+        SELECT clinic_id
+        FROM user_clinic
+        WHERE user_id = ?
+        AND role = ?
+        `,
+      [userId, role],
+    );
+
+    const existingClinicIds = existingMappings.map((item) =>
+      Number(item.clinic_id),
+    );
+
+    console.log("Existing Clinic IDs:", existingClinicIds);
+
+    /**
+     * Find Added Clinics
+     */
+
+    const addedClinicIds = normalizedClinicIds.filter(
+      (id) => !existingClinicIds.includes(id),
+    );
+
+    /**
+     * Find Removed Clinics
+     */
+
+    const removedClinicIds = existingClinicIds.filter(
+      (id) => !normalizedClinicIds.includes(id),
+    );
+
+    console.log({
+      addedClinicIds,
+      removedClinicIds,
+    });
+
+    /**
+     * ADD NEW CLINICS
+     */
+
+    for (const clinicId of addedClinicIds) {
+      console.log(`➕ Adding Clinic: ${clinicId}`);
+
+      await addUserClinicMapping(conn, {
+        userId,
+        userName,
+        role,
+        keycloakId,
+        clinicId,
+        createdBy,
+      });
+    }
+
+    /**
+     * REMOVE CLINICS
+     */
+
+    for (const clinicId of removedClinicIds) {
+      console.log(`❌ Removing Clinic: ${clinicId}`);
+
+      await record.deleteRecord(
+        "user_clinic",
+        ["user_id", "role", "clinic_id"],
+        [userId, role, clinicId],
+        conn,
+      );
+    }
+
+    /**
+     * UPDATE COMMON FIELDS
+     */
+
+    await record.updateRecord(
+      "user_clinic",
+      ["user_name", "keycloak_id"],
+      [userName, keycloakId],
+      ["user_id", "role"],
+      [userId, role],
+      conn,
+    );
+
+    console.log("✅ Common fields updated");
+
+    console.log("========== END SYNC ==========");
+  } catch (error) {
+    console.error("Sync User Clinic Error:", error);
+
+    throw error;
+  } finally {
+    conn.release();
+  }
+};
+
+const syncUserUpdateClinicMappings = async ({
+  tenantId,
+  userId,
+  role,
+  clinicIds = [],
+  userName,
+  keycloakId,
+  createdBy = "SYSTEM",
+}) => {
+  const conn = await pool.getConnection();
+
+  try {
+    console.log("========== SYNC USER CLINIC ==========");
+
+    /**
+     * Normalize Clinic IDs
+     */
+    const normalizedClinicIds = [...new Set(clinicIds.map((id) => Number(id)))];
+
+    /**
+     * Existing mappings by keycloak_id
+     */
+    const [existingMappings] = await conn.query(
+      `
+      SELECT clinic_id
+      FROM user_clinic
+      WHERE keycloak_id = ?
+      `,
+      [keycloakId],
+    );
+
+    const existingClinicIds = existingMappings.map((item) =>
+      Number(item.clinic_id),
+    );
+
+    /**
+     * New clinic ids to add
+     */
+    const addedClinicIds = normalizedClinicIds.filter(
+      (id) => !existingClinicIds.includes(id),
+    );
+
+    /**
+     * Old clinic ids to remove
+     */
+    const removedClinicIds = existingClinicIds.filter(
+      (id) => !normalizedClinicIds.includes(id),
+    );
+
+    console.log({
+      existingClinicIds,
+      normalizedClinicIds,
+      addedClinicIds,
+      removedClinicIds,
+    });
+
+    /**
+     * ADD NEW CLINICS
+     */
+    for (const clinicId of addedClinicIds) {
+      console.log(`➕ Adding Clinic ${clinicId}`);
+
+      await addUserClinicMapping(conn, {
+        tenantId,
+        userId,
+        userName,
+        role,
+        keycloakId,
+        clinicId,
+        createdBy,
+      });
+    }
+
+    /**
+     * REMOVE OLD CLINICS
+     */
+    if (removedClinicIds.length > 0) {
+      console.log(`❌ Removing Clinics`, removedClinicIds);
+
+      await conn.query(
+        `
+        DELETE FROM user_clinic
+        WHERE keycloak_id = ?
+        AND clinic_id IN (?)
+        `,
+        [keycloakId, removedClinicIds],
+      );
+    }
+
+    /**
+     * UPDATE COMMON FIELDS
+     */
+    await conn.query(
+      `
+      UPDATE user_clinic
+      SET
+        user_id = ?,
+        user_name = ?,
+        role = ?,
+        updated_by = ?,
+        updated_time = CURRENT_TIMESTAMP
+      WHERE keycloak_id = ?
+      `,
+      [userId, userName, role, createdBy, keycloakId],
+    );
+
+    console.log("✅ Sync Completed");
+  } catch (error) {
+    console.error("Sync User Clinic Error:", error);
+    throw error;
+  } finally {
+    conn.release();
+  }
+};
+
+// -------------------- EXPORTS --------------------
+
+module.exports = {
+  generateOTP,
+  sendWhatsAppOTP,
+  getJsonValue,
+  toBooleanNumber,
+  decodeJsonFields,
+  sameLengthChecker,
+  safeJsonParse,
+  mapBooleanFields,
+  buildUpdatedData,
+  safeStringify,
+  parseBoolean,
+  duration,
+  convertDbToFrontend,
+  getExistingAwardsIfNoneUploaded,
+  unflattenAwards,
+  generateUsername,
+  generateAlphanumericPassword,
+  generateUsername,
+  encrypt,
+  decrypt,
+  sanitizeFields,
+  addUserClinicMapping,
+  syncUserClinicMappings,
+  syncUserUpdateClinicMappings,
+};

@@ -1,0 +1,1119 @@
+[
+  {
+    "date": "2025-03-01",
+    "procedures": {
+      "Extraction": 2,
+      "Crown": 8,
+      "Bridge": 7,
+      "Fluoride Treatment": 1,
+      "Scaling": 1
+    }
+  },
+  {
+    "date": "2025-03-02",
+    "procedures": {
+      "Gum Surgery": 10,
+      "Veneers": 7,
+      "Braces": 6,
+      "Scaling": 6,
+      "Extraction": 6
+    }
+  },
+  {
+    "date": "2025-03-03",
+    "procedures": {
+      "Implant": 4,
+      "Cleaning": 4,
+      "Dentures": 3,
+      "Fluoride Treatment": 9,
+      "Filling": 1
+    }
+  },
+  {
+    "date": "2025-03-04",
+    "procedures": {
+      "Cleaning": 7,
+      "Braces": 8,
+      "X-ray": 2,
+      "Dentures": 8,
+      "Veneers": 9
+    }
+  },
+  {
+    "date": "2025-03-05",
+    "procedures": {
+      "Extraction": 4,
+      "Implant": 1,
+      "Gum Surgery": 5,
+      "Dentures": 7,
+      "Cleaning": 10
+    }
+  },
+  {
+    "date": "2025-03-06",
+    "procedures": {
+      "Extraction": 9,
+      "Veneers": 7,
+      "Root Canal": 1,
+      "Crown": 9,
+      "Implant": 9
+    }
+  },
+  {
+    "date": "2025-03-07",
+    "procedures": {
+      "Filling": 1,
+      "Cleaning": 7,
+      "Veneers": 4,
+      "Bridge": 6,
+      "Implant": 10
+    }
+  },
+  {
+    "date": "2025-03-08",
+    "procedures": {
+      "Bridge": 5,
+      "Braces": 6,
+      "Crown": 2
+    }
+  },
+  {
+    "date": "2025-03-09",
+    "procedures": {
+      "X-ray": 4,
+      "Filling": 10,
+      "Implant": 7,
+      "Cleaning": 3,
+      "Fluoride Treatment": 7,
+      "Crown": 9
+    }
+  },
+  {
+    "date": "2025-03-10",
+    "procedures": {
+      "Bridge": 6,
+      "Filling": 8,
+      "Dentures": 3,
+      "Fluoride Treatment": 6
+    }
+  },
+  {
+    "date": "2025-03-11",
+    "procedures": {
+      "Gum Surgery": 1,
+      "Veneers": 3,
+      "Implant": 7
+    }
+  },
+  {
+    "date": "2025-03-12",
+    "procedures": {
+      "Implant": 9,
+      "Root Canal": 4
+    }
+  },
+  {
+    "date": "2025-03-13",
+    "procedures": {
+      "Filling": 8,
+      "Crown": 10,
+      "Root Canal": 9,
+      "Fluoride Treatment": 5,
+      "Cleaning": 5
+    }
+  },
+  {
+    "date": "2025-03-14",
+    "procedures": {
+      "Cleaning": 5,
+      "Filling": 5,
+      "X-ray": 4,
+      "Bridge": 2,
+      "Scaling": 8,
+      "Extraction": 8
+    }
+  },
+  {
+    "date": "2025-03-15",
+    "procedures": {
+      "Braces": 2,
+      "Crown": 3,
+      "Whitening": 4,
+      "Filling": 8,
+      "Implant": 2,
+      "Root Canal": 8
+    }
+  },
+  {
+    "date": "2025-03-16",
+    "procedures": {
+      "Implant": 9,
+      "Filling": 10
+    }
+  },
+  {
+    "date": "2025-03-17",
+    "procedures": {
+      "Veneers": 3,
+      "Whitening": 2,
+      "Braces": 5,
+      "Root Canal": 7
+    }
+  },
+  {
+    "date": "2025-03-18",
+    "procedures": {
+      "Bridge": 3,
+      "Crown": 4,
+      "Scaling": 6,
+      "Veneers": 4,
+      "X-ray": 4,
+      "Filling": 8
+    }
+  },
+  {
+    "date": "2025-03-19",
+    "procedures": {
+      "Fluoride Treatment": 7,
+      "Dentures": 2,
+      "Filling": 2,
+      "Braces": 1,
+      "X-ray": 10
+    }
+  },
+  {
+    "date": "2025-03-20",
+    "procedures": {
+      "Crown": 6,
+      "Scaling": 1
+    }
+  },
+  {
+    "date": "2025-03-21",
+    "procedures": {
+      "Veneers": 3,
+      "Dentures": 6
+    }
+  },
+  {
+    "date": "2025-03-22",
+    "procedures": {
+      "Cleaning": 7,
+      "Veneers": 4,
+      "Crown": 1,
+      "Implant": 5,
+      "Bridge": 8
+    }
+  },
+  {
+    "date": "2025-03-23",
+    "procedures": {
+      "X-ray": 5,
+      "Filling": 8,
+      "Implant": 10,
+      "Fluoride Treatment": 8
+    }
+  },
+  {
+    "date": "2025-03-24",
+    "procedures": {
+      "Filling": 7,
+      "Extraction": 4,
+      "Gum Surgery": 10
+    }
+  },
+  {
+    "date": "2025-03-25",
+    "procedures": {
+      "Dentures": 10,
+      "X-ray": 6
+    }
+  },
+  {
+    "date": "2025-03-26",
+    "procedures": {
+      "Crown": 5,
+      "Scaling": 4
+    }
+  },
+  {
+    "date": "2025-03-27",
+    "procedures": {
+      "Root Canal": 1,
+      "Veneers": 5,
+      "X-ray": 9,
+      "Filling": 5,
+      "Whitening": 6
+    }
+  },
+  {
+    "date": "2025-03-28",
+    "procedures": {
+      "X-ray": 1,
+      "Cleaning": 7,
+      "Braces": 8,
+      "Bridge": 5
+    }
+  },
+  {
+    "date": "2025-03-29",
+    "procedures": {
+      "Implant": 6,
+      "Extraction": 10,
+      "Dentures": 8,
+      "Bridge": 5,
+      "Whitening": 3,
+      "Scaling": 10
+    }
+  },
+  {
+    "date": "2025-03-30",
+    "procedures": {
+      "Extraction": 7,
+      "Implant": 1,
+      "Dentures": 7
+    }
+  },
+  {
+    "date": "2025-03-31",
+    "procedures": {
+      "Dentures": 3,
+      "Extraction": 7,
+      "Implant": 1,
+      "Bridge": 7
+    }
+  },
+  {
+    "date": "2025-04-01",
+    "procedures": {
+      "Veneers": 2,
+      "Filling": 7,
+      "Cleaning": 5,
+      "Whitening": 2,
+      "Implant": 7
+    }
+  },
+  {
+    "date": "2025-04-02",
+    "procedures": {
+      "Whitening": 3,
+      "Bridge": 10,
+      "Veneers": 7,
+      "Braces": 8
+    }
+  },
+  {
+    "date": "2025-04-03",
+    "procedures": {
+      "Braces": 3,
+      "Veneers": 6,
+      "X-ray": 6,
+      "Implant": 5
+    }
+  },
+  {
+    "date": "2025-04-04",
+    "procedures": {
+      "Braces": 1,
+      "Veneers": 10,
+      "Whitening": 9,
+      "Fluoride Treatment": 5
+    }
+  },
+  {
+    "date": "2025-04-05",
+    "procedures": {
+      "Extraction": 10,
+      "Veneers": 5,
+      "Crown": 8,
+      "Dentures": 9
+    }
+  },
+  {
+    "date": "2025-04-06",
+    "procedures": {
+      "Gum Surgery": 2,
+      "Cleaning": 4,
+      "Root Canal": 2,
+      "Fluoride Treatment": 2,
+      "Whitening": 10
+    }
+  },
+  {
+    "date": "2025-04-07",
+    "procedures": {
+      "Filling": 8,
+      "Cleaning": 10,
+      "Gum Surgery": 5,
+      "Braces": 8
+    }
+  },
+  {
+    "date": "2025-04-08",
+    "procedures": {
+      "Implant": 1,
+      "X-ray": 9,
+      "Bridge": 7,
+      "Crown": 3,
+      "Cleaning": 4,
+      "Gum Surgery": 5
+    }
+  },
+  {
+    "date": "2025-04-09",
+    "procedures": {
+      "Veneers": 1,
+      "Filling": 7,
+      "X-ray": 6,
+      "Cleaning": 1,
+      "Scaling": 4,
+      "Root Canal": 1
+    }
+  },
+  {
+    "date": "2025-04-10",
+    "procedures": {
+      "Veneers": 8,
+      "Implant": 7,
+      "Filling": 7,
+      "Cleaning": 2,
+      "X-ray": 6
+    }
+  },
+  {
+    "date": "2025-04-11",
+    "procedures": {
+      "Whitening": 7,
+      "Fluoride Treatment": 6,
+      "Dentures": 6,
+      "Cleaning": 9,
+      "Gum Surgery": 9,
+      "Scaling": 4
+    }
+  },
+  {
+    "date": "2025-04-12",
+    "procedures": {
+      "Crown": 8,
+      "Whitening": 7,
+      "Bridge": 10,
+      "Dentures": 1,
+      "Extraction": 6,
+      "Gum Surgery": 8
+    }
+  },
+  {
+    "date": "2025-04-13",
+    "procedures": {
+      "Crown": 1,
+      "Veneers": 10
+    }
+  },
+  {
+    "date": "2025-04-14",
+    "procedures": {
+      "Bridge": 5,
+      "Gum Surgery": 2,
+      "Filling": 6
+    }
+  },
+  {
+    "date": "2025-04-15",
+    "procedures": {
+      "Braces": 6,
+      "Veneers": 1
+    }
+  },
+  {
+    "date": "2025-04-16",
+    "procedures": {
+      "Scaling": 2,
+      "Fluoride Treatment": 2,
+      "Implant": 2,
+      "Filling": 3
+    }
+  },
+  {
+    "date": "2025-04-17",
+    "procedures": {
+      "Cleaning": 10,
+      "X-ray": 7,
+      "Filling": 8,
+      "Gum Surgery": 3
+    }
+  },
+  {
+    "date": "2025-04-18",
+    "procedures": {
+      "Implant": 3,
+      "Braces": 9
+    }
+  },
+  {
+    "date": "2025-04-19",
+    "procedures": {
+      "Dentures": 10,
+      "Whitening": 8
+    }
+  },
+  {
+    "date": "2025-04-20",
+    "procedures": {
+      "Bridge": 6,
+      "Veneers": 3,
+      "Whitening": 8,
+      "Braces": 8,
+      "Fluoride Treatment": 2,
+      "Gum Surgery": 4
+    }
+  },
+  {
+    "date": "2025-04-21",
+    "procedures": {
+      "Filling": 6,
+      "Scaling": 9
+    }
+  },
+  {
+    "date": "2025-04-22",
+    "procedures": {
+      "Filling": 2,
+      "Dentures": 1,
+      "Bridge": 5,
+      "Whitening": 2
+    }
+  },
+  {
+    "date": "2025-04-23",
+    "procedures": {
+      "Gum Surgery": 5,
+      "Extraction": 2,
+      "Crown": 4
+    }
+  },
+  {
+    "date": "2025-04-24",
+    "procedures": {
+      "Cleaning": 6,
+      "Implant": 8,
+      "Dentures": 8,
+      "Braces": 1
+    }
+  },
+  {
+    "date": "2025-04-25",
+    "procedures": {
+      "Root Canal": 9,
+      "Veneers": 8,
+      "Implant": 1
+    }
+  },
+  {
+    "date": "2025-04-26",
+    "procedures": {
+      "Bridge": 8,
+      "Braces": 7,
+      "Filling": 3
+    }
+  },
+  {
+    "date": "2025-04-27",
+    "procedures": {
+      "Cleaning": 5,
+      "Scaling": 7,
+      "Dentures": 4,
+      "Root Canal": 2,
+      "Gum Surgery": 7
+    }
+  },
+  {
+    "date": "2025-04-28",
+    "procedures": {
+      "X-ray": 9,
+      "Scaling": 10
+    }
+  },
+  {
+    "date": "2025-04-29",
+    "procedures": {
+      "Gum Surgery": 5,
+      "X-ray": 7,
+      "Braces": 4,
+      "Crown": 5,
+      "Root Canal": 7,
+      "Bridge": 9
+    }
+  },
+  {
+    "date": "2025-04-30",
+    "procedures": {
+      "Cleaning": 3,
+      "Root Canal": 1,
+      "Veneers": 10,
+      "Implant": 7
+    }
+  },
+  {
+    "date": "2025-05-01",
+    "procedures": {
+      "Veneers": 5,
+      "Scaling": 3,
+      "Whitening": 9
+    }
+  },
+  {
+    "date": "2025-05-02",
+    "procedures": {
+      "Scaling": 1,
+      "Cleaning": 9,
+      "Braces": 2
+    }
+  },
+  {
+    "date": "2025-05-03",
+    "procedures": {
+      "Implant": 8,
+      "Gum Surgery": 7,
+      "Bridge": 8
+    }
+  },
+  {
+    "date": "2025-05-04",
+    "procedures": {
+      "Whitening": 2,
+      "X-ray": 10
+    }
+  },
+  {
+    "date": "2025-05-05",
+    "procedures": {
+      "Scaling": 5,
+      "Cleaning": 5,
+      "Braces": 2,
+      "Crown": 5
+    }
+  },
+  {
+    "date": "2025-05-06",
+    "procedures": {
+      "Implant": 8,
+      "Dentures": 2,
+      "Veneers": 9,
+      "Root Canal": 6,
+      "Crown": 5
+    }
+  },
+  {
+    "date": "2025-05-07",
+    "procedures": {
+      "Fluoride Treatment": 10,
+      "Root Canal": 7,
+      "Veneers": 10,
+      "Implant": 4,
+      "Extraction": 3
+    }
+  },
+  {
+    "date": "2025-05-08",
+    "procedures": {
+      "Implant": 1,
+      "Extraction": 2
+    }
+  },
+  {
+    "date": "2025-05-09",
+    "procedures": {
+      "X-ray": 6,
+      "Braces": 7,
+      "Cleaning": 10,
+      "Gum Surgery": 8,
+      "Whitening": 4,
+      "Filling": 9
+    }
+  },
+  {
+    "date": "2025-05-10",
+    "procedures": {
+      "Crown": 10,
+      "Dentures": 5,
+      "X-ray": 3,
+      "Veneers": 7,
+      "Whitening": 6,
+      "Braces": 4
+    }
+  },
+  {
+    "date": "2025-05-11",
+    "procedures": {
+      "Braces": 2,
+      "Fluoride Treatment": 8,
+      "Cleaning": 6
+    }
+  },
+  {
+    "date": "2025-05-12",
+    "procedures": {
+      "Gum Surgery": 3,
+      "X-ray": 1,
+      "Braces": 2
+    }
+  },
+  {
+    "date": "2025-05-13",
+    "procedures": {
+      "Root Canal": 1,
+      "Extraction": 4,
+      "X-ray": 5
+    }
+  },
+  {
+    "date": "2025-05-14",
+    "procedures": {
+      "Whitening": 4,
+      "Implant": 9,
+      "Veneers": 9,
+      "Bridge": 1
+    }
+  },
+  {
+    "date": "2025-05-15",
+    "procedures": {
+      "Gum Surgery": 10,
+      "Whitening": 6,
+      "Crown": 4
+    }
+  },
+  {
+    "date": "2025-05-16",
+    "procedures": {
+      "Gum Surgery": 2,
+      "Braces": 5,
+      "Bridge": 10
+    }
+  },
+  {
+    "date": "2025-05-17",
+    "procedures": {
+      "Scaling": 2,
+      "Cleaning": 5,
+      "Fluoride Treatment": 7
+    }
+  },
+  {
+    "date": "2025-05-18",
+    "procedures": {
+      "Cleaning": 7,
+      "Fluoride Treatment": 5,
+      "Implant": 1
+    }
+  },
+  {
+    "date": "2025-05-19",
+    "procedures": {
+      "Implant": 9,
+      "Braces": 5,
+      "Bridge": 4,
+      "Fluoride Treatment": 1,
+      "Root Canal": 10,
+      "Cleaning": 10
+    }
+  },
+  {
+    "date": "2025-05-20",
+    "procedures": {
+      "X-ray": 1,
+      "Implant": 4,
+      "Braces": 9,
+      "Dentures": 8
+    }
+  },
+  {
+    "date": "2025-05-21",
+    "procedures": {
+      "Whitening": 9,
+      "Cleaning": 10,
+      "Crown": 3,
+      "X-ray": 3
+    }
+  },
+  {
+    "date": "2025-05-22",
+    "procedures": {
+      "Veneers": 9,
+      "Fluoride Treatment": 6
+    }
+  },
+  {
+    "date": "2025-05-23",
+    "procedures": {
+      "Fluoride Treatment": 2,
+      "Implant": 8,
+      "Cleaning": 6
+    }
+  },
+  {
+    "date": "2025-05-24",
+    "procedures": {
+      "Gum Surgery": 7,
+      "Fluoride Treatment": 10,
+      "Implant": 2,
+      "Veneers": 4
+    }
+  },
+  {
+    "date": "2025-05-25",
+    "procedures": {
+      "Dentures": 9,
+      "Implant": 8,
+      "Braces": 5
+    }
+  },
+  {
+    "date": "2025-05-26",
+    "procedures": {
+      "Gum Surgery": 4,
+      "Braces": 3,
+      "Implant": 5,
+      "Extraction": 3,
+      "Cleaning": 3
+    }
+  },
+  {
+    "date": "2025-05-27",
+    "procedures": {
+      "Whitening": 3,
+      "Gum Surgery": 5
+    }
+  },
+  {
+    "date": "2025-05-28",
+    "procedures": {
+      "Dentures": 2,
+      "Filling": 3,
+      "Bridge": 10,
+      "Extraction": 3
+    }
+  },
+  {
+    "date": "2025-05-29",
+    "procedures": {
+      "Cleaning": 7,
+      "Braces": 10,
+      "Implant": 10
+    }
+  },
+  {
+    "date": "2025-05-30",
+    "procedures": {
+      "Filling": 9,
+      "Root Canal": 8,
+      "Bridge": 5,
+      "Whitening": 5,
+      "Implant": 8
+    }
+  },
+  {
+    "date": "2025-05-31",
+    "procedures": {
+      "Braces": 6,
+      "Implant": 3,
+      "Whitening": 3
+    }
+  },
+  {
+    "date": "2025-06-01",
+    "procedures": {
+      "Root Canal": 5,
+      "X-ray": 1,
+      "Gum Surgery": 6,
+      "Braces": 4
+    }
+  },
+  {
+    "date": "2025-06-02",
+    "procedures": {
+      "Crown": 3,
+      "Scaling": 10
+    }
+  },
+  {
+    "date": "2025-06-03",
+    "procedures": {
+      "Fluoride Treatment": 3,
+      "Braces": 5,
+      "Scaling": 3,
+      "Extraction": 4
+    }
+  },
+  {
+    "date": "2025-06-04",
+    "procedures": {
+      "Extraction": 6,
+      "Crown": 9,
+      "Gum Surgery": 2,
+      "Root Canal": 10,
+      "Dentures": 3,
+      "Braces": 1
+    }
+  },
+  {
+    "date": "2025-06-05",
+    "procedures": {
+      "Fluoride Treatment": 10,
+      "Bridge": 2,
+      "Implant": 3,
+      "X-ray": 10,
+      "Root Canal": 5,
+      "Filling": 5
+    }
+  },
+  {
+    "date": "2025-06-06",
+    "procedures": {
+      "Cleaning": 4,
+      "Gum Surgery": 10,
+      "Scaling": 5,
+      "Crown": 3,
+      "Dentures": 1,
+      "Veneers": 8
+    }
+  },
+  {
+    "date": "2025-06-07",
+    "procedures": {
+      "Scaling": 1,
+      "Bridge": 9,
+      "X-ray": 2,
+      "Veneers": 1,
+      "Cleaning": 10,
+      "Whitening": 1
+    }
+  },
+  {
+    "date": "2025-06-08",
+    "procedures": {
+      "X-ray": 7,
+      "Filling": 3,
+      "Scaling": 2
+    }
+  },
+  {
+    "date": "2025-06-09",
+    "procedures": {
+      "Crown": 5,
+      "Cleaning": 2,
+      "Root Canal": 9,
+      "Veneers": 1,
+      "Filling": 5,
+      "Fluoride Treatment": 9
+    }
+  },
+  {
+    "date": "2025-06-10",
+    "procedures": {
+      "Whitening": 7,
+      "Dentures": 5
+    }
+  },
+  {
+    "date": "2025-06-11",
+    "procedures": {
+      "Gum Surgery": 3,
+      "Veneers": 9
+    }
+  },
+  {
+    "date": "2025-06-12",
+    "procedures": {
+      "Implant": 5,
+      "Cleaning": 7
+    }
+  },
+  {
+    "date": "2025-06-13",
+    "procedures": {
+      "Dentures": 2,
+      "Extraction": 9,
+      "Crown": 8,
+      "Filling": 4,
+      "Gum Surgery": 1,
+      "Bridge": 1
+    }
+  },
+  {
+    "date": "2025-06-14",
+    "procedures": {
+      "X-ray": 7,
+      "Root Canal": 5
+    }
+  },
+  {
+    "date": "2025-06-15",
+    "procedures": {
+      "Extraction": 2,
+      "Veneers": 7
+    }
+  },
+  {
+    "date": "2025-06-16",
+    "procedures": {
+      "Bridge": 4,
+      "Fluoride Treatment": 10,
+      "X-ray": 8,
+      "Dentures": 4,
+      "Whitening": 6
+    }
+  },
+  {
+    "date": "2025-06-17",
+    "procedures": {
+      "Cleaning": 10,
+      "Dentures": 5
+    }
+  },
+  {
+    "date": "2025-06-18",
+    "procedures": {
+      "Extraction": 2,
+      "X-ray": 6
+    }
+  },
+  {
+    "date": "2025-06-19",
+    "procedures": {
+      "Whitening": 4,
+      "Root Canal": 6
+    }
+  },
+  {
+    "date": "2025-06-20",
+    "procedures": {
+      "Braces": 1,
+      "Extraction": 10,
+      "Crown": 2,
+      "Whitening": 1,
+      "Implant": 6
+    }
+  },
+  {
+    "date": "2025-06-21",
+    "procedures": {
+      "Fluoride Treatment": 9,
+      "Dentures": 10
+    }
+  },
+  {
+    "date": "2025-06-22",
+    "procedures": {
+      "Veneers": 8,
+      "Bridge": 6,
+      "Dentures": 7,
+      "Filling": 10,
+      "X-ray": 7
+    }
+  },
+  {
+    "date": "2025-06-23",
+    "procedures": {
+      "Extraction": 1,
+      "Whitening": 9,
+      "Scaling": 9
+    }
+  },
+  {
+    "date": "2025-06-24",
+    "procedures": {
+      "Fluoride Treatment": 9,
+      "Braces": 5,
+      "Root Canal": 2,
+      "Bridge": 3,
+      "Extraction": 6,
+      "Crown": 9
+    }
+  },
+  {
+    "date": "2025-06-25",
+    "procedures": {
+      "Filling": 5,
+      "Gum Surgery": 7,
+      "X-ray": 9,
+      "Veneers": 4,
+      "Implant": 1,
+      "Fluoride Treatment": 7
+    }
+  },
+  {
+    "date": "2025-06-26",
+    "procedures": {
+      "Fluoride Treatment": 5,
+      "Implant": 10,
+      "Root Canal": 2,
+      "X-ray": 6,
+      "Dentures": 2,
+      "Filling": 3
+    }
+  },
+  {
+    "date": "2025-06-27",
+    "procedures": {
+      "Braces": 10,
+      "Implant": 5
+    }
+  },
+  {
+    "date": "2025-06-28",
+    "procedures": {
+      "Veneers": 9,
+      "Scaling": 9,
+      "Implant": 10,
+      "Gum Surgery": 2
+    }
+  },
+  {
+    "date": "2025-06-29",
+    "procedures": {
+      "Scaling": 7,
+      "Filling": 3,
+      "Cleaning": 5,
+      "X-ray": 3,
+      "Extraction": 1
+    }
+  },
+  {
+    "date": "2025-06-30",
+    "procedures": {
+      "Cleaning": 8,
+      "Bridge": 1,
+      "Root Canal": 10,
+      "Implant": 2
+    }
+  },
+  {
+    "date": "2025-07-01",
+    "procedures": {
+      "Fluoride Treatment": 5,
+      "Braces": 2,
+      "Extraction": 7,
+      "Filling": 9,
+      "Scaling": 9,
+      "Implant": 8
+    }
+  },
+  {
+    "date": "2025-07-02",
+    "procedures": {
+      "Extraction": 4,
+      "Gum Surgery": 8,
+      "Whitening": 8,
+      "Veneers": 6
+    }
+  },
+  {
+    "date": "2025-07-03",
+    "procedures": {
+      "Veneers": 9,
+      "Implant": 5,
+      "Dentures": 7
+    }
+  }
+]

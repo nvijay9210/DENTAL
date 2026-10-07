@@ -1,0 +1,8415 @@
+{
+  "daily_patient_data": [
+    {
+      "date": "2025-03-01",
+      "new_patients": [
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        }
+      ],
+      "repeated_patients": []
+    },
+    {
+      "date": "2025-03-02",
+      "new_patients": [
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        }
+      ],
+      "repeated_patients": [
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-03",
+      "new_patients": [
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        }
+      ],
+      "repeated_patients": [
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-04",
+      "new_patients": [
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        }
+      ],
+      "repeated_patients": [
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-05",
+      "new_patients": [
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        }
+      ],
+      "repeated_patients": [
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-06",
+      "new_patients": [
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        }
+      ],
+      "repeated_patients": [
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-07",
+      "new_patients": [
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        }
+      ],
+      "repeated_patients": [
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-08",
+      "new_patients": [
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        }
+      ],
+      "repeated_patients": [
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-09",
+      "new_patients": [
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        }
+      ],
+      "repeated_patients": [
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-10",
+      "new_patients": [
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        }
+      ],
+      "repeated_patients": [
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-11",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-12",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-13",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-14",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-15",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-16",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-17",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-18",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-19",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-20",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-21",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-22",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-23",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-24",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-25",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-26",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-27",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-28",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-29",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-30",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-31",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-01",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-02",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-03",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-04",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-05",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-06",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-07",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-08",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-09",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-10",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-11",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-12",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-13",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-14",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-15",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-16",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-17",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-18",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-19",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-20",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-21",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-22",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-23",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-24",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-25",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-26",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-27",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-28",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-29",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-04-30",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-01",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-02",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-03",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-04",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-05",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-06",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-07",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-08",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-09",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-10",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-11",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-12",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-13",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-14",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-15",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-16",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-17",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-18",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-19",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-20",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-21",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-22",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-23",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-24",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-25",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-26",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-27",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-28",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-29",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-30",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-05-31",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-01",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-02",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-03",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-04",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-05",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-06",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-07",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-08",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-09",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-10",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-11",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-12",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-13",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-14",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-15",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-16",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-17",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-18",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-19",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-20",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-21",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-22",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Miller",
+          "age": 83,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-23",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Brown",
+          "age": 32,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-24",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Johnson",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-25",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Moore",
+          "age": 60,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-26",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 71,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-27",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Davis",
+          "age": 3,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-28",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Garcia",
+          "age": 57,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 62,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-29",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Max Jones",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 63,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Tom Jones",
+          "age": 64,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 36,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Lee",
+          "age": 32,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Brown",
+          "age": 21,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-06-30",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Brown",
+          "age": 45,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Brown",
+          "age": 23,
+          "gender": "Male"
+        },
+        {
+          "name": "John Moore",
+          "age": 4,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 4,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Brown",
+          "age": 38,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Miller",
+          "age": 29,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-07-01",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Smith",
+          "age": 74,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Nina Davis",
+          "age": 90,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Wilson",
+          "age": 86,
+          "gender": "Male"
+        },
+        {
+          "name": "Sara Lee",
+          "age": 64,
+          "gender": "Male"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Nina Wilson",
+          "age": 56,
+          "gender": "Male"
+        },
+        {
+          "name": "John Brown",
+          "age": 78,
+          "gender": "Male"
+        }
+      ]
+    },
+    {
+      "date": "2025-07-02",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Nina Moore",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Garcia",
+          "age": 73,
+          "gender": "Female"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 66,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Miller",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Moore",
+          "age": 43,
+          "gender": "Male"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Johnson",
+          "age": 13,
+          "gender": "Female"
+        },
+        {
+          "name": "Sara Smith",
+          "age": 22,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Smith",
+          "age": 44,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Miller",
+          "age": 65,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Johnson",
+          "age": 13,
+          "gender": "Female"
+        }
+      ]
+    },
+    {
+      "date": "2025-07-03",
+      "new_patients": [],
+      "repeated_patients": [
+        {
+          "name": "Bob Jones",
+          "age": 77,
+          "gender": "Male"
+        },
+        {
+          "name": "Lily Miller",
+          "age": 42,
+          "gender": "Male"
+        },
+        {
+          "name": "Leo Moore",
+          "age": 61,
+          "gender": "Female"
+        },
+        {
+          "name": "Tom Lee",
+          "age": 56,
+          "gender": "Female"
+        },
+        {
+          "name": "Alice Wilson",
+          "age": 19,
+          "gender": "Male"
+        },
+        {
+          "name": "John Johnson",
+          "age": 53,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Garcia",
+          "age": 22,
+          "gender": "Female"
+        },
+        {
+          "name": "Jane Moore",
+          "age": 54,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Wilson",
+          "age": 89,
+          "gender": "Male"
+        },
+        {
+          "name": "Jane Johnson",
+          "age": 18,
+          "gender": "Female"
+        },
+        {
+          "name": "Bob Garcia",
+          "age": 30,
+          "gender": "Female"
+        },
+        {
+          "name": "John Brown",
+          "age": 8,
+          "gender": "Male"
+        }
+      ]
+    }
+  ],
+  "top_5_repeated_patients": [
+    {
+      "name": "Jane Brown",
+      "visits": 79,
+      "age": 23,
+      "gender": "Male"
+    },
+    {
+      "name": "Lily Miller",
+      "visits": 69,
+      "age": 66,
+      "gender": "Female"
+    },
+    {
+      "name": "Alice Wilson",
+      "visits": 67,
+      "age": 19,
+      "gender": "Male"
+    },
+    {
+      "name": "John Brown",
+      "visits": 62,
+      "age": 8,
+      "gender": "Male"
+    },
+    {
+      "name": "Bob Wilson",
+      "visits": 60,
+      "age": 89,
+      "gender": "Male"
+    }
+  ]
+}

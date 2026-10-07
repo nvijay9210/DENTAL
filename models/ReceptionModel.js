@@ -1,0 +1,147 @@
+const pool = require("../config/db");
+const { CustomError } = require("../middlewares/CustomeError");
+const record = require("../query/Records");
+
+const TABLE = "reception";
+
+// Create Reception
+const createReception = async (conn, table, columns, values) => {
+  try {
+    const reception = await record.createRecord(table, columns, values, conn);
+
+    return reception.insertId;
+  } catch (error) {
+    console.error("Error creating reception:", error);
+    throw error;
+  }
+};
+
+// Get all receptions by tenant ID with pagination
+const getAllReceptionsByTenantId = async (tenantId, limit, offset) => {
+  try {
+    if (
+      !Number.isInteger(limit) ||
+      !Number.isInteger(offset) ||
+      limit < 1 ||
+      offset < 0
+    ) {
+      throw error;
+    }
+    return await record.getAllRecords(
+      "reception",
+      "tenant_id",
+      tenantId,
+      limit,
+      offset,
+    );
+  } catch (error) {
+    console.error("Error fetching receptions:", error);
+    throw error;
+  }
+};
+
+// Get reception by tenant ID and reception ID
+const getReceptionByTenantAndReceptionId = async (
+  tenant_id,
+  reception_id,
+  connection,
+) => {
+  try {
+    const rows = await record.getRecordByIdAndTenantId(
+      TABLE,
+      "tenant_id",
+      tenant_id,
+      "reception_id",
+      reception_id,
+      connection,
+    );
+    return rows;
+  } catch (error) {
+    console.error("Error fetching reception:", error);
+    throw error;
+  }
+};
+
+// Update reception
+const updateReception = async (
+  reception_id,
+  columns,
+  values,
+  tenant_id,
+  connection,
+) => {
+  try {
+    const conditionColumn = ["tenant_id", "reception_id"];
+    const conditionValue = [tenant_id, reception_id];
+
+    return await record.updateRecord(
+      TABLE,
+      columns,
+      values,
+      conditionColumn,
+      conditionValue,
+      connection,
+    );
+  } catch (error) {
+    console.error("Error updating reception:", error);
+    throw error;
+  }
+};
+
+// Delete reception
+const deleteReceptionByTenantAndReceptionId = async (
+  connection,
+  tenant_id,
+  reception_id,
+) => {
+  try {
+    const conditionColumn = ["tenant_id", "reception_id"];
+    const conditionValue = [tenant_id, reception_id];
+
+    const result = await record.deleteRecord(
+      TABLE,
+      conditionColumn,
+      conditionValue,
+      connection,
+    );
+    return result.affectedRows;
+  } catch (error) {
+    console.error("Error deleting reception:", error);
+    throw error;
+  }
+};
+
+const getAllReceptionsByTenantIdAndClinicId = async (
+  tenantId,
+  clinicId,
+  limit,
+  offset,
+) => {
+  const query1 = `SELECT * FROM reception  WHERE tenant_id = ? AND clinic_id = ? limit ? offset ?`;
+  const query2 = `SELECT count(*) as total FROM reception  WHERE tenant_id = ? AND clinic_id = ?`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      clinicId,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [tenantId, clinicId]);
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.error(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+module.exports = {
+  createReception,
+  getAllReceptionsByTenantId,
+  getReceptionByTenantAndReceptionId,
+  updateReception,
+  deleteReceptionByTenantAndReceptionId,
+  getAllReceptionsByTenantIdAndClinicId,
+};

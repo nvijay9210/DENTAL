@@ -1,0 +1,376 @@
+const pool = require("../config/db");
+const { CustomError } = require("../middlewares/CustomeError");
+const record = require("../query/Records");
+
+const TABLE = "prescription";
+
+// Create Prescription
+const createPrescription = async (table, columns, values) => {
+  try {
+    const prescription = await record.createRecord(table, columns, values);
+    return prescription.insertId;
+  } catch (error) {
+    console.error("Error creating prescription:", error);
+    throw error
+  }
+};
+
+// Get all prescriptions by tenant ID with pagination
+const getAllPrescriptionsByTenantId = async (tenantId, limit, offset) => {
+  try {
+    if (
+      !Number.isInteger(limit) ||
+      !Number.isInteger(offset) ||
+      limit < 1 ||
+      offset < 0
+    ) {
+      throw error
+    }
+    return await record.getAllRecords(
+      TABLE,
+      "tenant_id",
+      tenantId,
+      limit,
+      offset
+    );
+  } catch (error) {
+    console.error("Error fetching prescriptions:", error);
+    throw error
+  }
+};
+
+// Get prescription by tenant ID and prescription ID
+const getPrescriptionByTenantAndPrescriptionId = async (
+  tenant_id,
+  prescription_id
+) => {
+  try {
+    const rows = await record.getRecordByIdAndTenantId(
+      TABLE,
+      "tenant_id",
+      tenant_id,
+      "prescription_id",
+      prescription_id
+    );
+    return rows;
+  } catch (error) {
+    console.error("Error fetching prescription:", error);
+    throw error
+  }
+};
+
+// Update prescription
+const updatePrescription = async (
+  prescription_id,
+  columns,
+  values,
+  tenant_id
+) => {
+  try {
+    const conditionColumn = ["tenant_id", "prescription_id"];
+    const conditionValue = [tenant_id, prescription_id];
+
+    return await record.updateRecord(
+      TABLE,
+      columns,
+      values,
+      conditionColumn,
+      conditionValue
+    );
+  } catch (error) {
+    console.error("Error updating prescription:", error);
+    throw error
+  }
+};
+
+// Delete prescription
+const deletePrescriptionByTenantAndPrescriptionId = async (
+  tenant_id,
+  prescription_id
+) => {
+  try {
+    const conditionColumn = ["tenant_id", "prescription_id"];
+    const conditionValue = [tenant_id, prescription_id];
+
+    const [result] = await record.deleteRecord(
+      TABLE,
+      conditionColumn,
+      conditionValue
+    );
+    // console.log(result);
+    return result.affectedRows;
+  } catch (error) {
+    console.error("Error deleting prescription:", error);
+    throw error
+  }
+};
+
+const getAllPrescriptionsByTenantAndClinicIdAndTreatmentId = async (
+  tenantId,
+  clinic_id,
+  treatment_id,
+  limit,
+  offset
+) => {
+  const query1 = `SELECT *
+FROM 
+    prescription 
+WHERE 
+    tenant_id = ? AND 
+    clinic_id = ? AND 
+     treatment_id=?
+    limit ? offset ? 
+`;
+  const query2 = `SELECT COUNT(*) AS total
+FROM 
+    prescription 
+WHERE 
+    tenant_id = ? AND 
+    clinic_id = ? AND 
+     treatment_id=?
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      clinic_id,
+      treatment_id,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [
+      tenantId,
+      clinic_id,
+      treatment_id,
+    ]);
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+const getAllPrescriptionsByTenantAndClinicIdAndAppointmentId = async (
+  tenantId,
+  clinic_id,
+  appointment_id,
+  limit,
+  offset
+) => {
+  const query1 = `
+    SELECT 
+      p.*,
+      t.*,
+
+      c.clinic_name,
+      c.email,
+      c.phone_number,
+      c.address,
+      c.website,
+      c.city,
+      c.state,
+      c.country,
+      c.pin_code,
+      c.clinic_logo
+
+    FROM prescription p
+
+    JOIN treatment t
+      ON t.treatment_id = p.treatment_id
+
+    LEFT JOIN clinic c
+      ON c.clinic_id = p.clinic_id
+
+    WHERE 
+      p.tenant_id = ? 
+      AND p.clinic_id = ? 
+      AND t.appointment_id = ?
+
+    LIMIT ? OFFSET ?
+  `;
+
+  const query2 = `
+    SELECT COUNT(*) AS total
+
+    FROM prescription p
+
+    JOIN treatment t
+      ON t.treatment_id = p.treatment_id
+
+    WHERE 
+      p.tenant_id = ? 
+      AND p.clinic_id = ? 
+      AND t.appointment_id = ?
+  `;
+
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      clinic_id,
+      appointment_id,
+      limit,
+      offset,
+    ]);
+
+    const [counts] = await conn.query(query2, [
+      tenantId,
+      clinic_id,
+      appointment_id,
+    ]);
+
+    return {
+      data: rows,
+      total: counts[0].total,
+    };
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+const getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId = async (
+  tenantId,
+  clinic_id,
+  dentist_id,
+  treatment_id,
+  limit,
+  offset
+) => {
+  const query1 = `SELECT *
+FROM 
+    prescription 
+WHERE 
+    tenant_id = ? AND 
+    clinic_id = ? AND 
+    dentist_id = ? AND 
+     treatment_id=?
+    limit ? offset ? 
+`;
+  const query2 = `SELECT COUNT(*) as total
+FROM 
+    prescription 
+WHERE 
+    tenant_id = ? AND 
+    clinic_id = ? AND 
+    dentist_id = ? AND 
+     treatment_id=?
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      clinic_id,
+      dentist_id,
+      treatment_id,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [
+      tenantId,
+      clinic_id,
+      dentist_id,
+      treatment_id,
+    ]);
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+const getAllPrescriptionsByTenantIdAndDentistId = async (
+  tenantId,
+  dentist_id,
+  limit,
+  offset
+) => {
+  const query1 = `SELECT *
+FROM 
+    prescription 
+WHERE 
+    tenant_id = ? AND 
+    dentist_id=?
+    limit ? offset ? 
+`;
+  const query2 = `SELECT COUNT(*) as total
+FROM 
+    prescription 
+WHERE 
+    tenant_id = ? AND 
+    dentist_id=?
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      dentist_id,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [tenantId, dentist_id]);
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+const getAllPrescriptionsByTenantIdAndPatientId = async (
+  tenantId,
+  patient_id,
+  limit,
+  offset
+) => {
+  const query1 = `SELECT *
+FROM 
+    prescription 
+WHERE 
+    tenant_id = ? AND 
+    patient_id = ?
+    limit ? offset ? 
+`;
+  const query2 = `SELECT COUNT(*) as total
+FROM 
+    prescription 
+WHERE 
+    tenant_id = ? AND 
+    patient_id = ?
+`;
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(query1, [
+      tenantId,
+      patient_id,
+      limit,
+      offset,
+    ]);
+    const [counts] = await conn.query(query2, [tenantId, patient_id]);
+    return { data: rows, total: counts[0].total };
+  } catch (error) {
+    console.log(error);
+    throw new Error("Database Operation Failed");
+  } finally {
+    conn.release();
+  }
+};
+
+module.exports = {
+  createPrescription,
+  getAllPrescriptionsByTenantId,
+  getPrescriptionByTenantAndPrescriptionId,
+  updatePrescription,
+  deletePrescriptionByTenantAndPrescriptionId,
+  getAllPrescriptionsByTenantAndClinicIdAndTreatmentId,
+  getAllPrescriptionsByTenantAndClinicIdAndPatientIdAndTreatmentId,
+  getAllPrescriptionsByTenantIdAndDentistId,
+  getAllPrescriptionsByTenantIdAndPatientId,
+  getAllPrescriptionsByTenantAndClinicIdAndAppointmentId
+};

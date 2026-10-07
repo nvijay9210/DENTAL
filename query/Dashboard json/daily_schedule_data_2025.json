@@ -1,0 +1,752 @@
+[
+  {
+    "date": "2025-03-01",
+    "scheduled": 24,
+    "completed": 24,
+    "cancelled": 0
+  },
+  {
+    "date": "2025-03-02",
+    "scheduled": 30,
+    "completed": 20,
+    "cancelled": 10
+  },
+  {
+    "date": "2025-03-03",
+    "scheduled": 13,
+    "completed": 8,
+    "cancelled": 5
+  },
+  {
+    "date": "2025-03-04",
+    "scheduled": 25,
+    "completed": 18,
+    "cancelled": 7
+  },
+  {
+    "date": "2025-03-05",
+    "scheduled": 25,
+    "completed": 9,
+    "cancelled": 16
+  },
+  {
+    "date": "2025-03-06",
+    "scheduled": 14,
+    "completed": 4,
+    "cancelled": 10
+  },
+  {
+    "date": "2025-03-07",
+    "scheduled": 27,
+    "completed": 18,
+    "cancelled": 9
+  },
+  {
+    "date": "2025-03-08",
+    "scheduled": 21,
+    "completed": 2,
+    "cancelled": 19
+  },
+  {
+    "date": "2025-03-09",
+    "scheduled": 12,
+    "completed": 6,
+    "cancelled": 6
+  },
+  {
+    "date": "2025-03-10",
+    "scheduled": 11,
+    "completed": 2,
+    "cancelled": 9
+  },
+  {
+    "date": "2025-03-11",
+    "scheduled": 16,
+    "completed": 13,
+    "cancelled": 3
+  },
+  {
+    "date": "2025-03-12",
+    "scheduled": 12,
+    "completed": 10,
+    "cancelled": 2
+  },
+  {
+    "date": "2025-03-13",
+    "scheduled": 16,
+    "completed": 13,
+    "cancelled": 3
+  },
+  {
+    "date": "2025-03-14",
+    "scheduled": 15,
+    "completed": 7,
+    "cancelled": 8
+  },
+  {
+    "date": "2025-03-15",
+    "scheduled": 11,
+    "completed": 7,
+    "cancelled": 4
+  },
+  {
+    "date": "2025-03-16",
+    "scheduled": 10,
+    "completed": 2,
+    "cancelled": 8
+  },
+  {
+    "date": "2025-03-17",
+    "scheduled": 24,
+    "completed": 15,
+    "cancelled": 9
+  },
+  {
+    "date": "2025-03-18",
+    "scheduled": 16,
+    "completed": 2,
+    "cancelled": 14
+  },
+  {
+    "date": "2025-03-19",
+    "scheduled": 29,
+    "completed": 29,
+    "cancelled": 0
+  },
+  {
+    "date": "2025-03-20",
+    "scheduled": 30,
+    "completed": 4,
+    "cancelled": 26
+  },
+  {
+    "date": "2025-03-21",
+    "scheduled": 21,
+    "completed": 17,
+    "cancelled": 4
+  },
+  {
+    "date": "2025-03-22",
+    "scheduled": 15,
+    "completed": 7,
+    "cancelled": 8
+  },
+  {
+    "date": "2025-03-23",
+    "scheduled": 11,
+    "completed": 1,
+    "cancelled": 10
+  },
+  {
+    "date": "2025-03-24",
+    "scheduled": 22,
+    "completed": 4,
+    "cancelled": 18
+  },
+  {
+    "date": "2025-03-25",
+    "scheduled": 10,
+    "completed": 5,
+    "cancelled": 5
+  },
+  {
+    "date": "2025-03-26",
+    "scheduled": 12,
+    "completed": 7,
+    "cancelled": 5
+  },
+  {
+    "date": "2025-03-27",
+    "scheduled": 13,
+    "completed": 11,
+    "cancelled": 2
+  },
+  {
+    "date": "2025-03-28",
+    "scheduled": 21,
+    "completed": 7,
+    "cancelled": 14
+  },
+  {
+    "date": "2025-03-29",
+    "scheduled": 10,
+    "completed": 8,
+    "cancelled": 2
+  },
+  {
+    "date": "2025-03-30",
+    "scheduled": 27,
+    "completed": 8,
+    "cancelled": 19
+  },
+  {
+    "date": "2025-03-31",
+    "scheduled": 29,
+    "completed": 24,
+    "cancelled": 5
+  },
+  {
+    "date": "2025-04-01",
+    "scheduled": 30,
+    "completed": 14,
+    "cancelled": 16
+  },
+  {
+    "date": "2025-04-02",
+    "scheduled": 18,
+    "completed": 2,
+    "cancelled": 16
+  },
+  {
+    "date": "2025-04-03",
+    "scheduled": 30,
+    "completed": 21,
+    "cancelled": 9
+  },
+  {
+    "date": "2025-04-04",
+    "scheduled": 12,
+    "completed": 10,
+    "cancelled": 2
+  },
+  {
+    "date": "2025-04-05",
+    "scheduled": 17,
+    "completed": 17,
+    "cancelled": 0
+  },
+  {
+    "date": "2025-04-06",
+    "scheduled": 14,
+    "completed": 4,
+    "cancelled": 10
+  },
+  {
+    "date": "2025-04-07",
+    "scheduled": 11,
+    "completed": 3,
+    "cancelled": 8
+  },
+  {
+    "date": "2025-04-08",
+    "scheduled": 17,
+    "completed": 6,
+    "cancelled": 11
+  },
+  {
+    "date": "2025-04-09",
+    "scheduled": 22,
+    "completed": 2,
+    "cancelled": 20
+  },
+  {
+    "date": "2025-04-10",
+    "scheduled": 25,
+    "completed": 12,
+    "cancelled": 13
+  },
+  {
+    "date": "2025-04-11",
+    "scheduled": 29,
+    "completed": 13,
+    "cancelled": 16
+  },
+  {
+    "date": "2025-04-12",
+    "scheduled": 24,
+    "completed": 20,
+    "cancelled": 4
+  },
+  {
+    "date": "2025-04-13",
+    "scheduled": 17,
+    "completed": 8,
+    "cancelled": 9
+  },
+  {
+    "date": "2025-04-14",
+    "scheduled": 14,
+    "completed": 0,
+    "cancelled": 14
+  },
+  {
+    "date": "2025-04-15",
+    "scheduled": 26,
+    "completed": 10,
+    "cancelled": 16
+  },
+  {
+    "date": "2025-04-16",
+    "scheduled": 25,
+    "completed": 14,
+    "cancelled": 11
+  },
+  {
+    "date": "2025-04-17",
+    "scheduled": 16,
+    "completed": 2,
+    "cancelled": 14
+  },
+  {
+    "date": "2025-04-18",
+    "scheduled": 26,
+    "completed": 8,
+    "cancelled": 18
+  },
+  {
+    "date": "2025-04-19",
+    "scheduled": 13,
+    "completed": 2,
+    "cancelled": 11
+  },
+  {
+    "date": "2025-04-20",
+    "scheduled": 20,
+    "completed": 4,
+    "cancelled": 16
+  },
+  {
+    "date": "2025-04-21",
+    "scheduled": 13,
+    "completed": 7,
+    "cancelled": 6
+  },
+  {
+    "date": "2025-04-22",
+    "scheduled": 23,
+    "completed": 14,
+    "cancelled": 9
+  },
+  {
+    "date": "2025-04-23",
+    "scheduled": 28,
+    "completed": 7,
+    "cancelled": 21
+  },
+  {
+    "date": "2025-04-24",
+    "scheduled": 22,
+    "completed": 13,
+    "cancelled": 9
+  },
+  {
+    "date": "2025-04-25",
+    "scheduled": 19,
+    "completed": 8,
+    "cancelled": 11
+  },
+  {
+    "date": "2025-04-26",
+    "scheduled": 18,
+    "completed": 9,
+    "cancelled": 9
+  },
+  {
+    "date": "2025-04-27",
+    "scheduled": 14,
+    "completed": 9,
+    "cancelled": 5
+  },
+  {
+    "date": "2025-04-28",
+    "scheduled": 16,
+    "completed": 9,
+    "cancelled": 7
+  },
+  {
+    "date": "2025-04-29",
+    "scheduled": 25,
+    "completed": 13,
+    "cancelled": 12
+  },
+  {
+    "date": "2025-04-30",
+    "scheduled": 30,
+    "completed": 5,
+    "cancelled": 25
+  },
+  {
+    "date": "2025-05-01",
+    "scheduled": 12,
+    "completed": 11,
+    "cancelled": 1
+  },
+  {
+    "date": "2025-05-02",
+    "scheduled": 19,
+    "completed": 10,
+    "cancelled": 9
+  },
+  {
+    "date": "2025-05-03",
+    "scheduled": 13,
+    "completed": 4,
+    "cancelled": 9
+  },
+  {
+    "date": "2025-05-04",
+    "scheduled": 25,
+    "completed": 22,
+    "cancelled": 3
+  },
+  {
+    "date": "2025-05-05",
+    "scheduled": 18,
+    "completed": 11,
+    "cancelled": 7
+  },
+  {
+    "date": "2025-05-06",
+    "scheduled": 11,
+    "completed": 10,
+    "cancelled": 1
+  },
+  {
+    "date": "2025-05-07",
+    "scheduled": 16,
+    "completed": 15,
+    "cancelled": 1
+  },
+  {
+    "date": "2025-05-08",
+    "scheduled": 18,
+    "completed": 14,
+    "cancelled": 4
+  },
+  {
+    "date": "2025-05-09",
+    "scheduled": 22,
+    "completed": 15,
+    "cancelled": 7
+  },
+  {
+    "date": "2025-05-10",
+    "scheduled": 27,
+    "completed": 3,
+    "cancelled": 24
+  },
+  {
+    "date": "2025-05-11",
+    "scheduled": 15,
+    "completed": 9,
+    "cancelled": 6
+  },
+  {
+    "date": "2025-05-12",
+    "scheduled": 19,
+    "completed": 16,
+    "cancelled": 3
+  },
+  {
+    "date": "2025-05-13",
+    "scheduled": 25,
+    "completed": 19,
+    "cancelled": 6
+  },
+  {
+    "date": "2025-05-14",
+    "scheduled": 28,
+    "completed": 3,
+    "cancelled": 25
+  },
+  {
+    "date": "2025-05-15",
+    "scheduled": 21,
+    "completed": 7,
+    "cancelled": 14
+  },
+  {
+    "date": "2025-05-16",
+    "scheduled": 30,
+    "completed": 17,
+    "cancelled": 13
+  },
+  {
+    "date": "2025-05-17",
+    "scheduled": 24,
+    "completed": 19,
+    "cancelled": 5
+  },
+  {
+    "date": "2025-05-18",
+    "scheduled": 24,
+    "completed": 20,
+    "cancelled": 4
+  },
+  {
+    "date": "2025-05-19",
+    "scheduled": 20,
+    "completed": 8,
+    "cancelled": 12
+  },
+  {
+    "date": "2025-05-20",
+    "scheduled": 21,
+    "completed": 12,
+    "cancelled": 9
+  },
+  {
+    "date": "2025-05-21",
+    "scheduled": 19,
+    "completed": 17,
+    "cancelled": 2
+  },
+  {
+    "date": "2025-05-22",
+    "scheduled": 12,
+    "completed": 12,
+    "cancelled": 0
+  },
+  {
+    "date": "2025-05-23",
+    "scheduled": 12,
+    "completed": 1,
+    "cancelled": 11
+  },
+  {
+    "date": "2025-05-24",
+    "scheduled": 21,
+    "completed": 10,
+    "cancelled": 11
+  },
+  {
+    "date": "2025-05-25",
+    "scheduled": 26,
+    "completed": 11,
+    "cancelled": 15
+  },
+  {
+    "date": "2025-05-26",
+    "scheduled": 26,
+    "completed": 5,
+    "cancelled": 21
+  },
+  {
+    "date": "2025-05-27",
+    "scheduled": 24,
+    "completed": 23,
+    "cancelled": 1
+  },
+  {
+    "date": "2025-05-28",
+    "scheduled": 14,
+    "completed": 13,
+    "cancelled": 1
+  },
+  {
+    "date": "2025-05-29",
+    "scheduled": 21,
+    "completed": 2,
+    "cancelled": 19
+  },
+  {
+    "date": "2025-05-30",
+    "scheduled": 10,
+    "completed": 0,
+    "cancelled": 10
+  },
+  {
+    "date": "2025-05-31",
+    "scheduled": 19,
+    "completed": 2,
+    "cancelled": 17
+  },
+  {
+    "date": "2025-06-01",
+    "scheduled": 17,
+    "completed": 5,
+    "cancelled": 12
+  },
+  {
+    "date": "2025-06-02",
+    "scheduled": 19,
+    "completed": 19,
+    "cancelled": 0
+  },
+  {
+    "date": "2025-06-03",
+    "scheduled": 10,
+    "completed": 0,
+    "cancelled": 10
+  },
+  {
+    "date": "2025-06-04",
+    "scheduled": 19,
+    "completed": 0,
+    "cancelled": 19
+  },
+  {
+    "date": "2025-06-05",
+    "scheduled": 13,
+    "completed": 9,
+    "cancelled": 4
+  },
+  {
+    "date": "2025-06-06",
+    "scheduled": 19,
+    "completed": 13,
+    "cancelled": 6
+  },
+  {
+    "date": "2025-06-07",
+    "scheduled": 18,
+    "completed": 11,
+    "cancelled": 7
+  },
+  {
+    "date": "2025-06-08",
+    "scheduled": 19,
+    "completed": 12,
+    "cancelled": 7
+  },
+  {
+    "date": "2025-06-09",
+    "scheduled": 20,
+    "completed": 6,
+    "cancelled": 14
+  },
+  {
+    "date": "2025-06-10",
+    "scheduled": 28,
+    "completed": 17,
+    "cancelled": 11
+  },
+  {
+    "date": "2025-06-11",
+    "scheduled": 19,
+    "completed": 14,
+    "cancelled": 5
+  },
+  {
+    "date": "2025-06-12",
+    "scheduled": 25,
+    "completed": 9,
+    "cancelled": 16
+  },
+  {
+    "date": "2025-06-13",
+    "scheduled": 22,
+    "completed": 6,
+    "cancelled": 16
+  },
+  {
+    "date": "2025-06-14",
+    "scheduled": 16,
+    "completed": 2,
+    "cancelled": 14
+  },
+  {
+    "date": "2025-06-15",
+    "scheduled": 20,
+    "completed": 20,
+    "cancelled": 0
+  },
+  {
+    "date": "2025-06-16",
+    "scheduled": 11,
+    "completed": 9,
+    "cancelled": 2
+  },
+  {
+    "date": "2025-06-17",
+    "scheduled": 20,
+    "completed": 1,
+    "cancelled": 19
+  },
+  {
+    "date": "2025-06-18",
+    "scheduled": 15,
+    "completed": 15,
+    "cancelled": 0
+  },
+  {
+    "date": "2025-06-19",
+    "scheduled": 14,
+    "completed": 7,
+    "cancelled": 7
+  },
+  {
+    "date": "2025-06-20",
+    "scheduled": 28,
+    "completed": 26,
+    "cancelled": 2
+  },
+  {
+    "date": "2025-06-21",
+    "scheduled": 26,
+    "completed": 14,
+    "cancelled": 12
+  },
+  {
+    "date": "2025-06-22",
+    "scheduled": 23,
+    "completed": 19,
+    "cancelled": 4
+  },
+  {
+    "date": "2025-06-23",
+    "scheduled": 20,
+    "completed": 11,
+    "cancelled": 9
+  },
+  {
+    "date": "2025-06-24",
+    "scheduled": 24,
+    "completed": 21,
+    "cancelled": 3
+  },
+  {
+    "date": "2025-06-25",
+    "scheduled": 28,
+    "completed": 4,
+    "cancelled": 24
+  },
+  {
+    "date": "2025-06-26",
+    "scheduled": 15,
+    "completed": 2,
+    "cancelled": 13
+  },
+  {
+    "date": "2025-06-27",
+    "scheduled": 24,
+    "completed": 11,
+    "cancelled": 13
+  },
+  {
+    "date": "2025-06-28",
+    "scheduled": 18,
+    "completed": 8,
+    "cancelled": 10
+  },
+  {
+    "date": "2025-06-29",
+    "scheduled": 26,
+    "completed": 13,
+    "cancelled": 13
+  },
+  {
+    "date": "2025-06-30",
+    "scheduled": 15,
+    "completed": 5,
+    "cancelled": 10
+  },
+  {
+    "date": "2025-07-01",
+    "scheduled": 19,
+    "completed": 8,
+    "cancelled": 11
+  },
+  {
+    "date": "2025-07-02",
+    "scheduled": 22,
+    "completed": 20,
+    "cancelled": 2
+  },
+  {
+    "date": "2025-07-03",
+    "scheduled": 13,
+    "completed": 7,
+    "cancelled": 6
+  }
+]
