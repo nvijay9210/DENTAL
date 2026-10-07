@@ -170,6 +170,8 @@ model clinic {
   toothdetails               toothdetails[]
   treatment                  treatment[]
   user_clinic                user_clinic[]
+  user_roles                 user_role[]
+  user_activity              user_activity[]
 
   @@index([tenant_id], map: "fk_clinic_tenant")
   @@index([phone_number], map: "idx_phone_number")
@@ -309,19 +311,27 @@ model expense {
 }
 
 model login_history {
-  login_history_id BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  tenant_id        BigInt?   @db.UnsignedBigInt
-  app_name         String?   @db.VarChar(100)
-  keycloak_user_id String    @db.Char(36)
-  session_id       String?   @db.VarChar(36)
-  login_time       DateTime  @db.DateTime(0)
-  logout_time      DateTime? @db.DateTime(0)
-  ip_address       String?   @db.VarChar(45)
-  user_agent       String?   @db.Text
-  created_time     DateTime? @default(now()) @db.Timestamp(0)
+  login_history_id BigInt @id @default(autoincrement()) @db.UnsignedBigInt
 
-  @@index([tenant_id], map: "idx_login_history_tenant")
-  @@index([keycloak_user_id], map: "idx_login_history_user")
+  user_id         BigInt    @db.UnsignedBigInt
+  tenant_id       BigInt?   @db.UnsignedBigInt
+
+  app_name        String?   @db.VarChar(100)
+
+  session_id      String?   @db.VarChar(36)
+
+  login_time      DateTime  @db.DateTime(0)
+  logout_time     DateTime? @db.DateTime(0)
+
+  ip_address      String?   @db.VarChar(45)
+  user_agent      String?   @db.Text
+
+  created_time    DateTime? @default(now()) @db.Timestamp(0)
+
+ user user @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([tenant_id])
 }
 
 model notificationrecipients {
@@ -387,8 +397,8 @@ model patient {
   dentist_preference          BigInt?          @db.UnsignedBigInt
   smoking_status              String           @db.VarChar(100)
   alcohol_consumption         String           @db.VarChar(100)
-  emergency_contact_name      String           @db.VarChar(255)
-  emergency_contact_number    String           @db.VarChar(15)
+  emergency_contact_name      String?           @db.VarChar(255)
+  emergency_contact_number    String?           @db.VarChar(15)
   insurance_provider          String?          @db.VarChar(255)
   insurance_policy_number     String?          @db.VarChar(10)
   insurance_policy_start_date DateTime?        @db.Date
@@ -872,6 +882,9 @@ model tenant {
   toothdetails            toothdetails[]
   treatment               treatment[]
   user_clinic             user_clinic[]
+  user_tenants            user_tenant[]
+  user_roles              user_role[]
+  user_activity           user_activity[]
 }
 
 model toothdetails {
@@ -948,39 +961,334 @@ model treatment {
 
 model user_activity {
   user_activity_id BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  tenant_id        BigInt?   @db.UnsignedBigInt
-  app_name         String?   @db.VarChar(100)
-  keycloak_user_id String    @db.Char(36)
-  activity_type    String    @db.VarChar(100)
-  activity_desc    String?   @db.Text
-  ip_address       String?   @db.VarChar(45)
-  user_agent       String?   @db.Text
-  activity_time    DateTime? @default(now()) @db.Timestamp(0)
+  user_id         BigInt    @db.UnsignedBigInt
+  tenant_id       BigInt?   @db.UnsignedBigInt
+  clinic_id       BigInt?   @db.UnsignedBigInt
+  app_name        String?   @db.VarChar(100)
+  activity_type   String    @db.VarChar(100)
+  activity_desc   String?   @db.Text
+  ip_address      String?   @db.VarChar(45)
+  user_agent      String?   @db.Text
+  activity_time   DateTime? @default(now()) @db.Timestamp(0)
 
+  user            user      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  tenant          tenant?   @relation(fields: [tenant_id], references: [tenant_id], onDelete: SetNull)
+  clinic          clinic?   @relation(fields: [clinic_id], references: [clinic_id], onDelete: SetNull)
+
+  @@index([user_id], map: "idx_user_activity_user")
   @@index([tenant_id], map: "idx_user_activity_tenant")
-  @@index([keycloak_user_id], map: "idx_user_activity_user")
+  @@index([clinic_id], map: "idx_user_activity_clinic")
+}
+
+
+model user {
+  user_id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+
+  // Global identity. Tenant/clinic scope is handled by user_tenant/user_clinic.
+  keycloak_id           String?   @unique(map: "uk_user_keycloak") @db.Char(36)
+  username              String?   @db.VarChar(100)
+  email                 String?   @db.VarChar(255)
+
+  first_name            String    @db.VarChar(100)
+  last_name             String?   @db.VarChar(100)
+  phone_number          String?   @db.VarChar(15)
+  alternate_phone_number String?  @db.VarChar(15)
+  profile_picture       String?   @db.VarChar(255)
+  date_of_birth         DateTime? @db.Date
+  gender                user_gender?
+  status                Boolean   @default(true)
+  last_login            DateTime? @db.DateTime(0)
+
+  created_by            String    @db.VarChar(30)
+  created_time          DateTime  @default(now()) @db.Timestamp(0)
+  updated_by            String?   @db.VarChar(30)
+  updated_time          DateTime? @db.Timestamp(0)
+
+  user_tenants          user_tenant[]
+  user_clinic           user_clinic[]
+  user_roles            user_role[]
+  login_history         login_history[]
+  user_activity         user_activity[]
+
+  dentist_profile       dentist_profile?
+  patient_profile       patient_profile? @relation("PatientUser")
+  preferred_by_patients  patient_profile[] @relation("PreferredDentist")
+  reception_profile     reception_profile?
+  superuser_profile     superuser_profile?
+  supplier_profile      supplier_profile?
+
+  @@index([email], map: "idx_user_email")
+  @@index([phone_number], map: "idx_user_phone")
+  @@index([username], map: "idx_user_username")
+}
+
+model user_tenant {
+  user_tenant_id BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id        BigInt   @db.UnsignedBigInt
+  tenant_id      BigInt   @db.UnsignedBigInt
+  status         Boolean  @default(true)
+
+  created_by     String   @db.VarChar(30)
+  created_time   DateTime @default(now()) @db.Timestamp(0)
+  updated_by     String?  @db.VarChar(30)
+  updated_time   DateTime? @db.Timestamp(0)
+
+  user           user     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  tenant         tenant   @relation(fields: [tenant_id], references: [tenant_id], onDelete: Cascade)
+
+  @@unique([user_id, tenant_id], map: "uk_user_tenant")
+  @@index([user_id], map: "idx_user_tenant_user")
+  @@index([tenant_id], map: "idx_user_tenant_tenant")
 }
 
 model user_clinic {
-  user_clinic_id BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  user_id        BigInt    @db.UnsignedBigInt
-  user_name      String    @db.VarChar(100)
-  role           String    @db.VarChar(50)
-  keycloak_id    String?   @db.Char(36)
-  tenant_id      BigInt?   @db.UnsignedBigInt
-  clinic_id      BigInt    @db.UnsignedBigInt
-  created_by     String    @db.VarChar(30)
-  created_time   DateTime  @default(now()) @db.Timestamp(0)
-  updated_by     String?   @db.VarChar(30)
-  updated_time   DateTime? @db.Timestamp(0)
-  clinic         clinic    @relation(fields: [clinic_id], references: [clinic_id], onDelete: Cascade, map: "fk_user_clinic_clinic")
-  tenant         tenant?   @relation(fields: [tenant_id], references: [tenant_id], onDelete: Cascade, map: "fk_user_clinic_tenant")
+  user_clinic_id BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id        BigInt   @db.UnsignedBigInt
+  tenant_id      BigInt   @db.UnsignedBigInt
+  clinic_id      BigInt   @db.UnsignedBigInt
+  status         Boolean  @default(true)
 
-  @@index([clinic_id], map: "fk_user_clinic_clinic")
-  @@index([tenant_id], map: "fk_user_clinic_tenant")
-  @@index([keycloak_id], map: "idx_user_clinic_keycloak")
+  created_by     String   @db.VarChar(30)
+  created_time   DateTime @default(now()) @db.Timestamp(0)
+  updated_by     String?  @db.VarChar(30)
+  updated_time   DateTime? @db.Timestamp(0)
+
+  user           user     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  tenant         tenant   @relation(fields: [tenant_id], references: [tenant_id], onDelete: Cascade)
+  clinic         clinic   @relation(fields: [clinic_id], references: [clinic_id], onDelete: Cascade)
+
+  @@unique([user_id, tenant_id, clinic_id], map: "uk_user_tenant_clinic")
+  @@index([user_id], map: "idx_user_clinic_user")
+  @@index([tenant_id], map: "idx_user_clinic_tenant")
+  @@index([clinic_id], map: "idx_user_clinic_clinic")
 }
 
+model role {
+  role_id       BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  role_code     String    @unique @db.VarChar(50)
+  role_name     String    @db.VarChar(100)
+  description   String?   @db.VarChar(255)
+  status        Boolean   @default(true)
+
+  created_by    String    @db.VarChar(30)
+  created_time  DateTime  @default(now()) @db.Timestamp(0)
+  updated_by    String?   @db.VarChar(30)
+  updated_time  DateTime? @db.Timestamp(0)
+
+  user_roles    user_role[]
+}
+
+model user_role {
+  user_role_id BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id      BigInt    @db.UnsignedBigInt
+  role_id      BigInt    @db.UnsignedBigInt
+
+  // TENANT:    tenant_id = NULL, clinic_id = NULL
+  // SUPERUSER: tenant_id required, clinic_id = NULL
+  // Others:    tenant_id required, clinic_id required
+  tenant_id    BigInt?   @db.UnsignedBigInt
+  clinic_id    BigInt?   @db.UnsignedBigInt
+
+  status       Boolean   @default(true)
+
+  created_by   String    @db.VarChar(30)
+  created_time DateTime  @default(now()) @db.Timestamp(0)
+  updated_by   String?   @db.VarChar(30)
+  updated_time DateTime? @db.Timestamp(0)
+
+  user         user      @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  role         role      @relation(fields: [role_id], references: [role_id], onDelete: Cascade)
+  tenant       tenant?   @relation(fields: [tenant_id], references: [tenant_id], onDelete: Cascade)
+  clinic       clinic?   @relation(fields: [clinic_id], references: [clinic_id], onDelete: Cascade)
+
+  @@unique([user_id, role_id, tenant_id, clinic_id], map: "uk_user_role_scope")
+  @@index([user_id], map: "idx_user_role_user")
+  @@index([role_id], map: "idx_user_role_role")
+  @@index([tenant_id], map: "idx_user_role_tenant")
+  @@index([clinic_id], map: "idx_user_role_clinic")
+}
+
+model dentist_profile {
+  dentist_profile_id BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+
+  user_id           BigInt @unique @db.UnsignedBigInt
+
+  dentist_code      String?  @db.VarChar(15)
+  specialisation    String   @default("") @db.VarChar(100)
+  designation       String   @default("") @db.VarChar(100)
+
+  member_of         String?  @db.LongText
+  experience_years  Int
+  license_number    String   @db.VarChar(20)
+
+  city              String   @db.VarChar(100)
+  state             String   @db.VarChar(100)
+  country           String   @db.VarChar(50)
+  pin_code          String   @db.VarChar(10)
+
+  working_hours     String?  @db.LongText
+  available_days    String?  @db.LongText
+
+  consultation_fee  Decimal? @default(0.00) @db.Decimal(12,2)
+  currency_code     String?  @db.VarChar(10)
+  min_booking_fee   Decimal? @default(0.00) @db.Decimal(12,2)
+
+  ratings           Decimal? @default(0.00) @db.Decimal(3,2)
+  reviews_count     Int?     @default(0)
+  appointment_count Int?     @default(0)
+
+  bio               String?  @db.LongText
+
+  teleconsultation_supported Boolean @default(false)
+
+  languages_spoken  String? @db.LongText
+  social_links      String? @db.LongText
+
+  internship        String? @db.LongText
+  position_held     String? @db.LongText
+  research_projects String? @db.LongText
+  publication       String? @db.LongText
+  social_activities String? @db.LongText
+
+  duration          Int?
+
+  user user @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([license_number])
+}
+
+model patient_profile {
+  patient_profile_id BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+
+  user_id             BigInt @unique @db.UnsignedBigInt
+
+  patient_reference_id String? @db.VarChar(30)
+  patient_code         String? @db.VarChar(15)
+
+  blood_group         String? @db.VarChar(10)
+
+  address             String? @db.Text
+  city                String? @db.VarChar(100)
+  state               String? @db.VarChar(100)
+  country             String? @db.VarChar(50)
+  pin_code            String? @db.VarChar(10)
+
+  pre_history         String? @db.Text
+  current_medications String? @db.Text
+
+  dentist_preference  BigInt? @db.UnsignedBigInt
+
+  smoking_status      String? @db.VarChar(100)
+  alcohol_consumption String? @db.VarChar(100)
+  emergency_contact_name String? @db.VarChar(255)
+  emergency_contact_number String? @db.VarChar(15)
+
+  insurance_provider  String? @db.VarChar(255)
+  insurance_policy_number String? @db.VarChar(10)
+
+  insurance_policy_start_date DateTime? @db.Date
+  insurance_policy_end_date   DateTime? @db.Date
+
+  treatment_history   String? @db.LongText
+
+  appointment_count  Int?
+  first_visit_date   DateTime? @db.Timestamp(0)
+  last_appointment_date DateTime? @db.DateTime(0)
+
+  referred_by         String? @db.VarChar(100)
+  profession          String? @db.VarChar(100)
+
+  tooth_details       String? @db.Text
+  medical_history_notes String? @db.Text
+
+  user user @relation("PatientUser", fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  preferred_dentist_user_id BigInt? @db.UnsignedBigInt
+
+  preferred_dentist user? @relation("PreferredDentist", fields: [preferred_dentist_user_id], references: [user_id])
+
+  @@index([preferred_dentist_user_id])
+}
+
+model reception_profile {
+  reception_profile_id BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+
+  user_id       BigInt   @unique @db.UnsignedBigInt
+
+  reception_code String? @db.VarChar(15)
+
+  address       String? @db.Text
+  city          String? @db.VarChar(100)
+  state         String? @db.VarChar(100)
+  country       String? @db.VarChar(50)
+  pincode       String? @db.VarChar(10)
+
+  user user @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model superuser_profile {
+  superuser_profile_id BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+
+  user_id       BigInt @unique @db.UnsignedBigInt
+
+  superuser_code String? @db.VarChar(15)
+
+  address       String? @db.Text
+  city          String? @db.VarChar(100)
+  state         String? @db.VarChar(100)
+  country       String? @db.VarChar(50)
+  pincode       String? @db.VarChar(10)
+
+  user user @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model supplier_profile {
+  supplier_profile_id BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+
+  user_id             BigInt @unique @db.UnsignedBigInt
+
+  supplier_code       String? @unique @db.VarChar(50)
+
+  category            String? @db.VarChar(100)
+
+  logo_url             String? @db.VarChar(255)
+  fax                  String? @db.VarChar(50)
+  website              String? @db.VarChar(255)
+
+  gst_number           String? @db.VarChar(50)
+  tax_id               String? @db.VarChar(50)
+  pan_number           String? @db.VarChar(50)
+
+  mode_of_payment      String? @db.VarChar(100)
+  preferred_currency   String? @db.VarChar(10)
+
+  credit_limit         Decimal? @db.Decimal(12,2)
+  opening_balance      Decimal? @db.Decimal(12,2)
+
+  notes                String? @db.Text
+
+  address_type         supplier_address_type? @default(billing)
+  address              String? @db.VarChar(100)
+  city                 String? @db.VarChar(100)
+  state                String? @db.VarChar(100)
+  postal_code          String? @db.VarChar(10)
+  country              String? @db.VarChar(100)
+
+  user user @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+model supplier_user {
+  supplier_user_id BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+
+  supplier_id BigInt @db.UnsignedBigInt
+  user_id     BigInt @db.UnsignedBigInt
+
+  status      Boolean @default(true)
+
+  created_by  String @db.VarChar(30)
+  created_time DateTime @default(now()) @db.Timestamp(0)
+
+  @@unique([supplier_id, user_id])
+}
 enum reminder_reminder_repeat {
   daily
   weekly
@@ -988,12 +1296,41 @@ enum reminder_reminder_repeat {
   yearly
 }
 
+enum user_gender {
+  M
+  F
+  O
+}
+
 enum dentist_gender {
   M
   F
-  TG
+  O
 }
 
+enum patient_gender {
+  M
+  F
+  O
+}
+
+enum reception_gender {
+  M
+  F
+  O
+}
+
+enum superuser_gender {
+  M
+  F
+  O
+}
+
+enum supplier_gender {
+  M
+  F
+  O
+}
 enum appointment_status {
   pending
   confirmed
@@ -1044,24 +1381,6 @@ enum purchase_orders_status {
   cancelled
 }
 
-enum reception_gender {
-  M
-  F
-  TG
-}
-
-enum patient_gender {
-  M
-  F
-  TG
-}
-
-enum superuser_gender {
-  M
-  F
-  TG
-}
-
 enum supplier_payments_supplier_payment_type {
   SP
   FP
@@ -1071,12 +1390,6 @@ enum supplier_address_type {
   billing
   shipping
   office
-}
-
-enum supplier_gender {
-  M
-  F
-  TG
 }
 
 enum clinic_otp_type {
