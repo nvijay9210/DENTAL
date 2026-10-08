@@ -18,6 +18,8 @@ const { userActivityLogger } = require("./utils/UserActivityUtil");
 
 // Routers
 const userRouter = require("./routes/userRouter");
+const roleRouter = require("./routes/RoleRouter");
+const userRoleRouter = require("./routes/UserRoleRouter");
 const tenantRouter = require("./routes/TenantRouter");
 const clinicRouter = require("./routes/ClinicRouter");
 const dentistRouter = require("./routes/DentistRouter");
@@ -548,6 +550,9 @@ app.use("/v1/toothdetails", toothdetailsRouter);
 app.use("/v1/reference", referenceRouter);
 app.use("/v1/messaging", otpRouter);
 app.use("/v1/ssoAuth", ssoRouter);
+app.use("/v1/user", userRouter);
+app.use("/v1/role", roleRouter);
+app.use("/v1/userrole", userRoleRouter);
 
 // Error handler must be last
 app.use(errorHandler);

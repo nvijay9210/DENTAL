@@ -1,83 +1,75 @@
-const userModel = require('../models/userModel');
+const userModel = require("../models/userModel");
 
-// Create user service (calls the model function)
 const createUser = async (data) => {
   try {
-    const userId = await userModel.createUser(data); // Call model function to insert user
-    return userId;
+    return await userModel.createUser(data);
   } catch (error) {
-    throw new Error('Failed to create user: ' + error.message);
+    throw new Error("Failed to create user: " + error.message);
   }
 };
 
-// Get all users service
 const getUsers = async () => {
   try {
-    const users = await userModel.getAllUser(); // Call model function to get users
-    return users;
+    return await userModel.getAllUsers();
   } catch (error) {
-    throw new Error('Failed to get users: ' + error.message);
+    throw new Error("Failed to get users: " + error.message);
   }
 };
 
-// Get user service
-const getUserById = async (id) => {
+const getUserById = async (userId) => {
   try {
-    const users = await userModel.getUserById(id); // Call model function to get users
-    return users;
+    return await userModel.getUserById(userId);
   } catch (error) {
-    throw new Error('Failed to get users: ' + error.message);
+    throw new Error("Failed to get user: " + error.message);
   }
 };
 
-
-
-// Check if user exists by phone number service
-const getUserByPhoneNumber = async (mobile) => {
+const getUserByKeycloakId = async (keycloakId) => {
   try {
-    const exists = await userModel.getUserByPhoneNumber(mobile); // Call model function to check user by mobile
-    return exists;
+    return await userModel.getUserByKeycloakId(keycloakId);
   } catch (error) {
-    throw new Error('Failed to check user by phone number: ' + error.message);
+    throw new Error(
+      "Failed to get user by Keycloak ID: " + error.message
+    );
   }
 };
 
-// Check if user exists by phone number service
-const getExcludeUserByPhoneNumberAndUserId = async (mobile,userId=null) => {
-  try {
-    const exists = await userModel.getExcludeUserByPhoneNumberAndUserId(mobile,userId); // Call model function to check user by mobile
- 
-    return exists;
-  } catch (error) {
-    throw new Error('Failed to check user by phone number and userId: ' + error.message);
-  }
-};
-
-// Update user service
 const updateUser = async (userId, data) => {
   try {
-    const affectedRows = await userModel.updateUser(userId, data);
-    // if (affectedRows === 0) {
-    //   throw new Error("User not found or no changes made.");
-    // }
-    return affectedRows;
+    return await userModel.updateUser(userId, data);
   } catch (error) {
-    throw new Error('Failed to update user: ' + error.message);
+    throw new Error("Failed to update user: " + error.message);
   }
 };
 
-// Delete user service
+const updateUserStatus = async (userId, status, updatedBy) => {
+  try {
+    return await userModel.updateUserStatus(
+      userId,
+      status,
+      updatedBy
+    );
+  } catch (error) {
+    throw new Error(
+      "Failed to update user status: " + error.message
+    );
+  }
+};
+
 const deleteUser = async (userId) => {
   try {
-    const affectedRows = await userModel.deleteUser(userId);
-    // if (affectedRows === 0) {
-    //   throw new Error("User not found.");
-    // }
-    return affectedRows;
+    return await userModel.deleteUser(userId);
   } catch (error) {
-    throw new Error('Failed to delete user: ' + error.message);
+    throw new Error("Failed to delete user: " + error.message);
   }
 };
 
-
-module.exports = { createUser, getUsers, getUserByPhoneNumber,getExcludeUserByPhoneNumberAndUserId,getUserById, updateUser,deleteUser };
+module.exports = {
+  createUser,
+  getUsers,
+  getUserById,
+  getUserByKeycloakId,
+  updateUser,
+  updateUserStatus,
+  deleteUser,
+};

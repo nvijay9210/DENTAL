@@ -1,120 +1,220 @@
 const pool = require("../config/db");
 const { userQuery } = require("../query/userQuery");
 
-const createUserTable = async () => {
-  const query = userQuery.createUserTable;
-  const conn = await pool.getConnection();
-  try {
-    await conn.query(query);
-    console.log("Users table created successfully.");
-  } catch (error) {
-    console.error("Error creating users table:", error);
-    throw new Error("Database error occurred while creating the users table.");
-  } finally {
-    conn.release();
-  }
-};
-
 const createUser = async (data) => {
-  const query = userQuery.createUser;
   const conn = await pool.getConnection();
+
   try {
-    const { name, mobile, email } = data;
-    // Execute query with values passed dynamically
-    await conn.query(query, [name, mobile, email]);
-    console.log(`User created successfully: ${name}`);
+    const {
+      keycloak_id,
+      username = null,
+      email = null,
+      status = 1,
+      created_by = "SYSTEM",
+    } = data;
+
+    const [result] = await conn.query(userQuery.createUser, [
+      keycloak_id,
+      username,
+      email,
+      status,
+      created_by,
+    ]);
+
+    return result.insertId;
   } catch (error) {
     console.error("Error creating user:", error);
-    throw new Error("Database error occurred while creating the user.");
+    throw error;
   } finally {
     conn.release();
   }
 };
 
-const getAllUser = async () => {
-  const query = userQuery.getAllUser;
+const getAllUsers = async () => {
   const conn = await pool.getConnection();
+
   try {
-    const [rows] = await conn.query(query);
+    const [rows] = await conn.query(userQuery.getAllUsers);
     return rows;
   } catch (error) {
     console.error("Error fetching users:", error);
-    throw new Error("Database error occurred while fetching users.");
-  } finally {
-    conn.release();
-  }
-};
-
-const getUserByPhoneNumber = async (mobile) => {
-  const query = userQuery.getUserByPhoneNumber;
-  const conn = await pool.getConnection();
-  try {
-    const [rows] = await conn.query(query, [mobile]);
-    // Return true if user exists, otherwise false
-    return rows.length > 0;
-  } catch (error) {
-    console.error(`Error fetching user by phone number ${mobile}:`, error);
-    throw new Error("Database error occurred while fetching the user.");
-  } finally {
-    conn.release();
-  }
-};
-
-const getExcludeUserByPhoneNumberAndUserId = async (mobile,userId) => {
-  const query = userQuery.getExcludeUserByPhoneNumberAndUserId;
-  const conn = await pool.getConnection();
-  try {
-    const [rows] = await conn.query(query, [mobile,userId]);
-    // Return true if user exists, otherwise false
-    return rows.length > 0;
-  } catch (error) {
-    console.error(`Error fetching user by phone number ${mobile}:`, error);
-    throw new Error("Database error occurred while fetching the user By phonenumber and userId.");
+    throw error;
   } finally {
     conn.release();
   }
 };
 
 const getUserById = async (userId) => {
-  const query = userQuery.getUserById;
   const conn = await pool.getConnection();
+
   try {
-    const [rows] = await conn.query(query, [userId]);
-    // Return true if user exists, otherwise false
+    const [rows] = await conn.query(userQuery.getUserById, [userId]);
+    return rows[0] || null;
+  } catch (error) {
+    console.error("Error fetching user by ID:", error);
+    throw error;
+  } finally {
+    conn.release();
+  }
+};
+
+const getUserByKeycloakId = async (keycloakId) => {
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(
+      userQuery.getUserByKeycloakId,
+      [keycloakId]
+    );
+
+    return rows[0] || null;
+  } catch (error) {
+    console.error("Error fetching user by Keycloak ID:", error);
+    throw error;
+  } finally {
+    conn.release();
+  }
+};
+
+const checkKeycloakIdExists = async (keycloakId) => {
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(
+      userQuery.checkKeycloakIdExists,
+      [keycloakId]
+    );
+
     return rows.length > 0;
-  } catch (error) {
-    throw new Error("Database error occurred while fetching the user.");
   } finally {
     conn.release();
   }
 };
 
-// Update User in the Database
+const checkUsernameExists = async (username) => {
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(
+      userQuery.checkUsernameExists,
+      [username]
+    );
+
+    return rows.length > 0;
+  } finally {
+    conn.release();
+  }
+};
+
+const checkUsernameExistsExcludeUser = async (username, userId) => {
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(
+      userQuery.checkUsernameExistsExcludeUser,
+      [username, userId]
+    );
+
+    return rows.length > 0;
+  } finally {
+    conn.release();
+  }
+};
+
+const checkEmailExists = async (email) => {
+  if (!email) return false;
+
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(
+      userQuery.checkEmailExists,
+      [email]
+    );
+
+    return rows.length > 0;
+  } finally {
+    conn.release();
+  }
+};
+
+const checkEmailExistsExcludeUser = async (email, userId) => {
+  if (!email) return false;
+
+  const conn = await pool.getConnection();
+
+  try {
+    const [rows] = await conn.query(
+      userQuery.checkEmailExistsExcludeUser,
+      [email, userId]
+    );
+
+    return rows.length > 0;
+  } finally {
+    conn.release();
+  }
+};
+
 const updateUser = async (userId, data) => {
-  const query = userQuery.updateUser; // Assume you have an update query in your `userQuery.js`
   const conn = await pool.getConnection();
+
   try {
-    const { name, mobile, email } = data;
-    const [result] = await conn.query(query, [name, mobile, email, userId]);
-    return result.affectedRows; // Return the number of rows affected (should be 1 if successful)
+    const {
+      username = null,
+      email = null,
+      status = 1,
+      updated_by = "SYSTEM",
+    } = data;
+
+    const [result] = await conn.query(userQuery.updateUser, [
+      username,
+      email,
+      status,
+      updated_by,
+      userId,
+    ]);
+
+    return result.affectedRows;
   } catch (error) {
-    console.error("Error updating user:", error.message);
-    throw new Error("Database error occurred while updating the user.");
+    console.error("Error updating user:", error);
+    throw error;
   } finally {
     conn.release();
   }
 };
 
-// Delete User in the Database
-const deleteUser = async (userId) => {
-  const query = userQuery.deleteUser; // Assume you have a delete query in your `userQuery.js`
+const updateUserStatus = async (userId, status, updatedBy = "SYSTEM") => {
   const conn = await pool.getConnection();
+
   try {
-    const [result] = await conn.query(query, [userId]);
-    return result.affectedRows; // Return the number of rows affected (should be 1 if successful)
+    const [result] = await conn.query(userQuery.updateUserStatus, [
+      status,
+      updatedBy,
+      userId,
+    ]);
+
+    return result.affectedRows;
   } catch (error) {
-    console.error("Error deleting user:", error.message);
-    throw new Error("Database error occurred while deleting the user.");
+    console.error("Error updating user status:", error);
+    throw error;
+  } finally {
+    conn.release();
+  }
+};
+
+const deleteUser = async (userId) => {
+  const conn = await pool.getConnection();
+
+  try {
+    const [result] = await conn.query(
+      userQuery.deleteUser,
+      [userId]
+    );
+
+    return result.affectedRows;
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw error;
   } finally {
     conn.release();
   }
@@ -122,10 +222,15 @@ const deleteUser = async (userId) => {
 
 module.exports = {
   createUser,
-  getAllUser,
+  getAllUsers,
   getUserById,
-  getUserByPhoneNumber,
-  getExcludeUserByPhoneNumberAndUserId,
+  getUserByKeycloakId,
+  checkKeycloakIdExists,
+  checkUsernameExists,
+  checkUsernameExistsExcludeUser,
+  checkEmailExists,
+  checkEmailExistsExcludeUser,
   updateUser,
+  updateUserStatus,
   deleteUser,
 };

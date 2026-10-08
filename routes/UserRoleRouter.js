@@ -1,60 +1,68 @@
 const express = require("express");
 const router = express.Router();
 
-const userController = require("../controllers/userController");
+const userRoleController = require("../controllers/UserRoleController");
 const routerPath = require("./RouterPath");
 
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
 
-// Create user
+
+// Create user role
 router.post(
-  routerPath.ADD_USER,
+  routerPath.ADD_USER_ROLE,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  userController.createUser
+  userRoleController.create
 );
 
-// Get all users
+
+// Get all user roles
 router.get(
-  routerPath.GETALL_USER,
+  routerPath.GETALL_USER_ROLE,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  userController.getAllUsers
+  userRoleController.getAll
 );
 
-// Get user by ID
+
+// Get user role by ID
 router.get(
-  routerPath.GET_USER,
+  routerPath.GET_USER_ROLE,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  userController.getUserById
+  userRoleController.getById
 );
 
-// Get user by Keycloak ID
+
+// Get all roles by user ID
 router.get(
-  routerPath.GET_USER_KEYCLOAK,
+  routerPath.GET_USER_ROLES_BY_USER,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  userController.getUserByKeycloakId
+  userRoleController.getByUserId
 );
 
-// Update user
+
+// Update user role
 router.put(
-  routerPath.UPDATE_USER,
+  routerPath.UPDATE_USER_ROLE,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  userController.updateUser
+  userRoleController.update
 );
 
-// Update status
+
+// Update user role status
 router.patch(
-  routerPath.UPDATE_USER_STATUS,
+  routerPath.UPDATE_USER_ROLE_STATUS,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  userController.updateUserStatus
+  userRoleController.updateStatus
 );
 
-// Delete user
+
+// Delete user role
 router.delete(
-  routerPath.DELETE_USER,
+  routerPath.DELETE_USER_ROLE,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  userController.deleteUser
+  userRoleController.delete
 );
+
 
 module.exports = router;

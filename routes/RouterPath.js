@@ -345,6 +345,31 @@ module.exports = {
   GET_LOGIN_HISTORY_KEYCLOAK_USER_ID:
     "/getloginhistory/:tenant_id/:keycloak_user_id",
   ADD_LOGIN_HISTORY_LOGOUT: "/updateloginhistory/:login_history_id/:tenant_id",
+
+  ADD_USER: "/adduser",
+  GETALL_USER: "/getallusers",
+  GET_USER: "/getuser/:user_id",
+  GET_USER_KEYCLOAK: "/getuser/keycloak/:keycloak_id",
+  UPDATE_USER: "/updateuser/:user_id",
+  UPDATE_USER_STATUS: "/updateuserstatus/:user_id",
+  DELETE_USER: "/deleteuser/:user_id",
+
+  ADD_ROLE: "/addrole",
+  GETALL_ROLE: "/getallroles",
+  GET_ROLE: "/getrole/:role_id",
+  GET_ROLE_CODE: "/getrole/code/:role_code",
+  UPDATE_ROLE: "/updaterole/:role_id",
+  UPDATE_ROLE_STATUS: "/updaterolestatus/:role_id",
+  DELETE_ROLE: "/deleterole/:role_id",
+
+  // User Role
+  ADD_USER_ROLE: "/adduserrole",
+  GETALL_USER_ROLE: "/getalluserroles",
+  GET_USER_ROLE: "/getuserrole/:user_role_id",
+  GET_USER_ROLES_BY_USER: "/user/:user_id",
+  UPDATE_USER_ROLE: "/updateuserrole/:user_role_id",
+  UPDATE_USER_ROLE_STATUS: "/updateuserrolestatus/:user_role_id",
+  DELETE_USER_ROLE: "/deleteuserrole/:user_role_id",
 };
 
 // GET /api/tenant?page=2&limit=10

@@ -1,1086 +1,2209 @@
 generator client {
+
   provider = "prisma-client-js"
+
 }
+
+
 
 datasource db {
+
   provider = "mysql"
+
   url      = env("DATABASE_URL")
+
+}
+model users {
+  user_id       BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  keycloak_id   String    @unique(map: "uq_users_keycloak_id") @db.Char(36)
+  username      String?   @db.VarChar(100)
+  email         String?   @db.VarChar(255)
+  status        Boolean   @default(true)
+  last_login    DateTime? @db.DateTime(0)
+  created_by    String    @default("SYSTEM") @db.VarChar(30)
+  created_time  DateTime  @default(now()) @db.Timestamp(0)
+  updated_by    String?   @db.VarChar(30)
+  updated_time  DateTime? @db.Timestamp(0)
+
+  user_roles    user_roles[]
+  dentist       dentist[]
+  reception     reception[]
+  superuser     superuser[]
+  supplier      supplier[]
+  patient       patient[]
+  login_history login_history[]
+  user_activity user_activity[]
+
+  @@index([username], map: "idx_users_username")
+  @@index([email], map: "idx_users_email")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model roles {
+  role_id       BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  role_code     String    @unique(map: "uq_roles_role_code") @db.VarChar(50)
+  role_name     String    @db.VarChar(100)
+  status        Boolean   @default(true)
+  created_by    String    @default("SYSTEM") @db.VarChar(30)
+  created_time  DateTime  @default(now()) @db.Timestamp(0)
+  updated_by    String?   @db.VarChar(30)
+  updated_time  DateTime? @db.Timestamp(0)
+
+  user_roles    user_roles[]
+}
+
+model user_roles {
+  user_role_id  BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id       BigInt    @db.UnsignedBigInt
+  role_id       BigInt    @db.UnsignedBigInt
+  tenant_id     BigInt    @db.UnsignedBigInt
+  clinic_id     BigInt    @db.UnsignedBigInt
+  is_primary    Boolean   @default(false)
+  status        Boolean   @default(true)
+  created_by    String    @default("SYSTEM") @db.VarChar(30)
+  created_time  DateTime  @default(now()) @db.Timestamp(0)
+  updated_by    String?   @db.VarChar(30)
+  updated_time  DateTime? @db.Timestamp(0)
+
+  user          users     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_user_roles_user")
+  role          roles     @relation(fields: [role_id], references: [role_id], onDelete: Cascade, map: "fk_user_roles_role")
+  tenant        tenant    @relation(fields: [tenant_id], references: [tenant_id], onDelete: Cascade, map: "fk_user_roles_tenant")
+  clinic        clinic    @relation(fields: [clinic_id], references: [clinic_id], onDelete: Cascade, map: "fk_user_roles_clinic")
+
+  @@index([user_id], map: "idx_user_roles_user")
+  @@index([role_id], map: "idx_user_roles_role")
+  @@index([tenant_id], map: "idx_user_roles_tenant")
+  @@index([clinic_id], map: "idx_user_roles_clinic")
+  @@index([user_id, tenant_id], map: "idx_user_roles_user_tenant")
+  @@index([user_id, tenant_id, clinic_id], map: "idx_user_roles_user_tenant_clinic")
+  @@unique([user_id, role_id, tenant_id, clinic_id], map: "uq_user_roles_assignment")
+}
+
+
+
+
+
+// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https\://pris.ly/d/database-comments*
+
 model appointment {
+
   appointment_id           BigInt                                @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id                BigInt                                @db.UnsignedBigInt
+
   patient_id               BigInt                                @db.UnsignedBigInt
+
   dentist_id               BigInt                                @db.UnsignedBigInt
+
   clinic_id                BigInt                                @db.UnsignedBigInt
+
   room_id                  String?                               @default("00000000-0000-0000-0000-000000000000") @db.Char(36)
+
   appointment_date         DateTime                              @db.Date
+
   start_time               DateTime                              @db.Time(0)
+
   end_time                 DateTime                              @db.Time(0)
+
   status                   appointment_status                    @default(pending)
+
   appointment_final_status appointment_appointment_final_status? @default(pending)
+
   appointment_type         appointment_appointment_type?
+
   doctor_rating            Decimal?                              @db.Decimal(3, 2)
+
   feedback                 String?                               @db.Text
+
   consultation_fee         Decimal?                              @default(0.00) @db.Decimal(12, 2)
+
   discount_applied         Decimal?                              @default(0.00) @db.Decimal(12, 2)
+
   payment_status           String?                               @db.VarChar(100)
+
   min_booking_fee          Decimal?                              @default(0.00) @db.Decimal(12, 2)
+
   paid_amount              Decimal?                              @default(0.00) @db.Decimal(12, 2)
+
   rescheduled_from         BigInt?                               @db.UnsignedBigInt
+
   cancelled_by             String?                               @db.VarChar(30)
+
   cancellation_reason      String?                               @db.Text
+
   is_virtual               Boolean?                              @default(false)
+
   reminder_send            Boolean?                              @default(false)
+
   feedback_display         Boolean?                              @default(true)
+
   meeting_link             String?                               @db.VarChar(255)
+
   checkin_time             DateTime?                             @db.DateTime(0)
+
   checkout_time            DateTime?                             @db.DateTime(0)
+
   mode_of_payment          String                                @db.VarChar(100)
+
   visit_reason             String?                               @db.Text
+
   follow_up_needed         Boolean                               @default(false)
+
   reminder_method          String?                               @db.VarChar(100)
+
   notes                    String?                               @db.Text
+
   created_by               String                                @db.VarChar(30)
+
   created_time             DateTime                              @default(now()) @db.Timestamp(0)
+
   updated_by               String?                               @db.VarChar(30)
+
   updated_time             DateTime?                             @db.Timestamp(0)
+
   clinic                   clinic                                @relation(fields: [clinic_id], references: [clinic_id], map: "fk_appointment_clinic")
+
   dentist                  dentist                               @relation(fields: [dentist_id], references: [dentist_id], map: "fk_appointment_dentist")
+
   patient                  patient                               @relation(fields: [patient_id], references: [patient_id], map: "fk_appointment_patient")
+
   tenant                   tenant                                @relation(fields: [tenant_id], references: [tenant_id], map: "fk_appointment_tenant")
+
   payment                  payment[]
+
   treatment                treatment[]
 
+
+
   @@index([clinic_id], map: "fk_appointment_clinic")
+
   @@index([dentist_id], map: "fk_appointment_dentist")
+
   @@index([patient_id], map: "fk_appointment_patient")
+
   @@index([tenant_id], map: "fk_appointment_tenant")
+
   @@index([tenant_id, appointment_date, start_time, status], map: "idx_tenant_date_time_status")
+
 }
+
+
 
 model appointment_reschedules {
+
   rescheduled_id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id               BigInt    @db.UnsignedBigInt
+
   clinic_id               BigInt    @db.UnsignedBigInt
+
   dentist_id              BigInt    @db.UnsignedBigInt
+
   original_appointment_id BigInt    @db.UnsignedBigInt
+
   new_appointment_id      BigInt    @db.UnsignedBigInt
+
   previous_date           DateTime  @db.Date
+
   previous_time           DateTime  @db.Time(0)
+
   new_date                DateTime  @db.Date
+
   new_start_time          DateTime  @db.Time(0)
+
   new_end_time            DateTime  @db.Time(0)
+
   reason                  String    @db.Text
+
   charge_applicable       Boolean   @default(false)
+
   charge_amount           Decimal   @default(0.00) @db.Decimal(12, 2)
+
   rescheduled_by          String    @db.VarChar(30)
+
   rescheduled_at          DateTime? @db.Timestamp(0)
+
   created_by              String    @db.VarChar(30)
+
   created_time            DateTime  @default(now()) @db.Timestamp(0)
+
   updated_by              String?   @db.VarChar(30)
+
   updated_time            DateTime? @db.Timestamp(0)
+
   clinic                  clinic    @relation(fields: [clinic_id], references: [clinic_id], map: "fk_appointment_reschedules_clinic")
+
   dentist                 dentist   @relation(fields: [dentist_id], references: [dentist_id], map: "fk_appointment_reschedules_dentist")
+
   tenant                  tenant    @relation(fields: [tenant_id], references: [tenant_id], map: "fk_appointment_reschedules_tenant")
 
+
+
   @@index([clinic_id], map: "fk_appointment_reschedules_clinic")
+
   @@index([dentist_id], map: "fk_appointment_reschedules_dentist")
+
   @@index([tenant_id], map: "fk_appointment_reschedules_tenant")
+
 }
+
+
 
 model appointment_stats {
+
   appointment_stats_id BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id            BigInt    @db.UnsignedBigInt
+
   clinic_id            BigInt    @db.UnsignedBigInt
+
   dentist_id           BigInt?   @db.UnsignedBigInt
+
   stat_date            DateTime  @db.Date
+
   confirmed            Int?      @default(0)
+
   completed            Int?      @default(0)
+
   cancelled            Int?      @default(0)
+
   created_by           String    @default("ADMIN") @db.VarChar(30)
+
   created_time         DateTime  @default(now()) @db.Timestamp(0)
+
   updated_by           String?   @db.VarChar(30)
+
   updated_time         DateTime? @db.Timestamp(0)
 
+
+
   @@unique([tenant_id, clinic_id, dentist_id, stat_date], map: "uk_tenant_date")
+
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+
+
+// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https\://pris.ly/d/database-comments*
+
 model clinic {
+
   clinic_id                  BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id                  BigInt                    @db.UnsignedBigInt
+
   clinic_name                String                    @db.VarChar(100)
+
   email                      String?                   @db.VarChar(255)
+
   phone_number               String                    @db.VarChar(15)
+
   alternate_phone_number     String?                   @db.VarChar(15)
+
   branch                     String?                   @db.VarChar(50)
+
   website                    String?                   @db.VarChar(255)
+
   address                    String                    @db.Text
+
   city                       String                    @db.VarChar(100)
+
   landmark                   String?                   @db.VarChar(100)
+
   state                      String                    @db.VarChar(100)
+
   country                    String                    @db.VarChar(50)
+
   pin_code                   String                    @db.VarChar(10)
+
   license_number             String                    @db.VarChar(10)
+
   gst_number                 String?                   @db.VarChar(15)
+
   pan_number                 String?                   @db.VarChar(10)
+
   clinic_logo                String?                   @db.VarChar(255)
+
   established_year           Int
+
   total_doctors              Int?                      @default(0)
+
   total_patients             BigInt?                   @default(0) @db.UnsignedBigInt
+
   seating_capacity           Int?                      @default(0)
+
   number_of_assistants       Int?                      @default(0)
+
   available_services         String                    @db.LongText
+
   operating_hours            String?                   @db.LongText
+
   insurance_supported        Boolean                   @default(false)
+
   ratings                    Decimal?                  @default(0.00) @db.Decimal(3, 2)
+
   reviews_count              Int?                      @default(0)
+
   emergency_support          Boolean                   @default(false)
+
   teleconsultation_supported Boolean                   @default(false)
+
   parking_availability       Boolean                   @default(false)
+
   pharmacy                   Boolean                   @default(false)
+
   wifi                       Boolean                   @default(false)
+
   clinic_app_font            String?                   @db.VarChar(50)
+
   clinic_app_themes          String?                   @db.VarChar(50)
+
   created_by                 String                    @default("ADMIN") @db.VarChar(30)
+
   created_time               DateTime                  @default(now()) @db.Timestamp(0)
+
   updated_by                 String?                   @db.VarChar(30)
+
   updated_time               DateTime?                 @db.Timestamp(0)
+
   otp                        Boolean                   @default(false)
+
   otp_type                   clinic_otp_type?          @default(whatsapp)
+
   appointment                appointment[]
+
   appointment_reschedules    appointment_reschedules[]
+
   tenant                     tenant                    @relation(fields: [tenant_id], references: [tenant_id], map: "fk_clinic_tenant")
+
   dentist                    dentist[]
+
   expense                    expense[]
+
   patient_clinic             patient_clinic[]
+
   payment                    payment[]
+
   prescription               prescription[]
+
   purchase_orders            purchase_orders[]
+
   reception                  reception[]
+
   reference                  reference[]
+
   reminder                   reminder[]
+
   superuser                  superuser[]
+
   supplier                   supplier[]
+
   supplier_payments          supplier_payments[]
+
   supplier_products          supplier_products[]
+
   supplier_reviews           supplier_reviews[]
+
   toothdetails               toothdetails[]
+
   treatment                  treatment[]
-  user_clinic                user_clinic[]
+
+
+
 
   @@index([tenant_id], map: "fk_clinic_tenant")
+
   @@index([phone_number], map: "idx_phone_number")
+
+  user_roles                user_roles[]
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+
+
+// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.*
+
 model databasechangelog {
+
   ID            String   @db.VarChar(255)
+
   AUTHOR        String   @db.VarChar(255)
+
   FILENAME      String   @db.VarChar(255)
+
   DATEEXECUTED  DateTime @db.DateTime(0)
+
   ORDEREXECUTED Int
+
   EXECTYPE      String   @db.VarChar(10)
+
   MD5SUM        String?  @db.VarChar(35)
+
   DESCRIPTION   String?  @db.VarChar(255)
+
   COMMENTS      String?  @db.VarChar(255)
+
   TAG           String?  @db.VarChar(255)
+
   LIQUIBASE     String?  @db.VarChar(20)
+
   CONTEXTS      String?  @db.VarChar(255)
+
   LABELS        String?  @db.VarChar(255)
+
   DEPLOYMENT_ID String?  @db.VarChar(10)
 
+
+
   @@ignore
+
 }
+
+
 
 model databasechangeloglock {
+
   ID          Int       @id
+
   LOCKED      Boolean
+
   LOCKGRANTED DateTime? @db.DateTime(0)
+
   LOCKEDBY    String?   @db.VarChar(255)
+
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+
+
+// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https\://pris.ly/d/database-comments*
+
 model dentist {
+
   dentist_id                 BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+
+  user_id                 BigInt @db.UnsignedBigInt
+
   tenant_id                  BigInt                    @db.UnsignedBigInt
+
   clinic_id                  BigInt                    @db.UnsignedBigInt
-  keycloak_id                String?                   @db.Char(36)
-  username                   String?                   @db.VarChar(50)
-  password                   Bytes?                    @db.VarBinary(255)
+
+
+
+
   first_name                 String                    @db.VarChar(50)
+
   last_name                  String                    @db.VarChar(50)
+
   gender                     dentist_gender?           @default(M)
+
   date_of_birth              DateTime?                 @db.Date
+
   email                      String?                   @db.VarChar(255)
+
   phone_number               String                    @db.VarChar(15)
+
   alternate_phone_number     String?                   @db.VarChar(15)
+
   specialisation             String                    @default("") @db.VarChar(100)
+
   designation                String                    @default("") @db.VarChar(100)
+
   member_of                  String?                   @db.LongText
+
   experience_years           Int
+
   license_number             String                    @db.VarChar(20)
+
   city                       String                    @db.VarChar(100)
+
   state                      String                    @db.VarChar(100)
+
   country                    String                    @db.VarChar(50)
+
   pin_code                   String                    @db.VarChar(10)
+
   profile_picture            String?                   @db.VarChar(255)
+
   working_hours              String?                   @db.LongText
+
   available_days             String?                   @db.LongText
+
   consultation_fee           Decimal?                  @default(0.00) @db.Decimal(12, 2)
+
   currency_code              String?                   @db.VarChar(10)
+
   min_booking_fee            Decimal?                  @default(0.00) @db.Decimal(12, 2)
+
   ratings                    Decimal?                  @default(0.00) @db.Decimal(3, 2)
+
   reviews_count              Int?                      @default(0)
+
   appointment_count          Int?                      @default(0)
+
   bio                        String?                   @db.LongText
+
   teleconsultation_supported Boolean                   @default(false)
+
   languages_spoken           String?                   @db.LongText
+
   social_links               String?                   @db.LongText
+
   internship                 String?                   @db.LongText
+
   position_held              String?                   @db.LongText
+
   research_projects          String?                   @db.LongText
+
   publication                String?                   @db.LongText
+
   social_activities          String?                   @db.LongText
+
   last_login                 DateTime?                 @db.Timestamp(0)
+
   duration                   Int?
+
   status                     Boolean?                  @default(true)
+
   created_by                 String                    @db.VarChar(30)
+
   created_time               DateTime                  @default(now()) @db.Timestamp(0)
+
   updated_by                 String?                   @db.VarChar(30)
+
   updated_time               DateTime?                 @db.Timestamp(0)
+
   dentist_code               String?                   @db.VarChar(15)
+
+  user                       users                  @relation(fields: [user_id], references: [user_id], map: "fk_dentist_user")
   appointment                appointment[]
+
   appointment_reschedules    appointment_reschedules[]
+
   clinic                     clinic                    @relation(fields: [clinic_id], references: [clinic_id], map: "fk_dentist_clinic")
+
   tenant                     tenant                    @relation(fields: [tenant_id], references: [tenant_id], map: "fk_dentist_tenant")
+
   patient                    patient[]
+
   payment                    payment[]
+
   prescription               prescription[]
+
   purchase_orders            purchase_orders[]
+
   toothdetails               toothdetails[]
+
   treatment                  treatment[]
 
+
+
   @@index([clinic_id], map: "idx_clinic_id")
-  @@index([keycloak_id], map: "idx_dentist_keycloak_id")
+
+
   @@index([phone_number], map: "idx_phone_number")
+
+  @@index([user_id], map: "idx_dentist_user_id")
   @@index([tenant_id], map: "idx_tenant_id")
+  @@unique([user_id, tenant_id, clinic_id], map: "uq_dentist_user_tenant_clinic")
+
 }
+
+
 
 model document {
+
   document_id  BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+
   table_name   String    @db.VarChar(100)
+
   table_id     BigInt    @db.UnsignedBigInt
+
   field_name   String    @db.VarChar(100)
+
   file_url     String    @db.VarChar(255)
+
   description  String?   @db.VarChar(255)
+
   created_by   String    @db.VarChar(30)
+
   created_time DateTime  @default(now()) @db.Timestamp(0)
+
   updated_by   String?   @db.VarChar(30)
+
   updated_time DateTime? @db.Timestamp(0)
 
+
+
   @@index([table_name, table_id, field_name], map: "idx_table_reference")
+
 }
+
+
 
 model expense {
+
   expense_id       BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id        BigInt    @db.UnsignedBigInt
+
   clinic_id        BigInt    @db.UnsignedBigInt
+
   expense_amount   Decimal?  @default(0.00) @db.Decimal(12, 2)
+
   expense_category String?   @db.VarChar(255)
+
   expense_reason   String?   @db.VarChar(255)
+
   expense_date     DateTime? @db.Date
+
   mode_of_payment  String?   @db.VarChar(100)
+
   receipt_number   String?   @db.VarChar(100)
+
   paid_by          String?   @db.VarChar(100)
+
   paid_by_user     String?   @db.VarChar(100)
+
   paid_to          String?   @db.VarChar(100)
+
   created_by       String    @db.VarChar(30)
+
   created_time     DateTime  @default(now()) @db.Timestamp(0)
+
   updated_by       String?   @db.VarChar(30)
+
   updated_time     DateTime? @db.Timestamp(0)
+
   clinic           clinic    @relation(fields: [clinic_id], references: [clinic_id], map: "fk_expense_clinic")
+
   tenant           tenant    @relation(fields: [tenant_id], references: [tenant_id], map: "fk_expense_tenant")
 
+
+
   @@index([clinic_id], map: "fk_expense_clinic")
+
   @@index([tenant_id], map: "fk_expense_tenant")
+
 }
+
+
 
 model login_history {
+
   login_history_id BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id        BigInt?   @db.UnsignedBigInt
+
   app_name         String?   @db.VarChar(100)
-  keycloak_user_id String    @db.Char(36)
+
+  user_id         BigInt    @db.UnsignedBigInt
+
   session_id       String?   @db.VarChar(36)
+
   login_time       DateTime  @db.DateTime(0)
+
   logout_time      DateTime? @db.DateTime(0)
+
   ip_address       String?   @db.VarChar(45)
+
   user_agent       String?   @db.Text
+
   created_time     DateTime? @default(now()) @db.Timestamp(0)
 
+
+
+  user          users    @relation(fields: [user_id], references: [user_id], map: "fk_login_history_user")
+
+  @@index([user_id], map: "idx_login_history_user")
   @@index([tenant_id], map: "idx_login_history_tenant")
-  @@index([keycloak_user_id], map: "idx_login_history_user")
+
+
 }
+
+
 
 model notificationrecipients {
+
   notification_recipient_id BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
+
   notification_id           BigInt        @db.UnsignedBigInt
+
   receiver_role             String        @db.VarChar(20)
+
   receiver_id               BigInt        @db.UnsignedBigInt
+
   status                    String        @default("unread") @db.VarChar(50)
+
   created_by                String?       @db.VarChar(50)
+
   delivered_at              DateTime?     @default(now()) @db.Timestamp(0)
+
   read_at                   DateTime?     @db.Timestamp(0)
+
   notifications             notifications @relation(fields: [notification_id], references: [notification_id], onDelete: Cascade, map: "fk_notification_recipients_notification")
 
+
+
   @@index([notification_id], map: "fk_notification_recipients_notification")
+
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+
+
+// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https\://pris.ly/d/database-comments*
+
 model notifications {
+
   notification_id        BigInt                   @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id              BigInt                   @db.UnsignedBigInt
+
   clinic_id              BigInt                   @db.UnsignedBigInt
+
   sender_role            String                   @db.VarChar(20)
+
   sender_id              BigInt                   @db.UnsignedBigInt
+
   type                   String                   @db.VarChar(50)
+
   title                  String                   @db.VarChar(255)
+
   message                String?                  @db.Text
+
   reference_id           BigInt?                  @db.UnsignedBigInt
+
   created_by             String?                  @db.VarChar(50)
+
   created_time           DateTime?                @default(now()) @db.Timestamp(0)
+
   updated_by             String?                  @db.VarChar(50)
+
   updated_time           DateTime?                @db.Timestamp(0)
+
   file_url               String?                  @db.VarChar(255)
+
   notificationrecipients notificationrecipients[]
+
   tenant                 tenant                   @relation(fields: [tenant_id], references: [tenant_id], onDelete: Cascade, map: "fk_notification_tenant")
 
+
+
   @@index([tenant_id], map: "fk_notification_tenant")
+
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+
+
+// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https\://pris.ly/d/database-comments*
+
 model patient {
+
   patient_id                  BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+
+  user_id                 BigInt? @db.UnsignedBigInt
+
   tenant_id                   BigInt           @db.UnsignedBigInt
+
   patient_reference_id        String?          @db.VarChar(30)
-  keycloak_id                 String?          @db.Char(36)
-  username                    String?          @db.VarChar(50)
-  password                    Bytes?           @db.VarBinary(255)
+
+
+
+
   first_name                  String           @db.VarChar(50)
+
   last_name                   String           @db.VarChar(50)
+
   email                       String?          @db.VarChar(255)
+
   phone_number                String           @db.VarChar(15)
+
   alternate_phone_number      String?          @db.VarChar(15)
+
   profile_picture             String?          @db.VarChar(255)
+
   date_of_birth               DateTime         @db.Date
+
   gender                      patient_gender   @default(M)
+
   blood_group                 String?          @db.VarChar(10)
+
   address                     String           @db.Text
+
   city                        String           @db.VarChar(100)
+
   state                       String           @db.VarChar(100)
+
   country                     String           @db.VarChar(50)
+
   pin_code                    String           @db.VarChar(10)
+
   pre_history                 String?          @db.Text
+
   current_medications         String?          @db.Text
+
   dentist_preference          BigInt?          @db.UnsignedBigInt
+
   smoking_status              String           @db.VarChar(100)
+
   alcohol_consumption         String           @db.VarChar(100)
+
   emergency_contact_name      String           @db.VarChar(255)
+
   emergency_contact_number    String           @db.VarChar(15)
+
   insurance_provider          String?          @db.VarChar(255)
+
   insurance_policy_number     String?          @db.VarChar(10)
+
   insurance_policy_start_date DateTime?        @db.Date
+
   insurance_policy_end_date   DateTime?        @db.Date
+
   treatment_history           String?          @db.LongText
+
   appointment_count           Int?
+
   first_visit_date            DateTime?        @db.Timestamp(0)
+
   last_appointment_date       DateTime?        @db.DateTime(0)
+
   referred_by                 String?          @db.VarChar(100)
+
   profession                  String?          @db.VarChar(100)
+
   tooth_details               String?          @db.Text
+
   created_by                  String           @db.VarChar(30)
+
   created_time                DateTime         @default(now()) @db.Timestamp(0)
+
   updated_by                  String?          @db.VarChar(30)
+
   updated_time                DateTime?        @db.Timestamp(0)
+
   medical_history_notes       String?          @db.Text
+
   patient_code                String?          @db.VarChar(15)
+
+ user users? @relation(fields: [user_id], references: [user_id], map: "fk_patient_user")
   appointment                 appointment[]
+
   dentist                     dentist?         @relation(fields: [dentist_preference], references: [dentist_id], map: "fk_patient_dentist")
+
   tenant                      tenant           @relation(fields: [tenant_id], references: [tenant_id], map: "fk_patient_tenant")
+
   patient_clinic              patient_clinic[]
+
   payment                     payment[]
+
   prescription                prescription[]
+
   toothdetails                toothdetails[]
+
   treatment                   treatment[]
 
+
+
   @@index([dentist_preference], map: "fk_patient_dentist")
+
+  @@index([user_id], map: "idx_patient_user_id")
   @@index([tenant_id], map: "fk_patient_tenant")
-  @@index([keycloak_id], map: "idx_patient_keycloak_id")
+  @@unique([user_id, tenant_id], map: "uq_patient_user_tenant")
+
+
 }
+
+
 
 model patient_clinic {
+
   patient_clinic_id BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+
   patient_id        BigInt    @db.UnsignedBigInt
+
   clinic_id         BigInt    @db.UnsignedBigInt
+
   created_by        String    @db.VarChar(50)
+
   created_time      DateTime? @default(now()) @db.Timestamp(0)
+
   updated_by        String?   @db.VarChar(50)
+
   updated_time      DateTime? @db.Timestamp(0)
+
   clinic            clinic    @relation(fields: [clinic_id], references: [clinic_id], onDelete: Cascade, onUpdate: Restrict, map: "fk_patient_clinic_clinic")
+
   patient           patient   @relation(fields: [patient_id], references: [patient_id], onDelete: Cascade, onUpdate: Restrict, map: "fk_patient_clinic_patient")
 
+
+
   @@unique([patient_id, clinic_id], map: "uk_patient_clinic")
+
   @@index([clinic_id], map: "fk_patient_clinic_clinic")
+
 }
+
+
 
 model payment {
+
   payment_id        BigInt               @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id         BigInt               @db.UnsignedBigInt
+
   clinic_id         BigInt               @db.UnsignedBigInt
+
   patient_id        BigInt               @db.UnsignedBigInt
+
   dentist_id        BigInt               @db.UnsignedBigInt
+
   appointment_id    BigInt               @db.UnsignedBigInt
+
   amount            Decimal?             @default(0.00) @db.Decimal(12, 2)
+
   discount_applied  Decimal?             @default(0.00) @db.Decimal(12, 2)
+
   total_amount      Decimal?             @default(0.00) @db.Decimal(12, 2)
+
   payment_for       payment_payment_for?
+
   final_amount      Decimal?             @default(0.00) @db.Decimal(12, 2)
+
   mode_of_payment   String?              @db.VarChar(100)
+
   payment_source    String?              @db.VarChar(100)
+
   payment_reference String?              @db.Text
+
   payment_status    String?              @db.VarChar(100)
+
   payment_verified  Boolean?             @default(false)
+
   receipt_number    String?              @db.VarChar(25)
+
   insurance_number  String?              @db.VarChar(25)
+
   payment_date      DateTime?            @db.DateTime(0)
+
   created_by        String               @db.VarChar(30)
+
   created_time      DateTime             @default(now()) @db.Timestamp(0)
+
   updated_by        String?              @db.VarChar(30)
+
   updated_time      DateTime?            @db.Timestamp(0)
+
   appointment       appointment          @relation(fields: [appointment_id], references: [appointment_id], map: "fk_payment_appointment")
+
   clinic            clinic               @relation(fields: [clinic_id], references: [clinic_id], map: "fk_payment_clinic")
+
   dentist           dentist              @relation(fields: [dentist_id], references: [dentist_id], map: "fk_payment_dentist")
+
   patient           patient              @relation(fields: [patient_id], references: [patient_id], map: "fk_payment_patient")
+
   tenant            tenant               @relation(fields: [tenant_id], references: [tenant_id], map: "fk_payment_tenant")
 
+
+
   @@index([appointment_id], map: "fk_payment_appointment")
+
   @@index([clinic_id], map: "fk_payment_clinic")
+
   @@index([dentist_id], map: "fk_payment_dentist")
+
   @@index([patient_id], map: "fk_payment_patient")
+
   @@index([tenant_id], map: "fk_payment_tenant")
+
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+
+
+// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https\://pris.ly/d/database-comments*
+
 model prescription {
+
   prescription_id BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id       BigInt    @db.UnsignedBigInt
+
   clinic_id       BigInt    @db.UnsignedBigInt
+
   patient_id      BigInt    @db.UnsignedBigInt
+
   dentist_id      BigInt    @db.UnsignedBigInt
+
   treatment_id    BigInt    @db.UnsignedBigInt
+
   medication      String?   @db.Text
+
   generic_name    String?   @db.VarChar(255)
+
   brand_name      String?   @db.VarChar(255)
+
   dosage          Int?      @default(0)
+
   frequency       String?   @db.Text
+
   quantity        Int?      @default(0)
+
   refill_allowed  Boolean?  @default(false)
+
   refill_count    Int?      @default(0)
+
   side_effects    String?   @db.Text
+
   start_date      DateTime? @db.Date
+
   end_date        DateTime? @db.Date
+
   instructions    String?   @db.Text
+
   notes           String?   @db.Text
+
   is_active       Boolean   @default(true)
+
   created_by      String    @db.VarChar(30)
+
   created_time    DateTime  @default(now()) @db.Timestamp(0)
+
   updated_by      String?   @db.VarChar(30)
+
   updated_time    DateTime? @db.Timestamp(0)
+
   clinic          clinic    @relation(fields: [clinic_id], references: [clinic_id], map: "fk_prescription_clinic")
+
   dentist         dentist   @relation(fields: [dentist_id], references: [dentist_id], map: "fk_prescription_dentist")
+
   patient         patient   @relation(fields: [patient_id], references: [patient_id], map: "fk_prescription_patient")
+
   tenant          tenant    @relation(fields: [tenant_id], references: [tenant_id], map: "fk_prescription_tenant")
+
   treatment       treatment @relation(fields: [treatment_id], references: [treatment_id], map: "fk_prescription_treatment")
 
+
+
   @@index([clinic_id], map: "fk_prescription_clinic")
+
   @@index([dentist_id], map: "fk_prescription_dentist")
+
   @@index([patient_id], map: "fk_prescription_patient")
+
   @@index([tenant_id], map: "fk_prescription_tenant")
+
   @@index([treatment_id], map: "fk_prescription_treatment")
+
 }
+
+
 
 model purchase_orders {
+
   purchase_order_id   BigInt                  @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id           BigInt                  @db.UnsignedBigInt
+
   clinic_id           BigInt                  @db.UnsignedBigInt
+
   dentist_id          BigInt?                 @db.UnsignedBigInt
+
   supplier_id         BigInt                  @db.UnsignedBigInt
+
   supplier_product_id BigInt                  @db.UnsignedBigInt
+
   order_number        String?                 @db.VarChar(100)
+
   order_date          DateTime?               @db.Date
+
   product_name        String?                 @db.VarChar(100)
+
   quantity            Int?
+
   total_amount        Decimal?                @db.Decimal(12, 2)
+
   status              purchase_orders_status? @default(pending)
+
   delivery_date       DateTime?               @db.Date
+
   created_by          String                  @db.VarChar(30)
+
   created_time        DateTime                @default(now()) @db.Timestamp(0)
+
   updated_by          String?                 @db.VarChar(30)
+
   updated_time        DateTime?               @db.Timestamp(0)
+
   clinic              clinic                  @relation(fields: [clinic_id], references: [clinic_id], map: "fk_po_clinic")
+
   dentist             dentist?                @relation(fields: [dentist_id], references: [dentist_id], onDelete: Restrict, map: "fk_po_dentist")
+
   supplier            supplier                @relation(fields: [supplier_id], references: [supplier_id], map: "fk_po_supplier")
+
   supplier_products   supplier_products       @relation(fields: [supplier_product_id], references: [supplier_product_id], map: "fk_po_supplier_product")
+
   tenant              tenant                  @relation(fields: [tenant_id], references: [tenant_id], map: "fk_po_tenant")
+
   supplier_payments   supplier_payments[]
+
   supplier_reviews    supplier_reviews[]
 
+
+
   @@index([clinic_id], map: "fk_purchase_order_clinic")
+
   @@index([dentist_id], map: "fk_purchase_order_dentist")
+
   @@index([supplier_id], map: "fk_purchase_order_supplier")
+
   @@index([supplier_product_id], map: "fk_purchase_order_supplier_product")
+
   @@index([tenant_id], map: "fk_purchase_order_tenant")
+
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+
+
+// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https\://pris.ly/d/database-comments*
+
 model reception {
+
   reception_id           BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+
+  user_id                 BigInt @db.UnsignedBigInt
+
   tenant_id              BigInt           @db.UnsignedBigInt
+
   clinic_id              BigInt           @db.UnsignedBigInt
-  keycloak_id            String?          @db.Char(36)
-  username               String?          @db.VarChar(50)
-  password               Bytes?           @db.VarBinary(255)
+
+
+
+
   email                  String?          @db.VarChar(255)
+
   phone_number           String           @db.VarChar(15)
+
   alternate_phone_number String?          @db.VarChar(15)
+
   profile_picture        String?          @db.VarChar(255)
+
   date_of_birth          DateTime         @db.Date
+
   gender                 reception_gender @default(M)
+
   status                 Boolean?         @default(true)
+
   address                String           @db.Text
+
   city                   String           @db.VarChar(100)
+
   state                  String           @db.VarChar(100)
+
   country                String           @db.VarChar(50)
+
   pincode                String           @db.VarChar(10)
+
   last_login             DateTime?        @db.DateTime(0)
+
   created_by             String           @db.VarChar(30)
+
   created_time           DateTime         @default(now()) @db.Timestamp(0)
+
   updated_by             String?          @db.VarChar(30)
+
   updated_time           DateTime?        @db.Timestamp(0)
+
   first_name             String           @db.VarChar(100)
+
   last_name              String           @db.VarChar(100)
+
   reception_code         String?          @db.VarChar(15)
+
+  user                   users             @relation(fields: [user_id], references: [user_id], map: "fk_reception_user")
   clinic                 clinic           @relation(fields: [clinic_id], references: [clinic_id], map: "fk_reception_clinic")
+
   tenant                 tenant           @relation(fields: [tenant_id], references: [tenant_id], map: "fk_reception_tenant")
 
+
+
   @@index([clinic_id], map: "fk_reception_clinic")
+
+  @@index([user_id], map: "idx_reception_user_id")
   @@index([tenant_id], map: "fk_reception_tenant")
-  @@index([keycloak_id], map: "idx_reception_keycloak_id")
+  @@unique([user_id, tenant_id, clinic_id], map: "uq_reception_user_tenant_clinic")
+
+
 }
+
+
 
 model reference {
+
   referral_reference_id BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id             BigInt    @db.UnsignedBigInt
+
   clinic_id             BigInt    @db.UnsignedBigInt
+
   sender_name           String    @db.VarChar(255)
+
   receiver_name         String    @db.VarChar(255)
+
   sender_keycloak_id    String    @db.VarChar(255)
+
   receiver_phone        String    @db.VarChar(30)
+
   reference_message     String    @db.Text
+
   reference_image       String?   @db.VarChar(255)
+
   created_by            String    @db.VarChar(30)
+
   created_time          DateTime  @default(now()) @db.Timestamp(0)
+
   updated_by            String?   @db.VarChar(30)
+
   updated_time          DateTime? @db.Timestamp(0)
+
   receiver_email        String?   @db.VarChar(255)
+
   clinic                clinic    @relation(fields: [clinic_id], references: [clinic_id], map: "fk_reference_clinic")
+
   tenant                tenant    @relation(fields: [tenant_id], references: [tenant_id], map: "fk_reference_tenant")
 
+
+
   @@index([clinic_id], map: "fk_reference_clinic")
+
   @@index([tenant_id], map: "fk_reference_tenant")
+
   @@index([sender_keycloak_id], map: "idx_table_reference")
+
 }
+
+
 
 model reminder {
+
   reminder_id         BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id           BigInt                    @db.UnsignedBigInt
+
   clinic_id           BigInt                    @db.UnsignedBigInt
+
   dentist_id          BigInt?                   @db.UnsignedBigInt
+
   title               String                    @db.VarChar(255)
+
   description         String?                   @db.Text
+
   reminder_repeat     reminder_reminder_repeat?
+
   category            String?                   @db.VarChar(100)
+
   reminder_type       String?                   @db.VarChar(100)
+
   type                reminder_type
+
   is_recurring        Boolean?
+
   start_date          DateTime                  @db.Date
+
   time                DateTime                  @db.Time(0)
+
   repeat_interval     Int                       @default(1)
+
   repeat_count        Int                       @default(0)
+
   repeat_weekdays     String?                   @db.VarChar(20)
+
   monthly_week        String?                   @db.Text
+
   monthly_weekdays    String?                   @db.Text
+
   repeat_end_date     DateTime?                 @db.Date
+
   monthly_option      String?                   @db.VarChar(20)
+
   notify              Boolean?                  @default(false)
+
   notify_before_hours Int?
+
   reminder_reason     String?                   @db.VarChar(255)
+
   status              String?                   @db.VarChar(20)
+
   created_by          String                    @db.VarChar(30)
+
   created_time        DateTime                  @default(now()) @db.Timestamp(0)
+
   updated_by          String?                   @db.VarChar(30)
+
   updated_time        DateTime?                 @db.Timestamp(0)
+
   clinic              clinic                    @relation(fields: [clinic_id], references: [clinic_id], map: "fk_reminder_clinic")
+
   tenant              tenant                    @relation(fields: [tenant_id], references: [tenant_id], map: "fk_reminder_tenant")
 
+
+
   @@index([clinic_id], map: "fk_reminder_clinic")
+
   @@index([tenant_id], map: "fk_reminder_tenant")
+
 }
+
+
 
 model statustype {
+
   status_type_id BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+
   status_type    String          @unique(map: "uk_status_type") @db.VarChar(100)
+
   created_by     String          @db.VarChar(30)
+
   created_time   DateTime        @default(now()) @db.Timestamp(0)
+
   updated_by     String?         @db.VarChar(30)
+
   updated_time   DateTime?       @db.Timestamp(0)
+
   statustypesub  statustypesub[]
+
 }
+
+
 
 model statustypesub {
+
   status_type_sub_id  BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id           BigInt     @db.UnsignedBigInt
+
   status_type_id      BigInt     @db.UnsignedBigInt
+
   status_type_sub     String     @db.VarChar(100)
+
   status_type_sub_ref String     @db.VarChar(100)
+
   created_by          String     @db.VarChar(30)
+
   created_time        DateTime   @default(now()) @db.Timestamp(0)
+
   updated_by          String?    @db.VarChar(30)
+
   updated_time        DateTime?  @db.Timestamp(0)
+
   statustype          statustype @relation(fields: [status_type_id], references: [status_type_id], map: "fk_statustypesub_status_type")
+
   tenant              tenant     @relation(fields: [tenant_id], references: [tenant_id], map: "fk_statustypesub_tenant")
 
+
+
   @@index([tenant_id], map: "fk_statustypesub_tenant")
+
   @@index([status_type_id], map: "idx_status_type_id")
+
 }
+
+
 
 model superuser {
+
   superuser_id           BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+
+  user_id                 BigInt @db.UnsignedBigInt
+
   tenant_id              BigInt           @db.UnsignedBigInt
+
   clinic_id              BigInt           @db.UnsignedBigInt
-  keycloak_id            String?          @db.Char(36)
-  username               String?          @db.VarChar(50)
-  password               Bytes?           @db.VarBinary(255)
+
+
+
+
   superuser_code         String?          @db.VarChar(15)
+
   first_name             String           @db.VarChar(50)
+
   last_name              String           @db.VarChar(50)
+
   email                  String?          @db.VarChar(255)
+
   phone_number           String           @db.VarChar(15)
+
   alternate_phone_number String?          @db.VarChar(15)
+
   profile_picture        String?          @db.VarChar(255)
+
   date_of_birth          DateTime         @db.Date
+
   gender                 superuser_gender @default(M)
+
   status                 Boolean?         @default(true)
+
   address                String           @db.Text
+
   city                   String           @db.VarChar(100)
+
   state                  String           @db.VarChar(100)
+
   country                String           @db.VarChar(50)
+
   pincode                String           @db.VarChar(10)
+
   last_login             DateTime?        @db.DateTime(0)
+
   created_by             String           @db.VarChar(30)
+
   created_time           DateTime         @default(now()) @db.Timestamp(0)
+
   updated_by             String?          @db.VarChar(30)
+
   updated_time           DateTime?        @db.Timestamp(0)
+
+  user                   users             @relation(fields: [user_id], references: [user_id], map: "fk_superuser_user")
   clinic                 clinic           @relation(fields: [clinic_id], references: [clinic_id], map: "fk_superuser_clinic")
+
   tenant                 tenant           @relation(fields: [tenant_id], references: [tenant_id], map: "fk_superuser_tenant")
 
+
+
   @@index([clinic_id], map: "fk_superuser_clinic")
+
+  @@index([user_id], map: "idx_superuser_user_id")
   @@index([tenant_id], map: "fk_superuser_tenant")
-  @@index([keycloak_id], map: "idx_superuser_keycloak_id")
+  @@unique([user_id, tenant_id, clinic_id], map: "uq_superuser_user_tenant_clinic")
+
+
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+
+
+// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https\://pris.ly/d/database-comments*
+
 model supplier {
+
   supplier_id            BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
+
+  user_id                 BigInt @db.UnsignedBigInt
+
   supplier_code          String?                @unique(map: "uq_supplier_code") @db.VarChar(50)
+
   tenant_id              BigInt                 @db.UnsignedBigInt
+
   clinic_id              BigInt                 @db.UnsignedBigInt
-  keycloak_id            String?                @db.Char(36)
-  username               String?                @db.VarChar(50)
-  password               Bytes?                 @db.VarBinary(255)
+
+
+
+
   category               String?                @db.VarChar(100)
+
   status                 Boolean?               @default(true)
+
   email                  String?                @db.VarChar(150)
+
   phone_number           String                 @db.VarChar(15)
+
   alternate_phone_number String?                @db.VarChar(15)
+
   logo_url               String?                @db.VarChar(255)
+
   fax                    String?                @db.VarChar(50)
+
   website                String?                @db.VarChar(255)
+
   gst_number             String?                @db.VarChar(50)
+
   tax_id                 String?                @db.VarChar(50)
+
   pan_number             String?                @db.VarChar(50)
+
   mode_of_payment        String?                @db.VarChar(100)
+
   preferred_currency     String?                @db.VarChar(10)
+
   credit_limit           Decimal?               @db.Decimal(12, 2)
+
   opening_balance        Decimal?               @db.Decimal(12, 2)
+
   notes                  String?                @db.Text
+
   address_type           supplier_address_type? @default(billing)
+
   address                String?                @db.VarChar(100)
+
   city                   String?                @db.VarChar(100)
+
   state                  String?                @db.VarChar(100)
+
   postal_code            String?                @db.VarChar(10)
+
   country                String?                @db.VarChar(100)
+
   created_by             String                 @db.VarChar(30)
+
   created_time           DateTime               @default(now()) @db.Timestamp(0)
+
   updated_by             String?                @db.VarChar(30)
+
   updated_time           DateTime?              @db.Timestamp(0)
+
   gender                 supplier_gender        @default(M)
+
   first_name             String                 @db.VarChar(100)
+
   last_name              String                 @db.VarChar(100)
+
+  user                  users                @relation(fields: [user_id], references: [user_id], map: "fk_supplier_user")
   purchase_orders        purchase_orders[]
+
   clinic                 clinic                 @relation(fields: [clinic_id], references: [clinic_id], map: "fk_supplier_clinic")
+
   tenant                 tenant                 @relation(fields: [tenant_id], references: [tenant_id], map: "fk_supplier_tenant")
+
   supplier_payments      supplier_payments[]
+
   supplier_products      supplier_products[]
+
   supplier_reviews       supplier_reviews[]
 
+
+
   @@index([clinic_id], map: "fk_supplier_clinic")
+
+  @@index([user_id], map: "idx_supplier_user_id")
   @@index([tenant_id], map: "fk_supplier_tenant")
-  @@index([keycloak_id], map: "idx_supplier_keycloak_id")
+  @@unique([user_id, tenant_id, clinic_id], map: "uq_supplier_user_tenant_clinic")
+
+
 }
+
+
 
 model supplier_payments {
+
   supplier_payment_id        BigInt                                   @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id                  BigInt                                   @db.UnsignedBigInt
+
   clinic_id                  BigInt                                   @db.UnsignedBigInt
+
   supplier_id                BigInt                                   @db.UnsignedBigInt
+
   purchase_order_id          BigInt                                   @db.UnsignedBigInt
+
   amount                     Decimal                                  @db.Decimal(12, 2)
+
   paid_amount                Decimal?                                 @default(0.00) @db.Decimal(12, 2)
+
   balance_amount             Decimal?                                 @default(0.00) @db.Decimal(12, 2)
+
   supplier_payment_documents String?                                  @db.Text
+
   mode_of_payment            String?                                  @db.VarChar(50)
+
   receipt_number             String?                                  @db.VarChar(100)
+
   bank_name                  String?                                  @db.VarChar(100)
+
   bank_account_number        String?                                  @db.VarChar(100)
+
   bank_ifsc                  String?                                  @db.VarChar(20)
+
   transaction_id             String?                                  @db.VarChar(100)
+
   payment_date               DateTime?                                @db.Date
+
   created_by                 String                                   @db.VarChar(30)
+
   created_time               DateTime                                 @default(now()) @db.Timestamp(0)
+
   updated_by                 String?                                  @db.VarChar(30)
+
   updated_time               DateTime?                                @db.Timestamp(0)
+
   supplier_payment_type      supplier_payments_supplier_payment_type? @default(SP)
+
   clinic                     clinic                                   @relation(fields: [clinic_id], references: [clinic_id], map: "fk_sp_clinic")
+
   purchase_orders            purchase_orders                          @relation(fields: [purchase_order_id], references: [purchase_order_id], onDelete: Cascade, map: "fk_sp_purchase_order")
+
   supplier                   supplier                                 @relation(fields: [supplier_id], references: [supplier_id], onDelete: Cascade, map: "fk_sp_supplier")
+
   tenant                     tenant                                   @relation(fields: [tenant_id], references: [tenant_id], map: "fk_sp_tenant")
 
+
+
   @@index([clinic_id], map: "fk_sp_clinic")
+
   @@index([purchase_order_id], map: "fk_sp_purchase_order")
+
   @@index([supplier_id], map: "fk_sp_supplier")
+
   @@index([tenant_id], map: "fk_sp_tenant")
+
 }
+
+
 
 model supplier_products {
+
   supplier_product_id BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id           BigInt            @db.UnsignedBigInt
+
   clinic_id           BigInt            @db.UnsignedBigInt
+
   supplier_id         BigInt            @db.UnsignedBigInt
+
   product_name        String?           @db.VarChar(255)
+
   description         String?           @db.Text
+
   image_url           String?           @db.VarChar(255)
+
   unit_price          Decimal?          @db.Decimal(12, 2)
+
   unit                String?           @db.VarChar(50)
+
   moq                 Int?
+
   lead_time_days      Int?
+
   currency_code       String            @db.VarChar(10)
+
   active              Boolean?          @default(true)
+
   created_by          String            @db.VarChar(30)
+
   created_time        DateTime          @default(now()) @db.Timestamp(0)
+
   updated_by          String?           @db.VarChar(30)
+
   updated_time        DateTime?         @db.Timestamp(0)
+
   purchase_orders     purchase_orders[]
+
   clinic              clinic            @relation(fields: [clinic_id], references: [clinic_id], map: "fk_supplier_product_clinic")
+
   supplier            supplier          @relation(fields: [supplier_id], references: [supplier_id], map: "fk_supplier_product_supplier")
+
   tenant              tenant            @relation(fields: [tenant_id], references: [tenant_id], map: "fk_supplier_product_tenant")
 
+
+
   @@index([clinic_id], map: "fk_supplier_product_clinic")
+
   @@index([supplier_id], map: "fk_supplier_product_supplier")
+
   @@index([tenant_id], map: "fk_supplier_product_tenant")
+
 }
+
+
 
 model supplier_reviews {
+
   supplier_review_id   BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id            BigInt          @db.UnsignedBigInt
+
   clinic_id            BigInt          @db.UnsignedBigInt
+
   supplier_id          BigInt          @db.UnsignedBigInt
+
   purchase_order_id    BigInt          @db.UnsignedBigInt
+
   rating_quality       Int?
+
   rating_delivery      Int?
+
   rating_communication Int?
+
   comment              String?         @db.Text
+
   reviewed_by          String          @db.VarChar(30)
+
   created_by           String          @db.VarChar(30)
+
   created_time         DateTime        @default(now()) @db.Timestamp(0)
+
   updated_by           String?         @db.VarChar(30)
+
   updated_time         DateTime?       @db.Timestamp(0)
+
   clinic               clinic          @relation(fields: [clinic_id], references: [clinic_id], map: "fk_supplier_review_clinic")
+
   purchase_orders      purchase_orders @relation(fields: [purchase_order_id], references: [purchase_order_id], map: "fk_supplier_review_purchase_order")
+
   supplier             supplier        @relation(fields: [supplier_id], references: [supplier_id], map: "fk_supplier_review_supplier")
+
   tenant               tenant          @relation(fields: [tenant_id], references: [tenant_id], map: "fk_supplier_review_tenant")
 
+
+
   @@index([clinic_id], map: "fk_supplier_review_clinic")
+
   @@index([purchase_order_id], map: "fk_supplier_review_purchase_order")
+
   @@index([supplier_id], map: "fk_supplier_review_supplier")
+
   @@index([tenant_id], map: "fk_supplier_review_tenant")
+
 }
+
+
 
 model tenant {
+
   tenant_id               BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_name             String                    @db.VarChar(50)
+
   tenant_domain           String                    @db.VarChar(255)
+
   created_time            DateTime                  @default(now()) @db.Timestamp(0)
+
   created_by              String                    @default("ADMIN") @db.VarChar(30)
+
   updated_time            DateTime?                 @db.Timestamp(0)
+
   updated_by              String?                   @db.VarChar(30)
+
   tenant_app_name         String?                   @db.VarChar(100)
+
   tenant_app_logo         String?                   @db.VarChar(255)
+
   tenant_app_font         String?                   @db.VarChar(50)
+
   tenant_app_themes       String?                   @db.VarChar(50)
+
   appointment             appointment[]
+
   appointment_reschedules appointment_reschedules[]
+
   clinic                  clinic[]
+
   dentist                 dentist[]
+
   expense                 expense[]
+
   notifications           notifications[]
+
   patient                 patient[]
+
   payment                 payment[]
+
   prescription            prescription[]
+
   purchase_orders         purchase_orders[]
+
   reception               reception[]
+
   reference               reference[]
+
   reminder                reminder[]
+
   statustypesub           statustypesub[]
+
   superuser               superuser[]
+
   supplier                supplier[]
+
   supplier_payments       supplier_payments[]
+
   supplier_products       supplier_products[]
+
   supplier_reviews        supplier_reviews[]
+
   toothdetails            toothdetails[]
+
   treatment               treatment[]
-  user_clinic             user_clinic[]
+
+
+  user_roles              user_roles[]
 }
+
+
 
 model toothdetails {
+
   toothdetails_id BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id       BigInt    @db.UnsignedBigInt
+
   clinic_id       BigInt    @db.UnsignedBigInt
+
   dentist_id      BigInt    @db.UnsignedBigInt
+
   patient_id      BigInt    @db.UnsignedBigInt
+
   tooth_id        Int       @db.UnsignedTinyInt
+
   tooth_name      String    @db.VarChar(100)
+
   tooth_position  String    @db.VarChar(100)
+
   disease_type    String    @db.VarChar(100)
+
   disease_name    String    @db.VarChar(100)
+
   treatment_date  DateTime  @db.Date
+
   description     String?   @db.Text
+
   created_by      String    @db.VarChar(30)
+
   created_time    DateTime  @default(now()) @db.Timestamp(0)
+
   updated_by      String?   @db.VarChar(30)
+
   updated_time    DateTime? @db.Timestamp(0)
+
   clinic          clinic    @relation(fields: [clinic_id], references: [clinic_id], map: "fk_toothdetails_clinic")
+
   dentist         dentist   @relation(fields: [dentist_id], references: [dentist_id], map: "fk_toothdetails_dentist")
+
   patient         patient   @relation(fields: [patient_id], references: [patient_id], map: "fk_toothdetails_patient")
+
   tenant          tenant    @relation(fields: [tenant_id], references: [tenant_id], map: "fk_toothdetails_tenant")
 
+
+
   @@index([clinic_id], map: "fk_toothdetails_clinic")
+
   @@index([dentist_id], map: "fk_toothdetails_dentist")
+
   @@index([patient_id], map: "fk_toothdetails_patient")
+
   @@index([tenant_id], map: "fk_toothdetails_tenant")
+
   @@index([treatment_date], map: "idx_toothdetails_treatment_date")
+
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+
+
+// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https\://pris.ly/d/database-comments*
+
 model treatment {
+
   treatment_id        BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id           BigInt         @db.UnsignedBigInt
+
   appointment_id      BigInt         @db.UnsignedBigInt
+
   patient_id          BigInt         @db.UnsignedBigInt
+
   dentist_id          BigInt         @db.UnsignedBigInt
+
   clinic_id           BigInt         @db.UnsignedBigInt
+
   diagnosis           String?        @db.Text
+
   treatment_procedure String?        @db.Text
+
   treatment_type      String         @db.VarChar(100)
+
   treatment_status    String         @db.VarChar(100)
+
   treatment_date      DateTime       @db.Date
+
   cost                Decimal        @default(0.00) @db.Decimal(12, 2)
+
   duration            String         @db.VarChar(50)
+
   complications       String?        @db.Text
+
   follow_up_required  Boolean        @default(false)
+
   follow_up_date      DateTime?      @db.Date
+
   follow_up_notes     String?        @db.Text
+
   anesthesia_used     Boolean        @default(false)
+
   anesthesia_type     String?        @db.VarChar(100)
+
   technician_assisted String?        @db.VarChar(255)
+
   notes               String?        @db.Text
+
   created_by          String         @db.VarChar(30)
+
   created_time        DateTime       @default(now()) @db.Timestamp(0)
+
   updated_by          String?        @db.VarChar(30)
+
   updated_time        DateTime?      @db.Timestamp(0)
+
   tax_catalog         String?        @db.VarChar(100)
+
   tax_percentage      Decimal?       @db.Decimal(5, 2)
+
   prescription        prescription[]
+
   appointment         appointment    @relation(fields: [appointment_id], references: [appointment_id], map: "fk_treatment_appointment")
+
   clinic              clinic         @relation(fields: [clinic_id], references: [clinic_id], map: "fk_treatment_clinic")
+
   dentist             dentist        @relation(fields: [dentist_id], references: [dentist_id], map: "fk_treatment_dentist")
+
   patient             patient        @relation(fields: [patient_id], references: [patient_id], map: "fk_treatment_patient")
+
   tenant              tenant         @relation(fields: [tenant_id], references: [tenant_id], map: "fk_treatment_tenant")
 
+
+
   @@index([appointment_id], map: "fk_treatment_appointment")
+
   @@index([clinic_id], map: "fk_treatment_clinic")
+
   @@index([dentist_id], map: "fk_treatment_dentist")
+
   @@index([patient_id], map: "fk_treatment_patient")
+
   @@index([tenant_id], map: "fk_treatment_tenant")
+
 }
+
+
 
 model user_activity {
+
   user_activity_id BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+
   tenant_id        BigInt?   @db.UnsignedBigInt
+
   app_name         String?   @db.VarChar(100)
-  keycloak_user_id String    @db.Char(36)
+
+  user_id         BigInt    @db.UnsignedBigInt
+
   activity_type    String    @db.VarChar(100)
+
   activity_desc    String?   @db.Text
+
   ip_address       String?   @db.VarChar(45)
+
   user_agent       String?   @db.Text
+
   activity_time    DateTime? @default(now()) @db.Timestamp(0)
 
+
+
+  user          users    @relation(fields: [user_id], references: [user_id], map: "fk_user_activity_user")
+
+  @@index([user_id], map: "idx_user_activity_user")
   @@index([tenant_id], map: "idx_user_activity_tenant")
-  @@index([keycloak_user_id], map: "idx_user_activity_user")
+
+
 }
 
-model user_clinic {
-  user_clinic_id BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  user_id        BigInt    @db.UnsignedBigInt
-  user_name      String    @db.VarChar(100)
-  role           String    @db.VarChar(50)
-  keycloak_id    String?   @db.Char(36)
-  tenant_id      BigInt?   @db.UnsignedBigInt
-  clinic_id      BigInt    @db.UnsignedBigInt
-  created_by     String    @db.VarChar(30)
-  created_time   DateTime  @default(now()) @db.Timestamp(0)
-  updated_by     String?   @db.VarChar(30)
-  updated_time   DateTime? @db.Timestamp(0)
-  clinic         clinic    @relation(fields: [clinic_id], references: [clinic_id], onDelete: Cascade, map: "fk_user_clinic_clinic")
-  tenant         tenant?   @relation(fields: [tenant_id], references: [tenant_id], onDelete: Cascade, map: "fk_user_clinic_tenant")
 
-  @@index([clinic_id], map: "fk_user_clinic_clinic")
-  @@index([tenant_id], map: "fk_user_clinic_tenant")
-  @@index([keycloak_id], map: "idx_user_clinic_keycloak")
-}
+
+
 
 enum reminder_reminder_repeat {
+
   daily
+
   weekly
+
   monthly
+
   yearly
+
 }
+
+
 
 enum dentist_gender {
+
   M
+
   F
+
   TG
+
 }
+
+
 
 enum appointment_status {
+
   pending
+
   confirmed
+
   checkedin
+
   inprogress
+
   completed
+
   cancelled
+
   clinic_cancelled
+
   noshow
+
   rescheduled
+
   followup
+
   rejected
+
   expired
+
   payment_pending
+
   paid
+
 }
+
+
 
 enum payment_payment_for {
+
   booking
+
   treatment
+
   late
+
 }
+
+
 
 enum reminder_type {
+
   reminder
+
   todo
+
 }
+
+
 
 enum appointment_appointment_final_status {
+
   pending
+
   inprogress
+
   completed
+
   fully_completed
+
   cancelled
+
   pending_payment
+
 }
+
+
 
 enum appointment_appointment_type {
+
   video
+
   audio
+
 }
+
+
 
 enum purchase_orders_status {
+
   pending
+
   confirmed
+
   shipped
+
   delivered
+
   cancelled
+
 }
+
+
 
 enum reception_gender {
+
   M
+
   F
+
   TG
+
 }
+
+
 
 enum patient_gender {
+
   M
+
   F
+
   TG
+
 }
+
+
 
 enum superuser_gender {
+
   M
+
   F
+
   TG
+
 }
+
+
 
 enum supplier_payments_supplier_payment_type {
+
   SP
+
   FP
+
 }
+
+
 
 enum supplier_address_type {
+
   billing
+
   shipping
+
   office
+
 }
+
+
 
 enum supplier_gender {
+
   M
+
   F
+
   TG
+
 }
 
+
+
 enum clinic_otp_type {
+
   whatsapp
+
   email
+
   sms
+
 }
+

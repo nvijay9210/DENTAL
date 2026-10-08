@@ -1,62 +1,141 @@
 const userService = require("../services/userService");
-const { createUserValidation, updateUserValidation } = require("../validations/userValidation");
+const {
+  validateCreateUser,
+  validateUpdateUser,
+  validateStatusUpdate,
+} = require("../validations/userValidation");
 
-exports.create = async (req, res, next) => {
+exports.createUser = async (req, res, next) => {
   try {
+    await validateCreateUser(req.body);
 
-    await createUserValidation(req.body)
-    // Create a new user
-    const id = await userService.createUser(req.body);
-    res.status(201).json({ message: "User created", id });
-  } catch (err) {
-    next(err);
+    const userId = await userService.createUser({
+      ...req.body,
+      created_by:
+        req.body.created_by ||
+        req.user?.preferred_username ||
+        "SYSTEM",
+    });
+
+    res.status(201).json({
+      message: "User created successfully",
+      user_id: userId,
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
-exports.getAll = async (req, res, next) => {
+exports.getAllUsers = async (req, res, next) => {
   try {
     const users = await userService.getUsers();
+
     res.status(200).json(users);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
-exports.update = async (req, res, next) => {
+exports.getUserById = async (req, res, next) => {
   try {
-    const userId = req.params.id;  // Get the user ID from the URL parameter
+    const { user_id } = req.params;
 
-    // Check if the user exists
-    const user = await userService.getUserById(userId);
+    const user = await userService.getUserById(user_id);
+
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
 
-    await updateUserValidation(req.body,userId)
-
-    // Update user data
-    const updatedUser = await userService.updateUser(userId, req.body);
-    res.status(200).json({ message: "User updated successfully", updatedUser });
-  } catch (err) {
-    next(err);
+    res.status(200).json(user);
+  } catch (error) {
+    next(error);
   }
 };
 
-exports.delete = async (req, res, next) => {
+exports.getUserByKeycloakId = async (req, res, next) => {
   try {
-    const userId = req.params.id;  // Get the user ID from the URL parameter
+    const { keycloak_id } = req.params;
 
-    // Check if the user exists
-    const user = await userService.getUserById(userId);
+    const user =
+      await userService.getUserByKeycloakId(keycloak_id);
+
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
 
-    // Delete user
-    await userService.deleteUser(userId);
-    res.status(200).json({ message: "User deleted successfully" });
-  } catch (err) {
-    next(err);
+    res.status(200).json(user);
+  } catch (error) {
+    next(error);
   }
 };
 
+exports.updateUser = async (req, res, next) => {
+  try {
+    const { user_id } = req.params;
+
+    await validateUpdateUser(user_id, req.body);
+
+    await userService.updateUser(user_id, {
+      ...req.body,
+      updated_by:
+        req.body.updated_by ||
+        req.user?.preferred_username ||
+        "SYSTEM",
+    });
+
+    res.status(200).json({
+      message: "User updated successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateUserStatus = async (req, res, next) => {
+  try {
+    const { user_id } = req.params;
+    const { status, updated_by } = req.body;
+
+    await validateStatusUpdate(user_id, status);
+
+    await userService.updateUserStatus(
+      user_id,
+      status,
+      updated_by ||
+        req.user?.preferred_username ||
+        "SYSTEM"
+    );
+
+    res.status(200).json({
+      message: "User status updated successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deleteUser = async (req, res, next) => {
+  try {
+    const { user_id } = req.params;
+
+    const user = await userService.getUserById(user_id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    await userService.deleteUser(user_id);
+
+    res.status(200).json({
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -1,60 +1,53 @@
 const express = require("express");
 const router = express.Router();
 
-const userController = require("../controllers/userController");
+const roleController = require("../controllers/RoleController");
 const routerPath = require("./RouterPath");
 
 const {
   authenticateTenantClinicGroup,
 } = require("../Keycloak/AuthenticateTenantAndClient");
 
-// Create user
 router.post(
-  routerPath.ADD_USER,
+  routerPath.ADD_ROLE,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  userController.createUser
+  roleController.createRole
 );
 
-// Get all users
 router.get(
-  routerPath.GETALL_USER,
+  routerPath.GETALL_ROLE,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  userController.getAllUsers
+  roleController.getAllRoles
 );
 
-// Get user by ID
 router.get(
-  routerPath.GET_USER,
+  routerPath.GET_ROLE,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  userController.getUserById
+  roleController.getRoleById
 );
 
-// Get user by Keycloak ID
 router.get(
-  routerPath.GET_USER_KEYCLOAK,
+  routerPath.GET_ROLE_CODE,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  userController.getUserByKeycloakId
+  roleController.getRoleByCode
 );
 
-// Update user
 router.put(
-  routerPath.UPDATE_USER,
+  routerPath.UPDATE_ROLE,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  userController.updateUser
+  roleController.updateRole
 );
 
-// Update status
 router.patch(
-  routerPath.UPDATE_USER_STATUS,
+  routerPath.UPDATE_ROLE_STATUS,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  userController.updateUserStatus
+  roleController.updateRoleStatus
 );
 
-// Delete user
 router.delete(
-  routerPath.DELETE_USER,
+  routerPath.DELETE_ROLE,
   authenticateTenantClinicGroup(["tenant", "superuser"]),
-  userController.deleteUser
+  roleController.deleteRole
 );
 
 module.exports = router;
