@@ -1,52 +1,112 @@
 // middleware/userActivityLogger.js
+
 const { createUserActivity } = require("../services/UserActivityService");
-// const { getClientInfo } = require("./LoginHistoryInfo");
+
+const { UAParser } = require("ua-parser-js");
+
+// ============================================================
+// USER ACTIVITY LOGGER
+// ============================================================
 
 const userActivityLogger = async (req, res, next) => {
+  if (req.originalUrl?.includes("/ssoAuth/login")) {
+    return next();
+  }
   res.on("finish", async () => {
+    // Only log successful requests
     if (res.statusCode >= 200 && res.statusCode < 300) {
       const method = req.method;
 
+      // Only log write operations
       if (["POST", "PUT", "DELETE"].includes(method)) {
         try {
-          const tenant_id =
-            req.params?.tenant_id || req.body?.tenant_id || req.cookies?.tenant_id || null;
-          const keycloak_user_id =
-            req.user?.sub || req.user?.keycloak_id ||req.cookies?.keycloak_user_id || "anonymous";
+          // ==================================================
+          // USER ID
+          // ==================================================
+          //
+          // New architecture:
+          // users.user_id = internal canonical user ID
+          //
+          // req.userDetails is populated by authentication
+          // middleware.
+          //
+          const user_id =
+            req.userDetails?.user_id ||
+            req.dbUser?.user_id ||
+            req.user?.user_id ||
+            null;
 
-          // ✅ Get detailed client info
+          // ==================================================
+          // TENANT ID
+          // ==================================================
+
+          const tenant_id =
+            req.tenant_id ||
+            req.params?.tenant_id ||
+            req.body?.tenant_id ||
+            req.query?.tenant_id ||
+            null;
+
+          // ==================================================
+          // CLIENT INFO
+          // ==================================================
+
           const clientInfo = getClientInfo(req);
 
-          // Map method → activity_type
+          // ==================================================
+          // ACTIVITY TYPE
+          // ==================================================
+
           let activity_type;
+
           switch (method) {
             case "POST":
               activity_type = "CREATE";
               break;
+
             case "PUT":
               activity_type = "UPDATE";
               break;
+
             case "DELETE":
               activity_type = "DELETE";
               break;
+
+            default:
+              return;
           }
+
+          // ==================================================
+          // ACTIVITY DESCRIPTION
+          // ==================================================
 
           const activity_desc = `${activity_type} ${req.originalUrl}`;
 
+          // ==================================================
+          // CREATE USER ACTIVITY
+          // ==================================================
+
           await createUserActivity(
             {
-              tenant_id,
+              user_id: user_id ? Number(user_id) : null,
+
+              tenant_id: tenant_id ? Number(tenant_id) : null,
+
               app_name: process.env.APP_NAME || "dental-app",
-              keycloak_user_id,
+
               activity_type,
+
               activity_desc,
+
               ip_address: clientInfo.ip,
+
               user_agent: JSON.stringify(clientInfo),
             },
-            req
+            req,
           );
         } catch (err) {
-          console.error("User Activity Log Error:", err.message);
+          // Activity logging must never break the API
+          console.error("❌ User Activity Log Error:", err.message);
         }
       }
     }
@@ -55,8 +115,9 @@ const userActivityLogger = async (req, res, next) => {
   next();
 };
 
-// utils/LoginActivity.js (or wherever you define this)
-const { UAParser } = require("ua-parser-js");// Adjust path
+// ============================================================
+// GET CLIENT INFO
+// ============================================================
 
 function getClientInfo(req) {
   let ip =
@@ -66,72 +127,135 @@ function getClientInfo(req) {
     req.socket?.remoteAddress ||
     (req.connection?.socket ? req.connection.socket.remoteAddress : null);
 
-  if (ip && ip.includes(",")) ip = ip.split(",")[0].trim();
-  if (ip && ip.includes("::ffff:")) ip = ip.substring(ip.lastIndexOf(":") + 1);
-  if (ip === "::1") ip = "127.0.0.1";
+  // Handle multiple forwarded IPs
+  if (ip && ip.includes(",")) {
+    ip = ip.split(",")[0].trim();
+  }
+
+  // Convert IPv4-mapped IPv6 address
+  if (ip && ip.includes("::ffff:")) {
+    ip = ip.substring(ip.lastIndexOf(":") + 1);
+  }
+
+  // Localhost IPv6
+  if (ip === "::1") {
+    ip = "127.0.0.1";
+  }
 
   const userAgent = req.headers["user-agent"] || "";
+
   const parser = new UAParser(userAgent);
+
   const uaResult = parser.getResult();
 
   return {
     ip: ip || "unknown",
-    browser: `${uaResult.browser.name || "Unknown"} ${uaResult.browser.version || ""}`.trim(),
-    os: `${uaResult.os.name || "Unknown"} ${uaResult.os.version || ""}`.trim(),
+
+    browser:
+      `${uaResult.browser.name || "Unknown"} ` +
+      `${uaResult.browser.version || ""}`.trim(),
+
+    os:
+      `${uaResult.os.name || "Unknown"} ` +
+      `${uaResult.os.version || ""}`.trim(),
+
     device: uaResult.device.model || "Unknown",
+
     deviceType: uaResult.device.type || "Computer",
+
     cpu: uaResult.cpu.architecture || "Unknown",
+
     userAgent,
   };
 }
 
-async function logUserViewActivity(req, description) {
-  // Skip if no user context available
-  if (!req.user && !req.cookies?.keycloak_user_id) {
-    return; 
-  }
+// ============================================================
+// LOG USER VIEW ACTIVITY
+// ============================================================
 
+async function logUserViewActivity(req, description) {
   try {
-    const clientInfo = getClientInfo(req);
-    
-    const tenant_id =
-      req.params?.tenant_id ||
-      req.body?.tenant_id ||
-      req.query?.tenant_id ||
-      req.cookies?.tenant_id ||
+    // ========================================================
+    // USER ID
+    // ========================================================
+    //
+    // New architecture:
+    // req.userDetails.user_id
+    //
+    const user_id =
+      req.userDetails?.user_id ||
+      req.dbUser?.user_id ||
+      req.user?.user_id ||
       null;
 
-    const keycloakUserId = 
-      req.user?.sub || 
-      req.user?.keycloak_id || 
-      req.cookies?.keycloak_user_id;
+    // No authenticated user
+    // Don't create anonymous VIEW activity
+    if (!user_id) {
+      console.warn("⚠️ logUserViewActivity: No user_id found");
 
-    if (!keycloakUserId) {
-      console.warn("⚠️ logUserViewActivity: No keycloak_user_id found");
       return;
     }
 
+    // ========================================================
+    // CLIENT INFO
+    // ========================================================
+
+    const clientInfo = getClientInfo(req);
+
+    // ========================================================
+    // TENANT ID
+    // ========================================================
+
+    const tenant_id =
+      req.tenant_id ||
+      req.params?.tenant_id ||
+      req.body?.tenant_id ||
+      req.query?.tenant_id ||
+      null;
+
+    // ========================================================
+    // CREATE VIEW ACTIVITY
+    // ========================================================
+
     await createUserActivity({
-      tenant_id: tenant_id ? parseInt(tenant_id) : null,
+      user_id: Number(user_id),
+
+      tenant_id: tenant_id ? Number(tenant_id) : null,
+
       app_name: process.env.APP_NAME || "dental-app",
-      keycloak_user_id: keycloakUserId,
+
       activity_type: "VIEW",
+
       activity_desc: description,
+
       ip_address: clientInfo.ip,
+
       user_agent: JSON.stringify({
         browser: clientInfo.browser,
+
         device: clientInfo.device,
-        os: clientInfo.os
+
+        os: clientInfo.os,
       }),
-      // Optional extra fields
+
+      // Optional activity metadata
       endpoint: req.originalUrl,
+
       method: req.method,
     });
-    
   } catch (err) {
-    // Never throw from logging function - it's non-critical
+    // Activity logging is non-critical.
+    // Never throw this error to the API.
     console.error("❌ logUserViewActivity failed:", err.message);
   }
 }
 
-module.exports = {userActivityLogger,logUserViewActivity,getClientInfo};
+// ============================================================
+// EXPORTS
+// ============================================================
+
+module.exports = {
+  userActivityLogger,
+  logUserViewActivity,
+  getClientInfo,
+};

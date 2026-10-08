@@ -11,7 +11,7 @@ const { convertUTCToLocal } = require("../utils/DateUtils");
 const userActivityFields = {
   tenant_id: (val) => val,
   app_name: (val) => val,
-  keycloak_user_id: (val) => val,
+  user_id: (val) => val,
   activity_type: (val) => val,
   activity_desc: (val) => val,
   ip_address: (val) => val,
@@ -22,7 +22,7 @@ const userActivityFieldsReverseMap = {
   user_activity_id: (val) => val,
   tenant_id: (val) => val,
   app_name: (val) => val,
-  keycloak_user_id: (val) => val,
+  user_id: (val) => val,
   activity_type: (val) => val,
   activity_desc: (val) => val,
   ip_address: (val) => val,
@@ -40,6 +40,7 @@ const createUserActivity = async (data) => {
       columns,
       values,
     );
+    console.log(columns,values)
     await invalidateCacheByPattern("user_activity:*");
     return user_activity_id;
   } catch (error) {

@@ -18,7 +18,7 @@ const db = require("../config/db");
 const loginhistoryFields = {
   tenant_id: (val) => val,
   app_name: (val) => val,
-  keycloak_user_id: (val) => val,
+  user_id: (val) => val,
   session_id: (val) => val,
   ip_address: (val) => val,
   // Combine browser_info + device_info → user_agent
@@ -38,7 +38,7 @@ const loginhistoryFieldsReverseMap = {
   login_history_id: (val) => val,
   tenant_id: (val) => val,
   app_name: (val) => val,
-  keycloak_user_id: (val) => val,
+  user_id: (val) => val,
   session_id: (val) => val,
   login_time: (val) => (val ? formatDateTime(val) : null),
   logout_time: (val) => (val ? formatDateTime(val) : null),
@@ -133,13 +133,13 @@ const getLoginHistoryByTenantIdAndLoginHistoryId = async (
 
 const getLoginHistoryByTenantAndKeycloakUserId = async (
   tenantId,
-  keycloak_user_id,
+  user_id,
 ) => {
   try {
     const login_history =
       await loginhistoryModel.getLoginHistoryByTenantAndKeycloakUserId(
         tenantId,
-        keycloak_user_id,
+        user_id,
       );
 
     const convertedRows = helper.convertDbToFrontend(
@@ -208,6 +208,62 @@ const updateLoginHistoryLogout = async (login_history_id) => {
   }
 };
 
+// ======================================================
+// UPDATE LOGIN HISTORY LOGOUT TIME BY SESSION ID
+// ======================================================
+
+const updateLoginHistoryLogoutBySessionId = async (
+  sessionId
+) => {
+  let conn;
+
+  try {
+    if (!sessionId) {
+      throw new Error(
+        "Session ID is required"
+      );
+    }
+
+    conn = await db.getConnection();
+
+    const query = `
+      UPDATE login_history
+      SET logout_time = NOW()
+      WHERE session_id = ?
+        AND logout_time IS NULL
+    `;
+
+    const [result] = await conn.query(
+      query,
+      [sessionId]
+    );
+
+    console.log(
+      "LOGIN HISTORY LOGOUT:",
+      {
+        sessionId,
+        affectedRows:
+          result.affectedRows,
+      }
+    );
+
+    await invalidateCacheByPattern(
+      "login_history:*"
+    );
+
+    return {
+      success: true,
+      session_id: sessionId,
+      affectedRows:
+        result.affectedRows,
+    };
+  } finally {
+    if (conn) {
+      conn.release();
+    }
+  }
+};
+
 // Delete LoginHistory
 const deleteLoginHistoryByTenantIdAndLoginHistoryId = async (
   tenantId,
@@ -241,4 +297,5 @@ module.exports = {
   deleteLoginHistoryByTenantIdAndLoginHistoryId,
   getLoginHistoryByTenantAndKeycloakUserId,
   updateLoginHistoryLogout,
+  updateLoginHistoryLogoutBySessionId,
 };

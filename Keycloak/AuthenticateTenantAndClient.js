@@ -4,16 +4,11 @@ const qs = require("querystring");
 
 const { CustomError } = require("../middlewares/CustomeError");
 
-const {
-  getUserByTenantClinicAndKeycloakId,
-  getUserByKeycloakId,
-} = require("../utils/Reusability");
-
 const { getTenantByTenantId } = require("../models/TenantModel");
 
-const { decodeToken } = require("./KeycloakAdmin");
-
-const { getClinicsByKeycloakId } = require("../services/ClinicService");
+// IMPORTANT:
+// Change this path only if your Redis config is in another location.
+const redisClient = require("../config/redis");
 
 // ============================================================
 // CONSTANTS
@@ -40,20 +35,6 @@ ${process.env.KEYCLOAK_REALM_PUBLIC_KEY}
 }
 
 // ============================================================
-// COOKIE OPTIONS
-// ============================================================
-
-function getCookieOptions() {
-  const isProduction = process.env.NODE_ENV === "production";
-
-  return {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "None" : "Lax",
-  };
-}
-
-// ============================================================
 // ROLE
 // ============================================================
 
@@ -64,44 +45,116 @@ function getUserRole(decoded) {
 }
 
 // ============================================================
-// TOKEN EXTRACTION
+// GET SESSION ID FROM COOKIE
 // ============================================================
 
-function extractTokens(req) {
-  const token =
-    req.cookies?.access_token ||
-    req.headers.authorization?.split(" ")[1] ||
-    req.headers["access_token"];
+function getSessionIdFromCookie(req) {
+  const sessionId = req.cookies?.dental_session;
 
-  const refreshToken =
-    req.cookies?.refresh_token || req.headers["refresh_token"];
+  if (!sessionId) {
+    throw new CustomError("Session not found", 401);
+  }
 
-  return {
-    token,
-    refreshToken,
-  };
+  return sessionId;
 }
 
 // ============================================================
-// VERIFY TOKEN
+// GET SESSION FROM REDIS
+// ============================================================
+
+// ============================================================
+// GET SESSION FROM REDIS
+// ============================================================
+
+async function getSessionFromRedis(sessionId) {
+  if (!sessionId) {
+    throw new CustomError("Session ID missing", 401);
+  }
+
+  const redisKey = `dental:session:${sessionId}`;
+
+  const rawSession = await redisClient.get(redisKey);
+
+  // Redis key not found
+  if (rawSession === null || rawSession === undefined) {
+    console.error("❌ Redis session not found:", redisKey);
+
+    throw new CustomError("Session expired or not found", 401);
+  }
+
+  try {
+    // ========================================================
+    // CASE 1:
+    // Redis client returned an object
+    // ========================================================
+
+    if (typeof rawSession === "object") {
+      console.log("✅ Redis session returned as object");
+
+      return rawSession;
+    }
+
+    // ========================================================
+    // CASE 2:
+    // Redis client returned a string
+    // ========================================================
+
+    if (typeof rawSession === "string") {
+      const trimmed = rawSession.trim();
+
+      if (!trimmed) {
+        throw new Error("Empty Redis session");
+      }
+
+      const parsed = JSON.parse(trimmed);
+
+      console.log("✅ Redis session parsed successfully");
+
+      return parsed;
+    }
+
+    // ========================================================
+    // Unexpected Redis value
+    // ========================================================
+
+    console.error("❌ Unexpected Redis session type:", typeof rawSession);
+
+    throw new Error("Invalid Redis session type");
+  } catch (error) {
+    console.error("❌ Redis session parse error:", error.message);
+
+    console.error("Redis session value:", rawSession);
+
+    throw new CustomError("Invalid session data", 401);
+  }
+}
+
+// ============================================================
+// VERIFY ACCESS TOKEN
 // ============================================================
 
 function verifyAccessToken(token) {
+  if (!token) {
+    throw new CustomError("Access token missing", 401);
+  }
+
   try {
     return jwt.verify(token, getPublicKey(), {
       algorithms: ["RS256"],
     });
   } catch (error) {
-    if (error.name !== "TokenExpiredError") {
-      throw new CustomError("Invalid token", 401);
+    if (error.name === "TokenExpiredError") {
+      throw error;
     }
 
-    throw error;
+    console.error("❌ JWT verification failed:", error.message);
+
+    throw new CustomError("Invalid token", 401);
   }
 }
 
 // ============================================================
-// GET EXPIRED TOKEN DATA
+// DECODE EXPIRED TOKEN
 // ============================================================
 
 function decodeExpiredToken(token) {
@@ -115,12 +168,67 @@ function decodeExpiredToken(token) {
 }
 
 // ============================================================
-// REFRESH TOKEN
+// UPDATE REDIS SESSION
+// ============================================================
+async function updateRedisSession(sessionId, sessionData, ttlSeconds = null) {
+  if (!sessionId) {
+    throw new CustomError("Session ID missing", 401);
+  }
+
+  const redisKey = `dental:session:${sessionId}`;
+
+  const sessionJson = JSON.stringify(sessionData);
+
+  // ========================================================
+  // UPDATE REDIS SESSION WITH KEYCLOAK REFRESH TOKEN TTL
+  // ========================================================
+
+  if (Number(ttlSeconds) > 0) {
+    await redisClient.set(redisKey, sessionJson, "EX", Number(ttlSeconds));
+
+    console.log(`🔐 Redis session updated. TTL: ${ttlSeconds} seconds`);
+  } else {
+    // If Keycloak did not return refresh_expires_in,
+    // update session without changing Redis TTL.
+    await redisClient.set(redisKey, sessionJson);
+
+    console.log("🔐 Redis session updated without changing TTL");
+  }
+}
+
+// ============================================================
+// DELETE REDIS SESSION
 // ============================================================
 
-async function refreshAccessToken(refreshToken, tenantId, realm, res) {
+async function deleteRedisSession(sessionId) {
+  if (!sessionId) {
+    return;
+  }
+
+  try {
+    await redisClient.del(`dental:session:${sessionId}`);
+
+    console.log("🗑️ Redis session deleted:", sessionId);
+  } catch (error) {
+    console.error("❌ Failed to delete Redis session:", error.message);
+  }
+}
+
+// ============================================================
+// REFRESH ACCESS TOKEN USING REDIS SESSION
+// ============================================================
+
+async function refreshAccessToken(sessionId, sessionData) {
+  const refreshToken = sessionData?.refreshToken;
+
   if (!refreshToken) {
     throw new CustomError("Refresh token missing", 401);
+  }
+
+  const tenantId = sessionData?.userDetails?.primary_tenant_id;
+
+  if (!tenantId) {
+    throw new CustomError("Tenant ID missing", 401);
   }
 
   const tenantConfig = await getTenantByTenantId(tenantId);
@@ -129,7 +237,22 @@ async function refreshAccessToken(refreshToken, tenantId, realm, res) {
     throw new CustomError("Tenant not found", 404);
   }
 
-  const clientId = tenantConfig.tenant_domain;
+  // ========================================================
+  // CLIENT ID
+  // Login time-la save pannina clientId use pannum
+  // ========================================================
+
+  const clientId = sessionData?.clientId || tenantConfig.tenant_domain;
+
+  // ========================================================
+  // REALM
+  // ========================================================
+
+  const realm = sessionData?.realm || process.env.KEYCLOAK_REALM;
+
+  // ========================================================
+  // KEYCLOAK TOKEN URL
+  // ========================================================
 
   const tokenUrl =
     `${process.env.KEYCLOAK_BASE_URL}` +
@@ -137,11 +260,20 @@ async function refreshAccessToken(refreshToken, tenantId, realm, res) {
     `/protocol/openid-connect/token`;
 
   try {
+    console.log("🔄 Access token expired.");
+    console.log("🔄 Refreshing token from Keycloak...");
+
+    // ======================================================
+    // REFRESH TOKEN REQUEST
+    // ======================================================
+
     const response = await axios.post(
       tokenUrl,
       qs.stringify({
         grant_type: "refresh_token",
+
         refresh_token: refreshToken,
+
         client_id: clientId,
       }),
       {
@@ -151,76 +283,185 @@ async function refreshAccessToken(refreshToken, tenantId, realm, res) {
       },
     );
 
-    const newAccessToken = response.data.access_token;
+    // ======================================================
+    // NEW ACCESS TOKEN
+    // ======================================================
 
-    const newRefreshToken = response.data.refresh_token;
+    const newAccessToken = response.data?.access_token;
 
-    saveTokensToCookies(res, newAccessToken, newRefreshToken);
+    if (!newAccessToken) {
+      throw new Error("New access token not received");
+    }
+
+    // ======================================================
+    // NEW REFRESH TOKEN
+    // ======================================================
+    //
+    // Keycloak refresh token rotation enabled:
+    //   → new refresh_token returned
+    //
+    // Rotation disabled:
+    //   → old refresh token continue
+    //
+    // ======================================================
+
+    const newRefreshToken = response.data?.refresh_token || refreshToken;
+
+    // ======================================================
+    // VERIFY NEW ACCESS TOKEN
+    // ======================================================
 
     const decoded = jwt.verify(newAccessToken, getPublicKey(), {
       algorithms: ["RS256"],
     });
 
-    return {
-      token: newAccessToken,
+    // ======================================================
+    // KEYCLOAK EXPIRY
+    // ======================================================
+
+    const expiresIn = Number(response.data?.expires_in || 0);
+
+    const refreshExpiresIn = Number(response.data?.refresh_expires_in || 0);
+
+    if (expiresIn <= 0) {
+      throw new Error("Invalid access token expiry received from Keycloak");
+    }
+
+    if (refreshExpiresIn <= 0) {
+      throw new Error("Invalid refresh token expiry received from Keycloak");
+    }
+
+    if (expiresIn >= refreshExpiresIn) {
+      throw new Error(
+        `Invalid token lifetime: access token (${expiresIn}s) ` +
+          `must be less than refresh token (${refreshExpiresIn}s)`,
+      );
+    }
+
+    const now = Date.now();
+
+    // ======================================================
+    // NEW SESSION DATA
+    // ======================================================
+
+    const updatedSession = {
+      ...sessionData,
+
+      // Same application session
+      sessionId,
+
+      // New access token
+      accessToken: newAccessToken,
+
+      // New refresh token if Keycloak returned one
       refreshToken: newRefreshToken,
+
+      // Keycloak access token expiry
+      accessExpiresAt: expiresIn > 0 ? now + expiresIn * 1000 : null,
+
+      // Keycloak refresh token expiry
+      refreshExpiresAt:
+        refreshExpiresIn > 0
+          ? now + refreshExpiresIn * 1000
+          : sessionData.refreshExpiresAt,
+
+      updatedAt: new Date().toISOString(),
+    };
+
+    // ======================================================
+    // SAVE NEW TOKENS + KEYCLOAK REFRESH TTL TO REDIS
+    // ======================================================
+
+    await updateRedisSession(
+      sessionId,
+      updatedSession,
+      refreshExpiresIn > 0 ? refreshExpiresIn : null,
+    );
+
+    // ======================================================
+    // LOG
+    // ======================================================
+
+    console.log("✅ New access token saved to Redis");
+
+    console.log("✅ New refresh token saved to Redis");
+
+    console.log("🔐 Access token expires in:", expiresIn, "seconds");
+
+    console.log("🔐 Refresh token expires in:", refreshExpiresIn, "seconds");
+
+    console.log("🕒 Access expires at:", updatedSession.accessExpiresAt);
+
+    console.log("🕒 Refresh expires at:", updatedSession.refreshExpiresAt);
+
+    // ======================================================
+    // RETURN UPDATED SESSION
+    // ======================================================
+
+    return {
+      sessionData: updatedSession,
+
+      token: newAccessToken,
+
+      refreshToken: newRefreshToken,
+
       decoded,
     };
   } catch (error) {
     console.error(
-      "Refresh Token Error:",
+      "❌ Refresh Token Error:",
       error?.response?.data || error.message,
     );
 
-    throw new CustomError("Session expired", 401);
+    console.error("Status:", error?.response?.status);
+    console.error("Client ID:", clientId);
+    console.error("Realm:", realm);
+
+    await deleteRedisSession(sessionId);
+
+    throw new CustomError(
+      error?.response?.data?.error_description ||
+        "Session expired. Please login again.",
+      401,
+    );
   }
 }
 
 // ============================================================
-// SAVE TOKENS TO COOKIE
+// VERIFY OR REFRESH TOKEN FROM REDIS SESSION
 // ============================================================
 
-function saveTokensToCookies(res, accessToken, refreshToken) {
-  const cookieOptions = getCookieOptions();
+async function verifyOrRefreshToken(sessionId, sessionData) {
+  const token = sessionData?.accessToken;
 
-  res.cookie("access_token", accessToken, {
-    ...cookieOptions,
-    maxAge: Number(process.env.ACCESS_COOKIE_EXPIRE_TIME) * 1000,
-  });
+  if (!token) {
+    throw new CustomError("Access token missing from session", 401);
+  }
 
-  res.cookie("refresh_token", refreshToken, {
-    ...cookieOptions,
-    maxAge: Number(process.env.REFRESH_COOKIE_EXPIRE_TIME) * 1000,
-  });
-}
-
-// ============================================================
-// VERIFY OR REFRESH TOKEN
-// ============================================================
-
-async function verifyOrRefreshToken(token, refreshToken, realm, res) {
   try {
+    // Access token valid
     const decoded = verifyAccessToken(token);
 
     return {
+      sessionData,
+
       token,
-      refreshToken,
+
+      refreshToken: sessionData.refreshToken || null,
+
       decoded,
     };
   } catch (error) {
+    // Invalid token - refresh panna koodathu
     if (error.name !== "TokenExpiredError") {
       throw error;
     }
 
-    const expiredDecoded = decodeExpiredToken(token);
+    console.log("⚠️ Access token expired");
 
-    const tenantId = expiredDecoded?.tenant_id;
-
-    if (!tenantId) {
-      throw new CustomError("Tenant ID missing from token", 401);
-    }
-
-    return refreshAccessToken(refreshToken, tenantId, realm, res);
+    // Refresh token Redis-la irundhu
+    // eduthu new token generate pannum
+    return refreshAccessToken(sessionId, sessionData);
   }
 }
 
@@ -229,8 +470,13 @@ async function verifyOrRefreshToken(token, refreshToken, realm, res) {
 // ============================================================
 
 function authorizeRole(userRole, requiredRoles) {
+  if (!userRole) {
+    throw new CustomError("User role not found", 403);
+  }
+
   const hasRequiredRole =
-    requiredRoles.length === 0 || requiredRoles.includes(userRole);
+    requiredRoles.length === 0 ||
+    requiredRoles.some((role) => role.toLowerCase() === userRole.toLowerCase());
 
   if (!hasRequiredRole) {
     throw new CustomError("Access denied", 403);
@@ -238,25 +484,20 @@ function authorizeRole(userRole, requiredRoles) {
 }
 
 // ============================================================
-// GET CLINIC ACCESS
+// GET CLINIC ACCESS FROM SESSION
 // ============================================================
 
-async function getClinicAccess(decoded) {
-  return getClinicsByKeycloakId(decoded.sub);
-}
-
-// ============================================================
-// RESOLVE ACTIVE TENANT
-// ============================================================
-
-function resolveActiveTenant(userRole, decoded, activeClinic) {
-  if (userRole === "tenant") {
-    return decoded?.tenant_id || null;
+function getClinicAccess(userDetails) {
+  if (Array.isArray(userDetails?.clinic)) {
+    return userDetails.clinic;
   }
 
-  return activeClinic?.tenant_id || null;
-}
+  if (Array.isArray(userDetails?.clinics)) {
+    return userDetails.clinics;
+  }
 
+  return [];
+}
 // ============================================================
 // VALIDATE CLINIC ACCESS
 // ============================================================
@@ -264,7 +505,7 @@ function resolveActiveTenant(userRole, decoded, activeClinic) {
 function validateClinicAccess(userRole, clinicAccess) {
   const hasClinicAccess = clinicAccess.length > 0;
 
-  if (userRole !== "tenant" && !hasClinicAccess) {
+  if (userRole !== "tenant" && userRole !== "guest" && !hasClinicAccess) {
     throw new CustomError("Clinic access denied", 403);
   }
 }
@@ -273,34 +514,34 @@ function validateClinicAccess(userRole, clinicAccess) {
 // GET ACTIVE CLINIC
 // ============================================================
 
-function getActiveClinic(clinicAccess) {
+function getActiveClinic(userDetails, clinicAccess) {
+  const primaryClinicId = userDetails?.primary_clinic_id;
+
+  if (primaryClinicId) {
+    const primaryClinic = clinicAccess.find(
+      (clinic) => Number(clinic.clinic_id) === Number(primaryClinicId),
+    );
+
+    if (primaryClinic) {
+      return primaryClinic;
+    }
+  }
+
   return clinicAccess[0] || null;
 }
 
 // ============================================================
-// GET DB USER
+// RESOLVE ACTIVE TENANT
 // ============================================================
 
-async function resolveDbUser(userRole, activeClinic, decoded) {
-  const shouldValidate =
-    userRole !== "tenant" && userRole !== "guest" && activeClinic;
-
-  if (!shouldValidate) {
-    return null;
+function resolveActiveTenant(userDetails, activeClinic) {
+  // Primary tenant from DB session.
+  if (userDetails?.primary_tenant_id) {
+    return userDetails.primary_tenant_id;
   }
 
-  const dbUser = await getUserByTenantClinicAndKeycloakId(
-    userRole,
-    activeClinic.tenant_id,
-    activeClinic.clinic_id,
-    decoded.sub,
-  );
-
-  if (!dbUser) {
-    throw new CustomError("User not found", 404);
-  }
-
-  return dbUser;
+  // Fallback from active clinic.
+  return activeClinic?.tenant_id || null;
 }
 
 // ============================================================
@@ -310,33 +551,56 @@ async function resolveDbUser(userRole, activeClinic, decoded) {
 function setRequestContext(
   req,
   {
+    sessionId,
+    sessionData,
     decoded,
     token,
+    refreshToken,
     realm,
     userRole,
     activeTenantId,
     activeClinic,
     clinicAccess,
-    dbUser,
+    userDetails,
   },
 ) {
+  // JWT decoded information.
   req.user = decoded;
 
+  // Complete DB user/session information.
+  req.userDetails = userDetails;
+
+  // Session ID.
+  req.sessionId = sessionId;
+
+  // Current access token.
+  req.token = token;
+
+  // Current refresh token.
+  // Available internally only.
+  req.refreshToken = refreshToken;
+
+  // Authentication details.
   req.role = userRole;
 
   req.realm = realm;
 
-  req.token = token;
-
+  // Tenant/clinic context.
   req.tenant_id = activeTenantId;
 
   req.clinic_id = activeClinic?.clinic_id || null;
 
+  // All allowed clinics.
   req.clinic_access = clinicAccess;
 
   req.related_clinic_ids = clinicAccess.map((clinic) => clinic.clinic_id);
 
-  req.dbUser = dbUser;
+  // Profile.
+  req.dbUser = userDetails?.profile || null;
+
+  // Full Redis session if any
+  // downstream service needs it.
+  req.authSession = sessionData;
 }
 
 // ============================================================
@@ -351,7 +615,20 @@ function handleDevelopmentMode(req, requiredRoles) {
     role,
   };
 
+  req.userDetails = {
+    username: "dev-user",
+    role: {
+      role_code: role,
+    },
+  };
+
   req.role = role;
+
+  req.tenant_id = null;
+
+  req.clinic_id = null;
+
+  req.clinic_access = [];
 
   return true;
 }
@@ -374,85 +651,160 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
       }
 
       // ======================================================
-      // TOKENS
+      // 1. GET SESSION ID FROM COOKIE
       // ======================================================
 
-      const { token: originalToken, refreshToken: originalRefreshToken } =
-        extractTokens(req);
+      const sessionId = getSessionIdFromCookie(req);
 
-      if (!originalToken) {
-        throw new CustomError("Access token missing", 401);
+      console.log("🔐 Authentication Session:", sessionId);
+
+      // ======================================================
+      // 2. GET SESSION FROM REDIS
+      // ======================================================
+
+      const sessionData = await getSessionFromRedis(sessionId);
+
+      console.log("✅ Redis session found:", {
+        userId: sessionData?.userId,
+        username: sessionData?.username,
+        accessExpiresAt: sessionData?.accessExpiresAt,
+        refreshExpiresAt: sessionData?.refreshExpiresAt,
+      });
+
+      // ======================================================
+      // 3. VERIFY / REFRESH ACCESS TOKEN
+      //
+      // If access token is valid:
+      //   → continue
+      //
+      // If access token expired:
+      //   → use refresh token
+      //   → call Keycloak
+      //   → get new access token
+      //   → get new refresh token if rotated
+      //   → save both into Redis
+      //   → continue request
+      // ======================================================
+
+      const {
+        sessionData: updatedSessionData,
+        token,
+        refreshToken,
+        decoded,
+      } = await verifyOrRefreshToken(sessionId, sessionData);
+
+      // ======================================================
+      // 4. GET USER DETAILS
+      // ======================================================
+
+      const userDetails = updatedSessionData?.userDetails;
+
+      if (!userDetails) {
+        throw new CustomError("User details missing from session", 401);
       }
 
-      const realm = process.env.KEYCLOAK_REALM;
-
       // ======================================================
-      // VERIFY / REFRESH
+      // 5. ROLE
       // ======================================================
 
-      const { token, refreshToken, decoded } = await verifyOrRefreshToken(
-        originalToken,
-        originalRefreshToken,
-        realm,
-        res,
-      );
+      let userRole = userDetails?.role?.role_code;
 
-      // ======================================================
-      // ROLE
-      // ======================================================
+      // Fallback to JWT realm roles
+      if (!userRole) {
+        userRole = getUserRole(decoded);
+      }
 
-      const userRole = getUserRole(decoded);
+      if (!userRole) {
+        throw new CustomError("User role not found", 403);
+      }
 
       authorizeRole(userRole, requiredRoles);
 
       // ======================================================
-      // CLINIC ACCESS
+      // 6. CLINIC ACCESS
       // ======================================================
 
-      const clinicAccess = await getClinicAccess(decoded);
+      const clinicAccess = getClinicAccess(userDetails);
 
-      validateClinicAccess(userRole, clinicAccess);
-
-      // ======================================================
-      // ACTIVE CLINIC
-      // ======================================================
-
-      const activeClinic = getActiveClinic(clinicAccess);
+      validateClinicAccess(userRole.toLowerCase(), clinicAccess);
 
       // ======================================================
-      // ACTIVE TENANT
+      // 7. ACTIVE CLINIC
       // ======================================================
 
-      const activeTenantId = resolveActiveTenant(
-        userRole,
-        decoded,
-        activeClinic,
-      );
+      const activeClinic = getActiveClinic(userDetails, clinicAccess);
 
       // ======================================================
-      // DATABASE USER
+      // 8. ACTIVE TENANT
       // ======================================================
 
-      const dbUser = await resolveDbUser(userRole, activeClinic, decoded);
+      const activeTenantId = resolveActiveTenant(userDetails, activeClinic);
 
       // ======================================================
-      // REQUEST CONTEXT
+      // 9. REQUEST CONTEXT
       // ======================================================
 
       setRequestContext(req, {
+        sessionId,
+
+        // IMPORTANT:
+        // This is the updated session.
+        // If token was refreshed, this contains
+        // the NEW accessToken and refreshToken.
+        sessionData: updatedSessionData,
+
         decoded,
+
+        // Current valid access token
         token,
+
+        // Current refresh token
         refreshToken,
-        realm,
+
+        realm: updatedSessionData?.realm || process.env.KEYCLOAK_REALM,
+
         userRole,
+
         activeTenantId,
+
         activeClinic,
+
         clinicAccess,
-        dbUser,
+
+        userDetails,
       });
+
+      // ======================================================
+      // 10. AUTHENTICATION SUCCESS
+      // ======================================================
+
+      console.log("✅ Authentication successful:", {
+        userId: userDetails.user_id,
+
+        username: userDetails.username,
+
+        role: userRole,
+
+        tenantId: activeTenantId,
+
+        clinicId: activeClinic?.clinic_id || null,
+
+        accessExpiresAt: updatedSessionData?.accessExpiresAt || null,
+
+        refreshExpiresAt: updatedSessionData?.refreshExpiresAt || null,
+
+        tokenRefreshed:
+          sessionData?.accessToken !== updatedSessionData?.accessToken,
+      });
+
+      // ======================================================
+      // 11. CONTINUE
+      // ======================================================
 
       return next();
     } catch (error) {
+      console.error("❌ Authentication middleware error:", error);
+
       return handleAuthenticationError(error, res);
     }
   };
@@ -463,16 +815,18 @@ function authenticateTenantClinicGroup(requiredRoles = []) {
 // ============================================================
 
 function handleAuthenticationError(error, res) {
-  console.error("Authentication Error:", error);
+  console.error("❌ Authentication Error:", error);
 
   if (error instanceof CustomError) {
     return res.status(error.statusCode).json({
+      success: false,
       status: "error",
       message: error.message,
     });
   }
 
   return res.status(500).json({
+    success: false,
     status: "error",
     message: "Authentication failed",
   });
@@ -483,6 +837,10 @@ function handleAuthenticationError(error, res) {
 // ============================================================
 
 async function checkUserInKeycloak(token, realm, userId) {
+  if (!token) {
+    throw new CustomError("Token missing", 401);
+  }
+
   const url =
     `${process.env.KEYCLOAK_BASE_URL}` +
     `/admin/realms/${realm}` +
@@ -501,12 +859,32 @@ async function checkUserInKeycloak(token, realm, userId) {
       return null;
     }
 
+    console.error(
+      "Keycloak user check error:",
+      error?.response?.data || error.message,
+    );
+
     throw new CustomError("Failed to verify user in Keycloak", 404);
   }
 }
 
 // ============================================================
 // VERIFY USER TOKEN IN DATABASE
+// ============================================================
+//
+// IMPORTANT:
+// This is kept only for backward compatibility.
+// DO NOT use this function in the new login/session flow.
+//
+// New flow:
+// dental_session cookie
+//       ↓
+// Redis session
+//       ↓
+// accessToken
+//       ↓
+// JWT validation
+//
 // ============================================================
 
 async function verifyUserTokenInDB(token) {
@@ -515,55 +893,23 @@ async function verifyUserTokenInDB(token) {
       throw new CustomError("Missing token", 401);
     }
 
-    // ========================================================
-    // VERIFY JWT
-    // ========================================================
-
     const decoded = jwt.verify(token, getPublicKey(), {
       algorithms: ["RS256"],
     });
 
-    const userId = decoded.sub;
-
-    const username = decoded?.preferred_username;
-
-    // ========================================================
-    // ROLE
-    // ========================================================
-
-    const userRole = getUserRole(decoded);
-
-    // ========================================================
-    // TENANT / GUEST
-    // ========================================================
-
-    if (userRole === "tenant" || userRole === "guest") {
-      return {
-        dbUser: {
-          userId,
-          username,
-          role: userRole,
-        },
-        role: userRole,
-      };
-    }
-
-    // ========================================================
-    // OTHER ROLES
-    // ========================================================
-
-    const dbUser = await getUserByKeycloakId(userRole, userId);
-
     return {
-      dbUser,
-      role: userRole,
+      userId: decoded.sub,
+
+      username: decoded?.preferred_username,
+
+      role: getUserRole(decoded),
     };
   } catch (error) {
     if (error instanceof CustomError) {
       throw error;
     }
 
-    throw new CustomError(error.message || "Token validation failed", 500);
+    throw new CustomError(error.message || "Token validation failed", 401);
   }
 }
 
@@ -573,6 +919,8 @@ async function verifyUserTokenInDB(token) {
 
 module.exports = {
   authenticateTenantClinicGroup,
+
   verifyUserTokenInDB,
+
   checkUserInKeycloak,
 };
