@@ -8,8 +8,13 @@ const KEYCLOAK_BASE_URL = process.env.KEYCLOAK_BASE_URL;
 
 // === DEBUG LOG HELPER ===
 const log = (label, message, data = null) => {
-  console.log(`[KeycloakAdmin] ${label}:`, message, data ? data : "");
+    console.log(
+      `[KeycloakAdmin] ${label}:`,
+      message,
+      data ? data : ""
+    );
 };
+
 
 // ✅ 1. Add User
 async function addUser(token, realm, userData) {
@@ -18,14 +23,14 @@ async function addUser(token, realm, userData) {
 
   const payload = {
     username: userData.username,
-    email: userData.email || "",
+    email: userData.email || '',
     firstName: userData.firstName || "",
     lastName: userData.lastName || "",
     enabled: true,
     emailVerified: true,
-    attributes: {
-      tenant_id: userData?.attributes?.tenant_id || "",
-      clinic_id: userData?.attributes?.clinic_id || "",
+    attributes:{
+      tenant_id: userData?.attributes?.tenant_id || '',
+      clinic_id: userData?.attributes?.clinic_id || '',
       phoneNumber: userData?.attributes?.phoneNumber,
     },
     credentials: [
@@ -42,7 +47,7 @@ async function addUser(token, realm, userData) {
     const existingUser = await getUserIdByUsername(
       token,
       realm,
-      payload.username,
+      payload.username
     );
     if (existingUser) {
       log("ADD_USER", "❌ User already exists");
@@ -186,7 +191,7 @@ async function resetUserPassword(
   realm,
   userId,
   newPassword,
-  temporary = false,
+  temporary = false
 ) {
   log("RESET_PASSWORD", "Resetting password", { userId, temporary });
   const url = `${KEYCLOAK_BASE_URL}/admin/realms/${realm}/users/${userId}/reset-password`;
@@ -200,7 +205,7 @@ async function resetUserPassword(
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      },
+      }
     );
 
     log("RESET_PASSWORD", "✅ Password reset successful");
@@ -343,7 +348,7 @@ const updateUserInKeycloak = async (token, realm, userId, userData) => {
     if (error.response) {
       throw new CustomError(
         `HTTP ${error.response.status}: ${JSON.stringify(error.response.data)}`,
-        404,
+        404
       );
     }
   }
@@ -364,7 +369,7 @@ const updateGroupAttributes = async (token, realm, groupId, attributes) => {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-    },
+    }
   );
   log("UPDATE_GROUP_ATTR", "✅ Updated");
 };
@@ -511,62 +516,28 @@ function decodeToken(token) {
 
 // ✅ Keycloak Login (password grant)
 const keycloakLogin = async (username, password, realm, clientId) => {
-  const tokenUrl = `${KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/token`;
-
-  log("KEYCLOAK_LOGIN", "Logging in", {
-    username,
-    realm,
-    clientId,
-    tokenUrl,
-  });
-
+  log("KEYCLOAK_LOGIN", "Logging in", { username, realm, clientId });
   try {
     const response = await axios.post(
-      tokenUrl,
+      `${KEYCLOAK_BASE_URL}/realms/${realm}/protocol/openid-connect/token`,
       new URLSearchParams({
         client_id: clientId,
         grant_type: "password",
         username,
         password,
       }),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        timeout: 15000,
-      },
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
-
-    log("KEYCLOAK_LOGIN", "✅ Login successful", {
-      status: response.status,
-    });
-
+    log("KEYCLOAK_LOGIN", "✅ Login successful");
     return response.data;
   } catch (error) {
     log("KEYCLOAK_LOGIN", "❌ Login failed", {
-      message: error.message,
-      code: error.code,
       status: error.response?.status,
-      statusText: error.response?.statusText,
       error: error.response?.data,
-      tokenUrl,
     });
-
-    console.error("========== KEYCLOAK LOGIN ERROR ==========");
-    console.error("URL:", tokenUrl);
-    console.error("STATUS:", error.response?.status);
-    console.error("STATUS TEXT:", error.response?.statusText);
-    console.error("RESPONSE:", error.response?.data);
-    console.error("MESSAGE:", error.message);
-    console.error("CODE:", error.code);
-    console.error("==========================================");
-
     throw new CustomError(
-      error.response?.data?.error_description ||
-        error.response?.data?.error ||
-        error.message ||
-        "Login failed",
-      error.response?.status || 500,
+      error.response?.data?.error_description || "Login failed",
+      error.response?.status || 500
     );
   }
 };
@@ -584,7 +555,7 @@ async function resetKeycloakPassword({ userId, realm, newPassword, token }) {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-    },
+    }
   );
   log("RESET_KEYCLOAK_PASSWORD", "✅ Password reset by admin");
 }
@@ -600,7 +571,7 @@ async function getClientToken(client_id, client_credentials) {
         client_id: client_id,
         client_secret: client_credentials,
       }),
-      { headers: { "Content-Type": "application/x-www-form-urlencoded" } },
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
     log("GET_CLIENT_TOKEN", "✅ Client token received");
     return response.data.access_token;
@@ -628,7 +599,7 @@ function getClientCredential(clientId) {
     log("GET_CLIENT_CREDENTIAL", "❌ Secret not found");
     throw new CustomError(
       `No client credential found for clientId: ${clientId}`,
-      400,
+      400
     );
   }
 
@@ -645,7 +616,7 @@ function extractUserInfo(token) {
   const issuer = token.iss;
   const realm = issuer.split("/").pop();
   const tenant = token.azp;
-  const tenantId = token.tenant_id;
+  const tenantId=token.tenant_id
 
   // console.log('token:',token)
 
@@ -657,14 +628,14 @@ function extractUserInfo(token) {
       mapString.split(",").map((pair) => {
         const [k, v] = pair.split(":");
         return [k.trim(), v.trim()];
-      }),
+      })
     );
 
     const domainMap = Object.fromEntries(
       domainMapString.split(",").map((pair) => {
         const [k, v] = pair.split(":");
         return [k.trim(), v.trim()];
-      }),
+      })
     );
 
     const parts = fullRealm.split(".");
@@ -720,24 +691,24 @@ function extractUserInfo(token) {
 
 async function refreshAccessToken({
   keycloakBaseUrl, // e.g. https://keycloak.example.com
-  realm, // e.g. 'myrealm'
+  realm,           // e.g. 'myrealm'
   clientId,
-  clientSecret, // optional for public clients
-  refreshToken,
+  clientSecret,    // optional for public clients
+  refreshToken
 }) {
-  const url = `${keycloakBaseUrl.replace(/\/$/, "")}/realms/${realm}/protocol/openid-connect/token`;
+  const url = `${keycloakBaseUrl.replace(/\/$/, '')}/realms/${realm}/protocol/openid-connect/token`;
 
   const data = {
-    grant_type: "refresh_token",
+    grant_type: 'refresh_token',
     refresh_token: refreshToken,
-    client_id: clientId,
+    client_id: clientId
   };
 
   // if confidential client, include client_secret (or use Basic auth)
   if (clientSecret) data.client_secret = clientSecret;
 
   const resp = await axios.post(url, qs.stringify(data), {
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
   });
 
   return resp.data; // contains access_token, refresh_token, expires_in, token_type
@@ -745,6 +716,7 @@ async function refreshAccessToken({
 
 // usage
 // refreshAccessToken({keycloakBaseUrl:'https://keycloak.example.com', realm:'myrealm', clientId:'app', clientSecret:'s3cret', refreshToken:'...' })
+
 
 // ✅ Export All
 module.exports = {
@@ -770,5 +742,5 @@ module.exports = {
   resetKeycloakPassword,
   getClientToken,
   getClientCredential,
-  refreshAccessToken,
+  refreshAccessToken
 };

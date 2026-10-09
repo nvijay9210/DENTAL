@@ -14,11 +14,27 @@ const globalInvalidationMiddleware = async (req, res, next) => {
       return next();
     }
 
+    // ======================================================
+    // SKIP AUTH / LOGIN ENDPOINTS
+    // ======================================================
+    const skipPaths = [
+      "/ssoAuth/login",
+      "/ssoAuth/logout",
+      "/ssoAuth/refresh",
+      "/login",
+      "/logout",
+    ];
+
     const currentPath = req.path || req.originalUrl;
 
-    if (currentPath.startsWith("/v1/ssoAuth/")) {
+    if (
+      skipPaths.some((path) =>
+        currentPath.startsWith(path)
+      )
+    ) {
       return next();
     }
+
     // ======================================================
     // AFTER RESPONSE SUCCESS
     // ======================================================
@@ -27,14 +43,19 @@ const globalInvalidationMiddleware = async (req, res, next) => {
         // ======================================================
         // ONLY SUCCESS RESPONSES
         // ======================================================
-        if (res.statusCode < 200 || res.statusCode >= 300) {
+        if (
+          res.statusCode < 200 ||
+          res.statusCode >= 300
+        ) {
           return;
         }
 
         // ======================================================
         // VERSION
         // ======================================================
-        const baseParts = (req.baseUrl || "").split("/").filter(Boolean);
+        const baseParts = (req.baseUrl || "")
+          .split("/")
+          .filter(Boolean);
 
         const version = baseParts[0] || "v1";
 
@@ -49,10 +70,13 @@ const globalInvalidationMiddleware = async (req, res, next) => {
           req.user?.tenantId;
 
         if (!tenant_id) {
-          console.log("ℹ️ Cache invalidation skipped: No tenant_id found", {
-            method: req.method,
-            path: req.originalUrl,
-          });
+          console.log(
+            "ℹ️ Cache invalidation skipped: No tenant_id found",
+            {
+              method: req.method,
+              path: req.originalUrl,
+            }
+          );
 
           return;
         }
@@ -101,25 +125,43 @@ const globalInvalidationMiddleware = async (req, res, next) => {
             // ----------------------------------------------
             // CLINIC SPECIFIC CACHE
             // ----------------------------------------------
-            const clinicPattern = `cache:${version}:*:tenant_${tenant_id}:clinic_${cid}*`;
+            const clinicPattern =
+              `cache:${version}:*:tenant_${tenant_id}:clinic_${cid}*`;
 
-            console.log("🗑️ INVALIDATING CLINIC:", clinicPattern);
+            console.log(
+              "🗑️ INVALIDATING CLINIC:",
+              clinicPattern
+            );
 
-            await clearCacheByPattern(clinicPattern);
+            await clearCacheByPattern(
+              clinicPattern
+            );
 
-            console.log("✅ INVALIDATED:", clinicPattern);
+            console.log(
+              "✅ INVALIDATED:",
+              clinicPattern
+            );
           }
 
           // ----------------------------------------------
           // CLINIC MODULE LIST CACHE
           // ----------------------------------------------
-          const clinicListPattern = `cache:${version}:clinic:tenant_${tenant_id}*`;
+          const clinicListPattern =
+            `cache:${version}:clinic:tenant_${tenant_id}*`;
 
-          console.log("🗑️ INVALIDATING CLINIC LIST:", clinicListPattern);
+          console.log(
+            "🗑️ INVALIDATING CLINIC LIST:",
+            clinicListPattern
+          );
 
-          await clearCacheByPattern(clinicListPattern);
+          await clearCacheByPattern(
+            clinicListPattern
+          );
 
-          console.log("✅ INVALIDATED:", clinicListPattern);
+          console.log(
+            "✅ INVALIDATED:",
+            clinicListPattern
+          );
 
           return;
         }
@@ -127,21 +169,36 @@ const globalInvalidationMiddleware = async (req, res, next) => {
         // ======================================================
         // TENANT LEVEL INVALIDATION
         // ======================================================
-        const tenantPattern = `cache:${version}:*:tenant_${tenant_id}*`;
+        const tenantPattern =
+          `cache:${version}:*:tenant_${tenant_id}*`;
 
-        console.log("🗑️ INVALIDATING TENANT:", tenantPattern);
+        console.log(
+          "🗑️ INVALIDATING TENANT:",
+          tenantPattern
+        );
 
-        await clearCacheByPattern(tenantPattern);
+        await clearCacheByPattern(
+          tenantPattern
+        );
 
-        console.log("✅ INVALIDATED TENANT:", tenantPattern);
+        console.log(
+          "✅ INVALIDATED TENANT:",
+          tenantPattern
+        );
       } catch (err) {
-        console.error("❌ Cache Invalidation Error:", err.message);
+        console.error(
+          "❌ Cache Invalidation Error:",
+          err.message
+        );
       }
     });
 
     next();
   } catch (error) {
-    console.error("❌ Middleware Error:", error.message);
+    console.error(
+      "❌ Middleware Error:",
+      error.message
+    );
 
     next();
   }
