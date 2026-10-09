@@ -8,8 +8,7 @@ const { getTenantByTenantId } = require("../models/TenantModel");
 
 // IMPORTANT:
 // Change this path only if your Redis config is in another location.
-const redisClient = require("../config/redis");
-
+const { redisClient } = require("../config/redis");
 // ============================================================
 // CONSTANTS
 // ============================================================
